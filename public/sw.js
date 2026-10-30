@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.28
+// MA VIGNE — Service Worker v11.29
+// v11.29 (30/10/2026) — QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » au déploiement général, et ses deux livrets PDF.
 // v11.28 (30/10/2026) — CFG-1 (§496) : la configuration du domaine revient en mémoire avec la copie du téléphone (et lui sert de base de fusion) — plus de réglage bloqué « fbSave config BLOQUE » à l’ouverture ; la fenêtre de la garde anti-écrasement parle en clair.
 // v11.27 (30/10/2026) — RSV-UX-1 (§495) : la Réserve — le « + » et « Nouveau mouvement » au téléphone, la pyramide d'abord, la part des anges vide en une ligne.
 // v11.26 (30/10/2026) — CAVE-UX-1 (§494) : Cave › Aujourd'hui — le sommaire qui suit, les compteurs sans zéros, trois colonnes sur ordinateur avec la fiche du contenant choisi.
@@ -4660,7 +4661,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.28';
+const CACHE_NAME   = 'mavigne-v11.29';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4677,7 +4678,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.28 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.29 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4697,7 +4698,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.28 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.29 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

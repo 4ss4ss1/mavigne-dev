@@ -7,12 +7,12 @@
   "src/app.js": {
     "dur": 97,
     "petit": 56,
-    "ko": 964
+    "ko": 976
   },
   "src/cave.js": {
     "dur": 28,
     "petit": 24,
-    "ko": 732
+    "ko": 738
   },
   "src/cockpit-vue.js": {
     "dur": 0,
@@ -28,6 +28,11 @@
     "dur": 0,
     "petit": 0,
     "ko": 23
+  },
+  "src/compteur.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 43
   },
   "src/coquille.js": {
     "dur": 0,
@@ -47,7 +52,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 206
+    "ko": 207
   },
   "src/gt.js": {
     "dur": 0,
@@ -62,7 +67,7 @@
   "src/jalons.js": {
     "dur": 2,
     "petit": 1,
-    "ko": 52
+    "ko": 53
   },
   "src/onboarding.js": {
     "dur": 3,
@@ -77,7 +82,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 925
+    "ko": 928
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -97,7 +102,7 @@
   "src/reserve.js": {
     "dur": 14,
     "petit": 4,
-    "ko": 105
+    "ko": 107
   },
   "src/taille-doc.js": {
     "dur": 0,
@@ -112,7 +117,7 @@
   "src/tracteur.js": {
     "dur": 10,
     "petit": 10,
-    "ko": 254
+    "ko": 216
   },
   "src/tutos.js": {
     "dur": 0,
@@ -122,12 +127,12 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 494
+    "ko": 529
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 548
+    "ko": 555
   },
   "index.html": {
     "dur": 74,
@@ -137,6 +142,6 @@
   "src/styles.css": {
     "dur": 237,
     "petit": 69,
-    "ko": 946
+    "ko": 964
   }
 }

@@ -6157,6 +6157,116 @@ body .mv-rail .mv-rail-cherche + .mv-rail-b{ margin-top:var(--e-1,4px); }
 #page-home .hpc-p{ min-height:var(--e-6,24px); }
 .sbox > input{ align-self:stretch; margin:-10px 0; padding:10px 0; }   /* le champ prend la hauteur de sa boîte : 16 → 39 px */
 
+/* ════ QDN-1 (§497) — « La nouvelle Ma Vigne » : le grand panneau du déploiement général ════ */
+html.qdn-ouvert, html.qdn-ouvert body { overflow: hidden; }
+.qdn { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: stretch; justify-content: center; background: var(--voile); font-family: var(--font-ui); color: var(--texte); }
+.qdn-boite { position: relative; display: flex; width: 100%; height: 100%; background: var(--bg-card); overflow: hidden; }
+.qdn-rail { display: none; }
+.qdn-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.qdn-tete { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2,8px); padding: calc(var(--e-2,8px) + env(safe-area-inset-top, 0px)) var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px) 0 var(--e-5,20px); }
+.qdn-prog { flex: 1 1 60%; display: flex; gap: var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px); }
+.qdn-prog i { flex: 1; height: 3px; border-radius: 2px; background: var(--piste); }
+.qdn-prog i.on { background: var(--accent); }
+.qdn-kick { order: 3; flex: 1 1 100%; padding: 0 0 var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px); font-size: var(--pt-micro,12px); font-weight: var(--fw-med,500); color: var(--texte-doux); }
+.qdn-x { flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--r-md,8px); background: transparent; color: var(--texte-med); cursor: pointer; }
+.qdn-corps { flex: 1; min-height: 0; overflow-y: auto; padding: var(--e-3,12px) var(--e-5,20px) var(--e-6,24px); }
+.qdn-ch-tete { display: flex; gap: var(--e-3,12px); align-items: flex-start; }
+.qdn-med { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--accent-doux); color: var(--accent-texte); display: flex; align-items: center; justify-content: center; }
+.qdn-h2 { margin: 0; font-family: var(--font-titre); font-weight: var(--fw-semi,600); font-size: var(--pt-xl,28px); line-height: 1.1; }
+.qdn-lead { margin: var(--e-2,8px) 0 0; font-size: var(--pt-base,14px); line-height: 1.45; color: var(--texte-med); }
+.qdn-pts, .qdn-fin { list-style: none; margin: var(--e-5,20px) 0 0; padding: 0; display: grid; gap: var(--e-4,16px); }
+.qdn-pts li, .qdn-fin li, .qdn-livret { display: flex; gap: var(--e-3,12px); align-items: flex-start; }
+.qdn-pi { flex: none; width: 32px; height: 32px; border-radius: var(--r-md,8px); background: var(--accent-doux); color: var(--accent-texte); display: flex; align-items: center; justify-content: center; }
+.qdn-pts b, .qdn-fin b, .qdn-livret b { display: block; font-size: var(--pt-base,14px); font-weight: var(--fw-semi,600); line-height: 1.3; }
+.qdn-pts li div > span, .qdn-fin li div > span, .qdn-livret div > span { display: block; margin-top: 2px; font-size: var(--pt-txt,13px); line-height: 1.45; color: var(--texte-med); }
+.qdn-note { margin: var(--e-5,20px) 0 0; padding: var(--e-3,12px); border-radius: var(--r-md,8px); background: var(--bg-doux); border: 1px solid var(--ligne,#E7E6E2); font-size: var(--pt-micro,12px); line-height: 1.5; color: var(--texte-med); }
+.qdn-pied { flex: none; display: flex; gap: var(--e-2,8px); padding: var(--e-3,12px) var(--e-5,20px) calc(var(--e-4,16px) + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--ligne,#E7E6E2); background: var(--bg-card); }
+.qdn-btn1, .qdn-btn2 { min-height: 48px; padding: 0 var(--e-5,20px); border-radius: var(--r-md,8px); font-family: var(--font-ui); font-size: var(--pt-base,14px); display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2,8px); cursor: pointer; text-decoration: none; }
+.qdn-btn1 { flex: 1; border: 0; background: var(--accent); color: var(--sur-accent); font-weight: var(--fw-semi,600); }
+.qdn-btn2 { border: 1px solid var(--ligne-forte); background: var(--bg-card); color: var(--texte); font-weight: var(--fw-med,500); }
+.qdn-btn1.petit, .qdn-btn2.petit { flex: none; min-height: 44px; padding: 0 var(--e-3,12px); font-size: var(--pt-txt,13px); }
+.qdn-gs { margin-top: var(--e-5,20px); display: grid; gap: var(--e-2,8px); }
+.qdn-g { border: 1px solid var(--ligne,#E7E6E2); border-radius: var(--r-lg,12px); background: var(--bg-card); overflow: hidden; }
+.qdn-g summary { min-height: 48px; display: flex; align-items: center; gap: var(--e-2,8px); padding: 0 var(--e-4,16px); background: var(--bg-doux); font-size: var(--pt-base,14px); font-weight: var(--fw-semi,600); cursor: pointer; list-style: none; }
+.qdn-g summary::-webkit-details-marker { display: none; }
+.qdn-g summary > span:first-child { flex: 1; min-width: 0; }
+.qdn-n { min-width: 24px; height: 22px; padding: 0 var(--e-2,8px); border-radius: var(--r-full,999px); background: var(--accent-doux); color: var(--accent-texte); font-size: var(--pt-micro,12px); font-weight: var(--fw-semi,600); display: inline-flex; align-items: center; justify-content: center; }
+.qdn-g ul { list-style: none; margin: 0; padding: 0 var(--e-4,16px) var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px); }
+.qdn-g li { display: flex; gap: var(--e-3,12px); padding: var(--e-2,8px) 0; border-top: 1px solid var(--ligne,#E7E6E2); font-size: var(--pt-txt,13px); line-height: 1.4; }
+.qdn-d { flex: none; width: 48px; color: var(--texte-doux); font-size: var(--pt-micro,12px); line-height: 1.6; }
+.qdn-fin { gap: var(--e-2,8px); }
+.qdn-fin li { align-items: center; padding: var(--e-3,12px); border: 1px solid var(--ligne,#E7E6E2); border-radius: var(--r-lg,12px); }
+.qdn-fin li > div, .qdn-livret > div { flex: 1; min-width: 0; }
+.qdn-fait { flex: none; display: inline-flex; align-items: center; gap: var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px); font-size: var(--pt-txt,13px); font-weight: var(--fw-semi,600); color: var(--ok-texte); }
+.qdn-livret { margin-top: var(--e-4,16px); align-items: center; padding: var(--e-4,16px); border-radius: var(--r-lg,12px); background: var(--accent-doux); }
+.qdn-lien2 { border: 0; background: none; padding: 0; font: inherit; color: var(--accent-texte); text-decoration: underline; cursor: pointer; }
+.qdn-couv { background: var(--cave); color: var(--sur-bandeau); justify-content: center; }
+.qdn-couv-txt { width: 100%; max-width: 560px; display: flex; flex-direction: column; overflow-y: auto; padding: calc(var(--e-2,8px) + env(safe-area-inset-top, 0px)) var(--e-5,20px) calc(var(--e-5,20px) + env(safe-area-inset-bottom, 0px)); }
+.qdn-couv-haut { display: flex; align-items: center; min-height: 44px; }
+.qdn-marque { font-family: var(--font-titre); font-size: var(--pt-md,20px); font-weight: var(--fw-semi,600); }
+.qdn-couv .qdn-x { margin-left: auto; color: var(--sur-bandeau-doux); }
+.qdn-couv-kick { margin-top: var(--e-3,12px); display: flex; align-items: center; gap: var(--e-2,8px); font-size: var(--pt-txt,13px); font-weight: var(--fw-med,500); color: var(--or-clair); }
+.qdn-champ { margin-top: var(--e-4,16px); }
+.qdn-champ svg { display: block; width: 100%; height: auto; }
+.qdn-champ polygon { fill: var(--or-clair); fill-opacity: .07; stroke: var(--or-clair); stroke-width: 1.25; }
+.qdn-champ line { stroke: var(--or-clair); stroke-width: 1; stroke-opacity: .9; }
+.qdn-champ line.i { stroke-opacity: .45; }
+.qdn-champ .qdn-pin-r { fill: var(--cave); fill-opacity: .88; }
+.qdn-champ .qdn-pin-c { fill: none; stroke: var(--or-clair); stroke-width: 1.25; }
+.qdn-champ .qdn-pin-p { fill: var(--or-clair); }
+.qdn-champ text { fill: var(--sur-bandeau); font-family: var(--font-ui); font-size: var(--pt-txt,13px); font-weight: var(--fw-med,500); }
+.qdn-dates { display: flex; justify-content: space-between; gap: var(--e-2,8px); margin-top: var(--e-2,8px); font-size: var(--pt-micro,12px); color: var(--or-clair); }
+.qdn-dates span:nth-child(2) { color: var(--sur-bandeau-doux); }
+.qdn-h1 { margin: var(--e-5,20px) 0 0; font-family: var(--font-titre); font-weight: var(--fw-semi,600); font-size: var(--pt-hero,40px); line-height: 1.04; color: var(--sur-bandeau); }
+.qdn-couv-lead { margin: var(--e-3,12px) 0 0; font-size: var(--pt-sm,16px); line-height: 1.5; color: var(--sur-bandeau); }
+.qdn-couv-ras { margin: var(--e-3,12px) 0 0; display: flex; gap: var(--e-2,8px); align-items: flex-start; font-size: var(--pt-txt,13px); line-height: 1.45; color: var(--sur-bandeau-doux); }
+.qdn-couv-ras svg, .qdn-couv-kick svg { flex: none; color: var(--or-clair); }
+.qdn-couv-btns { margin-top: var(--e-6,24px); display: flex; flex-direction: column; gap: var(--e-2,8px); }
+.qdn-or { min-height: 48px; padding: 0 var(--e-5,20px); border: 0; border-radius: var(--r-md,8px); background: var(--or-clair); color: var(--cave); font-family: var(--font-ui); font-size: var(--pt-sm,16px); font-weight: var(--fw-semi,600); cursor: pointer; }
+.qdn-couv-pdf { min-height: 48px; padding: 0 var(--e-5,20px); display: flex; align-items: center; justify-content: center; gap: var(--e-2,8px); border: 1px solid var(--or-clair); border-radius: var(--r-md,8px); color: var(--sur-bandeau); text-decoration: none; font-size: var(--pt-base,14px); font-weight: var(--fw-med,500); }
+.qdn-couv-lien { align-self: center; margin-top: var(--e-2,8px); min-height: 44px; border: 0; background: none; color: var(--or-clair); font-family: var(--font-ui); font-size: var(--pt-base,14px); font-weight: var(--fw-med,500); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.qdn-couv-duree { text-align: center; font-size: var(--pt-micro,12px); color: var(--sur-bandeau-doux); }
+@media (min-width: 900px) {
+  .qdn { align-items: center; padding: var(--e-6,24px); }
+  .qdn-boite { width: 960px; max-width: 100%; height: 620px; max-height: 100%; border-radius: var(--r-lg,12px); box-shadow: var(--shadow-lg,--ligne); }
+  .qdn-rail { display: flex; flex-direction: column; flex: none; width: 264px; padding: var(--e-5,20px) var(--e-3,12px) var(--e-4,16px); background: var(--bg-doux); border-right: 1px solid var(--ligne,#E7E6E2); overflow-y: auto; }
+  .qdn-rail ol { list-style: none; margin: var(--e-4,16px) 0; padding: 0; display: grid; gap: 2px; }
+  .qdn-ri { width: 100%; min-height: 36px; display: flex; align-items: center; gap: var(--e-2,8px); padding: var(--e-1,2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px) var(--e-2,8px); border: 0; border-radius: var(--r-md,8px); background: transparent; color: var(--texte); font-family: var(--font-ui); font-size: var(--pt-txt,13px); font-weight: var(--fw-med,500); text-align: left; cursor: pointer; }
+  .qdn-ri.on { background: var(--accent-doux); color: var(--accent-texte); font-weight: var(--fw-semi,600); }
+  .qdn-rn { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: var(--pt-micro,12px); font-weight: var(--fw-semi,600); background: var(--piste); color: var(--texte-med); }
+  .qdn-ri.on .qdn-rn { background: var(--accent); color: var(--sur-accent); }
+  .qdn-ri.vu .qdn-rn { background: var(--ok-doux); color: var(--ok-texte); }
+  .qdn-rail-n { display: block; font-family: var(--font-titre); font-size: var(--pt-md,20px); font-weight: var(--fw-semi,600); line-height: 1.1; }
+  .qdn-rail-v { display: block; margin-top: 2px; font-size: var(--pt-micro,12px); color: var(--texte-doux); }
+  .qdn-rail .qdn-btn2 { margin-top: auto; min-height: 40px; font-size: var(--pt-txt,13px); }
+  .qdn-prog { display: none; }
+  .qdn-tete { flex-wrap: nowrap; padding: var(--e-4,16px) var(--e-3,12px) 0 var(--e-7,32px); }
+  .qdn-kick { order: 0; flex: 1 1 auto; padding: 0; }
+  .qdn-corps { padding: var(--e-2,8px) var(--e-7,32px) var(--e-6,24px); }
+  .qdn-pts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-6,24px); }
+  .qdn-pied { justify-content: flex-end; padding: var(--e-3,12px) var(--e-7,32px) var(--e-4,16px); }
+  .qdn-btn1 { flex: none; min-width: 160px; }
+  .qdn-h2 { font-size: var(--pt-xxl,32px); }
+  .qdn-couv-txt { padding: var(--e-6,24px) var(--e-7,32px); }
+  .qdn-couv-btns { flex-direction: row; flex-wrap: wrap; }
+  .qdn-couv-lien { align-self: flex-start; padding: 0; }
+  .qdn-couv-duree { text-align: left; }
+}
+@media (prefers-reduced-motion: no-preference) { .qdn-boite { animation: qdn-entre .24s ease-out; } }
+@keyframes qdn-entre { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
 /* ★ TETE-1 (§272) — LES EN-TÊTES ET LES ONGLETS AU DESSIN DE LA MAQUETTE V2.
    Même balisage partout (les dix .mod-header, le bandeau et la barre d'onglets du Pilotage) : ce bloc ne change que
    l'habit, par jetons. En-têtes sur la surface, un filet dessous ; l'icône du module sans boîte ; titres en Outfit ;

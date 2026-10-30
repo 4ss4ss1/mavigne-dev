@@ -1,0 +1,30 @@
+{
+  "lot": "QDN-1",
+  "section": "§497",
+  "base": "ccc191691936fb38fb443faf0bff97b321a8ebb1",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "saute": "aucun des sept tutos n’est concerné (test:tutos --concernes) ; le panneau côte à côte reste à rejouer chez Nico : le Chromium de Playwright manque côté Claude"
+  },
+  "fichiers": {
+    ".mv-base": "1a585a186811ff1cac44874ffaeec51b4e8cfd5b2232411ff0e088a75e2cadf2",
+    "CLAUDE.md": "17bb4c3eca1f6d5bc64380bf8dc1cb1a7c85a98fb9dbad0d09cb472ff6b58768",
+    "docs/claude/INDEX.md": "760fa944526713f2350896054b625beb0e97f77be29e0686d5ba231198566805",
+    "docs/claude/chantiers-480-529.md": "86c6c784a322237a8cc7e53e77d6ef53ae59a952e47ab15c151669d3d645787b",
+    "docs/claude/journal.md": "e24da8347077113ca31b0f4e305f2b4a31589beb0d5c4df3515e642e0b84e33d",
+    "guide/12-reglages.html": "670f24b77d0afbe784c9dd770c9fb0a29179ac26aad67d64ccdc0ffbfc635e7f",
+    "index.html": "a698e2cf4d4211828f4403e8be6dff1e9e576320fda265f32ba77773e57f1df2",
+    "public/sw.js": "4ee7e3a7249a7645834c0d671e4072c72fc027fcc621552ddfc4e2494138eb3c",
+    "scripts/contraste-baseline.json": "3818832955d5336e39eb401494f77872c4a410a85d7f30dfc75f87feb2345bd5",
+    "scripts/mv-harnais-cote1.mjs": "6c959f684a6024f859e241bc362ad402bd4acef27f8127b86f4aa3892f07b011",
+    "scripts/mv-harnais-liste.mjs": "b333669c7a8626c731ac5cb90f6276f236d29d4b8860c8ba798bfe2f874f0924",
+    "scripts/typo-baseline.json": "eddc5b1b8febe2a56c777d7b07fe23bf6e33480624548c5bc2d1629a66abcb4c",
+    "src/styles.css": "7e5e74adade85a9cb81856d1d7deeb9231bc4c3453c7cbc626e924f311ee7677",
+    "src/utils.js": "7bb9ff35dbc2773a520f15e0fa9a629ead3154d0ad540ec518d1eb0e164381ad",
+    "src/whats-new.js": "35da3d21ac175ea873f9e5077e7155440709e195a6bba926b2c5eb37a896a12d",
+    "public/livret-nouvelle-ma-vigne-admin.pdf": "7dce0bd8327fa8e30132bdd8a554b2e0c507e2f19aed1b2045944834aba8063c",
+    "public/livret-nouvelle-ma-vigne-equipe.pdf": "5938619fb4ce3f38cde99c46ecb41dcb5c18abdce6b71a656568de92fe2f131d",
+    "scripts/mv-harnais-qdn1.mjs": "94f57522e45aac3fba4a958416e34a2581f15ff4915f47b80ddd2eb4abdd98f3"
+  }
+}

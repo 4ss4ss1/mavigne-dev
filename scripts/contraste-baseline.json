@@ -9,12 +9,12 @@
   },
   "code": {
     "clair": {
-      "mesurees": 932,
-      "nonResoluble": 355,
-      "fondInconnu": 498,
+      "mesurees": 971,
+      "nonResoluble": 390,
+      "fondInconnu": 529,
       "sous": {
         "src/app.js": 5,
-        "src/cave.js": 6,
+        "src/cave.js": 5,
         "src/cuvier.js": 5,
         "src/pilotage.js": 4,
         "src/planning.js": 3,
@@ -22,16 +22,16 @@
         "src/reserve.js": 1,
         "src/tracteur.js": 1,
         "index.html": 2,
-        "src/styles.css": 47
+        "src/styles.css": 46
       }
     },
     "sombre": {
-      "mesurees": 933,
-      "nonResoluble": 350,
-      "fondInconnu": 505,
+      "mesurees": 971,
+      "nonResoluble": 386,
+      "fondInconnu": 536,
       "sous": {
         "src/app.js": 7,
-        "src/cave.js": 15,
+        "src/cave.js": 14,
         "src/cuvier.js": 12,
         "src/phyto.js": 1,
         "src/pilotage.js": 6,
@@ -47,11 +47,10 @@
   "surfaces": {
     "src/app.js": 5,
     "src/cave.js": 1,
-    "src/pilotage.js": 1,
     "src/planning.js": 6,
     "src/reglages.js": 1,
     "src/tracteur.js": 1,
     "index.html": 1,
-    "src/styles.css": 10
+    "src/styles.css": 11
   }
 }

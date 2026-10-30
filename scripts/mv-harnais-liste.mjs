@@ -803,6 +803,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ux0.mjs --contre'],
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
+  ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement
+  ['node scripts/mv-harnais-qdn1.mjs --contre'],
   ['node scripts/mv-harnais-lisible1.mjs'],            // LISIBLE-1 (§470) : les textes et les cibles comme la maquette (11 px, 12 au téléphone ; initiales du Journal ; zones des boutons discrets), la décision du 26/09 tenue
   ['node scripts/mv-harnais-lisible1.mjs --contre'],
   ['node scripts/mv-harnais-annuler1.mjs'],            // ANNULER-1 (§471) : le toast commun (6 s, la barre), Dévalider, le lot de fûts, les gestes du Planning — chaque Annuler joué

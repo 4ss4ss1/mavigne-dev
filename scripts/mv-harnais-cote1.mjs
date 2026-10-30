@@ -19,6 +19,7 @@ const SAIN = { tutos: lire('src/tutos.js'), coq: lire('src/coquille.js'), css: l
   autres: SRC.filter((f) => fs.existsSync(f)).map(lire).join('\n') };
 // Les couches fixes posées sur toute la largeur qui n'ont pas à suivre le panneau — chacune avec sa raison.
 const EXEMPT = {
+  '.qdn': 'QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — une fois à l’ouverture, ou depuis Réglages › Moi ; jamais pendant un tuto',
   'body.mvr-mvt-ouvert #page-reserve .mvr-mvt-voile': 'RSV-UX-1 (§495) : le voile de « Nouveau mouvement », au téléphone seulement',
   'body.mvr-mvt-ouvert #page-reserve .mvr-mvt': 'RSV-UX-1 (§495) : la feuille « Nouveau mouvement » de la Réserve, au téléphone seulement',
   '#page-tracteur .t-feuille': 'TRAC-UX-1A (§480) : la feuille des filtres du Tracteur, au téléphone seulement',

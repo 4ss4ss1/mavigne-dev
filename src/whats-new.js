@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.48', d: '2026-10-30', items: [
+    { niv: 0, pour: ['tous'], emoji: 'etincelles', titre: 'La nouvelle Ma Vigne se présente',
+      desc: "À la première ouverture après la grande mise à jour, un grand panneau présente ce qui change pour vous, chapitre par chapitre, avec la liste complète des améliorations et un livret PDF à télécharger. Pour le revoir\u00a0: <b>Réglages › Moi › La nouvelle Ma Vigne</b>." },
+  ] },
   { v: '10.47', d: '2026-10-30', items: [
     { niv: 0, pour: ['tous'], emoji: 'bouclier', titre: 'Un enregistrement bloqué se dit en clair',
       desc: "À l’ouverture de l’appli, un réglage pouvait être refusé avec «\u00a0Erreur critique\u00a0» et un message technique. C’est corrigé\u00a0: la configuration du domaine est relue sur le téléphone dès le démarrage. Et si la protection anti-perte bloque un jour un enregistrement, la fenêtre dit en clair ce qui n’est pas parti — rien n’est perdu, c’est gardé dans Réglages › Saisies non enregistrées." },

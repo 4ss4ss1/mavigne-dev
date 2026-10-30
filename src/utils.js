@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.47';
+export const APP_VERSION = '10.48';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1419,6 +1419,374 @@ if (typeof document !== 'undefined') {
   }, true);
 }
 
+// ════ QDN-1 (§497) — « LA NOUVELLE MA VIGNE » : LE GRAND PANNEAU DU DÉPLOIEMENT GÉNÉRAL ════
+// Une fois par personne, à la première ouverture d'une version ≥ QDN_VERSION, si sa base ANN-1 est plus ancienne :
+// une couverture, les chapitres de son rôle, « Tout, en bref » (calculé depuis WHATS_NEW), puis « Avant de commencer ».
+// Il prend la place de la grande fenêtre ANN-1 ce jour-là. Revoir : Réglages › Moi › La nouvelle Ma Vigne.
+// Le contenu des chapitres vient de la même source que le livret PDF (public/livret-nouvelle-ma-vigne-*.pdf).
+var QDN_ID = 'refonte-2026';
+var QDN_VERSION = '10.48';
+var QDN_DEPUIS = '8.41';   // la dernière version générale avant la refonte (le parc d'appareils de l'Admin GT le confirme)
+var QDN_LIVRETS = { admin: '/livret-nouvelle-ma-vigne-admin.pdf', equipe: '/livret-nouvelle-ma-vigne-equipe.pdf' };
+var QDN_MOIS = ['janv.', 'f\u00e9vr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'ao\u00fbt', 'sept.', 'oct.', 'nov.', 'd\u00e9c.'];
+var QDN_CHAPITRES = [
+  { id: 'visage', pour: '*', ico: 'etincelles', titre: 'Un nouveau visage',
+    lead: { '*': 'Toute l’appli a été redessinée\u00a0: plus sobre, plus lisible, la même sur tous les écrans.' },
+    points: [
+      ['*', 'valide', 'La couleur a un sens', 'La lie-de-vin pour agir. Le vert pour ce qui est fait, l’orange pour ce qui est à surveiller, le rouge pour ce qui est en retard.'],
+      ['*', 'loupe', 'Plus grand, plus facile à toucher', 'Des textes plus grands, des boutons à la taille du doigt, et des parcelles bien colorées sur les plans.'],
+      ['*', 'maison', 'Au téléphone', 'La barre du bas à plat, les icônes des modules en relief, et un en-tête qui se range quand on descend.'],
+      ['*', 'graphique', 'Sur ordinateur', 'La barre de gauche, et partout la liste à gauche, la fiche à droite\u00a0: Parcelles, Journal, Tracteur, Phyto, Chai.']
+    ],
+    note: { '*': 'Vos données et vos réglages n’ont pas bougé\u00a0: rien à ressaisir.' } },
+  { id: 'apprendre', pour: '*', ico: 'doigt', titre: 'Apprendre en faisant',
+    lead: { 'A': 'L’appli vous montre où toucher, sur un domaine d’entraînement\u00a0: rien n’arrive sur le vôtre.', 'S': 'Des tutos accompagnés arrivent au fur et à mesure\u00a0: l’appli vous montrera où toucher, geste par geste.' },
+    points: [
+      ['*', 'doigt', 'Des tutos accompagnés', 'Un cadre doré montre où toucher, une consigne dit quoi faire, et c’est vous qui touchez. Bloqué\u00a0? «\u00a0Montre-moi\u00a0» fait le geste.'],
+      ['*', 'bouclier', 'Sans risque', 'Ils se jouent sur le Domaine des Grandes Vignes, un domaine fictif\u00a0: rien de ce que vous touchez n’arrive sur le vôtre.'],
+      ['A', 'livre', 'Déjà sept tutos', 'Les équipes du jour, corriger l’équipe d’une validation, une journée de cave, un plein de GNR, un amendement, un produit déjà utilisé, des mesures de maturité.'],
+      ['A', 'rotation', 'Et la suite, au fur et à mesure', 'Module par module, pour les plus de 800 gestes de l’appli. Sur ordinateur, le tuto s’ouvre à côté et suit vos gestes sur votre domaine.'],
+      ['S', 'rotation', 'Au fur et à mesure', 'Les premiers sont pour l’administrateur\u00a0; les vôtres arrivent module par module, et chacun s’annonce dans l’appli.'],
+      ['*', 'pousse', '«\u00a0Pourquoi\u00a0?\u00a0»\u00a0: chaque tâche s’explique', 'Une pastille à côté de la tâche du jour et dans la feuille de validation\u00a0: quand on la fait, pourquoi, ce que ça change pour le vin.']
+    ],
+    note: { 'A': 'On les lance depuis le «\u00a0? Aide\u00a0» de l’écran\u00a0: «\u00a0Me montrer comment faire\u00a0».' } },
+  { id: 'sure', pour: '*', ico: 'bouclier', titre: 'Plus rapide, plus sûre',
+    lead: { '*': 'Ce que vous saisissez est gardé, même quand le réseau ou le téléphone lâche.' },
+    points: [
+      ['*', 'bouclier', 'Une saisie ne se perd plus', 'Elle est gardée sur le téléphone avant de partir. Appli relancée ou coupée\u00a0: elle la retrouve et l’envoie dès que le serveur répond.'],
+      ['*', 'rotation', 'Annuler plutôt que confirmer', 'Plusieurs gestes se rattrapent d’un appui sur «\u00a0Annuler\u00a0», au lieu d’une fenêtre de confirmation.'],
+      ['*', 'cloche', 'Une seule notification par jour', 'Le matin, à votre heure de prise de poste\u00a0: la priorité qui vous concerne. Rien les jours de repos.'],
+      ['*', 'alerte', 'Un souci se dit en clair', 'Si un enregistrement est bloqué, la fenêtre dit ce qui n’est pas parti\u00a0; c’est gardé dans Réglages › Saisies non enregistrées.']
+    ],
+    note: { '*': 'À faire une fois\u00a0: Réglages › Moi › Notifications. Sur iPhone, depuis Ma Vigne installée sur l’écran d’accueil.' } },
+  { id: 'maj', pour: '*', ico: 'rotation', titre: 'Les mises à jour, sans y penser',
+    lead: { '*': 'Ma Vigne se met à jour toute seule, au bon moment\u00a0: jamais au milieu d’une saisie.' },
+    points: [
+      ['*', 'rotation', 'Toute seule', 'La nouvelle version s’installe quand vous quittez l’appli ou que vous y revenez, si rien n’est en cours.'],
+      ['*', 'doigt', 'Ou quand vous le choisissez', 'La barre «\u00a0Nouvelle version prête\u00a0» s’affiche au-dessus du menu\u00a0: «\u00a0Mettre à jour\u00a0», quelques secondes. Sur ordinateur, en bas de la barre de gauche.'],
+      ['*', 'engrenage', 'Vérifier vous-même', 'Réglages › Moi › Mise à jour, puis «\u00a0Rechercher\u00a0».'],
+      ['*', 'journal', 'Lire ce qui a changé', 'Réglages › Moi › Journal des nouveautés\u00a0: tout, mois par mois.']
+    ] },
+  { id: 'vignes', pour: '*', ico: 'raisin', titre: 'Dans les vignes',
+    lead: { 'A': 'Vous réglez l’ordre et les équipes une fois\u00a0; chacun les suit toute la journée.', 'S': 'Vous arrivez droit sur votre travail du jour, avec votre équipe, et la prochaine parcelle est sous le pouce.' },
+    points: [
+      ['S', 'carte', 'Droit sur la priorité', 'À l’ouverture, l’appli s’ouvre sur la tâche du moment et votre équipe. La prochaine parcelle porte la marque «\u00a0Prochaine\u00a0».'],
+      ['S', 'doigt', 'Deux grands boutons', '«\u00a0Début\u00a0» et «\u00a0Valider\u00a0» en bas de chaque carte, pour le pouce.'],
+      ['S', 'parcours', 'La tournée de votre équipe', 'Vos parcelles sont numérotées dans l’ordre choisi pour votre équipe.'],
+      ['S', 'tariere', 'Les pieds marqués', 'En validant le repérage, un pavé de gros chiffres demande combien de pieds sont marqués\u00a0: la tarière arrive préremplie.'],
+      ['*', 'maison', 'L’Accueil, rangé', 'Sept cartes claires\u00a0: la carte du jour avec ses rangs, la météo en une seule carte, ce qu’il faut savoir.'],
+      ['A', 'equipe', 'Des équipes qui restent', 'Les équipes du jour restent en place d’un jour à l’autre, et «\u00a0Cave\u00a0» y a sa place.'],
+      ['A', 'parcours', 'Les tournées, réglées une fois', 'Vigne › roue crantée › Tournées\u00a0; une tournée par équipe, choisie dans «\u00a0Équipes du jour\u00a0».'],
+      ['A', 'tariere', 'L’entreplantation, de bout en bout', 'Les pieds marqués comptés au repérage, la tarière préremplie, les heures comptées dès le repérage.']
+    ] },
+  { id: 'travail', pour: '*', ico: 'etoile', titre: 'Votre travail compte',
+    lead: { 'A': 'Pour chacun, «\u00a0Ma trace\u00a0» raconte sa saison. Les jalons restent personnels\u00a0: vous ne voyez que les vôtres.', 'S': '«\u00a0Ma trace\u00a0» raconte votre saison\u00a0: ce que vous avez fait, et ce que ça devient.' },
+    points: [
+      ['*', 'etoile', 'Des jalons', 'Premier hectare, kilomètres de rangs, trous de tarière… «\u00a0Nouveau jalon\u00a0» s’affiche après une validation. Seule la personne qui le gagne le voit.'],
+      ['*', 'carte', 'La carte de la saison', 'Les parcelles colorées selon vos passages, même sans réseau.'],
+      ['*', 'bouteille', 'Du rang à la bouteille', 'Les vins nés de votre travail, millésime par millésime.'],
+      ['*', 'document', 'Ma saison en images', 'Six cartes à faire défiler, et un PDF à garder.']
+    ],
+    note: { '*': 'L’annonce des jalons se coupe\u00a0: Réglages › Moi › Mon compte.' } },
+  { id: 'tracteur', pour: 'AT', ico: 'tracteur', titre: 'Au tracteur',
+    lead: { '*': 'Chaque session dit ses heures et son GNR, et le compteur des tracteurs avance tout seul.' },
+    points: [
+      ['*', 'chrono', 'La session en cours, en tête', 'Avec «\u00a0Terminer\u00a0» à portée de pouce, et un chrono qui se lit d’un coup d’œil.'],
+      ['*', 'equipe', 'Le coéquipier', 'Pour la tarière, l’ensemencement et l’engrais, il se choisit avec l’activité.'],
+      ['*', 'engrenage', 'Le compteur et la révision', 'Le compteur avance tout seul avec les sessions, la révision se recalcule, et un tracteur peut avoir plusieurs entretiens.'],
+      ['A', 'alerte', 'L’entretien le plus pressant', 'Le Pilotage le dit, en tête.'],
+      ['T', 'cloche', 'La notification du matin', 'Pour vous aussi\u00a0: un tracteur qui revient du réparateur, un délai avant récolte qui se termine.']
+    ] },
+  { id: 'pilotage', pour: 'P', ico: 'graphique', titre: 'Le Pilotage',
+    lead: { '*': '«\u00a0Aujourd’hui\u00a0» se lit d’un coup d’œil et bouge en direct\u00a0: où en est la campagne, qui est où, ce qui arrive.' },
+    points: [
+      ['*', 'graphique', 'Tous les onglets à la même mesure', 'Une seule barre «\u00a0Vous regardez\u00a0», les mêmes barres et la même échelle partout\u00a0; L’année et Travaux sont rangés.'],
+      ['*', 'carte', 'Le domaine en direct', 'Chaque parcelle à sa forme, qui est où en ce moment, et «\u00a0En direct\u00a0» à côté d’«\u00a0À savoir\u00a0».'],
+      ['*', 'euro', 'L’Économie, sur les vrais chiffres', 'Les heures payées du planning et la cadence réelle de l’équipe\u00a0; l’avance ou le retard se comptent sur vos jours travaillés.'],
+      ['C', 'barrique', 'La vue Cave', 'Les fûts qui demandent un geste, et la fleur, le piqué ou l’oxydé du fût goûté.'],
+      ['*', 'alerte', 'Des alertes justes', '«\u00a0Ce qu’il manque\u00a0» ne réclame que ce qui sert.']
+    ] },
+  { id: 'cave', pour: 'C', ico: 'barrique', titre: 'La cave',
+    lead: { '*': 'Cave › Aujourd’hui devient le tableau de bord du chai\u00a0: une ligne par cuve ou cuvée, un bouton par geste.' },
+    points: [
+      ['*', 'raisin', 'Le Cuvier, rangé', 'Maturités, récoltes et cuves sur un écran clair\u00a0; chaque cuve s’ouvre en fiche, et chaque appellation porte son minimum de sucre.'],
+      ['*', 'eprouvette', 'Le labo et le diagnostic', 'Une fiche par analyse, quatre analyses de plus, et Le Chai a son diagnostic, qui lit vos sulfitages.'],
+      ['*', 'cuve', 'Pas de «\u00a0Fini\u00a0» avant la malo', 'Après le décuvage, la frise attend la malo. «\u00a0Pas de malo (voulu)\u00a0» pour les vins qui l’évitent.'],
+      ['*', 'bouteille', 'Une seule fiche par cuvée', 'Un seul millésime regardé, le rendement par appellation et le hL/ha de chaque cuvée.']
+    ] },
+];
+var QDN_FIN = [
+  ['*', 'cloche', 'notif', 'Activer la notification du matin', 'Réglages › Moi › Notifications, une fois sur chaque téléphone.'],
+  ['A', 'parcours', 'tour', 'Vérifier vos tournées et vos équipes', 'Vigne › roue crantée › Tournées, puis «\u00a0Équipes du jour\u00a0».'],
+  ['P', 'euro', 'eco', 'Relire la vue Économie', 'Ses chiffres bougent\u00a0: ils disent maintenant ce qui se passe vraiment.']
+];
+var QDN_THEMES = [['appl', 'Toute l’appli'], ['tuto', 'Les tutos et l’aide'], ['vign', 'La vigne\u00a0: Accueil, Parcelles, équipes'], ['trav', 'Votre travail compte'], ['trac', 'Le tracteur'], ['phyt', 'Phyto et fertilisation'], ['cave', 'La cave'], ['pilo', 'Le Pilotage'], ['plan', 'Le Planning'], ['rese', 'La Réserve'], ['regl', 'Réglages']];
+var QDN_TESTS = [
+  ['tuto', /tuto|pourquoi ?[?]|« ?i ?»|aide »/i],
+  ['trav', /jalon|ma trace|premières fois|saison en images|rang à la bouteille|présence|mur du domaine|carte de votre saison/i],
+  ['pilo', /pilotage|économie|l’année|décider|ce qu’il manque|écart au barème|atterrissage|en direct|à savoir|vous regardez|exercice/i],
+  ['trac', /tracteur|session|chrono|gnr|coéquipier|entretien|compteur|révision/i],
+  ['phyt', /phyto|traitement|registre|catalogue|fertili|amendement|e-phy|cuivre|nitrates/i],
+  ['plan', /planning|congé|absence|motif|retenue|compta|journées? de cave|heures sup|mise à pied/i],
+  ['cave', /cuvier|chai|cave|cuve|cuvée|labo|malo|fml|maturit|vendange|récolte|millésime|soutirage|ouillage|appellation|fermentation|sucre|so2|anges|hl\/ha|rendement|fût|macération|sulfit|dégustation/i],
+  ['rese', /réserve|intrant|inventaire|achat|mouvement/i],
+  ['regl', /réglages|renommer|campagne suivante|clôtur/i],
+  ['vign', /parcelle|accueil|tournée|équipe|arrach|entreplant|pieds marqués|tâche|valider|début|vigne|priorité|carte du jour|météo|rangs/i]
+];
+var _qdn = null;
+
+function _qdnRoles() {
+  var r = (window.currentUser && window.currentUser.roles) || [];
+  var A = r.indexOf('admin') >= 0, T = r.indexOf('tractoriste') >= 0;
+  var S = !A && (r.indexOf('ouvrier') >= 0 || T);
+  return { A: A, S: S, T: T, C: A && _mvAnnPourMoi({ pour: ['cave'] }), P: A && _mvAnnPourMoi({ pour: ['pilotage'] }) };
+}
+function _qdnPour(p, R) {
+  if (p === '*') return true;
+  for (var i = 0; i < p.length; i++) if (R[p.charAt(i)]) return true;
+  return false;
+}
+function _qdnTxt(v, R) {
+  if (typeof v === 'string') return v;
+  if (!v) return '';
+  if (R.A && v.A != null) return v.A;
+  if (!R.A && v.S != null) return v.S;
+  return v['*'] != null ? v['*'] : '';
+}
+function _qdnTheme(it) {
+  var t = String((it && it.titre) || '').toLowerCase();
+  var d = String((it && it.desc) || '').replace(/<[^>]+>/g, ' ').toLowerCase();
+  for (var k = 0; k < 2; k++) {
+    var s = k ? d : t;
+    for (var i = 0; i < QDN_TESTS.length; i++) if (QDN_TESTS[i][1].test(s)) return QDN_TESTS[i][0];
+  }
+  return 'appl';
+}
+function _qdnDate(d) {
+  var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d || ''));
+  return m ? (parseInt(m[3], 10) + ' ' + QDN_MOIS[parseInt(m[2], 10) - 1]) : '';
+}
+// Les améliorations parues après `depuis` : comptées pour tous, rangées par thème pour la personne (ANN-1, _mvAnnPourMoi).
+function _qdnRecap(depuis) {
+  var par = {}, n = 0, total = 0, versions = 0, jours = [];
+  WHATS_NEW.forEach(function (b) {
+    if (_cmpVer(b.v, depuis) <= 0) return;
+    versions++;
+    if (b.d && jours.indexOf(b.d) < 0) jours.push(b.d);
+    (b.items || []).forEach(function (it) {
+      total++;
+      if (!_mvAnnPourMoi(it)) return;
+      var th = _qdnTheme(it);
+      (par[th] = par[th] || []).push({ d: _qdnDate(b.d), t: it.titre });
+      n++;
+    });
+  });
+  var groupes = [];
+  QDN_THEMES.forEach(function (g) { if (par[g[0]]) groupes.push({ code: g[0], nom: g[1], items: par[g[0]] }); });
+  jours.sort();
+  return { versions: versions, total: total, n: n, groupes: groupes, jours: jours };
+}
+function _qdnAMontrer(base) {
+  var cu = window.currentUser;
+  if (!cu || cu._isDemo || cu._isVisite || cu._isGTAdmin) return false;
+  if (typeof navigator === 'undefined' || navigator.webdriver) return false;   // hors navigateur (harnais) ou sous un contrôle automatique : pas de présentation
+  if (_cmpVer(APP_VERSION, QDN_VERSION) < 0) return false;
+  if (_mvAnnLire('qdn', '') === QDN_ID) return false;
+  return _cmpVer(base || APP_VERSION, QDN_VERSION) < 0;
+}
+function _qdnIco(n, t) { return (typeof window._mvIcon === 'function') ? window._mvIcon(n, t || 20) : ''; }
+
+// Le champ des versions : une parcelle dont chaque rang est une version ; un jour sur deux plus pâle.
+function _qdnChamp(rec) {
+  var W = 520, H = 170, n = Math.max(1, rec.versions), k = 0;
+  var TL = [0.06 * W, 0.16 * H], TR = [0.965 * W, 0.03 * H], BR = [W - 1, 0.86 * H], BL = [1, H - 2];
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true" focusable="false"><polygon points="'
+    + [TL, TR, BR, BL].map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '"></polygon>';
+  var parJour = {};
+  WHATS_NEW.forEach(function (b) { if (_cmpVer(b.v, _qdn ? _qdn.depuis : QDN_DEPUIS) > 0) parJour[b.d || ''] = (parJour[b.d || ''] || 0) + 1; });
+  rec.jours.forEach(function (j, ji) {
+    for (var q = 0; q < (parJour[j] || 0); q++) {
+      var t = (k + 0.5) / n;
+      s += '<line class="' + (ji % 2 ? 'i' : 'p') + '" x1="' + (TL[0] + t * (TR[0] - TL[0])).toFixed(1) + '" y1="' + (TL[1] + t * (TR[1] - TL[1]) + 2).toFixed(1)
+        + '" x2="' + (BL[0] + t * (BR[0] - BL[0])).toFixed(1) + '" y2="' + (BL[1] + t * (BR[1] - BL[1]) - 2).toFixed(1) + '"></line>';
+      k++;
+    }
+  });
+  var px = 0.27 * W, py = 0.5 * H, lib = rec.versions + ' versions';
+  s += '<rect class="qdn-pin-r" x="' + (px - 13) + '" y="' + (py - 13) + '" width="' + (lib.length * 7.4 + 40) + '" height="26" rx="5"></rect>'
+    + '<circle class="qdn-pin-c" cx="' + px + '" cy="' + py + '" r="7.5"></circle><circle class="qdn-pin-p" cx="' + px + '" cy="' + py + '" r="3.2"></circle>'
+    + '<text x="' + (px + 15) + '" y="' + (py + 5) + '">' + _mvEsc(lib) + '</text></svg>';
+  var j0 = rec.jours[0], j1 = rec.jours[rec.jours.length - 1];
+  return s + '<div class="qdn-dates"><span>' + _mvEsc(_qdnDate(j0)) + '</span><span>Un rang, une version</span><span>' + _mvEsc(_qdnDate(j1)) + '</span></div>';
+}
+
+function _qdnHtmlCouv(e) {
+  var nb = e.ch.length + 1, min = Math.max(2, Math.round(nb * 0.45));
+  return '<div class="qdn-boite qdn-couv" tabindex="-1"><div class="qdn-couv-txt">'
+    + '<div class="qdn-couv-haut"><span class="qdn-marque">Ma Vigne</span>'
+    + '<button type="button" class="qdn-x" data-qdn="fermer" aria-label="Plus tard">' + _qdnIco('croix', 20) + '</button></div>'
+    + '<div class="qdn-couv-kick">' + _qdnIco('valide', 16) + 'Ma Vigne est \u00e0 jour \u00b7 version ' + _mvEsc(APP_VERSION) + '</div>'
+    + '<div class="qdn-champ">' + _qdnChamp(e.rec) + '</div>'
+    + '<h2 class="qdn-h1" id="qdn-titre">La nouvelle Ma Vigne</h2>'
+    + '<p class="qdn-couv-lead">Depuis votre derni\u00e8re mise \u00e0 jour, l\u2019appli a re\u00e7u ' + e.rec.versions + ' versions et '
+    + e.rec.total + ' am\u00e9liorations. Voici ce qui change pour vous.</p>'
+    + '<p class="qdn-couv-ras">' + _qdnIco('bouclier', 16) + '<span>Vos donn\u00e9es et vos r\u00e9glages restent les m\u00eames\u00a0: rien \u00e0 ressaisir.</span></p>'
+    + '<div class="qdn-couv-btns"><button type="button" class="qdn-or" data-qdn="voir">Voir les nouveaut\u00e9s</button>'
+    + '<a class="qdn-couv-pdf" href="' + e.livret + '" target="_blank" rel="noopener">' + _qdnIco('document', 18) + 'T\u00e9l\u00e9charger le livret (PDF)</a></div>'
+    + '<button type="button" class="qdn-couv-lien" data-qdn="tout">Ou tout, en bref\u00a0: la liste des ' + e.rec.n + ' am\u00e9liorations</button>'
+    + '<div class="qdn-couv-duree">' + nb + ' chapitres, environ ' + min + ' minutes</div></div></div>';
+}
+function _qdnHtmlPoints(liste, R) {
+  var h = '';
+  liste.forEach(function (p) {
+    if (!_qdnPour(p[0], R)) return;
+    h += '<li><span class="qdn-pi">' + _qdnIco(p[1], 18) + '</span><div><b>' + _mvEsc(p[2]) + '</b><span>' + _mvEsc(p[3]) + '</span></div></li>';
+  });
+  return h;
+}
+function _qdnTete(ico, titre, lead) {
+  return '<div class="qdn-ch-tete"><span class="qdn-med">' + _qdnIco(ico, 26) + '</span><div><h2 class="qdn-h2" id="qdn-titre">'
+    + _mvEsc(titre) + '</h2>' + (lead ? '<p class="qdn-lead">' + _mvEsc(lead) + '</p>' : '') + '</div></div>';
+}
+function _qdnHtmlCorps(e, id) {
+  var R = e.R;
+  if (id === 'tout') {
+    var lead = R.A ? (e.rec.n + ' am\u00e9liorations depuis votre derni\u00e8re mise \u00e0 jour, rang\u00e9es par th\u00e8me. Les plus r\u00e9centes d\u2019abord.')
+      : (e.rec.n + ' am\u00e9liorations vous concernent, sur ' + e.rec.total + '. Les plus r\u00e9centes d\u2019abord.');
+    var g = '';
+    e.rec.groupes.forEach(function (gr) {
+      g += '<details class="qdn-g" open><summary><span>' + _mvEsc(gr.nom) + '</span><span class="qdn-n">' + gr.items.length + '</span></summary><ul>';
+      gr.items.forEach(function (it) { g += '<li><span class="qdn-d">' + _mvEsc(it.d) + '</span><span>' + _mvEsc(it.t) + '</span></li>'; });
+      g += '</ul></details>';
+    });
+    return _qdnTete('liste', 'Tout, en bref', lead) + '<div class="qdn-gs">' + g + '</div>'
+      + '<p class="qdn-note">Le d\u00e9tail de chacune, version par version\u00a0: R\u00e9glages \u203a Moi \u203a Journal des nouveaut\u00e9s.</p>';
+  }
+  if (id === 'fin') {
+    var f = '';
+    QDN_FIN.forEach(function (r) {
+      if (!_qdnPour(r[0], R)) return;
+      f += '<li><span class="qdn-pi">' + _qdnIco(r[1], 18) + '</span><div><b>' + _mvEsc(r[3]) + '</b><span>' + _mvEsc(r[4]) + '</span></div>'
+        + (e.fait[r[2]] ? '<span class="qdn-fait">' + _qdnIco('check', 16) + 'Fait</span>'
+          : '<button type="button" class="qdn-btn2 petit" data-qdn="vu" data-k="' + _mvEsc(r[2]) + '">Vu</button>') + '</li>';
+    });
+    return _qdnTete('valide', 'Avant de commencer', R.A ? 'Quelques v\u00e9rifications, et c\u2019est parti.' : 'Un seul r\u00e9glage, et c\u2019est parti.')
+      + '<ul class="qdn-fin">' + f + '</ul>'
+      + '<div class="qdn-livret"><span class="qdn-pi">' + _qdnIco('document', 18) + '</span><div><b>Le livret de la nouvelle version</b>'
+      + '<span>Ce qui a chang\u00e9 et le mode d\u2019emploi, \u00e0 lire ou \u00e0 imprimer (PDF).</span></div>'
+      + '<a class="qdn-btn1 petit" href="' + e.livret + '" target="_blank" rel="noopener">T\u00e9l\u00e9charger</a></div>'
+      + '<p class="qdn-note">Tout le d\u00e9tail, version par version\u00a0: <button type="button" class="qdn-lien2" data-qdn="journal">'
+      + 'R\u00e9glages \u203a Moi \u203a Journal des nouveaut\u00e9s</button>.</p>';
+  }
+  var ch = null;
+  e.ch.forEach(function (c) { if (c.id === id) ch = c; });
+  if (!ch) return '';
+  return _qdnTete(ch.ico, ch.titre, _qdnTxt(ch.lead, R)) + '<ul class="qdn-pts">' + _qdnHtmlPoints(ch.points, R) + '</ul>'
+    + (ch.note && _qdnTxt(ch.note, R) ? '<p class="qdn-note">' + _mvEsc(_qdnTxt(ch.note, R)) + '</p>' : '');
+}
+function _qdnTitre(e, id) {
+  if (id === 'tout') return 'Tout, en bref';
+  if (id === 'fin') return 'Avant de commencer';
+  var t = '';
+  e.ch.forEach(function (c) { if (c.id === id) t = c.titre; });
+  return t;
+}
+function _qdnHtml(e) {
+  var id = e.ecrans[e.i];
+  if (id === 'couv') return _qdnHtmlCouv(e);
+  var nCh = e.ecrans.length - 2, rail = '', prog = '';
+  e.ecrans.forEach(function (x, k) {
+    if (k === 0) return;
+    var cls = k === e.i ? ' on' : (e.vus[x] ? ' vu' : '');
+    rail += '<li><button type="button" class="qdn-ri' + cls + '" data-qdn="aller" data-i="' + k + '"><span class="qdn-rn">'
+      + (cls === ' vu' ? _qdnIco('check', 14) : k) + '</span><span>' + _mvEsc(_qdnTitre(e, x)) + '</span></button></li>';
+    if (k <= nCh) prog += '<i' + (k <= e.i ? ' class="on"' : '') + '></i>';
+  });
+  var kick = id === 'fin' ? 'Pour finir' : ('Chapitre ' + e.i + ' sur ' + nCh);
+  var suiv = id === 'fin' ? '<button type="button" class="qdn-btn1" data-qdn="fermer">C\u2019est parti</button>'
+    : '<button type="button" class="qdn-btn1" data-qdn="suiv">' + (e.i === nCh ? 'Pour finir' : 'Suivant') + '</button>';
+  return '<div class="qdn-boite" tabindex="-1">'
+    + '<nav class="qdn-rail" aria-label="Chapitres"><div><span class="qdn-rail-n">La nouvelle Ma Vigne</span>'
+    + '<span class="qdn-rail-v">Version ' + _mvEsc(APP_VERSION) + '</span></div><ol>' + rail + '</ol>'
+    + '<a class="qdn-btn2" href="' + e.livret + '" target="_blank" rel="noopener">' + _qdnIco('document', 16) + 'Le livret (PDF)</a></nav>'
+    + '<div class="qdn-main"><div class="qdn-tete"><div class="qdn-prog" aria-hidden="true">' + prog + '</div>'
+    + '<span class="qdn-kick">' + kick + '</span>'
+    + '<button type="button" class="qdn-x" data-qdn="fermer" aria-label="Plus tard">' + _qdnIco('croix', 20) + '</button></div>'
+    + '<div class="qdn-corps">' + _qdnHtmlCorps(e, id) + '</div>'
+    + '<div class="qdn-pied"><button type="button" class="qdn-btn2" data-qdn="prec">Pr\u00e9c\u00e9dent</button>' + suiv + '</div></div></div>';
+}
+function _qdnPeindre(haut) {
+  var el = document.getElementById('mv-qdn');
+  if (!el || !_qdn) return;
+  el.innerHTML = _qdnHtml(_qdn);
+  var b = el.querySelector('.qdn-boite');
+  if (b && b.focus) b.focus();
+  if (haut) { var c = el.querySelector('.qdn-corps, .qdn-couv-txt'); if (c) c.scrollTop = 0; }
+}
+function _qdnAller(i) {
+  if (!_qdn) return;
+  var x = _qdn.ecrans[_qdn.i];
+  if (x) _qdn.vus[x] = 1;
+  _qdn.i = Math.max(0, Math.min(_qdn.ecrans.length - 1, i));
+  _qdnPeindre(true);
+}
+function _qdnClic(ev) {
+  var b = ev.target && ev.target.closest ? ev.target.closest('[data-qdn]') : null;
+  if (!b || !_qdn) return;
+  var a = b.getAttribute('data-qdn');
+  if (a === 'fermer') { mvQdnFermer(); return; }
+  if (a === 'journal') { mvQdnFermer(); if (window.openNouvJournal) window.openNouvJournal(); return; }
+  if (a === 'vu') { _qdn.fait[b.getAttribute('data-k')] = 1; _qdnPeindre(false); return; }
+  if (a === 'voir') _qdnAller(1);
+  else if (a === 'suiv') _qdnAller(_qdn.i + 1);
+  else if (a === 'prec') _qdnAller(_qdn.i - 1);
+  else if (a === 'tout') _qdnAller(_qdn.ecrans.indexOf('tout'));
+  else if (a === 'aller') _qdnAller(parseInt(b.getAttribute('data-i'), 10) || 0);
+}
+function _qdnTouche(ev) {
+  if (!_qdn) return;
+  if (ev.key === 'Escape') { ev.preventDefault(); mvQdnFermer(); }
+  else if (ev.key === 'ArrowRight') _qdnAller(_qdn.i + 1);
+  else if (ev.key === 'ArrowLeft') _qdnAller(_qdn.i - 1);
+}
+function mvQdnOuvrir() {
+  try {
+    var R = _qdnRoles();
+    var base = _mvAnnLire('base', null) || QDN_DEPUIS;
+    var depuis = _cmpVer(base, QDN_DEPUIS) > 0 ? base : QDN_DEPUIS;
+    if (_cmpVer(depuis, QDN_VERSION) >= 0) depuis = QDN_DEPUIS;   // revu après coup : toute la refonte
+    var ch = QDN_CHAPITRES.filter(function (c) { return _qdnPour(c.pour, R); });
+    _qdn = { R: R, ch: ch, ecrans: ['couv'].concat(ch.map(function (c) { return c.id; }), ['tout', 'fin']), i: 0, vus: {}, fait: {},
+      depuis: depuis, rec: null, livret: R.A ? QDN_LIVRETS.admin : QDN_LIVRETS.equipe, retour: document.activeElement };
+    _qdn.rec = _qdnRecap(depuis);
+    _mvAnnEcrire('qdn', QDN_ID);
+    var el = document.getElementById('mv-qdn');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'mv-qdn';
+      el.className = 'qdn';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-modal', 'true');
+      el.setAttribute('aria-labelledby', 'qdn-titre');
+      el.addEventListener('click', _qdnClic);
+      (document.getElementById('app-root') || document.body).appendChild(el);   // dans #app-root : le thème (sombre, plein soleil) s'y pose
+    }
+    document.addEventListener('keydown', _qdnTouche, true);
+    document.documentElement.classList.add('qdn-ouvert');
+    _qdnPeindre(true);
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/mvQdnOuvrir'); }
+}
+function mvQdnFermer() {
+  var el = document.getElementById('mv-qdn');
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+  document.removeEventListener('keydown', _qdnTouche, true);
+  document.documentElement.classList.remove('qdn-ouvert');
+  var r = _qdn && _qdn.retour;
+  _qdn = null;
+  try { if (r && r.focus) r.focus(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'utils.js/mvQdnFermer'); }
+}
+// ════ fin QDN-1 ════
+
 let _whatsNewShown = false;
 export function checkWhatsNew() {
   if (_whatsNewShown) return;
@@ -1432,6 +1800,9 @@ export function checkWhatsNew() {
   var vus = _mvAnnVus(), auj = _mvAujIso();
   _mvAnnCarte(base, vus, auj);   // niveau 2 — la carte de l'Accueil
   _mvNouvVeille();               // niveau 1 — les pastilles
+  // QDN-1 (§497) : la première ouverture après le déploiement général présente la nouvelle Ma Vigne, une fois par personne ;
+  //   la grande fenêtre ANN-1 laisse sa place ce jour-là.
+  if (_qdnAMontrer(base)) { _whatsNewShown = true; _mvAnnEcrire('fenetre', auj); setTimeout(mvQdnOuvrir, 700); return; }
   // Niveau 3 — la grande fenêtre : au plus une fois tous les 30 jours, trois nouveautés au plus.
   var der = _mvAnnLire('fenetre', '');
   if (der && _mvAnnJours(der, auj) < _MV_ANN_MAJ_JOURS) return;
@@ -2612,6 +2983,7 @@ var MV_AIDE = {
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],
       ['Documents & impressions', "dans l’onglet Domaine rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],
+      ['La nouvelle Ma Vigne', "dans l’onglet Moi, rouvre la présentation de la grande mise à jour : ce qui change pour vous, chapitre par chapitre, la liste complète des améliorations et le livret PDF."],
       ['Le Journal des nouveautés', "dans l’onglet Moi, garde tout ce qui a changé, mois par mois. Une fenêtre ne s’ouvre plus que pour une grande nouveauté, au plus une fois par mois ; un point à vérifier attend sur l’Accueil jusqu’à « Vu » ; une pastille « Nouveau » marque une nouveauté là où elle se trouve."],
       ['La zone dangereuse', "ne réinitialise que cet appareil : les données du domaine restent sur le serveur."]
     ]
@@ -6212,4 +6584,5 @@ window._mvCaveEcrire = function(liste, part){
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1
 window.checkWhatsNew      = checkWhatsNew;
+window.mvQdnOuvrir        = mvQdnOuvrir;   // QDN-1 : Réglages › Moi › La nouvelle Ma Vigne
 window.dismissWhatsNew    = dismissWhatsNew;
