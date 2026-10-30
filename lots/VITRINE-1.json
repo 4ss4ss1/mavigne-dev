@@ -1,0 +1,19 @@
+{
+  "lot": "VITRINE-1",
+  "section": "§498",
+  "base": "68c715974170a4cb6e7bd07eee5567b3dde1a1d0",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "8b206531593441b1595683a514f507a0c30b72d07ee3d816b1c7516e232f269d",
+    "CLAUDE.md": "328d0aaffc88ab54bc0f8f5fadf04020f0bcb11eea0c359f1260d408fa50326b",
+    "docs/claude/INDEX.md": "0f40f3397c0fc6a663db21462c931af7b5d8a2cc6f1ae508fd25d97455295fe4",
+    "docs/claude/chantiers-480-529.md": "cdacf542e90b75d294e93c937a8d3d9ff0d4fa19cfaae098ab43a93ad9fb4645",
+    "docs/claude/journal.md": "8199f17a2cad536def87761835a81485d45caa8548d3a1432353cc486043205d",
+    "public/logiciel-vigne.html": "7989feae29e57520388323a63c4ddf4a8bbe5223ab9215f62d83a489a8a676df",
+    "scripts/harnais-claude-md.mjs": "bd4293e5475bf0e16337ed00a93fe6ea4b6dfe01da47a4dc23e1bc7a11c8c4cc",
+    "public/fond-saisons-vigne.jpg": "f1478d777ea5ff750cfb14efcdd0bc415dd6c4658317396262a46c92bb7e4e14",
+    "public/fond-saisons-vigne.mp4": "a9ac91f3dbbb06e3172cf61a57bc3c6621f9a5caa42016fe203730e680415ecc"
+  }
+}

@@ -474,3 +474,27 @@ Le 18/10, Nico prépare le déploiement général de la refonte (essayée sur le
 - Les illustrations de la maquette (morceaux d’écrans par chapitre) ne sont pas reprises dans l’appli : un médaillon d’icône par chapitre à la place.
 - Le panneau a été rendu avec le vrai style de l’appli sur une page d’essai (téléphone et ordinateur, clair et sombre), pas dans l’appli qui tourne : à regarder sur le canal refonte avant le déploiement.
 - `npm run test:tutos -- --concernes` (le panneau côte à côte) à rejouer une fois chez Nico : `npx playwright install` d’abord.
+
+## 498. ★ VITRINE-1 — LA PAGE LOGICIEL-VIGNE REFAITE : L’APPLI QUI SE MONTRE, LA VIDÉO DES SAISONS EN FOND (30/10 — `public/logiciel-vigne.html` · `public/fond-saisons-vigne.mp4` · `public/fond-saisons-vigne.jpg` · **aucun bump** : page du site seule)
+
+### 498a. D’où ça vient
+Nico (20/10) : que le site montre l’appli telle qu’elle est après la refonte, pour qu’un prospect n’y lise pas autre chose que ce qu’il découvre en ouvrant l’appli. Les pistes dessinées (crayon, silhouettes, manga) sont abandonnées le 27/10 au profit d’une page moderne avec les écrans de l’appli animés, **tons clairs uniquement**. Le 30/10 : l’écran d’avancement passe des vendanges aux réparations et à l’amendement (« nous sommes dans les périodes de réparation et d’amendement »), une carte dit l’amendement (sacs à commander, temps de tracteur prévu, travail posé — l’onglet Fertilisation, FERTI-1), et la vidéo des saisons (une illustration du même rang, de l’hiver à l’hiver, 20 s) passe **en fond de toute la page, à 15 %** (essais à 7 puis 9 %, « un tout petit peu plus visible », puis « passe à 15 % »).
+
+### 498b. Ce qui change
+- **L’en-tête de référencement est celui de l’ancienne page**, tel quel (titre, description, canonical, Open Graph, Twitter, JSON-LD) ; seule `theme-color` passe au papier `#F0EEE9`. Polices du site (`/fonts/fonts.css`), logo `logo-barre.png`.
+- **La vidéo est un fichier à part** (960×540, sans son, 1,2 Mo au lieu des 4,8 Mo fournis : invisible à cette intensité) : `preload="none"`, chargée après `load`, muette, en boucle ; image fixe (`fond-saisons-vigne.jpg`) si l’économie de données est demandée ; demi-vitesse en mouvement réduit ; en pause quand l’onglet est caché. ⚠️ **La politique de sécurité de `firebase.json` interdit ce que faisait la maquette** : `connect-src` refuse `data:` et `media-src` retombe sur `default-src 'self'`, donc pas de `blob:` — une vidéo embarquée ne jouerait pas en ligne.
+- **Les dix chiffres animés portent leur vraie valeur dans le HTML** (moteurs de recherche, aperçus de lien, sans JavaScript : « 29 € », pas « 0 € ») ; le script les remet à zéro, les compte à l’arrivée à l’écran, et un `setTimeout` pose la valeur finale même si l’affichage est ralenti.
+- **Liens** : l’essai `/essai.html` ; la démo **`https://mavigneapp.fr/demo.html`, adresse complète** (exigée par `mv-harnais-demo.mjs`) ; le contrat de sous-traitance (`/dpa.html`) dans la réponse sur les données ; téléphone et ligne © dans le pied. « Écrans de l’application, données de démonstration » sous le téléphone.
+- **Le service worker de l’appli** sert les fichiers du site par son dernier `respondWith` (cache d’abord) ; la vidéo arrive en 206 (requêtes Range), que le cache refuse : sans effet sur la lecture. Rien à changer dans `sw.js`.
+
+### 498c. Vérifié
+- Page servie avec les en-têtes de `firebase.json` (politique de sécurité comprise), téléphone 412×915 et PC 1440×900 : vidéo lue depuis `/fond-saisons-vigne.mp4`, 14 fontes chargées, aucune violation, aucune erreur, aucune requête en échec ; sans JavaScript, les dix chiffres affichent leur valeur.
+- Contraste des 24 textes posés directement sur la vidéo à 15 %, mesuré sur les images de printemps, d’automne et d’hiver : 5:1 au pire (seuil 4,5).
+- `mv-harnais-subset.mjs`, `mv-harnais-icones.mjs`, `mv-harnais-demo.mjs` et sa contre-épreuve : verts.
+- Mentions commerciales et réglementaires comparées à l’ancienne page (prix, forfaits, 60 €, TVA 293 B, Telepac, KML, 2023/564, arrêté du 24 décembre 2025, échéances 2027 et 2030, contrat de sous-traitance) : toutes présentes ; aucun nom de client.
+
+### 498d. Ce qui reste ouvert
+- **Le bloc « 127 heures par an » n’est plus sur la page** ; la fin de la démo (`demo.html`) annonce toujours ce chiffre « comme le site ». Décision de Nico.
+- `scripts/harnais-vitrine.mjs` et `scripts/contre-epreuves.mjs` (manuels, hors lanceur) décrivent l’ancienne page (table CREDITS, 127 h, un seul bloc `<script>`) : à réécrire sur la nouvelle ou à retirer.
+- Les valeurs des mini-écrans (« Ce qu’un carnet ne vous aurait jamais dit », l’amendement : 46 sacs, 1 h 50) sont des exemples.
+- **Mise en ligne** : la page part avec le déploiement général du vendredi 30/10 au soir (QDN-1, §497) — `npm run site` → `npm run build` → le canal `refonte` pour la regarder → `firebase deploy --only hosting`. Un `deploy --only hosting` publie tout `dist/` : la page et l’appli refondue partent ensemble, c’est voulu ce soir.
