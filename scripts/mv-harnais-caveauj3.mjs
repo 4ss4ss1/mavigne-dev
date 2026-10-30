@@ -56,16 +56,16 @@ function verifier(S) {
   const cuve = (G) => ({ k: 'c:c1', ref: 'c1', cuve: true, titre: 'Petite Chapelle + Perri\u00e8res', rang: 0, G });
   const al = { kind: 'alerte', urgence: 'due', note: '\u00e7a stagne \u2014 \u00e0 contr\u00f4ler', detail: 'sucres au labo 0,9 \u2192 0,7\u00a0g/L en 8\u00a0j', ref: 'c1' };
   const me = { kind: 'mesure', urgence: 'due', detail: 'dernier relev\u00e9 il y a 9 j', ref: 'c1' };
-  essai('alerte + relev\u00e9 d\u00fb sur la m\u00eame cuve : un seul \u00ab Relever \u00bb, qui ouvre la fen\u00eatre du relev\u00e9', () => { const b = boutons(L(cuve([al, me]))); return b.length === 1 && b[0].txt === 'Relever' && b[0].on === "_mlGo('mesure','c1')"; });
+  essai('alerte + relev\u00e9 d\u00fb sur la m\u00eame cuve : un seul \u00ab Relever \u00bb, qui ouvre la fen\u00eatre du relev\u00e9', () => { const b = boutons(L(cuve([al, me]))); return b.length === 1 && b[0].txt === 'Relever' && b[0].on === "event.stopPropagation();_mlGo('mesure','c1')"; });
   essai('les deux raisons restent affich\u00e9es', () => (L(cuve([al, me])).match(/class="caj-r /g) || []).length === 2);
-  essai('une alerte seule ouvre aussi la fen\u00eatre du relev\u00e9', () => { const b = boutons(L(cuve([{ kind: 'alerte', urgence: 'warn', note: 'temp\u00e9rature haute', detail: '31 \u00b0C au dernier relev\u00e9', ref: 'c1' }]))); return b.length === 1 && b[0].txt === 'Relever' && b[0].on === "_mlGo('mesure','c1')"; });
+  essai('une alerte seule ouvre aussi la fen\u00eatre du relev\u00e9', () => { const b = boutons(L(cuve([{ kind: 'alerte', urgence: 'warn', note: 'temp\u00e9rature haute', detail: '31 \u00b0C au dernier relev\u00e9', ref: 'c1' }]))); return b.length === 1 && b[0].txt === 'Relever' && b[0].on === "event.stopPropagation();_mlGo('mesure','c1')"; });
   const iMe = S.cave.indexOf("if(kind==='mesure'){"), jMe = iMe < 0 ? -1 : S.cave.indexOf('if(kind===', iMe + 10);
   T('le geste \u00ab mesure \u00bb de _mlGo ouvre bien la fen\u00eatre du relev\u00e9', iMe > 0 && jMe > iMe && S.cave.slice(iMe, jMe).includes('openOvVendMesure(ref);'));
   // 2. plusieurs gestes
   const cuvee = (G) => ({ k: 'v:v1', ref: 'v1', cuve: false, titre: 'Fixin 1er Cru \u201925', rang: 1, G });
   const ou = { kind: 'ouillage', urgence: 'due', detail: '3 f\u00fbts \u00b7 ~21 L', ref: 'v1' }, so = { kind: 'soutirage', detail: 'malo finie, pas encore soutir\u00e9e', ref: 'v1' };
-  essai('deux gestes diff\u00e9rents : deux boutons dans l\u2019ordre, et la ligne .plus', () => { const h = L(cuvee([ou, so])); const b = boutons(h); return b.length === 2 && b[0].on === "_mlGo('ouillage','v1')" && b[1].on === "_mlGo('soutirage','v1')" && /<li class="caj-l plus">/.test(h); });
-  essai('un seul geste : pas de .plus', () => /<li class="caj-l">/.test(L(cuve([me]))));
+  essai('deux gestes diff\u00e9rents : deux boutons dans l\u2019ordre, et la ligne .plus', () => { const h = L(cuvee([ou, so])); const b = boutons(h); return b.length === 2 && b[0].on === "event.stopPropagation();_mlGo('ouillage','v1')" && b[1].on === "event.stopPropagation();_mlGo('soutirage','v1')" && /<li class="caj-l plus" data-k=/.test(h); });
+  essai('un seul geste : pas de .plus', () => /<li class="caj-l" data-k=/.test(L(cuve([me]))));   /* CAVE-UX-1 (§494) : la ligne porte sa clé pour la fiche */
   // 3. la taille et la place
   essai('chaque bouton de ligne : jeu commun, taille compacte', () => { const b = boutons(L(cuvee([ou, so]))).concat(boutons(L(cuve([al, me])))); return b.length === 3 && b.every((x) => x.cls === 'mvbtn mvbtn-secondaire mvbtn-compact caj-b'); });
   T('aucun bouton de ligne \u00e9tir\u00e9 sur la largeur', !/\.caj-acts \.mvbtn\{\s*flex:1 1 0;/.test(S.css) && S.css.includes('#page-cave .caj-b{ position:relative; flex:none; }'));
@@ -94,7 +94,7 @@ const MUT = [
   ['l\u2019alerte garde son propre geste (deux \u00ab Relever \u00bb)', (S) => ({ ...S, cave: S.cave.replace("var _AUJ_GESTE={alerte:'mesure'};", 'var _AUJ_GESTE={};') })],
   ['les gestes ne sont plus d\u00e9doublonn\u00e9s', (S) => ({ ...S, cave: S.cave.replace('if(vus[k]) return; vus[k]=1; ', '') })],
   ['une raison perdue en fusionnant', (S) => ({ ...S, cave: S.cave.replace("  x.G.forEach(function(it){ h+='<span class=\"caj-r ", "  x.G.slice(0,1).forEach(function(it){ h+='<span class=\"caj-r ") })],
-  ['plus de ligne .plus', (S) => ({ ...S, cave: S.cave.replace("'<li class=\"caj-l'+(B.length>1?' plus':'')+'\">", "'<li class=\"caj-l\">") })],
+  ['plus de ligne .plus', (S) => ({ ...S, cave: S.cave.replace("'<li class=\"caj-l'+(B.length>1?' plus':'')+'\" data-k=", "'<li class=\"caj-l\" data-k=") })],
   ['le bouton repasse en taille terrain', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"', 'class="mvbtn mvbtn-secondaire caj-b"') })],
   ['le bouton de nouveau \u00e9tir\u00e9', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-b{ position:relative; flex:none; }', '#page-cave .caj-b{ position:relative; flex:1 1 0; }') })],
   ['plus de zone de toucher', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-b::before{ content:""; position:absolute; inset:calc(var(--e-2,8px) * -1 - var(--bw,1px)) calc(var(--e-1,4px) * -1 - var(--bw,1px)); }', '') })],

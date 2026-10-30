@@ -6219,11 +6219,11 @@ var _AUJ_GESTE={alerte:'mesure'};
 function _aujLigne(x){
   var meta=_aujMeta(x), vus={}, B=[];
   x.G.forEach(function(it){ var k=_AUJ_GESTE[it.kind]||it.kind; if(vus[k]) return; vus[k]=1; B.push(k); });
-  var h='<li class="caj-l'+(B.length>1?' plus':'')+'"><span class="caj-ico'+(x.rang<2?' due':'')+'">'+_mvIcon(x.cuve?'cuve':'barrique',18)+'</span>'
+  var h='<li class="caj-l'+(B.length>1?' plus':'')+'" data-k="'+_escAttr(x.k)+'" onclick="_aujSel(this.dataset.k)"><span class="caj-ico'+(x.rang<2?' due':'')+'">'+_mvIcon(x.cuve?'cuve':'barrique',18)+'</span>'
     +'<div class="caj-lc"><span class="caj-nom">'+_escHtml(x.titre||'')+'</span>'+(meta?'<span class="caj-meta">'+_escHtml(meta)+'</span>':'')+'<span class="caj-rs">';
   x.G.forEach(function(it){ h+='<span class="caj-r k-'+_escAttr(it.kind)+(it.urgence==='due'?' due':'')+'"><i></i><span>'+_escHtml(_aujRaison(it))+'</span></span>'; });
   h+='</span></div><div class="caj-acts">';
-  B.forEach(function(k){ h+='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-b" onclick="_mlGo(\''+_escAttr(k)+'\',\''+_escAttr(x.ref)+'\')">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; });
+  B.forEach(function(k){ h+='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-b" onclick="event.stopPropagation();_mlGo(\''+_escAttr(k)+'\',\''+_escAttr(x.ref)+'\')">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; });
   return h+'</div></li>';
 }
 // Ce qui est déjà fait aujourd'hui : les opérations du Chai datées du jour, les relevés et les décuvages du Cuvier.
@@ -6378,6 +6378,9 @@ function _aujColle(){
   var hd=document.querySelector('#page-cave .mod-header'), h=hd?hd.offsetHeight:0;
   dr.style.setProperty('--caj-haut',h+'px');
   dr.classList.toggle('colle',window.innerWidth>=1024&&(dr.offsetHeight+h+40)<=window.innerHeight);
+  // ★ CAVE-UX-1 (§494) : le sommaire se colle sous l'en-tête — sa hauteur suit celle de l'en-tête (replié ou non, TETE-3A)
+  var ab=document.getElementById('auj-body'); if(ab) ab.style.setProperty('--caj-som-haut',h+'px');
+  if(!_aujRO&&hd&&typeof window.ResizeObserver==='function'){ _aujRO=new ResizeObserver(function(){ var b2=document.getElementById('auj-body'); if(b2) b2.style.setProperty('--caj-som-haut',hd.offsetHeight+'px'); }); _aujRO.observe(hd); }
   if(!_aujColleOk){ _aujColleOk=true; window.addEventListener('resize',function(){ clearTimeout(window._aujColleT); window._aujColleT=setTimeout(_aujColle,150); }); }
 }
 // ═══ ★★ CAVEAUJ-2 (§435) — LE CUVIER, LE CHAI ET LES DERNIERS GESTES, D'UN COUP D'ŒIL (maquette validée le 22/10) ═══
@@ -6621,27 +6624,79 @@ function _aujRender(){
   var nEl=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).length;
   var auj=_mlGestes((sem[0]&&sem[0].items)||[]).filter(function(i){ return i.date===from; });
   var G=_aujGrouper(auj), faits=_aujFaits(from), PL={due:'Prioritaire', warn:'\u00c0 faire', ok:'\u00c0 jour'};
+  // ★ CAVE-UX-1 (§494) : les comptes du sommaire et les groupes de la fiche, posés pour renderCaveAujourdhui
+  _AUJ_G=G;
+  _AUJ_N={ presse:auj.length, semaine:((sem[0]&&sem[0].items)||[]).filter(function(it){ return it.kind!=='demarrage'&&it.date>=from; }).length, cuves:nSu,
+    futs:(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).reduce(function(a,c){ return a+(_caveNbTonneaux(c)||0); },0), releves:faits.length, veille:0 };
   var etat=auj.length?auj.length+' geste'+(auj.length>1?'s':'')+' \u00b7 '+G.length+' contenant'+(G.length>1?'s':''):(faits.length?'tout est fait':'rien \u00e0 faire');
   var h='<div class="caj-zone"><div class="caj-g"><section class="mvcarte caj-c caj-hero" aria-labelledby="caj-titre">'
     +'<div class="caj-hh"><span class="caj-hl">'+_mvIcon('eclair',16)+'Ce qui presse</span><span class="mvpas mvpas-statut '+({due:'mvpas-retard', warn:'mvpas-surveiller', ok:'mvpas-fait'})[v.cls]+' caj-etat">'+PL[v.cls]+'</span></div>'
     +'<h2 class="caj-titre" id="caj-titre">'+_escHtml(v.t)+'</h2><p class="caj-why">'+_escHtml(v.s)+'</p>'
     +'<div class="caj-sec"><span>\u00c0 faire aujourd\u2019hui</span><em>'+etat+'</em></div>';
   if(G.length) h+='<ul class="caj-ls">'+G.map(_aujLigne).join('')+'</ul>';
-  if(faits.length) h+='<div class="caj-fait"><b>D\u00e9j\u00e0 fait aujourd\u2019hui</b>'+faits.map(function(t){ return '<span>'+_mvIcon('check',16)+_escHtml(t)+'</span>'; }).join('')+'</div>';
+  if(faits.length) h+='<div class="caj-fait" id="caj-faits"><b>D\u00e9j\u00e0 fait aujourd\u2019hui</b>'+faits.map(function(t){ return '<span>'+_mvIcon('check',16)+_escHtml(t)+'</span>'; }).join('')+'</div>';
   if(!auj.length){ var pro=_aujProchain(sem,from); if(pro) h+='<p class="caj-suite">Prochain geste\u00a0: <b>'+_escHtml(pro)+'</b></p>'; }
   h+=_aujEquipe(from);
   var nT=G.filter(function(x){ return x.cuve&&x.G.some(function(i){ return i.kind==='mesure'||i.kind==='alerte'; }); }).length;
+  var _veil=_aujVeille(from,parc); _AUJ_N.veille=(_veil.match(/class="caj-asi/g)||[]).length;
   h+='<div class="caj-ctas">'
     +(nT?'<button type="button" class="mvbtn mvbtn-principal mvbtn-bureau caj-cta" onclick="selectCaveSection(\'vendange\');switchVendOng(\'tour\')">'+_mvIcon('parcours',18)+'Faire la tourn\u00e9e<span class="caj-ctan">\u00b7 '+nT+' cuve'+(nT>1?'s':'')+'</span></button>':'')
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau caj-cta" onclick="openOvCaveOp()">'+_mvIcon('ajout',18)+'Nouvelle op\u00e9ration</button></div>'
     +'<p class="caj-cadre"><i></i><span>Calcul\u00e9 sur '+nSu+' cuve'+(nSu>1?'s':'')+' suivie'+(nSu>1?'s':'')+' et '+nEl+' cuv\u00e9e'+(nEl>1?'s':'')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'
     +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></p></section>'+_aujEtat(from,parc)+'</div>'
-    +'<aside class="caj-dr" id="caj-droite" aria-label="\u00c0 surveiller">'+_aujVeille(from,parc)+'</aside></div>'
-    +_aujCal(sem,from);
+    +'<aside class="caj-dr" id="caj-droite" aria-label="\u00c0 surveiller">'+_veil+'</aside></div>'
+    +'<div id="caj-semaine">'+_aujCal(sem,from)+'</div>';
   h+=_aujRecentsHtml(from);
   return h;
 }
 
+// ★ CAVE-UX-1 (§494) — LE SOMMAIRE QUI SUIT, ET LE CONTENANT CHOISI (docs/maquettes/maquette-ux-v2.html, Cave ; décision de Nico, 28/10).
+//   Au téléphone, le sommaire (Ce qui presse · À faire · Cuves · Fûts · À surveiller · Relevés du jour) reste sous l'en-tête en
+//   descendant — sa hauteur suit celle de l'en-tête, replié ou non ; chaque entrée mène à sa partie. Sur ordinateur, trois colonnes :
+//   le sommaire, la page, et la fiche du contenant choisi dans « Ce qui presse » (ses raisons, sa densité ou ses fûts, ses gestes).
+//   « À surveiller » devient une entrée du sommaire. Les gestes gardent leur dessin fin (décision du 26/10 : la zone de 44 px suffit).
+var _AUJ_G=[], _AUJ_N={}, _aujSelK='', _aujRO=null;
+function _aujDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
+function _aujSommaireHtml(N){
+  N=N||{};
+  var E=[['caj-titre','Ce qui presse',N.presse],['caj-semaine','\u00c0 faire',N.semaine],['caj-cv-t','Cuves',N.cuves],['caj-ch-t','F\u00fbts',N.futs],['caj-droite','\u00c0 surveiller',N.veille],['caj-faits','Relev\u00e9s du jour',N.releves]];
+  return '<nav class="caj-som" id="caj-som" aria-label="Sommaire de la page">'+E.map(function(e){
+    return '<a href="#'+e[0]+'" class="caj-so" data-vers="'+e[0]+'" onclick="return _aujVers(this.dataset.vers)">'+_escHtml(e[1])+'<b>'+(Number(e[2])||0)+'</b></a>';
+  }).join('')+'</nav>';
+}
+function _aujVers(id){
+  var el=document.getElementById(id); if(!el) return false;
+  var hd=document.querySelector('#page-cave .mod-header'), so=document.getElementById('caj-som');
+  var off=(hd?hd.offsetHeight:0)+((so&&!_aujDesk())?so.offsetHeight:0)+8;
+  window.scrollTo({ top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-off), behavior:'smooth' });
+  return false;
+}
+function _aujFicheHtml(x){
+  if(!x) return '<div class="caj-fx-rien">Choisissez un contenant dans \u00ab\u00a0Ce qui presse\u00a0\u00bb.</div>';
+  var e=_aujEntite(x.ref,x.cuve)||{}, meta=_aujMeta(x), vus={}, B=[];
+  x.G.forEach(function(it){ var k=_AUJ_GESTE[it.kind]||it.kind; if(!vus[k]){ vus[k]=1; B.push(k); } });
+  var h='<div class="caj-fx-k">'+(x.cuve?'Cuve':'Cuv\u00e9e')+'</div><div class="caj-fx-t">'+_escHtml(x.titre||'')+'</div>'+(meta?'<div class="caj-fx-m">'+_escHtml(meta)+'</div>':'');
+  h+='<ul class="caj-fx-rs">'+x.G.map(function(it){ return '<li>'+_escHtml(_aujRaison(it))+'</li>'; }).join('')+'</ul>';
+  if(x.cuve){
+    var mes=[]; try{ mes=_vendTriMes(e)||[]; }catch(er){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/fiche',err:er}); }
+    var der=mes.length?mes[mes.length-1]:null, d20=der?_vendMesD20(der):null;
+    h+='<dl class="caj-fx-dl">'+(d20!=null?'<dt>Densit\u00e9 \u00e0 20\u00a0\u00b0C</dt><dd>'+_escHtml(_aujNb(d20))+'</dd>':'')+'<dt>Dernier relev\u00e9</dt><dd>'+(der?_escHtml(_mlFrJ(der.date)):'aucun')+'</dd></dl>';
+  } else {
+    var nt=0; try{ nt=_caveNbTonneaux(e)||0; }catch(er){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/fiche-futs',err:er}); }
+    if(nt) h+='<dl class="caj-fx-dl"><dt>F\u00fbts</dt><dd>'+nt+'</dd></dl>';
+  }
+  return h+'<div class="caj-fx-act">'+B.map(function(k,i){ return '<button type="button" class="mvbtn '+(i?'mvbtn-secondaire':'mvbtn-principal')+' caj-fx-b" data-g="'+_escAttr(k)+'" data-ref="'+_escAttr(x.ref)+'" onclick="_mlGo(this.dataset.g,this.dataset.ref)">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; }).join('')
+    +'<button type="button" class="mvbtn mvbtn-secondaire caj-fx-b" onclick="openOvCaveOp()">Autre geste</button></div>';
+}
+function _aujMontre(k){
+  _aujSelK=k||'';
+  [].slice.call(document.querySelectorAll('#auj-body .caj-l[data-k]')).forEach(function(li){ li.setAttribute('aria-selected',String(li.dataset.k===_aujSelK)); });
+  var el=document.getElementById('caj-fiche'); if(!el) return;
+  el.innerHTML=_aujFicheHtml(_AUJ_G.find(function(x){ return x.k===_aujSelK; }));
+}
+function _aujSel(k){ if(!_aujDesk()) return; _aujMontre(k); }
+function _aujFicheSync(){ if(!_aujDesk()) return; var ks=_AUJ_G.map(function(x){ return x.k; }); _aujMontre(ks.indexOf(_aujSelK)>=0?_aujSelK:(ks[0]||'')); }
+window._aujSel=_aujSel; window._aujVers=_aujVers;
 function renderCaveAujourdhui(){
   _mlInjectCss(); _aujInjectCss();
   // ⚠️ renderCave ne masque #cave-view-mil qu'APRES la branche aujourdhui :
@@ -6651,8 +6706,9 @@ function renderCaveAujourdhui(){
   host.style.display='block';
   var body=document.getElementById('auj-body'); if(!body) return;
   if(!window._dataReady){ body.innerHTML=window._mvSk?window._mvSk('chai'):''; return; }
-  body.innerHTML=_caveSaisBanner()+_aujRender();
-  _aujColle();
+  var _c=_aujRender();   // ★ CAVE-UX-1 (§494) : le sommaire, la page, le contenant choisi
+  body.innerHTML=_caveSaisBanner()+'<div class="caj-3">'+_aujSommaireHtml(_AUJ_N)+'<div class="caj-centre">'+_c+'</div><aside class="caj-fx" id="caj-fiche" aria-live="polite" aria-label="Le contenant choisi"></aside></div>';
+  _aujColle(); _aujFicheSync();
 }
 
 // ── L'EN-TETE ET LA BANDE, UNE SEULE FOIS ────────────────────────────────
@@ -6709,7 +6765,7 @@ function _caveKpisRender(){
   var kpis=[[hl,'hL en cuve',false],[futsVin,'f\u00fbts en vin',false],[aFaire,'\u00e0 faire cette semaine',aFaire>0],[t,'rentr\u00e9es',false]];
   kp.style.display='';
   kp.innerHTML=kpis.map(function(k){
-    return '<div class="mvu-kpi'+(k[2]?' due':'')+'"><div class="mvu-kpi-v">'+k[0]+'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';
+    return '<div class="mvu-kpi'+(k[2]?' due':'')+'"'+(parseFloat(String(k[0]).replace(/[^0-9,.\-]/g,'').replace(',','.'))===0?' hidden':'')+'><div class="mvu-kpi-v">'+k[0]+'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';   // ★ CAVE-UX-1 (§494) : un compteur à zéro se tait
   }).join('');
   if(note){
     var mils=_caveMilsEnCave().filter(function(m){ return m!=='?' && String(m)!==String(mm.mil); });

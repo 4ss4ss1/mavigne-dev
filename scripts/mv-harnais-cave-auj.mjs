@@ -161,7 +161,7 @@ pose(/(selectCaveSection\('aujourdhui'\)|_mvtGoCave\('aujourdhui')/.test(APPNU) 
 pose(/id:'aujourdhui'/.test(APPNU) && /id==='aujourdhui'/.test(APPNU), 'app.js : le chapitre d\u00e9mo « Aujourd\u2019hui » a sa branche');
 pose(/'cave\.auj':\s*\{/.test(UTNU) && /_mvInfoBtn\('cave\.auj'\)/.test(SRCNU), 'la fiche MV_INFO cave.auj existe et est pos\u00e9e');
 const ev = extraire(SRCNU, '_aujLigne')[1];
-pose((ev.match(/<button/g) || []).length === 1 && /class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"/.test(ev) && /onclick="_mlGo\(/.test(ev), 'CAVEAUJ-1 : une ligne = un contenant, un bouton du jeu commun par geste, le geste par _mlGo');
+pose((ev.match(/<button/g) || []).length === 1 && /class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"/.test(ev) && /onclick="event\.stopPropagation\(\);_mlGo\(/.test(ev), 'CAVEAUJ-1 : une ligne = un contenant, un bouton du jeu commun par geste, le geste par _mlGo (sans choisir la ligne : CAVE-UX-1, §494)');
 pose(/_mvIcon\(x\.cuve\?'cuve':'barrique',18\)/.test(ev) && !/[\u{1F300}-\u{1FAFF}]/u.test(ev), 'la ligne porte une ic\u00f4ne du sprite, aucun \u00e9moji');
 const ac = extraire(SRCNU, '_mlAgendaComplet')[1];
 pose(/_mlAgenda\(from,nSem\)/.test(ac), '_mlAgendaComplet consomme _mlAgenda (il ne le recopie pas)');

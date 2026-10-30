@@ -3804,6 +3804,37 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .trd-s{grid-column:1;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
 .trd-l > .mvpas,.trd-l > span:last-child:not(.trd-s):not(.trd-n){grid-column:2;grid-row:1 / span 2;}
 .trd-rien{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+/* ★ CAVE-UX-1 (§494) — maquette-ux-v2, Cave › Aujourd'hui : le sommaire qui suit, les compteurs sur une ligne ; sur ordinateur, trois
+   colonnes — le sommaire, la page, le contenant choisi (décision de Nico, 28/10 : « À surveiller » devient une entrée du sommaire). */
+.caj-fx{display:none;}
+.caj-som{position:sticky;top:var(--caj-som-haut,57px);z-index:60;display:flex;gap:var(--e-2,8px);overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * var(--e-3,12px)) var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);background:var(--bg-app,#F0EEE9);}
+.caj-so{display:inline-flex;align-items:center;gap:var(--e-1,4px);flex-shrink:0;min-height:36px;padding:0 var(--e-3,12px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-full,999px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font-size:var(--pt-micro,12px);font-weight:600;text-decoration:none;}
+.caj-so b{font-weight:700;color:var(--accent-texte,#7A2850);}
+.caj-so{position:relative;}
+.caj-so::after{content:'';position:absolute;left:0;right:0;top:-4px;bottom:-4px;}   /* la zone de 44 px de LISIBLE-1, le dessin de 36 */
+#cave-kpis{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-4,16px);}
+#cave-kpis .mvu-kpi{display:flex;align-items:baseline;gap:var(--e-1,4px);padding:0;border:0;background:none;box-shadow:none;min-height:0;}
+#cave-kpis .mvu-kpi[hidden]{display:none;}
+#cave-kpis .mvu-kpi-v{font-size:var(--pt-base,15px);}
+@media (min-width:1024px){
+  .caj-3{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr) minmax(0,340px);column-gap:var(--e-6,24px);align-items:start;}
+  .caj-som{top:var(--e-4,16px);flex-direction:column;overflow:visible;margin:0;padding:0;background:none;}
+  .caj-so{justify-content:space-between;min-height:44px;border-radius:var(--r-md,8px);}
+  .caj-fx{display:block;position:sticky;top:var(--e-4,16px);max-height:calc(100vh - var(--e-8,40px));overflow:auto;padding:var(--e-4,16px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);background:var(--bg-card,#FFFFFF);}
+  .caj-3 .caj-zone{display:block!important;}
+  .caj-3 .caj-dr,.caj-3 .caj-dr.colle{position:static!important;max-height:none!important;}
+  .caj-3 .caj-l[data-k]{cursor:pointer;}
+  .caj-3 .caj-l[aria-selected="true"]{outline:2px solid var(--accent,#7A2850);outline-offset:-2px;border-radius:var(--r-md,8px);}
+}
+.caj-fx-k{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.caj-fx-t{margin:var(--e-1,4px) 0;font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
+.caj-fx-m{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.caj-fx-rs{margin:var(--e-3,12px) 0;padding-left:var(--e-4,16px);}
+.caj-fx-dl{display:grid;grid-template-columns:auto 1fr;gap:var(--e-1,4px) var(--e-3,12px);margin:0 0 var(--e-3,12px);}
+.caj-fx-dl dt{color:var(--texte-doux,#686660);font-size:var(--pt-micro,12px);}
+.caj-fx-dl dd{margin:0;}
+.caj-fx-act{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);}
+.caj-fx-rien{color:var(--texte-doux,#686660);}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

@@ -1,0 +1,42 @@
+{
+  "lot": "CAVE-UX-1",
+  "section": "§494",
+  "base": "e2ff4dd262df08fcfd0a02d7d3f2433140a15d07",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "9e1e970154cb7f7079f9773b5241a7c6559e765a15d64c04371bc60b739e0585",
+    "date": "2026-10-30T15:23:17.741Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "2e5ab687422f98a8bfe1f6a0a24a335e7aa8436aaa16973a74593c7528e58637",
+    "CLAUDE.md": "f7ddb3367350c5bf7979ed6e8971cb2f3c65a375b14d584ba610f69939f08ea2",
+    "docs/claude/INDEX.md": "483425a613d281c4477d4442b3436f214449cfd6b04f21faad9a1bdd32bb221b",
+    "docs/claude/chantiers-480-529.md": "3fba8eef5ce75d2304549ffa0fd8fc1557fbc37d4952da2d4da563d5adfb115f",
+    "docs/claude/journal.md": "2f5b5d81a8ea7203b911cd617312c3c40f1412d20eaa08750d6921c94bbd07bd",
+    "guide/08-cave.html": "2114c4f66d4d436aa120031d6cdd23455b633419d04f4c7b62941ce0200267ca",
+    "index.html": "09b35096e16bc9008478e91f09dcf5760ee2427f4cf9b40a4d6d9a419ffeb2ed",
+    "public/sw.js": "95a77330071663f7f585c522ee9b082d569178bb22e22a24e140cbb9f6a91d76",
+    "scripts/harnais-claude-md.mjs": "5d514dd73bd96b4a7c5c2efdd5a54adbc2eb4a3ac0ce8e1ac69d796437c6de96",
+    "scripts/mv-harnais-cave-auj.mjs": "2f579b7ffa54fce1f11b7b009fd885e7617c61368bc08d4cecf1319b2fdea97f",
+    "scripts/mv-harnais-caveauj1.mjs": "3c98391d7bc47b95b86b7c7a9ba548bb3d86e24d301ebc86fb8827c48224b761",
+    "scripts/mv-harnais-caveauj2.mjs": "4d20d61e7999e6b73eb051695e5a9e1575a6521bd83b0bdf9e5a38a3b1dea428",
+    "scripts/mv-harnais-caveauj3.mjs": "6e1b12fe46a4e64670b66aea286111df21b9454ed9cd377911c21d912da65a91",
+    "scripts/mv-harnais-liste.mjs": "c0e4b1728814c6fedf7baa87ec0ad09ba347742138be97efff45ee06b9742daa",
+    "scripts/mv-ux-baseline.json": "aa19178874a8f54851ed9985e8e8dcdda5b0b2c6c2c26e2f48624f4af7e49b9b",
+    "scripts/tutos-couverture.json": "21e4660449ee7393a7c61a79b1ee8a883c10d2f622af668558df993676cf2ab9",
+    "src/cave.js": "e67e7eb0e4dd29f5d18995faca9aaa83086bbed6be21358f45032fefcf4d2db8",
+    "src/styles.css": "ecd66e3fde4eba08a16c3d4be637b3f25b31d167c070116973df1fe5d0bb38a0",
+    "src/utils.js": "4a1f47a7a49a71621f8b00185274095423bc26366bd94ebc432a3b250b66149e",
+    "src/whats-new.js": "98af947b27d8735615658203877d0ff2748fa39e3c729ab1c0743ab2cb9a0ff9",
+    "scripts/mv-harnais-cavux1.mjs": "e2097653b57c01d52015bb478eb9c1571f50772a0a45252ef8fbf476a3224ecc"
+  }
+}

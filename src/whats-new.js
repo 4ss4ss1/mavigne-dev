@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.45', d: '2026-10-30', items: [
+    { niv: 0, pour: ['admin'], emoji: 'cave', titre: 'Cave › Aujourd’hui : un sommaire, et le contenant à côté',
+      desc: "En haut de l’onglet Aujourd’hui, un sommaire — Ce qui presse, À faire, Cuves, Fûts, À surveiller, Relevés du jour, chacun avec son nombre — reste sous l’en-tête quand on descend et mène à chaque partie. Les compteurs tiennent sur une ligne, sans leurs zéros. Sur ordinateur, trois colonnes\u00a0: le sommaire, la page, et la fiche du contenant choisi dans «\u00a0Ce qui presse\u00a0» (ses raisons, sa densité ou ses fûts, ses gestes)\u00a0; «\u00a0À surveiller\u00a0» passe dans le fil de la page." },
+  ] },
   { v: '10.44', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Les équipes restent en place d’un jour à l’autre',
       desc: "Les équipes que vous posez dans «\u00a0Équipes du jour\u00a0» ne s’effacent plus le soir\u00a0: elles restent en place les jours suivants, jusqu’à ce que vous les changiez. Rien de posé\u00a0: tout le monde est ensemble en Équipe\u00a01, sauf qui est coché dans une équipe de la priorité. Le bouton «\u00a0Tout le monde ensemble\u00a0» devient «\u00a0Tout le monde en Équipe\u00a01\u00a0» et remet tout le monde dans la même équipe." },

@@ -376,3 +376,27 @@ Nico (30/10, dicté, réponse aux deux points ouverts d’EQDEF-1, §492d) : « 
 ### 493d. Ce qui reste ouvert
 - **Une validation sans groupe un jour sans équipes posées** (hors réseau, téléphone d’avant) reste à son auteur dans le temps réel — la journée du domaine répartit le reste comme avant. L’Équipe 1 n’y est pas injectée : elle ne se distinguerait pas d’un salarié seul par décision de l’administrateur.
 - **La fin d’une tâche n’arrête pas les équipes** (décidé) : c’est l’administrateur qui les change ou touche « Tout le monde en Équipe 1 ».
+
+## 494. ★★ CAVE-UX-1 — CAVE › AUJOURD’HUI : LE SOMMAIRE QUI SUIT, LES COMPTEURS SANS ZÉROS ; SUR ORDINATEUR, TROIS COLONNES ET LE CONTENANT CHOISI (30/10 — `src/cave.js` (`_aujSommaireHtml`, `_aujVers`, `_aujFicheHtml`, `_aujMontre`, `_aujSel`, `_aujFicheSync` ; `renderCaveAujourdhui`, `_aujRender`, `_aujLigne`, `_aujColle`, les compteurs) · `src/styles.css` · `src/utils.js` (l’aide de l’onglet, APP 10.45) · `guide/08-cave.html` · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.26) · `scripts/mv-harnais-cavux1.mjs` (neuf) · `scripts/mv-harnais-caveauj1.mjs` à `caveauj3.mjs` · `scripts/mv-harnais-cave-auj.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/CAVE-UX-1.json` · base `e2ff4dd`)
+
+### 494a. D’où ça vient — et deux arbitrages
+Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« Cave — les gestes du maître de chai à 44 px, un sommaire qui suit ») : la page faisait 4 018 px, cinq écrans, sans repère. Relu dans le code et le relevé UX avant d’écrire :
+- **Les gestes à 44 px étaient faits** (`cave.gestes_44` = 0) ; la maquette les voulait « en plein », mais Nico les voulait fins et discrets (23/10) et a décidé que les boutons discrets gagnent une zone de 44 px sans changer de dessin (26/10, LISIBLE-1) : **le dessin ne bouge pas**.
+- **Sur ordinateur, la maquette contredisait un dessin validé** (22/10 : « À surveiller » collée à droite). ★ **Nico (30/10) : trois colonnes, comme la maquette** — « À surveiller » devient une entrée du sommaire.
+
+### 494b. Ce qui change
+- **Le sommaire** (`_aujSommaireHtml`) : Ce qui presse · À faire (les gestes de la semaine à partir d’aujourd’hui) · Cuves (suivies) · Fûts (en vin) · À surveiller · Relevés du jour, chacun avec son nombre (« 0 » s’il n’y a rien) ; chaque entrée mène à sa partie (`_aujVers` : l’en-tête et le sommaire décomptés). Au téléphone, il reste sous l’en-tête en descendant : sa hauteur suit celle de l’en-tête, replié ou non (TETE-3A) — un `ResizeObserver` dans `_aujColle`. Deux ancres posées : `#caj-faits`, `#caj-semaine`.
+- **Les compteurs** de la Cave tiennent sur une ligne ; un compteur à zéro se tait (un tiret, « source absente », reste).
+- **Sur ordinateur, trois colonnes** (`.caj-3`) : le sommaire, collant ; la page — « À surveiller » remise dans le fil, sans colle ; la **fiche du contenant choisi** (`_aujFicheHtml`) : cuve ou cuvée, son nom et son détail, ses raisons, sa densité à 20 °C et son dernier relevé (une cuve) ou ses fûts (une cuvée), ses gestes — le premier en principal — et « Autre geste ». Un appui sur une ligne de « Ce qui presse » la choisit (`data-k`) ; ses boutons gardent leur geste sans la choisir (`event.stopPropagation`). La première est choisie d’office ; si elle disparaît, la première la remplace.
+- **L’aide de l’onglet** et le guide disent le sommaire et les trois colonnes. Deux gestes neufs exemptés de tuto, motivés.
+- **CAVEAUJ-1 à 3 suivent** : l’appel de `_aujColle` (entouré du sommaire et de la fiche), le calendrier (son ancre), les boutons d’une ligne (`event.stopPropagation`) et sa clé — leurs contre-épreuves visent le texte neuf.
+
+### 494c. Mesuré
+- `mv-harnais-cavux1` : 9 assertions — le sommaire, la fiche et la sélection JOUÉS (les six entrées dans l’ordre et leurs ancres, un zéro écrit, la cuve et sa densité, la cuvée et ses fûts, les gestes lus dans `data-*`, la première d’office, un appui, la disparue remplacée, rien au téléphone), la page, les ancres, les compteurs tus, la colle du sommaire, la grille ; **7/7 mutants**.
+- `test:ux` (référence regravée) : **le sommaire collé, 0 → 1** ; les gestes sous 44 px restent à 0. Les entrées du sommaire, dessinées à 36 px, comptaient parmi les cibles trop petites (6 → 12) : elles prennent la zone de 44 px de LISIBLE-1 (`::after`). **Une hausse acceptée et écrite** : au téléphone, en défilant, la bande collée de la Cave passe de 57 à ~109 px — l’en-tête replié plus le sommaire, ce que la maquette demande (« reste sous la bande quand on descend »).
+- Chaîne (607 commandes) : un rouge de plus — **`mv-harnais-cave-auj`** lisait le bouton d’une ligne (`onclick="_mlGo(`) : il lit maintenant `event.stopPropagation();_mlGo(` (le geste ne choisit pas la ligne), 51/51. Plus `build-guide --check`, attendu.
+- Tutos : voir la note de livraison.
+
+### 494d. Ce qui reste ouvert
+- **RSV-UX-1**, le lot suivant du plan.
+- **À vérifier chez Nico** : au téléphone, le sommaire collé (l’en-tête replié puis non), une entrée qui mène à sa partie ; sur ordinateur, les trois colonnes, la fiche qui suit le choix, « Relever » depuis la fiche.

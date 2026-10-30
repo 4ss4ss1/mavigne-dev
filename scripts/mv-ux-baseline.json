@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-10-29",
- "base": "98b75bd",
+ "date": "2026-10-30",
+ "base": "e2ff4dd",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -259,6 +259,17 @@
     "planning.grille_y : 460 → 443",
     "reglages.premier_y : 372 → 356"
    ]
+  },
+  {
+   "date": "2026-10-30",
+   "base": "e2ff4dd",
+   "motif": "hausse acceptée : CAVE-UX-1 (§494) : au téléphone, en défilant, la bande collée de la Cave passe de 57 à 109 px — l’en-tête replié plus le sommaire, ce que la maquette demande (le sommaire reste sous la bande quand on descend)",
+   "hausses": [
+    "cave › téléphone › chromeDefile : 57 → 109"
+   ],
+   "baisses": [
+    "cave.sommaire : 0 → 1"
+   ]
   }
  ],
  "mesures": {
@@ -324,16 +335,16 @@
     "hauteur": 1933
    },
    "cave": {
-    "cibles": 49,
+    "cibles": 59,
     "c24": 0,
     "c44": 6,
-    "textes": 260,
+    "textes": 272,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
-    "chromeDefile": 57,
+    "chromeDefile": 109,
     "pouce": null,
-    "hauteur": 4008
+    "hauteur": 4028
    },
    "reserve": {
     "cibles": 27,
@@ -446,16 +457,16 @@
     "hauteur": 1995
    },
    "cave": {
-    "cibles": 48,
+    "cibles": 60,
     "c24": 0,
-    "c44": 6,
-    "textes": 274,
+    "c44": 7,
+    "textes": 290,
     "t11": 0,
     "t12": 29,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 3216
+    "hauteur": 3640
    },
    "reserve": {
     "cibles": 27,
@@ -482,10 +493,10 @@
     "hauteur": 1239
    },
    "pilotage": {
-    "cibles": 61,
+    "cibles": 69,
     "c24": 0,
     "c44": 42,
-    "textes": 251,
+    "textes": 250,
     "t11": 0,
     "t12": 56,
     "chrome": 66,
@@ -512,7 +523,7 @@
   "tracteur.fab_recouvre": 0,
   "phyto.dates_machine": 15,
   "cave.gestes_44": 0,
-  "cave.sommaire": 0,
+  "cave.sommaire": 1,
   "reserve.action": 0,
   "planning.grille_y": 443,
   "reglages.premier_y": 356,

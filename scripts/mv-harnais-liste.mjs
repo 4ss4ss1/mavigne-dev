@@ -827,6 +827,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-traux1a.mjs --contre'],
   ['node scripts/mv-harnais-traux1b.mjs'],             // TRAC-UX-1B (§481) : le Tracteur sur ordinateur — le parc par urgence et le GNR à droite, la session en feuille
   ['node scripts/mv-harnais-traux1b.mjs --contre'],
+  ['node scripts/mv-harnais-cavux1.mjs'],              // CAVE-UX-1 (§494) : Cave › Aujourd’hui — le sommaire qui suit, les trois colonnes, la fiche du contenant
+  ['node scripts/mv-harnais-cavux1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

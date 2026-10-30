@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.25
+// MA VIGNE — Service Worker v11.26
+// v11.26 (30/10/2026) — CAVE-UX-1 (§494) : Cave › Aujourd'hui — le sommaire qui suit, les compteurs sans zéros, trois colonnes sur ordinateur avec la fiche du contenant choisi.
 // v11.25 (30/10/2026) — EQDEF-2 (§493) : les équipes restent en place d’un jour à l’autre, jusqu’au prochain réglage (CONFIG.equipes_jour lu « en place » depuis le 30/10, ajusté au jour) ; rien de posé : tout le monde en Équipe 1 (la priorité garde la main) — imposée au salarié, proposée à l’administrateur ; « Tout le monde ensemble » devient « Tout le monde en Équipe 1 » ; format des données 4. APP 10.44.
 // v11.24 (30/10/2026) — EQDEF-1 (§492) : « Équipes du jour » sans « Aucune » — à l’ouverture de la fenêtre, chacun arrive en Équipe 1 (sauf équipe déjà enregistrée ou cave) ; « Équipe 4 » prend la case ; pour mettre quelqu’un seul, l’administrateur lui donne une équipe à lui. Un jour où la fenêtre n’est pas enregistrée, rien ne change. Aide de la fenêtre, aide de la Vigne, guide et tuto des équipes suivent. APP 10.43.
 // v11.23 (30/10/2026) — CARTEDOM-2 (§491) : « La carte de votre saison » (Ma trace) devient la mosaïque de la carte du jour — les parcelles en vigne à leur forme et à leur surface, avec leurs rangs, la plus parcourue d’abord, en or de plus en plus plein ; un appui ouvre la fiche. Sur l’Accueil, les rangs de la carte du jour passent par-dessus la forme (cachés dessous depuis ACCV-1). APP 10.42.
@@ -4657,7 +4658,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.25';
+const CACHE_NAME   = 'mavigne-v11.26';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4674,7 +4675,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.25 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.26 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4694,7 +4695,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.25 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.26 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -93,7 +93,7 @@ function verifier(S) {
   const sticky = [...B.matchAll(/([^{}]*)\{[^{}]*position:sticky/g)].map((m) => m[1].trim());
   T('\u00ab \u00c0 surveiller \u00bb ne colle que par .colle, jamais sans condition', sticky.length === 1 && /\.caj-dr\.colle$/.test(sticky[0]));
   T('_aujColle pose .colle seulement si la colonne tient dans l\u2019\u00e9cran, sur ordinateur', /classList\.toggle\('colle',window\.innerWidth>=1024&&\(dr\.offsetHeight\+h\+40\)<=window\.innerHeight\)/.test(co));
-  T('renderCaveAujourdhui appelle _aujColle apr\u00e8s le rendu', /_aujRender\(\);\s*\n\s*_aujColle\(\);/.test(S.cave));
+  T('renderCaveAujourdhui appelle _aujColle apr\u00e8s le rendu', /var _c=_aujRender\(\);[^\n]*\n[^\n]*_aujSommaireHtml\(_AUJ_N\)[^\n]*\n\s*_aujColle\(\); _aujFicheSync\(\);/.test(S.cave));   /* CAVE-UX-1 (§494) : le sommaire et la fiche autour du rendu */
   // 7. jeu commun, jetons
   let rendu = '';
   try { rendu = ['_aujLigne', '_aujEquipe', '_aujVeille', '_aujCal', '_aujRender'].map((n) => corps(S.cave, n)).join('\n'); } catch (e) { rendu = ''; }
@@ -113,7 +113,7 @@ const MUT = [
   ['la fin de FA estim\u00e9e recompt\u00e9e comme un geste', (S) => ({ ...S, cave: S.cave.replace('var _ML_INFO={fa:1, demarrage:1};', 'var _ML_INFO={demarrage:1};') })],
   ['une ligne par geste (regroupement cass\u00e9)', (S) => ({ ...S, cave: S.cave.replace("k=(cuve?'c:':'v:')+(it.ref||it.titre);", "k=(cuve?'c:':'v:')+(it.ref||it.titre)+it.kind;") })],
   ['la colonne coll\u00e9e sans condition', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-dr.colle{ position:sticky;', '#page-cave .caj-dr{ position:sticky;') })],
-  ['le calendrier rentr\u00e9 dans la zone', (S) => ({ ...S, cave: S.cave.replace("'</aside></div>'\n    +_aujCal(sem,from);", "_aujCal(sem,from)+'</aside></div>';") })],
+  ['le calendrier rentr\u00e9 dans la zone', (S) => ({ ...S, cave: S.cave.replace("'</aside></div>'\n    +'<div id=\"caj-semaine\">'+_aujCal(sem,from)+'</div>';", "_aujCal(sem,from)+'</aside></div>';") })],
   ['un bouton hors du jeu commun', (S) => ({ ...S, cave: S.cave.replace('class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"', 'class="caj-b"') })],
   ['une carte maison au lieu de .mvcarte', (S) => ({ ...S, cave: S.cave.replace('<section class="mvcarte caj-c caj-hero"', '<section class="caj-c caj-hero"') })],
   ['une couleur \u00e9crite dans le bloc', (S) => ({ ...S, css: S.css.replace('#page-cave .caj-ico.due{ background:var(--danger-doux);', '#page-cave .caj-ico.due{ background:#FAEAE8;') })],

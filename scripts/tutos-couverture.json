@@ -28,6 +28,8 @@
     "_trEntSave": "COMPT-5 (§487) : « Enregistrer » un autre entretien — le formulaire dit ce qui manque",
     "_trEntSuppr": "COMPT-5 (§487) : « Retirer » un autre entretien — « Annuler » rattrape",
     "_trEntFait": "COMPT-5 (§487) : « Fait » sur un autre entretien — la feuille du compteur, la même que le relevé",
-    "_relFait": "COMPT-5 (§487) : une case « Fait aussi » dans la feuille de la révision — rien à apprendre"
+    "_relFait": "COMPT-5 (§487) : une case « Fait aussi » dans la feuille de la révision — rien à apprendre",
+    "_aujSel": "CAVE-UX-1 (§494) : choisir un contenant de « Ce qui presse » sur ordinateur — sa fiche s’affiche à côté ; rien à apprendre",
+    "_aujVers": "CAVE-UX-1 (§494) : une entrée du sommaire de la Cave mène à sa partie de la page — un lien"
   }
 }

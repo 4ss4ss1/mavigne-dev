@@ -65,7 +65,7 @@ function verifier(S) {
   T('l\u2019agenda dit \u00ab avanc\u00e9 du \u2026 \u00bb pour un ouillage d\u00e9plac\u00e9', /o\.du \? \('avanc\\u00e9 du '\+_mlFrJ\(o\.du\)/.test(S.cave));
   // 3. l'ordre et la place
   T('le Cuvier passe devant le Chai pendant les vendanges, derri\u00e8re le reste de l\u2019ann\u00e9e', /return _mlPhase\(\)==='vendange'\?cv\+ch:ch\+cv;/.test(S.cave));
-  T('les deux cartes vivent dans la colonne de \u00ab Ce qui presse \u00bb, les derniers gestes apr\u00e8s le calendrier', /\+_aujEtat\(from,parc\)\+'<\/div>'/.test(S.cave) && /\+_aujCal\(sem,from\);\n {2}h\+=_aujRecentsHtml\(from\);/.test(S.cave));
+  T('les deux cartes vivent dans la colonne de \u00ab Ce qui presse \u00bb, les derniers gestes apr\u00e8s le calendrier', /\+_aujEtat\(from,parc\)\+'<\/div>'/.test(S.cave) && /\+'<div id="caj-semaine">'\+_aujCal\(sem,from\)\+'<\/div>';\n {2}h\+=_aujRecentsHtml\(from\);/.test(S.cave)   /* CAVE-UX-1 (§494) : le calendrier porte l’ancre du sommaire */);
   // 4. les derniers gestes
   const E4 = { e: { cuvees: [{ id: 'v1', nom: 'VV', millesime: 2026 }], operations: [{ type: 'ouillage', date: '2026-10-21', cuvee_id: 'v1', operateur: 'Marie' }, { type: 'soutirage', date: '2026-10-05', cuvee_id: 'v1' }] },
     v: { cuves_vinif: [{ nom: 'Cuve 7', mesures_fa: [{ date: '2026-10-20', densite: 1014, temp_c: 24 }, { date: '2026-10-22', densite: 1012 }], decuvage: { date: '2026-10-21', cuvee_id: 'v1' } }] } };
