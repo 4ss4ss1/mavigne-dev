@@ -6529,15 +6529,15 @@ function _homePrioCarte(){
     :(sur('Priorit\u00e9 du jour','eclair')+'<h2 class="hpc-titre">Pas encore de priorit\u00e9<small>'+(adm?'Fixez la priorit\u00e9 du jour\u00a0: l\u2019\u00e9quipe la verra ici en ouvrant l\u2019appli, avec son \u00e9quipe et l\u2019avancement.':'D\u00e8s qu\u2019elle est fix\u00e9e, vous la verrez ici avec votre \u00e9quipe et l\u2019avancement.')+'</small></h2>'+mot);
   // Les trois faits : l'équipe (l'administrateur règle les équipes du jour d'ici), où elle est, quand ce sera fini.
   var eqBtn=function(){ var TJ=(typeof window._mvEqJour==='function'&&iso)?window._mvEqJour(iso):null, n=(TJ&&TJ.length)||0;
-    return '<button type="button" class="hpc-fx hpc-fx-b" data-tuto="home.eqj" onclick="openEqJour()"><span class="hpc-lbl">'+ico('equipe',16)+'<span>\u00c9quipes du jour\u00a0: '+(n?n+' \u00e9quipe'+(n>1?'s':''):'tout le monde ensemble')+'</span></span><span class="hpc-val"><span>'+(n?_escHtml(TJ.map(function(x){ return noms(x); }).join(' \u00b7 ')):'Une seule \u00e9quipe')+'</span></span><span class="hpc-s">modifier</span></button>'; };
+    return '<button type="button" class="hpc-fx hpc-fx-b" data-tuto="home.eqj" onclick="openEqJour()"><span class="hpc-lbl">'+ico('equipe',16)+'<span>\u00c9quipes du jour\u00a0: '+(n?n+' \u00e9quipe'+(n>1?'s':''):'tout le monde en \u00c9quipe 1')+'</span></span><span class="hpc-val"><span>'+(n?_escHtml(TJ.map(function(x){ return noms(x); }).join(' \u00b7 ')):'Une seule \u00e9quipe')+'</span></span><span class="hpc-s">modifier</span></button>'; };
   var faits='';
   if(t||sans){
     var f1;
     if(adm) f1=eqBtn();
     else {
-      var eqj=(me&&iso&&typeof window._mvEqDe==='function')?window._mvEqDe(me,iso):null, eqL=(eqj&&eqj.length)?eqj:((it&&it.equipe&&it.equipe.indexOf(me)>=0)?it.equipe:null), trn='';   // EQFIXE-1 (§490) : l'équipe de la priorité seulement si on y est coché — la règle des Parcelles
+      var eqj=(me&&iso&&typeof window._mvEqDe==='function')?window._mvEqDe(me,iso):null, _eqI=(!(eqj&&eqj.length)&&me&&iso&&typeof _mvEqImposee==='function')?_mvEqImposee(me, t||'', iso):null, eqL=(eqj&&eqj.length)?eqj:(_eqI?_eqI.T:((it&&it.equipe&&it.equipe.indexOf(me)>=0)?it.equipe:null)), trn='';   // EQFIXE-1 (§490) puis EQDEF-2 (§493) : la règle des Parcelles — posée, la priorité où il est coché, sinon l'Équipe 1
       try{ if(eqj&&typeof window._mvEqJour==='function'&&typeof _mvEqBrut==='function'&&typeof window._mvTourneesLues==='function'){ var TJ2=window._mvEqJour(iso)||[], k=-1; TJ2.forEach(function(x,i){ if(x.indexOf(me)>=0) k=i; }); var br=k>=0?(_mvEqBrut(iso)[k]||{}):{}; if(br.t){ var o=window._mvTourneesLues().find(function(x){ return String(x.id)===String(br.t); }); if(o) trn=o.nom; } } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_homePrioCarte#tournee'); }
-      f1='<div class="hpc-fx"><span class="hpc-lbl">'+ico('equipe',16)+'<span>Votre \u00e9quipe</span></span><span class="hpc-val">'+(eqL?eqL.map(avt).join('')+'<span>'+_escHtml(noms(eqL))+'</span>':'<span>Toute l\u2019\u00e9quipe</span>')+'</span><span class="hpc-s">'+(trn?'tourn\u00e9e \u00ab\u00a0'+_escHtml(trn)+'\u00a0\u00bb':(eqj?'\u00e9quipe du jour':(eqL?'\u00e9quipe de la priorit\u00e9':'pas d\u2019\u00e9quipe indiqu\u00e9e')))+'</span></div>';
+      f1='<div class="hpc-fx"><span class="hpc-lbl">'+ico('equipe',16)+'<span>Votre \u00e9quipe</span></span><span class="hpc-val">'+(eqL?eqL.map(avt).join('')+'<span>'+_escHtml(noms(eqL))+'</span>':'<span>Toute l\u2019\u00e9quipe</span>')+'</span><span class="hpc-s">'+(trn?'tourn\u00e9e \u00ab\u00a0'+_escHtml(trn)+'\u00a0\u00bb':(eqj?'\u00e9quipe du jour':((_eqI&&_eqI.src==='defaut')?'\u00c9quipe 1, tout le monde':(eqL?'\u00e9quipe de la priorit\u00e9':'pas d\u2019\u00e9quipe indiqu\u00e9e'))))+'</span></div>';
     }
     var ici=t?act.filter(function(p){ return etat(p)==='cours'; }):[], f2;
     if(ici.length){
@@ -9935,6 +9935,48 @@ function _mvEqPrioMoi(task){
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqPrioMoi'); return null; }
 }
 // Le message d'un appui sur une équipe imposée : les noms en toutes lettres (à l'arrivée, la barre ne montre que les pastilles).
+// ★★ EQDEF-2 (§493) — RIEN DE POSÉ = L'ÉQUIPE 1. L'équipe d'un salarié quand l'administrateur n'a posé aucune équipe : celle
+//   de la priorité où il est coché (quel que soit le travail qu'il valide), sinon l'Équipe 1 — tous les présents du jour
+//   (utils.js, _mvEqPresents : sous contrat, hors bureau, hors cave) qui ne sont dans aucune équipe de la priorité. Lui compris.
+//   Décidé (« oui ») : la priorité garde la main sur ce défaut ; ceux qui ne sont cochés nulle part sont ensemble.
+//   Avant MV_EQ_SUITE_DEPUIS : rien — l'histoire garde l'ancienne règle.
+function _mvEqDefautDe(nom, iso){
+  if(nom==null) return null;
+  iso=iso||_mvToday();
+  if(!window.MV_EQ_SUITE_DEPUIS || iso<window.MV_EQ_SUITE_DEPUIS) return null;
+  var P=(typeof window._mvEqPresents==='function')?window._mvEqPresents(iso):[], its=[], prio={}, sienne=null;
+  try{ its=(typeof _prioItems==='function')?_prioItems():[]; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqDefautDe'); }
+  its.forEach(function(it){
+    var eq=(it&&Array.isArray(it.equipe))?it.equipe.map(String):[];
+    eq.forEach(function(n){ prio[n]=1; });
+    if(!sienne && eq.indexOf(String(nom))>=0) sienne=eq;
+  });
+  if(sienne) return sienne.filter(function(n){ return n===String(nom) || P.indexOf(n)>=0; });
+  var T=P.filter(function(n){ return !prio[n]; });
+  if(T.indexOf(String(nom))<0) T.push(String(nom));
+  return T;
+}
+// L'équipe imposée à nom (lui compris) et d'où elle vient : 'jour' | 'suite' (posée, du jour ou gardée) · 'prio' · 'defaut'.
+//   null : rien d'imposé (avant la règle, sans équipe du jour ni de la priorité de ce travail).
+function _mvEqImposee(nom, task, iso){
+  if(nom==null) return null;
+  iso=iso||_mvToday();
+  var T=(typeof window._mvEqDe==='function')?window._mvEqDe(nom, iso):null;
+  if(T){ var o=(typeof window._mvEqOrigine==='function')?window._mvEqOrigine(iso):null; return { T:T, src:(o&&o.src==='suite')?'suite':'jour' }; }
+  T=_mvEqPrioDe(nom, task);
+  if(T) return { T:T, src:'prio' };
+  T=_mvEqDefautDe(nom, iso);
+  return T ? { T:T, src:'defaut' } : null;
+}
+// Chez le salarié, après l'équipe posée et celle de la priorité de CE travail (EQFIXE-1, inchangées) : l'Équipe 1, sans lui.
+function _mvEqDefautMoi(){
+  try{
+    var me=currentUser&&currentUser.nom;
+    if(!me || _mvMoiAdmin()) return null;
+    var T=_mvEqDefautDe(me);
+    return T ? T.filter(function(n){ return n!==me; }) : null;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvEqDefautMoi'); return null; }
+}
 function _mvEqFixeeMot(autres, duJour){
   var me=(currentUser&&currentUser.nom)||'';
   var qui=(autres&&autres.length)?[me].concat(autres).join(' + '):'personne d\u2019autre que vous';
@@ -9945,6 +9987,7 @@ function _mvEqApplique(e){
     if(!e || !e.qui || typeof window._mvEqDe!=='function') return e;
     var T=window._mvEqDe(e.qui, e.date||_mvToday()), duJour=!!T;
     if(!T && typeof _mvEqPrioDe==='function' && !_mvMoiAdmin()) T=_mvEqPrioDe(e.qui, e.tache);   // ★ EQFIXE-1 (§490) : sinon, l'équipe de la priorité où il est coché
+    if(!T && !_mvMoiAdmin()) T=_mvEqDefautDe(e.qui, e.date||_mvToday());   // ★ EQDEF-2 (§493) : sinon l'Équipe 1
     if(!T) return e;
     var autres=T.filter(function(n){ return n!==e.qui; });
     if(!_mvMoiAdmin()){
@@ -9965,7 +10008,9 @@ function _mvEqUi(prefix){
     if(!note){ note=document.createElement('div'); note.id=prefix+'-eqj-note'; note.className='mv-l'; note.style.display='none'; pick.parentNode.insertBefore(note,pick); }
     var me=currentUser&&currentUser.nom;
     var T=(me && typeof window._mvEqDe==='function') ? window._mvEqDe(me,_mvToday()) : null, duJour=!!T;
+    var _src=duJour?'jour':'';
     if(!T && me && !_mvMoiAdmin()) T=_mvEqPrioDe(me, _mvEqUiTache(prefix));   // ★ EQFIXE-1 (§490) : l'équipe de la priorité, imposée comme celle du jour
+    if(!T && me && !_mvMoiAdmin()){ T=_mvEqDefautDe(me); if(T) _src='defaut'; }   // ★ EQDEF-2 (§493) : sinon l'Équipe 1
     if(!T){ note.style.display='none'; pick.style.display=''; return; }
     var autres=T.filter(function(n){ return n!==me; });
     note.style.display='';
@@ -9973,7 +10018,7 @@ function _mvEqUi(prefix){
       pick.style.display='none';
       var sec=document.getElementById(prefix+'-equipe-section'); if(sec) sec.style.display='none';
       var hv=document.getElementById(prefix+'-equipe-val'); if(hv) hv.value=autres.length?'oui':'non';
-      note.textContent=(duJour?'\u00c9quipe du jour : ':'\u00c9quipe fix\u00e9e par l\u2019administrateur : ')+T.join(' + ');
+      note.textContent=(duJour?'\u00c9quipe du jour : ':(_src==='defaut'?'\u00c9quipe 1, tout le monde : ':'\u00c9quipe fix\u00e9e par l\u2019administrateur : '))+T.join(' + ');
       return;
     }
     pick.style.display='';
@@ -10024,7 +10069,7 @@ function _mvEqJourRender(){
     return;
   }
   w.style.display='';
-  if(!T){ w.classList.add('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : tout le monde ensemble'; }
+  if(!T){ w.classList.add('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : tout le monde en \u00c9quipe 1'; }   // EQDEF-2 (§493)
   else { w.classList.remove('home-prio-pill-vide'); tx.textContent='\u00c9quipes du jour : '+T.map(function(t){ return t.join(' + '); }).join(' \u00b7 '); }
 }
 // ★★ EQDEF-1 (§492, 30/10/2026) — PERSONNE HORS ÉQUIPE : « AUCUNE » RETIRÉE, TOUT LE MONDE ARRIVE EN ÉQUIPE 1.
@@ -10047,7 +10092,11 @@ function openEqJour(){
   if(typeof window._mvCaveJour==='function') _mvEqMembres().forEach(function(m){ if(window._mvCaveJour(m.nom,iso)==='j') _EQJ_SEL[m.nom]='cave'; });
   _mvEqMembres().forEach(function(m){ if(_EQJ_SEL[m.nom]==null) _EQJ_SEL[m.nom]=1; });   // ★ EQDEF-1 (§492) : personne hors équipe — Équipe 1, sauf équipe enregistrée ou cave
   var d=document.getElementById('eqj-date');
-  if(d){ var p=iso.split('-'); d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]; }
+  if(d){
+    var p=iso.split('-'), o=(typeof window._mvEqOrigine==='function')?window._mvEqOrigine(iso):null, od=(o&&o.d)?o.d.split('-'):null;
+    // ★ EQDEF-2 (§493) : les équipes restent en place — la fenêtre dit d'où viennent celles qu'elle montre.
+    d.textContent='Aujourd\u2019hui, '+p[2]+'/'+p[1]+'/'+p[0]+((o&&o.src==='suite'&&od)?(' \u00b7 \u00e9quipes pos\u00e9es le '+od[2]+'/'+od[1]+', toujours en place'):((o&&o.src==='defaut')?' \u00b7 rien de pos\u00e9\u00a0: tout le monde en \u00c9quipe\u00a01':''));
+  }
   _mvEqRows();
   openOv('ovEqJour');
 }
@@ -10082,8 +10131,8 @@ function _mvEqTrn(el){ var k=parseInt(el.getAttribute('data-eqj-k'),10)||0; if(!
 window._mvEqTrn=_mvEqTrn;
 // Les équipes du jour telles qu'écrites (objets {m, t}), dans l'ordre et avec le filtre de _mvEqJour (utils.js).
 function _mvEqBrut(iso){
-  var E=(window.CONFIG||{}).equipes_jour, L=(E&&typeof E==='object'&&!Array.isArray(E))?E[String(iso||'').slice(0,10)]:null;
-  return Array.isArray(L)?L.filter(function(t){ return t&&Array.isArray(t.m)&&t.m.some(function(n){ return n!=null&&n!==''; }); }):[];
+  var P=(typeof window._mvEqEnPlace==='function')?window._mvEqEnPlace(iso):null;   // ★ EQDEF-2 (§493) : en place, ajusté — aligné sur _mvEqJour
+  return P ? P.eq : [];
 }
 function _mvEqPick(el){
   var n=el.getAttribute('data-eqj-n'), ka=el.getAttribute('data-eqj-k'), k=(ka==='cave')?'cave':(parseInt(ka,10)||0);   // JCAVE-1 (§428)
@@ -10094,7 +10143,9 @@ function _mvEqPick(el){
 function _mvEqEcrire(iso, teams, trn){
   var cfg=window.CONFIG||{};
   var E=(cfg.equipes_jour && typeof cfg.equipes_jour==='object' && !Array.isArray(cfg.equipes_jour)) ? Object.assign({},cfg.equipes_jour) : {};
-  if(teams && teams.length) E[iso]=teams.map(function(t,i){ var o={m:t.slice()}; if(trn&&trn[i]) o.t=String(trn[i]); return o; }); else delete E[iso];
+  if(teams && teams.length) E[iso]=teams.map(function(t,i){ var o={m:t.slice()}; if(trn&&trn[i]) o.t=String(trn[i]); return o; });
+  else if(Array.isArray(teams)) E[iso]=[];   // ★ EQDEF-2 (§493) : « tout le monde en Équipe 1 » — gardé lui aussi, il arrête les équipes d'avant
+  else delete E[iso];
   // Deux ans gardés : le coût relit les journées passées (période consultée, cycle du millésime).
   var lim=new Date(iso+'T12:00:00'); lim.setDate(lim.getDate()-730);
   var limIso=_mvISO(lim);
@@ -10133,16 +10184,16 @@ function saveEqJour(){
   if(!teams.length){
     if(!_cv.length){ clearEqJour(); return; }
     _mvEqEcrire(_mvToday(), []);
-    _mvEqApres('Aujourd\u2019hui\u00a0: tout le monde ensemble'+_cvT);
+    _mvEqApres('Tout le monde en \u00c9quipe\u00a01 \u00e0 partir d\u2019aujourd\u2019hui'+_cvT);
     return;
   }
   _mvEqEcrire(_mvToday(), teams, cles.map(function(k){ return _EQJ_TRN[k]||''; }));   // TRN-2 : la tournée de chaque équipe
-  _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' pour aujourd\u2019hui'+_cvT);
+  _mvEqApres(teams.length+' \u00e9quipe'+(teams.length>1?'s':'')+' en place \u00e0 partir d\u2019aujourd\u2019hui'+_cvT);   // EQDEF-2 (§493) : jusqu'au prochain réglage
 }
 function clearEqJour(){
   if(!_mvMoiAdmin()) return;
-  _mvEqEcrire(_mvToday(), []);
-  _mvEqApres('Aujourd\u2019hui : tout le monde ensemble');
+  _mvEqEcrire(_mvToday(), []);   // ★ EQDEF-2 (§493) : l'ancien « Tout le monde ensemble » — tout le monde dans la même équipe, l'Équipe 1
+  _mvEqApres('Tout le monde en \u00c9quipe\u00a01 \u00e0 partir d\u2019aujourd\u2019hui');
 }
 function _mvMoiAdmin(){ try{ return (typeof isAdmin==='function'&&isAdmin()) && !!(currentUser&&currentUser.nom); }catch(e){ return false; } }
 function _mvQuiHors(containerId){
@@ -13509,7 +13560,7 @@ function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TAC
 //   (clé réservée __hors, comme __default). Lu seulement pour un administrateur.
 function _eqtHors(task){ if(!_eqtLoaded)_eqtLoad(); if(!_mvMoiAdmin()) return false; if(_mvEqJourMoi()) return false; var h=EQUIPE_TACHE.__hors; return !!(h&&typeof h==='object'&&!Array.isArray(h)&&h[task]); }
 function _eqtSetHors(task,v){ if(!_eqtLoaded)_eqtLoad(); var h=(EQUIPE_TACHE.__hors&&typeof EQUIPE_TACHE.__hors==='object'&&!Array.isArray(EQUIPE_TACHE.__hors))?EQUIPE_TACHE.__hors:{}; if(v) h[task]=1; else delete h[task]; EQUIPE_TACHE.__hors=h; _eqtSave(); }
-function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var _dp=_mvEqPrioMoi(task); if(_dp) return _eqtClean(_dp);   /* ★ EQFIXE-1 (§490) : puis, chez un salarié, l'équipe de la priorité où il est coché — lue à chaque appel, jamais recopiée */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
+function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var _dj=_mvEqJourMoi(); if(_dj) return _eqtClean(_dj);   /* ÉQUIPES-1 : l'équipe du jour d'abord */ var _dp=_mvEqPrioMoi(task); if(_dp) return _eqtClean(_dp);   /* ★ EQFIXE-1 (§490) : puis, chez un salarié, l'équipe de la priorité où il est coché — lue à chaque appel, jamais recopiée */ var _dd=_mvEqDefautMoi(); if(_dd) return _eqtClean(_dd);   /* ★ EQDEF-2 (§493) : sinon l'Équipe 1, imposée au salarié */ if(_mvMoiAdmin()&&EQUIPE_TACHE[task]===undefined){ var _me=currentUser&&currentUser.nom, _da=_mvEqDefautDe(_me); if(_da) return _eqtClean(_da.filter(function(n){ return n!==_me; })); }   /* … proposée à l'administrateur tant qu'il n'a rien choisi pour ce travail */ var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
 // ★★ DIRECT-1 (§318) — « DÉBUT » ENREGISTRE L'ÉQUIPE, COMME « VALIDER ».
 //   Nico (12/10) : « l'équipe est bien programmée mais c'est encore moi d'indiqué dessus ». « Valider » (pQuickValidate)
@@ -13617,7 +13668,7 @@ function _pvRenderTeamBar(){
   var w=document.getElementById('p-team-bar');if(!w)return;
   if(pTacheFilter==='toutes'||!canWrite()){w.innerHTML='';return;}
   var team=_eqtFor(pTacheFilter);
-  var _fixe=!_mvMoiAdmin()&&!!(_mvEqJourMoi()||_mvEqPrioMoi(pTacheFilter));   // EQFIXE-1 (§490) : l'équipe posée par l'admin ne se change pas chez le salarié
+  var _fixe=!_mvMoiAdmin()&&!!(_mvEqJourMoi()||_mvEqPrioMoi(pTacheFilter)||_mvEqDefautMoi());   // EQFIXE-1 (§490) puis EQDEF-2 (§493) : posée, de la priorité ou l'Équipe 1 — jamais au choix du salarié
   var names=team.length?(team.join(', ')+(_eqtHors(pTacheFilter)?' \u00b7 sans moi':'')):'Moi seul';
   var avs=team.length?team.slice(0,4).map(function(n){return '<div class="pv-team-av" style="background:'+(COULEURS_MBR[n]||'#3D6B27')+'">'+(n[0]||'?')+'</div>';}).join(''):'<div class="pv-team-av" style="background:#3D6B27"></div>';
   var tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
@@ -13628,6 +13679,7 @@ var _pvTeamSel=[], _pvMoiHors=false;
 function openPTeamJour(){
   if(_mvEqJourMoi()){ if(_mvMoiAdmin()) openEqJour(); else showToast(_mvEqFixeeMot(_mvEqJourMoi(),true),'#7A4F2E'); return; }   // ÉQUIPES-1
   var _dp=_mvEqPrioMoi(pTacheFilter); if(_dp){ showToast(_mvEqFixeeMot(_dp,false),'#7A4F2E'); return; }   // ★ EQFIXE-1 (§490) : l'équipe de la priorité ne se change pas non plus
+  var _dd=_mvEqDefautMoi(); if(_dd){ showToast('\u00c9quipe 1, tout le monde\u00a0: '+[currentUser.nom].concat(_dd).join(' + '),'#7A4F2E'); return; }   // ★ EQDEF-2 (§493) : l'Équipe 1 non plus
   _pvTeamSel=_eqtFor(pTacheFilter).slice();
   _pvMoiHors=_eqtHors(pTacheFilter);
   var tt=document.getElementById('pv-team-task');if(tt)tt.textContent=((typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter);

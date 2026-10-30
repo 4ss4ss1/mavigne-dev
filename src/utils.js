@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.43';
+export const APP_VERSION = '10.44';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -36,7 +36,10 @@ export const APP_VERSION = '10.43';
 //   Nico n'a rien à faire : la publication et le blocage sont automatiques (décision du 27/09).
 //   2 = TRN-1 (§330, 14/10) : CONFIG.tournees (une tournée = nom, travaux, ordre en pid).
 //   3 = TRN-2 (§331, 14/10) : CONFIG.equipes_jour[jour][i].t (la tournée de l'équipe du jour).
-export const MV_FORMAT = 3;
+//   4 = EQDEF-2 (§493, 30/10) : CONFIG.equipes_jour change de sens — un enregistrement reste en place les jours suivants
+//       (depuis MV_EQ_SUITE_DEPUIS), et [] veut dire « tout le monde en Équipe 1 ». Un téléphone d'avant ne verrait pas les
+//       équipes gardées et validerait avec l'ancienne règle : il doit se mettre à jour.
+export const MV_FORMAT = 4;
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -2284,7 +2287,7 @@ var MV_AIDE = {
       ['Chez un ouvrier', " : la Vigne a deux onglets, Accueil et Parcelles. On valide depuis les Parcelles ; le Journal reste à l’administrateur et au pilotage. « Ma saison » mène à « Ma trace », l’historique de votre travail."],
       ['Sur ordinateur', " : les modules sont dans la <b>barre à gauche</b> (repliable), et <b>Ctrl K</b> ouvre une recherche — une parcelle, un écran, un onglet du Pilotage. Sur téléphone et tablette, rien ne change. Un petit compteur au bout d’une entrée signale ce qui attend : un tracteur en réparation, un contrat qui finit dans le mois, ce qui presse en cave, les points à anticiper du Pilotage. Barre repliée, c’est un point sur l’icône : survolez-la pour lire le nombre."],
       ['La priorité du moment', "reste épinglée en haut, dans une carte : la tâche du jour en grand, le message de l’administrateur, l’avancement en hectares, ce qui a avancé aujourd’hui et hier, votre équipe, la parcelle en cours et la fin prévue au rythme des 15 derniers jours. « Aller aux parcelles » ouvre la tâche, « Pourquoi ? » sa fiche. À côté, les parcelles dessinées à leur forme (leur contour, nord en haut) et à leur surface (fait, en cours, à faire) — un appui sur l’une ouvre sa fiche ; elles portent leurs rangs, en vert ce qui est fait, en ambre ce qui est commencé, en blanc ce qui reste. Une parcelle dont le contour n’est pas enregistré reste un rectangle, en pointillé. Une parcelle où la tâche est désactivée, ou pas choisie pour la campagne, reste en contour pâle, en dernier, et ne compte pas dans l’avancement. Un délai de rentrée en cours s’affiche en rouge en haut de la carte et sur les parcelles concernées. Sans priorité, la carte montre les chantiers du moment d’après le calendrier de la campagne. L’administrateur modifie la priorité (« Modifier ») et règle les équipes du jour depuis la carte."],
-      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés sous contrat ce jour-là en équipes <b>pour la journée</b>, quatre au plus : chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Tout le monde y arrive en Équipe 1 ; pour mettre quelqu’un seul, il lui donne une équipe à lui. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. « Cave » met la personne en cave pour la journée : ses heures ne vont pas à la vigne et elle quitte les équipes — la même marque qu’au Planning, où se pose une demi-journée. Rien de réglé, ou « Tout le monde ensemble » : l’application fait comme d’habitude ; les journées de cave, elles, restent. Le lendemain, tout repart à zéro. Un salarié voit ici son équipe du jour, quand il y en a une."],
+      ['Équipes du jour', "juste sous la priorité. L’administrateur la touche pour répartir les salariés sous contrat en équipes, quatre au plus : <b>elles restent en place les jours suivants</b>, jusqu’à ce qu’il les change. Chacun validera et démarrera avec son équipe, sans pouvoir la changer, et ne voit pas les autres. Tout le monde y arrive en Équipe 1 ; pour mettre quelqu’un seul, il lui donne une équipe à lui. Sous les noms, il peut aussi choisir la tournée de chaque équipe : par défaut, celle du travail. « Cave » met la personne en cave pour la journée : ses heures ne vont pas à la vigne et elle quitte les équipes — la même marque qu’au Planning, où se pose une demi-journée. Rien de posé, ou « Tout le monde en Équipe 1 » : tout le monde est ensemble, en Équipe 1 — sauf qui est coché dans une équipe de la priorité, qui garde celle-là ; les journées de cave, elles, restent. Un salarié voit ici son équipe."],
       ['Une ligne « À vérifier »', "peut s’afficher en haut de l’Accueil : un changement de l’application qui vous concerne — un chiffre qui bouge, un réglage à contrôler. Touchez-la pour le détail, « Vu » pour la ranger ; elle reste dans Réglages › Moi › Journal des nouveautés."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma saison', " : ce que l’appli vous rend — votre part de la saison en hectares, vos jours au domaine, vos kilomètres de rangs ; votre part du chantier du moment (la priorité de votre équipe ; sans priorité, la seule tâche dans ses dates de travaux ; si plusieurs se chevauchent, celle où vous avez le plus travaillé ces 15 derniers jours) ; votre semaine en hectares, jamais en heures ; vos deux jalons les plus proches et le dernier gagné. « Ma trace » ouvre le détail."],
@@ -2799,7 +2802,7 @@ export const MV_INFO = {
     'Ces heures sont versées aux parcelles <b>validées ce jour-là</b>. Une validation vaut pour toutes les personnes nommées : trois personnes une heure sur un are, c\u2019est trois heures sur ce travail. Quelqu\u2019un qui n\u2019est nommé sur aucune validation du jour voit sa journée partagée entre <b>toutes</b> les parcelles validées ce jour-là : valider pour l\u2019équipe sans la cocher ne fait pas perdre ses heures. Deux équipes cochées sur des parcelles différentes gardent chacune les leurs. Une parcelle validée par une session tracteur (« faite au tracteur ») ne reçoit pas d\u2019heures de l\u2019équipe : son temps est celui de la session. Une étape d\u2019arrachage faite par un <b>prestataire</b> non plus : elle se valide, mais n\u2019absorbe aucune heure de l\u2019équipe.',
     'Plusieurs parcelles validées <b>le même jour</b> se partagent la journée <b>au prorata du barème</b> : pour un même travail, c\u2019est la surface. Trois personnes huit heures sur 1 ha, 0,5 ha et 0,5 ha de taille : 24 h pour 2 ha, soit <b>12 h/ha</b> — contre 15 au barème, le travail est allé plus vite que la convention. Une taille et un relevage validés le même jour se partagent la journée selon ce que chacun demande au barème.',
     'Un <b>travail à l’heure</b> (arrachage, désherbage manuel…) n’a pas de barème : le jour où il partage la liste avec des travaux au barème, la journée se partage d’abord <b>à la surface</b> entre les deux, puis au barème entre les travaux au barème. Avant, il ne prenait rien, et la réparation validée le même jour ramassait les heures d’arrachage.',
-    'Un jour où l\u2019administrateur a posé des <b>équipes du jour</b> (Accueil), chaque équipe garde ses parcelles : quelqu\u2019un qui n\u2019est pas dans le groupe d\u2019une validation n\u2019y met pas ses heures, il les garde pour ses propres validations. Une validation faite sans groupe ce jour-là prend l\u2019équipe du jour de son auteur.',
+    'Un jour où des <b>équipes</b> sont posées (Accueil — elles restent en place d\u2019un jour à l\u2019autre, jusqu\u2019au prochain réglage), chaque équipe garde ses parcelles : quelqu\u2019un qui n\u2019est pas dans le groupe d\u2019une validation n\u2019y met pas ses heures, il les garde pour ses propres validations. Une validation faite sans groupe ce jour-là prend l\u2019équipe de son auteur. Rien de posé : tout le monde est en Équipe 1, et les validations portent toute l\u2019équipe — la journée de chacun se partage entre les parcelles validées ce jour-là.',
     'Une validation marque la <b>fin</b> d\u2019un travail. Les jours où <b>personne</b> ne valide vont donc aux parcelles validées <b>ensuite</b>. Ce qui n\u2019a pas encore trouvé de validation reste <b>en attente</b>, affiché sous le tableau — jamais perdu, jamais compté deux fois.',
     'Pour le relevage et les travaux à passages, seul le niveau ou le passage <b>nouvellement fait</b> compte, et le barème est celui de ce niveau. Une validation annulée ne compte plus. Une parcelle <b>validée deux fois</b> sans annulation ne compte son barème <b>qu\u2019une fois</b> : le travail n\u2019a pas été fait deux fois. Revalidée le même jour qu\u2019une autre parcelle, elle ne prend rien de la journée ; seule ce jour-là, elle la reçoit.',
     'Quand l\u2019administrateur a découpé l\u2019<b>arrachage en étapes</b>, chaque étape est son propre travail : ses heures s\u2019affichent sur une ligne à part, sous la ligne Arrachage, avec son h/ha réel. Annuler une étape ne retire qu\u2019elle. Il n\u2019y a pas de barème : la colonne reste vide.',
@@ -4229,14 +4232,10 @@ window._mvOrdreTaches = function(){
 //   du travail. { m:['Victor','Shana'], t:'<id de tournée>' }. Lu pour la PERSONNE CONNECTÉE sur ses écrans de
 //   terrain (Parcelles : liste, numéros, barre, carte, anneau) ; Décider et le Tracteur gardent la tournée du travail.
 window._mvTourneeEquipe = function(nom, iso){
-  var E = (window.CONFIG||{}).equipes_jour;
-  if(nom==null || !E || typeof E !== 'object' || Array.isArray(E)) return '';
-  var L = E[String(iso||'').slice(0,10)];
-  if(!Array.isArray(L)) return '';
-  for (var i = 0; i < L.length; i++){
-    var t = L[i];
-    if(t && Array.isArray(t.m) && t.m.map(String).indexOf(String(nom)) >= 0) return t.t ? String(t.t) : '';
-  }
+  if(nom==null) return '';
+  var P = _mvEqEnPlace(iso);   // ★ EQDEF-2 (§493) : l'équipe EN PLACE — du jour, ou gardée d'un enregistrement d'avant
+  if(!P) return '';
+  for (var i = 0; i < P.eq.length; i++){ if(P.eq[i].m.indexOf(String(nom)) >= 0) return P.eq[i].t || ''; }
   return '';
 };
 window._mvOrdreMoi = function(tache){
@@ -6092,17 +6091,72 @@ window.APP_VERSION        = APP_VERSION;
 //   Rien pour une date = rien de réglé : l'app se comporte comme avant. Lu par la saisie (app.js :
 //   le groupe est forcé) ET par le calcul du temps (pilotage.js : une validation hors réseau, sans
 //   groupe, est rattachée à l'équipe de son auteur ce jour-là).
-export function _mvEqJour(iso){
-  var c=window.CONFIG||{}, E=c.equipes_jour;
-  if(!E || typeof E!=='object' || Array.isArray(E)) return null;
-  var L=E[String(iso||'').slice(0,10)];
-  if(!Array.isArray(L)) return null;
-  var out=[];
-  L.forEach(function(t){
-    var m=(t && Array.isArray(t.m)) ? t.m.filter(function(n){ return n!=null && n!==''; }).map(String) : [];
-    if(m.length) out.push(m);
+// ★★ EQDEF-2 (§493, 30/10/2026) — LES ÉQUIPES RESTENT EN PLACE ; RIEN DE POSÉ = TOUT LE MONDE EN ÉQUIPE 1.
+//   Nico (30/10, dicté) : « la numérotation d'une équipe se fait au jour le jour… s'il n'y a pas de numérotation demandée, …
+//   tout le monde ensemble dans l'équipe 1… tant que la tâche n'est pas terminée, on reste sur les deux équipes qui sont
+//   sélectionnées. S'il y a une modification…, ça doit être pris en compte. Sinon, par défaut, on reste enregistré sur les
+//   équipes qui ont été mises en place ». Décidé (« oui ») : un enregistrement reste en place les jours suivants, jusqu'au
+//   prochain ; « Tout le monde en Équipe 1 » (l'ancien « Tout le monde ensemble ») écrit [] — la fin des équipes, gardée elle
+//   aussi ; la fin d'une tâche ne les arrête pas toute seule (c'est l'administrateur qui le dit).
+//   ⚠️ La règle part de MV_EQ_SUITE_DEPUIS : avant, un jour ne lit que SON enregistrement — l'histoire ne se réécrit pas (même
+//   doctrine que _mvEnContratSurPeriode). Un jour GARDÉ (pas le jour même : là, l'enregistrement de l'administrateur fait foi)
+//   est ajusté au jour : qui n'y compte plus (fin de contrat, bureau, cave toute la journée) sort de son équipe ; qui compte sans
+//   être dans aucune arrive dans la première — l'Équipe 1.
+//   ⚠️ _mvEqJour reste « les équipes POSÉES » (du jour ou gardées) — ce qui coupe la journée du domaine dans le temps réel du
+//   Pilotage. L'Équipe 1 par défaut ne s'y lit pas : elle vit côté saisie (app.js, _mvEqDefautDe), où la priorité compte.
+export const MV_EQ_SUITE_DEPUIS = '2026-10-30';
+function _mvEqSource(iso){
+  var E=(window.CONFIG||{}).equipes_jour; iso=String(iso||'').slice(0,10);
+  if(!iso || !E || typeof E!=='object' || Array.isArray(E)) return null;
+  if(Array.isArray(E[iso])) return { d:iso, L:E[iso] };
+  var best='';   // seuls des jours >= MV_EQ_SUITE_DEPUIS se gardent : avant la règle, un jour ne lit que le sien
+  Object.keys(E).forEach(function(k){ if(k>=MV_EQ_SUITE_DEPUIS && k<iso && k>best && Array.isArray(E[k])) best=k; });
+  return best ? { d:best, L:E[best] } : null;
+}
+// Qui compte ce jour-là pour les équipes de la vigne : sous contrat, hors bureau, pas en cave toute la journée (JCAVE-1).
+//   La même règle que la fenêtre (app.js, _mvEquipeProposee / _mvEqMembres), pour une date quelconque.
+export function _mvEqPresents(iso){
+  iso=String(iso||'').slice(0,10);
+  var auj=(typeof window._mvToday==='function') ? window._mvToday() : '', out=[];
+  (window.MEMBRES||[]).forEach(function(m){
+    if(!m || !m.nom || m.bureau) return;
+    if(m.statut==='Inactif' && (!auj || iso>=auj)) return;
+    if(!((typeof window._mvEnContratLe==='function') ? window._mvEnContratLe(m, iso) : (m.statut!=='Inactif'))) return;
+    if(typeof window._mvCaveJour==='function' && window._mvCaveJour(m.nom, iso)==='j') return;
+    out.push(String(m.nom));
   });
-  return out.length ? out : null;
+  return out;
+}
+// Les équipes en place un jour donné, en objets {m, t} (t : la tournée de l'équipe, TRN-2) : { d: jour de l'enregistrement, eq }
+//   — eq vide : « tout le monde en Équipe 1 » posé ; null : rien de posé (ni ce jour-là ni, depuis la règle, avant).
+export function _mvEqEnPlace(iso){
+  iso=String(iso||'').slice(0,10);
+  var S=_mvEqSource(iso); if(!S) return null;
+  var out=[];
+  S.L.forEach(function(t){
+    var m=(t && Array.isArray(t.m)) ? t.m.filter(function(n){ return n!=null && n!==''; }).map(String) : [];
+    if(m.length) out.push({ m:m, t:(t && t.t) ? String(t.t) : '' });
+  });
+  if(out.length && S.d!==iso && iso>=MV_EQ_SUITE_DEPUIS){   // gardé d'un jour d'avant : ajusté au jour
+    var P=_mvEqPresents(iso), vu={};
+    out.forEach(function(o){ o.m=o.m.filter(function(n){ if(P.indexOf(n)<0 || vu[n]) return false; vu[n]=1; return true; }); });
+    var reste=P.filter(function(n){ return !vu[n]; });
+    if(reste.length) out[0].m=out[0].m.concat(reste);
+    out=out.filter(function(o){ return o.m.length; });
+  }
+  return { d:S.d, eq:out };
+}
+// D'où viennent les équipes d'un jour, pour les écrans : 'jour' (enregistrées ce jour-là), 'suite' (gardées depuis d),
+//   'defaut' (rien de posé, ou « tout le monde en Équipe 1 » depuis d), '' (avant la règle, rien de posé).
+export function _mvEqOrigine(iso){
+  iso=String(iso||'').slice(0,10);
+  var P=_mvEqEnPlace(iso);
+  if(P && P.eq.length) return { src:(P.d===iso) ? 'jour' : 'suite', d:P.d };
+  return (iso>=MV_EQ_SUITE_DEPUIS) ? { src:'defaut', d:P ? P.d : '' } : { src:'', d:'' };
+}
+export function _mvEqJour(iso){
+  var P=_mvEqEnPlace(iso);
+  return (P && P.eq.length) ? P.eq.map(function(o){ return o.m.slice(); }) : null;
 }
 export function _mvEqDe(nom, iso){
   var L=_mvEqJour(iso); if(!L || nom==null) return null;
@@ -6111,6 +6165,10 @@ export function _mvEqDe(nom, iso){
 }
 window._mvEqJour = _mvEqJour;
 window._mvEqDe   = _mvEqDe;
+window._mvEqEnPlace = _mvEqEnPlace;   // EQDEF-2 (§493)
+window._mvEqOrigine = _mvEqOrigine;
+window._mvEqPresents = _mvEqPresents;
+window.MV_EQ_SUITE_DEPUIS = MV_EQ_SUITE_DEPUIS;
 
 // ★★ JCAVE-1 (§428) — LES JOURNÉES DE CAVE. CONFIG.cave_jours = { 'AAAA-MM-JJ': { 'Nom': 'j' | 'm' | 'a' } } :
 //   la journée, le matin ou l'après-midi en cave. Posée par l'administrateur au Planning (planning.js, planCaveApply) ou,

@@ -135,7 +135,7 @@ var TU_TUTOS = [
     couvre: ['openEqJour', '_mvEqPick', 'saveEqJour'],
     retenir: ['Accueil › pastille « Équipes du jour ».',
               'Tout le monde arrive en Équipe 1. Pour mettre quelqu’un seul, donnez-lui une équipe à lui.',
-              '« Enregistrer pour aujourd’hui » vaut jusqu’à ce soir.'],
+              '« Enregistrer » : les équipes restent en place les jours suivants, jusqu’à ce que vous les changiez.'],
     etapes: [
       { type: 'toucher', cible: '[data-tuto="home.eqj"]',
         txt: function () { return 'Vous commencez sur l’Accueil. Les équipes du jour se règlent ici, sous la tâche prioritaire. {T} la pastille « ' + (L('[data-tuto="home.eqj"]').split(':')[0].trim() || 'Équipes du jour') + ' ».'; },
@@ -161,7 +161,7 @@ var TU_TUTOS = [
         },
         ok: 'C’est enregistré : le message vert le confirme.' },
       { type: 'regarder', cible: '[data-tuto="home.eqj"]',
-        txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, rien n’est réglé : tout le monde travaille ensemble.'; } }
+        txt: function () { return 'La pastille dit maintenant « ' + L('#home-eqj-txt') + ' ». Chacun valide avec son équipe, sans pouvoir la changer. Demain, elles sont toujours là : elles restent en place jusqu’à ce que vous les changiez.'; } }
     ] },
   // ★ JCAVE-1 (§428) — la journée de cave, au Planning (administrateur). Elle couvre les quatre gestes de la fenêtre « Travail de cave ».
   { id: 'cave', titre: 'Comment faire pour noter une journée de cave\u00a0?', fin: 'noter une journée de cave',

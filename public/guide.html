@@ -907,13 +907,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   pas à la parcelle dans le temps réel du Pilotage. Le choix est retenu pour chaque tâche.</div></div>
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg></span><div><b>Plusieurs équipes le même jour.</b>
   Sur l'Accueil, l'administrateur touche <b>« Équipes du jour »</b> et range chacun dans une équipe, quatre au plus :
-  tout le monde y arrive en <b>Équipe 1</b>, et quelqu'un n'est seul que si on lui donne une équipe à lui. Toute la journée,
-  un salarié qui valide ou démarre une parcelle le fait avec <b>son</b> équipe : il n'a rien à cocher, ne peut pas la
+  tout le monde y arrive en <b>Équipe 1</b>, et quelqu'un n'est seul que si on lui donne une équipe à lui. Les équipes
+  <b>restent en place les jours suivants</b>, jusqu'à ce qu'il les change. Tant qu'elles sont là, un salarié qui valide ou démarre une parcelle le fait avec <b>son</b> équipe : il n'a rien à cocher, ne peut pas la
   changer et ne voit pas les autres. L'administrateur valide avec la sienne et peut corriger le groupe d'une validation.
   Dans le Pilotage, chaque équipe garde ses parcelles. Sous les noms, il peut choisir la <b>tournée de chaque équipe</b> : par défaut, celle du travail ; chacun voit alors ses parcelles dans l'ordre de son équipe.
   « Cave » met une personne en cave pour la journée : ses heures ne vont pas à la vigne et elle quitte les équipes
-  (une demi-journée se marque au Planning). Rien de réglé, ou « Tout le monde ensemble » : l'application fait
-  comme d'habitude ; les journées de cave restent ; le lendemain, tout repart à zéro.</div></div>
+  (une demi-journée se marque au Planning). Rien de posé, ou « Tout le monde en Équipe 1 » : tout le monde
+  est ensemble, en Équipe 1 — sauf qui est coché dans une équipe de la priorité, qui garde celle-là ; les journées de cave restent.</div></div>
 
   <details><summary>J'ai validé la mauvaise parcelle</summary>
     <div class="dbody">Touchez <b>Annuler</b> dans le message qui s'affiche juste après. Passé ce délai,
@@ -3322,7 +3322,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       travail, la surface) ; un <b>travail à l'heure</b> (arrachage, désherbage manuel…) validé le même jour
       prend d'abord sa part à la surface, puis le reste se partage au barème ; les jours où personne ne valide
       vont aux parcelles validées ensuite. Un jour
-      où des <b>équipes du jour</b> sont posées sur l'Accueil, chaque équipe garde ses parcelles.
+      où des <b>équipes</b> sont posées sur l'Accueil (elles restent en place d'un jour à l'autre), chaque équipe garde ses parcelles ;
+      sans équipes posées, tout le monde est en Équipe 1 et les validations portent toute l'équipe.
       Pour chaque travail, le <b>h/ha réel</b> se lit à côté du <b>h/ha du barème</b> : trois
       personnes huit heures sur 2 ha, c'est 12 h/ha — plus vite qu'un barème à 15</li>
       <li>S'appuie sur les taux horaires et le prix réel du GNR</li>

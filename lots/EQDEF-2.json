@@ -1,0 +1,43 @@
+{
+  "lot": "EQDEF-2",
+  "section": "§493",
+  "base": "52a453331d7f605456d6a907bf3093cb4308eb35",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "65188a4907a66fd833be9dbf3c73ffde86e92e466834ced58c95a26145a3ea60",
+    "date": "2026-10-30T10:06:35.622Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "equipes"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "ca047093c4aa47d4748b5616bc828f6053786a4471cb161bd0b8bf575e02a70f",
+    "CLAUDE.md": "601796f9d95ea3d585d097f20351dbd3cc6ca96de239e7c31195c10ef8778b6e",
+    "docs/claude/INDEX.md": "f798713b2ad8660d0ede1582e1d0d4dbd8cc50b3ab54bdf01cfcca00878c885e",
+    "docs/claude/chantiers-480-529.md": "5db11d0e1b2fb7d9924804b93128894c32cbabc710786ad3c581770f6dd8a908",
+    "docs/claude/journal.md": "5e61517d812ce6f3a86bbaf10ec8b28e6baad3255647d1234606a8b530679e59",
+    "guide/04-vigne.html": "679ad5af3912cc45779a2566d04a85d711460dd335b8a9760a95b885268d0e8d",
+    "guide/11-pilotage.html": "97def78660a27a928da4b56c74d1528051f62c04ed36a2dc036a442acd538af2",
+    "index.html": "3e0aaafe8fccb8d542d691e17ee5f3cc496c549496c34d9ed1125100d12bc905",
+    "public/sw.js": "c371b71aad204bb9886f8557b507fbce9315587278d18d9962dea40085644f52",
+    "scripts/harnais-claude-md.mjs": "e292a4405a4de9dffb5b882810393d3d57167b06eafd03995006d7bde815e266",
+    "scripts/mv-harnais-eqdef1.mjs": "f37e8f90961abd09898ba31b02d5e1cd5423b7cc0ff8ac696a0c1d5bc073beab",
+    "scripts/mv-harnais-eqfixe1.mjs": "5277b7b082eb8c6ea73bd34824cb83e8298d0d07d8bd70d43e28b5b4a777768b",
+    "scripts/mv-harnais-equipes-jour.mjs": "20e48a64d0b9f5d0731ebcc4f471ad585852cfe40d98204bef8dd52a7633bcbe",
+    "scripts/mv-harnais-liste.mjs": "c9c2a4f34416e57f82d8996f6567245e410a4d08a9a18467a26351a9b4674d32",
+    "scripts/mv-harnais-trn2.mjs": "51af7f8088032ded69a53b62c81bdf4f5c4e5579547a4bf7937b05f8498a59b5",
+    "src/app.js": "207689e930c0cd6cb5945382d69ffbf0bf34e567fcf94fcab06a701b5f19b1c3",
+    "src/tutos.js": "6b27ead117042cca364e2cfd99d3db84cb4ba8d4d673640e125b7ab724b1aa02",
+    "src/utils.js": "5508cc349f7ec870e930a44d4b3d7d6db50df69ca07dbd74cb125060aae9709f",
+    "src/whats-new.js": "5612875d0fdfb0b8372b776f4b52d4f9e6fbdbff298939e9fb53dfdd8cb9e69b",
+    "scripts/mv-harnais-eqdef2.mjs": "0ac2dc5ad3dd7c08349bc473c490e70e58caa3fd0e8fa43716fe0e95a003ae09"
+  }
+}

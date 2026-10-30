@@ -31,13 +31,14 @@ function extraire(src, nom) {
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) return ''; let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 
 // ── Le monde des Parcelles : un salarié (ou l'admin), la config du domaine, la mémoire du téléphone ──
-const FA = ['_mvEqJourMoi', '_mvEqPrioDe', '_mvEqPrioMoi', '_mvEqFixeeMot', '_mvEqApplique', '_mvEqUi', '_mvEqUiTache', '_prioItems', '_prioForMember',
+const FA = ['_mvEqJourMoi', '_mvEqPrioDe', '_mvEqPrioMoi', '_mvEqDefautDe', '_mvEqDefautMoi', '_mvEqFixeeMot', '_mvEqApplique', '_mvEqUi', '_mvEqUiTache', '_prioItems', '_prioForMember',
   '_eqtClean', '_mvEquipeProposee', '_eqtKey', '_eqtRecentKey', '_eqtSameTeam', '_eqtPushRecent', '_eqtLoad', '_eqtSave', '_eqtHors', '_eqtFor', '_eqtSet',
   '_pvRenderTeamBar', 'openPTeamJour'];
 function monde(src, o = {}) {
   const A = nu(src.app), U = nu(src.utl), code = [], manque = [];
   for (const n of FA) { const f = extraire(A, n); if (f) code.push(f); else manque.push(n); }
-  for (const n of ['_mvEqJour', '_mvEqDe']) { const f = extraire(U, n); if (f) code.push(f); else manque.push(n); }
+  // EQDEF-2 (§493) : le monde vit au 29/10, la veille de la règle « rien de posé = l'Équipe 1 » (mv-harnais-eqdef2 la tient).
+  for (const n of ['_mvEqSource', '_mvEqPresents', '_mvEqEnPlace', '_mvEqOrigine', '_mvEqJour', '_mvEqDe']) { const f = extraire(U, n); if (f) code.push(f); else manque.push(n); }
   if (manque.length) return { manque };
   const LS = new Map(), reg = {};
   const el = id => { const e = { id, style: {}, textContent: '', innerHTML: '', value: '', classList: { toggle() {}, add() {}, remove() {} },
@@ -58,8 +59,9 @@ function monde(src, o = {}) {
     var EQUIPE_TACHE = {}, EQUIPE_RECENT = [], _eqtLoaded = false, _pvTeamSel = [], _pvMoiHors = false;
     var _validTache = 'Taille', _nivTache = '', _passTache = '';
     var HORS = ${JSON.stringify(o.horsContrat || [])};
+    var MV_EQ_SUITE_DEPUIS = '2026-10-30';
     function _mvMoiAdmin(){ return ${o.admin ? 'true' : 'false'}; }
-    function _mvToday(){ return '2026-10-30'; }
+    function _mvToday(){ return '2026-10-29'; }
     function getSaisonActive(){ return { nom: 'Hiver 2026' }; }
     function getTachesSaison(){ return [{ nom: 'Taille' }, { nom: 'Tirage' }, { nom: 'Réparation' }]; }
     function canWrite(){ return true; }
@@ -72,7 +74,7 @@ function monde(src, o = {}) {
     function toggleEquipeMode(){} function toggleNivEquipeMode(){} function togglePassEquipeMode(){} function toggleJEMode(){}
     window._mvEnContratLe = function(m){ return HORS.indexOf(m.nom) < 0; };
     ${code.join('\n')}
-    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe;
+    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe; window._mvEqEnPlace = _mvEqEnPlace; window._mvEqOrigine = _mvEqOrigine; window._mvEqPresents = _mvEqPresents; window.MV_EQ_SUITE_DEPUIS = MV_EQ_SUITE_DEPUIS;
     this.api = { pour: _eqtFor, applique: _mvEqApplique,
       barre: function(){ _pvRenderTeamBar(); return document.getElementById('p-team-bar').innerHTML; },
       appui: function(){ openPTeamJour(); },
@@ -95,7 +97,7 @@ function accueil(src, moi) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const win = { _mvParcForme: () => null, _mvEqJour: () => null, _mvTourneesLues: () => [], _mvPqBtn: () => '', TRAITEMENTS: [], CATALOGUE: [] };
   const c = f(doc, [{ nom: 'Les Crais', surface: '0,5' }], () => [IT], n => (IT.equipe.indexOf(n) >= 0 ? IT : null), () => 'Non démarré', () => ({ pct: 0 }), t => t, esc, esc, s => s, win,
-    { nom: moi }, () => false, () => '', [], [{ nom: 'Lucas' }, { nom: 'Inès' }], '', () => '2026-10-30', () => '2026-10-29',
+    { nom: moi }, () => false, () => '', [], [{ nom: 'Lucas' }, { nom: 'Inès' }], '', () => '2026-10-29', () => '2026-10-28',
     () => ({ pct: 10, restN: 1, rest: 0.5, fin: null }), () => '', () => null, () => '', s => s, () => [], () => ({ h: 0 }));
   return c ? c.innerHTML : '';
 }
@@ -113,23 +115,23 @@ function scenarios(src) {
   eq('P2 · l’admin change l’équipe sur la même tâche : elle suit au prochain affichage (le défaut signalé)', W.api.pour('Taille'), ['Alicia']);
   W = monde(src, { config: PRIO(['Victor', 'Alicia']), memoire: { Taille: ['Victor', 'Shana'] } });
   eq('P3 · une ancienne équipe dans la mémoire du téléphone ne passe plus devant', W.api.pour('Taille'), ['Alicia']);
-  W = monde(src, { config: Object.assign(PRIO(['Victor', 'Shana']), { equipes_jour: { '2026-10-30': [{ m: ['Victor', 'Pauline'] }] } }) });
+  W = monde(src, { config: Object.assign(PRIO(['Victor', 'Shana']), { equipes_jour: { '2026-10-29': [{ m: ['Victor', 'Pauline'] }] } }) });
   eq('P4 · les Équipes du jour passent devant la priorité', W.api.pour('Taille'), ['Pauline']);
   W = monde(src, { moi: 'Chloé', config: PRIO(['Victor', 'Shana']), memoire: { Taille: [] } });
   eq('P5 · un salarié coché dans aucune équipe garde son choix — pas l’équipe des autres', W.api.pour('Taille'), []);
-  let e = W.api.applique({ date: '2026-10-30', qui: 'Chloé', tache: 'Taille', equipe: false, membresEquipe: [] });
+  let e = W.api.applique({ date: '2026-10-29', qui: 'Chloé', tache: 'Taille', equipe: false, membresEquipe: [] });
   eq('P6 · … et sa validation reste telle quelle', [e.equipe, e.membresEquipe], [false, []]);
   W = monde(src, { moi: 'Nico', admin: true, config: PRIO(['Nico', 'Alicia']), memoire: { Taille: ['Pauline'] } });
   eq('P7 · l’administrateur garde la main : rien ne lui est imposé', W.api.pour('Taille'), ['Pauline']);
-  e = W.api.applique({ date: '2026-10-30', qui: 'Nico', tache: 'Taille', equipe: true, membresEquipe: ['Pauline'] });
+  e = W.api.applique({ date: '2026-10-29', qui: 'Nico', tache: 'Taille', equipe: true, membresEquipe: ['Pauline'] });
   eq('P8 · … et sa validation garde son groupe', e.membresEquipe, ['Pauline']);
   W = monde(src, { config: PRIO(['Victor']), memoire: { Taille: ['Shana'] } });
   eq('P9 · coché seul sur la priorité : seul, et c’est imposé (la mémoire ne revient pas)', W.api.pour('Taille'), []);
   W = monde(src, { config: PRIO(['Victor', 'Alicia']) });
-  e = W.api.applique({ date: '2026-10-30', qui: 'Victor', tache: 'Taille', equipe: true, membresEquipe: ['Hugo'], quiHors: true });
+  e = W.api.applique({ date: '2026-10-29', qui: 'Victor', tache: 'Taille', equipe: true, membresEquipe: ['Hugo'], quiHors: true });
   eq('P10 · la validation du salarié part avec l’équipe de la priorité', [e.equipe, e.membresEquipe, 'quiHors' in e], [true, ['Alicia'], false]);
   ok('P11 · … sans se dire « équipe du jour »', !e.eqJour);
-  e = W.api.applique({ date: '2026-10-30', qui: 'Victor', tache: 'Tirage', equipe: false, membresEquipe: [] });
+  e = W.api.applique({ date: '2026-10-29', qui: 'Victor', tache: 'Tirage', equipe: false, membresEquipe: [] });
   eq('P12 · une autre tâche que la priorité : inchangée', [e.equipe, e.membresEquipe], [false, []]);
   // La barre « Équipe sur… » et son appui
   W = monde(src, { config: PRIO(['Victor', 'Alicia']) });
@@ -143,7 +145,7 @@ function scenarios(src) {
   W = monde(src, { moi: 'Chloé', config: PRIO(['Victor', 'Shana']) });
   const h2 = W.api.barre(); W.api.appui();
   ok('P16 · rien d’imposé : « Changer » ouvre le choix, comme avant', h2.includes('>Changer<') && W.ctx.OUVERTS[0] === 'ovPTeam' && !W.ctx.TOASTS.length);
-  W = monde(src, { config: { equipes_jour: { '2026-10-30': [{ m: ['Victor', 'Pauline'] }] } } });
+  W = monde(src, { config: { equipes_jour: { '2026-10-29': [{ m: ['Victor', 'Pauline'] }] } } });
   W.api.appui();
   eq('P17 · équipe du jour : l’appui la nomme aussi', W.ctx.TOASTS[0], '\u00c9quipe du jour fix\u00e9e par l\u2019administrateur\u00a0: Victor + Pauline');
   // Le panneau de validation

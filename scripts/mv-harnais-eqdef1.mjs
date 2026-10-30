@@ -39,7 +39,8 @@ const FICHES = [{ nom: 'Marie' }, { nom: 'Jean' }, { nom: 'Sophie' }, { nom: 'Pa
 function monde(src, o = {}) {
   const A = nu(src.app), U = nu(src.utl), code = [], manque = [];
   for (const n of FA) { const f = extraire(A, n); if (f) code.push(f); else manque.push(n); }
-  for (const n of ['_mvEqJour', '_mvEqDe']) { const f = extraire(U, n); if (f) code.push(f); else manque.push(n); }
+  // EQDEF-2 (§493) : le lecteur passe par l'enregistrement en place.
+  for (const n of ['_mvEqSource', '_mvEqPresents', '_mvEqEnPlace', '_mvEqOrigine', '_mvEqJour', '_mvEqDe']) { const f = extraire(U, n); if (f) code.push(f); else manque.push(n); }
   if (manque.length) return { manque };
   const reg = {};
   ['eqj-rows', 'eqj-date'].forEach(id => { reg[id] = { id, innerHTML: '', textContent: '' }; });
@@ -56,6 +57,7 @@ function monde(src, o = {}) {
     var CAVE = ${JSON.stringify(o.cave || {})};
     var TRN = ${JSON.stringify(o.tournees || [])};
     var _EQJ_SEL = {}, _EQJ_TRN = {};
+    var MV_EQ_SUITE_DEPUIS = '2026-10-30';
     function _mvMoiAdmin(){ return ${o.salarie ? 'false' : 'true'}; }
     function _mvToday(){ return '${JOUR}'; }
     function _mvISO(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -72,7 +74,7 @@ function monde(src, o = {}) {
     window._mvCaveEcrire = function(liste, part){ liste.forEach(function(x){ CAVE_ECRITE.push([x.nom, part]); if(part) CAVE[x.nom + '|' + x.iso] = part; else delete CAVE[x.nom + '|' + x.iso]; }); return liste.length; };
     window._mvTourneesLues = function(){ return TRN; };
     ${code.join('\n')}
-    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe;
+    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe; window._mvEqEnPlace = _mvEqEnPlace; window._mvEqOrigine = _mvEqOrigine;
     this.api = {
       ouvrir: function(){ openEqJour(); return document.getElementById('eqj-rows').innerHTML; },
       choisir: function(n, k){ _mvEqPick({ getAttribute: function(a){ return a === 'data-eqj-n' ? n : String(k); } }); return document.getElementById('eqj-rows').innerHTML; },
@@ -104,7 +106,7 @@ function scenarios(src) {
   ok('R5 · les fiches de bureau et les contrats finis ne sont ni proposés ni rangés', !/data-eqj-n="(Hugo|Lucas)"/.test(h) && !('Hugo' in W.api.etat()) && !('Lucas' in W.api.etat()));
   let E = W.api.enregistrer();
   eq('R6 · enregistré sans rien toucher : une seule équipe, tout le monde ensemble', E, [{ m: ['Marie', 'Jean', 'Sophie', 'Paul'] }]);
-  ok('R7 · … la configuration du domaine est enregistrée, et le message le dit', W.ctx.SAUVES.indexOf('config') >= 0 && W.ctx.TOASTS[0] === '1 \u00e9quipe pour aujourd\u2019hui');
+  ok('R7 · … la configuration du domaine est enregistrée, et le message le dit', W.ctx.SAUVES.indexOf('config') >= 0 && W.ctx.TOASTS[0] === '1 \u00e9quipe en place \u00e0 partir d\u2019aujourd\u2019hui');   // EQDEF-2 (§493) : jusqu'au prochain réglage
   eq('R8 · côté salarié, personne n’est seul : chacun lit l’équipe de tous', ['Jean', 'Paul'].map(n => W.api.de(n)), [['Marie', 'Jean', 'Sophie', 'Paul'], ['Marie', 'Jean', 'Sophie', 'Paul']]);
   // R9-R12 · l'administrateur met quelqu'un seul : une équipe à lui, la quatrième s'il le faut
   W = monde(src); W.api.ouvrir();
@@ -145,7 +147,7 @@ function branchements(src) {
   T.push(['B1 · l’aide de la fenêtre ne parle plus de « Aucune » et dit l’Équipe 1', !!F && !/Aucune/.test(F) && F.includes('Tout le monde arrive en \u00c9quipe 1') && F.includes('une \u00e9quipe \u00e0 lui')]);
   T.push(['B2 · le tuto des équipes : plus de « Aucune », plus de choix « 0 », il enseigne l’équipe à soi', !!tu && !/Aucune/.test(tu.replace(/^\s*\/\/.*$/gm, '')) && !/data-eqj-k="0"/.test(tu)
     && tu.includes("'[data-eqj-n=\"Paul\"][data-eqj-k=\"2\"]'") && tu.includes('Tout le monde arrive en \u00c9quipe 1.') && tu.includes("couvre: ['openEqJour', '_mvEqPick', 'saveEqJour']")]);
-  T.push(['B3 · l’aide de la Vigne le dit (quatre au plus, Équipe 1, seul = une équipe à lui)', src.utl.includes('<b>pour la journ\u00e9e</b>, quatre au plus') && src.utl.includes('Tout le monde y arrive en \u00c9quipe 1 ; pour mettre quelqu\u2019un seul, il lui donne une \u00e9quipe \u00e0 lui.')]);
+  T.push(['B3 · l’aide de la Vigne le dit (quatre au plus, Équipe 1, seul = une équipe à lui)', src.utl.includes('en \u00e9quipes, quatre au plus : <b>elles restent en place les jours suivants</b>') && src.utl.includes('Tout le monde y arrive en \u00c9quipe 1 ; pour mettre quelqu\u2019un seul, il lui donne une \u00e9quipe \u00e0 lui.')]);
   T.push(['B4 · le guide le dit', src.guide.includes('quatre au plus :') && src.guide.includes("tout le monde y arrive en <b>\u00c9quipe 1</b>, et quelqu'un n'est seul que si on lui donne une \u00e9quipe \u00e0 lui")]);
   T.push(['B5 · les nouveautés 10.43 l’annoncent à l’administrateur', /\{ v: '10\.43', d: '2026-10-30', items: \[\n    \{ niv: 0, pour: \['admin'\], emoji: 'equipe', titre: 'Personne hors \u00e9quipe dans les \u00c9quipes du jour'/.test(src.wn)]);
   T.push(['B6 · ce harnais est branché dans la liste des contrôles', src.liste.includes("['node scripts/mv-harnais-eqdef1.mjs'") && src.liste.includes("['node scripts/mv-harnais-eqdef1.mjs --contre'")]);

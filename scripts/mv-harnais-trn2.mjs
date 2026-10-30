@@ -15,13 +15,14 @@ function fonction(src, nom){
   throw new Error('fin introuvable : ' + nom);
 }
 const LECTURE = tranche(U, 'window._mvOrdreMap = function(){', '// ══ LA DERNIÈRE PARCELLE VALIDÉE');
+const EQ = "var MV_EQ_SUITE_DEPUIS = '2026-10-30';\n" + ['_mvEqSource', '_mvEqPresents', '_mvEqEnPlace'].map(n => fonction(U, n)).join('\n') + '\nwindow._mvEqEnPlace = _mvEqEnPlace;\n';   // EQDEF-2 (§493)
 const APP = ['_mvEqEcrire', '_mvEqBrut', '_pProxBloque', '_pOrdTitre', '_pOrdNomTournee'].map(n => fonction(A, n)).join('\n');
 const ESC = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 function monde(lecture, app){
   const window = { CONFIG: {}, PARCELLES: [], currentUser: { nom: 'Shana' }, _mvToday: () => '2026-10-14', saves: [] };
   const etat = { admin: false, tache: 'Tirage' };
   const f = new Function('window', 'saveData', '_mvISO', '_escHtml', '_mvMoiAdmin', '_pOrdTache',
-    'var CONFIG = window.CONFIG;\n' + lecture + '\n' + app + '\nreturn { _mvEqEcrire, _mvEqBrut, _pProxBloque, _pOrdTitre, lireConfig: () => CONFIG };');
+    'var CONFIG = window.CONFIG;\n' + EQ + lecture + '\n' + app + '\nreturn { _mvEqEcrire, _mvEqBrut, _pProxBloque, _pOrdTitre, lireConfig: () => CONFIG };');
   const api = f(window, k => window.saves.push(k), d => d.toISOString().slice(0, 10), ESC, () => etat.admin, () => etat.tache);
   return { w: window, api, etat };
 }
@@ -72,7 +73,8 @@ const CONTRE = [
   ['l’équipe ignorée', LECTURE.replace('var id = moi ? window._mvTourneeEquipe(moi, iso) : \'\';', "var id = '';"), APP],
   ['la tournée d’équipe perdue à l’enregistrement', LECTURE, APP.replace('if(trn&&trn[i]) o.t=String(trn[i]);', '')],
   ['la proximité jamais bloquée', LECTURE, APP.replace("return !_mvMoiAdmin() && !!_pOrdTache();", 'return false;')],
-  ['relecture non filtrée (indices décalés)', LECTURE, APP.replace("return Array.isArray(L)?L.filter(function(t){ return t&&Array.isArray(t.m)&&t.m.some(function(n){ return n!=null&&n!==''; }); }):[];", 'return Array.isArray(L)?L:[];')],
+  // EQDEF-2 (§493) : le filtre a déménagé dans _mvEqEnPlace (utils.js) ; le défaut réinjecté : _mvEqBrut relit le brut du jour.
+  ['relecture non filtrée (indices décalés)', LECTURE, APP.replace("return P ? P.eq : [];", "var E=(window.CONFIG||{}).equipes_jour, L=E?E[String(iso||'').slice(0,10)]:null; return Array.isArray(L)?L:[];")],
   ['les numéros ignorent l’équipe', LECTURE.replace("var o = (moi && typeof window._mvOrdreMoi === 'function') ? window._mvOrdreMoi(tache) : window._mvOrdreFor(tache);", 'var o = window._mvOrdreFor(tache);'), APP]
 ];
 let ko = 0;

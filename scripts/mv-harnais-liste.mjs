@@ -843,6 +843,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-eqfixe1.mjs --contre'],
   ['node scripts/mv-harnais-eqdef1.mjs'],             // EQDEF-1 (§492) : « Équipes du jour » sans « Aucune » — tout le monde arrive en Équipe 1, Équipe 4, un « 0 » ne retire personne
   ['node scripts/mv-harnais-eqdef1.mjs --contre'],
+  ['node scripts/mv-harnais-eqdef2.mjs'],             // EQDEF-2 (§493) : les équipes restent en place d'un jour à l'autre ; rien de posé = l'Équipe 1 (la priorité garde la main)
+  ['node scripts/mv-harnais-eqdef2.mjs --contre'],
   ['node scripts/mv-harnais-tete3d.mjs'],              // TETE-3D (§482) : la bande campagne/date sous l'en-tête retrouve sa forme (TETE-1 et TETE-2 la visent), blanche ; test:ux la garde au rendu
   ['node scripts/mv-harnais-tete3d.mjs --contre'],
   ['node scripts/mv-harnais-ecart1.mjs'],              // ECART-1 (§460) : l'écart au barème d'Aujourd'hui › Économie en heures — la tuile est le total de la carte (un tiret sans rien à comparer), barres à l'échelle jusqu'à ±50 %

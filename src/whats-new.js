@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.44', d: '2026-10-30', items: [
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Les équipes restent en place d’un jour à l’autre',
+      desc: "Les équipes que vous posez dans «\u00a0Équipes du jour\u00a0» ne s’effacent plus le soir\u00a0: elles restent en place les jours suivants, jusqu’à ce que vous les changiez. Rien de posé\u00a0: tout le monde est ensemble en Équipe\u00a01, sauf qui est coché dans une équipe de la priorité. Le bouton «\u00a0Tout le monde ensemble\u00a0» devient «\u00a0Tout le monde en Équipe\u00a01\u00a0» et remet tout le monde dans la même équipe." },
+    { niv: 0, pour: ['salaries'], emoji: 'equipe', titre: 'Votre équipe est toujours indiquée',
+      desc: "Quand l’administrateur n’a posé aucune équipe, vous êtes avec tout le monde, en Équipe\u00a01\u00a0: vos validations partent avec toute l’équipe, plus jamais «\u00a0Moi seul\u00a0» par défaut. Votre équipe se lit sur l’Accueil et sur la barre «\u00a0Équipe sur…\u00a0»." },
+  ] },
   { v: '10.43', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Personne hors équipe dans les Équipes du jour',
       desc: "Dans «\u00a0Équipes du jour\u00a0», quelqu’un laissé sur «\u00a0Aucune\u00a0» n’était dans aucune équipe\u00a0: son téléphone retombait sur sa propre équipe, souvent «\u00a0Moi seul\u00a0». «\u00a0Aucune\u00a0» disparaît. En ouvrant la fenêtre, tout le monde est en Équipe\u00a01\u00a0: si vous enregistrez sans rien toucher, tout le monde travaille ensemble. Pour mettre quelqu’un seul, donnez-lui une équipe à lui — il y en a maintenant quatre. «\u00a0Cave\u00a0» ne change pas, ni un jour où la fenêtre n’est pas enregistrée." },

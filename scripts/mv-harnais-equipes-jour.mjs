@@ -28,7 +28,8 @@ function extraire(src, nom) {
 
 function monde(src, { admin = false, moi = 'Victor', config = {} } = {}) {
   const A = nu(src.app), U = nu(src.utl);
-  const fns = [['_mvEqJour', U], ['_mvEqDe', U], ['_mvEqJourMoi', A], ['_mvEqApplique', A], ['_mvEqEcrire', A], ['_mvEqCaveEcrire', A], ['saveEqJour', A], ['clearEqJour', A]];
+  const fns = [['_mvEqSource', U], ['_mvEqPresents', U], ['_mvEqEnPlace', U], ['_mvEqOrigine', U], ['_mvEqJour', U], ['_mvEqDe', U],   // EQDEF-2 (§493) : le lecteur passe par l'enregistrement en place
+    ['_mvEqJourMoi', A], ['_mvEqApplique', A], ['_mvEqEcrire', A], ['_mvEqCaveEcrire', A], ['saveEqJour', A], ['clearEqJour', A]];
   const code = [], manque = [];
   for (const [n, s] of fns) { const f = extraire(s, n); if (f) code.push(f); else manque.push(n); }
   if (manque.length) return { manque };
@@ -38,6 +39,7 @@ function monde(src, { admin = false, moi = 'Victor', config = {} } = {}) {
   vm.runInContext(`
     var currentUser = { nom: ${JSON.stringify(moi)} };
     var CONFIG = window.CONFIG;
+    var MV_EQ_SUITE_DEPUIS = '2026-10-30';
     var _EQJ_SEL = {}, _EQJ_TRN = {};   // TRN-2 (§331) : la tournée de chaque équipe, état du module comme _EQJ_SEL
     function _mvMoiAdmin(){ return ${admin ? 'true' : 'false'}; }
     function _mvToday(){ return '2026-09-30'; }
@@ -45,7 +47,7 @@ function monde(src, { admin = false, moi = 'Victor', config = {} } = {}) {
     function saveData(k){ saves.push(k); }
     function _mvEqApres(msg){ ferme++; toasts.push(msg); }
     ${code.join('\n')}
-    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe;
+    window._mvEqJour = _mvEqJour; window._mvEqDe = _mvEqDe; window._mvEqEnPlace = _mvEqEnPlace; window._mvEqOrigine = _mvEqOrigine;
     this.api = { applique: _mvEqApplique, moi: _mvEqJourMoi, ecrire: _mvEqEcrire, save: function(sel){ _EQJ_SEL = sel; saveEqJour(); }, clear: clearEqJour,
                  jour: _mvEqJour, cfg: function(){ return window.CONFIG; } };
   `, ctx);
@@ -90,7 +92,8 @@ function scenarios(src) {
   ok('E11 · une journée de plus de deux ans est retirée, une récente reste', !c.equipes_jour['2024-01-01'] && !!c.equipes_jour['2026-09-01']);
   ok('E12 · le reste de la configuration est intact, et elle est sauvée', c.autre === 1 && W.ctx.saves.indexOf('config') >= 0);
   W.api.clear();
-  ok('E13 · « tout le monde ensemble » efface la journée', !W.api.cfg().equipes_jour['2026-09-30']);
+  // EQDEF-2 (§493) : l'ancien « Tout le monde ensemble » devient « Tout le monde en Équipe 1 » — [] se GARDE (il arrête les équipes d'avant).
+  ok('E13 · « Tout le monde en Équipe 1 » écrit [] pour la journée (gardé), et le lecteur n’y voit aucune équipe posée', Array.isArray(W.api.cfg().equipes_jour['2026-09-30']) && W.api.cfg().equipes_jour['2026-09-30'].length === 0 && W.api.jour('2026-09-30') === null);
   W = monde(src, { config: {}, moi: 'Victor', admin: false });
   W.api.save({ Victor: 1, Shana: 1 });
   ok('E14 · un salarié ne peut pas enregistrer d\'équipes', !W.api.cfg().equipes_jour && W.ctx.saves.length === 0);
@@ -125,7 +128,7 @@ const MUT = [
   ['un salarié peut enregistrer', 'app', "function saveEqJour(){\n  if(!_mvMoiAdmin()) return;", "function saveEqJour(){\n"],
   ['une écriture oublie l\'équipe du jour (passages)', 'app', "JOURNAL.unshift(_mvEqApplique(_jeP));", "JOURNAL.unshift(_jeP);"],
   ['le panneau des niveaux ne montre plus l\'équipe', 'app', "  _mvEqUi('niv');", ""],
-  ['une équipe vide est lue', 'utl', "    if(m.length) out.push(m);", "    out.push(m);"],
+  ['une équipe vide est lue', 'utl', "    if(m.length) out.push({ m:m, t:(t && t.t) ? String(t.t) : '' });", "    out.push({ m:m, t:(t && t.t) ? String(t.t) : '' });"],   // EQDEF-2 (§493) : le filtre vit dans _mvEqEnPlace
 ];
 
 let rouge = 0;
