@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **30 octobre 2026 (FERTI-9)** — **L’AMENDEMENT PRÉPARE SA SESSION TRACTEUR : UNE CARTE « À DÉMARRER » DANS TRACTEUR, LA SESSION NÉE AU DÉMARRAGE AVEC SES SEULES PARCELLES ET LEURS SACS** (§499). Base `6ae66b1` (« vitrine1 »). APP 10.48 → 10.49, SW 11.29 → 11.30. Nico (30/10, dicté) : à la validation d’un amendement, une session tracteur avec les parcelles cochées et la quantité de sacs de chacune. Reformulé, avec un point à trancher et une recommandation suivie (« oui », puis « go directement ») : l’amendement s’enregistre avant l’épandage ; une session démarrée à ce moment aurait porté la date de la saisie (que le registre reprend quand la parcelle n’a pas de temps mesuré), aucun conducteur, et sauté le compteur. L’amendement PRÉPARE donc la session (`prep`, `sacsParc` au demi-sac de l’étape 2) : une carte « À démarrer » attend sous la session en cours (`#trac-prep`), « Démarrer » ouvre la feuille « Nouvelle session » remplie, et la session naît reliée (`ferOp`) avec `parcellesSkip` = tout sauf ce qui reste. Pas de statut neuf dans les sessions : aucun de leurs lecteurs n’a à l’apprendre. Puis deux décisions de Nico à la relecture : **pas de demi-sac** — des sacs entiers par parcelle (« si c’est 1,5, on en dit 2 »), la commande en est la somme (`_ferSacEntier`, `o.SC`) ; **une parcelle est datée du jour où elle a été faite**, pas de celui où la session a démarré — la coche du Tracteur porte son jour (`d`, `_trCocheJour`), le registre et le journal le lisent (`_ferJourParc` : t0 du chrono, sinon `d`, sinon la date de la session). `mv-harnais-ferti9` : 60 assertions, 15 mutants sur 15.
+> Dernière consolidation : **31 octobre 2026 (DEMO-5)** — **LA DÉMO DU SITE REFAITE SUR L’APPLI D’AUJOURD’HUI (HABILLAGE DU SITE, 40 ÉCRANS REPRIS, OUTIL DE CAPTURES VERSIONNÉ), ET LA VISITE `?demo=visite` SANS SA VISITE GUIDÉE** (§500). Base `dbedf17` (« ferti9 »). APP 10.49 → 10.50, SW 11.30 → 11.31. Nico (30/10) : mettre à jour la démo avec les nouvelles possibilités et la nouvelle charte ; reformulé, maquette publiée ; puis (31/10) « la démo visite est-elle encore utile ? » — proposition suivie : garder l’appli libre sans compte et le compteur, corriger le 0 % de palissage, retirer la visite guidée, le tout dans ce lot. `demo.html` prend l’habillage du site (tons clairs seulement) ; ses écrans sont repris par `node scripts/mv-demo-captures.mjs` (l’appli construite, chaque personne avec ses droits) ; les parcours montrent la refonte. ⚠️ `_startDemoVisite` / `_visiteScenario` restent : entrée de test:tutos, test:ux, test:gabarit et des captures. Chez Nico : supprimer `public\demo\` avant de dézipper, et `scripts\harnais-demo.mjs` + `scripts\harnais-demo-contre.mjs`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -281,7 +281,7 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | **Fiche `MV_AIDE`** du module touché | `src/utils.js` | dès qu'un écran, un geste ou un onglet change |
 | **Fiche `MV_INFO`** du chiffre touché | `src/utils.js` | dès que la MÉTHODE de calcul change, ou qu'un chiffre cesse d'être posé |
 | **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
-| **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
+| **La démo du site** (captures) | `public/demo.html`, `public/demo/` | dès qu'un écran montré change : `node scripts/mv-demo-captures.mjs`, puis relire les textes des scènes (§500 — la visite guidée `_mvtSteps` est retirée) |
 | **Tutos guidés** `TU_TUTOS` | `src/tutos.js` | dès qu'un geste enseigné change — `npm run test:tutos` le rejoue au build et rougit sinon ; un geste nouveau sans tuto fait monter le compte de `mv-harnais-tutos` (§358). ★ **TUTO-9 (§423) : un tuto se rejoue AVANT de livrer, pas après la CI** — la marque d’un lot qui touche l’appli exige `rapports/tutos.json`, vert, sur ses fichiers ; un tuto neuf apporte ses données au domaine fictif (`_charger`). ★ **TUTO-10 (§425) : seulement les tutos que le lot touche** — `node scripts/mv-tutos-concernes.mjs` (la liste, à recopier dans la note de livraison), `npm run test:tutos -- --concernes` ; un lien manquant trouvé par la CI s’ajoute à la fiche du tuto (`couvre`) ou à l’aiguillage |
 | **`WHATS_NEW`** | `src/whats-new.js` (WN-COUPE-1, §469 ; `utils.js` le réexporte) | dès que le changement est **visible** par l'utilisateur — avec son `niv` et son `pour` (§225). ★ Un contrôle qui vérifie une annonce la cherche dans `src/whats-new.js` : 62 la cherchaient dans `utils.js` (§469) |
 | **Écran qui énumère ce qui reste à faire** | selon | dès qu'on lui apprend à faire une des choses listées |
@@ -720,7 +720,7 @@ mavigne/
 │   ├── charte.css · styles.css  (la charte : TOUS les réglages, CHARTE-2 — puis le CSS applicatif, qui l’importe en premier ; asset Vite hashé)
 │   ├── app.js               (routage, dock, journal, parcelles, accueil, gating, restitution,
 │   │                        TACHES_CATALOGUE, MV_BAREMES, _normalizeTaches, recalcTravaux,
-│   │                        openPrompt / openConfirmDel, visite guidée _mvtSteps,
+│   │                        openPrompt / openConfirmDel, accueil de la visite libre _mvtWelcome,
 │   │                        widget Mise en route _dmr*)
 │   ├── whats-new.js        (★ WN-COUPE-1 §469 : le journal WHATS_NEW — utils.js l'importe et le réexporte)
 │   ├── utils.js            (APP_VERSION, WHATS_NEW réexporté, MV_AIDE + assembleurs _mvAide*, logError,
@@ -1061,6 +1061,7 @@ globale de `app.js`.
 trouve rien renvoie `null`, il **ne lève pas**, donc aucun `catch` de repli ne se déclenche.
 Vécu : la clé d'onglet `ecf` a disparu au regroupement du Pilotage ; la visite publique a continué
 à la demander pendant des semaines, projecteur posé au hasard, **sur le lien de démo publié**.
+★ DEMO-5 (§500) : la visite guidée est retirée — C22 ne vérifie plus que l'aide contextuelle et le guide public. La démo du site montre des captures : on les refait avec `node scripts/mv-demo-captures.mjs`.
 
 **Ce qu'il vérifie**, en tolérance zéro et sans aucune clé de baseline :
 
@@ -1898,7 +1899,7 @@ Les 75 rubriques d’avant (236 points, posées du 11/08 au 21/10) ont été con
 - L’essai : ce qui se passe après J30 ; la lecture seule côté serveur, frein ou serrure (§40, §43).
 - La clôture d’une saison très incomplète : l’empêcher ou la signaler (§43).
 - Le « Vu » des nouveautés : par appareil (aujourd’hui) ou en base (ANN-1).
-- Le chrono du tracteur dans la démo : le semer pour en faire un moment, ou pas (§43).
+- ✅ ~~Le chrono du tracteur dans la démo~~ — sans objet : la visite guidée est retirée (§500).
 - La compilation Vite (Terser, deux passes) (BUILD-1) ; le thème saisonnier (maquette 4 saisons).
 - « En direct » : une seule ligne dépasse déjà la hauteur d’une journée calme (colonne de 280 px) — elle s’affiche en fondu avec « Tout voir (1) » ; 40 px de plus la feraient tenir (COLLE-1, §412).
 
@@ -1937,7 +1938,7 @@ Les 75 rubriques d’avant (236 points, posées du 11/08 au 21/10) ont été con
 
 #### 6. Commercial et juridique
 - **Le prospect de Gironde (Château Garraud)** : le devis sur la nouvelle grille (l’offre de lancement est bornée depuis le 14/08) ; le DPA signé avant les comptes salariés ; le slug enregistré avant `onboardTenant` ; le recalibrage du barème (densité girondine) ; trois questions au contact technique.
-- **Les chiffres du gain de temps** : aligner les trois (la démo 127 h, la plaquette 215 h/an pour 10 ha, l’oral 3 à 5 h/mois) et faire signer à Nico les trois estimations neuves ; regarder les 19 moments de la visite en vrai.
+- **Les chiffres du gain de temps** : aligner les trois (la démo 127 h, la plaquette 215 h/an pour 10 ha, l’oral 3 à 5 h/mois) et faire signer à Nico les trois estimations neuves . (Les 19 moments de la visite guidée : sans objet, retirée au §500.)
 - **Divers** : vérifier les empreintes de `_mv_signatures` ; l’indexation Search Console ; les posts LinkedIn n° 4 et suivants (douze angles prêts).
 - **Juridique** : les durées de conservation ; les sous-traitants à publier (Google Ireland, SMTP) ; une relecture par un juriste ; les deux gabarits restants de `dpa.html` ; la relecture trimestrielle des pages publiques (et des écrans) ; « Ma Vigne produit un relevé d’heures, pas un bulletin de paie » dans le guide et les CGU ; la page de confidentialité doit parler des jalons et du compteur d’ouvertures (JALONS).
 

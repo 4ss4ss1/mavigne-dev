@@ -7,6 +7,7 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.50', d: '2026-10-31', items: [] },   // DEMO-5 (§500) : la démo du site et la visite ?demo=visite — côté prospects, rien ne change pour un client
   { v: '10.49', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'L’amendement prépare sa session tracteur',
       desc: "En enregistrant un amendement (Phyto › Fertilisation), la session tracteur se prépare toute seule\u00a0: une carte «\u00a0À démarrer\u00a0» attend en tête du Tracteur, avec les parcelles cochées et les sacs de chacune. Le tractoriste la démarre le jour venu — la session prend la date du jour, son nom, et le compteur s’il le faut. Sur chaque apport de l’onglet, «\u00a0Préparer la session tracteur\u00a0» la propose pour un amendement saisi avant, «\u00a0Ne plus la proposer\u00a0» la retire ; chaque parcelle à faire montre ses sacs. Les sacs se comptent <b>entiers</b>, parcelle par parcelle — le semoir se charge au sac — et la commande en est la somme. Dans le registre, chaque parcelle est datée du jour où elle a été faite, même quand la session dure plusieurs jours." },

@@ -955,7 +955,7 @@ function checkAideEtVisite() {
   if (app) {
     const i0 = app.indexOf('var _mvtSteps = [');
     if (i0 < 0) {
-      add('WARN', 'src/app.js', null, 'C22 : _mvtSteps introuvable — les selecteurs de la visite guidee n\'ont pas pu etre verifies.');
+      // DEMO-5 (§500) : la visite guidee est retiree de l'appli (la demo du site, demo.html, la remplace) : plus rien a verifier ici.
     } else {
       const j0 = app.indexOf('\n];', i0);
       const blk = app.slice(i0, j0 < 0 ? app.length : j0);

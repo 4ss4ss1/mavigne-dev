@@ -156,9 +156,8 @@ pose(/id="cave-view-auj"/.test(HTMLNU) && /id="auj-body"/.test(HTMLNU) && /id="c
 //   au lieu de reecrire `goTo` + `selectCaveSection` a la main. Ce qui doit
 //   rester vrai : un moment de la visite atterrit sur Aujourd'hui, et vise
 //   bien son corps.
-pose(/(selectCaveSection\('aujourdhui'\)|_mvtGoCave\('aujourdhui')/.test(APPNU) && /sel:\['#auj-body','#cave-view-auj','#page-cave'\]/.test(APPNU),
-  'app.js : la visite guid\u00e9e atterrit sur Aujourd\u2019hui');
-pose(/id:'aujourdhui'/.test(APPNU) && /id==='aujourdhui'/.test(APPNU), 'app.js : le chapitre d\u00e9mo « Aujourd\u2019hui » a sa branche');
+// ★ DEMO-5 (§500) : la visite guidée est retirée (la démo du site la remplace) — l'assertion qui la visait part avec elle.
+// ★ DEMO-5 (§500) : les chapitres de la visite guidée sont retirés avec elle — l'assertion « le chapitre démo Aujourd'hui » part aussi.
 pose(/'cave\.auj':\s*\{/.test(UTNU) && /_mvInfoBtn\('cave\.auj'\)/.test(SRCNU), 'la fiche MV_INFO cave.auj existe et est pos\u00e9e');
 const ev = extraire(SRCNU, '_aujLigne')[1];
 pose((ev.match(/<button/g) || []).length === 1 && /class="mvbtn mvbtn-secondaire mvbtn-compact caj-b"/.test(ev) && /onclick="event\.stopPropagation\(\);_mlGo\(/.test(ev), 'CAVEAUJ-1 : une ligne = un contenant, un bouton du jeu commun par geste, le geste par _mlGo (sans choisir la ligne : CAVE-UX-1, §494)');

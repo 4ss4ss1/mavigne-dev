@@ -49,7 +49,7 @@ function jouer(S) {
   t('④ les cases : Économie gagne « Le budget de l’année », Équipe « Le renfort à prévoir », plus de liste « an »', /eco:\[\['an_budget',/.test(P) && /\['an_frise','Le renfort \\u00e0 pr\\u00e9voir'\]\],\n  eco:/.test(P) && !/\n  an: \[\['an_budget'/.test(P) && /tab==='eco'\|\|tab==='cfm'\);/.test(P));
   t('④ « an_cadres » mène à Économie › Synthèse, et fait clignoter les avis (ou la barre)', /_PIL_TAB='eco'; _pilSaveTab\('eco'\); _PEC_SUB='syn'/.test(P) && /getElementById\('pil-an-cadres'\)\|\|document\.getElementById\('pil-crumb'\)/.test(P));
   // ⑤ les autres portes
-  t('⑤ la coquille ne propose plus L’année ; le cockpit et les tutos y mènent à Économie', !/\['an', 'L’année'\]/.test(S.coq) && /annee:'eco'/.test(S.app) && /an: 'eco' \}/.test(S.vue));
+  t('⑤ la coquille ne propose plus L’année ; le cockpit et les tutos y mènent à Économie', !/\['an', 'L’année'\]/.test(S.coq) && /an: 'eco' \}/.test(S.vue));   // DEMO-5 (§500) : _MVT_PILTAB (annee:'eco') est parti avec la visite guidée
   t('⑤ l’aide et le guide disent où sont le budget et le renfort', S.utils.includes("['Le budget de l’année et le renfort', ") && /L'onglet « L'année » est rangé/.test(S.guide) && !/Aujourd'hui · L'année ·/.test(S.guide));
   t('⑥ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange2b.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange2b.mjs --contre'") > 0);
 }

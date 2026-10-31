@@ -58,7 +58,10 @@ function suite(S) {
     const f = new Function('S', 'HORS_H', fnSrc(D, 'lignes') + '\n' + fnSrc(D, 'totalH') + '\nreturn totalH();');
     tot = f({ ha: 12, eq: 6, hors: false }, 37);
   } catch (e) { tot = NaN; }
-  T('la fin compte 127 h à 12 ha et 6 permanents, comme le site (' + tot + ' h)', tot === 127);
+  T('la fin compte 127 h à 12 ha et 6 permanents (' + tot + ' h)', tot === 127);   // DEMO-5 (§500) : le site n'affiche plus ce chiffre (VITRINE-1) ; la démo le garde (Nico, 30/10)
+  // ★ DEMO-5 (§500) — l'habillage du site : tons clairs seulement, et des captures refaites par l'outil versionné
+  T('la page est en tons clairs seulement : aucun mode sombre', !/prefers-color-scheme:\s*dark|data-theme="dark"/.test(D));
+  T('l\u2019outil qui refait les captures est dans le dépôt (scripts/mv-demo-captures.mjs)', fs.existsSync(path.join(R, 'scripts/mv-demo-captures.mjs')));
   T('le site mène à la démo (/demo.html), plus au tour guidé', S.site.includes('https://mavigneapp.fr/demo.html') && !S.site.includes('?demo=visite'));
   T('la démo garde ses deux portes : l\u2019essai et l\u2019appli libre', D.includes('href="/essai.html"') && D.includes('href="/?demo=visite"'));
   return out;
@@ -68,10 +71,11 @@ const DEFAUTS = [
   ['police Google', S => ({ ...S, demo: S.demo.replace('</head>', '<link href="https://fonts.googleapis.com/css2?family=Outfit" rel="stylesheet"></head>') })],
   ['le mot « maquette »', S => ({ ...S, demo: S.demo.replace('Rien n\u2019est enregistré.', 'Maquette.') })],
   ['un montant', S => ({ ...S, demo: S.demo.replace('h par an', '€ par an') })],
-  ['une capture absente du dossier', S => ({ ...S, fichiers: new Set([...S.fichiers].filter(f => f !== 'r-ouv-liste.webp')) })],
-  ['un écran sans image', S => ({ ...S, demo: S.demo.replace("img:'r-ouv-liste'", "img:'r-ouv-inconnu'") })],
+  ['une capture absente du dossier', S => ({ ...S, fichiers: new Set([...S.fichiers].filter(f => f !== 'r-ouv-arrivee.webp')) })],
+  ['un écran sans image', S => ({ ...S, demo: S.demo.replace("img:'r-ouv-arrivee'", "img:'r-ouv-inconnu'") })],
   ['un parcours vers un écran inconnu', S => ({ ...S, demo: S.demo.replace("ouvrier:['prep',", "ouvrier:['prep','fantome',") })],
   ['le barème faussé', S => ({ ...S, demo: S.demo.replace("{lab:'Journal et validations', min:5,", "{lab:'Journal et validations', min:6,") })],
+  ['un mode sombre revenu', S => ({ ...S, demo: S.demo.replace('</style>', '@media (prefers-color-scheme: dark){:root{--bg:#14100C}}</style>') })],   // DEMO-5 (§500)
   ['le site resté sur le tour guidé', S => ({ ...S, site: S.site.replace('https://mavigneapp.fr/demo.html', 'https://mavigneapp.fr/?demo=visite') })],
   ['la porte de l\u2019essai fermée', S => ({ ...S, demo: S.demo.replace('href="/essai.html"', 'href="#"') })]
 ];

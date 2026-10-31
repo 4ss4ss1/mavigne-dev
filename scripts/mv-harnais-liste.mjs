@@ -163,7 +163,6 @@ export const GROUPES = {
   //   jamais ne prouve rien, et c'est elle qui a trouve que l'assertion sur
   //   les selecteurs se prouvait toute seule (elle cherchait la cible dans
   //   le fichier qui l'ecrit).
-  'la-visite-guidee-et-sa': 'Harnais — la visite guidee, et sa contre-epreuve',
 
   // Le pic du Pilotage. Deux fautes reelles, toutes deux invisibles a la
   // relecture : un pic de la FENETRE affiche sur l'ecran « Aujourd'hui »
@@ -481,8 +480,7 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-vignoble.mjs', 'les-six-documents'],
   ['node scripts/mv-harnais-carte.mjs', 'echelle-pastille-i-carte-a'],
   ['node scripts/mv-harnais-entretien.mjs', 'les-six-documents'],
-  ['node scripts/harnais-demo.mjs', 'la-visite-guidee-et-sa'],
-  ['node scripts/harnais-demo-contre.mjs', 'la-visite-guidee-et-sa'],
+  // DEMO-5 (§500) : harnais-demo et harnais-demo-contre retirés avec la visite guidée qu’ils mesuraient
   ['node scripts/mv-harnais-confidentialite.mjs --contre', 'confidentialite-aucune'],
   ['node scripts/mv-harnais-globaux.mjs --contre', 'globaux-un-nom-lu-existe-t'],
   ['node scripts/mv-harnais-cuvier.mjs --contre', 'globaux-un-nom-lu-existe-t'],

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.30
+// MA VIGNE — Service Worker v11.31
+// v11.31 (31/10/2026) — DEMO-5 (§500) : la démo du site refaite sur l’appli d’aujourd’hui (habillage du site, 40 écrans repris, outil de captures versionné) ; la visite ?demo=visite perd sa visite guidée et retrouve son palissage à 60 %
 // v11.30 (30/10/2026) — FERTI-9 (§499) : l’amendement prépare sa session tracteur — une carte « À démarrer » sous la session en cours ; « Démarrer » ouvre la nouvelle session remplie (activité, machine, conducteur), qui ne garde que les parcelles de l’amendement, chacune avec ses sacs. APP 10.49.
 // v11.29 (30/10/2026) — QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » au déploiement général, et ses deux livrets PDF.
 // v11.28 (30/10/2026) — CFG-1 (§496) : la configuration du domaine revient en mémoire avec la copie du téléphone (et lui sert de base de fusion) — plus de réglage bloqué « fbSave config BLOQUE » à l’ouverture ; la fenêtre de la garde anti-écrasement parle en clair.
@@ -4662,7 +4663,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.30';
+const CACHE_NAME   = 'mavigne-v11.31';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4679,7 +4680,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.30 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.31 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4699,7 +4700,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.30 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.31 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

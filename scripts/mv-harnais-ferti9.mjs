@@ -315,8 +315,9 @@ function controles(S) {
     T('B10', 'l’aide du Tracteur et du Phyto le disent',
       S.utl.includes('une carte \\u00ab\\u00a0\\u00c0 d\\u00e9marrer\\u00a0\\u00bb attend sous la session en cours') && S.utl.includes('\\u00ab\\u00a0Pr\\u00e9parer la session tracteur\\u00a0\\u00bb'));
     T('B11', 'les guides le disent (Tracteur, Phyto)', S.g6.includes('<b>Un amendement à démarrer</b>') && S.g7.includes('une <b>session tracteur se prépare</b>'));
+    // ★ DEMO-5 (§500) : l'entrée 10.49 n'est plus la première de WHATS_NEW — on la cherche où elle est.
     T('B12', 'les nouveautés 10.49 l’annoncent à l’administrateur et au tractoriste',
-      /export const WHATS_NEW = \[\n  \{ v: '10\.49', d: '2026-10-30', items: \[\n    \{ niv: 0, pour: \['admin'\], emoji: 'pousse', titre: 'L’amendement prépare sa session tracteur',[\s\S]{0,2400}?\{ niv: 0, pour: \['tractoriste'\], emoji: 'tracteur'/.test(S.wn));
+      /\n  \{ v: '10\.49', d: '2026-10-30', items: \[\n    \{ niv: 0, pour: \['admin'\], emoji: 'pousse', titre: 'L’amendement prépare sa session tracteur',[\s\S]{0,2400}?\{ niv: 0, pour: \['tractoriste'\], emoji: 'tracteur'/.test(S.wn));
   });
   return out;
 }

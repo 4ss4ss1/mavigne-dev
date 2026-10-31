@@ -9,11 +9,11 @@
   },
   "code": {
     "clair": {
-      "mesurees": 971,
-      "nonResoluble": 390,
-      "fondInconnu": 529,
+      "mesurees": 966,
+      "nonResoluble": 384,
+      "fondInconnu": 525,
       "sous": {
-        "src/app.js": 5,
+        "src/app.js": 4,
         "src/cave.js": 5,
         "src/cuvier.js": 5,
         "src/pilotage.js": 4,
@@ -26,11 +26,11 @@
       }
     },
     "sombre": {
-      "mesurees": 971,
-      "nonResoluble": 386,
-      "fondInconnu": 536,
+      "mesurees": 966,
+      "nonResoluble": 380,
+      "fondInconnu": 532,
       "sous": {
-        "src/app.js": 7,
+        "src/app.js": 6,
         "src/cave.js": 14,
         "src/cuvier.js": 12,
         "src/phyto.js": 1,
