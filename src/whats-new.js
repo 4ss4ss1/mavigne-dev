@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.51', d: '2026-10-31', items: [
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning : la grille d’abord',
+      desc: "Les congés et les horaires chaleur sur une période passent dans le menu «\u00a0…\u00a0» de la barre de la semaine, avec l’année suivante et le chemin des relevés d’heures\u00a0: la grille remonte en haut de l’écran. L’année se change par «\u00a0‹ 2026 ›\u00a0», et une année sans donnée le dit." },
+  ] },
   { v: '10.50', d: '2026-10-31', items: [] },   // DEMO-5 (§500) : la démo du site et la visite ?demo=visite — côté prospects, rien ne change pour un client
   { v: '10.49', d: '2026-10-30', items: [
     { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'L’amendement prépare sa session tracteur',

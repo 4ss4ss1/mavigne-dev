@@ -833,6 +833,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cavux1.mjs --contre'],
   ['node scripts/mv-harnais-rsvux1.mjs'],              // RSV-UX-1 (§495) : la Réserve — le « + » et « Nouveau mouvement », la pyramide d’abord, la part des anges vide en une ligne
   ['node scripts/mv-harnais-rsvux1.mjs --contre'],
+  ['node scripts/mv-harnais-planux1.mjs'],             // PLAN-UX-1 (§501) : le Planning — « ‹ 2026 › », le menu « … », la grille d’abord
+  ['node scripts/mv-harnais-planux1.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair
   ['node scripts/mv-harnais-cfg1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles

@@ -1,5 +1,5 @@
 {
-  "plafond": 805,
+  "plafond": 803,
   "exempts": {
     "_homeDirectTout": "ACCV-2 (§417) : déplie « En direct » sur place, rien à apprendre — la carte montre déjà l’essentiel",
     "_esDatesNote": "PERDATE-1 (§427) : relit les dates de « Modifier la période » quand on quitte une case — rien à apprendre, c’est l’écran qui signale une date impossible",
@@ -35,6 +35,8 @@
     "_rsvMvtFermer": "RSV-UX-1 (§495) : le voile ferme la feuille — rien à apprendre",
     "_rsvMvtVa": "RSV-UX-1 (§495) : une ligne de « Nouveau mouvement » ouvre son formulaire (achat, fûts neufs, se séparer, inventaire, ouillage) — les gestes d’avant",
     "_trFerDemarrer": "FERTI-9 (§499) : « Démarrer » sur la carte d’un amendement ouvre la feuille « Nouvelle session » déjà remplie — le geste est celui de toute session, la carte dit ce qu’elle fait",
-    "_ferPrep": "FERTI-9 (§499) : un lien qui dit ce qu’il fait (« Préparer la session tracteur » / « Ne plus la proposer ») ; « Annuler » le rattrape"
+    "_ferPrep": "FERTI-9 (§499) : un lien qui dit ce qu’il fait (« Préparer la session tracteur » / « Ne plus la proposer ») ; « Annuler » le rattrape",
+    "_pl2Plus": "PLAN-UX-1 (§501) : ouvre et ferme le menu « … » de la semaine — chaque ligne ouvre un geste qui existe",
+    "_pl2PlusVa": "PLAN-UX-1 (§501) : une ligne du menu « … » ouvre congés, chaleur, l’année suivante ou « Les gens » — les gestes d’avant"
   }
 }

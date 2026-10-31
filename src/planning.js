@@ -214,22 +214,16 @@ function _planYearHasData(y){
 function planSetYear(y){ y=parseInt(y,10); if(isNaN(y))return; planYear=y; _pl2Wi=null; _pl2Sel={}; renderPlanning(); }
 function planAddYear(){ var list=_planYearList(); var next=(list.length?Math.max.apply(null,list):(new Date()).getFullYear())+1; _planExtraYears.push(next); planSetYear(next); if(window.showToast)showToast('Ann\u00e9e '+next+' ajout\u00e9e','#3D6B27'); }
 function _pl2YearTabs(){
+  // ★ PLAN-UX-1 (§501) — maquette-ux-v2, Planning : la bascule d'année tient en « ‹ 2026 › » (elle prenait trois cartes de 28 px) ;
+  //   « année suivante » passe dans le menu « … » de la barre de la semaine.
   if(!isAdmin())return '';
-  var list=_planYearList();
-  var h='<div class="pl2-yrtabs" style="display:flex;gap:7px;flex-wrap:wrap;align-items:stretch;margin-bottom:10px">';
-  list.forEach(function(y){
-    var on=(y===planYear), data=_planYearHasData(y);
-    h+='<button onclick="planSetYear('+y+')" style="cursor:pointer;font-family:inherit;border-radius:11px;padding:7px 13px;min-width:74px;text-align:left;'
-      +'border:1.5px solid '+(on?'var(--plan-acc)':'var(--gris-clair)')+';background:'+(on?'var(--plan-acc-pale)':'var(--bg-card)')+';'
-      +'box-shadow:'+(on?'0 0 0 1px var(--plan-acc) inset':'none')+';display:flex;flex-direction:column;gap:1px">'
-      +'<span style="font-size:var(--pt-md,20px);font-weight:800;line-height:1;letter-spacing:.4px;color:'+(on?'color-mix(in srgb,var(--plan-acc) 70%,var(--texte))':'var(--texte)')+'">'+y+'</span>'
-      +'<span style="font-size:var(--pt-nano,9.5px);display:flex;align-items:center;gap:4px;color:var(--texte-doux)"><span style="width:6px;height:6px;border-radius:50%;background:'+(data?'var(--vert-med)':'var(--gris-clair)')+'"></span>'+(data?'saisi':'vide')+'</span>'
-    +'</button>';
-  });
-  h+='<button onclick="planAddYear()" title="Ajouter l\'ann\u00e9e suivante" style="cursor:pointer;font-family:inherit;border-radius:11px;padding:7px 12px;min-width:44px;border:1.5px dashed var(--gris-clair);background:transparent;color:var(--texte-doux);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px">'
-    +'<span style="font-size:22px;font-weight:400;line-height:.9">+</span><span style="font-size:var(--pt-nano,9.5px)">ann\u00e9e</span></button>';
-  h+='</div>';
-  return h;
+  var list=_planYearList().slice().sort(function(a,b){return a-b;}), i=list.indexOf(planYear);
+  var prev=i>0?list[i-1]:null, next=(i>=0&&i<list.length-1)?list[i+1]:null;
+  return '<div class="pl2-an" role="group" aria-label="Ann\u00e9e du planning">'
+    +'<button type="button" class="pl2-an-b"'+(prev==null?' disabled':'')+' data-y="'+(prev==null?'':prev)+'" onclick="planSetYear(+this.dataset.y)" aria-label="Ann\u00e9e pr\u00e9c\u00e9dente">\u2039</button>'
+    +'<b class="pl2-an-v">'+planYear+(_planYearHasData(planYear)?'':'<small>vide</small>')+'</b>'   // l’année sans donnée se dit, comme le faisait le point des anciens onglets
+    +'<button type="button" class="pl2-an-b"'+(next==null?' disabled':'')+' data-y="'+(next==null?'':next)+'" onclick="planSetYear(+this.dataset.y)" aria-label="Ann\u00e9e suivante">\u203a</button>'
+    +'</div>';
 }
 (function(){
   try{
@@ -3336,6 +3330,7 @@ function _pl2Toolbar(){
       +'<button class="'+(_pl2View==='wk'?'on':'')+'" onclick="pl2SetView(\'wk\')">Sem.</button>'
       +'<button class="'+(_pl2View==='mo'?'on':'')+'" onclick="pl2SetView(\'mo\')">Mois</button>'
     +'</div>'
+    +(isAdmin()?'<button type="button" class="pl2-plus-b" onclick="_pl2Plus(true)" aria-label="Plus d\u2019actions\u00a0: cong\u00e9s, chaleur, journ\u00e9es de cave, ann\u00e9e suivante, relev\u00e9s">\u2026</button>'+_pl2PlusHtml():'')
   +'</div>';
 }
 function _pl2IsToday(d){var t=new Date();return t.getFullYear()===planYear&&t.getMonth()===planMonth&&t.getDate()===d;}
@@ -3534,7 +3529,7 @@ function _pl2Annual_(){
 function _pl2RenderEquipe(){
   var body=document.getElementById('plan-body');
   if(!body)return;
-  body.innerHTML=_pl2YearTabs()+_planRecaleBar()+_pl2Toolbar()+_planPeriodeBar()+_pl2Board()+_pl2HorsContrat();
+  body.innerHTML=_pl2YearTabs()+_planRecaleBar()+_pl2Toolbar()+_pl2Board()+_pl2HorsContrat();   // ★ PLAN-UX-1 (§501) : les périodes sont dans le menu « … »
   _pl2MbarSync();
   if(_pl2PulseNom){
     var row=body.querySelector('.pl2-pulse');
@@ -3615,12 +3610,29 @@ function _planRecaleBar(){
   +'</div>';
 }
 
-function _planPeriodeBar(){
-  return '<div class="pl2-perbar">'
-    +'<button onclick="openPlanCP()"><span>'+_mvIcon('soleil',16)+'</span> Cong\u00e9s sur une p\u00e9riode</button>'
-    +'<button onclick="openPlanChaleur()"><span>'+_mvIcon('thermometre',16)+'</span> Chaleur sur une p\u00e9riode</button>'
-  +'</div>';
+// ★ PLAN-UX-1 (§501) — LE MENU « … » DE LA SEMAINE (docs/maquettes/maquette-ux-v2.html, Planning) : la grille est le quotidien, les
+//   périodes l'exception. Congés et chaleur sur une période (ils étaient au-dessus de la grille, qui commençait vers 520 px), les
+//   journées de cave (elles se notent sur les cases cochées : la ligne le dit), l'année suivante, les relevés (ils vivent dans la
+//   fiche de chacun : la ligne y mène). Une feuille au téléphone, un menu sous le bouton sur ordinateur.
+function _pl2PlusHtml(){
+  var L=[['cp','Cong\u00e9s sur une p\u00e9riode','une personne, du \u2026 au \u2026'],['chaleur','Horaires chaleur sur une p\u00e9riode','toute l\u2019\u00e9quipe, du \u2026 au \u2026'],
+    ['cave','Journ\u00e9es de cave','cochez les cases de ceux qui \u00e9taient en cave, puis \u00ab\u00a0Cave\u00a0\u00bb dans la barre'],
+    ['annee','Ann\u00e9e '+((Math.max.apply(null,_planYearList().concat([planYear])))+1),'pr\u00e9parer depuis '+planYear],['releves','Relev\u00e9s d\u2019heures du mois','dans la fiche de chacun, \u00ab\u00a0Les gens\u00a0\u00bb']];
+  return '<div class="pl2-plus-voile" onclick="_pl2Plus(false)"></div><div class="pl2-plus" role="dialog" aria-label="Plus d\u2019actions">'
+    +'<div class="pl2-plus-t">Semaine et au-del\u00e0</div>'
+    +L.map(function(x){ return '<button type="button" class="pl2-plus-l" data-k="'+x[0]+'" onclick="_pl2PlusVa(this.dataset.k)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>'; }).join('')
+    +'</div>';
 }
+function _pl2Plus(o){ document.body.classList.toggle('pl2-plus-ouvert',!!o); }
+function _pl2PlusVa(k){
+  _pl2Plus(false);
+  if(k==='cp') openPlanCP();
+  else if(k==='chaleur') openPlanChaleur();
+  else if(k==='annee') planAddYear();
+  else if(k==='releves'){ planSwitchTab('gens'); if(window.showToast) showToast('Le relev\u00e9 de chacun s\u2019ouvre depuis sa fiche','#3D6B27'); }
+  else if(k==='cave'){ if(window.showToast) showToast('Cochez les cases de ceux qui \u00e9taient en cave, puis \u00ab Cave \u00bb dans la barre','#3D6B27'); }
+}
+window._pl2Plus=_pl2Plus; window._pl2PlusVa=_pl2PlusVa;
 
 // Hors contrat : l'information vivait sous les cartes de synthèse. Elle appartient
 // à la grille — c'est elle qui montre des lignes absentes.

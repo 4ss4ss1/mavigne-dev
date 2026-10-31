@@ -3858,6 +3858,26 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvr-mvt-l{display:flex;flex-direction:column;justify-content:center;width:100%;min-height:48px;padding:var(--e-2,8px) 0;border:0;border-top:1px solid var(--ligne,#E7E6E2);background:none;text-align:left;font:inherit;color:var(--texte,#1B1A18);cursor:pointer;}
 .mvr-mvt-l b{font-weight:600;}
 .mvr-mvt-l span{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+/* ★ PLAN-UX-1 (§501) — maquette-ux-v2, Planning : la grille d'abord. L'année en « ‹ 2026 › », le menu « … » de la semaine (une
+   feuille au téléphone, un menu sous le bouton sur ordinateur), les cases du mois à 44 px de haut au téléphone. */
+.pl2-an{display:inline-flex;align-items:center;gap:var(--e-1,4px);margin-bottom:var(--e-2,8px);}
+.pl2-an-b{min-width:44px;min-height:44px;border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-full,999px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font-size:var(--pt-md,20px);line-height:1;}
+.pl2-an-b[disabled]{opacity:.35;}
+.pl2-an-v{min-width:56px;text-align:center;font-size:var(--pt-md,20px);color:var(--texte,#1B1A18);}
+.pl2-an-v small{display:block;font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte-doux,#686660);}
+#page-planning .pl2-toolbar{position:relative;}
+.pl2-plus-b{min-width:44px;min-height:44px;margin-left:auto;border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-full,999px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font-size:var(--pt-md,20px);line-height:1;}
+.pl2-plus,.pl2-plus-voile{display:none;}
+body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;z-index:70;width:min(360px,100%);padding:var(--e-2,8px) var(--e-4,16px);background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);box-shadow:0 8px 24px var(--voile,rgba(16,15,13,.30));}
+.pl2-plus-t{padding:var(--e-2,8px) 0;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.pl2-plus-l{display:flex;flex-direction:column;justify-content:center;width:100%;min-height:48px;padding:var(--e-2,8px) 0;border:0;border-top:1px solid var(--ligne,#E7E6E2);background:none;text-align:left;font:inherit;color:var(--texte,#1B1A18);cursor:pointer;}
+.pl2-plus-l b{font-weight:600;}
+.pl2-plus-l span{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+@media (max-width:767.98px){
+  body.pl2-plus-ouvert #page-planning .pl2-plus-voile{display:block;position:fixed;inset:0;z-index:1199;background:var(--voile,rgba(16,15,13,.30));}
+  body.pl2-plus-ouvert #page-planning .pl2-plus{position:fixed;left:0;right:0;top:auto;bottom:0;z-index:1200;width:auto;max-height:80vh;overflow-y:auto;border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);}
+  #page-planning .pl2-mo .pl2-name-n{font-size:var(--pt-micro,12px);}
+}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

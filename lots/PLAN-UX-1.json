@@ -1,0 +1,39 @@
+{
+  "lot": "PLAN-UX-1",
+  "section": "§501",
+  "base": "1ec8cf5f51ad269e889814c1169e50d0d6ad84f2",
+  "inclut": [],
+  "date": "2026-10-31",
+  "tutos": {
+    "ok": true,
+    "empreinte": "1573d2098860141f456ccdc433c5a63d75a6cb9e4ce0d0362d0eddd56ba6d56d",
+    "date": "2026-10-31T10:08:35.307Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "24ca29b8e76fa66f22c5d3ae1ab0f494294821487d1b66dfc6664cab886eb7a6",
+    "CLAUDE.md": "f4944f3e119f0abe7d170321bd6a9250e32cd054fc425cbad01dc952d0f6300a",
+    "docs/claude/INDEX.md": "f35911137f3e7e28825053c0827f1404c692c94b3474453acaa2ecbab4ef6fe9",
+    "docs/claude/chantiers-480-529.md": "dda3dcac79dc5cda143df81a2705f4a1d499123c1e72aca6332069c8137135ab",
+    "docs/claude/journal.md": "5d56f989d3c3784847f76572d30b02d32ad75e37044b74a0baf801f555eb4f95",
+    "guide/10-planning.html": "3d9a0f7de30b34bb234b3082bf5e2a1648f9315ee03c0b3cb6109c823d7a044c",
+    "index.html": "c9d58fb4a17e0f92af1cba6306287afdd0094cf5fb009e94de581726355c40f7",
+    "public/sw.js": "a82f2a105e200bf593913cf45d8a482b8d8ee9c9c6dbcf6e10e1c46d78a99c08",
+    "scripts/harnais-claude-md.mjs": "549d9fcb5fefeda9add00bd1dabf0a02321b683598930c7d1642ec39d5e8c51f",
+    "scripts/mv-harnais-cote1.mjs": "bb4cc21ec9db807cbb68e2343f8dad9fbd10cdc9e9b569491d8507fc19c1f650",
+    "scripts/mv-harnais-liste.mjs": "4d72cc172892b6d0e93ba82e0d751ea31789cf0569eab3c02ce288349f6802a6",
+    "scripts/mv-ux-baseline.json": "42133d574cc50d6e29f56fe91d811e359a29e8df33f7fee481bac374f2304401",
+    "scripts/tutos-couverture.json": "dd0d68851850684a7ec26173bea35ff69f6676c90a48d4dacbb457e6d0eebed6",
+    "src/planning.js": "7afcbe1dd5dc914b6fe9f586a3d5308bc69f91573e46c607082168d775746f76",
+    "src/styles.css": "ce5a3de8805a9d8a0e3b35bf53e957f1ac77ed02845f31cde7a286a60e87032b",
+    "src/utils.js": "404fc7f1c063f10d186f259498e3086375b13e655d7f650f3228b6122fbc7759",
+    "src/whats-new.js": "5a9f96125025e87c845491b8aa867a65ca65810c50739408b7d7560805d97f4f",
+    "scripts/mv-harnais-planux1.mjs": "4bdd573837c0a2f96b9b86080f72625acedf813d7ce1c4f9370877065e9483d1"
+  }
+}

@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-10-30",
- "base": "9f29e4d",
+ "date": "2026-10-31",
+ "base": "1ec8cf5",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -280,6 +280,18 @@
     "reserve › téléphone › pouce : 6 → 4",
     "reserve.action : 0 → 1"
    ]
+  },
+  {
+   "date": "2026-10-31",
+   "base": "1ec8cf5",
+   "motif": "PLAN-UX-1 (§501) : la grille du Planning remonte (le haut de la grille 460 → 373 px)",
+   "hausses": [],
+   "baisses": [
+    "planning › téléphone › c44 : 78 → 73",
+    "parcelles › ordinateur › c44 : 41 → 29",
+    "planning › ordinateur › c44 : 12 → 7",
+    "planning.grille_y : 443 → 373"
+   ]
   }
  ],
  "mesures": {
@@ -294,19 +306,19 @@
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 3136
+    "hauteur": 3138
    },
    "parcelles": {
-    "cibles": 36,
+    "cibles": 24,
     "c24": 0,
     "c44": 6,
-    "textes": 60,
+    "textes": 44,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 0,
-    "hauteur": 1928
+    "hauteur": 1279
    },
    "journal": {
     "cibles": 37,
@@ -369,16 +381,16 @@
     "hauteur": 1532
    },
    "planning": {
-    "cibles": 91,
+    "cibles": 89,
     "c24": 0,
-    "c44": 78,
-    "textes": 141,
+    "c44": 73,
+    "textes": 137,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 1399
+    "hauteur": 1329
    },
    "pilotage": {
     "cibles": 68,
@@ -419,16 +431,16 @@
     "hauteur": 1462
    },
    "parcelles": {
-    "cibles": 53,
+    "cibles": 37,
     "c24": 0,
-    "c44": 41,
-    "textes": 107,
+    "c44": 29,
+    "textes": 91,
     "t11": 0,
     "t12": 7,
     "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1095
+    "hauteur": 918
    },
    "journal": {
     "cibles": 62,
@@ -491,16 +503,16 @@
     "hauteur": 1265
    },
    "planning": {
-    "cibles": 91,
+    "cibles": 89,
     "c24": 0,
-    "c44": 12,
-    "textes": 152,
+    "c44": 7,
+    "textes": 148,
     "t11": 0,
     "t12": 3,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1239
+    "hauteur": 1303
    },
    "pilotage": {
     "cibles": 69,
@@ -535,7 +547,7 @@
   "cave.gestes_44": 0,
   "cave.sommaire": 1,
   "reserve.action": 1,
-  "planning.grille_y": 443,
+  "planning.grille_y": 373,
   "reglages.premier_y": 356,
   "parcelles.valider": 48
  }

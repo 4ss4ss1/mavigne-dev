@@ -554,3 +554,4 @@
 | 498 | 498. ★ VITRINE-1 — LA PAGE LOGICIEL-VIGNE REFAITE : L’APPLI QUI SE MONTRE, LA VIDÉO DES SAISONS EN FOND (30… | `docs/claude/chantiers-480-529.md` |
 | 499 | 499. ★★ FERTI-9 — L’AMENDEMENT PRÉPARE SA SESSION TRACTEUR : UNE CARTE « À DÉMARRER », LA SESSION NÉE AU DÉ… | `docs/claude/chantiers-480-529.md` |
 | 500 | 500. ★★ DEMO-5 — LA DÉMO DU SITE REFAITE SUR L’APPLI D’AUJOURD’HUI, ET LA VISITE `?demo=visite` SANS SA VIS… | `docs/claude/chantiers-480-529.md` |
+| 501 | 501. ★★ PLAN-UX-1 — LE PLANNING : LA GRILLE D’ABORD, LES ACTIONS RARES DANS « … », L’ANNÉE EN « ‹ 2026 › » … | `docs/claude/chantiers-480-529.md` |

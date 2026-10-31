@@ -555,3 +555,25 @@ Puis, à la relecture (30/10), Nico tranche les deux points remontés en fin de 
 - Une démo s’abîme en silence : le 0 % de palissage était là depuis que la tâche a changé de forme, et personne ne l’a vu.
 
 **Chez Nico.** Supprimer le dossier `public\demo\` avant de dézipper (les anciennes images ne sont pas reprises) ; supprimer `scripts\harnais-demo.mjs` et `scripts\harnais-demo-contre.mjs`.
+
+## 501. ★★ PLAN-UX-1 — LE PLANNING : LA GRILLE D’ABORD, LES ACTIONS RARES DANS « … », L’ANNÉE EN « ‹ 2026 › » (31/10 — `src/planning.js` (`_pl2YearTabs`, `_pl2Toolbar`, `_pl2PlusHtml`, `_pl2Plus`, `_pl2PlusVa` ; `_planPeriodeBar` retirée) · `src/styles.css` · `guide/10-planning.html` · `src/utils.js` (APP 10.51) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.32) · `scripts/mv-harnais-planux1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/mv-harnais-cote1.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PLAN-UX-1.json` · base `1ec8cf5`)
+
+### 501a. D’où ça vient
+Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« Planning — la grille d’abord, les actions rares dans une feuille ») : mesuré, « Congés sur une période » et « Chaleur sur une période » au-dessus de la grille, qui commençait vers 520 px ; la bascule d’année à trois états dans 28 px. « La grille est le quotidien, les périodes sont l’exception. »
+
+### 501b. Ce qui change
+- **Le menu « … »** au bout de la barre de la semaine (administrateur ; une feuille au téléphone, un menu sous le bouton sur ordinateur), rangées de 48 px : congés sur une période (`openPlanCP`), horaires chaleur sur une période (`openPlanChaleur`), **journées de cave** — elles se notent sur les cases cochées puis « Cave » dans la barre : la ligne le dit (`planCaveSheet` demande une sélection, rien d’inventé), **l’année suivante** (`planAddYear`), **les relevés d’heures** — ils vivent dans la fiche de chacun : la ligne mène à « Les gens ». La barre des périodes (`_planPeriodeBar`) est retirée du dessus de la grille.
+- **L’année en « ‹ 2026 › »** (`_pl2YearTabs`) : la précédente et la suivante dans l’ordre, bornées ; une année sans donnée dit « vide » (ce que disait le point des anciennes cartes — `_planYearHasData` garde un appelant).
+- **Les noms du mois à 12** au téléphone. Les cases à 44 px de haut et « le week-end étroit qui s’ouvre d’un tap » : la grille actuelle ne les a pas encore — à mesurer au rendu, ce lot ne les touche pas.
+- Le guide du Planning suit ; deux gestes neufs exemptés de tuto, motivés ; le menu en feuille et son voile exemptés du panneau côte à côte (au téléphone seulement).
+
+### 501c. Mesuré
+- `mv-harnais-planux1` : 6 assertions — `_pl2YearTabs` et `_pl2PlusVa` JOUÉES (« ‹ 2026 › » dans l’ordre et ses bornes, l’année vide dite, chaque ligne ferme le menu et ouvre son geste, la cave dit comment faire), la barre des périodes retirée, le menu dans la barre, la règle CSS ; **6/6 mutants**.
+- `test:ux` (référence regravée) : **le haut de la grille, 460 → 373 px** au téléphone ; l’objectif de la maquette (≤ 300) n’est pas atteint — la bascule d’année et la barre de la semaine s’empilent encore au-dessus (à resserrer : l’année dans la barre de la semaine).
+- Chaîne (615 commandes) : la contre-épreuve du contrôle des tutos (« un geste nouveau sans tuto ») restait verte — les boutons « Congés », « Chaleur » et « + année » ont quitté la page (le menu les appelle), les gestes sans tuto sont passés de 805 à 803, sous le plafond ; le contrôle le demandait : **le plafond descend à 803**. Plus `build-guide --check`, attendu.
+- Tutos : voir la note de livraison.
+
+### 501d. Ce qui reste ouvert
+- **Les cases du mois à 44 px de haut et le week-end qui s’ouvre d’un tap** (la maquette) : à faire avec la mesure.
+- **PHY-UX-1**, le lot suivant du plan.
+- **À vérifier chez Nico** : le menu « … » au téléphone et sur ordinateur, chacune de ses lignes, « ‹ 2026 › ».
