@@ -1,0 +1,17 @@
+{
+  "lot": "VITRINE-2",
+  "section": "§503",
+  "base": "e6acc9dfe5f72431c92cce49c0ae0fb1ed3d78a9",
+  "inclut": [],
+  "date": "2026-10-31",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "567035cb1731afef9b2596e376cafebfe4eafe834ad285280bc4a891883ba5be",
+    "CLAUDE.md": "6656a553878180d513a09227e0ffb8aa767db693e768a0c8e5be39126e32eee0",
+    "docs/claude/INDEX.md": "c3e520cadcb7464d3bf17909b84b0feffe16f8238318d9b950775187b275819b",
+    "docs/claude/chantiers-480-529.md": "5d5a5d50a3565a787486ea15b81e7c68c7dc87b802303c3831066d05d3396cf4",
+    "docs/claude/journal.md": "531cf80d53f8ce42ab181d89cd2996a6bacbed2fba9613aea42eae2a9b2fcc6f",
+    "public/logiciel-vigne.html": "eded353bc0eb15a3e0d89a13da738c3f7ecc1653b3145656f14bab830d3f2777",
+    "scripts/harnais-claude-md.mjs": "c18d959a1b6970e05ff1b2eab5d803b74fe52b6c16447c89d6d56a7949c5e2a3"
+  }
+}

@@ -215,16 +215,42 @@ a{color:inherit}
 .num{font-variant-numeric:tabular-nums}
 
 /* barre flottante */
-.barre{position:fixed;z-index:40;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:48px;
+.barre{position:fixed;z-index:40;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:28px;
   width:max-content;max-width:calc(100% - 24px);padding:8px 8px 8px 16px;border-radius:16px;background:color-mix(in srgb,var(--bg-app) 76%,transparent);
   -webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 0 0 1px color-mix(in srgb,var(--texte) 9%,transparent)}
 .barre{opacity:0;transition:opacity .75s var(--e2)}.pret .barre{opacity:1}
 .marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;min-height:44px}
 .marque img{width:30px;height:30px;border-radius:8px;display:block}
 .marque span{font:600 25px/1 var(--font-titre);letter-spacing:-.01em}
-.liens{display:flex;align-items:center;gap:22px}
-.lien-demo{font:400 15px/1 var(--font-ui);text-decoration:none;color:var(--texte-med);padding:12px 0}
-.lien-demo:hover{color:var(--texte);text-decoration:underline;text-underline-offset:4px}
+/* le menu : les sections de la page, comme sur un vrai site */
+.menu{display:flex;align-items:center;gap:2px}
+.menu a{position:relative;font:400 15px/1 var(--font-ui);text-decoration:none;color:var(--texte-med);padding:14px 12px;border-radius:10px;transition:color .3s var(--e2),background-color .3s var(--e2)}
+.menu a:hover{color:var(--texte);background:color-mix(in srgb,var(--texte) 5%,transparent)}
+.menu a[aria-current="true"]{color:var(--texte)}
+.menu a[aria-current="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:1.5px;border-radius:2px;background:var(--accent)}
+.bt-menu{display:none;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:none;font:500 15px/1 var(--font-ui);color:var(--texte);cursor:pointer;transition:background-color .3s var(--e2)}
+.bt-menu:hover{background:color-mix(in srgb,var(--texte) 5%,transparent)}
+.bt-menu:active{transform:translateY(1px)}
+.bt-menu-ico{position:relative;width:18px;height:12px;display:inline-block}
+.bt-menu-ico i{position:absolute;left:0;right:0;height:1.5px;border-radius:2px;background:currentColor;transition:transform .5s var(--e)}
+.bt-menu-ico i:first-child{top:2px}.bt-menu-ico i:last-child{top:9px}
+.menu-ouvert .bt-menu-ico i:first-child{transform:translateY(3.5px) rotate(45deg)}
+.menu-ouvert .bt-menu-ico i:last-child{transform:translateY(-3.5px) rotate(-45deg)}
+.panneau{position:fixed;inset:0;z-index:39;display:flex;flex-direction:column;justify-content:space-between;gap:32px;overflow-y:auto;
+  padding:calc(96px + env(safe-area-inset-top,0px)) var(--marge) calc(28px + env(safe-area-inset-bottom,0px));
+  background:color-mix(in srgb,var(--bg-app) 95%,transparent);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);opacity:0;transition:opacity .35s var(--e2)}
+.panneau[hidden]{display:none}
+.panneau.ouvert{opacity:1}
+.panneau nav{display:flex;flex-direction:column}
+.panneau nav a{font:500 32px/1.1 var(--font-titre);letter-spacing:-.015em;color:var(--texte);text-decoration:none;padding:14px 0;border-bottom:1px solid var(--ligne)}
+.panneau nav a,.panneau-actions{opacity:0;transform:translateY(24px);transition:opacity .5s var(--e2),transform .7s var(--e);transition-delay:calc(var(--k,0) * 55ms)}
+.panneau.ouvert nav a,.panneau.ouvert .panneau-actions{opacity:1;transform:none}
+.panneau-actions{display:grid;gap:10px}
+.panneau-actions .bt{width:100%}
+html.menu-ouvert{overflow:hidden}
+.evitement{position:fixed;left:12px;top:-64px;z-index:60;background:var(--bg-card);color:var(--texte);padding:12px 16px;border-radius:8px;box-shadow:var(--shadow-md);text-decoration:none;font:500 15px/1 var(--font-ui)}
+.evitement:focus{top:12px}
+section[id]{scroll-margin-top:84px}
 .actions{display:flex;flex-wrap:wrap;gap:12px}
 .bt{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:var(--r-md);font:500 16px/1 var(--font-ui);text-decoration:none;white-space:nowrap;transition:background-color .5s var(--e2),box-shadow .5s var(--e2)}
 .bt-plein{background:var(--accent);color:#fff}.bt-plein:hover{background:var(--accent-survol)}
@@ -234,12 +260,15 @@ a{color:inherit}
 /* ── haut de page ── */
 .haut{min-height:100vh;min-height:100svh;display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:center;gap:48px;
   padding:calc(110px + env(safe-area-inset-top,0px)) var(--marge) 64px;max-width:1360px;margin:0 auto}
-.haut h1{font:500 clamp(44px,5.2vw,78px)/.98 var(--font-titre);letter-spacing:-.025em;margin:0 0 .32em;max-width:11ch;text-wrap:balance}
-.haut .chapo{font:300 clamp(17px,1.4vw,20px)/1.55 var(--font-ui);color:var(--texte-med);max-width:44ch;margin:0 0 32px}
-.preuves{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-wrap:wrap;gap:10px 22px;font:400 14px/1.3 var(--font-ui);color:var(--texte-med)}
-.preuves li{display:flex;align-items:center;gap:8px}
-.preuves svg{width:16px;height:16px;flex:none}
-.preuves path{fill:none;stroke:var(--ok);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.haut h1{margin:0}
+.h1-sur{display:flex;align-items:center;gap:14px;font:500 13px/1.2 var(--font-ui);letter-spacing:.28em;text-transform:uppercase;color:var(--accent-texte);margin:0 0 18px}
+.h1-sur::before{content:"";width:36px;height:1px;background:currentColor;flex:none}
+.h1-nom{display:block;font:500 clamp(64px,7.6vw,116px)/.9 var(--font-titre);letter-spacing:-.03em;color:var(--texte)}
+.devise{font:italic 400 clamp(24px,2.3vw,34px)/1.2 var(--font-titre);color:var(--texte-med);margin:.3em 0 .95em}
+.haut .chapo{font:300 clamp(17px,1.35vw,19px)/1.6 var(--font-ui);color:var(--texte-med);max-width:46ch;margin:0 0 30px;text-wrap:pretty}
+.signature{display:flex;align-items:center;gap:14px;margin:32px 0 0;padding-top:22px;border-top:1px solid var(--ligne-forte);max-width:46ch;font:400 14.5px/1.5 var(--font-ui);color:var(--texte-med);text-wrap:pretty}
+.signature img{width:36px;height:36px;flex:none;border-radius:9px}
+@media (max-width:420px){.h1-sur{letter-spacing:.2em;gap:10px;font-size:12px}.h1-sur::before{width:22px}}
 .scene-tel{display:flex;justify-content:center;align-items:flex-start;position:relative}
 .tel-echelle{position:relative;width:100%;height:var(--h-tel,760px)}
 .tel-echelle .tel{position:absolute;left:50%;top:0;transform-origin:50% 0}
@@ -295,35 +324,22 @@ a{color:inherit}
 .ecran{width:25%;flex:none;height:100%;overflow:hidden}
 .verdict-c{font:600 var(--pt-lg)/1.15 var(--font-titre);letter-spacing:-.02em}
 .scene-tel{overflow:visible}
-.flotte{position:relative;z-index:3;opacity:0;transform:translateX(44px) scale(.9);filter:blur(4px);transition:opacity .7s var(--e2),transform 1.05s var(--e),filter .7s var(--e2);pointer-events:none}
-.flotte.sorti{opacity:1;transform:none;filter:none}
-.flotte-in{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--ligne);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow-md);font:400 12px/1.3 var(--font-ui);color:var(--texte-doux);animation:flotter 2.8s ease-in-out infinite}
-.flotte-in b{display:block;color:var(--texte);font-weight:600;font-size:14px}
-.flotte.pouls .flotte-in{animation:flotter 2.8s ease-in-out infinite,battre 1s var(--e2)}
-.f2 .flotte-in{animation-delay:-.9s}.f3 .flotte-in{animation-delay:-1.8s}
-.pastille{width:30px;height:30px;border-radius:50%;background:var(--ok-doux);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.pastille svg{width:16px;height:16px}.pastille path{fill:none;stroke:var(--ok);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pastille.ph{background:rgba(91,45,142,.12)}.pastille.ph path{stroke:var(--phyto)}
-.pastille.cv{background:var(--accent-doux)}.pastille.cv path{stroke:var(--accent)}
-.scene-tel{display:grid;grid-template-columns:minmax(0,236px) minmax(0,1fr);gap:26px;align-items:center}
-.flottes{display:flex;flex-direction:column;gap:16px}
+.scene-tel{display:block}
 .tel-col{min-width:0}
-@keyframes flotter{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes battre{0%{box-shadow:0 0 0 0 rgba(122,40,80,.28),var(--shadow-md)}100%{box-shadow:0 0 0 14px rgba(122,40,80,0),var(--shadow-md)}}
-/* bandeau des modules, en continu */
-.bandeau{overflow:hidden;border-top:1px solid var(--ligne);border-bottom:1px solid var(--ligne);background:var(--bg-card)}
-.bandeau-piste{display:flex;width:max-content;animation:defiler 42s linear infinite}
-.bandeau span{display:inline-flex;align-items:center;gap:12px;padding:20px 30px;font:400 15px/1 var(--font-ui);color:var(--texte-med);white-space:nowrap}
-.bandeau span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ligne-forte)}
-@keyframes defiler{to{transform:translateX(-50%)}}
+/* Ma Vigne en bref : quatre faits posés, à la place du bandeau qui défilait */
+.bref{border-top:1px solid var(--ligne);border-bottom:1px solid var(--ligne);background:rgba(255,255,255,.8)}
+.bref-in{max-width:1360px;margin:0 auto;padding:28px var(--marge);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 36px}
+.bref b{display:block;font:600 15px/1.3 var(--font-ui);color:var(--texte);margin-bottom:4px}
+.bref span{display:block;font:400 14px/1.5 var(--font-ui);color:var(--texte-med);text-wrap:pretty}
+@media (max-width:980px){.bref-in{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.bref-in{grid-template-columns:1fr;gap:16px;padding:24px var(--marge)}}
 /* les sections arrivent en douceur */
 [data-r]{opacity:0;transform:translateY(12px);filter:blur(4px);transition:opacity .8s var(--e2),transform 1.05s var(--e),filter .8s var(--e2);transition-delay:calc(var(--i,0) * 70ms)}
 [data-r].vu-r{opacity:1;transform:none;filter:none}
-@media (max-width:640px){.flotte-in{padding:8px 11px;font-size:11px}.flotte-in b{font-size:12.5px}.pastille{width:24px;height:24px}}
 
 
 /* ── les cartes de fonctionnalités ── */
-.section{max-width:1360px;margin:0 auto;padding:clamp(72px,10vw,128px) var(--marge)}
+.section{max-width:1360px;margin:0 auto;padding:clamp(72px,6vw,96px) var(--marge)}
 .section-tete{max-width:46rem;margin-bottom:40px}
 .section-tete h2{font:500 clamp(36px,4.2vw,60px)/1.02 var(--font-titre);letter-spacing:-.022em;margin:0 0 .4em;text-wrap:balance}
 .section-tete p{font:300 clamp(17px,1.35vw,19px)/1.55 var(--font-ui);color:var(--texte-med);margin:0;max-width:52ch}
@@ -332,6 +348,7 @@ a{color:inherit}
 .fc.large{grid-column:1 / -1;flex-direction:row}
 .fc-texte{padding:28px 28px 8px}
 .fc.large .fc-texte{flex:0 0 34%;padding:36px 32px}
+@media (min-width:981px){.fc.large .fc-texte{align-self:center}}
 .fc h3{font:600 clamp(24px,2vw,28px)/1.15 var(--font-titre);letter-spacing:-.02em;margin:0 0 8px}
 .fc p{margin:0;color:var(--texte-med);font-size:16px;line-height:1.55;max-width:40ch}
 .fc-visuel{position:relative;flex:1;min-height:340px;margin:16px;border-radius:12px;background:var(--bg-app);border:1px solid var(--ligne);overflow:hidden}
@@ -482,7 +499,7 @@ a{color:inherit}
 @keyframes ctrait{0%,30%{stroke-dashoffset:24}45%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:24}}
 .reg-mini{position:relative}
 .reg-mini .registre{position:relative;left:auto;right:auto;margin-bottom:8px}
-.reg-mini .r1{animation:arrive 5s var(--e) infinite}.reg-mini .r2,.reg-mini .r3{animation:descend 5s var(--e) infinite}
+.reg-mini .r1{animation:arrive 5s var(--e) infinite}.reg-mini .r2,.reg-mini .r3,.reg-mini .r4,.reg-mini .r5{animation:descend 5s var(--e) infinite}
 @keyframes arrive{0%,12%{opacity:0;transform:translateY(-14px);filter:blur(5px)}30%,88%{opacity:1;transform:none;filter:none}100%{opacity:0}}
 @keyframes descend{0%,12%{transform:translateY(-62px)}30%,100%{transform:none}}
 .reg-mini .r1{border-left-color:var(--rouge)}
@@ -493,6 +510,11 @@ a{color:inherit}
 .eco-barres b{color:var(--texte);text-align:right}
 @keyframes barre{0%,10%{clip-path:inset(0 100% 0 0 round 999px)}40%,90%{clip-path:inset(0 calc(100% - var(--p)) 0 0 round 999px)}100%{clip-path:inset(0 100% 0 0 round 999px)}}
 .sous-q{margin:28px 0 0;color:var(--texte-med)}.sous-q a{color:var(--accent-texte);font-weight:500}
+.ml-t{font:600 var(--pt-micro)/1.2 var(--font-ui);letter-spacing:.04em;color:var(--texte-doux);margin:16px 2px 6px}
+.ml-liste{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:0 12px}
+.ml{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-top:1px solid var(--ligne);font-size:var(--pt-txt);color:var(--texte-med)}
+.ml:first-child{border-top:0}.ml b{color:var(--texte);font-weight:600;font-variant-numeric:tabular-nums}
+.mv-av{margin-bottom:4px}.mv-av .av-l b{white-space:nowrap}.mv-av>.note{display:block;margin-top:8px}
 /* ── trois lieux ── */
 .trois{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
 .lieu{background:var(--bg-card);border:1px solid var(--ligne);border-radius:16px;padding:26px 26px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;opacity:0;transform:translateY(24px);filter:blur(6px);transition:opacity .8s var(--e2),transform 1.05s var(--e),filter .8s var(--e2);transition-delay:calc(var(--i) * 110ms)}
@@ -504,7 +526,13 @@ a{color:inherit}
 .auteur{max-width:760px;margin:0 auto;text-align:left;background:var(--bg-card);border:1px solid var(--ligne);border-radius:20px;padding:clamp(28px,4vw,48px);box-shadow:var(--shadow-sm)}
 .auteur h2{font:500 clamp(32px,3.4vw,46px)/1.05 var(--font-titre);margin:0 0 .5em}
 .auteur p{color:var(--texte-med);font-size:17px;line-height:1.65;margin:0 0 14px}
-.auteur .signe{font:600 18px/1.3 var(--font-titre);color:var(--texte);margin:18px 0 0}
+.auteur .signe{display:flex;align-items:center;gap:12px;font:600 18px/1.3 var(--font-titre);color:var(--texte);margin:18px 0 0}
+.auteur .signe img{width:28px;height:28px;border-radius:7px;flex:none}
+.pres{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:24px;align-items:stretch}
+.pres .auteur{max-width:none;margin:0;display:flex;flex-direction:column}
+.pour-qui .pq-lien{margin:auto 0 0;padding-top:18px;border-top:1px solid var(--ligne)}
+.pour-qui .pq-lien a{color:var(--accent-texte);font-weight:500}
+@media (max-width:980px){.pres{grid-template-columns:1fr}}
 /* ── objections ── */
 .faq{max-width:860px;display:grid;gap:10px}
 .faq details{background:var(--bg-card);border:1px solid var(--ligne);border-radius:14px;padding:0 20px;box-shadow:var(--shadow-sm);transition:box-shadow .4s}
@@ -515,6 +543,12 @@ a{color:inherit}
 .faq details[open] summary::after{transform:rotate(225deg) translateY(-3px)}
 .faq details p{margin:0 0 18px;color:var(--texte-med);font-size:16px;line-height:1.6;animation:ouvrir .5s var(--e2)}
 @keyframes ouvrir{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.faq-cols{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:56px;align-items:start}
+.faq-cols .section-tete{position:sticky;top:110px;margin-bottom:0}
+@media (min-width:1100px){.faq-cols .section-tete h2{font-size:clamp(34px,3.4vw,52px)}}
+.faq-cols .section-tete a{color:var(--accent-texte);font-weight:500}
+.faq-cols .faq{max-width:none}
+@media (max-width:1099px){.faq-cols{display:block}.faq-cols .section-tete{position:static;margin-bottom:40px}}
 /* ── prix ── */
 .formules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:stretch}
 .formule{background:var(--bg-card);border:1px solid var(--ligne);border-radius:18px;padding:28px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;opacity:0;transform:translateY(24px);filter:blur(6px);transition:opacity .8s var(--e2),transform 1.05s var(--e),filter .8s var(--e2);transition-delay:calc(var(--i) * 110ms)}
@@ -522,7 +556,7 @@ a{color:inherit}
 .formule.mise{border:2px solid var(--accent);box-shadow:var(--shadow-md)}
 .formule h3{font:600 28px/1.1 var(--font-titre);margin:0 0 4px}
 .prix-l{display:flex;align-items:flex-end;gap:10px;margin:16px 0 18px}.prix-l b{font:600 48px/1 var(--font-ui);letter-spacing:-.02em}.prix-l span{color:var(--texte-doux);font-size:13px;line-height:1.3;padding-bottom:4px}
-.formule ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:8px;flex:1}
+.formule ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;flex:1;align-content:start}
 .formule li{display:flex;gap:10px;font-size:15.5px}.formule li::before{content:"";width:16px;height:16px;flex:none;margin-top:3px;border-radius:50%;background:var(--ok-doux) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5 7 11.5 12 5' fill='none' stroke='%23237A47' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
 .mer{margin:0;padding-top:14px;border-top:1px solid var(--ligne);color:var(--texte-med);font-size:14px}.mer b{color:var(--texte)}
 .trois-infos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:28px}
@@ -536,7 +570,7 @@ a{color:inherit}
   .trois,.formules,.trois-infos{grid-template-columns:1fr}
   .dates li{grid-template-columns:1fr;gap:4px}
 }
-@media (prefers-reduced-motion:reduce){.moment,.qe,.lieu,.formule{transform:none!important;filter:none!important}.anneau-g .arc,.pop,.rangl .cocheb,.rangl .cocheb path,.reg-mini .r1,.reg-mini .r2,.reg-mini .r3,.eco-barres i{animation-duration:9s}}
+@media (prefers-reduced-motion:reduce){.moment,.qe,.lieu,.formule{transform:none!important;filter:none!important}.anneau-g .arc,.pop,.rangl .cocheb,.rangl .cocheb path,.reg-mini .r1,.reg-mini .r2,.reg-mini .r3,.reg-mini .r4,.reg-mini .r5,.eco-barres i{animation-duration:9s}}
 
 
 /* ── avancement des vendanges : le planning qui annonce la fin ── */
@@ -621,11 +655,21 @@ a{color:inherit}
 /* la vidéo des saisons, en fond, à peine devinée */
 .fond-video{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;--fond-op:.15}
 .fond-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:var(--fond-op);filter:saturate(.8) contrast(.85)}
-.bandeau{background:rgba(255,255,255,.8)}
 /* la suite et le pied */
-.suite{max-width:1360px;margin:0 auto;padding:clamp(72px,10vw,120px) var(--marge);text-align:left}
+.suite{max-width:1360px;margin:0 auto;padding:clamp(72px,6vw,96px) var(--marge) clamp(80px,8vw,128px);text-align:left}
 .suite h2{font:500 clamp(36px,4.4vw,62px)/1.02 var(--font-titre);letter-spacing:-.022em;margin:0 0 .35em;max-width:15ch}
 .suite p{color:var(--texte-med);max-width:46ch;margin:0 0 30px;font-size:clamp(17px,1.35vw,19px)}
+.suite .citation{margin:36px 0 0;max-width:30ch;color:var(--texte);font-size:clamp(22px,2vw,28px)}
+.suite-cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center}
+.etapes-carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:20px;padding:clamp(24px,3vw,36px);box-shadow:var(--shadow-sm)}
+.etapes-carte h3{font:600 26px/1.15 var(--font-titre);margin:0 0 8px}
+.etapes{list-style:none;margin:0;padding:0;counter-reset:et}
+.etapes li{counter-increment:et;position:relative;padding:18px 0 18px 52px;border-top:1px solid var(--ligne)}
+.etapes li:first-child{border-top:0}
+.etapes li::before{content:counter(et);position:absolute;left:0;top:18px;width:34px;height:34px;border-radius:50%;background:var(--accent-doux);color:var(--accent-texte);display:flex;align-items:center;justify-content:center;font:600 16px/1 var(--font-ui)}
+.etapes b{display:block;font:600 20px/1.25 var(--font-titre);color:var(--texte);margin-bottom:4px}
+.etapes span{display:block;color:var(--texte-med);font-size:15.5px;line-height:1.55}
+@media (max-width:980px){.suite-cols{grid-template-columns:1fr;gap:40px}}
 .pied{border-top:1px solid var(--ligne-forte);display:flex;flex-wrap:wrap;gap:18px 36px;justify-content:space-between;align-items:flex-start;
   padding:30px var(--marge) calc(30px + env(safe-area-inset-bottom,0px));font:400 14px/1.6 var(--font-ui);color:var(--texte-med)}
 .pied .m{display:flex;align-items:center;gap:10px;color:var(--texte);font:600 21px/1 var(--font-titre);margin-bottom:8px}
@@ -639,11 +683,10 @@ a{color:inherit}
 @media (max-width:980px){
   .haut{grid-template-columns:1fr;gap:40px;padding-top:calc(100px + env(safe-area-inset-top,0px))}
   .grille{grid-template-columns:1fr}
-  .scene-tel{grid-template-columns:1fr}.flottes{order:2;display:grid;gap:10px}.flotte{transform:translateY(-10px) scale(.96)}
   .fc.large{flex-direction:column}.fc.large .fc-texte{flex:none;padding:28px 28px 8px}
 }
 @media (max-width:640px){
-  .lien-demo{display:none}.barre{width:calc(100% - 24px)}
+  .barre{width:calc(100% - 24px)}
   .flux{grid-template-columns:1fr;gap:28px;padding:16px;align-content:center}
   .fc.large .fc-visuel{min-height:560px}
   .fc-visuel{margin:12px}
@@ -651,48 +694,57 @@ a{color:inherit}
 @media (prefers-reduced-motion:reduce){
   [data-a],[data-r],.fc{transform:none!important;filter:none!important}
   .vu .fc [data-u]{animation-name:fondu!important}
-  .flotte{transform:none!important;filter:none!important}
-  .flotte-in{animation:none!important}
-  .bandeau-piste{animation-duration:140s!important}
+  .panneau nav a,.panneau-actions{transform:none!important}
 }
 @keyframes fondu{from{opacity:0}to{opacity:1}}
-.arret .bandeau-piste,.arret .flotte-in{animation-play-state:paused!important}
+@media (max-width:1099px){.menu{display:none}.bt-menu{display:inline-flex}}
+@media (max-width:640px){.bt-essai{display:none}}
+@media (min-width:1100px){.panneau{display:none!important}}
 .pause{display:block;margin:14px auto 0;appearance:none;background:none;border:0;font:400 13px/1 var(--font-ui);color:var(--texte-doux);text-decoration:underline;text-underline-offset:3px;padding:12px 8px;min-height:44px;cursor:pointer}
 .pause:hover{color:var(--texte)}
 </style>
 </head>
 <body>
 <div class="fond-video" aria-hidden="true"><video id="fondVideo" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback tabindex="-1" poster="/fond-saisons-vigne.jpg" data-src="/fond-saisons-vigne.mp4"></video></div>
+<a class="evitement" href="#contenu">Aller au contenu</a>
 <header class="barre">
   <a class="marque" href="/logiciel-vigne.html"><img src="/logo-barre.png" alt="" width="30" height="30"><span>Ma Vigne</span></a>
-  <nav class="liens" aria-label="Actions">
-    <a class="lien-demo" href="https://mavigneapp.fr/demo.html">Voir la démo</a>
-    <a class="bt bt-plein bt-petit" href="/essai.html">Demander un essai</a>
+  <nav class="menu" aria-label="Sections de la page">
+    <a href="#presentation">Présentation</a>
+    <a href="#fonctions">L’application</a>
+    <a href="#registre">Registre 2027</a>
+    <a href="#objections">Questions</a>
+    <a href="#prix">Tarifs</a>
   </nav>
+  <a class="bt bt-trait bt-petit bt-essai" href="/essai.html">Demander un essai</a>
+  <button type="button" class="bt-menu" id="bt-menu" aria-expanded="false" aria-controls="panneau"><span class="bt-menu-ico" aria-hidden="true"><i></i><i></i></span><span class="bt-menu-txt">Menu</span></button>
 </header>
+<div class="panneau" id="panneau" hidden>
+  <nav aria-label="Sections de la page">
+    <a href="#presentation" style="--k:0">Présentation</a>
+    <a href="#fonctions" style="--k:1">L’application</a>
+    <a href="#journee" style="--k:2">Une journée</a>
+    <a href="#registre" style="--k:3">Registre 2027</a>
+    <a href="#objections" style="--k:4">Questions</a>
+    <a href="#prix" style="--k:5">Tarifs</a>
+  </nav>
+  <div class="panneau-actions" style="--k:6"><a class="bt bt-plein" href="https://mavigneapp.fr/demo.html">Voir la démo</a><a class="bt bt-trait" href="/essai.html">Demander un essai</a></div>
+</div>
 
-<main>
-<section class="haut" aria-label="Présentation">
-  <div>
-    <h1 data-a style="--i:1">Le soir, il n’y a plus rien à ressaisir.</h1>
-    <p class="chapo" data-a style="--i:3">Parcelles, travaux à la tâche, journal, registre phyto, matériel, cave, planning, pilotage&nbsp;: une seule application pour conduire le domaine. Une seule saisie, faite dans le rang, alimente tout le reste.</p>
+<main id="contenu">
+<section class="haut" id="haut" aria-labelledby="titre-haut">
+  <div class="haut-texte">
+    <h1 id="titre-haut" data-a style="--i:1"><span class="h1-sur">Logiciel de gestion viticole</span> <span class="h1-nom">Ma Vigne</span></h1>
+    <p class="devise" data-a style="--i:2">De la parcelle au registre, tout en un.</p>
+    <p class="chapo" data-a style="--i:3">Une seule application pour conduire le domaine&nbsp;: les parcelles et les travaux à la tâche, le journal de l’équipe, le registre phyto, le matériel, la cave, le planning et le pilotage. Chacun saisit une fois, dans le rang, sur le tracteur ou au chai&nbsp;; tout le reste se met à jour tout seul.</p>
     <div class="actions" data-a style="--i:4">
-      <a class="bt bt-plein" href="/essai.html">Demander un essai de 15 jours</a>
-      <a class="bt bt-trait" href="https://mavigneapp.fr/demo.html">Voir la démo</a>
+      <a class="bt bt-plein" href="https://mavigneapp.fr/demo.html">Voir la démo</a>
+      <a class="bt bt-trait" href="#presentation">Découvrir Ma Vigne</a>
     </div>
-    <ul class="preuves" data-a style="--i:5">
-      <li><svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>Sans inscription, sans carte bancaire</li>
-      <li><svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>Écrite par un chef de culture en activité</li>
-      <li><svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>Utilisée tous les jours sur des domaines bourguignons</li>
-    </ul>
+    <p class="signature" data-a style="--i:5"><img src="/logo-barre.png" alt="" width="36" height="36"><span>Conçue dans les rangs de la Côte de Nuits par Nicolas&nbsp;Guéret, chef de culture, et utilisée tous les jours sur des domaines bourguignons.</span></p>
   </div>
 
   <div class="scene-tel">
-    <div class="flottes" aria-hidden="true">
-    <div class="flotte f1" id="f1"><div class="flotte-in"><span class="pastille"><svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg></span><div><b>Rang 13 validé</b><span>Taille · Les Charmes · à l’instant</span></div></div></div>
-    <div class="flotte f2" id="f2"><div class="flotte-in"><span class="pastille ph"><svg viewBox="0 0 16 16"><path d="M8 2c2.5 3 4 5.3 4 7a4 4 0 0 1-8 0c0-1.7 1.5-4 4-7Z"/></svg></span><div><b>Registre à jour</b><span>Soufre mouillable · 8 kg/ha · Paul</span></div></div></div>
-    <div class="flotte f3" id="f3"><div class="flotte-in"><span class="pastille cv"><svg viewBox="0 0 16 16"><path d="M4 2.5h8v3a4 4 0 0 1-8 0v-3ZM8 9.5v3.5M5.5 13.5h5"/></svg></span><div><b>Cuve 4 · FA terminée</b><span>densité 0,994 · 8 h 15</span></div></div></div>
-    </div>
     <div class="tel-col">
       <div class="tel-echelle" data-a style="--i:6" aria-hidden="true"><div class="tel app" id="tel-demo">
       <div class="tel-barre"><span class="num">9:12</span><span>Côte de Nuits · 14 °C</span></div>
@@ -771,10 +823,32 @@ a{color:inherit}
   </div>
 </section>
 
-<div class="bandeau" role="region" aria-label="Les modules de Ma Vigne"><div class="bandeau-piste">
-  <span>Parcelles et carte</span><span>Journal d’équipe</span><span>Tracteur et GNR</span><span>Registre phyto</span><span>Le Cuvier</span><span>Le Chai</span><span>Planning et heures</span><span>Pilotage</span><span>Météo par parcelle</span><span>La Réserve</span>
-  <span aria-hidden="true">Parcelles et carte</span><span aria-hidden="true">Journal d’équipe</span><span aria-hidden="true">Tracteur et GNR</span><span aria-hidden="true">Registre phyto</span><span aria-hidden="true">Le Cuvier</span><span aria-hidden="true">Le Chai</span><span aria-hidden="true">Planning et heures</span><span aria-hidden="true">Pilotage</span><span aria-hidden="true">Météo par parcelle</span><span aria-hidden="true">La Réserve</span>
-</div></div>
+<section class="bref" aria-label="Ma Vigne en bref">
+  <div class="bref-in">
+    <div data-r><b>Téléphone et ordinateur</b><span>Elle s’installe sur l’écran d’accueil, sans passer par un magasin d’applications.</span></div>
+    <div data-r style="--i:1"><b>Sans réseau dans les rangs</b><span>Les saisies attendent sur le téléphone et repartent seules au retour du réseau.</span></div>
+    <div data-r style="--i:2"><b>Prête pour le registre 2027</b><span>Le registre phyto s’exporte au format électronique structuré.</span></div>
+    <div data-r style="--i:3"><b>Un prix par domaine</b><span>De 29 à 79&nbsp;€ par mois, sans coût par utilisateur.</span></div>
+  </div>
+</section>
+
+<section class="section" id="presentation">
+  <div class="pres">
+    <article class="auteur" id="auteur" data-r>
+      <h2>Qui écrit ce logiciel</h2>
+      <p>Je m’appelle Nicolas Guéret. Je suis chef de culture en Côte de Nuits, et je développe Ma Vigne. Les deux en même temps, pas l’un après l’autre.</p>
+      <p>Aucune fonction de cette application n’a été imaginée sur plan. Chacune répond à un problème que j’ai eu la veille, dans une parcelle ou devant un tableur&nbsp;: le relevé d’heures qui ne tombait jamais juste, le registre qu’on recopie la veille d’un contrôle, les fûts qu’on croit connaître et qu’on recompte à la lampe torche.</p>
+      <p>Et quand un chiffre est faux, je le dis. Le calcul des coûts par parcelle l’a été. Je l’ai mesuré, corrigé, puis j’ai écrit un banc d’essai qui vérifie ces chiffres à chaque mise à jour, pour que ça ne revienne pas.</p>
+      <p class="signe"><img src="/logo-barre.png" alt="" width="28" height="28" loading="lazy">Nicolas Guéret · chef de culture en Côte de Nuits</p>
+    </article>
+    <article class="auteur pour-qui" data-r style="--i:1">
+      <h2>Pour quels domaines</h2>
+      <p>Pour les domaines viticoles, du petit domaine familial à celui qui fait travailler une équipe complète, avec ou sans cave.</p>
+      <p>On n’installe pas Ma Vigne seul dans son coin&nbsp;: je la mets en route sur vos parcelles, avec votre barème et vos périodes, puis je forme votre équipe. Ensuite, chacun n’a sur son téléphone que ce qui le concerne&nbsp;: l’ouvrier, ses parcelles du jour&nbsp;; vous, tout le domaine.</p>
+      <p class="pq-lien"><a href="https://mavigneapp.fr/demo.html">Ouvrir la démo</a>, sans compte ni inscription, pour voir avant d’en parler.</p>
+    </article>
+  </div>
+</section>
 
 <section class="section" id="fonctions">
   <div class="section-tete">
@@ -842,7 +916,7 @@ a{color:inherit}
   </div>
 </section>
 
-<section class="section" id="journee">
+<section class="section" id="journee" data-nav="#fonctions">
   <div class="section-tete"><h2 data-r>Le logiciel ne se voit pas. Il écrit derrière vous.</h2><p data-r style="--i:1">Cinq moments d’une journée de juin, sur un domaine de quinze hectares et cinq personnes.</p></div>
   <ol class="frise" id="frise">
     <li class="moment"><div class="m-heure num">6 h 30</div><div class="m-corps"><h3>« Il a plu cette nuit. Mais où&nbsp;? »</h3><p>Les prévisions arrivent du modèle AROME de Météo-France, secteur par secteur, pas une moyenne pour la commune d’à côté. Quatre millimètres sur le haut, rien sur le bas&nbsp;: la fenêtre de traitement se lit sur les parcelles concernées.</p></div>
@@ -881,7 +955,7 @@ a{color:inherit}
   </div>
 </section>
 
-<section class="section" id="ecrans">
+<section class="section" id="ecrans" data-nav="#fonctions">
   <div class="section-tete"><h2 data-r>Quatre écrans, quatre questions.</h2><p data-r style="--i:1">Pas de tableau de bord décoratif&nbsp;: chaque écran existe parce qu’une question revient tous les jours.</p></div>
   <div class="quatre">
     <figure class="qe"><div class="mtel app"><div class="tel-barre"><span class="num">7:02</span><span>Pilotage</span></div><div class="bande"><div style="flex:1"><div class="t">Réparations et amendement</div><span class="s">objectif le 28 novembre</span></div></div>
@@ -903,19 +977,19 @@ a{color:inherit}
       </div></div>
       <figcaption><b>Réparations et amendement&nbsp;: est-ce qu’on tient la date&nbsp;?</b>L’écran prend ce qui reste à faire et la cadence réelle de l’équipe, et annonce la fin&nbsp;: le 20 novembre, pour un objectif au 28.</figcaption></figure>
     <figure class="qe"><div class="mtel app"><div class="tel-barre"><span class="num">8:15</span><span>Vigne</span></div><div class="bande"><div style="flex:1"><div class="t">Mes parcelles du jour</div><span class="s">Jean · relevage</span></div></div>
-      <div class="tel-corps"><div class="carte" style="padding:0 12px"><div class="ligne rangl"><span><span class="nom">Les Charmes</span><span class="sous">0,82 ha</span></span><span class="cocheb"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span></div><div class="ligne"><span><span class="nom">Aux Murgers</span><span class="sous">0,55 ha</span></span><span class="cocheb vide"></span></div><div class="ligne"><span><span class="nom">La Combotte</span><span class="sous">1,10 ha</span></span><span class="cocheb vide"></span></div></div></div></div>
+      <div class="tel-corps"><div class="carte mv-av"><div class="av-l"><span class="note">Relevage · tout le domaine</span><b class="num">64 %</b></div><div class="jauge"><i style="--p:64%"></i></div><span class="note">Ma part du chantier · 1,37 ha</span></div><h4>AUJOURD’HUI</h4><div class="carte" style="padding:0 12px"><div class="ligne rangl"><span><span class="nom">Les Charmes</span><span class="sous">0,82 ha</span></span><span class="cocheb"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span></div><div class="ligne"><span><span class="nom">Aux Murgers</span><span class="sous">0,55 ha</span></span><span class="cocheb vide"></span></div><div class="ligne"><span><span class="nom">La Combotte</span><span class="sous">1,10 ha</span></span><span class="cocheb vide"></span></div></div></div></div>
       <figcaption><b>Dans le rang</b>Les parcelles du jour, l’avancement, une coche. C’est tout ce que voit celui qui travaille&nbsp;: ni coûts, ni heures des autres.</figcaption></figure>
     <figure class="qe"><div class="mtel app"><div class="tel-barre"><span class="num">15:04</span><span>Phyto</span></div><div class="bande"><div style="flex:1"><div class="t">Registre</div><span class="s">12 traitements · 2026</span></div></div>
-      <div class="tel-corps reg-mini"><div class="registre r1"><div class="l1"><b>Soufre mouillable</b><span class="d">à l’instant</span></div><div class="l2">8 kg/ha · Les Charmes · Paul</div></div><div class="registre r2"><div class="l1"><b>Vacciplant</b><span class="d">8 sept.</span></div><div class="l2">0,75 L/ha · Aux Murgers · Marie</div></div><div class="registre r3"><div class="l1"><b>Bouillie bordelaise</b><span class="d">23 août</span></div><div class="l2">1,5 kg/ha · Clos du Moulin · Jean</div></div></div></div>
+      <div class="tel-corps reg-mini"><div class="registre r1"><div class="l1"><b>Soufre mouillable</b><span class="d">à l’instant</span></div><div class="l2">8 kg/ha · Les Charmes · Paul</div></div><div class="registre r2"><div class="l1"><b>Vacciplant</b><span class="d">8 sept.</span></div><div class="l2">0,75 L/ha · Aux Murgers · Marie</div></div><div class="registre r3"><div class="l1"><b>Bouillie bordelaise</b><span class="d">23 août</span></div><div class="l2">1,5 kg/ha · Clos du Moulin · Jean</div></div><div class="registre r4"><div class="l1"><b>Soufre mouillable</b><span class="d">11 août</span></div><div class="l2">8 kg/ha · La Combotte · Paul</div></div><div class="registre r5"><div class="l1"><b>Bouillie bordelaise</b><span class="d">28 juil.</span></div><div class="l2">1,8 kg/ha · Les Perrières · Jean</div></div></div></div>
       <figcaption><b>Le registre, écrit le jour même</b>Produit, famille, dose, parcelles, applicateur, date. Douze traitements déjà en ligne, prêts à l’export réglementaire.</figcaption></figure>
     <figure class="qe"><div class="mtel app"><div class="tel-barre"><span class="num">18:40</span><span>Économie</span></div><div class="bande"><div style="flex:1"><div class="t">Exercice 2025-2026</div><span class="s">tout le domaine</span></div></div>
-      <div class="tel-corps"><div class="eco-l"><span class="note">Coût à l’hectare</span><b class="num" data-compte="5220" data-fin=" €">5 220 €</b></div><div class="eco-barres"><div><span>Salaires</span><i style="--p:71%"></i><b>71 %</b></div><div><span>Matériel</span><i style="--p:17%"></i><b>17 %</b></div><div><span>Produits</span><i style="--p:12%"></i><b>12 %</b></div></div><span class="etiq att pop">3 achats sans prix · comptés pour zéro</span></div></div>
+      <div class="tel-corps"><div class="eco-l"><span class="note">Coût à l’hectare</span><b class="num" data-compte="5220" data-fin=" €">5 220 €</b></div><div class="eco-barres"><div><span>Salaires</span><i style="--p:71%"></i><b>71 %</b></div><div><span>Matériel</span><i style="--p:17%"></i><b>17 %</b></div><div><span>Produits</span><i style="--p:12%"></i><b>12 %</b></div></div><span class="etiq att pop">3 achats sans prix · comptés pour zéro</span><div class="ml-t">PAR PARCELLE</div><div class="ml-liste"><div class="ml"><span>Les Charmes</span><b>6 140 €/ha</b></div><div class="ml"><span>Aux Murgers</span><b>4 980 €/ha</b></div><div class="ml"><span>La Combotte</span><b>5 310 €/ha</b></div></div></div></div>
       <figcaption><b>Ce que l’année a coûté, sans rouvrir le tableur</b>Le total de l’exercice, le coût à l’hectare, la part des salaires. Et, avant les chiffres, ce qui leur manque encore.</figcaption></figure>
   </div>
   <p class="sous-q" data-r>Vous pouvez ouvrir tous les écrans vous-même&nbsp;: <a href="https://mavigneapp.fr/demo.html">la démo est libre</a>, sans compte et sans inscription.</p>
 </section>
 
-<section class="section" id="lieux">
+<section class="section" id="lieux" data-nav="#fonctions">
   <div class="section-tete"><h2 data-r>Trois lieux, un seul carnet.</h2><p data-r style="--i:1">Les modules ne sont pas rangés par thème informatique, mais par l’endroit où vous êtes quand vous en avez besoin.</p></div>
   <div class="trois">
     <article class="lieu" style="--i:0"><h3>La vigne</h3><dl><dt>Parcelles et travaux</dt><dd>Suivi à la tâche, avancement en surface réelle, validation depuis le rang, priorité du jour.</dd><dt>Journal</dt><dd>Chaque geste daté et attribué. Une équipe entière tient en une seule entrée.</dd><dt>Météo par parcelle</dt><dd>Modèle AROME, secteur par secteur. Risque de gel, de pluie, fenêtres de traitement.</dd><dt>Traitements et registre</dt><dd>Catalogue E-Phy, DAR, délai de rentrée, ZNT, cumul de cuivre sur sept ans, export réglementaire.</dd><dt>Matériel</dt><dd>Sessions de tracteur, entretiens, GNR, révisions, historique des réparations.</dd></dl></article>
@@ -925,7 +999,7 @@ a{color:inherit}
 </section>
 
 
-<section class="section" id="carnet">
+<section class="section" id="carnet" data-nav="#fonctions">
   <div class="section-tete"><h2 data-r>Ce qu’un carnet ne vous aurait jamais dit.</h2><p data-r style="--i:1">Noter, c’est la base. Mais certaines réponses n’existent pas sur le papier&nbsp;: il faut croiser, projeter, calculer. Ma Vigne le fait avec ce que vous avez déjà noté.</p></div>
   <div class="carnet-grille">
     <article class="cc cc-large" style="--i:0">
@@ -980,19 +1054,10 @@ a{color:inherit}
   </div>
 </section>
 
-<section class="section" id="auteur">
-  <div class="auteur" data-r>
-    <h2>Qui écrit ce logiciel</h2>
-    <p>Je m’appelle Nicolas Guéret. Je suis chef de culture en Côte de Nuits, et je développe Ma Vigne. Les deux en même temps, pas l’un après l’autre.</p>
-    <p>Aucune fonction de cette application n’a été imaginée sur plan. Chacune répond à un problème que j’ai eu la veille, dans une parcelle ou devant un tableur&nbsp;: le relevé d’heures qui ne tombait jamais juste, le registre qu’on recopie la veille d’un contrôle, les fûts qu’on croit connaître et qu’on recompte à la lampe torche.</p>
-    <p>Et quand un chiffre est faux, je le dis. Le calcul des coûts par parcelle l’a été. Je l’ai mesuré, corrigé, puis j’ai écrit un banc d’essai qui vérifie ces chiffres à chaque mise à jour, pour que ça ne revienne pas.</p>
-    <p class="signe">Nicolas Guéret · chef de culture en Côte de Nuits</p>
-  </div>
-</section>
-
 <section class="section" id="objections">
-  <div class="section-tete"><h2 data-r>Les vraies objections, répondues franchement.</h2></div>
-  <div class="faq" data-r style="--i:1">
+  <div class="faq-cols">
+  <div class="section-tete"><h2 data-r>Les vraies objections, répondues franchement.</h2><p data-r style="--i:1">Ce que les domaines demandent avant de se lancer. Une autre question&nbsp;? Écrivez-moi&nbsp;: <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a>, je réponds moi-même.</p></div>
+  <div class="faq" data-r style="--i:2">
     <details open><summary>« Mes gars ne s’en serviront pas. »</summary><p>C’est la première objection, avant le prix. L’écran d’un ouvrier ne contient que ses parcelles du jour et une coche. Pas de coûts, pas les heures des autres, pas de réglages. Et s’il oublie de cocher, ça se rattrape&nbsp;: le même bouton fonctionne le lendemain.</p></details>
     <details><summary>« Il n’y a pas de réseau dans mes vignes. »</summary><p>Les validations faites hors réseau sont mises en file d’attente sur le téléphone et remontent seules dès que la connexion revient. Un compteur indique ce qui attend. L’application s’installe sur l’écran d’accueil comme une application classique, sans passer par un magasin d’applications.</p></details>
     <details><summary>« Je n’ai pas de parcellaire numérique. »</summary><p>Un export PAC / Telepac ou un fichier KML suffit&nbsp;: vos parcelles arrivent avec leurs contours et leurs surfaces. Si vous n’avez ni l’un ni l’autre, on les crée ensemble pendant l’installation, c’est compris dans le forfait de mise en route.</p></details>
@@ -1000,6 +1065,7 @@ a{color:inherit}
     <details><summary>« Qui voit mes données&nbsp;? »</summary><p>Chaque domaine dispose d’un espace isolé, hébergé en Europe. Personne d’autre que vous et les comptes que vous créez n’y accède. Le contrat de sous-traitance RGPD est signé avant la création des comptes de vos salariés, parce que ce sont leurs données personnelles. Les documents sont consultables&nbsp;: <a href="/cgu.html">CGU</a>, <a href="/dpa.html">contrat de sous-traitance</a>, <a href="/confidentialite.html">confidentialité</a>.</p></details>
     <details><summary>« Combien de temps pour être opérationnel&nbsp;? »</summary><p>L’installation est un forfait, pas une facturation à l’heure&nbsp;: reprise du parcellaire, création des comptes de l’équipe, paramétrage du barème et des périodes, formation. Selon la formule, il comprend 10, 15 ou 20 heures d’accompagnement. Un domaine d’une vingtaine d’hectares est en fonctionnement en quelques jours.</p></details>
     <details><summary>« Le forfait de mise en route, c’est combien&nbsp;? »</summary><p>490 € pour Essentiel, 690 € pour Vigneron, 990 € pour Domaine, payés une seule fois au démarrage.</p></details>
+  </div>
   </div>
 </section>
 
@@ -1019,10 +1085,22 @@ a{color:inherit}
 </section>
 
 <section class="suite" id="suite">
-  <h2 data-r>Le mieux, c’est encore de l’ouvrir.</h2>
-  <p data-r style="--i:1">La démo se visite sans compte et sans engagement. Puis, si le courant passe, quinze jours d’essai sur vos propres parcelles.</p>
-  <div class="actions"><a class="bt bt-plein" href="/essai.html">Demander un essai de 15 jours</a><a class="bt bt-trait" href="https://mavigneapp.fr/demo.html">Voir la démo</a></div>
-  <p class="citation" data-r>« Quinze jours sur vos parcelles, vos surfaces, votre barème. Vous compterez vous-même. »</p>
+  <div class="suite-cols">
+    <div>
+      <h2 data-r>Le mieux, c’est encore de l’ouvrir.</h2>
+      <p data-r style="--i:1">La démo se visite sans compte et sans engagement. Puis, si le courant passe, quinze jours d’essai sur vos propres parcelles.</p>
+      <div class="actions"><a class="bt bt-plein" href="/essai.html">Demander un essai de 15 jours</a><a class="bt bt-trait" href="https://mavigneapp.fr/demo.html">Voir la démo</a></div>
+      <p class="citation" data-r>« Quinze jours sur vos parcelles, vos surfaces, votre barème. Vous compterez vous-même. »</p>
+    </div>
+    <div class="etapes-carte" data-r style="--i:2">
+      <h3>Comment ça se passe</h3>
+      <ol class="etapes">
+        <li><b>La démo, libre</b><span>Tous les écrans de l’application, sans compte et sans inscription.</span></li>
+        <li><b>Quinze jours d’essai</b><span>Sur vos propres parcelles, sans carte bancaire. Rien ne se paie en ligne&nbsp;: tout démarre par un échange.</span></li>
+        <li><b>La mise en route</b><span>Si vous continuez, rien n’est à refaire&nbsp;: le parcellaire, les comptes, le barème, les périodes et l’équipe posés pendant l’essai sont conservés et sauvegardés. Puis l’abonnement, sans durée d’engagement.</span></li>
+      </ol>
+    </div>
+  </div>
 </section>
 </main>
 
@@ -1059,7 +1137,7 @@ function tracerFlux(){
   const x0=vert?b.left-R.left+18:b.right-R.left-4,y0=vert?b.bottom-R.top-4:b.top-R.top+b.height/2;
   F.dest.forEach((d,i)=>{const r=d.getBoundingClientRect();let x1,y1,dd;
     if(vert){x1=r.left-R.left;y1=r.top-R.top+r.height/2;const xo=V.left-R.left-30-i*14;dd=`M${x0},${y0} C${x0-10},${y0+40} ${xo},${(y0+y1)/2-30} ${xo},${(y0+y1)/2} S${x1-40},${y1} ${x1},${y1}`;}
-    else{x1=r.left-R.left;y1=r.top-R.top+r.height/2;const yt=V.top-R.top-34-i*16;dd=`M${x0},${y0} C${x0+90},${yt} ${x1-110},${yt} ${x1},${y1}`;}
+    else{x1=r.left-R.left;y1=r.top-R.top+r.height/2;const k=Math.max(24,(x1-x0)*.55);dd=`M${x0},${y0} C${x0+k},${y0} ${x1-k},${y1} ${x1},${y1}`;}
     const p=document.createElementNS(NS,'path');p.setAttribute('d',dd);p.setAttribute('class','fil');s.appendChild(p);chemins.push(p);
     const e=document.createElementNS(NS,'circle');e.setAttribute('cx',x1);e.setAttribute('cy',y1);e.setAttribute('r','4');e.setAttribute('class','bout');s.appendChild(e);
     const h=document.createElementNS(NS,'circle');h.setAttribute('r','11');h.setAttribute('class','halo');h.style.opacity=0;s.appendChild(h);
@@ -1113,8 +1191,7 @@ function histCuve(t){
 /* ── le téléphone du haut : une démo qui enchaîne Vigne, Tracteur, Phyto, Cave ── */
 const D={tel:$('#tel-demo'),rail:$('#rail'),dock:[...document.querySelectorAll('#dock span')],doigt:$('#doigt'),toast:$('#toast'),
   vr:$('#v-rang'),vj:$('#v-jauge'),vb:$('#v-btn'),vn:$('#v-new'),tp:$('#t-pct'),tj:$('#t-jauge'),th:$('#t-ha'),tc:$('#t-ch'),tb:$('#t-btn'),
-  rows:[...document.querySelectorAll('#p-liste .registre')],cd:$('#c-d'),ce:$('#c-etiq'),cclip:$('#c-clip-r'),cl:$('#c-ligne'),ca:$('#c-aire'),cpt:$('#c-pt'),csvg:$('#c-svg'),
-  f:[$('#f1'),$('#f2'),$('#f3')]};
+  rows:[...document.querySelectorAll('#p-liste .registre')],cd:$('#c-d'),ce:$('#c-etiq'),cclip:$('#c-clip-r'),cl:$('#c-ligne'),ca:$('#c-aire'),cpt:$('#c-pt'),csvg:$('#c-svg')};
 const PER=4.2,LOOP=4*PER;let tours=0,dernierE=-1,HRP=0;
 (function(){let d='';DEN.forEach((v,i)=>{d+=(i?'L':'M')+(i*30)+','+yD(v).toFixed(1);});D.cl.setAttribute('d',d);D.ca.setAttribute('d',d+'L300,119L0,119Z');})();
 function doigtSur(el,v,t0){
@@ -1124,7 +1201,6 @@ function doigtSur(el,v,t0){
   D.doigt.style.left=((b.left-r.left)/sc+b.width/sc*.45)+'px';D.doigt.style.top=((b.top-r.top)/sc+b.height/sc/2+piste([[0,26],[t0-.4,0],[t0+.6,0],[t0+.9,26]],v))+'px';
   D.doigt.style.opacity=piste([[0,0],[t0-.5,0],[t0-.25,1],[t0+.6,1],[t0+.9,0]],v);D.doigt.style.transform=`scale(${1-.16*tap})`;
 }
-function flotte(i,on){const f=D.f[i];if(!on)return;if(!f.classList.contains('sorti')){f.classList.add('sorti');return;}f.classList.remove('pouls');void f.offsetWidth;f.classList.add('pouls');}
 function ecranVigne(v){
   const a=piste([[0,0],[.95,0],[1.6,1]],v);D.vr.textContent=a>.5?'13':'12';D.vj.style.setProperty('--p',(31.6+2.6*a).toFixed(1)+'%');
   D.vb.textContent=v>1?'Rang 13 validé':'Valider le rang 13';D.vb.style.opacity=v>1?.8:1;
@@ -1150,15 +1226,13 @@ function ecranCave(v){
   const e=piste([[0,0],[1.95,0],[2.25,1]],v);D.ce.style.opacity=e;D.ce.style.transform=`scale(${.86+.14*e})`;
   D.doigt.style.opacity=0;D.toast.style.opacity=0;
 }
-const ECR=[ecranVigne,ecranTracteur,ecranPhyto,ecranCave],FLOT=[[0,1.1],null,[1,1.0],[2,2.0]];
-let flotDone={};
+const ECR=[ecranVigne,ecranTracteur,ecranPhyto,ecranCave];
 function demo(t){
   const k=Math.floor(t/LOOP),tl=t-k*LOOP,e=Math.min(3,Math.floor(tl/PER)),u=tl-e*PER;
   let x;if(douxMode){x=e;D.rail.style.opacity=(k===0&&e===0)?1:piste([[0,0],[.45,1]],u).toFixed(3);}else if(e===0)x=k>0?3*(1-io(cl(u/.8))):0;else x=e-1+io(cl(u/.6));
   D.rail.style.setProperty('--x',x.toFixed(4));D.dock.forEach((s,i)=>s.classList.toggle('on',i===e+1));
   const v=u-(e===0&&k>0?.8:.6);ECR[e](v);
   for(let j=0;j<4;j++)if(j!==e&&j!==(e+3)%4)ECR[j](-1);
-  const fl=FLOT[e],key=k+'-'+e;if(fl&&v>=fl[1]&&!flotDone[key]){flotDone[key]=1;flotte(fl[0],true);}
 }
 
 /* ── l'horloge : chaque histoire tourne quand son écran est à l'écran, décalée des autres ── */
@@ -1180,12 +1254,12 @@ requestAnimationFrame(()=>{document.body.classList.add('pret');H[0].parti=true;}
 if('fonts' in document)document.fonts.ready.then(mesurer);mesurer();
 const sec=$('#fonctions');
 const rv=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){e.target.classList.add('vu-r');rv.unobserve(e.target);}},{threshold:.3});document.querySelectorAll('[data-r]').forEach(e=>rv.observe(e));
-if(fixe){sec.classList.add('vu');document.querySelectorAll('[data-r]').forEach(e=>e.classList.add('vu-r'));D.f.forEach(f=>f.classList.add('sorti'));reposer();demo(3*PER+3);return;}
-new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){sec.classList.add('vu');H.slice(1).forEach(h=>h.parti=true);}},{threshold:.12}).observe(sec);
+if(fixe){sec.classList.add('vu');document.querySelectorAll('[data-r]').forEach(e=>e.classList.add('vu-r'));reposer();demo(3*PER+3);return;}
+new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){sec.classList.add('vu');H.slice(1).forEach(h=>h.parti=true);setTimeout(tracerFlux,1400);}},{threshold:.12}).observe(sec);
 const vo=new IntersectionObserver(es=>{for(const e of es){const h=H.find(x=>x.el===e.target);if(h)h.vis=e.isIntersecting;}},{threshold:.05});H.forEach(h=>vo.observe(h.el));
 requestAnimationFrame(boucle);
 const bp=$('#pause');bp.addEventListener('click',()=>{pause=!pause;document.body.classList.toggle('arret',pause);bp.setAttribute('aria-pressed',String(pause));bp.textContent=pause?'Relancer l’animation':'Mettre l’animation en pause';});
-window.__motion={pause:()=>{pause=true;},jouer:()=>{pause=false;},caler:(i,t)=>{H[i].t=H[i].debut+t;H[i].f(t%H[i].dur);},etat:()=>({x:getComputedStyle(D.rail).getPropertyValue('--x'),rang:D.vr.textContent,pct:D.tp.textContent,f:D.f.map(f=>f.classList.contains('sorti'))})};
+window.__motion={pause:()=>{pause=true;},jouer:()=>{pause=false;},caler:(i,t)=>{H[i].t=H[i].debut+t;H[i].f(t%H[i].dur);},etat:()=>({x:getComputedStyle(D.rail).getPropertyValue('--x'),rang:D.vr.textContent,pct:D.tp.textContent})};
 })();
 </script>
 <script>
@@ -1202,6 +1276,29 @@ const frise=document.getElementById('frise');
 function majFrise(){if(!frise)return;const ms=[...frise.querySelectorAll('.moment')],n=ms.filter(m=>m.classList.contains('joue')).length;frise.style.setProperty('--prog',ms.length?(n/ms.length).toFixed(3):0);}
 
 if(/[?&]still/.test(location.search))document.querySelectorAll('.moment,.qe,.lieu,.formule,#export').forEach(e=>e.classList.add('joue','vu-x'));
+})();
+</script>
+<script>
+/* Le menu : les sections de la page. Sur PC, la section lue est soulignée ; sur téléphone, un panneau plein écran. */
+(()=>{'use strict';
+  const html=document.documentElement,bt=document.getElementById('bt-menu'),pan=document.getElementById('panneau');
+  if(bt&&pan){
+    const txt=bt.querySelector('.bt-menu-txt');
+    const fermer=rendre=>{if(!pan.classList.contains('ouvert'))return;pan.classList.remove('ouvert');html.classList.remove('menu-ouvert');bt.setAttribute('aria-expanded','false');txt.textContent='Menu';
+      setTimeout(()=>{if(!pan.classList.contains('ouvert'))pan.hidden=true;},360);if(rendre)bt.focus();};
+    const ouvrir=()=>{pan.hidden=false;void pan.offsetWidth;pan.classList.add('ouvert');html.classList.add('menu-ouvert');bt.setAttribute('aria-expanded','true');txt.textContent='Fermer';
+      const l=pan.querySelector('a');if(l)l.focus({preventScroll:true});};
+    bt.addEventListener('click',()=>{pan.classList.contains('ouvert')?fermer(false):ouvrir();});
+    pan.addEventListener('click',e=>{if(e.target.closest('a'))fermer(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')fermer(true);});
+    const large=matchMedia('(min-width:1100px)');const surLarge=e=>{if(e.matches)fermer(false);};
+    if(large.addEventListener)large.addEventListener('change',surLarge);
+  }
+  const liens=[...document.querySelectorAll('.menu a[href^="#"]')];
+  if(!liens.length||!('IntersectionObserver' in window))return;
+  const marquer=cle=>liens.forEach(a=>a.setAttribute('aria-current',String(a.getAttribute('href')===cle)));
+  const lu=new IntersectionObserver(es=>{for(const e of es){if(!e.isIntersecting)continue;const t=e.target;marquer(t.dataset.nav||('#'+(t.id||'')));}},{rootMargin:'-42% 0px -52% 0px'});
+  document.querySelectorAll('main > section').forEach(x=>lu.observe(x));
 })();
 </script>
 <script>
