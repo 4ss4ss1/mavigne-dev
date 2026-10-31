@@ -50,7 +50,7 @@ const FONCTIONS = ['_chrNeuf', '_chrJour', '_chrMes', '_chrNom', '_chrDur', '_ch
   '_stopChronoTimer', '_startChronoTimer', '_chrSuspect', '_chrSuspectTotal', '_chrTrace', '_chrPose', '_chrPoserBloc',
   '_chrCloturer', '_chrDemarrer', '_chrFermerAilleurs', '_chrTapParcelle', '_chrReprendreParcelle', '_chrAjouterAuBloc',
   '_chrFini', '_chrInterrompre', '_chrDejeuner', '_chrReprendre', '_chrFermerPause', '_chrFinJournee',
-  '_chronoFinalizeOnClose', '_chrRestaurer', 'renderSessionProgress', 'toggleSessionSkip', '_sdDecocher', '_sdNorm',
+  '_chronoFinalizeOnClose', '_chrRestaurer', 'renderSessionProgress', 'toggleSessionSkip', '_sdDecocher', '_sdNorm', '_trCocheJour',   // FERTI-9 (§499) : la coche pose son jour
   '_sdRetablir', 'toggleSessionParcelle', 'confirmerValidationChamp'];
 const VARS = [/^var _CHR_CLE = .*$/m, /^var _CHR_CLE2 = .*$/m, /^var _CHR_HAUT = .*$/m, /var _CHR_MOTIFS=\{[\s\S]*?\};/,
   /^var _CHR_TRACE_MAX=.*$/m, /^var _chrPersistKO=false;$/m, /^var _ocvNomParcelle=null;$/m];

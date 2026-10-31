@@ -84,7 +84,7 @@
   manque reste « — », rien n'est inventé.</p>
   <ol class="steps">
     <li><b>Le produit</b>La recherche trouve d'abord <b>vos produits</b>, ceux de vos apports passés : en choisir un remplit la fiche comme au dernier apport. Ses teneurs sont celles de la dernière campagne ; celles des campagnes précédentes restent à un geste, car elles changent d'une année à l'autre selon l'analyse du produit — vérifiez-les sur le sac. Ensuite, E-Phy, famille des matières fertilisantes. Chaque résultat dit ce que son autorisation permet : <b>Vigne</b>, <b>Toutes cultures</b>, <b>Culture non précisée</b> ou <b>Pas la vigne</b> (choisissable, avec un avertissement) ; choisi, il apporte ses teneurs déclarées. Un produit <b>normé</b> n'a pas de numéro d'AMM : « Pas dans E-Phy » est alors normal. Tapez son nom, puis touchez sa norme : NF U 44-051 pour un amendement organique, NF U 42-001 pour un engrais, ou fertilisant UE. Elle est écrite sur le sac, à côté du nom du type ; la mention « utilisable en agriculture biologique » n'est pas la norme, elle se coche. La formule du sac, comme <b>4-10-1</b>, remplit l'azote, le phosphore et la potasse. <b>Ce que c'est</b> pose le type au sens de la directive nitrates et dit pourquoi (type II quand on ne sait pas, comme le veut la règle). Puis la dose conseillée en t/ha, le poids d'un sac et, si vous l'avez, le prix.</li>
-    <li><b>Les parcelles</b>Cochez celles qui reçoivent l'amendement, une par une ou <b>par règle</b> : un seuil de rendement (celui de la vendange, repris du Cuvier) et des appellations à retirer, puis « Cocher ces parcelles ». Une parcelle sans rendement connu reste de côté, et l'écran la nomme ; on ajuste ensuite à la main. Chaque ligne montre son appellation, son rendement, ses sacs (arrondis au demi-sac), ses kilos, son azote et son temps. La commande est arrondie au sac entier.</li>
+    <li><b>Les parcelles</b>Cochez celles qui reçoivent l'amendement, une par une ou <b>par règle</b> : un seuil de rendement (celui de la vendange, repris du Cuvier) et des appellations à retirer, puis « Cocher ces parcelles ». Une parcelle sans rendement connu reste de côté, et l'écran la nomme ; on ajuste ensuite à la main. Chaque ligne montre son appellation, son rendement, ses sacs (des sacs entiers : le semoir se charge au sac), ses kilos, son azote et son temps. La commande est la somme de ces sacs.</li>
     <li><b>Le passage tracteur</b>Machine, vitesse dans le rang, écartement (repris des réglages) et
     <b>temps utile</b>.</li>
     <li><b>Date et conditions</b>La semaine prévue et l'enfouissement.</li>
@@ -102,14 +102,22 @@
     <li>le produit entre dans <b>La Réserve</b> (fournitures vigne). L'achat se saisit à la livraison,
     le prix à la facture. Un prix saisi dans l'amendement entre en attendant au <b>prévu</b> du Pilotage, et
     la facture le remplace dès qu'elle est saisie ;</li>
+    <li>une <b>session tracteur se prépare</b> : une carte « À démarrer » attend en tête du Tracteur, avec les
+    parcelles cochées et les sacs de chacune (des sacs entiers, comme à l'étape 2). Le tractoriste la démarre le jour
+    venu : la session prend la date du jour, son nom, et le compteur s'il le faut ;</li>
     <li>l'apport entre au registre, une ligne par parcelle.</li>
   </ul>
   <p>La <b>date d'épandage</b> ne se saisit pas : c'est le jour où la parcelle est validée, dans une
-  session tracteur de l'activité « Amendement » ou en validant la tâche. Sans l'un ni l'autre,
+  session tracteur de l'activité « Amendement » ou en validant la tâche. Dans une session sur plusieurs jours,
+  chaque parcelle porte le jour où elle a été faite (avec le chrono, le début de sa mesure). Sans l'un ni l'autre,
   l'administrateur la pose à la main sur la ligne de la parcelle.</p>
   <p>La session tracteur <b>coche aussi la tâche « Amendement »</b> de la parcelle. Le journal la note
   « Fait au tracteur », au nom du conducteur. Dans le Pilotage, ce temps reste celui de la session : il n'est
   pas compté une seconde fois. Une validation annulée depuis la parcelle n'est pas refaite par la même session.</p>
+  <p>Sur chaque apport de l'onglet, une ligne dit où en est la session : <b>prête</b> dans Tracteur, <b>en cours</b>,
+  ou rien quand tout est fait ; chaque parcelle à faire montre ses sacs. L'administrateur la propose (« Préparer la
+  session tracteur », pour un amendement saisi avant) ou la retire (« Ne plus la proposer », « Annuler » pendant six
+  secondes).</p>
   <p>En bas de l'onglet, <b>« Ce qu'un contrôle va demander »</b> : les parcelles en <b>zone
   vulnérable</b>, leur <b>îlot PAC</b>, leur <b>type de sol</b> et leur <b>année de plantation</b> (touchez le
   nom d'une parcelle pour les poser), l'analyse de sol exigée au-delà de 3&nbsp;ha en zone vulnérable, le fractionnement de

@@ -6,7 +6,7 @@
 //  que les sacs, le temps tracteur, le travail prévu et le cahier de
 //  fertilisation se remplissent seuls. Ce qu'on éprouve :
 //    · le barème h/ha depuis vitesse, écartement et temps utile
-//    · sacs par parcelle (demi-sac) et commande (sac entier)
+//    · sacs par parcelle (sacs entiers, FERTI-9 §499) et commande (leur somme)
 //    · l'azote : dose × % N ; composition absente = null, jamais 0
 //    · les dates d'épandage LUES : session « Amendement », tâche validée,
 //      date posée à la main — et une validation ne sert qu'à UN apport
@@ -128,7 +128,7 @@ console.log('\n\u2500\u2500 L\u2019enregistrement');
   f.prod.nom = 'Fertil Bio 3-2-3'; f.prod.N = '3'; f.dose = '1,5'; f.kg = '25'; f.parcs = { A: 1, C: 1 }; f.v = '4'; f.ec = '1'; f.rd = '75'; f.mach = 't1';
   api.setFer(f);
   const o = api._ferCalc();
-  t('sacs : 1,5 t \u00d7 1,54 ha / 25 kg \u2192 commande 93', o.sacsCmd === 93);
+  t('sacs : des sacs entiers par parcelle (A 25,2 \u2192 26, C 67,2 \u2192 68) \u2192 commande 94, leur somme (FERTI-9, \u00a7499 : pas de demi-sac, d\u00e9cision de Nico)', o.sacsCmd === 94);
   t('heures : 3,33 h/ha \u00d7 1,54 ha', Math.abs(o.H - 1.54 * 10000 / 4000 / 0.75) < 1e-9);
   api._ferSave();
   const op = (win.INTRANTS.fertil || [])[0];

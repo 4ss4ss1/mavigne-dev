@@ -1,0 +1,45 @@
+{
+  "lot": "FERTI-9",
+  "section": "§499",
+  "base": "6ae66b134c8f03bce01b1e26e84418cf1f09fd42",
+  "inclut": [],
+  "date": "2026-10-30",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f278aea075c30ff6eda5892266945f8dc5cedcd5ee328bbd72107dca852305c8",
+    "date": "2026-10-30T20:29:01.789Z",
+    "joues": {
+      "téléphone": 2,
+      "ordinateur": 2,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "amendement",
+      "produit-repris"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "79dc88a9012b312e43faaf96ddfd3f35b138af937404ee5ff7445f901e7073a5",
+    "CLAUDE.md": "7832764d16173929e2c3f23d67444adef50d9e07a00eaf6c5a80a6b8166cd2a6",
+    "docs/claude/INDEX.md": "f2029e593110154045e596df70e4213a9b0ed576f1278d2f3ca29d944af161d0",
+    "docs/claude/chantiers-480-529.md": "2ee930990955107ea4bccc8321551a35e743994cc915ea0e76369e67788327e1",
+    "docs/claude/journal.md": "dbdfa6dc4006770c8dc7b56146aba92e4d3cf38cd19a044a37461ca2a38fa4d6",
+    "guide/06-tracteur.html": "8cd2f1be98bd8bb3a492090a196e204955f90d6ee87a45778f069744b9b3b887",
+    "guide/07-phyto.html": "3bc885e7c743c434f721d70d0e2418ef445fed3f252b36001f149e4b860b1a06",
+    "index.html": "e97d3b50871dda29dc98c4439b11cc43d126ffa8e99db06adc20a333133be9d4",
+    "public/sw.js": "ab2fc07394bcc030c9fedbbf7d6ca08c40bac79b6dfaf9d2f69d038f05c0d7a2",
+    "scripts/mv-harnais-fertil.mjs": "8d2c6860d363e576088076cab74aadce03eb963b74bee8471377777e093003d0",
+    "scripts/mv-harnais-kit4.mjs": "51b8bf984d6734d35203ce4cc8c0e2529b5f8e5b2bd32aa7b6609d01cc7b8a1c",
+    "scripts/mv-harnais-liste.mjs": "ee535ca4436ea82f787b42fad3efde06fa96c206856b380d08e331218a8bd619",
+    "scripts/mv-harnais-sessions.mjs": "1c9358d207afa9db752df095c767c2223d28aa6b21f1bca57d2ce64af6ac8a25",
+    "scripts/mv-harnais-tap.mjs": "8d5d12e292ada34065d6885c1a21d36fbe703fa6daf268c951cf1eebf1901f52",
+    "scripts/tutos-couverture.json": "c6e37e812067cb28c52f163cc6dd0045b8ddd48278e2097cf20a831a85c6c492",
+    "src/phyto.js": "7b580030943be85386c66bcf680cd9dc4588291a07673d37a77ddb6ef580c439",
+    "src/styles.css": "0be8013704bd46129eaece64329ee6152e137245bbe1f0c91ee2c0a15d5ee988",
+    "src/tracteur.js": "d3eef16d4d10282ea53aec529a35d8dc7ebe7396d1321847fd19f6f48fe23682",
+    "src/utils.js": "f7a720412f0b42b177d23354db95446199e5215bd9bf5efde3f4555aad890d48",
+    "src/whats-new.js": "31f40812a39e6e98ae44be25197a38aab63e679a3110d43dd8342c6f897f31ba",
+    "scripts/mv-harnais-ferti9.mjs": "c2688d597c4e50a0345f6f0903ae6bd3180208f19d40a0f8bdbe0c5f5e7d0cec"
+  }
+}

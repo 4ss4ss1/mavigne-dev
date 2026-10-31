@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.49', d: '2026-10-30', items: [
+    { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'L’amendement prépare sa session tracteur',
+      desc: "En enregistrant un amendement (Phyto › Fertilisation), la session tracteur se prépare toute seule\u00a0: une carte «\u00a0À démarrer\u00a0» attend en tête du Tracteur, avec les parcelles cochées et les sacs de chacune. Le tractoriste la démarre le jour venu — la session prend la date du jour, son nom, et le compteur s’il le faut. Sur chaque apport de l’onglet, «\u00a0Préparer la session tracteur\u00a0» la propose pour un amendement saisi avant, «\u00a0Ne plus la proposer\u00a0» la retire ; chaque parcelle à faire montre ses sacs. Les sacs se comptent <b>entiers</b>, parcelle par parcelle — le semoir se charge au sac — et la commande en est la somme. Dans le registre, chaque parcelle est datée du jour où elle a été faite, même quand la session dure plusieurs jours." },
+    { niv: 0, pour: ['tractoriste'], emoji: 'tracteur', titre: 'Un amendement vous attend : « Démarrer »',
+      desc: "Quand l’administrateur enregistre un amendement, une carte «\u00a0À démarrer\u00a0» apparaît en tête du Tracteur. <b>Démarrer</b> ouvre la nouvelle session déjà remplie\u00a0: l’activité Amendement, la machine, votre nom. La session ne garde que les parcelles de l’amendement, et chaque ligne dit combien de sacs entiers y mettre. Terminée avant la fin, la carte revient avec les parcelles qui restent." },
+  ] },
   { v: '10.48', d: '2026-10-30', items: [
     { niv: 0, pour: ['tous'], emoji: 'etincelles', titre: 'La nouvelle Ma Vigne se présente',
       desc: "À la première ouverture après la grande mise à jour, un grand panneau présente ce qui change pour vous, chapitre par chapitre, avec la liste complète des améliorations et un livret PDF à télécharger. Pour le revoir\u00a0: <b>Réglages › Moi › La nouvelle Ma Vigne</b>." },

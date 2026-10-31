@@ -1484,6 +1484,64 @@ function _trTerminer(id){
   if(typeof window.showToastAnnuler==='function') window.showToastAnnuler((s.activite||'Session')+' termin\u00e9e', annuler); else showToast('Session termin\u00e9e','#3D6B27');
   if(typeof _trRelevePassage==='function') _trRelevePassage(id,'terminer');   // ★ COMPT-1 (§483) : le relevé au passage
 }
+// ★ FERTI-9 (§499) — LA SESSION PRÉPARÉE PAR L'AMENDEMENT. Nico (30/10, dicté) : « quand je valide cet amendement, ça crée une
+//   session tracteur […] avec les parcelles qui ont été sélectionnées et la quantité de sacs sur chaque parcelle ». Recommandation
+//   suivie (« oui ») : l'amendement PRÉPARE la session ; elle attend ici en carte « À démarrer », sous la session en cours, et ne naît
+//   qu'au démarrage, par la feuille « Nouvelle session » remplie — la date du jour, le conducteur, le compteur s'il le faut : les règles
+//   de toute session (créée à l'enregistrement, elle aurait porté la date de la saisie, que le registre reprend quand la parcelle n'a
+//   pas de temps mesuré). `ferOp` relie la session à l'apport ; `parcellesSkip` ne laisse que ses parcelles ; chaque ligne dit ses sacs.
+//   Les données viennent de phyto.js par window (`_ferPreps`, `_ferSacsParc`) : phyto.js est chargé après ce module.
+//   Une boîte à part (#trac-prep) : test:ux mesure la session en cours par « #trac-encours .trx », et traux1a épingle sa boîte.
+var _trFerOp=null;   // l'apport dont « Démarrer » a ouvert la feuille « Nouvelle session »
+function _trFerListe(){
+  try{ return (typeof window._ferPreps==='function')?(window._ferPreps()||[]):[]; }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trFerListe'); return []; }
+}
+function _trFerSacsTxt(v){ var x=Math.ceil(Number(v)-1e-9); return String(x)+'\u00a0sac'+(x>=2?'s':''); }   // des sacs entiers (décision de Nico, 30/10)
+function _trFerHtml(f){
+  var peut=(typeof isTractoriste==='function'&&isTractoriste()), n=f.reste.length;
+  var meta=[f.prod, f.sem?('pr\u00e9vu semaine du '+_fmtDate(f.sem)):''].filter(Boolean).join(' \u00b7 ');
+  var ha=window._mvHaT?window._mvHaT(f.surf):String(f.surf);
+  var sacs=(f.sacs>0&&!f.sacsInc)?(' \u00b7 '+_trFerSacsTxt(f.sacs)+(f.kgSac?(' de '+String(f.kgSac).replace('.',',')+'\u00a0kg'):'')):'';
+  return '<div class="trx trx-prep" data-op="'+_escAttr(f.id)+'">'
+    +'<div class="trx-hd"><div><div class="trx-k">'+(f.demarree?'\u00c0 reprendre':'\u00c0 d\u00e9marrer')+'</div><div class="trx-t">'+_escHtml(f.act||'Amendement')+'</div>'+(meta?'<div class="trx-m">'+_escHtml(meta)+'</div>':'')+'</div></div>'
+    +'<div class="trx-ha">'+_escHtml(n+' parcelle'+(n>1?'s':'')+(f.demarree?' restante'+(n>1?'s':''):'')+' \u00b7 '+ha+' ha'+sacs)+'</div>'
+    +(peut?'<div class="trx-act"><button type="button" class="trx-av" onclick="_trFerDemarrer(this.closest(\'.trx\').dataset.op)">D\u00e9marrer</button></div>'
+          :'<div class="trx-m trx-prep-qui">Le tractoriste la d\u00e9marre le jour venu.</div>')
+    +'</div>';
+}
+// « Démarrer » : la feuille habituelle, remplie — l'activité, la machine de l'amendement, soi comme conducteur s'il est dans la liste.
+function _trFerDemarrer(id){
+  if(!(typeof isTractoriste==='function'&&isTractoriste())){ showToast('R\u00e9serv\u00e9 aux tractoristes','#C0392B'); return; }
+  var f=_trFerListe().find(function(x){ return x.id===id; });
+  if(!f){ showToast('Cet amendement n\u2019attend plus de session','#8A8072'); renderTracteur(); return; }
+  var a=ACTIVITES.find(function(x){ return x&&x.nom===f.act; });
+  if(!a){ showToast('Activit\u00e9 \u00ab\u00a0'+f.act+'\u00a0\u00bb introuvable \u2014 enregistrez de nouveau l\u2019amendement','#B85A1A'); return; }
+  openNewSession();
+  var sel=document.getElementById('s-act'); if(!sel) return;
+  sel.value=f.act; onSessionActChange();
+  if(f.mach&&f.mach!==a.tracteurDefautId&&(TRACTEURS_LIST||[]).some(function(t){ return t.id===f.mach; })&&!REPARATEUR[f.mach]) _pickTrac('s', f.mach, a.tracteurDefautId||'');
+  var moi=window.currentUser&&window.currentUser.nom;
+  if(moi){ var pc=Array.prototype.slice.call(document.querySelectorAll('#s-cond-pick .pchk')).find(function(el){ return el.textContent.trim()===moi; }); if(pc) pickCond(pc); }
+  _trFerOp=f.id;   // après openNewSession, qui le remet à zéro
+  _trFerBan();
+}
+// L'encadré de la feuille « Nouvelle session » : l'amendement et ce que la session gardera — seulement si l'activité est la sienne.
+function _trFerBan(){
+  var el=document.getElementById('s-fer'); if(!el) return;
+  var f=_trFerOp?_trFerListe().find(function(x){ return x.id===_trFerOp; }):null;
+  if(!f||_actNomDuSelect('s-act')!==f.act){ el.style.display='none'; el.textContent=''; return; }
+  var n=f.reste.length;
+  el.innerHTML='<span class="mvencadre-t">'+_escHtml(f.prod||f.act)+'</span>'
+    +_escHtml(n+' parcelle'+(n>1?'s':'')+((f.sacs>0&&!f.sacsInc)?(', '+_trFerSacsTxt(f.sacs)):'')+'. La session ne garde qu\u2019elles\u00a0; chaque ligne dit ses sacs.');
+  el.style.display='';
+}
+// Les sacs d'une parcelle, dans la feuille d'une session née d'un amendement.
+function _trFerSacsLigne(s, nom){
+  if(!s||!s.ferOp||typeof window._ferSacsParc!=='function') return '';
+  var v=null; try{ v=window._ferSacsParc(s.ferOp, nom); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_trFerSacsLigne'); }
+  return (v==null)?'':'<div class="sdp-sacs">'+_escHtml(_trFerSacsTxt(v))+'</div>';
+}
 function _tTrouve(s,q){
   q=String(q||'').trim().toLowerCase(); if(!q) return true;
   var faites=(s.parcellesFaites||[]).map(function(x){ return typeof x==='string'?x:((x&&x.nom)||''); });
@@ -1500,6 +1558,7 @@ function _tFeuille(ouvrir){ document.body.classList.toggle('t-feuille-ouverte', 
 function _tFiltresEffacer(){ window.fCond='tous'; window.fAct='toutes'; renderTracteur(); }
 function _tCherche(v){ window.fTracQ=String(v||''); renderTracteur(); }
 window._trTerminer=_trTerminer; window._tFeuille=_tFeuille; window._tFiltresEffacer=_tFiltresEffacer; window._tCherche=_tCherche;
+window._trFerDemarrer=_trFerDemarrer;   // FERTI-9 (§499)
 // ★ TRAC-UX-1B (§481) — SUR ORDINATEUR, LA COLONNE DE DROITE (docs/maquettes/maquette-ux-v2.html, Tracteur ; décision de Nico, 28/10) :
 //   le parc rangé par urgence — au garage, révision dépassée ou toute proche, le reste — et la cuve de GNR, avec les heures de moteur du
 //   mois. Les mêmes données qu'ailleurs, rien d'inventé ; un tracteur ouvre son entretien. Elle remplace la fiche de session (TRAC-1),
@@ -1633,6 +1692,7 @@ function renderTracteur(){
   const dataEnc=data.filter(s=>s.statut==='En cours'&&!isTrait(s)).sort((a,b)=>b.date.localeCompare(a.date));
   // ★ TRAC-UX-1A (§480) : la session en cours en tête de la page (ses deux boutons), les compteurs sans leurs zéros, « Filtrer · n ».
   var _enc=document.getElementById('trac-encours'); if(_enc) _enc.innerHTML=dataEnc.map(_trEncoursHtml).join('');
+  var _prp=document.getElementById('trac-prep'); if(_prp) _prp.innerHTML=_trFerListe().map(_trFerHtml).join('');   // ★ FERTI-9 (§499) : les sessions préparées par un amendement
   _tCompteurs();
   var _fn=document.getElementById('t-filtrer-n'), _nf=(window.fCond!=='tous'?1:0)+(window.fAct!=='toutes'?1:0); if(_fn) _fn.textContent=_nf?String(_nf):'';
   var _fv=document.getElementById('t-feuille-voir'); if(_fv) _fv.textContent='Voir '+data.length+' session'+(data.length>1?'s':'');
@@ -2568,7 +2628,7 @@ function renderSDParcelles(){
       const dist=(!fait&&typeof p._chrD==='number'&&p._chrD>0)?'<div class="sdp-dist">'+_chrFmtM(p._chrD)+'</div>':'';
       return sep+'<div class="sdp-row '+(enCours?'sdp-live':(fait?(ecart?'sdp-done sdp-bar':'sdp-done'):''))+'" data-action="coche" data-nom="'+p.nom.replace(/"/g,'&quot;')+'" style="cursor:pointer">'
         +'<div class="sdp-check '+(enCours?'live':(fait?'on':''))+'">'+(enCours?_mvIcon('chrono',16):(fait?_mvIcon('check',16):''))+'</div>'
-        +'<div style="flex:1;min-width:0"><div class="sdp-nom">'+_escHtml(p.nom)+'</div>'+dataHtml+'</div>'
+        +'<div style="flex:1;min-width:0"><div class="sdp-nom">'+_escHtml(p.nom)+'</div>'+_trFerSacsLigne(s,p.nom)+dataHtml+'</div>'
         +'<div class="sdp-surf">'+window._mvHaP(p.surface)+' ha'+dist+'</div>'
         +(chronoUi?_chrTag(s,p,fait,entryFaite):'')
       +'</div>';
@@ -2672,6 +2732,7 @@ function toggleSessionParcelle(nom,row){
   // parcelle par parcelle entre deux téléphones (FUSION-1) ; une seule chaîne en faisait une « feuille ».
   _sdNorm(s);
   s.parcellesFaites.push({nom:nom});
+  _trCocheJour(s,nom);   // FERTI-9 (§499) : la parcelle porte le jour où elle est faite
   _chrTrace(s,'coche',nom);
   _saveData('sessions');renderSessionProgress();renderSDParcelles();
 }
@@ -2692,6 +2753,16 @@ function _sdDecocher(nom){
 // Variable temporaire pour stocker la parcelle en attente de validation champ
 // SESS-1 : les coches anciennes (chaînes) deviennent des objets {nom} quand la session est touchée.
 function _sdNorm(s){if(s&&Array.isArray(s.parcellesFaites))s.parcellesFaites=s.parcellesFaites.map(function(x){return typeof x==='string'?{nom:x}:x;});}
+// ★ FERTI-9 (§499) — décision de Nico (30/10) : une parcelle est datée du jour où ELLE est faite, pas du jour où la session a
+//   démarré. Sans chrono, la coche ne portait que le nom : une session sur plusieurs jours datait tout au premier jour, et le
+//   registre de fertilisation le reprenait. Le jour n'est posé que s'il diffère de celui de la session (sinon il le dit déjà :
+//   rien de plus à enregistrer) ; une parcelle mesurée au chrono a déjà le sien (t0).
+function _trCocheJour(s,nom){
+  if(!s||!Array.isArray(s.parcellesFaites)) return;
+  var j=(typeof _mvToday==='function')?_mvToday():''; if(!j||j===String(s.date||'').slice(0,10)) return;
+  var e=s.parcellesFaites.find(function(x){ return x&&typeof x==='object'&&x.nom===nom; });
+  if(e&&!(typeof e.t0==='number'&&e.t0>0)) e.d=j;
+}
 /* L'HISTORIQUE DES GESTES (boîte noire, SESS-1 §168) — administrateur, en bas de la feuille.
    « Rétablir » remet une parcelle décochée telle qu'elle était (temps, valeur saisie). */
 var _SD_GESTES={debut:'d\u00e9but',reprise:'reprise \u2014 le temps s\u2019ajoute',ajout:'ajout\u00e9e au bloc',fin:'fin',
@@ -2751,6 +2822,7 @@ function confirmerValidationChamp(){
   _sdNorm(s);
   var _jv=s.parcellesFaites.findIndex(function(x){return _chrNom(x)===_ocvNomParcelle;});
   if(_jv>=0)s.parcellesFaites[_jv]={nom:_ocvNomParcelle,data:data};else s.parcellesFaites.push({nom:_ocvNomParcelle,data:data});
+  _trCocheJour(s,_ocvNomParcelle);   // FERTI-9 (§499)
   _chrTrace(s,'valeur',_ocvNomParcelle,{v:val});
   if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/confirmerValidationChamp'); } }
   var nomAff=_ocvNomParcelle;
@@ -2959,6 +3031,7 @@ function openNewSession(){
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   if(document.getElementById('s-trac-override'))document.getElementById('s-trac-override').value='0';
   _fillTracPick('s', ACTIVITES[0]?ACTIVITES[0].nom:'');
+  _trFerOp=null; var _sf=document.getElementById('s-fer'); if(_sf){ _sf.style.display='none'; _sf.textContent=''; }   // FERTI-9 (§499) : une feuille ouverte par « + » n'est reliée à aucun amendement
   _sessCoeqRender();   // COEQ-1 (§343)
   _openOv('ovSession');
 }
@@ -2967,6 +3040,7 @@ function onSessionActChange(){
   _sessCoeqRender();   // COEQ-1 (§343) : le coéquipier suit l'activité choisie
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   _fillTracPick('s', actNom);
+  _trFerBan();   // FERTI-9 (§499) : l'encadré de l'amendement suit l'activité choisie
   // Vérifier si le tracteur défaut est en répar → bloquer avec modal
   var act=ACTIVITES.find(function(a){return a.nom===actNom;});
   if(act&&REPARATEUR[act.tracteurDefautId]){
@@ -3302,6 +3376,12 @@ function saveSession(){
     note:document.getElementById('s-note').value
   };
   if(_coeq) _sess.coequipier=_coeq;   // jamais `undefined` (Firestore le refuse)
+  if(typeof _trFerOp!=='undefined'&&_trFerOp){   // ★ FERTI-9 (§499) : démarrée depuis la carte d'un amendement — reliée à lui, ses parcelles seules
+    var _fx=_trFerListe().find(function(x){ return x.id===_trFerOp; });
+    if(_fx&&_fx.act===a){ var _rs={}; _fx.reste.forEach(function(n){ _rs[n]=1; }); _sess.ferOp=_fx.id;
+      _sess.parcellesSkip=PARCELLES.filter(function(p){ return p&&p.statut!=='Arrachee'&&!_rs[p.nom]; }).map(function(p){ return p.nom; }); }
+    _trFerOp=null;
+  }
   SESSIONS.push(_sess);
   _saveData('sessions');
   _closeOv(null,'ovSession');

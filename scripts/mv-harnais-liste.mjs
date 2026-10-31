@@ -407,6 +407,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ferti6.mjs --contre'],
   ['node scripts/mv-harnais-ferti8.mjs'],           // FERTI-8 (§466) : « Vos produits » — apports passés groupés, teneurs par campagne, la plus récente d’abord ; la chaux sans type
   ['node scripts/mv-harnais-ferti8.mjs --contre'],
+  ['node scripts/mv-harnais-ferti9.mjs'],           // FERTI-9 (§499) : l’amendement prépare sa session tracteur — la carte « À démarrer », la feuille remplie, la session reliée à ses seules parcelles, les sacs de chaque ligne
+  ['node scripts/mv-harnais-ferti9.mjs --contre'],
   ['node scripts/mv-harnais-tri3.mjs'],
   ['node scripts/mv-harnais-cuvgr3.mjs'],
   ['node scripts/mv-harnais-crb2.mjs', 'crb-2-le-couloir-des-courbes'],

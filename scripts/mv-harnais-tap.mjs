@@ -258,7 +258,7 @@ function bacDecoche(S, o = {}) {
     _chrReprendreParcelle: nom => env.chrTap.push('reprise:' + nom)
   };
   vm.createContext(ctx);
-  vm.runInContext([S.chrNom, S.chrDur, S.chrMes, S.sdnorm, S.decocher, S.toggle, 'var _ocvNomParcelle=null;'].join('\n'), ctx);
+  vm.runInContext([S.chrNom, S.chrDur, S.chrMes, S.sdnorm, S.cocheJour, S.decocher, S.toggle, 'var _ocvNomParcelle=null;'].join('\n'), ctx);   // FERTI-9 (§499) : _trCocheJour, la coche pose son jour
   env.ctx = ctx; env.s = s;
   env.noms = () => s.parcellesFaites.map(x => (typeof x === 'string' ? x : x.nom)).join();
   return env;
@@ -346,7 +346,8 @@ function mesurer(src) {
     chrNom: fonction(src.trac, '_chrNom'),
     chrDur: fonction(src.trac, '_chrDur'),
     chrMes: fonction(src.trac, '_chrMes'),
-    sdnorm: fonction(src.trac, '_sdNorm') };
+    sdnorm: fonction(src.trac, '_sdNorm'),
+    cocheJour: fonction(src.trac, '_trCocheJour') };
   const manque = ['bloc', 'toggle', 'decocher', 'chrNom', 'chrDur', 'chrMes', 'sdnorm'].filter(k => !S[k]);
   const R = [['le bloc TAP-1 et les quatre fonctions se lisent dans tracteur.js'
     + (manque.length ? ' (manque : ' + manque.join(', ') + ')' : ''), !manque.length]];

@@ -33,6 +33,8 @@
     "_aujVers": "CAVE-UX-1 (§494) : une entrée du sommaire de la Cave mène à sa partie de la page — un lien",
     "_rsvMvt": "RSV-UX-1 (§495) : le « + » de la Réserve ouvre « Nouveau mouvement » — chaque ligne ouvre un formulaire qui existe",
     "_rsvMvtFermer": "RSV-UX-1 (§495) : le voile ferme la feuille — rien à apprendre",
-    "_rsvMvtVa": "RSV-UX-1 (§495) : une ligne de « Nouveau mouvement » ouvre son formulaire (achat, fûts neufs, se séparer, inventaire, ouillage) — les gestes d’avant"
+    "_rsvMvtVa": "RSV-UX-1 (§495) : une ligne de « Nouveau mouvement » ouvre son formulaire (achat, fûts neufs, se séparer, inventaire, ouillage) — les gestes d’avant",
+    "_trFerDemarrer": "FERTI-9 (§499) : « Démarrer » sur la carte d’un amendement ouvre la feuille « Nouvelle session » déjà remplie — le geste est celui de toute session, la carte dit ce qu’elle fait",
+    "_ferPrep": "FERTI-9 (§499) : un lien qui dit ce qu’il fait (« Préparer la session tracteur » / « Ne plus la proposer ») ; « Annuler » le rattrape"
   }
 }

@@ -3761,6 +3761,14 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .trx-act button{flex:1;min-height:44px;border-radius:var(--r-full,999px);font-weight:600;font-size:var(--pt-micro,12px);}
 .trx-av{border:0;background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);}
 .trx-fin{border:1px solid var(--ligne-forte,#C9C7C1);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);}
+/* ★ FERTI-9 (§499) — la session préparée par un amendement : la carte de la session en cours, au liseré « à faire », dans sa boîte
+   (#trac-prep, sous #trac-encours) ; et les sacs de chaque parcelle dans la feuille d'une session née d'un amendement. */
+.trac-prep:empty{display:none;}
+.trac-prep{padding:var(--e-3,12px) var(--e-4,16px) 0;}
+.trx-prep{border-left-color:var(--attention,#A15C00);}
+.trx-prep .trx-k{color:var(--attention-texte,#975600);}
+.trx-prep .trx-ha,.trx-prep-qui{margin-top:var(--e-2,8px);}
+.sdp-sacs{margin-top:2px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--accent-texte,#7A2850);}
 #trac-kpis{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-4,16px);padding:var(--e-3,12px) var(--e-4,16px) 0;}
 #trac-kpis .mvu-kpi{display:flex;align-items:baseline;gap:var(--e-1,4px);padding:0;border:0;background:none;box-shadow:none;min-height:0;}
 #trac-kpis .mvu-kpi[hidden]{display:none;}

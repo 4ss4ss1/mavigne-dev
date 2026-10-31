@@ -1285,8 +1285,10 @@ function _ferFmt(x){ var c=Math.round(x*100), d=(c%100===0)?0:((c%10===0)?1:2); 
 function _ferNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); return (isNaN(v)||v<0)?0:v; }
 function _ferFr(x,d){ d=d||0; return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function _ferHm(h){ var t=Math.round(h*60), H=Math.floor(t/60), M=t%60; return H+'\u00a0h\u00a0'+(M<10?'0':'')+M; }
-function _ferHalf(x){ return Math.ceil(x*2-1e-9)/2; }
-function _ferSacs(x){ return _ferFr(_ferHalf(x),1).replace(/,0$/,''); }
+// FERTI-9 (§499) — décision de Nico (30/10) : pas de demi-sac. Le semoir se charge au sac entier ; « si c'est 1,5,
+// on en dit 2 ». La commande est la somme des sacs de chaque parcelle : autant de sacs achetés que de sacs à mettre.
+function _ferSacEntier(x){ return Math.ceil(x-1e-9); }
+function _ferSacs(x){ return _ferFr(_ferSacEntier(x),0); }
 function _ferList(){ var I=window.INTRANTS; if(!I) return []; if(!Array.isArray(I.fertil)) I.fertil=[]; return I.fertil; }
 function _ferParcs(){ return (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; }); }
 function _ferParc(nom){ return (window.PARCELLES||[]).find(function(p){ return p && p.nom===nom; }) || null; }
@@ -1307,6 +1309,17 @@ function _ferEha(op,k){ var d=_ferNum(op.dose), n=op.prod?op.prod[k]:null; if(!d
 // à v km/h ça fait un temps de semis pur, divisé par la part de temps utile.
 function _ferHha(v,ec,rd){ v=_ferNum(v); ec=_ferNum(ec); rd=_ferNum(rd); if(!v||!ec||!rd) return 0; return (10000/ec)/(v*1000)/(rd/100); }
 
+// FERTI-9 (§499) — décision de Nico (30/10) : une parcelle est datée du jour où ELLE a été démarrée, pas du jour où
+// la session l'a été. Chrono : le début de sa mesure (t0, sinon t1) ; sans chrono : le jour de la coche (`d`, posé par
+// le Tracteur quand il diffère du jour de la session) ; sinon le jour de la session.
+function _ferJourParc(s, x){
+  if(x&&typeof x==='object'){
+    if(typeof x.t0==='number'&&x.t0>0) return _ferIso(new Date(x.t0));
+    if(typeof x.t1==='number'&&x.t1>0) return _ferIso(new Date(x.t1));
+    if(typeof x.d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)) return x.d;
+  }
+  return String((s&&s.date)||'').slice(0,10);
+}
 // -- Les dates d'épandage, LUES (jamais écrites par le registre) -------------
 // Pour chaque apport et chaque parcelle : la première validation APRÈS la
 // création de l'apport. Une validation ne sert qu'à un seul apport (le plus
@@ -1318,7 +1331,7 @@ function _ferFaits(){
     if(!s||s.activite!==FER_ACT) return;
     (s.parcellesFaites||[]).forEach(function(x){
       var nom=(typeof x==='string')?x:((x&&x.nom)||''); if(!nom) return;
-      var d=(x&&typeof x==='object'&&typeof x.t1==='number')?_ferIso(new Date(x.t1)):String(s.date||'').slice(0,10);
+      var d=_ferJourParc(s,x);
       if(d) ev.push({nom:nom, date:d, src:'session'});
     });
   });
@@ -1368,7 +1381,7 @@ function _ferSyncSessions(){
       if(!p.taches||typeof p.taches!=='object'||Array.isArray(p.taches)) p.taches={};
       var st=p.taches[FER_TACHE];
       if(st==='Valid\u00e9') { deja[sid+'\u0000'+nom]=1; return; }   // déjà validée à la main : on ne double pas le journal
-      var d=(x&&typeof x==='object'&&typeof x.t1==='number')?_ferIso(new Date(x.t1)):String(s.date||'').slice(0,10);
+      var d=_ferJourParc(s,x);
       if(!d) return;
       p.taches[FER_TACHE]='Valid\u00e9';
       J.unshift({ id:(t0+n).toString(16), date:d, parcelle:nom, tache:FER_TACHE, qui:s.conducteur||'', quiHors:true,
@@ -1385,6 +1398,90 @@ function _ferSyncSessions(){
   return n;
 }
 
+// -- FERTI-9 (§499) : la session tracteur préparée par l'amendement -------------
+// Nico (30/10, dicté) : à la validation, une session « Amendement » avec les parcelles
+// cochées et les sacs de chacune. Recommandation suivie (« oui ») : l'amendement PRÉPARE
+// la session — une carte « À démarrer » en tête du Tracteur — qui ne naît qu'au démarrage,
+// par la feuille « Nouvelle session » : la date du jour, le conducteur, le compteur s'il le
+// faut, les règles de toute session. Créée ici, elle aurait porté la date de la saisie, et
+// le registre (_ferFaits) la reprend quand la parcelle n'a pas de temps mesuré. Rien d'autre
+// dans l'appli ne la compte avant son démarrage.
+// L'apport porte `prep` (true : proposé au tracteur) et `sacsParc` (les sacs de chaque
+// parcelle, figés tels que l'étape 2 les montre : des sacs entiers).
+function _ferSacsDe(op, nom, p){
+  var f=op&&op.sacsParc;
+  if(f&&typeof f==='object'&&f[nom]!=null&&f[nom]!==''){ var v=Number(f[nom]); if(isFinite(v)&&v>=0) return v; }
+  var d=_ferNum(op&&op.dose), kg=_ferNum(op&&op.kgSac), s=_ferSurf(p||_ferParc(nom));
+  if(!d||!kg||!s) return null;
+  return _ferSacEntier(d*s*1000/kg);
+}
+// Pure : les apports préparés qui attendent leur session. Une parcelle reste tant qu'elle
+// n'est ni datée au registre (faits = _ferFaits), ni désactivée dans une session née de
+// l'apport (un retrait voulu), ni arrachée. Une session « En cours » née de l'apport le
+// retire de la liste : elle est déjà en tête du Tracteur. `demarree` : une session née de
+// lui s'est terminée avant la fin (la carte dit « À reprendre »).
+function _ferPrepCalc(ops, faits, sessions, parcelles){
+  var act={}; (parcelles||[]).forEach(function(p){ if(p&&p.nom&&p.statut!=='Arrachee') act[p.nom]=p; });
+  var out=[];
+  (ops||[]).forEach(function(op){
+    if(!op||op.prep!==true||!op.id) return;
+    var liees=(sessions||[]).filter(function(s){ return s&&s.ferOp===op.id; });
+    if(liees.some(function(s){ return s.statut==='En cours'; })) return;
+    var r=(faits&&faits[op.id])||{}, retirees={};
+    liees.forEach(function(s){ (s.parcellesSkip||[]).forEach(function(n){ retirees[n]=1; }); });
+    var reste=(op.parcs||[]).filter(function(n){ return !!act[n] && !r[n] && !retirees[n]; });
+    if(!reste.length) return;
+    var sacs=0, inc=false, surf=0, det={};
+    reste.forEach(function(n){ var v=_ferSacsDe(op,n,act[n]); det[n]=v; if(v==null) inc=true; else sacs+=v; surf+=_ferSurf(act[n]); });
+    out.push({ id:op.id, act:FER_ACT, prod:String((op.prod&&op.prod.nom)||''), reste:reste, sacsParc:det, sacs:sacs, sacsInc:inc,
+               surf:surf, kgSac:_ferNum(op.kgSac)||null, sem:op.sem||'', mach:(op.trac&&op.trac.mach)||'', cree:op.cree||'', demarree:liees.length>0 });
+  });
+  return out.sort(function(a,b){ var x=String(a.sem||a.cree), y=String(b.sem||b.cree); return x<y?-1:(x>y?1:0); });
+}
+// « 1 sac », « 2 sacs » : le pluriel à partir de 2.
+function _ferSacsTxt(x){ return _ferSacs(x)+'\u00a0sac'+(_ferSacEntier(x)>=2?'s':''); }
+function _ferSacsLib(op, nom, p){ var v=_ferSacsDe(op,nom,p); return (v==null)?'':' \u00b7 '+_ferSacsTxt(v); }
+// La ligne « session tracteur » d'un apport, dans l'onglet (l'administrateur la propose ou la retire).
+function _ferPrepLigne(op, Fa, adm){
+  var S=window.SESSIONS||[];
+  if(S.some(function(s){ return s&&s.ferOp===op.id&&s.statut==='En cours'; })) return '<div class="fer-rs" style="margin-top:4px"><span class="fer-chip ok">session en cours</span> au Tracteur</div>';
+  var f=_ferPrepCalc([Object.assign({}, op, {prep:true})], Fa, S, window.PARCELLES||[])[0];
+  if(!f) return '';
+  var lk=function(t){ return '<span class="fer-lk" data-op="'+_escAttr(op.id)+'" onclick="_ferPrep(this.dataset.op)">'+t+'</span>'; };
+  if(op.prep===true) return '<div class="fer-rs" style="margin-top:4px"><span class="fer-chip n">session pr\u00eate</span> dans Tracteur \u00b7 '+f.reste.length+' parcelle'+(f.reste.length>1?'s':'')+(adm?' \u00b7 '+lk('Ne plus la proposer'):'')+'</div>';
+  return adm?'<div class="fer-rs" style="margin-top:4px">'+lk('Pr\u00e9parer la session tracteur')+'</div>':'';
+}
+// L'administrateur propose la session au tracteur (un amendement saisi avant FERTI-9) ou la
+// retire (un amendement qui ne se fera pas). « Annuler » six secondes.
+function _ferPrep(opId){
+  if(!isAdmin()) return;
+  var op=_ferList().find(function(x){ return x && x.id===opId; }); if(!op) return;
+  var avant={ prep:op.prep, sacsParc:op.sacsParc };
+  if(op.prep===true) op.prep=false;
+  else {
+    op.prep=true;
+    if(!op.sacsParc||typeof op.sacsParc!=='object'){ var sp={}, ok=false; (op.parcs||[]).forEach(function(n){ var v=_ferSacsDe(op,n,_ferParc(n)); if(v!=null){ sp[n]=v; ok=true; } }); op.sacsParc=ok?sp:null; }
+  }
+  window.saveIntrants(); _ferRender();
+  var annuler=function(){
+    var o2=_ferList().find(function(x){ return x && x.id===opId; }); if(!o2) return;
+    if(avant.prep===undefined) delete o2.prep; else o2.prep=avant.prep;
+    if(avant.sacsParc===undefined) delete o2.sacsParc; else o2.sacsParc=avant.sacsParc;
+    window.saveIntrants(); _ferRender(); showToast('R\u00e9tabli','#3D6B27');
+  };
+  var msg=(op.prep===true)?'Session pr\u00eate dans Tracteur':'Session retir\u00e9e du Tracteur';
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler); else showToast(msg,'#3D6B27');
+}
+// Ce que lit le Tracteur (tracteur.js est chargé avant phyto.js : il passe par window).
+window._ferPreps=function(){
+  var L=_ferList(); if(!L.some(function(op){ return op&&op.prep===true; })) return [];
+  return _ferPrepCalc(L, _ferFaits(), window.SESSIONS||[], window.PARCELLES||[]);
+};
+window._ferSacsParc=function(opId, nom){
+  var op=_ferList().find(function(x){ return x&&x.id===opId; }); if(!op) return null;
+  return _ferSacsDe(op, nom, _ferParc(nom));
+};
+
 var _fer = null;
 function _ferNeuf(){
   var vg=(typeof window._mvVigne==='function')?window._mvVigne():null;
@@ -1400,12 +1497,12 @@ function _ferCalc(){
   o.hha=_ferHha(F.v,F.ec,F.rd);
   var op={dose:F.dose, prod:F.prod};
   o.nha=_ferNha(op); o.pha=_ferEha(op,'P'); o.kha=_ferEha(op,'K');
-  o.list=[]; o.surf=0; o.T=0; o.SA=0; o.H=0; o.NT=0; o.nzv=0;
+  o.list=[]; o.surf=0; o.T=0; o.SA=0; o.SC=0; o.H=0; o.NT=0; o.nzv=0;
   _ferParcs().forEach(function(p){
     if(!F.parcs[p.nom]) return; var s=_ferSurf(p), t=o.dose*s;
-    o.list.push(p); o.surf+=s; o.T+=t; o.SA+=o.kg?t*1000/o.kg:0; o.H+=o.hha*s; if(o.nha!=null) o.NT+=o.nha*s; if(p.zv) o.nzv++;
+    o.list.push(p); o.surf+=s; o.T+=t; o.SA+=o.kg?t*1000/o.kg:0; o.SC+=(o.dose&&o.kg)?_ferSacEntier(t*1000/o.kg):0; o.H+=o.hha*s; if(o.nha!=null) o.NT+=o.nha*s; if(p.zv) o.nzv++;
   });
-  o.sacsCmd=(o.dose&&o.kg)?Math.ceil(o.SA-1e-9):0; o.tCmd=o.sacsCmd*o.kg/1000;
+  o.sacsCmd=(o.dose&&o.kg)?o.SC:0;   // FERTI-9 (§499) : la somme des sacs entiers de chaque parcelle o.tCmd=o.sacsCmd*o.kg/1000;
   o.cout=o.prix?(F.pu==='t'?(o.kg?o.tCmd:o.T)*o.prix:o.sacsCmd*o.prix):0;
   return o;
 }
@@ -1579,7 +1676,7 @@ function openOvFerti(){
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(0)">Tout d\u00e9cocher</button>'
       +'<button type="button" class="mvr-btn mvr-btn-o" style="flex:none" onclick="_ferAll(\'zv\')">Zone vuln\u00e9rable</button></div>'
     +'<div id="fer-plist" data-tuto="fer.plist"></div>'
-    +'<div class="fer-h">Sacs arrondis au demi-sac par parcelle\u00a0; la commande est arrondie au sac entier sur le total. <span class="fer-chip zv">ZV</span> = zone vuln\u00e9rable, d\u00e9clar\u00e9e dans le registre de fertilisation, parcelle par parcelle.</div>'
+    +'<div class="fer-h">Des sacs entiers par parcelle\u00a0: le semoir se charge au sac. La commande est leur somme. <span class="fer-chip zv">ZV</span> = zone vuln\u00e9rable, d\u00e9clar\u00e9e dans le registre de fertilisation, parcelle par parcelle.</div>'
     +'<div id="fer-ilot"></div>')
   +_ferStep(3,'Le passage tracteur',''
     +'<div class="mvr-fl" style="margin-top:0">Machine</div>'
@@ -1764,7 +1861,7 @@ function _ferUp(){
     return '<div class="fer-pl'+(on?' on':'')+'" onclick="_ferPick('+i+')"><div class="fer-ck">'+(on?_mvIcon('check',16):'')+'</div>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px)">'+_escHtml(p.nom)+(p.zv?' <span class="fer-chip zv">ZV</span>':'')+'</div>'
       +'<div class="fer-rs">'+_ferFr(s,2)+'\u00a0ha'+(p.cepage?' \u00b7 '+_escHtml(p.cepage):'')+(p.appellation?' \u00b7 '+_escHtml(p.appellation):'')+(p.ilot?' \u00b7 '+_escHtml(p.ilot):'')+'</div>'+_ferRdtLigne(p)+'</div>'
-      +'<div class="fer-pv"><b>'+(ok1?_ferSacs(sc)+' sacs':'\u2014')+'</b>'+(o.dose?_ferFr(t*1000)+'\u00a0kg':'dose\u00a0?')+(o.nha!=null&&o.dose?' \u00b7 '+_ferFr(o.nha*s,1)+'\u00a0kg N':'')+(o.hha?'<br>'+_ferHm(o.hha*s):'')+'</div></div>';
+      +'<div class="fer-pv"><b>'+(ok1?_ferSacsTxt(sc):'\u2014')+'</b>'+(o.dose?_ferFr(t*1000)+'\u00a0kg':'dose\u00a0?')+(o.nha!=null&&o.dose?' \u00b7 '+_ferFr(o.nha*s,1)+'\u00a0kg N':'')+(o.hha?'<br>'+_ferHm(o.hha*s):'')+'</div></div>';
   }).join('') || '<div class="fer-h">Aucune parcelle en exploitation.</div>';
   _ferRegleUp();   // FERTI-6 (§463)
   var miss=o.list.filter(function(p){ return p.zv && !p.ilot; });
@@ -1798,6 +1895,7 @@ function _ferUp(){
     [np, 'Registre de fertilisation', np?(np+' ligne'+(np>1?'s':'')+' pr\u00e9vue'+(np>1?'s':'')+(o.nha!=null?', '+_ferFr(o.nha)+'\u00a0kg N/ha':', azote \u00ab\u00a0\u2014\u00a0\u00bb')+'. Chaque ligne se date seule quand la parcelle est valid\u00e9e.'):'Choisissez au moins une parcelle.'],
     [np&&o.hha, 'Travail pr\u00e9vu \u00b7 t\u00e2che \u00ab\u00a0Amendement\u00a0\u00bb', (np&&o.hha)?(_ferHm(o.H)+' pr\u00e9vues sur '+np+' parcelle'+(np>1?'s':'')+', dans la p\u00e9riode active. Elles comptent dans l\u2019avancement, le reste \u00e0 faire et les temps de travaux du Pilotage.'):'Il faut des parcelles et une vitesse pour estimer les heures.'],
     [o.hha, 'Tracteur \u00b7 activit\u00e9 \u00ab\u00a0Amendement\u00a0\u00bb', o.hha?('Bar\u00e8me pos\u00e9 \u00e0 '+_ferFr(o.hha,1)+'\u00a0h/ha'+(trac?', '+_escHtml(trac.nom||''):'')+'. Les sessions de semis comptent dans les heures tracteur.'):'Bar\u00e8me non pos\u00e9\u00a0: l\u2019activit\u00e9 est cr\u00e9\u00e9e sans estimation.'],
+    [np, 'Tracteur \u00b7 une session pr\u00eate', np?('Une carte \u00ab\u00a0\u00c0 d\u00e9marrer\u00a0\u00bb attend en t\u00eate du Tracteur\u00a0: '+np+' parcelle'+(np>1?'s':'')+((o.dose&&o.kg)?', les sacs de chacune':'')+'. Le tractoriste la d\u00e9marre le jour venu\u00a0: la session prend la date du jour, son nom, et le compteur s\u2019il le faut.'):'Choisissez au moins une parcelle.'],   // FERTI-9 (§499)
     [P.nom, 'R\u00e9serve \u00b7 le produit', P.nom?('\u00ab\u00a0'+_escHtml(P.nom)+'\u00a0\u00bb, fournitures vigne'+(o.sacsCmd?', '+o.sacsCmd+' sacs de '+_ferFr(o.kg)+'\u00a0kg \u00e0 commander':'')+'. L\u2019achat se saisit \u00e0 la livraison, le prix \u00e0 la facture.'):'Donnez un nom au produit.'],
     [o.cout, 'Co\u00fbt pr\u00e9vu', o.cout?(_ferFr(o.cout)+'\u00a0\u20ac HT, gard\u00e9 sur l\u2019apport. Le co\u00fbt r\u00e9el entre dans le Pilotage avec la facture.'):'Co\u00fbt \u00ab\u00a0\u2014\u00a0\u00bb tant que le prix n\u2019est pas saisi.']
   ];
@@ -1824,6 +1922,9 @@ function _ferSave(){
   }
   if(P.four){ if(!Array.isArray(I.achat_four)) I.achat_four=[]; if(I.achat_four.indexOf(P.four)<0) I.achat_four.push(P.four); }
   // 2) L'apport.
+  // FERTI-9 (§499) : les sacs de chaque parcelle, tels que l'étape 2 les montre (des sacs entiers).
+  var sacsParc=null;
+  if(o.dose&&o.kg){ sacsParc={}; o.list.forEach(function(p){ sacsParc[p.nom]=_ferSacEntier(o.dose*_ferSurf(p)*1000/o.kg); }); }
   var hha=o.hha?Math.round(o.hha*100)/100:0;
   var op={ id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), cree:_mvToday(),
     prodId:prod.id,
@@ -1832,7 +1933,8 @@ function _ferSave(){
     dose:num(F.dose), kgSac:num(F.kg), prix:num(F.prix), pu:F.pu, cout:o.cout||null, sacs:o.sacsCmd||null,
     parcs:o.list.map(function(p){ return p.nom; }),
     trac:{ v:num(F.v), ec:num(F.ec), rd:num(F.rd), hha:hha||null, mach:F.mach||'' },
-    sem:F.sem||'', enf:F.enf||'non', man:{} };
+    sem:F.sem||'', enf:F.enf||'non', man:{},
+    prep:true, sacsParc:sacsParc };   // FERTI-9 (§499) : la session prête dans Tracteur
   _ferList().push(op);
   window.saveIntrants();
   // 3) La tâche « Amendement » : barème = celui du calcul, posée dans la période active.
@@ -1861,7 +1963,7 @@ function _ferSave(){
   if(hha) a.h_ha=hha;
   window.ACTIVITES=A; if(window.saveData) window.saveData('activites');
   closeOv(null,'ovFerti');
-  showToast('Amendement enregistr\u00e9 \u00b7 '+o.list.length+' parcelle'+(o.list.length>1?'s':''),'#3D6B27');
+  showToast('Amendement enregistr\u00e9 \u00b7 '+o.list.length+' parcelle'+(o.list.length>1?'s':'')+' \u00b7 session pr\u00eate dans Tracteur','#3D6B27');
   _fer=null;
   if(typeof window.renderParcelles==='function'){ try{ window.renderParcelles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'phyto.js/_ferSave parcelles'); } }
   _ferRender();
@@ -1922,7 +2024,7 @@ function _ferDel(opId){
   if(!isAdmin()) return;
   var L=_ferList(), i=L.findIndex(function(x){ return x && x.id===opId; }); if(i<0) return;
   var go=function(){ L.splice(i,1); window.saveIntrants(); _ferRender(); showToast('Apport retir\u00e9 du registre','#8A8072'); };
-  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer cet apport du registre\u00a0?', 'La t\u00e2che, l\u2019activit\u00e9 tracteur et le produit de La R\u00e9serve restent en place.', go, 'corbeille', 'Retirer cet apport',null);
+  if(typeof window.openConfirmDel==='function') window.openConfirmDel('Retirer cet apport du registre\u00a0?', 'La t\u00e2che, l\u2019activit\u00e9 tracteur et le produit de La R\u00e9serve restent en place. Une session pr\u00eate dans Tracteur dispara\u00eet\u00a0; une session d\u00e9j\u00e0 d\u00e9marr\u00e9e reste.', go, 'corbeille', 'Retirer cet apport',null);
 }
 
 // -- L'onglet « Fertilisation » ---------------------------------------------
@@ -1972,12 +2074,12 @@ function _ferRender(){
         +'<br>'+(op.dose?_ferFr(op.dose,1)+'\u00a0t/ha':'dose \u2014')+(op.sacs?' \u00b7 '+op.sacs+' sacs de '+_ferFr(op.kgSac||0)+'\u00a0kg':'')+(op.cout?' \u00b7 '+_ferFr(op.cout)+'\u00a0\u20ac HT pr\u00e9vus':'')+'</div></div>'
         +'<span class="fer-chip '+(pct>=100?'ok':'al')+'">'+(pct>=100?'fait':'en cours')+'</span></div>'
       +'<div class="fer-trk"><div class="fer-fil" style="width:'+pct+'%"></div></div>'
-      +'<div class="fer-rs">'+nf+' parcelle'+(nf>1?'s':'')+' sur '+(op.parcs||[]).length+' faite'+(nf>1?'s':'')+' \u00b7 '+_ferFr(fait,2)+'\u00a0ha sur '+_ferFr(tot,2)+'\u00a0ha</div>'
+      +'<div class="fer-rs">'+nf+' parcelle'+(nf>1?'s':'')+' sur '+(op.parcs||[]).length+' faite'+(nf>1?'s':'')+' \u00b7 '+_ferFr(fait,2)+'\u00a0ha sur '+_ferFr(tot,2)+'\u00a0ha</div>'+_ferPrepLigne(op, Fa, adm)
       +'<div style="margin-top:6px">'+(op.parcs||[]).map(function(n){
           var p=_ferParc(n), f=r[n], s=_ferSurf(p);
           var src=f?(f.src==='session'?'session tracteur':(f.src==='journal'?'t\u00e2che valid\u00e9e':'pos\u00e9e \u00e0 la main')):'';
           return '<div class="fer-tr"><div style="min-width:0"><b>'+_escHtml(n)+'</b>'+(p&&p.zv?' <span class="fer-chip zv">ZV</span>':'')
-            +'<small>'+_ferFr(s,2)+'\u00a0ha \u00b7 '+(f?('sem\u00e9 le '+_ferDfr(f.date)+' ('+src+')'):(op.sem?'pr\u00e9vu semaine du '+_ferDfr(op.sem):'pr\u00e9vu'))
+            +'<small>'+_ferFr(s,2)+'\u00a0ha \u00b7 '+(f?('sem\u00e9 le '+_ferDfr(f.date)+' ('+src+')'):(op.sem?'pr\u00e9vu semaine du '+_ferDfr(op.sem):'pr\u00e9vu')+_ferSacsLib(op,n,p))
             +(adm?' \u00b7 <span class="fer-lk" onclick="_ferMan(\''+_escAttr(op.id)+'\',\''+_escAttr(n)+'\')">'+(f&&f.src==='main'?'corriger':(f?'':'poser la date'))+'</span>':'')+'</small></div>'
             +'<div style="text-align:right;flex:none;font-variant-numeric:lining-nums tabular-nums">'+(nha!=null?_ferFr(nha*s,1)+'\u00a0kg N':'\u2014')+'<small>'+(f?'<span class="fer-chip ok">fait</span>':'<span class="fer-chip n">\u00e0 faire</span>')+'</small></div></div>';
         }).join('')+'</div>'
@@ -2076,3 +2178,4 @@ window._ferPickVos=_ferPickVos; window._ferVer=_ferVer;   // FERTI-8 (§466)
 window.openFerParc=openFerParc; window._ferParcSave=_ferParcSave; window._ferMan=_ferMan; window._ferDel=_ferDel;
 window._ferRender=_ferRender; window._ferCamp=_ferCamp; window._ferExportPdf=_ferExportPdf; window._ferExportCsv=_ferExportCsv;
 window._ferFaits=_ferFaits; window._ferSyncSessions=_ferSyncSessions; window._ferLignes=_ferLignes; window._ferHha=_ferHha;
+window._ferPrep=_ferPrep;   // FERTI-9 (§499)
