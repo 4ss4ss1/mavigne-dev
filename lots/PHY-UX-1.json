@@ -1,0 +1,38 @@
+{
+  "lot": "PHY-UX-1",
+  "section": "§502",
+  "base": "5f976f4b633d905e4e9ea8458f4fe6fef6d153bf",
+  "inclut": [],
+  "date": "2026-10-31",
+  "tutos": {
+    "ok": true,
+    "empreinte": "93f2fdfafd6316d124c5563a715082e5406ad3d34ba68cad7058d4e7373e05d8",
+    "date": "2026-10-31T11:37:56.150Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "99bb82c2e0645f1bca54709a960547c56459b8f67b41e1740225b313e6ecbbaf",
+    "CLAUDE.md": "12b6a26950e6d08293544db38caf94412ec27e49dae604f12431bc42ed515ccc",
+    "docs/claude/INDEX.md": "3ad00396e10af762af7e952e7f09f10ed11ec5920aefe3f26d6f06da15840fd4",
+    "docs/claude/chantiers-480-529.md": "0bfe0904c09e40872fa7fef32b3912617f0e0f471c4a5a7bb9e8c120d9156cba",
+    "docs/claude/journal.md": "02cf782236779dc3360ead7f0d30bfaf6179d9b9fb84200b23116b3c63565f14",
+    "guide/07-phyto.html": "c3c4029dc3e535f7162073818051175044e9950915241009e7f4ccbcd79e7683",
+    "index.html": "02ba7ecbc12923a653fccece6a9cda8908de7584128cfc39629e5684bd9fc4b5",
+    "public/sw.js": "67ce6bef353ae93adc6486cf448660671be34b01a0576767a9356a2ac2ee1d65",
+    "scripts/harnais-claude-md.mjs": "f8bb48004637c4e162551b4db05a1d19428d6e5a4405148d2bf4f93a8cc88d23",
+    "scripts/mv-harnais-liste.mjs": "7920b2f1321bfb7dbde069a2bf1e6976a571a6e780282e924ec3e8d8480fb6f1",
+    "scripts/mv-harnais-textea.mjs": "d3cab6dd61c13529501228f1fd262cf0cbd3fcf76e64b99ad0431d54faa8cacb",
+    "scripts/mv-ux-baseline.json": "502a9d30e41ebff3a7580e0ab87eacdbbd9b95e1b39248bd026acfbac8b313a7",
+    "src/styles.css": "c11c53eb02c1de62b3c3d42ede63581990bc9b5602d88a6272df1055370185aa",
+    "src/tracteur.js": "80fba0856e629135509ee0525af9e12953776e29f3b2878c18dec5abb00bdf9b",
+    "src/utils.js": "7aaad98a5a9d507d480bae3bdf2b861af48377510092a81912244fa1cf672d48",
+    "src/whats-new.js": "5f372fd9934ecb098d2494be94aa60e4d9f252bd26205f5561f619be8aa18509",
+    "scripts/mv-harnais-phyux1.mjs": "15ef1586fedf07cc0b7b5ace9f9361e265164b5e0932d0ffbd35540881b3eefa"
+  }
+}

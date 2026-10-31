@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.32
+// MA VIGNE — Service Worker v11.33
+// v11.33 (31/10/2026) — PHY-UX-1 (§502) : le registre phyto — la date dite, l'état de la rentrée, le cuivre de l'année.
 // v11.32 (31/10/2026) — PLAN-UX-1 (§501) : le Planning — la grille d'abord, le menu « … » de la semaine, l'année en « ‹ 2026 › ».
 // v11.31 (31/10/2026) — DEMO-5 (§500) : la démo du site refaite sur l’appli d’aujourd’hui (habillage du site, 40 écrans repris, outil de captures versionné) ; la visite ?demo=visite perd sa visite guidée et retrouve son palissage à 60 %
 // v11.30 (30/10/2026) — FERTI-9 (§499) : l’amendement prépare sa session tracteur — une carte « À démarrer » sous la session en cours ; « Démarrer » ouvre la nouvelle session remplie (activité, machine, conducteur), qui ne garde que les parcelles de l’amendement, chacune avec ses sacs. APP 10.49.
@@ -4664,7 +4665,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.32';
+const CACHE_NAME   = 'mavigne-v11.33';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4681,7 +4682,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.32 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.33 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4701,7 +4702,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.32 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.33 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

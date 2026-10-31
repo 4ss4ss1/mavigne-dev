@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-31",
- "base": "1ec8cf5",
+ "base": "5f976f4",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -292,6 +292,16 @@
     "planning › ordinateur › c44 : 12 → 7",
     "planning.grille_y : 443 → 373"
    ]
+  },
+  {
+   "date": "2026-10-31",
+   "base": "5f976f4",
+   "motif": "PHY-UX-1 (§502) : le registre phyto écrit ses dates comme on les dit (dates machine → 0)",
+   "hausses": [],
+   "baisses": [
+    "phyto › ordinateur › t12 : 16 → 1",
+    "phyto.dates_machine : 15 → 0"
+   ]
   }
  ],
  "mesures": {
@@ -348,13 +358,13 @@
     "cibles": 22,
     "c24": 0,
     "c44": 4,
-    "textes": 116,
+    "textes": 131,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": 4,
-    "hauteur": 1933
+    "hauteur": 2540
    },
    "cave": {
     "cibles": 59,
@@ -470,13 +480,13 @@
     "cibles": 23,
     "c24": 0,
     "c44": 6,
-    "textes": 140,
+    "textes": 155,
     "t11": 0,
-    "t12": 16,
+    "t12": 1,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
-    "hauteur": 1995
+    "hauteur": 2376
    },
    "cave": {
     "cibles": 60,
@@ -543,7 +553,7 @@
  "gestes": {
   "tracteur.session_y": 161,
   "tracteur.fab_recouvre": 0,
-  "phyto.dates_machine": 15,
+  "phyto.dates_machine": 0,
   "cave.gestes_44": 0,
   "cave.sommaire": 1,
   "reserve.action": 1,

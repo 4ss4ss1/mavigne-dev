@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.52', d: '2026-10-31', items: [
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'pulve', titre: 'Le registre phyto dit si on peut y retourner',
+      desc: "Chaque traitement du registre dit sa date comme on la dit («\u00a0hier, 6 h 30\u00a0», «\u00a08 sept. 2026\u00a0») et où en est la rentrée\u00a0: «\u00a0rentrée interdite jusqu’à…\u00a0», puis «\u00a0rentrée libre depuis…\u00a0», calculée comme sur l’Accueil des ouvriers. Un traitement au cuivre dit aussi sa dose et le cumul de l’année, sur le plafond." },
+  ] },
   { v: '10.51', d: '2026-10-31', items: [
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning : la grille d’abord',
       desc: "Les congés et les horaires chaleur sur une période passent dans le menu «\u00a0…\u00a0» de la barre de la semaine, avec l’année suivante et le chemin des relevés d’heures\u00a0: la grille remonte en haut de l’écran. L’année se change par «\u00a0‹ 2026 ›\u00a0», et une année sans donnée le dit." },

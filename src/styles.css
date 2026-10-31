@@ -3878,6 +3878,10 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
   body.pl2-plus-ouvert #page-planning .pl2-plus{position:fixed;left:0;right:0;top:auto;bottom:0;z-index:1200;width:auto;max-height:80vh;overflow-y:auto;border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);}
   #page-planning .pl2-mo .pl2-name-n{font-size:var(--pt-micro,12px);}
 }
+/* ★ PHY-UX-1 (§502) — maquette-ux-v2, Phyto : chaque ligne du registre dit l'état de la rentrée (et le cuivre de l'année). */
+.ph-etat{margin-top:var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.ph-etat-interdite{color:var(--danger-texte,#BA361A);}
+.ph-etat-libre{color:var(--ok-texte,#217343);}
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

@@ -224,6 +224,49 @@ function _phFicheHtml(i){
 window._phSel=_phSel;
 if(window.matchMedia)window.matchMedia('(min-width:1024px)').addEventListener('change',function(){ try{ if(window._dataReady)renderPhytoTrac(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_phDesk'); } });
 
+// ★ PHY-UX-1 (§502) — LE REGISTRE SE LIT DANS LES RANGS (docs/maquettes/maquette-ux-v2.html, Phyto) : « je peux y retourner ? ». La date
+//   s'écrit comme on la dit (« hier, 6 h 30 », « 8 sept. 2026 » — plus « 2026-09-08 ») ; chaque ligne dit l'état de la rentrée, calculé
+//   comme l'Accueil des ouvriers (_homeDreLignes : l'heure de fin, sinon de début, sinon midi, plus le délai du produit) ; une ligne de
+//   cuivre dit sa dose et le cumul de l'année de la parcelle la plus chargée, sur le plafond réglé.
+var _PH_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+function _phJours(d,now){ var j=new Date(d.getFullYear(),d.getMonth(),d.getDate()), n=new Date(now.getFullYear(),now.getMonth(),now.getDate()); return Math.round((j-n)/86400000); }
+function _phHeureFr(h){ var p=String(h||'').split(':'); if(p.length<2||p[0]==='') return ''; return parseInt(p[0],10)+' h '+('0'+(parseInt(p[1],10)||0)).slice(-2); }
+function _phDateFr(t,now){
+  if(!t||!t.date) return '';
+  var d=new Date(String(t.date)+'T12:00:00'); if(isNaN(d)) return String(t.date);
+  var dj=_phJours(d,now), h=_phHeureFr(t.heureFin||t.heureDebut);
+  if(dj===0||dj===-1) return (dj===0?'aujourd\u2019hui':'hier')+(h?', '+h:'');
+  return d.getDate()+(d.getDate()===1?'er':'')+' '+_PH_MOIS[d.getMonth()]+' '+d.getFullYear();
+}
+function _phQuandFr(d,now){
+  var dj=_phJours(d,now), h=d.getHours()+' h '+('0'+d.getMinutes()).slice(-2);
+  if(dj===0) return 'aujourd\u2019hui '+h; if(dj===1) return 'demain '+h; if(dj===-1) return 'hier '+h;
+  return 'le '+d.getDate()+(d.getDate()===1?'er':'')+' '+_PH_MOIS[d.getMonth()]+(d.getFullYear()!==now.getFullYear()?' '+d.getFullYear():'');
+}
+function _phEtatRentree(t,m,now){
+  if(!t||!t.date) return null;
+  var dre=dreEffectif(m.drae,m.type,m.dreH,m.dreHc), h=(dre&&dre.h)||0;
+  if(!(h>0)) return { k:'libre', txt:(String(m.type||'')==='Biocontr\u00f4le'?'biocontr\u00f4le, sans d\u00e9lai':'sans d\u00e9lai de rentr\u00e9e') };
+  var hm=String(t.heureFin||t.heureDebut||'12:00').split(':');
+  var app=new Date(t.date+'T'+('0'+(hm[0]||'12')).slice(-2)+':'+('0'+(hm[1]||'00')).slice(-2)+':00'); if(isNaN(app)) return null;
+  var fin=new Date(app.getTime()+h*3600000), quand=_phQuandFr(fin,now);
+  return fin>now ? { k:'interdite', txt:'rentr\u00e9e interdite jusqu\u2019\u00e0 '+quand } : { k:'libre', txt:'rentr\u00e9e libre depuis '+quand };
+}
+function _phCuivreTxt(t){
+  var cu=parseFloat(t&&t.cuMetal); if(!(cu>0)) return '';
+  var an=String(t.date||'').slice(0,4), P=Array.isArray(t.parcelles)?t.parcelles:[], cumul=0;
+  P.forEach(function(nom){
+    var s=(TRAITEMENTS||[]).filter(function(x){ return x&&String(x.date||'').slice(0,4)===an&&parseFloat(x.cuMetal)>0&&Array.isArray(x.parcelles)&&x.parcelles.indexOf(nom)>=0; })
+      .reduce(function(a,x){ return a+parseFloat(x.cuMetal); },0);
+    if(s>cumul) cumul=s;
+  });
+  var pl=(typeof window._cuPlafond==='function')?window._cuPlafond():4, f=function(n){ return String(Math.round(n*10)/10).replace('.',','); };
+  return 'cuivre\u00a0: '+f(cu)+' kg Cu/ha'+(cumul>0?' \u00b7 '+f(cumul)+' sur '+f(pl)+' cette ann\u00e9e':'');
+}
+function _phEtatHtml(et,cu){
+  if(et) return '<div class="ph-etat ph-etat-'+_escAttr(et.k)+'">'+_escHtml(et.txt+(cu?' \u00b7 '+cu:''))+'</div>';
+  return cu?'<div class="ph-etat">'+_escHtml(cu)+'</div>':'';
+}
 function renderPhytoTrac(){
   const el=document.getElementById('traitements-list-trac');if(!el)return;
   const list=[...TRAITEMENTS].sort((a,b)=>b.date.localeCompare(a.date));
@@ -241,12 +284,8 @@ function renderPhytoTrac(){
       const reste=Math.ceil((fin-now)/86400000);
       if(reste>0) darBadge='<span class="mvpas mvpas-type mvpas-ambre">DAR '+reste+'j</span>';
     }
-    const dreInfo=dreEffectif(m.drae,m.type,m.dreH,m.dreHc);
-    let draeBadge='';
-    if(dreInfo.h>0&&t.date){
-      const draeR=Math.max(0,dreInfo.h-Math.floor((now-new Date(t.date))/3600000));
-      if(draeR>0) draeBadge='<span class="mvpas mvpas-type mvpas-orange">Réentrée '+draeR+'h</span>';
-    }
+    const draeBadge='';   // ★ PHY-UX-1 (§502) : la ligne de l'état de la rentrée remplace le badge « Réentrée nh » (compté depuis minuit)
+    const _et=_phEtatRentree(t,m,now), _cu=_phCuivreTxt(t);
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
     const emj='';
     const parcP=_phParcParts(t), parc=parcP.noms;
@@ -256,7 +295,7 @@ function renderPhytoTrac(){
     return `<div class="phyto-row mvcarte-fond mvcarte-clic" onclick="_phSel(${idx})" data-pidx="${Number(idx)}" style="padding:12px 14px;margin-bottom:8px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
         <span style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(t.produit)}</span>
-        <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(t.date)}</span>
+        <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(_phDateFr(t,now))}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;${meta3?'margin-bottom:6px':''}">
         <span style="font-size:var(--pt-nano,11px);font-weight:700;padding:2px 8px;border-radius:7px;background:${tb};color:${tc}">${emj}${_escHtml(m.type||'—')}</span>
@@ -265,6 +304,7 @@ function renderPhytoTrac(){
         ${draeBadge}
       </div>
       ${meta3?`<div class="phyto-row-meta" style="display:flex;gap:12px;font-size:var(--pt-micro,11px);color:var(--texte-doux);align-items:center;min-width:0">${parc?'<span style="display:flex;gap:4px;min-width:0;flex:1 1 auto"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(parc)+'</span>'+(parcP.plus?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(parcP.plus)+'</span>':'')+'</span>':''}${cond?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;flex-shrink:0;color:var(--gris)">›</span></div>`:''}
+    ${_phEtatHtml(_et,_cu)}
     </div>`;
   }).join('');
   // PHYTO-1 (§285) — garde de type : mv-harnais-textea joue renderPhytoTrac seule, hors du module.

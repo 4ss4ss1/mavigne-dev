@@ -577,3 +577,24 @@ Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« P
 - **Les cases du mois à 44 px de haut et le week-end qui s’ouvre d’un tap** (la maquette) : à faire avec la mesure.
 - **PHY-UX-1**, le lot suivant du plan.
 - **À vérifier chez Nico** : le menu « … » au téléphone et sur ordinateur, chacune de ses lignes, « ‹ 2026 › ».
+
+## 502. ★★ PHY-UX-1 — LE REGISTRE PHYTO SE LIT DANS LES RANGS : LA DATE DITE, L’ÉTAT DE LA RENTRÉE, LE CUIVRE DE L’ANNÉE (31/10 — `src/tracteur.js` (`_phDateFr`, `_phEtatRentree`, `_phCuivreTxt`, `_phEtatHtml` et leurs aides ; la ligne de `renderPhytoTrac`) · `src/styles.css` · `guide/07-phyto.html` · `src/utils.js` (APP 10.52) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.33) · `scripts/mv-harnais-phyux1.mjs` (neuf) · `scripts/mv-harnais-textea.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PHY-UX-1.json` · base `5f976f4`)
+
+### 502a. D’où ça vient
+Le lot suivant du plan, dessiné dans `docs/maquettes/maquette-ux-v2.html` (« Phyto — des dates qui se lisent, une ligne qui dit où en est le délai ») : mesuré, des dates en format machine (« 2026-09-08 »), des textes à 10 px. « Le registre est une liste qu’on consulte dans les rangs pour une question : je peux y retourner ? » Relu dans le code : **le tri du plus récent au plus ancien existait** ; **« le pas de dose à 44 »** : l’assistant porte un champ numérique, pas de pas — rien à faire ; le liste-fiche sur ordinateur existe (PHYTO-1), son clavier aussi (PC-LISTE-2).
+
+### 502b. Ce qui change
+- **La date dite** (`_phDateFr`) : « aujourd’hui, 6 h 30 » ou « hier, 18 h 05 » (l’heure de fin, sinon de début), sinon « 8 sept. 2026 », « 1er août 2026 ».
+- **L’état de la rentrée sur chaque ligne** (`_phEtatRentree`), calculé comme l’Accueil des ouvriers (`_homeDreLignes`) : l’heure de fin, sinon de début, sinon midi, plus le délai effectif du produit (`dreEffectif`) — « rentrée interdite jusqu’à aujourd’hui 18 h 30 » (en rouge), puis « rentrée libre depuis le 9 sept. » (en vert) ; « biocontrôle, sans délai » ou « sans délai de rentrée ». Le badge « Réentrée nh », compté depuis minuit (il pouvait dire « libre » des heures trop tôt), est retiré.
+- **Le cuivre** (`_phCuivreTxt`) : la dose (`cuMetal`) et le cumul de l’année civile de la parcelle la plus chargée parmi celles du traitement, sur le plafond réglé (`window._cuPlafond`, 4 par défaut).
+- **L’étiquette du type** : son jeton `--pt-nano` donne déjà 12 au téléphone (LISIBLE-1). La ligne d’état passe par une aide qui échappe (`_phEtatHtml` — règle C24c).
+
+### 502c. Mesuré
+- `mv-harnais-phyux1`, à heure fixée (lundi 26/10/2026, 10 h 40) : 7 assertions — les dates dites (le 1er compris), l’état « interdite jusqu’à … » puis « libre depuis … » (l’heure de fin prise, midi sinon), le biocontrôle et le sans-délai, le cuivre de l’année (l’année d’avant exclue), la ligne échappée et sa classe, la ligne du registre branchée, les couleurs ; **6/6 mutants**.
+- `test:ux` (référence regravée) : **« Phyto : dates écrites 2026-09-08 » → 0** ; 18 vérifications vertes.
+- Chaîne (617 commandes) : deux rouges à moi, suivis — **LISIBLE-1** garde l’étiquette du registre au jeton `--pt-nano` (12 au téléphone par son plancher, 11 sur ordinateur) : je l’avais passée à `--pt-micro`, elle y revient — « les tags à 12 » de la maquette sont tenus au téléphone ; **TEXTE-A** fait tourner la vraie carte du registre dans une boîte : les aides neuves (`_phDateFr`, `_phEtatRentree`…) n’y étaient pas, elle plantait — elle les embarque (`scripts/mv-harnais-textea.mjs`), 13/13 et 8/8. Plus `build-guide --check`, attendu.
+- Tutos : voir la note de livraison.
+
+### 502d. Ce qui reste ouvert
+- **REGL-UX-1**, le dernier lot des écrans de la maquette v2.
+- **À vérifier chez Nico** : un traitement d’hier soir (« interdite jusqu’à … »), un ancien (« libre depuis … »), un cuivre (son cumul).

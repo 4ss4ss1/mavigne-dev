@@ -35,12 +35,15 @@ function suite(B) {
   T('le harnais typographique porte le même barème', /'--pt-micro': 12,/.test(B.typo) && /'--pt-lbl': 12, '--pt-nano': 11 /.test(B.typo));
   // La vraie carte du registre
   const parts = fonction(B.trac, '_phParcParts'), rend = fonction(B.trac, 'renderPhytoTrac');
+  // PHY-UX-1 (§502) : la ligne du registre dit sa date et l’état de la rentrée — leurs aides montent avec la carte.
+  const iM = B.trac.indexOf('var _PH_MOIS='), mois = B.trac.slice(iM, B.trac.indexOf(';', iM) + 1);
+  const aides = ['_phJours', '_phHeureFr', '_phDateFr', '_phQuandFr', '_phEtatRentree', '_phCuivreTxt', '_phEtatHtml'].map(n => fonction(B.trac, n));
   const NOMS = ['Les Grandes Vignes', 'Clos du Moulin', 'La Combe', 'Les Chaumes', 'En Champs', 'Le Pré de la Rue', 'Les Crais', 'La Justice', 'Les Seuvrées', 'Aux Corvées'];
   const el = { innerHTML: '' };
   const ctx = { window: {}, document: { getElementById: () => el }, _mvIcon: () => '', dreEffectif: () => ({ h: 0 }),
-    _escHtml: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'), TRAITEMENTS: [], Date, Math, JSON };
+    _escHtml: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'), _escAttr: s => String(s), TRAITEMENTS: [], Date, Math, JSON };
   ctx.window.PARCELLES = NOMS.map(nom => ({ nom, statut: 'Actif' }));
-  vm.createContext(ctx); vm.runInContext([parts, rend].join('\n'), ctx);
+  vm.createContext(ctx); vm.runInContext([mois, ...aides, parts, rend].join('\n'), ctx);
   const p8 = ctx._phParcParts({ parcelles: NOMS.slice(0, 8) }), p2 = ctx._phParcParts({ parcelles: NOMS.slice(0, 2) }), pT = ctx._phParcParts({ parcelles: NOMS });
   T('la liste abrégée en deux morceaux : trois noms, et « +5 » à part', p8.noms === 'Les Grandes Vignes, Clos du Moulin, La Combe' && p8.plus === '+5');
   T('… deux parcelles : les deux noms, pas de « + »', p2.noms === 'Les Grandes Vignes, Clos du Moulin' && p2.plus === '');
