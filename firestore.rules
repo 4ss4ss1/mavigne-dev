@@ -114,7 +114,8 @@ service cloud.firestore {
       return d in ['membres', 'saisons',
                    'planning_entries', 'planning_templates',
                    'planning_acomptes', 'planning_hsup',
-                   'intrants', 'paie'];
+                   'intrants', 'paie',
+                   'pheno'];   // ★ PHENO-1A (§505) : les stades par parcelle — notés par l'administrateur seul (décision de Nico, 31/10), lus par tous
     }
 
     // ── MOTIFS-1 (§250) — documents LUS par l'administrateur seul ─────────────

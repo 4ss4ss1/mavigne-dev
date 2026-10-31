@@ -44,7 +44,7 @@ function jouer(S) {
   t('③ au téléphone : l’état, les tâches et Liste / Carte cachés en haut ; Liste / Carte revient sur la carte ; la barre basse ; « Filtres » pour tous',
     S.css.includes('#page-parcelles .frow,#page-parcelles .tabs2,#page-parcelles #p-tache-filter-row{display:none!important;}') && S.css.includes('#page-parcelles.p-vue-carte .tabs2{display:flex!important;}')
     && S.css.includes('#page-parcelles .p-srow{position:fixed;') && S.css.includes('#page-parcelles .p-fx-btn{display:inline-flex;'));
-  t('③ switchPTab marque la vue carte ; _pFxVue ferme la feuille sur la vue choisie, exposée', S.app.includes("if(_pg) _pg.classList.toggle('p-vue-carte',tab==='carte');") && S.app.includes("function _pFxVue(v){ switchPTab(v==='carte'?'carte':'liste'); if(typeof closeOv==='function') closeOv(null,'ovPFiltres'); }") && S.app.includes('window._pFxVue = _pFxVue;'));
+  t('③ switchPTab marque la vue carte ; _pFxVue ferme la feuille sur la vue choisie, exposée', S.app.includes("_pg.classList.toggle('p-vue-carte',tab==='carte');") && S.app.includes("function _pFxVue(v){ switchPTab(v==='carte'||v==='stades'?v:'liste'); if(typeof closeOv==='function') closeOv(null,'ovPFiltres'); }")   /* PHENO-1A (§505) : et les stades */ && S.app.includes('window._pFxVue = _pFxVue;'));
   t('④ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-filtre1b.mjs'") > 0 && S.liste.indexOf("mv-harnais-filtre1b.mjs --contre'") > 0);
 }
 if (!CONTRE) {

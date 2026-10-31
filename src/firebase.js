@@ -306,6 +306,9 @@ const COLLECTIONS = [
   'cave_elevage','cave_vendange','planning_templates','planning_entries','planning_acomptes','planning_hsup',
   'kml_polygons',
   'intrants',
+  // ★ PHENO-1A (§505) — `pheno` : les stades notés par parcelle, rangés par année ({ "2026": [ {pid, nom, b, d, par, t} ] }) ;
+  //   écrit par l'administrateur seul (isAdminOnlyDoc), lu par tout membre — même régime que `intrants`, donc en temps réel.
+  'pheno',
   // `paie` — taux horaires nominatifs + appoints de cuve GNR (prix d'achat).
   // Admin-only en LECTURE comme en écriture (firestore.rules). Un non-admin reçoit
   // ici un permission-denied absorbé par le catch level:'info' de _pullKeys : la clé
@@ -343,7 +346,7 @@ const COLLECTIONS = [
 //   05/10 : ils restent dans FB_REALTIME POUR L'ADMIN ; un téléphone de salarié ne les écoute pas (_mvClesLues) : il écoute
 //   planning_equipe et planning_moi_<uid>, et ne les écrit jamais (garde de fbSave).
 var FB_REALTIME = ['parcelles','journal','sessions','traitements','reparateur','reparateur_hist','entretiens','planning_templates','planning_entries','planning_acomptes','planning_hsup',
-                   'intrants'];
+                   'intrants','pheno'];
 var FB_STATIC   = ['travaux','catalogue','conducteurs','activites',
                    'membres','saisons','taches','config','historique','tracteurs_list',
                    'cave_elevage','cave_vendange','kml_polygons',
@@ -1329,7 +1332,7 @@ var _MV_KEYLBL = {
   config:'Réglages', historique:'Historique', tracteurs_list:'Matériel',
   entretiens:'Entretiens', reparateur:'Réparateur', reparateur_hist:'Réparateur',
   cave_elevage:'Cave', cave_vendange:'Vendanges', kml_polygons:'Parcellaire',
-  intrants:'La Réserve', paie:'Paie',
+  intrants:'La Réserve', paie:'Paie', pheno:'Les stades',
   planning_entries:'Planning', planning_templates:'Planning',
   planning_acomptes:'Planning', planning_hsup:'Planning'
 };
@@ -1851,7 +1854,7 @@ var _MV_GUARD_FLOORS = {
   journal: 5, sessions: 5, cave_elevage: 1, cave_vendange: 1,
   tracteurs_list: 2, conducteurs: 2, activites: 2,
   planning_entries: 2, planning_templates: 1, planning_acomptes: 1, planning_hsup: 1,
-  traitements: 5, intrants: 3, paie: 2, taches: 5,
+  traitements: 5, intrants: 3, paie: 2, pheno: 2, taches: 5,
   entretiens: 5, historique: 5, reparateur_hist: 2
 };
 // Lecture-avant-ecriture pour les cles protegees (hors parcelles, qui a son garde

@@ -1,0 +1,42 @@
+{
+  "lot": "PHENO-1A",
+  "section": "§505",
+  "base": "90e98c19bd6dc951aafcd9fedd690ee94c2f26c5",
+  "inclut": [],
+  "date": "2026-10-31",
+  "tutos": {
+    "ok": true,
+    "empreinte": "a07bf56944acd02dadbfe01339f6481f0a5308cb94c31c4c4abe5af0b457645c",
+    "date": "2026-10-31T21:16:22.241Z",
+    "joues": {
+      "téléphone": 7,
+      "ordinateur": 7,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "b129058a2c1a52cbf6dfd4d187065d868aafb2b5d0dfa0dea282df8fc5e1d7dc",
+    "CLAUDE.md": "1c3d680e32c9c49c4fd0cb4e11f00922b9e6dda5b8462a97d275100c89059c5c",
+    "docs/claude/INDEX.md": "ab2ffed2056416c331125cc63d50b2a23d058869f46c1cc5032fe479394fd286",
+    "docs/claude/chantiers-480-529.md": "9fef5bf478593753822bfb1eefbf18e87c7c581e898eb3e5d3c832d645aa4290",
+    "docs/claude/journal.md": "7d28e2c797c0b882cf804576b5fa8e4b84b95d30ab030d30afe0b9c7be57e154",
+    "firestore.rules": "220a9c60bcaa721f3ed6a225c3e3eccb5899ff7258ccc140d93980d98d1c6f55",
+    "guide/04-vigne.html": "9dca556a504f4bae9ddaf36104e8de5cd29b38c5d2a04f84284fabdeb2c9d891",
+    "index.html": "857c3dcdccce6b448e8ba0a45302b555459df1065188b55bcb2f9a10d8c3eff0",
+    "public/sw.js": "1a5d4d5db81f2f262e8e1f0b634cc5081e56adb2999e456346aceca14ad92181",
+    "scripts/harnais-claude-md.mjs": "251d7ce4cbdaaaa50763f3090da93069afbb85e7450b44cdc31fbe7be1a8ed91",
+    "scripts/mv-harnais-filtre1b.mjs": "cdedac6b7fc4242c3aefebb70799a92b1b07e963a777f5947805b540cf3b51de",
+    "scripts/mv-harnais-liste.mjs": "719cc693d019e1fca8239d4c6b8f22eba4ae09a8b7a28a2a77ef3d2852bb573d",
+    "scripts/mv-ux-baseline.json": "aaec5603b523e7a8dede0b34271b238caf83f89c2eba78c3e6b1f0ee21cb3ad0",
+    "scripts/tutos-couverture.json": "2054bdd17a65c5e114f2c2fcdfab8f5a179872783e26107acdff9b8d8b4c9ff4",
+    "src/app.js": "7994e500013bab18a12807f51e3d90979820c0d49c420b53daacd1df792782a9",
+    "src/firebase.js": "2c4da768aa4d487925b298238e78af5cf11b538823ce968106293cf2b9034de4",
+    "src/reglages.js": "00d2909d96b260d5303a9adf08a1887d6e7237d571c425ab1ef3239e4aacde60",
+    "src/styles.css": "f203ad526edbc7b17051417598db63d9574f75ff0bab5bf3ca45075607d33123",
+    "src/utils.js": "e622c732ec246a288531e9729d8498215096d62f9b0b6bd3b747d0c3d20852f9",
+    "src/whats-new.js": "58972f26731cd2351818a3974590e71aa51bfbd0d486823c984dd0b13fa71da9",
+    "scripts/mv-harnais-phenoa.mjs": "0c0c4268596cfe3e43de6d9a45b9f79c6d72c8ad017b5ea465d902b3822ef659"
+  }
+}

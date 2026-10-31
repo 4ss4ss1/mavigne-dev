@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-31",
- "base": "c3d9bd3",
+ "base": "90e98c1",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -314,6 +314,13 @@
     "pilotage › ordinateur › c44 : 42 → 39",
     "reglages.premier_y : 356 → 282"
    ]
+  },
+  {
+   "date": "2026-10-31",
+   "base": "90e98c1",
+   "motif": "hausse acceptée : Pilotage sur ordinateur 39 → 42 cibles sous 44 px : la hausse liée à l’heure réelle (§470e), revenue à ce relevé — gardée à 42 pour qu’un relevé fait à une autre heure ne rougisse pas",
+   "hausses": [],
+   "baisses": []
   }
  ],
  "mesures": {
@@ -453,10 +460,10 @@
     "hauteur": 1462
    },
    "parcelles": {
-    "cibles": 37,
+    "cibles": 38,
     "c24": 0,
-    "c44": 29,
-    "textes": 91,
+    "c44": 30,
+    "textes": 92,
     "t11": 0,
     "t12": 7,
     "chrome": 120,
@@ -516,9 +523,9 @@
     "cibles": 28,
     "c24": 0,
     "c44": 23,
-    "textes": 94,
+    "textes": 95,
     "t11": 0,
-    "t12": 6,
+    "t12": 7,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
@@ -542,7 +549,7 @@
     "c44": 39,
     "textes": 251,
     "t11": 0,
-    "t12": 56,
+    "t12": 57,
     "chrome": 66,
     "chromeDefile": 171,
     "pouce": null,

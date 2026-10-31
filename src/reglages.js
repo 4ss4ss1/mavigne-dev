@@ -4219,7 +4219,8 @@ var MV_SAUV_NOMS = {
   cave_vendange:'Cuvier — vendange et cuves', planning_templates:'Modèles de semaine',
   planning_entries:'Planning — saisies', planning_acomptes:'Acomptes',
   planning_hsup:'Heures supplémentaires', kml_polygons:'Contours des parcelles',
-  intrants:'Réserve — intrants', paie:'Taux horaires et GNR'
+  intrants:'Réserve — intrants', paie:'Taux horaires et GNR',
+  pheno:'Stades de la vigne'   // ★ PHENO-1A (§505)
 };
 function _sauvNom(k){ return MV_SAUV_NOMS[k] || k; }
 

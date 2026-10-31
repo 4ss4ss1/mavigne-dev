@@ -3882,6 +3882,44 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .ph-etat{margin-top:var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
 .ph-etat-interdite{color:var(--danger-texte,#BA361A);}
 .ph-etat-libre{color:var(--ok-texte,#217343);}
+/* ★ PHENO-1A (§505) — maquette « niveau au-dessus », partie 1 : noter le stade (la fiche, la fenêtre) et la vue « Stades » de Parcelles.
+   Cinq teintes du plus tardif au plus précoce : feuilles, boutons, floraison, grappe, véraison. */
+.dp-pheno{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);}
+.dp-pheno-k{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
+.dp-pheno-v{font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
+.phn-st{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--e-2,8px);margin-bottom:var(--e-3,12px);}
+.phn-b{display:flex;align-items:center;justify-content:space-between;gap:var(--e-2,8px);min-height:48px;padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font:inherit;text-align:left;cursor:pointer;}
+.phn-b b{font-weight:700;color:var(--texte-doux,#686660);}
+.phn-b.on{border-color:var(--accent,#7A2850);box-shadow:inset 0 0 0 1px var(--accent,#7A2850);}
+.phn-b.on b{color:var(--accent-texte,#7A2850);}
+.phn-rep{display:flex;align-items:flex-start;gap:var(--e-2,8px);margin-bottom:var(--e-3,12px);font-size:var(--pt-base,15px);color:var(--texte,#1B1A18);}
+.phn-rep input{width:20px;height:20px;margin-top:2px;}
+.phn-rep small{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.phn-date{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);margin-bottom:var(--e-3,12px);}
+.phn-date input{min-height:44px;}
+.phs-t{font-size:var(--pt-md,20px);font-weight:600;color:var(--texte,#1B1A18);}
+.phs-s,.phs-k{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.phs-k{margin:var(--e-4,16px) 0 var(--e-2,8px);font-weight:600;}
+.phs-r{margin:var(--e-3,12px) 0;font-size:var(--pt-base,15px);color:var(--texte,#1B1A18);}
+.phs-vide{margin-top:var(--e-4,16px);color:var(--texte-doux,#686660);}
+.phs-m{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--e-2,8px);}
+.phs-c{display:flex;flex-direction:column;gap:var(--e-1,4px);min-height:56px;padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,8px);border:1px solid var(--ligne,#E7E6E2);}
+.phs-c b{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte,#1B1A18);}
+.phs-c span{font-size:var(--pt-micro,12px);color:var(--texte,#1B1A18);}
+.phs-sans{background:var(--bg-card,#FFFFFF);}
+.phs-sans span{color:var(--texte-doux,#686660);}
+.phs-g1{background:var(--tag-green-bg,rgba(46,100,30,.14));}
+.phs-g2{background:var(--tag-teal-bg,rgba(44,110,73,.16));}
+.phs-g3{background:var(--tag-amber-bg,rgba(125,102,8,.16));}
+.phs-g4{background:var(--tag-blue-bg,rgba(26,74,122,.14));}
+.phs-g5{background:var(--tag-purple-bg,rgba(90,45,142,.16));}
+.phs-leg{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);color:var(--texte,#1B1A18);}
+.phs-leg span{padding:2px var(--e-2,8px);border-radius:var(--r-full,999px);}
+.phs-leg em{font-style:normal;color:var(--texte-doux,#686660);}
+.phs-ps div{display:flex;justify-content:space-between;gap:var(--e-3,12px);min-height:32px;align-items:center;border-top:1px solid var(--ligne,#E7E6E2);}
+.phs-al{margin-top:var(--e-4,16px);padding:var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);color:var(--attention-texte,#975600);}
+.phs-al-b{min-height:32px;padding:0 var(--e-1,4px);border:0;background:none;font:inherit;color:var(--accent-texte,#7A2850);text-decoration:underline;cursor:pointer;}
+@media (max-width:767.98px){ #page-parcelles.p-vue-stades .tabs2{display:flex!important;} }
 /* ★ FILTRE-1B (§477) — Parcelles au téléphone, le même patron : les compteurs restent en tête ; l'état, les tâches et Liste / Carte
    passent dans la feuille « Filtres » (celle d'ARRIVEE-4, pour tous désormais) ; la recherche et « Filtres » en barre basse. Sur la
    carte, Liste / Carte revient en haut (la barre vit dans la liste). Sur ordinateur, rien ne bouge. */

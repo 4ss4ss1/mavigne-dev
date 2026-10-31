@@ -37,6 +37,9 @@
     "_trFerDemarrer": "FERTI-9 (§499) : « Démarrer » sur la carte d’un amendement ouvre la feuille « Nouvelle session » déjà remplie — le geste est celui de toute session, la carte dit ce qu’elle fait",
     "_ferPrep": "FERTI-9 (§499) : un lien qui dit ce qu’il fait (« Préparer la session tracteur » / « Ne plus la proposer ») ; « Annuler » le rattrape",
     "_pl2Plus": "PLAN-UX-1 (§501) : ouvre et ferme le menu « … » de la semaine — chaque ligne ouvre un geste qui existe",
-    "_pl2PlusVa": "PLAN-UX-1 (§501) : une ligne du menu « … » ouvre congés, chaleur, l’année suivante ou « Les gens » — les gestes d’avant"
+    "_pl2PlusVa": "PLAN-UX-1 (§501) : une ligne du menu « … » ouvre congés, chaleur, l’année suivante ou « Les gens » — les gestes d’avant",
+    "_phenoNoter": "PHENO-1A (§505) : « Noter le stade » (fiche de la parcelle, administrateur) — un tuto « Comment noter le stade ? » viendra avec PHENO-1B, quand la prévision dira à quoi il sert",
+    "_phenoChoisir": "PHENO-1A (§505) : choisir le stade dans la fenêtre — un bouton par stade, rien à apprendre",
+    "_phenoEnregistrer": "PHENO-1A (§505) : « Enregistrer le stade », avec Annuler six secondes — le bouton dit ce qu’il fait"
   }
 }

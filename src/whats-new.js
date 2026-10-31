@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.54', d: '2026-10-31', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Les stades de la vigne, parcelle par parcelle',
+      desc: "Depuis la fiche d’une parcelle, «\u00a0Noter le stade\u00a0» : le stade atteint (du débourrement à la véraison, avec son code BBCH) et la date — et, d’une case, le même stade sur les parcelles du même cépage et de la même commune. L’onglet «\u00a0Stades\u00a0» de Parcelles montre où en est la vigne\u00a0: la mosaïque des parcelles, les surfaces par stade, et celles restées sans stade depuis douze jours." },
+  ] },
   { v: '10.53', d: '2026-10-31', items: [
     { niv: 0, pour: ['admin'], emoji: 'reglages', titre: 'Réglages : le domaine sur une ligne',
       desc: "En tête de l’onglet Domaine, le nom du domaine, sa campagne, ses parcelles et sa surface tiennent sur une ligne de la liste, au lieu d’une grande carte\u00a0; les lignes de réglage ont 48 px, et les derniers petits textes de l’écran passent à la taille des étiquettes." },

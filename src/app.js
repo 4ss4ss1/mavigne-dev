@@ -898,6 +898,7 @@ function _mvValeursMemoire(){
     planning_acomptes:  window.PLANNING_ACOMPTES,
     planning_hsup:      window.PLANNING_HSUP,
     config:             window.CONFIG || CONFIG,
+    pheno:              window.PHENO || (window.PHENO={}),   // ★ PHENO-1A (§505) : les stades notés (écrits par l'administrateur seul)
   };
   return W;
 }
@@ -7116,14 +7117,15 @@ function _pFxRender(){
   var carte=!!(document.getElementById('tbc')&&document.getElementById('tbc').classList.contains('active'));
   h+='<div class="p-fx-k">Affichage</div><div class="p-fx-chips">'
     +'<button type="button" class="p-fx-chip'+(carte?'':' on')+'" data-v="liste" onclick="_pFxVue(this.dataset.v)">Liste</button>'
-    +'<button type="button" class="p-fx-chip'+(carte?' on':'')+'" data-v="carte" onclick="_pFxVue(this.dataset.v)">Carte</button></div>';
+    +'<button type="button" class="p-fx-chip'+(carte?' on':'')+'" data-v="carte" onclick="_pFxVue(this.dataset.v)">Carte</button>'
+    +'<button type="button" class="p-fx-chip'+((document.getElementById('tbs')&&document.getElementById('tbs').classList.contains('active'))?' on':'')+'" data-v="stades" onclick="_pFxVue(this.dataset.v)">Stades</button></div>';   // ★ PHENO-1A (§505)
   var n=document.querySelectorAll('#pwrapliste .pc-row').length;   // une ligne .pc-row par carte de parcelle (la carte : .mv-c)
   h+='<div class="p-fx-act"><button type="button" onclick="_pFxRemettre()">Tout remettre</button><button type="button" class="p" onclick="closeOv(null,\'ovPFiltres\')">Voir '+n+' parcelle'+(n>1?'s':'')+'</button></div>';
   box.innerHTML=h;
 }
 function openPFiltres(){ _pFxRender(); if(typeof openOv==='function') openOv('ovPFiltres'); }
 // ★ FILTRE-1B (§477) — Liste ou Carte, depuis la feuille : la feuille se ferme sur la vue choisie.
-function _pFxVue(v){ switchPTab(v==='carte'?'carte':'liste'); if(typeof closeOv==='function') closeOv(null,'ovPFiltres'); }
+function _pFxVue(v){ switchPTab(v==='carte'||v==='stades'?v:'liste'); if(typeof closeOv==='function') closeOv(null,'ovPFiltres'); }   // ★ PHENO-1A (§505) : et les stades
 function _pFxAfficher(v){
   var f={finies:'complet',encours:'avance',arrachees:'arrachee'}[v]||'toutes';
   pFilter=f; window.pShowDone=(v==='toutes');   // la tâche prioritaire reste : on ne remet pas pTacheFilter à « toutes »
@@ -8530,6 +8532,7 @@ function openDP(nom){
       dpCepRow.style.display='none';
     }
     if(dpCepBtn){dpCepBtn.style.display=isAdmin()?'':'none';dpCepBtn.onclick=function(){openDPCepage(nom);};}
+_phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, et « Noter le stade » pour l'administrateur
   }
   try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
   try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
@@ -10466,12 +10469,132 @@ function _ensureLeaflet(){
 }
 window._ensureLeaflet=_ensureLeaflet;
 function _mvLeafletFail(){ if(window.showToast) showToast('Carte indisponible hors ligne','#C0392B'); }
+// ★ PHENO-1A (§505) — OÙ EN EST LA VIGNE (docs/maquettes/maquette-niveau-au-dessus-v1.html, partie 1). Le stade se notait sur un
+//   traitement seulement ; il se note maintenant par parcelle, au téléphone, depuis sa fiche — par l'administrateur seul (décision de
+//   Nico, 31/10 : `pheno` est un document que seul l'admin écrit, firestore.rules), et peut se reporter sur les parcelles du même
+//   cépage et de la même commune (le « secteur » de la maquette : les parcelles n'ont pas d'autre champ de lieu). Chaque note garde
+//   l'identifiant stable de la parcelle (pid) : un renommage ne casse rien. La vue « Stades » de Parcelles en tire la mosaïque, les
+//   surfaces par stade et les parcelles restées sans stade. Les codes sont ceux de l'échelle BBCH de la vigne (Lorenz et al., 1994).
+var _PHENO_STADES=[[5,'Bourgeon dans le coton','coton'],[9,'D\u00e9bourrement','d\u00e9bourrement'],[12,'2\u20133 feuilles','2\u20133 feuilles'],[16,'6\u20138 feuilles','6\u20138 feuilles'],
+  [55,'Boutons agglom\u00e9r\u00e9s','agglom\u00e9r\u00e9s'],[57,'Boutons s\u00e9par\u00e9s','boutons s\u00e9par\u00e9s'],[61,'D\u00e9but floraison','d\u00e9but floraison'],[65,'Pleine floraison','pleine floraison'],
+  [71,'Nouaison','nouaison'],[79,'Fermeture de la grappe','fermeture'],[81,'V\u00e9raison','v\u00e9raison']];
+var _PHENO_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+var _phenoP=null, _phenoB=null;
+function _phenoAdm(){ return !!(typeof isAdmin==='function'&&isAdmin()); }
+function _phenoStade(b){ return _PHENO_STADES.find(function(s){ return s[0]===Number(b); })||null; }
+function _phenoAn(){ return String(new Date().getFullYear()); }
+function _phenoListe(an){ var P=window.PHENO||{}, L=P[an||_phenoAn()]; return Array.isArray(L)?L.filter(function(e){ return e&&_phenoStade(e.b)&&e.d; }):[]; }
+function _phenoDernier(p,an){
+  if(!p) return null;
+  var L=_phenoListe(an).filter(function(e){ return p.pid&&e.pid?e.pid===p.pid:e.nom===p.nom; });
+  L.sort(function(a,b){ return String(a.d).localeCompare(String(b.d))||String(a.t||'').localeCompare(String(b.t||'')); });
+  return L.length?L[L.length-1]:null;
+}
+function _phenoCepages(p){ return (p&&p.cepages&&p.cepages.length)?p.cepages:(p&&p.cepage?[p.cepage]:[]); }
+function _phenoVoisines(p){
+  var c=_phenoCepages(p)[0]; if(!p||!c) return [];
+  return (window.PARCELLES||[]).filter(function(x){ return x&&x!==p&&x.nom!==p.nom&&x.statut!=='Arrachee'&&_phenoCepages(x)[0]===c&&String(x.commune||'')===String(p.commune||''); });
+}
+function _phenoJour(d){ var x=new Date(String(d)+'T12:00:00'); if(isNaN(x)) return String(d||''); return 'le '+x.getDate()+(x.getDate()===1?'er':'')+' '+_PHENO_MOIS[x.getMonth()]; }
+function _phenoLib(e){ var s=_phenoStade(e&&e.b); return (s?s[2]:'stade')+' ('+(e&&e.b)+')'; }
+function _phenoNoter(nom){
+  if(!_phenoAdm()) return;
+  var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
+  _phenoP=p; var der=_phenoDernier(p); _phenoB=der?Number(der.b):null;
+  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
+  t.textContent=p.nom+' \u00b7 noter le stade';
+  s.textContent=der?('Dernier stade not\u00e9\u00a0: '+_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e';
+  var V=_phenoVoisines(p), cp=_phenoCepages(p)[0]||'', auj=todayStr();
+  var h='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){
+    return '<button type="button" class="phn-b'+(_phenoB===x[0]?' on':'')+'" role="radio" aria-checked="'+(_phenoB===x[0])+'" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>';
+  }).join('')+'</div>';
+  if(V.length) h+='<label class="phn-rep"><input type="checkbox" id="phn-rep"><span>Reporter sur les '+_escHtml(cp)+(p.commune?' de '+_escHtml(p.commune):'')+'<small>'+_escHtml(V.map(function(x){ return x.nom; }).join(', '))+' \u00b7 '+V.length+' parcelle'+(V.length>1?'s':'')+'</small></span></label>';
+  h+='<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>';
+  h+='<button type="button" class="mbtn verte" id="phn-ok" onclick="_phenoEnregistrer()"'+(_phenoB==null?' disabled':'')+'>Enregistrer le stade</button>';
+  c.innerHTML=h; openOv('ovPheno');
+}
+function _phenoChoisir(b){
+  _phenoB=Number(b);
+  [].slice.call(document.querySelectorAll('#phn-corps .phn-b')).forEach(function(x){ var on=Number(x.dataset.b)===_phenoB; x.classList.toggle('on',on); x.setAttribute('aria-checked',String(on)); });
+  var ok=document.getElementById('phn-ok'); if(ok) ok.disabled=false;
+}
+function _phenoEnregistrer(){
+  if(!_phenoAdm()||!_phenoP||_phenoB==null||!_phenoStade(_phenoB)) return;
+  var auj=todayStr(), d=(document.getElementById('phn-date')||{}).value||auj; if(d>auj) d=auj;
+  var rep=document.getElementById('phn-rep'), cibles=[_phenoP].concat(rep&&rep.checked?_phenoVoisines(_phenoP):[]);
+  var an=String(d).slice(0,4), P=window.PHENO||(window.PHENO={}); if(!Array.isArray(P[an])) P[an]=[];
+  var par=(window.currentUser&&window.currentUser.nom)||'', t=new Date().toISOString(), b=_phenoB;
+  P[an]=P[an].concat(cibles.map(function(x){ return { pid:x.pid||'', nom:x.nom, b:b, d:d, par:par, t:t }; }));
+  saveData('pheno'); closeOv(null,'ovPheno');
+  var n=cibles.length, lib=(_phenoStade(b)||[0,'Stade'])[1];
+  showToastAnnuler(lib+' not\u00e9'+(n>1?' sur '+n+' parcelles':''), function(){
+    var Q=window.PHENO||{}; if(Array.isArray(Q[an])) Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); });
+    saveData('pheno'); _phenoRafraichir();
+  });
+  _phenoRafraichir();
+}
+function _phenoRafraichir(){
+  var v=document.getElementById('pwrapstades'); if(v&&v.classList.contains('vis')) _phenoRendreVue();
+  if(_phenoP) _phenoFiche(_phenoP);
+}
+function _phenoFiche(p){
+  var el=document.getElementById('dp-pheno'); if(!el||!p) return;
+  var der=_phenoDernier(p), adm=_phenoAdm();
+  if(!der&&!adm){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='';
+  el.innerHTML='<div class="dp-pheno-l"><div class="dp-pheno-k">Stade</div><div class="dp-pheno-v">'+_escHtml(der?(_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e')+'</div></div>'
+    +(adm?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-nom="'+_escAttr(p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">Noter le stade</button>':'');
+}
+function _phenoVue(an,auj){
+  var act=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; });
+  var L=act.map(function(p){ return { p:p, e:_phenoDernier(p,an), s:parseFloat(p.surface)||0 }; });
+  var notees=L.filter(function(x){ return x.e; }), ds=notees.map(function(x){ return x.e.d; }).sort();
+  var parB={}; notees.forEach(function(x){ parB[x.e.b]=(parB[x.e.b]||0)+x.s; });
+  var tot=notees.reduce(function(a,x){ return a+x.s; },0), bs=Object.keys(parB).map(Number);
+  var bMax=bs.sort(function(a,b){ return (parB[b]-parB[a])||(b-a); })[0];
+  var plusAv=notees.slice().sort(function(a,b){ return (b.e.b-a.e.b)||String(a.p.nom).localeCompare(String(b.p.nom)); })[0]||null;
+  var mois=Number(String(auj).slice(5,7)), enPousse=mois>=3&&mois<=9, ilYa=function(d){ return Math.round((new Date(auj+'T12:00:00')-new Date(String(d)+'T12:00:00'))/86400000); };
+  var sans=enPousse?L.filter(function(x){ return !x.e||ilYa(x.e.d)>12; }):[];
+  return { act:act, L:L, notees:notees, ds:ds, parB:parB, tot:tot, bMax:bMax, plusAv:plusAv, sans:sans };
+}
+function _phenoRendreVue(){
+  var el=document.getElementById('pstades'); if(!el) return;
+  var an=_phenoAn(), auj=todayStr(), V=_phenoVue(an,auj), fsu=function(n){ return String(Math.round(n*100)/100).replace('.',','); };
+  var h='<div class="phs-t">O\u00f9 en est la vigne</div><div class="phs-s">'+V.act.length+' parcelle'+(V.act.length>1?'s':'')
+    +(V.ds.length?' \u00b7 stades not\u00e9s '+(V.ds[0]===V.ds[V.ds.length-1]?_phenoJour(V.ds[0]):'entre '+_phenoJour(V.ds[0])+' et '+_phenoJour(V.ds[V.ds.length-1])):' \u00b7 aucun stade not\u00e9 en '+an)+'</div>';
+  if(!V.notees.length){
+    el.innerHTML=h+'<div class="phs-vide">'+(_phenoAdm()?'Notez le stade d\u2019une parcelle depuis sa fiche (\u00ab\u00a0Noter le stade\u00a0\u00bb)\u00a0: la mosa\u00efque se remplit, et les parcelles du m\u00eame c\u00e9page peuvent suivre en un geste.':'Aucun stade not\u00e9 pour l\u2019instant\u00a0: l\u2019administrateur les note depuis la fiche des parcelles.')+'</div>';
+    return;
+  }
+  var part=V.tot>0?V.parB[V.bMax]/V.tot:0, mot=part>=0.95?'sur tout ce qui est not\u00e9':part>=0.7?'sur les trois quarts du domaine not\u00e9':part>=0.45?'sur la moiti\u00e9 du domaine not\u00e9':'sur '+Math.round(part*100)+'\u00a0% du domaine not\u00e9';
+  var sM=_phenoStade(V.bMax);
+  var phr=_escHtml((sM?sM[1]:'')+' '+mot);
+  if(V.plusAv&&V.plusAv.e.b>V.bMax) phr+=' \u00b7 le plus avanc\u00e9\u00a0: '+_escHtml(V.plusAv.p.nom)+' ('+_escHtml(_phenoStade(V.plusAv.e.b)[2])+')';
+  h+='<div class="phs-r">'+phr+'</div>';
+  var tri=V.L.slice().sort(function(a,b){ return ((b.e?b.e.b:-1)-(a.e?a.e.b:-1))||String(a.p.nom).localeCompare(String(b.p.nom)); });
+  h+='<div class="phs-m">'+tri.map(function(x){
+    var s=x.e?_phenoStade(x.e.b):null;
+    return '<div class="phs-c'+(s?' phs-g'+_phenoGroupe(x.e.b):' phs-sans')+'"><b>'+_escHtml(x.p.nom)+'</b><span>'+_escHtml(s?(s[2]+' \u00b7 '+s[0]):'sans stade')+'</span></div>';
+  }).join('')+'</div>';
+  var bsAsc=Object.keys(V.parB).map(Number).sort(function(a,b){ return a-b; });
+  h+='<div class="phs-leg">'+bsAsc.map(function(b){ return '<span class="phs-g'+_phenoGroupe(b)+'">'+_escHtml(_phenoStade(b)[2])+'</span>'; }).join('')+'<em>de la plus tardive \u00e0 la plus pr\u00e9coce</em></div>';
+  h+='<div class="phs-k">Par stade, en surface</div><div class="phs-ps">'+bsAsc.slice().reverse().map(function(b){ return '<div><span>'+_escHtml(_phenoStade(b)[1])+' ('+b+')</span><b>'+fsu(V.parB[b])+' ha</b></div>'; }).join('')+'</div>';
+  if(V.sans.length) h+='<div class="phs-al">'+V.sans.length+' parcelle'+(V.sans.length>1?'s':'')+' sans stade depuis 12 jours\u00a0: '+V.sans.map(function(x){
+    return _phenoAdm()?'<button type="button" class="phs-al-b" data-nom="'+_escAttr(x.p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">'+_escHtml(x.p.nom)+'</button>':_escHtml(x.p.nom);
+  }).join(', ')+'</div>';
+  el.innerHTML=h;
+}
+function _phenoGroupe(b){ b=Number(b); return b<=16?1:b<=57?2:b<=65?3:b<=79?4:5; }
+window._phenoNoter=_phenoNoter; window._phenoChoisir=_phenoChoisir; window._phenoEnregistrer=_phenoEnregistrer;
 function switchPTab(tab){
-  var _pg=document.getElementById('page-parcelles'); if(_pg) _pg.classList.toggle('p-vue-carte',tab==='carte');   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte
+  var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');
   document.getElementById('tbc').classList.toggle('active',tab==='carte');
+  var _tbs=document.getElementById('tbs'); if(_tbs) _tbs.classList.toggle('active',tab==='stades');
   document.getElementById('pwrapliste').classList.toggle('vis',tab==='liste');
   document.getElementById('pwrapcarte').classList.toggle('vis',tab==='carte');
+  var _pws=document.getElementById('pwrapstades'); if(_pws) _pws.classList.toggle('vis',tab==='stades');
+  if(tab==='stades') _phenoRendreVue();   // ★ PHENO-1A (§505)
   if(tab==='carte'){
     if(!mapInit){
       _ensureLeaflet().then(function(){
