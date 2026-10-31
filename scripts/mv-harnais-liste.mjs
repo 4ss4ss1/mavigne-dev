@@ -837,6 +837,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-planux1.mjs --contre'],
   ['node scripts/mv-harnais-phyux1.mjs'],              // PHY-UX-1 (§502) : le registre — la date dite, l’état de la rentrée, le cuivre de l’année (joués à heure fixée)
   ['node scripts/mv-harnais-phyux1.mjs --contre'],
+  ['node scripts/mv-harnais-regux1.mjs'],              // REGL-UX-1 (§504) : les Réglages — le domaine en première ligne, les lignes à 48, plus de 8-9 px à l’écran
+  ['node scripts/mv-harnais-regux1.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair
   ['node scripts/mv-harnais-cfg1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles

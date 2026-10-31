@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-10-31",
- "base": "5f976f4",
+ "base": "c3d9bd3",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "141.0.7390.37",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -302,6 +302,18 @@
     "phyto › ordinateur › t12 : 16 → 1",
     "phyto.dates_machine : 15 → 0"
    ]
+  },
+  {
+   "date": "2026-10-31",
+   "base": "c3d9bd3",
+   "motif": "hausse acceptée : PHY-UX-1 (§502) : l’étiquette du type du registre est revenue au jeton nano (11 px sur ordinateur, ce que LISIBLE-1 veut) après que la référence eut été gravée avec 12 — la hausse sur ordinateur (1 → 16 textes sous 12 px) est celle-là",
+   "hausses": [
+    "phyto › ordinateur › t12 : 1 → 16"
+   ],
+   "baisses": [
+    "pilotage › ordinateur › c44 : 42 → 39",
+    "reglages.premier_y : 356 → 282"
+   ]
   }
  ],
  "mesures": {
@@ -418,13 +430,13 @@
     "cibles": 16,
     "c24": 0,
     "c44": 5,
-    "textes": 49,
+    "textes": 48,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 45,
     "pouce": null,
-    "hauteur": 1408
+    "hauteur": 1335
    }
   },
   "ordinateur": {
@@ -482,7 +494,7 @@
     "c44": 6,
     "textes": 155,
     "t11": 0,
-    "t12": 1,
+    "t12": 16,
     "chrome": 120,
     "chromeDefile": 111,
     "pouce": null,
@@ -525,10 +537,10 @@
     "hauteur": 1303
    },
    "pilotage": {
-    "cibles": 69,
+    "cibles": 61,
     "c24": 0,
-    "c44": 42,
-    "textes": 250,
+    "c44": 39,
+    "textes": 251,
     "t11": 0,
     "t12": 56,
     "chrome": 66,
@@ -540,13 +552,13 @@
     "cibles": 16,
     "c24": 0,
     "c44": 6,
-    "textes": 56,
+    "textes": 55,
     "t11": 0,
     "t12": 17,
     "chrome": 120,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1186
+    "hauteur": 1113
    }
   }
  },
@@ -558,7 +570,7 @@
   "cave.sommaire": 1,
   "reserve.action": 1,
   "planning.grille_y": 373,
-  "reglages.premier_y": 356,
+  "reglages.premier_y": 282,
   "parcelles.valider": 48
  }
 }

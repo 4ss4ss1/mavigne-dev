@@ -508,7 +508,7 @@ function renderReglages(){
       else if(catRef.type==='passages'&&catRef.passagesHha){ convTxt='Convention : '+catRef.passagesHha.join('/')+' h/ha'; }
       else if(_horsBar){ convTxt='Ce barème ne prévoit pas ce travail'; }
       else { convTxt='Convention : '+catRef.hha+' h/ha'+((window._mvHhaDens&&window._mvHhaDens(catRef.hha)!==catRef.hha)?(' · à votre densité : '+window._mvHhaDens(catRef.hha)):''); }
-      var _chip=function(txt,yr){return '<span style="font-size:9px;font-weight:700;border-radius:10px;padding:1px 7px;margin-right:3px;background:'+(yr?'rgba(61,107,39,0.14)':'var(--gris-clair)')+';color:'+(yr?'var(--vert-med)':'var(--texte-med)')+'">'+txt+'</span>';};
+      var _chip=function(txt,yr){return '<span style="font-size:var(--pt-nano,11px);font-weight:700;border-radius:10px;padding:1px 7px;margin-right:3px;background:'+(yr?'rgba(61,107,39,0.14)':'var(--gris-clair)')+';color:'+(yr?'var(--vert-med)':'var(--texte-med)')+'">'+txt+'</span>';};
       var sChips=t.anytime?_chip('Toute l&#39;année',true):(t.saisons||[]).map(function(st){return _chip(_escHtml(st),false);}).join('');
       var nomEsc=_escAttr(t.nom);
       var isStd=(window.TACHES_CATALOGUE||[]).some(function(c){return c.nom===t.nom;});
@@ -3430,7 +3430,7 @@ function _clotOverlayHTML(ctx){
   var reste = Math.max(0, 100 - (ctx.pct||0));
   var stat = function(v,l){ return '<div class="mvcarte-fond" style="padding:12px 6px;text-align:center">'
     + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
-    + '<div style="font-size:9px;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
+    + '<div style="font-size:var(--pt-nano,11px);color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Campagne déjà préparée</label>'
@@ -6965,7 +6965,7 @@ function _tcvInjectCss(){
    +'.tcv-nom{font-weight:700;font-size:13.5px;color:var(--texte)}'
    +'.tcv-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px}'
    +'.tcv-h{font-size:var(--pt-txt,13px);font-weight:800;color:var(--terre,#8A5A38);white-space:nowrap}'
-   +'.tcv-tag{display:inline-block;font-size:9px;font-weight:700;border-radius:10px;padding:1px 7px;'
+   +'.tcv-tag{display:inline-block;font-size:var(--pt-nano,11px);font-weight:700;border-radius:10px;padding:1px 7px;'
    +'margin-right:4px;background:rgba(61,107,39,0.14);color:var(--vert-med)}'
    +'.tcv-act{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;'
    +'justify-content:center;font-size:var(--pt-sm,16px);font-weight:700;color:var(--vert-med);'

@@ -8018,6 +8018,13 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-reglages #regl-view-domaine > #set-sec-saisons{ order:4; }
 }
 /* ★ FIN RG-1 */
+/* ★ REGL-UX-1 (§504) — maquette-ux-v2, Réglages : le domaine devient la première ligne de la liste (nom, campagne, parcelles, surface)
+   au lieu d'une carte de 150 px ; les lignes de réglage à 48 px. */
+#page-reglages .dom-badge{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:var(--e-1,4px);min-height:64px;padding:var(--e-3,12px) var(--e-4,16px);margin:0 16px var(--e-3,12px);text-align:left;}
+#page-reglages .db-logo{display:none;}
+#page-reglages .db-nom{margin:0;font-family:inherit;font-size:var(--pt-base,15px);font-weight:600;opacity:1;color:var(--texte,#1B1A18);}
+#page-reglages .db-sub{font-size:var(--pt-micro,12px);opacity:1;color:var(--texte-doux,#686660);}
+#page-reglages .set-row{min-height:48px;}
 /* ★ RG-2 (§296) — RÉGLAGES › ÉQUIPE ET MOI AU DESSIN DE LA MAQUETTE V10 (habit seulement : aucun réglage, aucun droit, aucun
    enregistrement ne bouge). Équipe : les membres en lignes dans une carte (avatar neutre, nom en Outfit, rôles au kit, l'admin à
    l'accent), « Ajouter un membre » à l'accent, le cadre vide des alertes de contrat caché tant qu'il est vide. Moi : la zone

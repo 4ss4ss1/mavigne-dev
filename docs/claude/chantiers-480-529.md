@@ -624,3 +624,24 @@ La maquette disait, pour la mise en route : « parcellaire importé, comptes cr�
 - Les accents ê et è des grands titres en Cormorant flottent haut : c’est le dessin de la police (glyphes simples, version 4.001), pas un défaut de la page. Signalé, pas traité.
 - Toujours ouverts depuis §498d : le « 127 heures par an » que la démo annonce « comme le site » ; `harnais-vitrine.mjs` et `contre-epreuves.mjs` décrivent l’ancienne page.
 - Les valeurs ajoutées dans les mini-écrans (64 %, 1,37 ha, 6 140 €/ha…) sont des exemples.
+
+## 504. ★★ REGL-UX-1 — LES RÉGLAGES : LE DOMAINE EN PREMIÈRE LIGNE, LES LIGNES À 48, PLUS DE TEXTES À 8-9 PX À L’ÉCRAN (31/10 — `src/reglages.js` (`renderReglages`, `_clotOverlayHTML`, `_tcvInjectCss` : trois tailles) · `src/styles.css` · `src/utils.js` (APP 10.53) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.34) · `scripts/mv-harnais-regux1.mjs` (neuf) · `scripts/mv-harnais-tete3a.mjs` · `src/app.js` (le seuil du repli) · `scripts/mv-ux-baseline.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/REGL-UX-1.json` · base `c3d9bd3`)
+
+### 504a. D’où ça vient
+Le dernier écran de `docs/maquettes/maquette-ux-v2.html` (« Réglages — l’en-tête en une ligne, les lignes à 48 ») : mesuré, la carte « Ma Vigne · Domaine » prend 150 px avant le premier réglage ; des textes à 8 et 9 px. Relu dans le code : **la liste de la maquette est en partie dépassée** — tâches et barèmes, tournées, jalons ont quitté les Réglages pour la roue crantée de leur module (NAV-1) ; l’onglet Domaine porte le nom, l’invitation, les campagnes, les documents. « Chaque réglage avec sa valeur à droite » : le nom du domaine la portait déjà ; les autres lignes n’ont pas de valeur courte à montrer — rien d’inventé.
+
+### 504b. Ce qui change
+- **La carte du domaine devient la première ligne de la liste** : sans le logo « Ma Vigne », le nom en titre de ligne et sa ligne (campagne · avancement · parcelles · surface), 64 px au moins au lieu de 150.
+- **Les lignes de réglage à 48 px.**
+- **Plus de texte à 8 ou 9 px à l’écran** : les trois qui restaient (la pastille des campagnes de `renderReglages`, une légende de la fenêtre de clôture, l’étiquette de la conversion des tâches) passent au jeton `--pt-nano` (12 au téléphone, 11 sur ordinateur). **Les documents imprimés gardent leur barème** (journal, mois, registre phyto, vendange) : 8-9 px, à l’impression, sont la norme d’une feuille A4.
+
+### 504c. Mesuré
+- `mv-harnais-regux1` : 5 assertions — aucun 8-9 px dans les quatre fonctions d’écran (dont la feuille de style et le rendu de la conversion), les trois passés au jeton, les documents imprimés intacts, la carte du domaine en ligne, les lignes à 48 ; **5/5 mutants** (dont un document imprimé passé par erreur au jeton).
+- **RG-1** gardait son bloc de style « par jetons seulement » : les règles de ce lot y étaient posées (trois valeurs en dur) — elles passent après sa fin (`★ FIN RG-1`), 7/7.
+- ★ **Le repli de l’en-tête se dépliait aussitôt sur une page courte — trouvé au relevé, corrigé** (`src/app.js`, TETE-3A suit) : les Réglages, plus courts de 73 px, défilaient par pas de 82 px ; replié à 82 px, l’en-tête raccourcit la page de ~66 px, l’ancrage remonte d’autant — 16 px, sous la règle « en haut, on déplie », qui passe avant le gel de TETE-3B. Le journal des changements de classe l’a montré : replié à 14 px, déplié à 80. **Le repli part maintenant passé 140 px** (l’ancrage ne peut plus retomber sous 24) ; un mutant garde le seuil.
+- `test:ux` (référence regravée) : les Réglages se replient de nouveau (45 px) ; **une hausse acceptée et écrite, qui vient de PHY-UX-1** : sur ordinateur, les textes du Phyto sous 12 px, 1 → 16 — l’étiquette du type y est revenue au jeton nano (11 px sur ordinateur, ce que LISIBLE-1 veut) après que la référence eut été gravée avec 12.
+- Tutos et chaîne : voir la note de livraison.
+
+### 504d. Ce qui reste ouvert
+- **Les écrans de la maquette v2 sont tous faits.** La suite du plan : PHENO-1, PHENO-2, OBS-1, FENETRE-2, RECOLTE-1, IFT-1, REG27-1 (la maquette « niveau au-dessus »).
+- **À vérifier chez Nico** : l’onglet Domaine des Réglages (la première ligne, les lignes).

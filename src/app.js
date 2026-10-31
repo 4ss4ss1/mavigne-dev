@@ -12890,7 +12890,10 @@ function _mvRepliMaj(){
   if(Date.now()<_mvRepliGel){ _mvRepliY=y; return; }
   if(Date.now()-_mvRepliGeste<2500){   // 900 ms ne suffisaient pas quand la page est lourde
     var replie=b.classList.contains('mv-replie');
-    if(d>6&&y>72&&!replie){ b.classList.add('mv-replie'); _mvRepliGel=Date.now()+350; }
+    // ★ REGL-UX-1 (§504) — passé 140 px, pas 72 : se replier raccourcit la page de ~66 px et l'ancrage remonte d'autant ; replié à 82 px,
+    //   on retombait à 16 px — sous la règle « en haut, on déplie » (qui passe avant le gel) : l'en-tête se dépliait aussitôt. Vu au
+    //   relevé sur les Réglages, devenus plus courts (le défilement y avance par pas de 82 px).
+    if(d>6&&y>140&&!replie){ b.classList.add('mv-replie'); _mvRepliGel=Date.now()+350; }
     else if(d<-6&&replie){ b.classList.remove('mv-replie'); _mvRepliGel=Date.now()+350; }
   }
   if(Math.abs(d)>6) _mvRepliY=y;

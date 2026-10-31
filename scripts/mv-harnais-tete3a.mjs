@@ -6,7 +6,7 @@
    POURQUOI IL EXISTE
    Un en-tête qui se replie au mauvais moment cache ce qu'on vient chercher : un tuto qui fait défiler vers un onglet, un test
    qui clique dessus. Ce harnais JOUE _mvRepliMaj (extraite d'app.js) sur une horloge et un défilement posés : un défilement
-   programmé ne replie pas ; un défilement de la main vers le bas, passé 72 px, replie ; remonter ou revenir en haut déplie ;
+   programmé ne replie pas ; un défilement de la main vers le bas, passé 140 px (REGL-UX-1, §504), replie ; remonter ou revenir en haut déplie ;
    sur ordinateur, jamais. Il garde la règle CSS (la bande et les onglets cachés, une ligne de 44 px), et le geste de molette
    que test:ux envoie avant de faire défiler — sans lui, la mesure « en défilant » ne verrait jamais l'en-tête replié.
    ─────────────────────────────────────────────────────── */
@@ -33,9 +33,9 @@ function jouer(S) {
   const A = monde(S, true);
   t('① un défilement programmé (tuto, test, scrollIntoView) ne replie pas', A.aller(400, false) === false);
   const E = monde(S, true); E.aller(30, true);
-  t('① un petit geste près du haut (sous 72 px) ne replie pas', E.aller(60, true) === false);
+  t('① un petit geste près du haut (sous 140 px : l’ancrage du repli ne doit pas retomber sous 24 px) ne replie pas', E.aller(60, true) === false && E.aller(130, true) === false);
   const B = monde(S, true); B.aller(30, true);
-  t('① un défilement de la main vers le bas, passé 72 px, replie', B.aller(200, true) === true);
+  t('① un défilement de la main vers le bas, passé 140 px, replie', B.aller(200, true) === true);
   const F = monde(S, true); F.aller(30, true); F.aller(300, true);
   t('① le saut de l’ancrage juste après le repli (−54 px en 50 ms) ne déplie pas', F.aller(246, true, 40) === true);
   t('① remonter de quelques pixels déplie', B.aller(180, true) === false);
@@ -62,7 +62,8 @@ if (!CONTRE) {
   const m = (cle, a, b) => (S) => { if (!S[cle].includes(a)) throw new Error('ancre absente'); return Object.assign({}, S, { [cle]: S[cle].replace(a, b) }); };
   const mutants = [
     ['un défilement programmé replie aussi', m('app', 'if(Date.now()-_mvRepliGeste<2500){', 'if(true){')],
-    ['le repli part dès le premier pixel', m('app', 'if(d>6&&y>72&&!replie){', 'if(d>0&&!replie){')],
+    ['le repli part dès le premier pixel', m('app', 'if(d>6&&y>140&&!replie){', 'if(d>0&&!replie){')],
+    ['le seuil retombe à 72 px (l’ancrage ramène sous 24 px)', m('app', 'if(d>6&&y>140&&!replie){', 'if(d>6&&y>72&&!replie){')],
     ['remonter ne déplie plus', m('app', "else if(d<-6&&replie){ b.classList.remove('mv-replie'); _mvRepliGel=Date.now()+350; }", '')],
     ['plus de gel après un changement (l’ancrage fait osciller l’en-tête)', m('app', 'if(Date.now()<_mvRepliGel){ _mvRepliY=y; return; }', '')],
     ['l’ordinateur se replie aussi', m('app', "if(!tel||y<24){", 'if(y<24){')],
