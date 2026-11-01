@@ -12,7 +12,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, wmoDesc, wmoIcone, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, showToastAnnuler
+         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, showToastAnnuler, _mvCommuneNom
 } from './utils.js';
 // ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
 //   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
@@ -10481,7 +10481,7 @@ var _PHENO_STADES=[[5,'Bourgeon dans le coton','coton'],[9,'D\u00e9bourrement','
   [55,'Boutons agglom\u00e9r\u00e9s','agglom\u00e9r\u00e9s'],[57,'Boutons s\u00e9par\u00e9s','boutons s\u00e9par\u00e9s'],[61,'D\u00e9but floraison','d\u00e9but floraison'],[65,'Pleine floraison','pleine floraison'],
   [71,'Nouaison','nouaison'],[79,'Fermeture de la grappe','fermeture'],[81,'V\u00e9raison','v\u00e9raison']];
 var _PHENO_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
-var _phenoP=null, _phenoB=null;
+var _phenoP=null, _phenoB=null, _phenoFen={ jour:'auj', autre:'', corr:false, confirme:false, coches:{}, cible:null };
 function _phenoAdm(){ return !!(typeof isAdmin==='function'&&isAdmin()); }
 function _phenoStade(b){ return _PHENO_STADES.find(function(s){ return s[0]===Number(b); })||null; }
 function _phenoAn(){ return String(new Date().getFullYear()); }
@@ -10497,32 +10497,188 @@ function _phenoCepages(p){ return (p&&p.cepages&&p.cepages.length)?p.cepages:(p&
 //   le regroupement se fait par cuvée, dans le relevé de la vue Stades.
 function _phenoJour(d){ var x=new Date(String(d)+'T12:00:00'); if(isNaN(x)) return String(d||''); return 'le '+x.getDate()+(x.getDate()===1?'er':'')+' '+_PHENO_MOIS[x.getMonth()]; }
 function _phenoLib(e){ var s=_phenoStade(e&&e.b); return (s?s[2]:'stade')+' ('+(e&&e.b)+')'; }
+// ★ PHENO-1D (§509) — LA DATE EN UN APPUI, AUCUN RETOUR EN ARRIÈRE, UNE QUESTION AVANT LES GRANDS SAUTS (la maquette de la date, v3,
+//   validée par Nico le 01/11). La date : Aujourd'hui (d'office), Hier, Avant-hier, ou une autre date du calendrier du téléphone —
+//   jamais dans le futur, jamais d'une autre année (les notes sont rangées par année). La garde : une note datée du jour D reste entre la
+//   plus avancée des notes d'avant D et la moins avancée des notes d'après D — la vigne ne revient jamais en arrière ; le même jour, la
+//   nouvelle note remplace l'ancienne (une faute de doigt se rattrape après les six secondes d'« Annuler »). Sauter au moins une phase
+//   entière (feuilles, boutons, floraison, grappe, véraison) demande « Vous êtes sûr ? » sans bloquer : sauter la floraison ferait prendre
+//   la note suivante pour la date de floraison à « Ce qui vient » (_phenoPrevisions lit la première note ≥ 65).
+var _PHENO_MOIS_L=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+var _PHENO_SEM=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+function _phenoIso(x){ return x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2); }
+function _phenoDecale(d,n){ var x=new Date(String(d)+'T12:00:00'); x.setDate(x.getDate()+n); return _phenoIso(x); }
+function _phenoEcart(a,b){ return Math.round((new Date(String(b)+'T12:00:00')-new Date(String(a)+'T12:00:00'))/86400000); }
+function _phenoJm(d){ return _phenoJour(d).replace(/^le /,''); }
+function _phenoDateLongue(d){ var x=new Date(String(d)+'T12:00:00'); if(isNaN(x)) return String(d||''); return _PHENO_SEM[x.getDay()]+' '+x.getDate()+(x.getDate()===1?'er':'')+' '+_PHENO_MOIS_L[x.getMonth()]; }
+function _phenoDateCourte(d){ var x=new Date(String(d)+'T12:00:00'); if(isNaN(x)) return String(d||''); return _PHENO_SEM[x.getDay()].slice(0,3)+'. '+x.getDate()+(x.getDate()===1?'er':'')+' '+_PHENO_MOIS[x.getMonth()]; }
+function _phenoCap(t){ t=String(t||''); return t.charAt(0).toUpperCase()+t.slice(1); }
+function _phenoRel(d,auj){ var n=_phenoEcart(d,auj); return n<=0?'aujourd\u2019hui':n===1?'hier':n===2?'avant-hier':_phenoJour(d); }
+function _phenoDat(d,auj){ var r=_phenoRel(d,auj); return r==='hier'?'d\u2019hier':r==='avant-hier'?'d\u2019avant-hier':r==='aujourd\u2019hui'?'d\u2019aujourd\u2019hui':'du '+_phenoJm(d); }
+function _phenoDateDe(k,autre,auj){
+  if(k==='hier') return _phenoDecale(auj,-1);
+  if(k==='avh') return _phenoDecale(auj,-2);
+  if(k==='autre'&&autre&&String(autre)<=auj&&String(autre).slice(0,4)===String(auj).slice(0,4)) return String(autre);
+  return auj;
+}
+function _phenoGarde(p,d){
+  var f=null, c=null, j=null;
+  _phenoListe(String(d).slice(0,4)).forEach(function(e){
+    if(!p||!(p.pid&&e.pid?e.pid===p.pid:e.nom===p.nom)) return;
+    var b=Number(e.b), n={ b:b, d:e.d, t:String(e.t||'') };
+    if(e.d<d){ if(!f||b>f.b||(b===f.b&&e.d>f.d)) f=n; }
+    else if(e.d>d){ if(!c||b<c.b||(b===c.b&&e.d<c.d)) c=n; }
+    else if(!j||n.t>j.t) j=n;
+  });
+  return { f:f, c:c, j:j };
+}
+function _phenoPermis(g,b){ b=Number(b); return (!g.f||b>=g.f.b)&&(!g.c||b<=g.c.b); }
+function _phenoSaut(g,b,d){
+  if(!g||!g.f) return null;
+  var a=_phenoGroupe(g.f.b), z=_phenoGroupe(b); if(z-a<2) return null;
+  var noms={ 2:'les boutons', 3:'la floraison', 4:'la grappe' }, m=[]; for(var k=a+1;k<z;k++) m.push(noms[k]);
+  var liste=m.length===1?m[0]:m.slice(0,-1).join(', ')+' ni '+m[m.length-1], n=_phenoEcart(g.f.d,d);
+  return { txt:'De '+_phenoLib(g.f)+' \u00e0 '+_phenoLib({ b:Number(b) })+' en '+n+'\u00a0jour'+(n>1?'s':'')+', sans '+liste+'.', flo:a<3&&z>3, manque:liste };
+}
 function _phenoNoter(nom){
   if(!_phenoAdm()) return;
   var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
-  _phenoP=p; var der=_phenoDernier(p); _phenoB=der?Number(der.b):null;
-  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
-  t.textContent=p.nom+' \u00b7 noter le stade';
-  s.textContent=der?('Dernier stade not\u00e9\u00a0: '+_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e';
-  var auj=todayStr();
-  var h='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){
-    return '<button type="button" class="phn-b'+(_phenoB===x[0]?' on':'')+'" role="radio" aria-checked="'+(_phenoB===x[0])+'" data-tuto="phn.stade" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>';
-  }).join('')+'</div>';
-  h+='<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>';
-  h+='<button type="button" class="mbtn verte" id="phn-ok" data-tuto="phn.ok" onclick="_phenoEnregistrer()"'+(_phenoB==null?' disabled':'')+'>Enregistrer le stade</button>';
-  c.innerHTML=h; openOv('ovPheno');
+  _phenoP=p; _phenoB=null; _phenoCuv=null;
+  _phenoFen={ jour:'auj', autre:'', corr:false, confirme:false, coches:{}, cible:null };   // ★ PHENO-1D : rien de choisi d'office, la date du jour
+  if(_phenoFenetre()) openOv('ovPheno');
 }
 function _phenoChoisir(b){
-  _phenoB=Number(b);
-  [].slice.call(document.querySelectorAll('#phn-corps .phn-b')).forEach(function(x){ var on=Number(x.dataset.b)===_phenoB; x.classList.toggle('on',on); x.setAttribute('aria-checked',String(on)); });
-  var ok=document.getElementById('phn-ok'); if(ok) ok.disabled=false;
+  _phenoB=Number(b); _phenoFen.confirme=false; _phenoFen.corr=false;
+  _phenoFenetre();
 }
-function _phenoEnregistrer(){
+function _phenoEnregistrer(force){
   if(!_phenoAdm()||!_phenoP||_phenoB==null||!_phenoStade(_phenoB)) return;
-  var auj=todayStr(), d=(document.getElementById('phn-date')||{}).value||auj; if(d>auj) d=auj;
-  var cibles=_phenoCuveeCibles?_phenoCuveeCibles():null;
+  var auj=todayStr(), d=_phenoDateDe(_phenoFen.jour,_phenoFen.autre,auj), b=Number(_phenoB), X=_phenoFenCibles(d);
+  var ok=X.filter(function(x){ return _phenoPermis(x.g,b)&&(!_phenoCuv||_phenoFen.coches[x.p.nom]!==false); });
+  if(!ok.length) return;
+  // ★ PHENO-1D : un saut d'au moins une phase entière demande d'abord « Vous êtes sûr ? » (la question remplace le bouton)
+  if(!force&&ok.some(function(x){ return _phenoSaut(x.g,b,d); })){ _phenoFen.confirme=true; _phenoFenetre(); return; }
+  var ecartees=X.filter(function(x){ return !_phenoPermis(x.g,b); }).map(function(x){ return x.p; });   // comptées par le message, jamais notées
+  _phenoCuv=null; _phenoFen.confirme=false;
   closeOv(null,'ovPheno');
-  _phenoAjouter(cibles&&cibles.length?cibles:[_phenoP], _phenoB, d);
+  _phenoAjouter(ok.map(function(x){ return x.p; }).concat(ecartees), b, d);
+}
+function _phenoFenCibles(d){
+  // ★ PHENO-1D : les parcelles de la fenêtre (la parcelle, ou celles de la cuvée), chacune avec sa garde à la date d
+  var ps=_phenoCuv?(window.PARCELLES||[]).filter(function(p){ return p&&_phenoCuv.noms.indexOf(p.nom)>=0; }):(_phenoP?[_phenoP]:[]);
+  return ps.map(function(p){ return { p:p, g:_phenoGarde(p,d) }; });
+}
+function _phenoJoursHtml(ctx,jour,autre,auj){
+  // ★ PHENO-1D : « Observé le » — le choix de la charte ; « Autre » porte le calendrier du téléphone (un champ date transparent posé dessus)
+  var h=[['auj','Aujourd\u2019hui'],['hier','Hier'],['avh','Avant-hier']].map(function(x){ var on=jour===x[0];
+    return '<button type="button" class="phn-opt'+(on?' on':'')+'" aria-pressed="'+on+'" data-ctx="'+_escAttr(ctx)+'" data-k="'+x[0]+'" onclick="_phenoDate(this.dataset.ctx,this.dataset.k)">'+x[1]+'</button>'; }).join('');
+  var aOn=jour==='autre'&&!!autre;
+  h+='<label class="phn-opt'+(aOn?' on':'')+'">'+(aOn?'':_mvIcon('calendrier',16))+'<span>'+(aOn?_escHtml(_phenoDateCourte(autre)):'Autre')+'</span>'
+    +'<input class="phn-sous" type="date" min="'+String(auj).slice(0,4)+'-01-01" max="'+auj+'" value="'+(aOn?_escAttr(autre):'')+'" aria-label="Autre date\u00a0: ouvrir le calendrier" data-ctx="'+_escAttr(ctx)+'" onchange="_phenoDate(this.dataset.ctx,\'autre\',this.value)"></label>';
+  return '<div class="phn-jours" role="group" aria-label="Date d\u2019observation">'+h+'</div>';
+}
+function _phenoFenetre(){
+  // ★ PHENO-1D (§509) : la fenêtre se redessine à chaque geste — le stade, la date, la correction, la question.
+  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c||!_phenoP) return false;
+  var auj=todayStr(), F=_phenoFen, d=_phenoDateDe(F.jour,F.autre,auj), X=_phenoFenCibles(d), cuv=!!_phenoCuv, b=_phenoB, h='';
+  if(!X.length) return false;
+  var nOk=function(v){ var n=0; X.forEach(function(x){ if(_phenoPermis(x.g,v)) n++; }); return n; }, bOk=b!=null&&nOk(b)>0;
+  var der=cuv?null:_phenoDernier(_phenoP), di=-1;
+  if(der) _PHENO_STADES.forEach(function(x,k){ if(x[0]===Number(der.b)) di=k; });
+  if(cuv){ t.textContent=_phenoCuv.nom; s.textContent='Noter pour la cuv\u00e9e \u00b7 '+X.length+' parcelle'+(X.length>1?'s':'')+' \u2014 d\u00e9cochez celles qui n\u2019y sont pas'; }
+  else { t.textContent=_phenoP.nom; s.textContent=der?('Dernier stade not\u00e9\u00a0: '+_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e'; }
+  var nB=0;
+  h+='<div class="phn-sec"><div class="phn-etq" id="phn-etq-st">Stade atteint</div><div class="phn-st" role="radiogroup" aria-labelledby="phn-etq-st">'+_PHENO_STADES.map(function(x,k){
+    var n=nOk(x[0]), ok=n>0, on=ok&&b===x[0], actuel=!cuv&&k===di, prochain=!cuv&&ok&&!actuel&&(di<0?k===0:k===di+1), partiel=cuv&&ok&&n<X.length;
+    if(!ok) nB++;
+    var lg=actuel?'dernier not\u00e9':(prochain?'suivant':(partiel?'pour '+n+' sur '+X.length:''));
+    return '<button type="button" class="phn-b'+(on?' on':'')+(actuel?' actuel':'')+(prochain?' prochain':'')+(ok?'':' bloque')+'" role="radio" aria-checked="'+on+'"'+(ok?'':' disabled')+' data-tuto="phn.stade" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)">'
+      +'<span class="phr-code phr-g'+_phenoGroupe(x[0])+'">'+x[0]+'</span><span class="phn-bt"><span class="phn-bn">'+_escHtml(x[1])+'</span>'+(lg?'<span class="phn-bl">'+lg+'</span>':'')+'</span>'
+      +(on?_mvIcon('check',16):(ok?'':_mvIcon('cadenas',16)))+'</button>';
+  }).join('')+'</div>';
+  var rows=[], nC=0, nEx=0, sauts=[], flo=false;
+  if(!cuv){
+    var g=X[0].g;
+    if(nB&&(g.f||g.c)){
+      var txt;
+      if(g.f&&g.c) txt=(g.f.b===g.c.b)?'\u00c0 cette date, seul '+_phenoLib(g.f)+' est possible\u00a0: il est not\u00e9 '+_phenoJour(g.f.d)+' et '+_phenoJour(g.c.d)+'.':'\u00c0 cette date, seuls '+_phenoLib(g.f)+' \u00e0 '+_phenoLib(g.c)+' sont possibles, entre les notes du '+_phenoJm(g.f.d)+' et du '+_phenoJm(g.c.d)+'.';
+      else if(g.f) txt='Gris\u00e9s\u00a0: avant '+_phenoLib(g.f)+', not\u00e9 '+_phenoJour(g.f.d)+'. La vigne ne revient pas en arri\u00e8re.';
+      else txt='Gris\u00e9s\u00a0: apr\u00e8s '+_phenoLib(g.c)+', not\u00e9 plus tard, '+_phenoJour(g.c.d)+'.';
+      F.cible=g.f||g.c;
+      h+='<p class="phn-garde">'+_mvIcon('cadenas',16)+'<span>'+_escHtml(txt)+'</span></p>';
+      if(!F.corr) h+='<button type="button" class="phn-lien" onclick="_phenoCorriger(1)">La note du '+_escHtml(_phenoJm(F.cible.d))+' est fausse\u00a0? La corriger</button>';
+      else h+='<div class="phn-corr"><p class="phn-corr-t">Supprimer la note du '+_escHtml(_phenoDateLongue(F.cible.d))+'\u00a0?</p><p class="phn-corr-s">'+_escHtml(_phenoCap(_phenoLib(F.cible)))+'. Les stades qu\u2019elle bloque redeviendront possibles\u00a0; les autres notes ne bougent pas.</p>'
+        +'<div class="phn-corr-b"><button type="button" class="mvbtn mvbtn-secondaire" onclick="_phenoCorriger(0)">Garder</button><button type="button" class="mvbtn mvbtn-danger" onclick="_phenoCorriger(2)">Supprimer la note</button></div></div>';
+    } else F.cible=null;
+  } else {
+    F.cible=null;
+    X.forEach(function(x){
+      var dx=_phenoDernier(x.p), ex=bOk&&!_phenoPermis(x.g,b), co=!ex&&F.coches[x.p.nom]!==false, sq=(bOk&&!ex)?_phenoSaut(x.g,b,d):null, etat;
+      if(ex){ nEx++; etat=(x.g.f&&b<x.g.f.b)?'D\u00e9j\u00e0 plus avanc\u00e9e\u00a0: '+_phenoLib(x.g.f)+', '+_phenoJour(x.g.f.d):'Une note plus r\u00e9cente dit '+_phenoLib(x.g.c)+', '+_phenoJour(x.g.c.d); }
+      else if(sq) etat='Saute '+sq.manque+' \u00b7 '+_phenoLib(x.g.f)+' '+_phenoJour(x.g.f.d);
+      else if(bOk&&x.g.j) etat='Note de ce jour remplac\u00e9e\u00a0: '+_phenoLib(x.g.j);
+      else etat=dx?_phenoLib(dx)+', '+_phenoJour(dx.d):'sans note';
+      if(co){ nC++; if(sq){ sauts.push(x.p.nom); if(sq.flo) flo=true; } }
+      rows.push('<label class="phn-cl'+(ex?' exclue':'')+(sq?' saute':'')+'"><input type="checkbox"'+(co?' checked':'')+(ex?' disabled':'')+' data-nom="'+_escAttr(x.p.nom)+'" onchange="_phenoCuvCoche(this.dataset.nom,this.checked)"><span class="phn-clt"><span class="phn-cln">'+_escHtml(x.p.nom)+'</span><small>'+_escHtml(etat)+'</small></span></label>');
+    });
+    if(nEx) h+='<p class="phn-ecart">'+_mvIcon('alerte',16)+'<span>'+nEx+' parcelle'+(nEx>1?'s':'')+' \u00e9cart\u00e9e'+(nEx>1?'s':'')+'\u00a0: ce stade serait un retour en arri\u00e8re.</span></p>';
+  }
+  h+='</div>';
+  var n=_phenoEcart(d,auj);
+  h+='<div class="phn-sec"><div class="phn-etq">Observ\u00e9 le</div>'+_phenoJoursHtml('f',F.jour,F.autre,auj)
+    +'<p class="phn-datel">'+_mvIcon('calendrier',16)+'<span>'+_escHtml(_phenoCap(_phenoDateLongue(d))+' '+d.slice(0,4)+(n>2?' \u00b7 il y a '+n+' jours':''))+'</span></p>';
+  if(!cuv&&X[0].g.j) h+='<p class="phn-info">'+_mvIcon('rotation',16)+'<span>Une note existe d\u00e9j\u00e0 ce jour-l\u00e0\u00a0: '+_escHtml(_phenoLib(X[0].g.j))+'. Elle sera remplac\u00e9e.</span></p>';
+  h+='</div>';
+  if(cuv) h+='<div class="phn-sec"><div class="phn-etq">Parcelles de la cuv\u00e9e</div><div class="phn-cuv">'+rows.join('')+'</div></div>';
+  var nCib=cuv?nC:(bOk?1:0), sq1=(!cuv&&bOk)?_phenoSaut(X[0].g,b,d):null, qOn=F.confirme&&(cuv?sauts.length>0:!!sq1);
+  h+='<div class="phn-pied">';
+  if(qOn){
+    var qt=cuv?(sauts.length===1?sauts[0]+' saute une phase enti\u00e8re.':sauts.length+' parcelles sautent une phase enti\u00e8re\u00a0: '+sauts.join(', ')+'.'):sq1.txt, qf=cuv?flo:sq1.flo;
+    h+='<div class="phn-q" role="alert"><p class="phn-qt">'+_mvIcon('alerte',16)+'<span>Vous \u00eates s\u00fbr\u00a0?</span></p><p class="phn-qs">'+_escHtml(qt)+'</p>'
+      +(qf?'<p class="phn-qn">\u00ab\u00a0Ce qui vient\u00a0\u00bb prendrait '+(cuv?'ces notes':'cette note')+' comme date de floraison, et la pr\u00e9vision de v\u00e9raison se d\u00e9calerait.</p>':'')
+      +'<div class="phn-qb"><button type="button" class="mvbtn mvbtn-secondaire" onclick="_phenoReponse(\'f\',0)">Revoir</button><button type="button" class="mvbtn mvbtn-principal" onclick="_phenoReponse(\'f\',1)">'+(cuv&&nC>1?'Oui, noter les '+nC:'Oui, noter')+'</button></div></div>';
+  } else {
+    h+='<button type="button" class="mbtn verte" id="phn-ok" data-tuto="phn.ok" onclick="_phenoEnregistrer()"'+(nCib?'':' disabled')+'>'+(cuv?(nC?'Enregistrer pour '+nC+' parcelle'+(nC>1?'s':''):'Aucune parcelle \u00e0 noter'):'Enregistrer le stade')+'</button>';
+  }
+  h+='</div>';
+  c.innerHTML=h;
+  return true;
+}
+function _phenoCorriger(e){
+  // ★ PHENO-1D : une note fausse se corrige — la fenêtre dit laquelle sera supprimée ; « Annuler » la rend six secondes.
+  if(!_phenoAdm()||!_phenoP) return;
+  if(e===2&&_phenoFen.cible){ var n=_phenoFen.cible; _phenoFen.corr=false; _phenoFen.cible=null; _phenoSupprimer(_phenoP,n); }
+  else _phenoFen.corr=!!e;
+  _phenoFenetre();
+}
+function _phenoSupprimer(p,n){
+  if(!_phenoAdm()||!p||!n) return;
+  var an=String(n.d).slice(0,4), P=window.PHENO||{}; if(!Array.isArray(P[an])) return;
+  var retires=P[an].filter(function(e){ return e&&e.d===n.d&&Number(e.b)===Number(n.b)&&(p.pid&&e.pid?e.pid===p.pid:e.nom===p.nom); });
+  if(!retires.length) return;
+  P[an]=P[an].filter(function(e){ return retires.indexOf(e)<0; });
+  saveData('pheno');
+  showToastAnnuler('Note du '+_phenoJm(n.d)+' supprim\u00e9e', function(){
+    var Q=window.PHENO||(window.PHENO={}); if(!Array.isArray(Q[an])) Q[an]=[];
+    Q[an]=Q[an].concat(retires); saveData('pheno'); _phenoRafraichir();
+    var o=document.getElementById('ovPheno'); if(o&&o.classList.contains('open')) _phenoFenetre();
+  });
+  _phenoRafraichir();
+}
+function _phenoCuvCoche(nom,on){ _phenoFen.coches[nom]=!!on; _phenoFen.confirme=false; _phenoFenetre(); }
+function _phenoReponse(ctx,oui){
+  // ★ PHENO-1D : la réponse à « Vous êtes sûr ? » — dans la fenêtre ('f') ou sous la ligne du relevé ('r')
+  if(ctx==='r'){ var q=_phenoQuestion; _phenoQuestion=null; if(oui&&q) _phenoNoterDirect(q.nom,q.b,true); else _phenoRendreVue(); return; }
+  if(oui) _phenoEnregistrer(true); else { _phenoFen.confirme=false; _phenoFenetre(); }
+}
+function _phenoDate(ctx,k,v){
+  // ★ PHENO-1D : choisir la date — de la fenêtre ('f') ou du relevé entier ('r') ; jamais dans le futur, jamais d'une autre année
+  var auj=todayStr();
+  if(['auj','hier','avh','autre'].indexOf(k)<0) return;
+  if(k==='autre'){ v=String(v||''); if(!v||v>auj||v.slice(0,4)!==auj.slice(0,4)){ if(ctx==='r') _phenoRendreVue(); else _phenoFenetre(); return; } }
+  if(ctx==='r'){ _phenoRelJour=k; _phenoRelAutre=(k==='autre')?v:''; _phenoRelDu=auj; _phenoQuestion=null; _phenoMenu=false; closeOv(null,'ovPhenoDate'); _phenoRendreVue(); return; }
+  _phenoFen.jour=k; if(k==='autre') _phenoFen.autre=v; _phenoFen.corr=false; _phenoFen.confirme=false;
+  _phenoFenetre();
 }
 function _phenoRafraichir(){
   var v=document.getElementById('pwrapstades'); if(v&&v.classList.contains('vis')) _phenoRendreVue();
@@ -10550,6 +10706,7 @@ function _phenoFiche(p){
 //   propose un stade à toutes, chacune se décoche. Hors saison, la vue se lit ; on note depuis la fiche. L'affichage est sobre : la
 //   couleur du stade en filet, le code BBCH en chiffres tabulaires dans une pastille teintée, la répartition en une barre fine.
 var _phenoMode='parcelle', _phenoFiltre=false, _phenoOuverte='', _phenoCuv=null;
+var _phenoRelJour='auj', _phenoRelAutre='', _phenoRelDu='', _phenoQuestion=null, _phenoMenu=false;   // ★ PHENO-1D : la date du relevé, la question en attente, le menu de la date (ordinateur)
 function _phenoDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
 function _phenoEnSaison(auj){ var m=Number(String(auj).slice(5,7)); return m>=3&&m<=9; }
 function _phenoGroupe(b){ b=Number(b); return b<=16?1:b<=57?2:b<=65?3:b<=79?4:5; }
@@ -10582,14 +10739,46 @@ function _phenoBarre(V){
   return h+'</div>'+l+'</div>';
 }
 function _phenoCode(e){ return e?'<span class="phr-code phr-g'+_phenoGroupe(e.b)+'">'+Number(e.b)+'</span>':'<span class="phr-code phr-g0">\u2014</span>'; }
-function _phenoEchelle(x,classe,saison){
+function _phenoEchelle(x,classe,saison,d){
   var cur=x.e?Number(x.e.b):null, idx=_PHENO_STADES.findIndex(function(s){ return s[0]===cur; }), nxt=idx<0?0:Math.min(_PHENO_STADES.length-1,idx+1);
-  var peut=_phenoAdm()&&saison;
+  var peut=_phenoAdm()&&saison, g=peut?_phenoGarde(x.p,d||todayStr()):null, q=(peut&&_phenoQuestion&&_phenoQuestion.nom===x.p.nom)?_phenoQuestion.b:null;
+  var teinte=classe==='phr-ech-pc';   // ★ PHENO-1D : sur ordinateur les stades passés gardent leur teinte (le chemin parcouru) ; au téléphone, la garde les grise
   return '<div class="'+classe+'">'+_PHENO_STADES.map(function(s,i){
-    var k=(cur!=null&&i<idx)?'passe':(i===idx?'actuel':(i===nxt&&peut?'prochain':''));
-    return peut?'<button type="button" class="phr-e '+k+'" data-nom="'+_escAttr(x.p.nom)+'" data-b="'+s[0]+'" onclick="_phenoNoterDirect(this.dataset.nom,+this.dataset.b)" title="'+_escAttr(s[1])+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></button>'
+    var ok=!peut||_phenoPermis(g,s[0]);
+    var k=(cur!=null&&i<idx&&(teinte||!peut))?'passe':(i===idx?'actuel':(i===nxt&&peut&&ok?'prochain':''));
+    if(!ok) k+=' bloque';
+    if(q===s[0]) k+=' attente';
+    return peut?'<button type="button" class="phr-e '+k+'" data-nom="'+_escAttr(x.p.nom)+'" data-b="'+s[0]+'"'+(ok?'':' disabled')+' onclick="_phenoNoterDirect(this.dataset.nom,+this.dataset.b)" title="'+_escAttr(ok?s[1]:s[1]+'\u00a0: retour en arri\u00e8re impossible')+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></button>'
       :'<span class="phr-e '+k+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></span>';
   }).join('')+'</div>';
+}
+function _phenoQuestionHtml(x,d,desk){
+  // ★ PHENO-1D : « Vous êtes sûr ? » sous la ligne, à la place de l'enregistrement direct, pour un saut d'au moins une phase entière
+  var q=_phenoQuestion; if(!q||q.nom!==x.p.nom) return '';
+  var g=_phenoGarde(x.p,d), sq=_phenoPermis(g,q.b)?_phenoSaut(g,q.b,d):null, st=_phenoStade(q.b); if(!sq||!st) return '';
+  return '<div class="phr-question" role="alert"><p class="phn-qt">'+_mvIcon('alerte',16)+'<span>'+_escHtml(_phenoCap(st[2])+' ('+q.b+')'+(desk?' pour '+x.p.nom:'')+'\u00a0: vous \u00eates s\u00fbr\u00a0?')+'</span></p><p class="phn-qs">'+_escHtml(sq.txt)+'</p>'
+    +(sq.flo?'<p class="phn-qn">\u00ab\u00a0Ce qui vient\u00a0\u00bb prendrait cette note comme date de floraison, et la pr\u00e9vision de v\u00e9raison se d\u00e9calerait.</p>':'')
+    +'<div class="phn-qb"><button type="button" class="mvbtn mvbtn-secondaire" onclick="_phenoReponse(\'r\',0)">Revoir</button><button type="button" class="mvbtn mvbtn-principal" onclick="_phenoReponse(\'r\',1)">Oui, noter</button></div></div>';
+}
+function _phenoBloques(x,d){ var g=_phenoGarde(x.p,d); return _PHENO_STADES.some(function(s){ return !_phenoPermis(g,s[0]); }); }
+function _phenoReleveRaz(){ _phenoRelJour='auj'; _phenoRelAutre=''; _phenoRelDu=todayStr(); _phenoQuestion=null; _phenoMenu=false; }
+function _phenoReleveDate(auj){ if(_phenoRelDu!==auj) _phenoReleveRaz(); return _phenoDateDe(_phenoRelJour,_phenoRelAutre,auj); }
+function _phenoMenuHtml(){
+  // ★ PHENO-1D : la date d'observation du relevé — la même au téléphone (fenêtre) et sur ordinateur (menu sous le bouton)
+  var auj=todayStr(), k=_phenoRelJour;
+  var h=[['auj','Aujourd\u2019hui',0],['hier','Hier',-1],['avh','Avant-hier',-2]].map(function(x){ var on=k===x[0], dx=_phenoDecale(auj,x[2]);
+    return '<button type="button" class="phr-mi'+(on?' on':'')+'" aria-pressed="'+on+'" data-k="'+x[0]+'" onclick="_phenoDate(\'r\',this.dataset.k)"><span class="phr-mit"><span class="phr-mia">'+x[1]+'</span><span class="phr-mib">'+_escHtml(_phenoDateLongue(dx))+'</span></span>'+(on?_mvIcon('check',18):'')+'</button>'; }).join('');
+  var aOn=k==='autre'&&!!_phenoRelAutre;
+  h+='<label class="phr-mi'+(aOn?' on':'')+'"><span class="phr-mit"><span class="phr-mia">Autre date</span><span class="phr-mib">'+(aOn?_escHtml(_phenoDateLongue(_phenoRelAutre)):'Choisir dans le calendrier')+'</span></span>'+(aOn?_mvIcon('check',18):_mvIcon('calendrier',18))
+    +'<input class="phn-sous" type="date" min="'+auj.slice(0,4)+'-01-01" max="'+auj+'" value="'+(aOn?_escAttr(_phenoRelAutre):'')+'" aria-label="Autre date\u00a0: ouvrir le calendrier" onchange="_phenoDate(\'r\',\'autre\',this.value)"></label>';
+  return '<div class="phr-ml">'+h+'</div><p class="phr-mp">Elle vaut pour toutes les notes du relev\u00e9 et revient \u00e0 aujourd\u2019hui quand vous rouvrez l\u2019onglet.</p>';
+}
+function _phenoMenuDate(o){
+  if(!_phenoAdm()) return;
+  if(_phenoDesk()){ _phenoMenu=(o===undefined)?!_phenoMenu:!!o; _phenoRendreVue(); return; }
+  if(o===0){ closeOv(null,'ovPhenoDate'); return; }
+  var c=document.getElementById('phd-corps'); if(!c) return;
+  c.innerHTML=_phenoMenuHtml(); openOv('ovPhenoDate');
 }
 // ★ PHENO-1B (§507) — CE QUI VIENT (maquette-niveau-au-dessus-v1, partie 1) : la somme de températures depuis le 1er mars (moyennes
 //   journalières, base 0 °C — le modèle GFV, Parker et al. 2011, 2013) et la prévision de pleine floraison et de véraison par cépage, sur
@@ -10695,17 +10884,25 @@ function _phenoCqvRemplir(){ var auj=todayStr(); if(!_phenoEnSaison(auj)) return
 function _phenoRendreVue(){
   var el=document.getElementById('pstades'); if(!el) return;
   var an=_phenoAn(), auj=todayStr(), saison=_phenoEnSaison(auj), V=_phenoVue(an,auj), desk=_phenoDesk(), adm=_phenoAdm();
-  var h='<div class="phr-tete"><div><div class="phr-t">'+(saison?'Relev\u00e9 des stades':'Stades de l\u2019ann\u00e9e')+'</div><div class="phr-s">'+_escHtml(saison?(V.der?'derni\u00e8re note '+_phenoDepuis(V.der,auj):'aucune note encore cette ann\u00e9e')+(adm?' \u00b7 un appui sur la ligne, un appui sur le stade':''):'hors saison \u2014 on note depuis la fiche de la parcelle')+'</div></div>'
+  var dRel=_phenoReleveDate(auj), decale=dRel!==auj, rel=_phenoRel(dRel,auj);   // ★ PHENO-1D : une seule date pour toute la tournée
+  var h='<div class="phr-tete"><div><div class="phr-t">'+(saison?'Relev\u00e9 des stades':'Stades de l\u2019ann\u00e9e')+'</div><div class="phr-s">'+_escHtml(saison?(V.der?'derni\u00e8re note '+_phenoDepuis(V.der,auj):'aucune note encore cette ann\u00e9e')+(adm?(desk?' \u00b7 un clic sur l\u2019\u00e9chelle de la ligne':' \u00b7 un appui sur la ligne, un appui sur le stade'):''):'hors saison \u2014 on note depuis la fiche de la parcelle')+'</div></div>'
     +'<div class="phr-mseg" role="group" aria-label="Rangement"><button type="button" class="'+(_phenoMode==='parcelle'?'on':'')+'" data-m="parcelle" onclick="_phenoModeVue(this.dataset.m)">Par parcelle</button><button type="button" class="'+(_phenoMode==='cuvee'?'on':'')+'" data-m="cuvee" onclick="_phenoModeVue(this.dataset.m)">Par cuv\u00e9e</button></div></div>';
   h+=_phenoBarre(V);
-  if(V.aNoter.length) h+='<div class="phr-outils"><button type="button" class="phr-filtre'+(_phenoFiltre?' on':'')+'" onclick="_phenoFiltreBascule()">\u00c0 noter \u00b7 '+V.aNoter.length+'</button></div>';
+  var pill=(saison&&adm)?'<span class="phr-pw"><button type="button" class="phr-pdate'+(decale?' decale':'')+'" aria-haspopup="true" aria-expanded="'+(desk&&_phenoMenu?'true':'false')+'" onclick="_phenoMenuDate()">'+_mvIcon('calendrier',16)+'<span>'+_escHtml(decale?(rel.indexOf('le ')===0?'Observ\u00e9 '+rel:'Observ\u00e9 '+rel+' \u00b7 '+_phenoJm(dRel)):'Observ\u00e9 aujourd\u2019hui')+'</span>'+_mvIcon('chevron',16)+'</button>'
+    +(desk&&_phenoMenu?'<button type="button" class="phr-fond" aria-label="Fermer le menu" onclick="_phenoMenuDate(0)"></button><div class="phr-menu">'+_phenoMenuHtml()+'</div>':'')+'</span>':'';
+  var filtre=V.aNoter.length?'<button type="button" class="phr-filtre'+(_phenoFiltre?' on':'')+'" onclick="_phenoFiltreBascule()">\u00c0 noter \u00b7 '+V.aNoter.length+'</button>':'';
+  if(pill||filtre) h+='<div class="phr-outils">'+pill+filtre+'</div>';
   var L=V.L.filter(function(x){ return !_phenoFiltre||x.vieux; });
   var ligne=function(x){
     var e=x.e, s=e?_phenoStade(e.b):null, depuis=e?_phenoDepuis(e.d,auj):'';
-    if(desk) return '<tr class="phr-tr phr-g'+(e?_phenoGroupe(e.b):0)+'"><td class="phr-f"></td><td><b>'+_escHtml(x.p.nom)+'</b><div class="phr-m">'+_escHtml(_phenoCepages(x.p)[0]||'')+'</div></td><td>'+(x.cuvee?_escHtml(x.cuvee):'<span class="phr-m">\u2014</span>')+'</td><td>'+_phenoCode(e)+' <span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span></td><td class="'+(saison&&x.vieux&&e?'phr-vieux':'')+'">'+_escHtml(depuis)+'</td><td>'+_phenoEchelle(x,'phr-ech-pc',saison)+'</td></tr>';
+    var sous=[_phenoCepages(x.p)[0],_mvCommuneNom(x.p)].filter(Boolean).join(' \u00b7 ');   // ★ PHENO-1D : la commune par son nom ({nom, lat, lng} depuis la météo par secteur)
+    var q=(saison&&adm)?_phenoQuestionHtml(x,dRel,desk):'';
+    if(desk) return '<tr class="phr-tr phr-g'+(e?_phenoGroupe(e.b):0)+'"><td class="phr-f"></td><td><b>'+_escHtml(x.p.nom)+'</b><div class="phr-m">'+_escHtml(sous)+'</div></td><td>'+(x.cuvee?_escHtml(x.cuvee):'<span class="phr-m">\u2014</span>')+'</td><td>'+_phenoCode(e)+' <span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span></td><td class="'+(saison&&x.vieux&&e?'phr-vieux':'')+'">'+_escHtml(depuis)+'</td><td>'+_phenoEchelle(x,'phr-ech-pc',saison,dRel)+'</td></tr>'
+      +(q?'<tr class="phr-qtr"><td colspan="6">'+q+'</td></tr>':'');
     var ouv=_phenoOuverte===x.p.nom&&saison&&adm;
-    return '<div class="phr-l phr-g'+(e?_phenoGroupe(e.b):0)+(ouv?' ouverte':'')+'"><button type="button" class="phr-lb" data-nom="'+_escAttr(x.p.nom)+'" onclick="_phenoOuvrir(this.dataset.nom)"'+(saison&&adm?'':' disabled')+'><span class="phr-f"></span><span class="phr-n"><b>'+_escHtml(x.p.nom)+'</b><span class="phr-m">'+_escHtml([_phenoCepages(x.p)[0],x.p.commune].filter(Boolean).join(' \u00b7 '))+'</span></span><span class="phr-st">'+_phenoCode(e)+'<span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span><span class="phr-d'+(saison&&x.vieux&&e?' phr-vieux':'')+'">'+_escHtml(depuis)+'</span></span></button>'
-      +(ouv?'<div class="phr-ouv"><div class="phr-q">Stade atteint</div>'+_phenoEchelle(x,'phr-ech',saison)+'<label class="phr-date"><span>Date</span><input type="date" id="phr-date" value="'+auj+'" max="'+auj+'"></label></div>':'')+'</div>';
+    return '<div class="phr-l phr-g'+(e?_phenoGroupe(e.b):0)+(ouv?' ouverte':'')+'"><button type="button" class="phr-lb" data-nom="'+_escAttr(x.p.nom)+'" onclick="_phenoOuvrir(this.dataset.nom)"'+(saison&&adm?'':' disabled')+'><span class="phr-f"></span><span class="phr-n"><b>'+_escHtml(x.p.nom)+'</b><span class="phr-m">'+_escHtml(sous)+'</span></span><span class="phr-st">'+_phenoCode(e)+'<span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span><span class="phr-d'+(saison&&x.vieux&&e?' phr-vieux':'')+'">'+_escHtml(depuis)+'</span></span></button>'
+      +(ouv?'<div class="phr-ouv"><div class="phr-q"><span>Stade atteint</span>'+(decale?'<b>dat\u00e9 '+_escHtml(_phenoDat(dRel,auj))+'</b>':'')+'</div>'+_phenoEchelle(x,'phr-ech',saison,dRel)
+        +(q||(_phenoBloques(x,dRel)?'<p class="phr-aide">Gris\u00e9s\u00a0: ce serait un retour en arri\u00e8re. Une note fausse se corrige depuis la fiche de la parcelle.</p>':''))+'</div>':'')+'</div>';
   };
   var corps='';
   if(_phenoMode==='cuvee'){
@@ -10727,43 +10924,41 @@ function _phenoRendreVue(){
 function _phenoModeVue(m){ _phenoMode=(m==='cuvee')?'cuvee':'parcelle'; _phenoOuverte=''; _phenoRendreVue(); }
 function _phenoFiltreBascule(){ _phenoFiltre=!_phenoFiltre; _phenoRendreVue(); }
 function _phenoOuvrir(nom){ _phenoOuverte=(_phenoOuverte===nom)?'':nom; _phenoRendreVue(); }
-function _phenoNoterDirect(nom,b){
+function _phenoNoterDirect(nom,b,force){
   if(!_phenoAdm()||!_phenoStade(b)) return;
   var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
-  var auj=todayStr(), di=document.getElementById('phr-date'), d=(di&&_phenoOuverte===nom&&di.value)?di.value:auj; if(d>auj) d=auj;
-  _phenoOuverte=''; _phenoAjouter([p],Number(b),d);
+  var auj=todayStr(), d=_phenoReleveDate(auj), g=_phenoGarde(p,d); b=Number(b);   // ★ PHENO-1D : la date du relevé (jamais dans le futur)
+  if(!_phenoPermis(g,b)) return;
+  if(!force&&_phenoSaut(g,b,d)){ _phenoQuestion={ nom:nom, b:b }; _phenoRendreVue(); return; }
+  _phenoQuestion=null; _phenoOuverte=''; _phenoAjouter([p],b,d);
 }
 function _phenoAjouter(cibles,b,d){
-  if(!_phenoAdm()||!cibles||!cibles.length||!_phenoStade(b)) return;
+  if(!_phenoAdm()||!cibles||!cibles.length||!_phenoStade(b)) return 0;
+  b=Number(b);
   var an=String(d).slice(0,4), P=window.PHENO||(window.PHENO={}); if(!Array.isArray(P[an])) P[an]=[];
+  // ★ PHENO-1D : jamais un retour en arrière, même si un écran laissait passer — la garde vit ici, dans l'enregistrement
+  var ok=cibles.filter(function(x){ return _phenoPermis(_phenoGarde(x,d),b); }), ex=cibles.length-ok.length;
+  if(!ok.length) return 0;
   var par=(window.currentUser&&window.currentUser.nom)||'', t=new Date().toISOString();
-  P[an]=P[an].concat(cibles.map(function(x){ return { pid:x.pid||'', nom:x.nom, b:Number(b), d:d, par:par, t:t }; }));
+  var meme=function(e,x){ return e&&e.d===d&&(x.pid&&e.pid?e.pid===x.pid:e.nom===x.nom); };
+  var retires=P[an].filter(function(e){ return ok.some(function(x){ return meme(e,x); }); });   // ★ PHENO-1D : le même jour, la nouvelle note remplace l'ancienne
+  P[an]=P[an].filter(function(e){ return retires.indexOf(e)<0; }).concat(ok.map(function(x){ return { pid:x.pid||'', nom:x.nom, b:b, d:d, par:par, t:t }; }));
   saveData('pheno');
-  var n=cibles.length, lib=_phenoStade(b)[2]+' ('+Number(b)+')';
-  showToastAnnuler((n>1?n+' parcelles':cibles[0].nom)+' \u00b7 '+lib, function(){
-    var Q=window.PHENO||{}; if(Array.isArray(Q[an])) Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); });
+  var n=ok.length, lib=_phenoStade(b)[2]+' ('+b+')', rel=_phenoRel(d,todayStr());
+  showToastAnnuler((retires.length&&n===1?'Note remplac\u00e9e \u00b7 ':'')+(n>1?n+' parcelles':ok[0].nom)+' \u00b7 '+lib+(rel==='aujourd\u2019hui'?'':', '+rel)+(ex?' \u00b7 '+ex+' \u00e9cart\u00e9e'+(ex>1?'s':''):''), function(){
+    var Q=window.PHENO||{}; if(Array.isArray(Q[an])) Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); }).concat(retires);
     saveData('pheno'); _phenoRafraichir();
   });
   _phenoRafraichir();
+  return n;
 }
 function _phenoNoterCuvee(cuvee){
   if(!_phenoAdm()) return;
   var cuv=_phenoCuvees(), xs=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'&&cuv[p.nom]===cuvee; }); if(!xs.length) return;
+  _phenoReleveDate(todayStr());
   _phenoP=xs[0]; _phenoB=null; _phenoCuv={ nom:cuvee, noms:xs.map(function(p){ return p.nom; }) };
-  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
-  t.textContent=cuvee+' \u00b7 noter pour la cuv\u00e9e'; s.textContent=xs.length+' parcelle'+(xs.length>1?'s':'')+' \u2014 d\u00e9cochez celles qui n\u2019y sont pas';
-  var auj=todayStr();
-  c.innerHTML='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){ return '<button type="button" class="phn-b" role="radio" aria-checked="false" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>'; }).join('')+'</div>'
-    +'<div class="phn-cuv">'+xs.map(function(p){ var e=_phenoDernier(p); return '<label><input type="checkbox" checked data-nom="'+_escAttr(p.nom)+'"><span>'+_escHtml(p.nom)+'</span><small>'+_escHtml(e?_phenoLib(e):'sans note')+'</small></label>'; }).join('')+'</div>'
-    +'<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>'
-    +'<button type="button" class="mbtn verte" id="phn-ok" onclick="_phenoEnregistrer()" disabled>Enregistrer le stade</button>';
-  openOv('ovPheno');
-}
-function _phenoCuveeCibles(){
-  if(!_phenoCuv) return null;
-  var noms=[].slice.call(document.querySelectorAll('#phn-corps .phn-cuv input[type=checkbox]')).filter(function(i){ return i.checked; }).map(function(i){ return i.dataset.nom; });
-  _phenoCuv=null;
-  return (window.PARCELLES||[]).filter(function(p){ return p&&noms.indexOf(p.nom)>=0; });
+  _phenoFen={ jour:_phenoRelJour, autre:_phenoRelAutre, corr:false, confirme:false, coches:{}, cible:null };   // ★ PHENO-1D : la date du relevé
+  if(_phenoFenetre()) openOv('ovPheno');
 }
 function _phenoAccueil(){
   var el=document.getElementById('home-pheno-note'); if(!el) return;
@@ -10777,6 +10972,7 @@ function _phenoAccueil(){
 function _phenoAllerReleve(){ if(typeof goTo==='function') goTo('parcelles'); _phenoFiltre=true; setTimeout(function(){ switchPTab('stades'); },0); }
 window._phenoNoter=_phenoNoter; window._phenoChoisir=_phenoChoisir; window._phenoEnregistrer=_phenoEnregistrer;
 window._phenoModeVue=_phenoModeVue; window._phenoFiltreBascule=_phenoFiltreBascule; window._phenoOuvrir=_phenoOuvrir; window._phenoNoterDirect=_phenoNoterDirect; window._phenoNoterCuvee=_phenoNoterCuvee; window._phenoAllerReleve=_phenoAllerReleve;
+window._phenoDate=_phenoDate; window._phenoCorriger=_phenoCorriger; window._phenoCuvCoche=_phenoCuvCoche; window._phenoReponse=_phenoReponse; window._phenoMenuDate=_phenoMenuDate;   // ★ PHENO-1D
 function switchPTab(tab){
   var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');
@@ -10785,7 +10981,7 @@ function switchPTab(tab){
   document.getElementById('pwrapliste').classList.toggle('vis',tab==='liste');
   document.getElementById('pwrapcarte').classList.toggle('vis',tab==='carte');
   var _pws=document.getElementById('pwrapstades'); if(_pws) _pws.classList.toggle('vis',tab==='stades');
-  if(tab==='stades') _phenoRendreVue();   // ★ PHENO-1A (§505)
+  if(tab==='stades'){ _phenoReleveRaz(); _phenoRendreVue(); }   // ★ PHENO-1D : la date du relevé revient à aujourd'hui à chaque ouverture   // ★ PHENO-1A (§505)
   if(tab==='carte'){
     if(!mapInit){
       _ensureLeaflet().then(function(){

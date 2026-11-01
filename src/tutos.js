@@ -82,8 +82,9 @@ function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.cla
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
 // ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
 function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Object.keys(C).forEach(function (k) { n += Object.keys(C[k] || {}).length; }); return n; }
-// ★ PHENO-1C (§508) : le nombre de stades notés cette année (PHENO), pour voir qu'une note vient d'être posée.
-function _phenoN() { var P = window.PHENO || {}, L = P[String(new Date().getFullYear())]; return Array.isArray(L) ? L.length : 0; }
+// ★ PHENO-1C (§508), PHENO-1D (§509) : l'instant de la note la plus récente de l'année (PHENO), pour voir qu'une note vient d'être posée —
+//   le compte ne suffit plus : le même jour, une nouvelle note REMPLACE l'ancienne et le compte ne bouge pas.
+function _phenoT() { var P = window.PHENO || {}, L = P[String(new Date().getFullYear())], t = ''; (Array.isArray(L) ? L : []).forEach(function (e) { if (e && String(e.t || '') > t) t = String(e.t || ''); }); return t; }
 // ★ PHENO-1C (§508) : la semaine en cours a-t-elle un jour ouvré (lundi à vendredi) dans le mois en cours ?
 function _semaineOuvree(auj) {
   var d = auj ? new Date(auj + 'T12:00:00') : new Date(), m = d.getMonth(), lun = new Date(d); lun.setDate(d.getDate() - ((d.getDay() + 6) % 7));
@@ -367,8 +368,9 @@ var TU_TUTOS = [
     couvre: ['openDP', '_phenoNoter', '_phenoChoisir', '_phenoEnregistrer'],
     retenir: ['Depuis la fiche de la parcelle : « Noter le stade », le stade, « Enregistrer ».',
               'En saison (mars à septembre), l’onglet Stades de Parcelles est un relevé : un appui sur la ligne, un sur le stade.',
+              'Un stade plus ancien que le dernier noté est grisé : la vigne ne revient pas en arrière.',
               '« Annuler » rattrape pendant six secondes.'],
-    avant: function (memo) { memo.n0 = _phenoN(); },
+    avant: function (memo) { memo.t0 = _phenoT(); },
     etapes: [
       { type: 'toucher', cible: '[data-tuto="parc.ligne"]',
         txt: function () { return '{T} une parcelle de la liste.'; },
@@ -384,7 +386,7 @@ var TU_TUTOS = [
         ok: 'Le stade est choisi ; la date est celle du jour.' },
       { type: 'toucher', cible: '[data-tuto="phn.ok"]',
         txt: function () { return '{T} « ' + (L('[data-tuto="phn.ok"]') || 'Enregistrer le stade') + ' ».'; },
-        fait: function (memo) { return !_ouvert('ovPheno') && _phenoN() > (memo.n0 || 0); },
+        fait: function (memo) { return !_ouvert('ovPheno') && _phenoT() > (memo.t0 || ''); },
         ok: 'C’est noté : « Annuler » reste six secondes en bas de l’écran.' },
       { type: 'regarder', cible: '[data-tuto="dp.stade.v"]',
         txt: function () { return 'La fiche dit maintenant le stade noté. En saison, l’onglet Stades de Parcelles fait la même chose en deux appuis.'; } },
@@ -991,7 +993,8 @@ function _rejouer(id) {
    mv-harnais-cote1, qui lit la feuille et rougit sinon ; test:tutos mesure la page au navigateur (rien sous le panneau). */
 var COTE_MQ = '(min-width: 1280px)';
 var COTE_L = 'clamp(360px, 28vw, 420px)';
-var COTE_VOILES = ['.overlay', '.mvv-ov', '.mvz-ov', '.pil-scrim', '.pil-diagwrap', '.pil-dz-shw', '.pil-dz-fm', '.mvds-bg', '.mv-pal-voile', '.ck-agr', '.trn-ov', '.trn-layer', '#mv-perime-ov', '#mv-expired-ov', '#ovCloture', '.dgn-voile'];
+// PHENO-1D (§509) : '.phr-fond', le fond qui ferme le menu de la date du relevé (ordinateur), s'arrête au panneau du tuto.
+var COTE_VOILES = ['.overlay', '.mvv-ov', '.mvz-ov', '.pil-scrim', '.pil-diagwrap', '.pil-dz-shw', '.pil-dz-fm', '.mvds-bg', '.mv-pal-voile', '.ck-agr', '.trn-ov', '.trn-layer', '#mv-perime-ov', '#mv-expired-ov', '#ovCloture', '.dgn-voile', '.phr-fond'];
 var COTE_DROITE = ['.pil-drawer', '.dgn-tiroir'];
 var COTE_BARRES = ['#demo-banner', '#mv-trial-bar', '#mv-maj-barre', '.trn-toast', '.pl2-abar', '.pl2-mbar'];
 var COTE_CENTRES = ['#mv-toast', '#pv-toast', '.mv-pal', '.pil-dz-pk', '.vt-bot', '.dgn-fen'];

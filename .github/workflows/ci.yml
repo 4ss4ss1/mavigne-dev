@@ -76,7 +76,10 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # L'app boote-t-elle vraiment ? Le type de bug que node --check ne voit pas.
+      # PHENO-1D (§509) : une limite a l'etape — un smoke bloque (10 a 11 min en CI jusqu'ici) doit rougir ICI,
+      # pas faire couper les tutos par la limite de 20 min du job.
       - name: Smoke — l'app demarre sans exception
+        timeout-minutes: 4
         run: npm run test:smoke
 
       # TUTO-1 (§358) : chaque tuto est rejoue tout seul (telephone et ordinateur) sur le build.

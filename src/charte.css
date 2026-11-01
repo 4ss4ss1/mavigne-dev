@@ -218,6 +218,11 @@
    tout le document. AUCUNE déclaration n'est dupliquée : c'est le même bloc,
    avec deux sélecteurs. Les règles #app-root[data-theme="dark"] .xxx qui
    existent ailleurs continuent de fonctionner sans changement. */
+/* ★ PHENO-1D (§509) : le thème clair FORCÉ fixe aussi les commandes du navigateur (calendrier, listes, cases à cocher). :root
+   déclare « light dark » : un téléphone réglé en sombre dessinait alors le calendrier en sombre dans une appli claire — un champ date
+   gris foncé au texte presque invisible (capture du 01/11). En mode Auto, rien ne change : c'est le thème du téléphone qui décide. */
+#app-root[data-theme="light"],:root[data-theme="light"]{color-scheme:light;}
+
 #app-root[data-theme="dark"],:root[data-theme="dark"]{
   color-scheme:dark;
   --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);

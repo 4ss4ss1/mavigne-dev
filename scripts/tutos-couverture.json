@@ -43,6 +43,11 @@
     "_phenoOuvrir": "PHENO-1A2 (§506) : déplier une ligne du relevé au téléphone (l’échelle des stades) — un tuto « Comment noter le stade ? » viendra avec PHENO-1B",
     "_phenoNoterDirect": "PHENO-1A2 (§506) : un appui sur le stade note la parcelle, avec Annuler six secondes — le tuto viendra avec PHENO-1B",
     "_phenoNoterCuvee": "PHENO-1A2 (§506) : « Noter pour la cuvée » — la fenêtre dit ce qu’elle fait, chaque parcelle se décoche",
-    "_phenoAllerReleve": "PHENO-1A2 (§506) : la carte « Relevé des stades » de l’Accueil mène au relevé — un lien"
+    "_phenoAllerReleve": "PHENO-1A2 (§506) : la carte « Relevé des stades » de l’Accueil mène au relevé — un lien",
+    "_phenoDate": "PHENO-1D (§509) : choisir la date d’observation (Aujourd’hui, Hier, Avant-hier, Autre) — la fenêtre et le relevé l’écrivent en toutes lettres",
+    "_phenoCorriger": "PHENO-1D (§509) : corriger une note fausse — la fenêtre dit quelle note sera supprimée, « Annuler » la rend",
+    "_phenoCuvCoche": "PHENO-1D (§509) : cocher ou décocher une parcelle de la cuvée — le bouton recompte",
+    "_phenoReponse": "PHENO-1D (§509) : répondre à « Vous êtes sûr ? » avant un grand saut — la question dit ce qui manque et en combien de jours",
+    "_phenoMenuDate": "PHENO-1D (§509) : ouvrir la date du relevé — un bouton qui dit la date"
   }
 }

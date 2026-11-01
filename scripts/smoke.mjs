@@ -46,6 +46,13 @@ const URL_ARG = getArg('--url', null);
 const TENANT = getArg('--tenant', null);
 const HEADED = flag('--headed');
 const BOOT_TIMEOUT_MS = parseInt(getArg('--timeout', '25000'), 10);
+// ★ PHENO-1D (§509) — UNE GARDE DE TEMPS POUR TOUT LE SMOKE. En CI, l'étape durait 10 à 11 min 30 (vitrine2, pheno1a2, pheno1b,
+//   pheno1c — 2 s dans le bac à sable) : le job tombait sur sa limite de 20 min PENDANT les tutos, qui passaient pour rouges. Un
+//   smoke bloqué doit le dire lui-même, en nommant l'étape où il est resté, pas laisser couper l'étape d'après.
+const GARDE_MS = parseInt(getArg('--garde', '120000'), 10);
+let etape = 'démarrage du harnais';
+const t0 = Date.now();
+setTimeout(() => { console.error('\x1b[31m\n  ✖ Le smoke dépasse ' + Math.round(GARDE_MS / 1000) + ' s — bloqué à l\u2019étape : ' + etape + '\x1b[0m\n'); process.exit(1); }, GARDE_MS).unref();
 
 // --- fonctions critiques attendues sur window (dérivées des vrais fichiers) ---
 // Volontairement SOFT : une absence = avertissement, pas un échec (certaines
@@ -138,6 +145,7 @@ async function main() {
   const hardErrors = [];   // exceptions non catchées + console.error non bénignes
   const benignSeen = [];   // pour info
 
+  etape = 'lancement du navigateur';
   const browser = await chromium.launch({ headless: !HEADED });
   const context = await browser.newContext({ serviceWorkers: 'block' }); // pas de SW → pas de reload boot.js
   // Force le token debug App Check avant tout code de l'appli
@@ -145,8 +153,12 @@ async function main() {
   const page = await context.newPage();
 
   // Réseau Firebase/Google COUPÉ → hermétique, pas de contact prod, l'appli dégrade
+  // ★ PHENO-1D (§509) : sur le serveur local, HERMÉTIQUE comme les tutos, l'UX et le gabarit — tout ce qui n'est pas lui est coupé.
+  //   La liste d'avant laissait passer le reste d'internet : en CI (internet réel), le smoke attendait des appels qu'aucun autre
+  //   contrôle n'attend, et durait dix minutes. Contre un site en ligne (--url), on garde la liste : il faut bien charger le site.
   await page.route('**/*', (route) => {
     const u = route.request().url();
+    if (!URL_ARG) return (u.startsWith(baseUrl) || u.startsWith('data:') || u.startsWith('blob:')) ? route.continue() : route.abort();
     if (/googleapis\.com|cloudfunctions\.net|gstatic\.com|recaptcha|unpkg\.com|tile\.openstreetmap\.org|api\.open-meteo\.com|api-adresse\.data\.gouv\.fr/i.test(u)) {
       return route.abort();
     }
@@ -165,10 +177,12 @@ async function main() {
   });
 
   console.log(c.dim(`  Chargement : ${testUrl}`));
+  etape = 'chargement de la page';
   let bootOk = false, bootErr = null;
   try {
     await page.goto(testUrl, { waitUntil: 'domcontentloaded', timeout: BOOT_TIMEOUT_MS });
     // Signal de démarrage universel : l'appli pose window.__MV_BOOTED
+    etape = 'attente du démarrage (window.__MV_BOOTED)';
     await page.waitForFunction(() => window.__MV_BOOTED === true, { timeout: BOOT_TIMEOUT_MS });
     bootOk = true;
   } catch (e) {
@@ -185,13 +199,15 @@ async function main() {
     }, EXPECTED_GLOBALS);
   }
 
+  etape = 'fermeture du navigateur';
   await browser.close();
   if (server) server.close();
+  etape = 'rapport';
 
   // ---- Rapport ----
   console.log('\n' + c.b('── Smoke test de démarrage ─────────────────────────────'));
   if (bootOk) {
-    console.log(c.g('  ✓ Boot OK') + c.dim('  (window.__MV_BOOTED === true)'));
+    console.log(c.g('  ✓ Boot OK') + c.dim('  (window.__MV_BOOTED === true) · ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s'));
   } else {
     console.log(c.r('  ✖ Boot ÉCHEC') + c.dim('  — window.__MV_BOOTED jamais passé à true dans le délai'));
     if (bootErr) console.log(c.dim('    ' + bootErr));

@@ -7,6 +7,16 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.58', d: '2026-11-01', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Noter le stade : la date en un appui',
+      desc: "La fenêtre «\u00a0Noter le stade\u00a0» a ses marges, le code BBCH en couleur devant chaque stade, le dernier noté cerclé et le suivant signalé. La date se choisit d’un appui\u00a0: Aujourd’hui, Hier, Avant-hier ou Autre (le calendrier du téléphone), jamais dans le futur, écrite en toutes lettres dessous. Dans l’onglet «\u00a0Stades\u00a0», une seule date vaut pour toute la tournée\u00a0: «\u00a0Observé aujourd’hui\u00a0» en haut de la liste\u00a0; changée, elle passe en orange, et sur ordinateur aussi on peut noter à une autre date." },
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Le stade ne revient jamais en arrière',
+      desc: "Un stade plus ancien que le dernier noté est grisé et ne se choisit plus\u00a0: la vigne ne revient pas en arrière. Par cuvée, les parcelles déjà plus avancées sont écartées, avec la raison, et le bouton ne compte que les autres. Le même jour, une nouvelle note remplace la précédente. Une note fausse se corrige depuis la fiche\u00a0: «\u00a0La note du… est fausse\u00a0? La corriger\u00a0»." },
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Une question avant les grands sauts',
+      desc: "Sauter une phase entière (par exemple des feuilles à la floraison sans les boutons) demande «\u00a0Vous êtes sûr\u00a0?\u00a0», sans bloquer\u00a0: le message dit ce qui manque et en combien de jours. Quand c’est la floraison qui manque, il prévient que «\u00a0Ce qui vient\u00a0» prendrait la note comme date de floraison." },
+    { niv: 0, pour: ['tous'], emoji: 'outil', titre: 'Corrections',
+      desc: "Dans la liste des stades, la commune s’affiche par son nom au lieu de «\u00a0[object Object]\u00a0». En thème clair, les calendriers et listes du téléphone restent clairs même quand le téléphone est réglé en sombre. En sombre, le stade suivant et le stade actuel du relevé se lisent de nouveau." },
+  ] },
   { v: '10.57', d: '2026-11-01', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Les stades dans le Pilotage, et un tuto',
       desc: "En saison, la vue Terrain du Pilotage montre «\u00a0Où en est la vigne\u00a0»\u00a0: le stade qui domine, les parcelles à noter et la prochaine date prévue, avec un bouton vers le relevé. Et le tuto «\u00a0Comment faire pour noter le stade d’une parcelle\u00a0?\u00a0» montre le geste pas à pas." },

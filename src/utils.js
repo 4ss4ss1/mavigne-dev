@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.57';
+export const APP_VERSION = '10.58';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2707,7 +2707,8 @@ var MV_AIDE = {
       ['Valider pour l’équipe sans y être', "l’administrateur voit sa propre puce dans le groupe («\u00a0Moi\u00a0», «\u00a0Moi aussi dans les rangs\u00a0» sur la barre d’équipe)\u00a0: décochée, la validation reste signée de son nom mais ses heures ne vont pas à la parcelle. Le choix est retenu pour la tâche."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."],
       ['Le fichier Excel des parcelles', "se prend au même endroit : une ligne par parcelle, avec la surface, l’avancement, chaque tâche et le rendement du millésime choisi en hL/ha — mesuré ou estimé, c’est écrit à côté. Avant de le télécharger, vous choisissez l’ordre : par nom (A → Z ou Z → A) ou par rendement (le plus fort ou le plus faible d’abord). Une parcelle sans récolte part en fin de liste."],
-      ['L’arrachage au prestataire', "dans la liste filtrée sur l’arrachage : dès que l’équipe a fait toutes ses étapes sur une parcelle, celle-ci quitte « À faire » — la suite est au prestataire. « Toutes » la montre, marquée « Au prestataire » ; l’étape du prestataire se valide depuis sa fiche. Elle ne compte plus comme commencée sur la carte de l’Accueil, l’anneau des cartes ni la tournée."]
+      ['L’arrachage au prestataire', "dans la liste filtrée sur l’arrachage : dès que l’équipe a fait toutes ses étapes sur une parcelle, celle-ci quitte « À faire » — la suite est au prestataire. « Toutes » la montre, marquée « Au prestataire » ; l’étape du prestataire se valide depuis sa fiche. Elle ne compte plus comme commencée sur la carte de l’Accueil, l’anneau des cartes ni la tournée."],
+      ['Le stade de la vigne', "l’administrateur le note depuis la fiche d’une parcelle (« Noter le stade ») ou, en saison, dans l’onglet Stades. La date se choisit d’un appui — Aujourd’hui, Hier, Avant-hier ou Autre, jamais dans le futur ; dans l’onglet Stades, une seule date vaut pour toute la tournée. Un stade plus ancien que le dernier noté est grisé : la vigne ne revient pas en arrière. Sauter une phase entière demande « Vous êtes sûr ? ». Une note fausse se corrige depuis la fiche : « La note du… est fausse ? La corriger »."]
     ]
   },
   journal: {
@@ -3772,6 +3773,16 @@ function _mvIconInconnue(nom) {
   _MV_IC_DIT[nom] = 1;
   if (window.logError) window.logError({ level: 'info', cat: 'icone', msg: 'icone inconnue : ' + nom });
 }
+
+// ★ PHENO-1D (§509) — LE NOM DE LA COMMUNE D'UNE PARCELLE, UNE SEULE FOIS. `p.commune` est {nom, lat, lng} depuis la météo par
+//   secteur, une chaîne avant (et dans l'assistant d'installation) : lue telle quelle, elle s'écrivait « [object Object] » dans le relevé
+//   des stades. cockpit.js (_ckCommuneDe), cockpit-vue.js (nomCommune), reglages.js (_vgnCommune) et tournees.js (_trnCom) en gardent
+//   chacun une copie — à rapprocher de celle-ci.
+export function _mvCommuneNom(p) {
+  var c = p && p.commune;
+  return String((c && typeof c === 'object') ? (c.nom || '') : (c || '')).trim();
+}
+window._mvCommuneNom = _mvCommuneNom;
 
 export function _mvIcon(nom, taille) {
   var n = String(nom == null ? '' : nom);
