@@ -70,6 +70,13 @@ function makeEnv(opts) {
         if (key === 'parcelles')    return opts.fichesNow !== undefined ? opts.fichesNow : fiches;
         return null;
       },
+      // ★ GTFIX-1 (§510) : la relecture passe par fbAdminLire — au serveur, et elle LÈVE sur erreur.
+      async fbAdminLire(slug, key) {
+        if (opts.readFail) throw new Error('read KO');
+        const v = key === 'kml_polygons' ? (opts.baseNow !== undefined ? opts.baseNow : base)
+                : key === 'parcelles'    ? (opts.fichesNow !== undefined ? opts.fichesNow : fiches) : null;
+        return (v === null || v === undefined) ? { existe: false, valeur: undefined } : { existe: true, valeur: JSON.parse(JSON.stringify(v)) };
+      },
       async fbAdminWrite(slug, key, value) {
         if (opts.writeFail === key) return false;
         ecrits.push({ slug, key, value: JSON.parse(JSON.stringify(value)) });
@@ -281,8 +288,8 @@ contre('C5 garde sur l\'etat de lecture retiree',
 // C6 — relecture supprimee : on ecrit sur la foi de l'apercu
 contre('C6 ecriture sur l\'apercu au lieu d\'une relecture',
   s => s.replace(
-    "    var baseNow   = await window.fbAdminRead(slug, 'kml_polygons');\n    var fichesNow = await window.fbAdminRead(slug, 'parcelles');",
-    "    var baseNow   = _agtKmlBase;\n    var fichesNow = _agtKmlFiches;"),
+    "    var _lk = await window.fbAdminLire(slug, 'kml_polygons');\n    var _lf = await window.fbAdminLire(slug, 'parcelles');",
+    "    var _lk = { existe: true, valeur: _agtKmlBase };\n    var _lf = { existe: true, valeur: _agtKmlFiches };"),
   async m => {
     const bougee = CHAP.concat([P('Champs Claude')]);
     const { env, api } = makeEnv({
@@ -292,6 +299,18 @@ contre('C6 ecriture sur l\'apercu au lieu d\'une relecture',
     await api.agtKmlSave();
     const k = env.ecrits.find(e => e.key === 'kml_polygons');
     return !!k && k.value.some(x => x.name === 'Champs Claude');
+  });
+
+// C7 — ★ GTFIX-1 (§510) : la relecture qui échoue lue comme « base vide » (l'ancien défaut de
+//      fbAdminRead → null → []). « Compléter » devenait « remplacer » : il faut que ça rougisse.
+contre('C7 relecture ratee lue comme base vide',
+  s => s.replace(
+    "    var _lk = await window.fbAdminLire(slug, 'kml_polygons');\n    var _lf = await window.fbAdminLire(slug, 'parcelles');",
+    "    var _lk = await window.fbAdminLire(slug, 'kml_polygons').catch(function(){ return { existe: false }; });\n    var _lf = await window.fbAdminLire(slug, 'parcelles').catch(function(){ return { existe: false }; });"),
+  async m => {
+    const { env, api } = makeEnv({ source: m, base: CHAP, fiches: CHAPF, polys: [VRIS], readFail: true });
+    await api.agtKmlSave();
+    return env.ecrits.length === 0;
   });
 
 await runContres();

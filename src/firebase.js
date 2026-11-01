@@ -2994,6 +2994,68 @@ window.fbAdminWriteGT = async function(key, value) {
   } catch(e) { console.warn('[fbAdminWriteGT]', key, e.code); throw e; }
 };
 
+// ════ GTFIX-1 (§510) — LES ÉCRITURES DE LA CONSOLE GT SE FONT EN TRANSACTION ════
+//
+// ★★★ POURQUOI — l'audit du 01/11 (docs/maquettes/audit-console-gt-2026-11-01.md, GT-B01, B02, B06).
+//   fbAdminRead / fbAdminReadGT ci-dessus rendent `null` sur N'IMPORTE QUELLE erreur. La console
+//   prenait ce `null` pour une liste vide, puis réécrivait le document ENTIER : un réseau qui flanche
+//   au moment d'ajouter un client, et le registre ne contenait plus que lui. Ailleurs elle réécrivait
+//   la copie lue à l'ouverture du panneau, et effaçait ce qui avait été écrit depuis (entrées d'essai
+//   notées par le serveur, erreurs remontées, membre ajouté par le client).
+// ★ LA RÈGLE : lire ET écrire dans la même transaction. Une lecture qui échoue fait échouer le tout :
+//   rien n'est écrit, et rien n'attend le réseau pour écrire plus tard (une transaction ne part pas
+//   hors ligne — un setDoc, si, et il écrase au retour). « Absent » n'est PAS une lecture ratée :
+//   l'argument `existe` le dit, et seul un document absent autorise une liste neuve.
+// ⚠️ `fn` peut être REJOUÉE par le SDK si le document change pendant la transaction : elle doit être
+//   pure — aucun effet hors de la valeur qu'elle rend. Rendre `undefined` (ou null pour le registre) =
+//   ne rien écrire. Une exception levée dans `fn` annule tout et remonte telle quelle.
+// ⚠️ Gardés comme ils sont : fbAdminRead/fbAdminReadGT (lectures d'affichage) et fbAdminWrite
+//   (assistant d'installation sur un domaine neuf, fiche client — GTFIX-2).
+var _FB_GT_PLAFOND = 900 * 1024;   // sous le 1 Mio de Firestore : un document trop gros est refusé AVANT l'envoi
+function _fbGtTaille(v) { try { return new Blob([JSON.stringify(v)]).size; } catch (e) { return JSON.stringify(v).length; } }
+window.fbGtMaj = async function (key, fn) {
+  var ref = doc(db, '_guerettech', key);
+  return runTransaction(db, async function (tx) {
+    var snap = await tx.get(ref);
+    var existe = snap.exists();
+    var suite = fn(existe ? snap.data() : null, existe);
+    if (suite === undefined) return { ecrit: false, valeur: existe ? snap.data() : null };
+    if (_fbGtTaille(suite) > _FB_GT_PLAFOND) throw new Error('document trop gros : ' + key);
+    tx.set(ref, suite);
+    return { ecrit: true, valeur: suite };
+  });
+};
+window.fbAdminMaj = async function (tenantSlug, key, fn) {
+  var ref = doc(db, 'mavigne_' + tenantSlug, key);
+  return runTransaction(db, async function (tx) {
+    var snap = await tx.get(ref);
+    var existe = snap.exists();
+    var suite = fn(existe ? snap.data().value : undefined, existe);
+    if (suite === undefined) return { ecrit: false, valeur: existe ? snap.data().value : undefined };
+    if (_fbGtTaille(suite) > _FB_GT_PLAFOND) throw new Error('document trop gros : ' + key);
+    tx.set(ref, { value: suite });
+    return { ecrit: true, valeur: suite };
+  });
+};
+// Le registre : `tenants` (public) et `clients` (privé), lus et écrits ENSEMBLE.
+window.fbGtMajRegistre = async function (fn) {
+  var rT = doc(db, '_guerettech', 'tenants'), rC = doc(db, '_guerettech', 'clients');
+  return runTransaction(db, async function (tx) {
+    var sT = await tx.get(rT), sC = await tx.get(rC);
+    var suite = fn(sT.exists() ? sT.data() : null, sC.exists() ? sC.data() : null);
+    if (!suite) return { ecrit: false };
+    tx.set(rC, suite.clients);
+    tx.set(rT, suite.tenants);
+    return { ecrit: true, tenants: suite.tenants, clients: suite.clients };
+  });
+};
+// Lecture AU SERVEUR qui LÈVE sur erreur — jamais confondue avec « absent ». Pour qui relit avant
+// d'écrire sans transaction (import KML : deux documents, plan calculé sur les deux).
+window.fbAdminLire = async function (tenantSlug, key) {
+  var snap = await getDocFromServer(doc(db, 'mavigne_' + tenantSlug, key));
+  return { existe: snap.exists(), valeur: snap.exists() ? snap.data().value : undefined };
+};
+
 // ════ SEC-GT — session GUERETTECH : vérité serveur + session non persistante ════
 //
 // _fbClaims(force) : les claims RÉELS du jeton. Seule source de vérité pour l'accès

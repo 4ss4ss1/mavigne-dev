@@ -1,0 +1,30 @@
+{
+  "lot": "GTFIX-1",
+  "section": "§510",
+  "base": "2fc01683834fa448af196c8d37a4931838f6d4ea",
+  "inclut": [],
+  "date": "2026-11-01",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "baa23468a3aadc6d959325dd781664a29cb044d07e66df43ad2034388da22ade",
+    "CLAUDE.md": "ce9e2924d3945d6698f8efb5a0f5a1b13d9716030e05aba32dfe530dbffb7deb",
+    "docs/claude/INDEX.md": "d7c50423d44a21349ec017f26c69a85cd0a833e5a01cf7d3d17f64c26e8f46bb",
+    "docs/claude/chantiers-480-529.md": "7e54fe7c60cdf1a1886d3b8ffa5134d22cfedbfaa9397f3097e1d6a4cf52267b",
+    "docs/claude/journal.md": "2ef2a7d0fac8e69ef02536078d74ace6c6729d3df1dc85dcd0aabaf6491f6acf",
+    "docs/maquettes/LISEZMOI.md": "3ca083f8a255c007daaf40c18b540ddeae185d02b8228684efc2d9c01ba9f303",
+    "functions/claims.js": "da1c3709d5f3840baa4bdddc7bd9029f39165d4f20c4ede1abc4deb59c7e76d6",
+    "scripts/harnais-claude-md.mjs": "be05a5440546c15ad157f228890e9186e10ea092e2e1e3e05991c5ef5aa9af97",
+    "scripts/harnais-parcours-prospect.mjs": "ecafdc373a216164d58fd5979b7d333afc09f40a85a184e2af363af640f2a309",
+    "scripts/mv-harnais-kml-fusion.mjs": "2f29b3abba53add29a811a49a92cbbadb928f3c9478b7daff079310ded69d307",
+    "scripts/mv-harnais-liste.mjs": "8277ec43ca44ef11fccd1f4e53e6e60daa80b042ba3a9f88e203ababf746c852",
+    "scripts/mv-harnais-prep.mjs": "32abfdc2a716720fc5f1c09f911454eec0e946adbdba341c0392607ffa9f1b7d",
+    "src/admin-gt.js": "4f9e73198d4f74848119112b2a69d097a85d454bb06afde692db1f1c56bcd1da",
+    "src/firebase.js": "7550e9db6a3f20cd21d6b977926179aac7d43795f66bea32b93f72a7d0c827a3",
+    "docs/maquettes/audit-console-gt-2026-11-01.md": "909a2af05fb0776a9f354e09d7781150c0d9018e785ff6133172cc4dc76f062f",
+    "docs/maquettes/maquette-console-gt-v1.html": "8c05321cc1fecb07b31ecf97e1575d425f2c5aad8631ba8c6a5ac030115c214a",
+    "scripts/mv-harnais-gtfix1.mjs": "495b3c0d570767a4e9b4a0aa7749cb375b053b32c0c03ea03c96118e6bc9289c"
+  }
+}

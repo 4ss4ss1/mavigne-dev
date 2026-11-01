@@ -175,7 +175,8 @@ t('trialPrevu n\'est posé QUE si l\'essai est différé',
   /if \(trial > 0 && !trialNow\) clients\[slug\]\.trialPrevu = trial;/.test(AGT));
 t('trialPrevu est effacé quand l\'essai part', /delete cur\.trialPrevu;/.test(AGT));
 t('l\'ordre est celui de _fcSaveAbo : claims d\'abord, registre ensuite',
-  AGT.indexOf('_fbSetTenantPlan(c.slug') < AGT.indexOf('fbAdminWriteGT(\'tenants\', Object.assign({}, gt, { clients: clients }))'));
+  // ★ GTFIX-1 (§510) : le registre s'écrit par _agtMajRegistre (transaction) — l'ancienne ancre n'existait plus depuis l'extraction de `clients`.
+  AGT.indexOf('_fbSetTenantPlan(c.slug') > 0 && AGT.indexOf('_fbSetTenantPlan(c.slug') < AGT.indexOf('await _agtMajRegistre(function (clients) {\n      // Object.assign sur l\'existant'));
 t('le bouton ne peut pas partir deux fois', /if \(!c \|\| !c\.trial \|\| c\.trialArme\) return;/.test(AGT));
 t('l\'écran de remise dit si le compte à rebours court', /non d\\u00e9marr\\u00e9/.test(AGT) && /, en cours/.test(AGT));
 t('le bandeau ne se contente plus d\'exiger d\'installer le jour de la remise',
@@ -186,7 +187,7 @@ bloc('7. admin-gt.js — les pièces jointes cessent d\'être hors radar');
 t('la pastille n\'apparaît que si la mise en route est arrivée', /if\(l\.mer\)\{[\s\S]{0,200}_agtLeadSt\[l\._id\]&&_agtLeadSt\[l\._id\]\.pj/.test(AGT));
 t('deux états distincts : reçues / attendues', /Pi\\u00e8ces re\\u00e7ues/.test(AGT) && /Pi\\u00e8ces attendues/.test(AGT));
 t('la bascule écrit dans leads_status, pas dans `leads`', /_agtLeadSt\[id\]=Object\.assign\(\{\}, e, \{ pj:!e\.pj/.test(AGT));
-t('elle ne rafraîchit l\'écran qu\'après une écriture réussie', /if\(await _agtSaveLeadSt\(\)\)\{[\s\S]{0,200}agtRenderBody\(\);/.test(AGT));
+t('elle ne rafraîchit l\'écran qu\'après une écriture réussie', /if\(await _agtSaveLeadSt\(id\)\)\{[\s\S]{0,200}agtRenderBody\(\);/.test(AGT));
 t('agtLeadPj exposé sur window (C23)', /window\.agtLeadPj\s*=\s*agtLeadPj;/.test(AGT));
 t('agtInsTrialGo exposé sur window (C23)', /window\.agtInsTrialGo\s*=\s*agtInsTrialGo;/.test(AGT));
 

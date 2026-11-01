@@ -200,17 +200,28 @@ function fileDisque(M, tenantMarque) {
 }
 
 /* ══ 3 · admin-gt.js ══ */
-const BLOC_GT = affectation(SRC.gt, '_agtLogAccessLu', 'src/admin-gt.js');
+// ★ GTFIX-1 (§510) : _agtLogAccessLu passe par la même porte qu'agtLogAccess — _agtJournalAjout, en
+//   transaction (window.fbGtMaj). Le bouchon rejoue une transaction : il passe à la fonction ce que la
+//   base contient (null = document absent), écrit ce qu'elle rend, et LÈVE quand la lecture échoue.
+const BLOC_GT = [ligneVar(SRC.gt, '_AGT_AL_JOURS', 'src/admin-gt.js'), fonction(SRC.gt, '_agtAlGarder', 'src/admin-gt.js'),
+  fonction(SRC.gt, '_agtMutJournal', 'src/admin-gt.js'), fonction(SRC.gt, '_agtJournalAjout', 'src/admin-gt.js'),
+  affectation(SRC.gt, '_agtLogAccessLu', 'src/admin-gt.js')].join('\n');
 const PRELUDE_GT = `
 var E = { ecrit: null };
-var _LU = null;
+var _LU = null, _PANNE = false;
 var _agtAccessLog = [];
 var window = {};
-window.fbAdminReadGT = async function(){ return _LU; };
-window.fbAdminWriteGT = async function(k, v){ E.ecrit = [k, v]; };
+window.fbGtMaj = async function(k, fn){
+  if (_PANNE) throw new Error('lecture impossible');
+  var existe = _LU !== null;
+  var suite = fn(existe ? JSON.parse(JSON.stringify(_LU)) : null, existe);
+  if (suite === undefined) return { ecrit: false, valeur: _LU };
+  E.ecrit = [k, suite];
+  return { ecrit: true, valeur: suite };
+};
 `;
 const RETOUR_GT = `
-return { lu: function(v){ _LU = v; }, E, window };
+return { lu: function(v){ _LU = v; }, panne: function(){ _PANNE = true; }, E, window };
 `;
 const monterGt = mut => new Function(PRELUDE_GT + (mut ? mut(BLOC_GT) : BLOC_GT) + RETOUR_GT)();
 
@@ -445,9 +456,20 @@ if (!CONTRE) {
   pose(await ESSAIS.gtRelu(monterGt()), '★★★ le journal est RELU puis complété, jamais remplacé');
   { const M = monterGt(); M.lu(null); await M.window._agtLogAccessLu('dom-a', 'x', ''); pose(M.E.ecrit && M.E.ecrit[1].value.length === 1, 'journal absent : première ligne'); }
   { const M = monterGt(); M.lu({ foo: 1 }); const ok = await M.window._agtLogAccessLu('dom-a', 'x', ''); pose(ok === false && M.E.ecrit === null, '★ forme inconnue : on n’écrase rien'); }
+  { const M = monterGt(); M.lu({ value: [{ id: 'x1' }] }); M.panne(); let leve = false;
+    try { await M.window._agtLogAccessLu('dom-a', 'x', ''); } catch (e) { leve = true; }
+    pose(leve && M.E.ecrit === null, '★★★ GTFIX-1 : lecture ratée → RIEN d’écrit (l’ancienne version réécrivait le journal avec une seule ligne)'); }
   {
-    const M = monterGt(); M.lu({ value: Array.from({ length: 100 }, (_, i) => ({ id: 'e' + i })) });
-    await M.window._agtLogAccessLu('dom-a', 'x', ''); pose(M.E.ecrit[1].value.length === 100 && M.E.ecrit[1].value[99].id === 'e98', 'plafond de 100 lignes tenu');
+    const M = monterGt(); const t0 = Date.now();
+    M.lu({ value: Array.from({ length: 2000 }, (_, i) => ({ id: 'e' + i, ts: new Date(t0 - i * 60000).toISOString() })) });
+    await M.window._agtLogAccessLu('dom-a', 'x', ''); pose(M.E.ecrit[1].value.length === 2000 && M.E.ecrit[1].value[1999].id === 'e1998', 'plafond de taille tenu (2 000 lignes)');
+  }
+  {
+    const M = monterGt(); const j = 86400000, t0 = Date.now();
+    M.lu({ value: [{ id: 'recent', ts: new Date(t0 - 300 * j).toISOString() }, { id: 'vieux', ts: new Date(t0 - 400 * j).toISOString() }] });
+    await M.window._agtLogAccessLu('dom-a', 'x', '');
+    const ids = M.E.ecrit[1].value.map(e => e.id);
+    pose(ids.indexOf('recent') !== -1 && ids.indexOf('vieux') === -1, '★ GTFIX-1 : gardé un an par la date (décision D4) — 300 j gardé, 400 j retiré');
   }
 
   console.log('\n── 8 · câblage ──');
@@ -519,7 +541,7 @@ if (CONTRE) {
   await F('la formule du registre est ignorée en préparation',
     '(window._mvPrepOn && window._mvPrepOn() && window.currentUser._prepPlan)', '(false)', ESSAIS.fbPlan);
   await G('★★★ le journal d’accès est écrit sans être relu',
-    "var d=await window.fbAdminReadGT('access_log');", 'var d={ value:_agtAccessLog };', ESSAIS.gtRelu);
+    'return _agtMutJournal(d, existe, entree);', 'return _agtMutJournal({ value:_agtAccessLog }, true, entree);', ESSAIS.gtRelu);
 
   /* Câblage : la mutation porte sur la SOURCE lue par statiques(). */
   const mordS = (titre, fichier, ancre, remplace, motif) => {

@@ -56,20 +56,56 @@ async function _agtReadClients(){
   var t = window.fbAdminReadGT ? await window.fbAdminReadGT('tenants') : null;
   return (t && t.clients && typeof t.clients === 'object') ? t.clients : {};
 }
-// gtData = le document `tenants` tel qu'il vient d'etre lu : on preserve ses
-// champs inconnus, on retire `clients`, on recalcule `statuts`.
-async function _agtWriteClients(clients, slugs, gtData){
-  if (!window.fbAdminWriteGT) return;
-  await window.fbAdminWriteGT('clients', { clients: clients, maj: _agtNowISO() });
-  var pub = Object.assign({}, gtData || {});
+// ════ GTFIX-1 (§510) — LES ÉCRITURES DE LA CONSOLE PASSENT PAR UNE TRANSACTION ════
+// ★★★ L'audit du 01/11 (docs/maquettes/audit-console-gt-2026-11-01.md, GT-B01, B02, B06) : la console
+//   prenait une lecture RATÉE pour une liste vide (fbAdminReadGT rend null sur toute erreur), puis
+//   réécrivait le document entier — un réseau qui flanche en ajoutant un client, et le registre ne
+//   contenait plus que lui. Ailleurs, elle réécrivait la copie chargée à l'ouverture du panneau et
+//   effaçait ce qui avait été écrit depuis. Désormais : lire ET écrire d'un bloc (fbGtMaj, fbAdminMaj,
+//   fbGtMajRegistre dans firebase.js). Une lecture ratée n'écrit rien, et rien ne part plus tard.
+// ⚠️ La fonction passée à une transaction peut être REJOUÉE : elle ne touche qu'à ce qu'elle rend.
+//   Les variables du panneau se mettent à jour APRÈS, avec la valeur réellement écrite.
+function _agtEchecEcriture(e, quoi){
+  var conflit = !!(e && e.conflit);
+  if (window.logError) window.logError({ level:'error', cat:'gt-ecriture', msg:quoi+' : rien n\u2019a \u00e9t\u00e9 \u00e9crit', detail:(e && (e.code || e.message)) || String(e) });
+  showToast(quoi+(conflit ? ' \u2014 modifi\u00e9 ailleurs entre-temps : recharg\u00e9, refaites le geste.'
+                          : ' \u2014 rien n\u2019a \u00e9t\u00e9 \u00e9crit : lecture impossible, r\u00e9essayez.'), '#C0392B');
+}
+// Comparaison stable : Firestore ne garde pas l'ordre des clés d'un objet.
+function _agtJsonStable(v){
+  if (v === undefined) return undefined;
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(function(x){ var s = _agtJsonStable(x); return s === undefined ? 'null' : s; }).join(',') + ']';
+  return '{' + Object.keys(v).sort().filter(function(k){ return v[k] !== undefined; })
+    .map(function(k){ return JSON.stringify(k) + ':' + _agtJsonStable(v[k]); }).join(',') + '}';
+}
+// Le registre = deux documents écrits ENSEMBLE : `clients` (privé) et `tenants` (public : slugs,
+// statuts). On préserve les champs inconnus de `tenants`, on retire `clients`, on recalcule `statuts`.
+function _agtRegClients(tenants, docClients){
+  if (docClients && docClients.clients && typeof docClients.clients === 'object') return docClients.clients;
+  if (tenants && tenants.clients && typeof tenants.clients === 'object') return tenants.clients;
+  return {};
+}
+function _agtRegSortie(tenants, clients, slugs){
+  var pub = Object.assign({}, tenants || {});
   delete pub.clients;
-  pub.slugs = (slugs || pub.slugs || []).slice();
+  pub.slugs = slugs.slice();
   pub.statuts = {};
   Object.keys(clients).forEach(function(sg){
     var st = clients[sg] && clients[sg].status;
     if (st === 'pending' || st === 'active') pub.statuts[sg] = st;
   });
-  await window.fbAdminWriteGT('tenants', pub);
+  return { tenants: pub, clients: { clients: clients, maj: _agtNowISO() } };
+}
+// fn(clients, slugs) modifie les deux EN PLACE ; rendre false = ne rien écrire.
+async function _agtMajRegistre(fn){
+  if (!window.fbGtMajRegistre) throw new Error('fbGtMajRegistre indisponible');
+  return window.fbGtMajRegistre(function(tenants, docClients){
+    var clients = Object.assign({}, _agtRegClients(tenants, docClients));
+    var slugs = (tenants && Array.isArray(tenants.slugs)) ? tenants.slugs.slice() : [];
+    if (fn(clients, slugs) === false) return null;
+    return _agtRegSortie(tenants, clients, slugs);
+  });
 }
 function _agtNowISO(){ return new Date().toISOString(); }
 
@@ -196,8 +232,8 @@ async function _agtGuard(force){
 // et a la fermeture de session : un panneau qu'on quitte ne doit rien laisser
 // derriere lui, y compris dans le DOM d'un onglet reste ouvert.
 function _agtWipe(){
-  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={};
-  _agtLeads=null; _agtLeadSt={}; _agtEssais=[]; _agtAccessLog=[];
+  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={};
+  _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[];
   _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null; _agtLeadOpen=null;
   var b=document.getElementById('agt-body');
   if(b) b.innerHTML='';
@@ -415,6 +451,7 @@ async function renderAdminGT(){
   // en lecture publique. Format {value:{slug:{fact:[...],note}}}.
   var _bil = window.fbAdminReadGT ? await window.fbAdminReadGT('billing') : null;
   _agtBilling = (_bil && _bil.value && typeof _bil.value==='object') ? _bil.value : {};
+  _agtBillingNoter(_agtBilling);   // ★ GTFIX-1 : la base de comparaison de chaque domaine
 
   // AXE A — demandes entrantes du formulaire public. La collection `leads` est
   // ecrite par la seule Cloud Function submitLead (write:if false cote client) :
@@ -422,6 +459,7 @@ async function renderAdminGT(){
   _agtLeads = window._fbReadLeads ? await window._fbReadLeads() : null;
   var _lst = window.fbAdminReadGT ? await window.fbAdminReadGT('leads_status') : null;
   _agtLeadSt = (_lst && _lst.value && typeof _lst.value==='object') ? _lst.value : {};
+  _agtLeadStNoter(_agtLeadSt);   // ★ GTFIX-1 : la base de comparaison de chaque fiche
 
   var repGT = window.fbAdminReadGT?await window.fbAdminReadGT('support_reports'):null;
   _agtReportsGT = (repGT&&Array.isArray(repGT.value))?repGT.value:[];
@@ -679,11 +717,42 @@ async function agtResolveReport(id, slug){
   catch(e){ if(window.showToast) showToast('Résolution non enregistrée — réessayez','#E07060'); }
 }
 
-async function agtLogAccess(slug, action, icon){
-  var entry={id:'al'+Date.now(),ts:new Date().toISOString(),tenant:slug,action:action,icon:icon||''};
-  _agtAccessLog.unshift(entry);
-  if(_agtAccessLog.length>100)_agtAccessLog.length=100;
-  if(window.fbAdminWriteGT)window.fbAdminWriteGT('access_log',{value:_agtAccessLog}).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'admin-gt.js/agtLogAccess'); });
+// ★★ GTFIX-1 (§510) — LE JOURNAL D'ACCÈS : relu et complété dans la même transaction, gardé UN AN par
+//   la date (décision D4 du 01/11). Avant : la liste EN MÉMOIRE, chargée à l'ouverture, réécrite en
+//   entier — les entrées notées depuis par le serveur (codes d'essai) ou par une préparation
+//   disparaissaient, et l'écran promettait « 90 jours » sur un plafond de 100 lignes.
+// ⚠ Les MÊMES deux nombres côté serveur (functions/claims.js, AL_JOURS / AL_MAX) : le harnais gtfix1 compare.
+var _AGT_AL_JOURS = 365, _AGT_AL_MAX = 2000;
+function _agtAlGarder(liste, maintenant){
+  var lim = (maintenant || Date.now()) - _AGT_AL_JOURS * 86400000;
+  var r = liste.filter(function(e){ var t = e && Date.parse(e.ts); return !(t && t < lim); });
+  if (r.length > _AGT_AL_MAX) r.length = _AGT_AL_MAX;
+  return r;
+}
+// Document absent = journal neuf. Forme inconnue = on n'écrase rien (undefined).
+function _agtMutJournal(d, existe, entree){
+  var liste;
+  if (!existe) liste = [];
+  else if (d && Array.isArray(d.value)) liste = d.value;
+  else return undefined;
+  liste.unshift(entree);
+  return { value: _agtAlGarder(liste) };
+}
+// type : 'donnees' (accès aux données d'un domaine), 'commercial' (facture, essai, lead), 'systeme'.
+async function _agtJournalAjout(slug, action, icon, type){
+  if (!window.fbGtMaj) return false;
+  var entree = { id:'al'+Date.now(), ts:new Date().toISOString(), tenant:String(slug||''), action:String(action||''), icon:String(icon||''), type:String(type||'donnees') };
+  var r = await window.fbGtMaj('access_log', function(d, existe){ return _agtMutJournal(d, existe, entree); });
+  if (!r || !r.ecrit) return false;
+  _agtAccessLog = r.valeur.value;
+  return true;
+}
+async function agtLogAccess(slug, action, icon, type){
+  try { return await _agtJournalAjout(slug, action, icon, type); }
+  catch (e) {
+    if (window.logError) window.logError({ level:'error', cat:'gt-journal', msg:'acc\u00e8s non not\u00e9 au journal', detail:String(action||'')+' \u00b7 '+((e && (e.code || e.message)) || String(e)) });
+    return false;
+  }
 }
 
 // ─── Maintenance : resynchro catalogue E-Phy (ANSES) ──────────────────────────
@@ -995,22 +1064,11 @@ async function agtAccedeTenant(slug){
 //   sur l'écran de connexion du domaine, sans session. « Préparer » entre dans ses écrans,
 //   dans CET onglet. Chevauchement signalé, non tranché (§134).
 //
-// Journal d'accès RELU avant d'écrire. agtLogAccess écrit la liste EN MÉMOIRE, chargée par
-// le panneau : appelée hors du panneau (depuis une préparation), elle remplacerait tout le
-// journal par une seule ligne.
+// Journal d'accès RELU avant d'écrire. ★ GTFIX-1 (§510) : la même porte qu'agtLogAccess (transaction).
+// L'ancienne version relisait bien, mais prenait une lecture RATÉE pour un journal vide — et le
+// réécrivait avec une seule ligne. Une lecture ratée fait maintenant échouer l'écriture.
 window._agtLogAccessLu = async function(slug, action, icon){
-  if(!window.fbAdminReadGT || !window.fbAdminWriteGT) return false;
-  var d=await window.fbAdminReadGT('access_log');
-  var liste=null;
-  if(!d) liste=[];
-  else if(Array.isArray(d.value)) liste=d.value.slice();
-  else if(Array.isArray(d)) liste=d.slice();
-  if(liste===null) return false;   // forme inconnue : on n'écrase rien
-  liste.unshift({ id:'al'+Date.now(), ts:new Date().toISOString(), tenant:String(slug||''), action:String(action||''), icon:String(icon||'') });
-  if(liste.length>100) liste.length=100;
-  _agtAccessLog=liste;
-  await window.fbAdminWriteGT('access_log',{ value:liste });
-  return true;
+  return _agtJournalAjout(slug, action, icon, 'donnees');
 };
 
 // La feuille VÉRIFIE avant d'ouvrir : session GT, file d'attente et coffre de CETTE fenêtre.
@@ -1086,7 +1144,7 @@ async function agtPrepOuvrir(slug){
 // ─── Onglet Accès log ─────────────────────────────────────────────────────────
 function _agtBuildLog(){
   var h='<div class="agt-section-lbl">Log d\'accès GT — '+(_agtAccessLog.length)+' entrée(s)</div>';
-  h+='<div class="agt-infobox">Accès enregistrés conformément aux CGU (support/maintenance). Conservés 90 jours.</div>';
+  h+='<div class="agt-infobox">Accès enregistrés conformément aux CGU (support/maintenance). Gardés un an, par la date.</div>';
   if(!_agtAccessLog.length){
     h+='<div style="text-align:center;padding:28px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucun accès enregistré</div>';
     return h;
@@ -1407,23 +1465,34 @@ async function agtResolveGroup(gid){
     if(window.logError) window.logError({level:'info',cat:'ui',msg:'journal local non mis a jour',detail:(e&&e.message)||String(e)});
   }
 
-  var touches=[];
-  _agtTenants.forEach(function(t){
-    if(!Array.isArray(t.errors)) return;
-    if(!t.errors.some(function(e){ return ids[e.id] && !e.resolved; })) return;
-    t.errors=t.errors.map(function(e){ return ids[e.id] ? Object.assign({},e,{resolved:true}) : e; });
-    _agtErrRecount(t);
-    touches.push(t);
+  // ★ GTFIX-1 (§510) : le journal de chaque domaine est RELU dans la transaction. Avant, la copie
+  //   chargée à l'ouverture était réécrite : les erreurs remontées depuis disparaissaient (GT-B07).
+  var touches=_agtTenants.filter(function(t){
+    return Array.isArray(t.errors) && t.errors.some(function(e){ return ids[e.id] && !e.resolved; });
   });
-  agtRenderBody();
-
+  var echec=0;
   for(var i=0;i<touches.length;i++){
-    if(!window.fbAdminWrite) break;
-    var ok=await window.fbAdminWrite(touches[i].slug,'error_log',touches[i].errors);
-    if(!ok) showToast('\u00c9criture refus\u00e9e sur '+touches[i].slug,'#C0392B');
+    if(!(await _agtErrEcrire(touches[i], ids, false))) echec++;
   }
+  agtRenderBody();
   var n=Object.keys(ids).length;
-  showToast(''+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
+  if(!echec) showToast(''+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
+}
+// Marque traitées (ids) ou purge les traitées (purge) DANS le journal relu du domaine ; la mémoire du
+// panneau prend ensuite la valeur réellement écrite — erreurs arrivées entre-temps comprises.
+function _agtMutErreurs(liste, existe, ids, purge){
+  if (liste === undefined){ if (existe) throw new Error('journal d\u2019erreurs illisible'); return undefined; }
+  if (!Array.isArray(liste)) throw new Error('journal d\u2019erreurs illisible');
+  if (purge) return liste.filter(function(e){ return !(e && e.resolved); });
+  return liste.map(function(e){ return (e && ids[e.id]) ? Object.assign({}, e, { resolved:true }) : e; });
+}
+async function _agtErrEcrire(t, ids, purge){
+  try {
+    if (!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+    var r = await window.fbAdminMaj(t.slug, 'error_log', function(l, existe){ return _agtMutErreurs(l, existe, ids, purge); });
+    if (r && Array.isArray(r.valeur)) { t.errors = r.valeur; _agtErrRecount(t); }
+    return true;
+  } catch (e) { _agtEchecEcriture(e, 'Erreurs de '+t.slug); return false; }
 }
 
 // Copie un rapport lisible : de quoi chercher dans le code sans retourner a l'ecran.
@@ -1489,15 +1558,18 @@ async function saveAddTenant() {
   var plan=(planEl&&['essentiel','vigneron','domaine'].indexOf(planEl.value)>=0)?planEl.value:'domaine';
   var trialDays=trialEl?Math.max(0,Math.min(90,parseInt(trialEl.value,10)||0)):0;
   try {
-    var gtData=window.fbAdminReadGT?await window.fbAdminReadGT('tenants'):null;
-    var slugs=(gtData&&Array.isArray(gtData.slugs))?gtData.slugs.slice():['marchand-grillot'];
-    var clients=Object.assign({},await _agtReadClients());
-    if(slugs.indexOf(slug)>=0){showToast('Ce slug existe d\u00e9j\u00e0','#C0392B');return;}
-    slugs.push(slug);
-    // status 'pending' → l'assistant d'onboarding s'ouvre pour ce slug (routage _fbTenantStatus).
-    // plan + trialDays : appliqu\u00e9s au compte admin par la Cloud Function onboardTenant.
-    clients[slug]={plan:plan,trialDays:trialDays,status:'pending',created_at:new Date().toISOString()};
-    await _agtWriteClients(clients,slugs,gtData);
+    // ★ GTFIX-1 (§510) : lu et écrit dans la même transaction (GT-B01). L'ancienne version repartait de
+    //   ['marchand-grillot'] sur une lecture ratée — et effaçait tous les autres clients du registre.
+    var dejaLa=false;
+    await _agtMajRegistre(function(clients,slugs){
+      dejaLa=slugs.indexOf(slug)>=0;
+      if(dejaLa) return false;
+      slugs.push(slug);
+      // status 'pending' → l'assistant d'onboarding s'ouvre pour ce slug (routage _fbTenantStatus).
+      // plan + trialDays : appliqu\u00e9s au compte admin par la Cloud Function onboardTenant.
+      clients[slug]={plan:plan,trialDays:trialDays,status:'pending',created_at:new Date().toISOString()};
+    });
+    if(dejaLa){showToast('Ce slug existe d\u00e9j\u00e0','#C0392B');return;}
     var link=GT_BASE_URL+'/?tenant='+slug;
     if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(link).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'admin-gt.js/saveAddTenant'); });
     if(window.closeOv) window.closeOv(null,'ovAddTenant');
@@ -1506,7 +1578,7 @@ async function saveAddTenant() {
     showToast('Client ajout\u00e9 ('+plan+ess+') \u2014 lien copi\u00e9','#3D6B27');
     renderAdminGT();
   } catch(e) {
-    showToast('Erreur : '+(e.message||'inconnue'),'#C0392B');
+    _agtEchecEcriture(e,'Client non ajout\u00e9');
   }
 }
 
@@ -1546,35 +1618,37 @@ async function agtResolveError(id) {
 
   var idx = _agtErrTenantIdx(id);
   if (idx >= 0) {
-    var t = _agtTenants[idx];
-    t.errors = t.errors.map(function(e){
-      return e.id === id ? Object.assign({}, e, { resolved: true }) : e;
-    });
-    _agtErrRecount(t);
-    if (window.fbAdminWrite) {
-      var ok = await window.fbAdminWrite(t.slug, 'error_log', t.errors);
-      if (!ok) showToast('Ecriture refusee sur ' + t.slug, '#C0392B');
-    }
+    var ids = {}; ids[id] = true;
+    await _agtErrEcrire(_agtTenants[idx], ids, false);   // ★ GTFIX-1 : relu dans la transaction
   }
   agtRenderBody();
 }
 
 // Purge les erreurs resolues, ici et dans chaque domaine concerne.
-async function agtPurgeErrors() {
+// ★ GTFIX-1 (§510) : la purge efface pour de bon, dans le journal de chaque domaine — elle se confirme.
+function agtPurgeErrors() {
+  if (window.openConfirmDel) {
+    window.openConfirmDel('Purger les erreurs trait\u00e9es ?',
+      'Elles sont supprim\u00e9es du journal de chaque domaine. Les erreurs non trait\u00e9es restent.',
+      function(){ _agtDoPurgeErrors(); }, 'corbeille', 'Purger', '#C0392B');
+    return;
+  }
+  _agtDoPurgeErrors();
+}
+async function _agtDoPurgeErrors() {
   try {
     var raw = localStorage.getItem(_ERR_KEY);
     var log = raw ? JSON.parse(raw) : [];
     localStorage.setItem(_ERR_KEY, JSON.stringify(log.filter(function(e){ return !e.resolved; })));
   } catch(e) { console.warn('[agtPurgeErrors] local', e); }
 
+  var echec = 0;
   for (var i = 0; i < _agtTenants.length; i++) {
     var t = _agtTenants[i];
     if (!Array.isArray(t.errors) || !t.errors.some(function(e){ return e.resolved; })) continue;
-    t.errors = t.errors.filter(function(e){ return !e.resolved; });
-    _agtErrRecount(t);
-    if (window.fbAdminWrite) await window.fbAdminWrite(t.slug, 'error_log', t.errors);
+    if (!(await _agtErrEcrire(t, {}, true))) echec++;
   }
-  showToast('Erreurs resolues supprimees', '#3D6B27');
+  if (!echec) showToast('Erreurs trait\u00e9es supprim\u00e9es', '#3D6B27');
   agtRenderBody();
 }
 
@@ -1694,11 +1768,13 @@ async function agtSaveAddMembre(slug) {
     //    localStorage, pas sur le domaine affiche. Cf. le commentaire de createAuthAccount.
     var cred = await window.createAuthAccount(email, pwd, { roles: roles, tenant: slug });
     if(!cred) throw new Error('\u00c9chec cr\u00e9ation compte Auth');
-    var mbr = await window.fbAdminRead(slug, 'membres') || [];
-    var couleur = _AGT_MBR_COLORS[mbr.length % _AGT_MBR_COLORS.length];
-    mbr.push({ nom:nom, email:email, roles:roles, couleur:couleur, statut:'actif' });
-    var ok = await window.fbAdminWrite(slug, 'membres', mbr);
-    if(!ok) throw new Error('\u00c9chec \u00e9criture Firestore');
+    // ★ GTFIX-1 (§510) : la liste est relue dans la transaction. Avant, une lecture ratée valait
+    //   « aucun membre » : l'équipe entière était remplacée par le nouveau (GT-B02).
+    if(!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+    var _rm = await window.fbAdminMaj(slug, 'membres', function(mbr, existe){
+      return _agtMutMembres(mbr, existe, [{ nom:nom, email:email, roles:roles, statut:'actif' }]);
+    });
+    if(!_rm || !_rm.ecrit) throw new Error('\u00c9chec \u00e9criture Firestore');
     showToast('Membre cr\u00e9\u00e9\u00a0: '+nom, '#3D6B27');
     // Mot de passe genere = il n'existe nulle part ailleurs. Meme remise que
     // l'installation et que « Nouveau mot de passe » : un ecran, une fois.
@@ -1938,6 +2014,22 @@ function _agtLotModsLigne(roles) {
 // Creation. Une par une — createMemberAccount cree UN compte. Ce qui echoue est
 // dit, ce qui a reussi est garde : on ecrit le document `membres` MEME en cas
 // d'echec partiel, sinon un compte existerait sans fiche, invisible et inutilisable.
+// ★ GTFIX-1 (§510) — ajouter des fiches à l'équipe RELUE. Document absent = équipe neuve ; forme
+//   inconnue = on n'écrit rien. Une adresse déjà présente n'est pas ajoutée deux fois. La couleur suit
+//   la place réelle dans la liste relue (elle était calculée sur la copie du panneau).
+function _agtMutMembres(liste, existe, fiches){
+  if (liste === undefined){ if (existe) throw new Error('liste des membres illisible'); liste = []; }
+  if (!Array.isArray(liste)) throw new Error('liste des membres illisible');
+  var vus = {};
+  liste.forEach(function(m){ if (m && m.email) vus[String(m.email).toLowerCase()] = true; });
+  fiches.forEach(function(f){
+    var cle = String(f.email || '').toLowerCase();
+    if (cle && vus[cle]) return;
+    vus[cle] = true;
+    liste.push(Object.assign({}, f, { couleur: f.couleur || _AGT_MBR_COLORS[liste.length % _AGT_MBR_COLORS.length] }));
+  });
+  return liste;
+}
 async function agtLotGo() {
   if (_agtLot.busy) return;
   var slug = _agtLot.slug;
@@ -1946,7 +2038,7 @@ async function agtLotGo() {
   _agtLot.busy = true;
   var btn = document.getElementById('agt-lot-go');
   var mbr = (_agtLot.exist || []).slice();
-  var creds = [], err = [];
+  var creds = [], err = [], nouvelles = [];   // ★ GTFIX-1 : seules les fiches NEUVES partent, ajoutées à la liste relue
   for (var i = 0; i < todo.length; i++) {
     var x = todo[i];
     if (btn) { btn.disabled = true; btn.textContent = 'Cr\u00e9ation\u2026 ' + (i + 1) + '/' + todo.length; }
@@ -1965,7 +2057,7 @@ async function agtLotGo() {
       } catch (e) {
         if (window.logError) window.logError({ level: 'info', cat: 'agt-lot', msg: 'mods par defaut non poses' });
       }
-      mbr.push(_fiche);
+      mbr.push(_fiche); nouvelles.push(_fiche);
       creds.push({ nom: x.nom, mail: x.email, pwd: (cred.password || '') });
     } catch (e) {
       var msg = (e && (e.message || e.code)) || 'erreur';
@@ -1975,9 +2067,10 @@ async function agtLotGo() {
   }
   if (creds.length) {
     try {
-      var ok = await window.fbAdminWrite(slug, 'membres', mbr);
-      if (!ok) throw new Error('\u00e9criture refus\u00e9e');
-      _agtLot.exist = mbr;
+      if (!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+      var _rl = await window.fbAdminMaj(slug, 'membres', function (liste, existe) { return _agtMutMembres(liste, existe, nouvelles); });
+      if (!_rl || !_rl.ecrit) throw new Error('\u00e9criture refus\u00e9e');
+      _agtLot.exist = _rl.valeur;
       await agtLogAccess(slug, creds.length + ' compte(s) cr\u00e9\u00e9(s) en lot', '\uD83D\uDC65');
     } catch (e) {
       // Les comptes existent, la fiche n'est pas passee : le dire fort, c'est
@@ -2192,17 +2285,33 @@ async function agtShowConfig(slug) {
     +'<div id="agt-cfg-err" style="display:none;color:#EF4444;font-size:var(--pt-micro,12px);margin-top:6px"></div>';
 }
 
+// ★ GTFIX-1 (§510) — UNE règle pour le nom et les coordonnées d'un domaine, appliquée à la config RELUE.
+//   Avant : `fbAdminRead(…) || {}` — une lecture ratée remplaçait TOUTE la config du domaine par trois
+//   champs ; et la fenêtre Config écrivait 0 pour une case vide (`parseFloat(…) || 0`, GT-B17), là où la
+//   fiche › Domaine n'y touchait pas. Une case vide ne touche plus à rien, dans les deux écrans.
+function _agtMutConfigDomaine(cfg, existe, nom, lat, lon){
+  if (cfg === undefined){ if (existe) throw new Error('config illisible'); cfg = {}; }
+  if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) throw new Error('config illisible');
+  cfg.domaine_nom = nom;
+  if (!isNaN(lat)) cfg.lat = lat;
+  if (!isNaN(lon)) cfg.lon = lon;
+  return cfg;
+}
 async function agtSaveConfig(slug) {
   var nom = (document.getElementById('cfg-nom')||{value:''}).value.trim();
-  var lat = parseFloat((document.getElementById('cfg-lat')||{value:''}).value) || 0;
-  var lon = parseFloat((document.getElementById('cfg-lon')||{value:''}).value) || 0;
+  var lat = parseFloat((document.getElementById('cfg-lat')||{value:''}).value);
+  var lon = parseFloat((document.getElementById('cfg-lon')||{value:''}).value);
   var errEl = document.getElementById('agt-cfg-err');
   if(!nom) { if(errEl){errEl.textContent='Nom requis';errEl.style.display='block';} return; }
-  var cfg = await window.fbAdminRead(slug, 'config') || {};
-  cfg.domaine_nom = nom; cfg.lat = lat; cfg.lon = lon;
-  var ok = await window.fbAdminWrite(slug, 'config', cfg);
-  if(ok) { showToast('Config sauvegard\u00e9e', '#3D6B27'); document.getElementById('agt-panel-overlay').remove(); }
-  else   { if(errEl){errEl.textContent='Erreur Firestore';errEl.style.display='block';} }
+  try {
+    if(!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+    await window.fbAdminMaj(slug, 'config', function(cfg, existe){ return _agtMutConfigDomaine(cfg, existe, nom, lat, lon); });
+    showToast('Config sauvegard\u00e9e', '#3D6B27');
+    var _ov = document.getElementById('agt-panel-overlay'); if(_ov) _ov.remove();
+  } catch(e) {
+    if(errEl){ errEl.textContent='Rien n\u2019a \u00e9t\u00e9 \u00e9crit : '+((e&&(e.message||e.code))||'lecture impossible'); errEl.style.display='block'; }
+    if(window.logError) window.logError({level:'error',cat:'gt-ecriture',msg:'config non \u00e9crite',detail:(e&&(e.code||e.message))||String(e)});
+  }
 }
 
 // ─── Journal ─────────────────────────────────────────────────────────────────
@@ -2459,17 +2568,26 @@ async function agtCreateEssai(){
     usage_count: 0,
     last_access: null
   };
-  _agtEssais.push(entry);
   try {
-    if(window.fbAdminWriteGT) await window.fbAdminWriteGT('demo_tokens',{value:_agtEssais});
+    // ★ GTFIX-1 (§510) : ajouté à la liste RELUE (transaction), plus à la copie du panneau.
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var _rc=await window.fbGtMaj('demo_tokens',function(d,existe){ return _agtMutCodes(d,existe,function(v){ v.push(entry); return v; }); });
+    _agtEssais=_rc.valeur.value;
     // Copier le code dans le presse-papier
     if(navigator.clipboard) navigator.clipboard.writeText(code).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'admin-gt.js/agtCreateEssai'); });
     showToast('Code g\u00e9n\u00e9r\u00e9 et copi\u00e9 : '+code,'#3D6B27');
     agtRenderBody();
   } catch(e) {
-    _agtEssais.pop();
-    showToast('Erreur lors de la cr\u00e9ation','#E07B2A');
+    _agtEchecEcriture(e,'Code non cr\u00e9\u00e9');
   }
+}
+// Document absent = liste neuve ; forme inconnue = erreur (on n'écrase rien).
+function _agtMutCodes(d, existe, f){
+  var v;
+  if (!existe) v = [];
+  else if (d && Array.isArray(d.value)) v = d.value;
+  else throw new Error('liste des codes illisible');
+  return { value: f(v) };
 }
 
 // confirm() natif retire : bloquant en PWA iOS (l'action echouait sans aucun retour).
@@ -2486,13 +2604,14 @@ function agtRevokeEssai(id){
   _agtDoRevokeEssai(id);
 }
 async function _agtDoRevokeEssai(id){
-  _agtEssais = _agtEssais.filter(function(t){return t.id!==id;});
   try {
-    if(window.fbAdminWriteGT) await window.fbAdminWriteGT('demo_tokens',{value:_agtEssais});
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var _rc=await window.fbGtMaj('demo_tokens',function(d,existe){ return _agtMutCodes(d,existe,function(v){ return v.filter(function(t){ return t && t.id!==id; }); }); });
+    _agtEssais=_rc.valeur.value;
     showToast('Code supprim\u00e9','#B85A1A');
     agtRenderBody();
   } catch(e) {
-    showToast('Erreur lors de la suppression','#E07B2A');
+    _agtEchecEcriture(e,'Code non supprim\u00e9');
   }
 }
 
@@ -2503,13 +2622,15 @@ function agtCopyEssaiCode(code){
 
 // Mise \u00e0 jour des stats d'acc\u00e8s (appel\u00e9e depuis app.js apr\u00e8s login d\u00e9mo r\u00e9ussi)
 window.agtUpdateEssaiAccess = async function(code){
-  var entry = _agtEssais.find(function(t){return t.code===code;});
-  if(!entry) return;
-  entry.usage_count = (entry.usage_count||0)+1;
-  entry.last_access = new Date().toISOString();
+  // ★ GTFIX-1 : en transaction comme les autres. ⚠ Personne ne l'appelle plus depuis GT-1 (l'appli des
+  //   clients ne charge pas ce fichier) : le compteur réel est dans le journal — GTFIX-4 (GT-B15).
+  if(!window.fbGtMaj) return;
   try {
-    if(window.fbAdminWriteGT) await window.fbAdminWriteGT('demo_tokens',{value:_agtEssais});
-  } catch(e) { console.warn('[agtUpdateEssaiAccess]',e); }
+    var _rc=await window.fbGtMaj('demo_tokens',function(d,existe){ return _agtMutCodes(d,existe,function(v){
+      return v.map(function(t){ return (t && t.code===code) ? Object.assign({},t,{ usage_count:(t.usage_count||0)+1, last_access:new Date().toISOString() }) : t; });
+    }); });
+    _agtEssais=_rc.valeur.value;
+  } catch(e) { if(window.logError) window.logError({level:'info',cat:'gt-ecriture',msg:'compteur du code non mis \u00e0 jour',detail:(e&&(e.code||e.message))||String(e)}); }
 };
 
 
@@ -2828,15 +2949,19 @@ async function agtKmlSave() {
   if (_agtKmlBusy) return;
   _agtKmlBusy = true; agtRenderBody();
   try {
-    if (!window.fbAdminWrite || !window.fbAdminRead) throw new Error('accès Firestore indisponible');
+    if (!window.fbAdminWrite || !window.fbAdminLire) throw new Error('accès Firestore indisponible');
 
     // ⚠️ RELECTURE. L'aperçu peut dater de plusieurs minutes, et le client travaille
     //    pendant ce temps. Le plan écrit se calcule sur ce que la base contient
     //    MAINTENANT, pas sur ce qu'elle contenait à l'ouverture de l'écran.
-    var baseNow   = await window.fbAdminRead(slug, 'kml_polygons');
-    var fichesNow = await window.fbAdminRead(slug, 'parcelles');
-    baseNow   = Array.isArray(baseNow) ? baseNow : [];
-    fichesNow = Array.isArray(fichesNow) ? fichesNow : [];
+    // ★ GTFIX-1 (§510) : relue AU SERVEUR, et une lecture qui échoue ARRÊTE tout. Avant, fbAdminRead
+    //   rendait null sur erreur, lu comme [] : « compléter » devenait « remplacer » (les contours du
+    //   client perdus) et la liste des fiches réécrite ne gardait que les fiches neuves.
+    var _lk = await window.fbAdminLire(slug, 'kml_polygons');
+    var _lf = await window.fbAdminLire(slug, 'parcelles');
+    if ((_lk.existe && !Array.isArray(_lk.valeur)) || (_lf.existe && !Array.isArray(_lf.valeur))) throw new Error('base illisible — rien ne sera écrit');
+    var baseNow   = _lk.existe ? _lk.valeur : [];
+    var fichesNow = _lf.existe ? _lf.valeur : [];
     var p = _agtKmlPlan(baseNow, fichesNow);
 
     // ⚠️ Un plan de fusion qui n'écrirait RIEN de plus que la base, alors que le
@@ -3214,7 +3339,7 @@ window._fcRenewTrial=async function(){
     var z2=document.getElementById('agt-fc-trial');        if(z2) z2.value=_fcTrialLeft(_FC);
     var z3=document.getElementById('agt-fc-renew');        if(z3) z3.outerHTML=_fcRenewHtml();
     _fcSyncSum();
-    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Essai reconduit '+_FC_TRIAL_DAYS+' j','\u23F3');
+    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Essai reconduit '+_FC_TRIAL_DAYS+' j','\u23F3','commercial');
     showToast('Essai reconduit '+_FC_TRIAL_DAYS+' j \u00b7 un rappel d\u2019appel part vers vous','#3D6B27');
   }catch(e){
     var code=String((e&&(e.code||''))||''), msg=String((e&&e.message)||'');
@@ -3434,13 +3559,9 @@ window._fcSaveDom=async function(){
   var lon=parseFloat((document.getElementById('agt-fc-lon')||{value:''}).value);
   if(!nom){ showToast('Nom du domaine requis','#E07060'); return; }
   try{
-    var cfg=await window.fbAdminRead(_FC_SLUG,'config'); if(!cfg||typeof cfg!=='object') cfg={};
-    cfg.domaine_nom=nom;
-    if(!isNaN(lat)) cfg.lat=lat;
-    if(!isNaN(lon)) cfg.lon=lon;
-    var ok=await window.fbAdminWrite(_FC_SLUG,'config',cfg);
-    if(ok===false) throw new Error('\u00e9criture refus\u00e9e');
-    _FC.config=cfg;
+    if(!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+    var _rd=await window.fbAdminMaj(_FC_SLUG,'config',function(cfg,existe){ return _agtMutConfigDomaine(cfg,existe,nom,lat,lon); });
+    _FC.config=_rd.valeur;
     if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 domaine enregistr\u00e9','\uD83D\uDCBE');
     showToast('Domaine enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
   }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
@@ -3454,27 +3575,31 @@ window._fcSaveAbo=async function(){
     if(!window._fbSetTenantPlan) throw new Error('_fbSetTenantPlan indisponible');
     var _pres=await window._fbSetTenantPlan(_FC_SLUG,plan,td);
     var _texp=(_pres&&typeof _pres.trialUntil==='number')?_pres.trialUntil:(td>0?Date.now()+td*86400000:0);
-    if(window.fbAdminReadGT && window.fbAdminWriteGT){
-      var gt=await window.fbAdminReadGT('tenants')||{};
-      var clients=Object.assign({},await _agtReadClients());
+    // ★ GTFIX-1 (§510) : le registre relu et écrit d'un bloc (GT-B01) — l'ancienne version écrivait
+    //   `slugs: []` si la lecture de `tenants` échouait.
+    await _agtMajRegistre(function(clients){
       clients[_FC_SLUG]=Object.assign({},clients[_FC_SLUG]||{},{plan:plan,trialDays:td,trialExp:_texp});
-      await _agtWriteClients(clients,gt.slugs,gt);
-    }
+    });
     try{
-      var _cfg=(_FC.config&&typeof _FC.config==='object')?_FC.config:{};
-      var _feats=(_cfg.features&&typeof _cfg.features==='object')?Object.assign({},_cfg.features):{};
-      ['tracteur','planning','pilotage','cave','reserve'].forEach(function(k){
-        var _hasOv=_FC.featOv&&(k in _FC.featOv)&&_FC.featOv[k]!==_FC_PLANDEF[plan][k];
-        if(_hasOv) _feats[k]=_FC.featOv[k]; else delete _feats[k];
+      // Les modules : appliqués à la config RELUE, plus à la copie lue à l'ouverture de la fiche.
+      if(!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
+      var _rf=await window.fbAdminMaj(_FC_SLUG,'config',function(_cfg,existe){
+        if(_cfg===undefined){ if(existe) throw new Error('config illisible'); _cfg={}; }
+        if(!_cfg||typeof _cfg!=='object'||Array.isArray(_cfg)) throw new Error('config illisible');
+        var _feats=(_cfg.features&&typeof _cfg.features==='object')?Object.assign({},_cfg.features):{};
+        ['tracteur','planning','pilotage','cave','reserve'].forEach(function(k){
+          var _hasOv=_FC.featOv&&(k in _FC.featOv)&&_FC.featOv[k]!==_FC_PLANDEF[plan][k];
+          if(_hasOv) _feats[k]=_FC.featOv[k]; else delete _feats[k];
+        });
+        if(Object.keys(_feats).length) _cfg.features=_feats; else delete _cfg.features;
+        return _cfg;
       });
-      if(Object.keys(_feats).length) _cfg.features=_feats; else delete _cfg.features;
-      var _okF=await window.fbAdminWrite(_FC_SLUG,'config',_cfg);
-      if(_okF!==false) _FC.config=_cfg;
-    }catch(_e){ if(window._mvAvale) window._mvAvale(_e,'admin-gt.js/_fcSaveAbo'); }
+      _FC.config=_rf.valeur;
+    }catch(_e){ _agtEchecEcriture(_e,'Modules du domaine'); }
     _FC.plan=plan; _FC.trialDays=td; _FC.trialExp=_texp;
     if(_FC_TAB==='abo'){ var _tsEl=document.getElementById('agt-fc-trial-status'); if(_tsEl) _tsEl.outerHTML=_fcTrialStatusHtml(_FC); var _tiEl=document.getElementById('agt-fc-trial'); if(_tiEl) _tiEl.value=_fcTrialLeft(_FC); }
     _fcSyncSum();
-    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 abonnement '+plan,'\uD83D\uDCB3');
+    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 abonnement '+plan,'\uD83D\uDCB3','commercial');
     showToast('Abonnement : '+plan+(td>0?' \u00b7 essai '+td+'j':'')+' \u2192 tous les membres','#3D6B27');
   }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
 };
@@ -4609,17 +4734,16 @@ async function agtInsGo() {
   if (btn) { btn.disabled = true; btn.textContent = 'Installation\u2026'; }
 
   try {
-    // 1. Registre
-    var gtData = window.fbAdminReadGT ? await window.fbAdminReadGT('tenants') : null;
-    var slugs = (gtData && Array.isArray(gtData.slugs)) ? gtData.slugs.slice() : ['marchand-grillot'];
-    var clients = Object.assign({}, await _agtReadClients());
-    if (clients[slug] && clients[slug].status === 'active') throw new Error('Ce domaine est d\u00e9j\u00e0 install\u00e9');
-    if (slugs.indexOf(slug) < 0) slugs.push(slug);
-    clients[slug] = { plan: plan, trialDays: trialNow, status: 'pending', created_at: new Date().toISOString() };
-    // ⚠️ trialPrevu n'est LU PAR PERSONNE cote serveur : c'est une note pour la fiche
-    //    client, qui dirait sinon « abonnement actif » d'un domaine en attente de remise.
-    if (trial > 0 && !trialNow) clients[slug].trialPrevu = trial;
-    await _agtWriteClients(clients, slugs, gtData);
+    // 1. Registre — ★ GTFIX-1 (§510) : relu et écrit d'un bloc (GT-B01). Une lecture ratée arrête
+    //    l'installation ICI, avant tout compte créé, au lieu d'effacer les autres clients du registre.
+    await _agtMajRegistre(function (clients, slugs) {
+      if (clients[slug] && clients[slug].status === 'active') throw new Error('Ce domaine est d\u00e9j\u00e0 install\u00e9');
+      if (slugs.indexOf(slug) < 0) slugs.push(slug);
+      clients[slug] = { plan: plan, trialDays: trialNow, status: 'pending', created_at: new Date().toISOString() };
+      // ⚠️ trialPrevu n'est LU PAR PERSONNE cote serveur : c'est une note pour la fiche
+      //    client, qui dirait sinon « abonnement actif » d'un domaine en attente de remise.
+      if (trial > 0 && !trialNow) clients[slug].trialPrevu = trial;
+    });
 
     // 2. Les communes, une seule fois chacune (meteo par secteur des l'ouverture).
     var _comm = await _agtInsGeoComm();
@@ -4757,17 +4881,16 @@ async function agtInsTrialGo() {
     if (!window._fbSetTenantPlan) throw new Error('_fbSetTenantPlan indisponible');
     var r = await window._fbSetTenantPlan(c.slug, c.plan || 'domaine', c.trial);
     var exp = (r && typeof r.trialUntil === 'number') ? r.trialUntil : (Date.now() + c.trial * 86400000);
-    if (window.fbAdminReadGT && window.fbAdminWriteGT) {
-      var gt = (await window.fbAdminReadGT('tenants')) || {};
-      var clients = Object.assign({}, await _agtReadClients());
+    // ★ GTFIX-1 (§510) : relu et écrit d'un bloc — l'ancienne version écrivait `slugs: []` si la
+    //   lecture de `tenants` échouait (GT-B01).
+    await _agtMajRegistre(function (clients) {
       // Object.assign sur l'existant : plan, status et created_at ne se perdent pas.
       var cur = Object.assign({}, clients[c.slug] || {}, { trialDays: c.trial, trialExp: exp });
       delete cur.trialPrevu;
       clients[c.slug] = cur;
-      await _agtWriteClients(clients, gt.slugs, gt);
-    }
+    });
     c.trialArme = true;
-    if (typeof agtLogAccess === 'function') agtLogAccess(c.slug, 'Essai de ' + c.trial + ' j d\u00e9marr\u00e9', '\u23F3');
+    if (typeof agtLogAccess === 'function') agtLogAccess(c.slug, 'Essai de ' + c.trial + ' j d\u00e9marr\u00e9', '\u23F3', 'commercial');
     showToast('Essai de ' + c.trial + ' jours d\u00e9marr\u00e9', '#3D6B27');
     _agtInsRender();
     if (window.renderAdminGT) renderAdminGT();
@@ -4878,14 +5001,36 @@ function _agtFacts(slug){
   return (b && Array.isArray(b.fact)) ? b.fact : [];
 }
 
-async function _agtSaveBilling(){
+// ★★ GTFIX-1 (§510) — LA FACTURATION S'ÉCRIT DOMAINE PAR DOMAINE, EN COMPARANT AVANT D'ÉCRIRE.
+//   Avant : tout `billing` réécrit depuis la copie chargée à l'ouverture. Maintenant, dans la
+//   transaction : les AUTRES domaines viennent de la base relue (rien d'écrit ailleurs ne se perd) ;
+//   celui qu'on modifie n'est écrit que s'il n'a pas changé depuis la lecture — sinon tout est
+//   rechargé et le geste est à refaire (rien n'est écrasé en silence).
+var _agtBillingBase = {};
+function _agtBillingNoter(b){ _agtBillingBase = {}; Object.keys(b || {}).forEach(function(s){ _agtBillingBase[s] = _agtJsonStable(b[s]); }); }
+function _agtMutBilling(d, existe, slug, local, base){
+  var v;
+  if (!existe) v = {};
+  else if (d && d.value && typeof d.value === 'object' && !Array.isArray(d.value)) v = d.value;
+  else throw new Error('facturation illisible');
+  if (_agtJsonStable(v[slug]) !== base){ var c = new Error('facturation modifi\u00e9e ailleurs'); c.conflit = true; c.frais = v; throw c; }
+  if (local === undefined) delete v[slug]; else v[slug] = local;
+  return { value: v };
+}
+async function _agtSaveBilling(slug){
+  var local = (_agtBilling[slug] === undefined) ? undefined : JSON.parse(JSON.stringify(_agtBilling[slug]));
+  var base = _agtBillingBase[slug];
   try{
-    if(!window.fbAdminWriteGT) return false;
-    await window.fbAdminWriteGT('billing', { value:_agtBilling });
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var r = await window.fbGtMaj('billing', function(d, existe){ return _agtMutBilling(d, existe, slug, local, base); });
+    _agtBilling = r.valeur.value; _agtBillingNoter(_agtBilling);
     return true;
   }catch(e){
-    if(window.logError) window.logError({level:'error',cat:'firebase',msg:'billing non enregistre',detail:(e&&e.code)||String(e)});
-    showToast('Enregistrement refus\u00e9','#C0392B');
+    if (e && e.conflit && e.frais){ _agtBilling = e.frais; _agtBillingNoter(_agtBilling); }
+    else if (base !== undefined) _agtBilling[slug] = JSON.parse(base);
+    else delete _agtBilling[slug];
+    _agtEchecEcriture(e, 'Facturation');
+    agtRenderBody(); if (typeof _agtBizFill === 'function') _agtBizFill();
     return false;
   }
 }
@@ -5264,7 +5409,7 @@ function agtBizAbo(i){
       if(isNaN(p)||p<0){ showToast('Montant invalide','#B85A1A'); return; }
       if(p===plein){
         if(_agtBilling[t.slug]) delete _agtBilling[t.slug].abo;
-        _agtSaveBilling().then(function(ok){ if(ok){ showToast('Tarif plein r\u00e9tabli','#3D6B27'); agtRenderBody(); _agtBizFill(); } });
+        _agtSaveBilling(t.slug).then(function(ok){ if(ok){ showToast('Tarif plein r\u00e9tabli','#3D6B27'); agtRenderBody(); _agtBizFill(); } });
         return;
       }
       window.openPrompt({
@@ -5274,7 +5419,7 @@ function agtBizAbo(i){
         cb:function(mo){
           if(!_agtBilling[t.slug]) _agtBilling[t.slug]={};
           _agtBilling[t.slug].abo={ prix:p, motif:String(mo||'').trim()||'Tarif remis\u00e9', fin:'' };
-          _agtSaveBilling().then(function(ok){
+          _agtSaveBilling(t.slug).then(function(ok){
             if(ok){ showToast('Abonnement \u00e0 '+_agtEur(p)+'/mois','#3D6B27'); agtRenderBody(); _agtBizFill(); }
           });
         }
@@ -5342,7 +5487,7 @@ async function agtBizRattache(i,k,val){
   var fs=_agtFacts(t.slug), g=fs[k], cible=fs[parseInt(val,10)];
   if(!g || !cible) return;
   g.ref=cible.ref||'';
-  if(await _agtSaveBilling()){
+  if(await _agtSaveBilling(t.slug)){
     showToast('Geste rattach\u00e9 \u00e0 '+g.ref,'#3D6B27');
     agtRenderBody(); _agtBizFill();
   }
@@ -5622,7 +5767,7 @@ function agtBizInterne(i){
   var t=_agtTenants[i]; if(!t) return;
   if(!_agtBilling[t.slug]) _agtBilling[t.slug]={};
   _agtBilling[t.slug].interne = !_agtInterne(t.slug);
-  _agtSaveBilling().then(function(ok){
+  _agtSaveBilling(t.slug).then(function(ok){
     if(ok){
       showToast(_agtBilling[t.slug].interne ? 'Domaine interne \u2014 hors des totaux' : 'Domaine compt\u00e9 dans les totaux', '#3D6B27');
       agtRenderBody(); _agtBizFill();
@@ -5657,9 +5802,9 @@ async function agtFactAdd(i){
     statut:(ty==='geste'?'applique':'emise'),
     ts:new Date().toISOString()
   });
-  if(await _agtSaveBilling()){
+  if(await _agtSaveBilling(t.slug)){
     showToast(''+_AGT_TY[ty].lbl+' '+r+' enregistr\u00e9'+(ty==='heures'?'es':''),'#3D6B27');
-    agtLogAccess(t.slug, _AGT_TY[ty].lbl+' '+r+' \u00b7 '+_agtEur(m), '\uD83E\uDDFE');
+    agtLogAccess(t.slug, _AGT_TY[ty].lbl+' '+r+' \u00b7 '+_agtEur(m), '\uD83E\uDDFE', 'commercial');
     agtRenderBody(); _agtBizFill();
   }
 }
@@ -5670,7 +5815,7 @@ async function agtFactPaye(i,k){
   if(_agtFType(f)==='geste'){ showToast('Un geste commercial ne s\u2019encaisse pas','#B85A1A'); return; }
   f.statut = (f.statut==='payee') ? 'emise' : 'payee';
   if(f.statut==='payee') f.paye_le=_agtIso(new Date()); else delete f.paye_le;
-  if(await _agtSaveBilling()){ agtRenderBody(); _agtBizFill(); }
+  if(await _agtSaveBilling(t.slug)){ agtRenderBody(); _agtBizFill(); }
 }
 
 async function agtFactDel(i,k){
@@ -5681,7 +5826,7 @@ async function agtFactDel(i,k){
   var fs=_agtFacts(t.slug);
   if(!fs[k]) return;
   fs.splice(k,1);
-  if(await _agtSaveBilling()){ showToast('Ligne supprim\u00e9e','#3D6B27'); agtRenderBody(); _agtBizFill(); }
+  if(await _agtSaveBilling(t.slug)){ showToast('Ligne supprim\u00e9e','#3D6B27'); agtRenderBody(); _agtBizFill(); }
 }
 
 // ── Documents de travail ────────────────────────────────────────────────────
@@ -5831,14 +5976,34 @@ function _agtLeadStOf(id){
   return _AGT_LEADST[st] ? st : 'nouveau';
 }
 
-async function _agtSaveLeadSt(){
+// ★ GTFIX-1 (§510) — même principe que la facturation, fiche par fiche (le serveur écrit aussi des
+//   fiches de leads) : les autres fiches viennent de la base relue ; celle qu'on touche n'est écrite
+//   que si elle n'a pas changé depuis la lecture.
+var _agtLeadStBase = {};
+function _agtLeadStNoter(v){ _agtLeadStBase = {}; Object.keys(v || {}).forEach(function(k){ _agtLeadStBase[k] = _agtJsonStable(v[k]); }); }
+function _agtMutLeadSt(d, existe, id, local, base){
+  var v;
+  if (!existe) v = {};
+  else if (d && d.value && typeof d.value === 'object' && !Array.isArray(d.value)) v = d.value;
+  else throw new Error('statuts des leads illisibles');
+  if (_agtJsonStable(v[id]) !== base){ var c = new Error('lead modifi\u00e9 ailleurs'); c.conflit = true; c.frais = v; throw c; }
+  if (local === undefined) delete v[id]; else v[id] = local;
+  return { value: v };
+}
+async function _agtSaveLeadSt(id){
+  var local = (_agtLeadSt[id] === undefined) ? undefined : JSON.parse(JSON.stringify(_agtLeadSt[id]));
+  var base = _agtLeadStBase[id];
   try{
-    if(!window.fbAdminWriteGT) return false;
-    await window.fbAdminWriteGT('leads_status', { value:_agtLeadSt });
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var r = await window.fbGtMaj('leads_status', function(d, existe){ return _agtMutLeadSt(d, existe, id, local, base); });
+    _agtLeadSt = r.valeur.value; _agtLeadStNoter(_agtLeadSt);
     return true;
   }catch(e){
-    if(window.logError) window.logError({level:'error',cat:'firebase',msg:'leads_status non enregistre',detail:(e&&e.code)||String(e)});
-    showToast('Enregistrement refus\u00e9','#C0392B');
+    if (e && e.conflit && e.frais){ _agtLeadSt = e.frais; _agtLeadStNoter(_agtLeadSt); }
+    else if (base !== undefined) _agtLeadSt[id] = JSON.parse(base);
+    else delete _agtLeadSt[id];
+    _agtEchecEcriture(e, 'Lead');
+    agtRenderBody();
     return false;
   }
 }
@@ -5974,9 +6139,9 @@ function _agtLeadById(id){
 async function agtLeadSet(id,st){
   if(!_AGT_LEADST[st]) return;
   _agtLeadSt[id]=Object.assign({}, _agtLeadSt[id]||{}, { st:st, ts:new Date().toISOString() });
-  if(await _agtSaveLeadSt()){
+  if(await _agtSaveLeadSt(id)){
     var l=_agtLeadById(id);
-    agtLogAccess('', 'Lead ' + ((l&&l.domaine)||id.slice(0,8)) + ' \u2192 ' + _AGT_LEADST[st].l, '\uD83D\uDCE9');
+    agtLogAccess('', 'Lead ' + ((l&&l.domaine)||id.slice(0,8)) + ' \u2192 ' + _AGT_LEADST[st].l, '\uD83D\uDCE9', 'commercial');
     renderAdminGT();
   }
 }
@@ -5989,7 +6154,7 @@ function agtLeadNote(id){
     valeur:cur, type:'texte', btnLabel:'Enregistrer',
     cb:async function(v){
       _agtLeadSt[id]=Object.assign({}, _agtLeadSt[id]||{}, { note:String(v||'').slice(0,500), ts:new Date().toISOString() });
-      if(await _agtSaveLeadSt()) renderAdminGT();
+      if(await _agtSaveLeadSt(id)) renderAdminGT();
     }
   });
 }
@@ -6013,7 +6178,7 @@ function agtLeadMail(id){
 async function agtLeadPj(id){
   var e=_agtLeadSt[id]||{};
   _agtLeadSt[id]=Object.assign({}, e, { pj:!e.pj, ts:new Date().toISOString() });
-  if(await _agtSaveLeadSt()){
+  if(await _agtSaveLeadSt(id)){
     showToast(_agtLeadSt[id].pj?'\u2705 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces en attente', _agtLeadSt[id].pj?'#3D6B27':'#B85A1A');
     agtRenderBody();
   }

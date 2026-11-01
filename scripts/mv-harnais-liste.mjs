@@ -921,6 +921,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-jcave1.mjs --contre'],
   ['node scripts/mv-harnais-diag1.mjs'],          // DIAG-1 (§429) : le diagnostic du Chai — six cuvées du domaine fictif, sur le vrai _laboLignes et le vrai module
   ['node scripts/mv-harnais-diag1.mjs --contre'],
+  ['node scripts/mv-harnais-gtfix1.mjs'],          // GTFIX-1 (§510) : les écritures de la console GT en transaction — lecture ratée = rien d'écrit, rien d'écrasé
+  ['node scripts/mv-harnais-gtfix1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

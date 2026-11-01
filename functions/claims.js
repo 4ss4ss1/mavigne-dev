@@ -1662,16 +1662,19 @@ exports.gtDeleteTenant = onCall({ region: REGION, enforceAppCheck: true, timeout
     await regRef.set(reg);
   } catch (e) { console.error('[gtDeleteTenant][registre]', e); }
 
-  // 4. Purger les entrées d'access_log du domaine + tracer la suppression (best-effort)
+  // 4. Tracer la suppression (best-effort). ★ GTFIX-1 (§510, décision D4 du 01/11) : les accès du
+  //    domaine RESTENT au journal — les effacer avec lui effaçait la preuve de ce qui avait été fait
+  //    chez lui. Écrit en transaction (la console écrit aussi ce journal), gardé un an par la date.
   try {
     const logRef = db.doc('_guerettech/access_log');
-    const logSnap = await logRef.get();
-    let list = (logSnap.exists && Array.isArray(logSnap.data().value)) ? logSnap.data().value : [];
-    list = list.filter((a) => a && a.tenant !== slug);
-    list.unshift({ id: 'al' + Date.now(), ts: new Date().toISOString(), tenant: 'GT',
-      action: 'Domaine supprimé : ' + slug + ' (' + authDeleted + ' compte' + (authDeleted > 1 ? 's' : '') + ', ' + docsDeleted + ' doc' + (docsDeleted > 1 ? 's' : '') + ')', icon: '🗑️' });
-    if (list.length > 100) list.length = 100;
-    await logRef.set({ value: list });
+    await db.runTransaction(async (tx) => {
+      const logSnap = await tx.get(logRef);
+      if (logSnap.exists && !Array.isArray((logSnap.data() || {}).value)) return;   // forme inconnue : on n'écrase rien
+      const list = logSnap.exists ? logSnap.data().value : [];
+      list.unshift({ id: 'al' + Date.now(), ts: new Date().toISOString(), tenant: 'GT',
+        action: 'Domaine supprimé : ' + slug + ' (' + authDeleted + ' compte' + (authDeleted > 1 ? 's' : '') + ', ' + docsDeleted + ' doc' + (docsDeleted > 1 ? 's' : '') + ')', icon: '🗑️', type: 'systeme' });
+      tx.set(logRef, { value: _alGarder(list) });
+    });
   } catch (e) { console.error('[gtDeleteTenant][log]', e); }
 
   return { ok: true, slug: slug, authDeleted: authDeleted, authErrors: authErrors, docsDeleted: docsDeleted };
@@ -2240,15 +2243,27 @@ exports.acceptTerms = onCall({ region: REGION, enforceAppCheck: true, timeoutSec
 
 
 // Format identique à fbLogDemoAccess / agtLogAccess — cap 100 entrées.
+// ★★ GTFIX-1 (§510) — le journal d'accès se garde UN AN, par la date (décision D4 du 01/11), sous un
+//   plafond de taille. Avant : 100 lignes, quelle que soit leur date — et la console promettait 90 jours.
+//   ⚠ Les MÊMES deux nombres que la console (src/admin-gt.js, _AGT_AL_JOURS / _AGT_AL_MAX) : le harnais
+//   gtfix1 les compare.
+const AL_JOURS = 365, AL_MAX = 2000;
+function _alGarder(list, maintenant) {
+  const lim = (maintenant || Date.now()) - AL_JOURS * 86400000;
+  const r = list.filter((e) => { const t = e && Date.parse(e.ts); return !(t && t < lim); });
+  if (r.length > AL_MAX) r.length = AL_MAX;
+  return r;
+}
 async function appendAccessLog(db, code, action) {
   const ref = db.doc('_guerettech/access_log');
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    const list = (snap.exists && Array.isArray(snap.data().value)) ? snap.data().value : [];
+    // Forme inconnue : on n'écrase rien (la console fait de même).
+    if (snap.exists && !Array.isArray((snap.data() || {}).value)) return;
+    const list = snap.exists ? snap.data().value : [];
     list.unshift({ id: 'al' + Date.now(), ts: new Date().toISOString(),
-                   tenant: 'essai:' + code, action: 'Essai ' + code + ' — ' + action, icon: '🎫' });
-    if (list.length > 100) list.length = 100;
-    tx.set(ref, { value: list });
+                   tenant: 'essai:' + code, action: 'Essai ' + code + ' — ' + action, icon: '🎫', type: 'systeme' });
+    tx.set(ref, { value: _alGarder(list) });
   });
 }
 
