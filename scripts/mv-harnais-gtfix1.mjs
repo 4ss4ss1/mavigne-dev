@@ -354,7 +354,9 @@ function statiques(S) {
     '★★ plus aucun registre reconstruit sur une lecture ratée']);
   const kml = fonction(S.gt, 'agtKmlSave', 'src/admin-gt.js');
   r.push([kml.indexOf('fbAdminLire(') !== -1 && kml.indexOf('fbAdminRead(') === -1, '★ l’import KML relit au serveur (fbAdminLire), plus par fbAdminRead']);
-  r.push([!/_agtSaveBilling\(\s*\)/.test(gt) && (gt.match(/_agtSaveBilling\(t\.slug\)/g) || []).length === 7, 'les 7 écritures de facturation nomment leur domaine']);
+  // ★ GTFIX-3 (§512) : la saisie du paiement, son annulation et la périodicité écrivent aussi — chaque appel nomme son domaine.
+  const appelsFact = (gt.match(/_agtSaveBilling\(/g) || []).length - 1, nommes = (gt.match(/_agtSaveBilling\(t\.slug\)/g) || []).length;
+  r.push([!/_agtSaveBilling\(\s*\)/.test(gt) && appelsFact >= 7 && nommes === appelsFact, 'chaque écriture de facturation nomme son domaine (' + nommes + ' sur ' + appelsFact + ')']);
   r.push([!/_agtSaveLeadSt\(\s*\)/.test(gt) && (gt.match(/await _agtSaveLeadSt\(id\)/g) || []).length === 3, 'les 3 écritures de leads nomment leur fiche']);
   r.push([/_agtBillingNoter\(_agtBilling\);\s*\/\/ ★ GTFIX-1/.test(S.gt) && /_agtLeadStNoter\(_agtLeadSt\);\s*\/\/ ★ GTFIX-1/.test(S.gt),
     'la base de comparaison est notée au chargement (facturation, leads)']);

@@ -1,0 +1,23 @@
+{
+  "lot": "GTFIX-3",
+  "section": "§512",
+  "base": "1bed91fd83d206b48a39ea302dda473f669a5200",
+  "inclut": [],
+  "date": "2026-11-01",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "666ba36b9d08e14b9f5a3d2b0886d9bada964bda1e8d9576e646f739a63eb920",
+    "CLAUDE.md": "2f754f0cb1591bccffdd2b5ff4b1742df8cca90c57884d2bced42199606e9d38",
+    "docs/claude/INDEX.md": "9a16b6405cdd5d6097784f044a5ab938bc0f535b00de4440cf06e1b9da4feb02",
+    "docs/claude/chantiers-480-529.md": "4f0ed603616c2aa3e50d52077fa2b5e3ef6f5841892195ff1bf66b0fa4c2ce26",
+    "docs/claude/journal.md": "fece578d81ab9b47c4680853580fb00f89ee4e55b97fda00e876d12834e372d8",
+    "scripts/harnais-claude-md.mjs": "de73391f8d2ecaf36986285ba17db4e3104fcb24762d0a418a70d2266435863c",
+    "scripts/mv-harnais-gtfix1.mjs": "5d32a67e39376a2fae92fcd26d1c312985bc6f86a2ef1344289cc9ac061bf1da",
+    "scripts/mv-harnais-liste.mjs": "38aabd77accc2b266a7b15156989a46760529b6f9f6c34278a3c9a9556be390d",
+    "src/admin-gt.js": "a30e693231c2fd8a0762e1cd6886ae8595710da3ef28d6c84384f71e5afcef27",
+    "scripts/mv-harnais-gtfix3.mjs": "9785153eb06fc1b259dd44c2cf0c6f62699727badee2ca720352bc12a192ab59"
+  }
+}

@@ -630,7 +630,7 @@ function _agtBuildRadar(){
       h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
       h+='<span style="flex:1;min-width:160px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
       if(r.m) h+='<span style="font-size:var(--pt-txt,13px);font-weight:600">'+r.m+'</span>';
-      h+='<button onclick="'+r.a+'" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:4px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+r.b+'</button>';
+      if(r.b) h+='<button onclick="'+r.a+'" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:4px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+r.b+'</button>';
       h+='</div>';
     });
     h+='</div>';
@@ -4901,6 +4901,9 @@ function _agtPlan(slug){
 // GT ; la verite d'execution reste le claim trial_until du compte client.
 function _agtStatutOf(slug){
   var c=_agtCli(slug), now=Date.now();
+  // ★ GTFIX-3 : sans fiche commerciale, un domaine est « à qualifier » — jamais compté abonné à 79 € (GT-B14).
+  if(!c.status && !c.plan && !c.trialExp && !c.trialDays && !c.created_at && !c.activated_at)
+    return { cle:'aqualifier', label:'\u00c0 qualifier', color:'#9CA3AF', jours:0 };
   var exp=0;
   if(c.trialExp) { var d=_agtD(c.trialExp); exp=d?d.getTime():0; }
   if(exp>now){
@@ -5033,6 +5036,81 @@ function _agtFVent(slug, f){
   }
   return (f.statut==='payee') ? { du:0, enc:v } : { du:v, enc:0 };
 }
+// ════ GTFIX-3 (§512) — L'ARGENT JUSTE ════
+// ★★★ L'audit du 01/11 (docs/maquettes/audit-console-gt-2026-11-01.md) :
+//   GT-B08 — l'encaissé se rangeait à la date de FACTURE ; le livre des recettes d'un micro-entrepreneur suit
+//            la date où l'argent arrive, avec six mentions : date d'encaissement, numéro de facture, client,
+//            nature, montant, mode de règlement. `paye_le` était écrit, jamais lu, et prenait la date du clic ;
+//   GT-B09 — la relance, « À traiter », les retards et le récapitulatif lisaient le montant BRUT : une
+//            installation à 990 € avec l'offre à −495 € était réclamée 990 € ;
+//   GT-B10 — un domaine supprimé sortait des totaux, des courbes, de l'export et de la numérotation ;
+//   GT-B13 — un abonnement annuel déclenchait « à émettre » tous les mois ;
+//   GT-B14 — un domaine sans fiche commerciale comptait comme abonné à 79 €.
+var _AGT_MODES = { virement:'Virement', cheque:'Ch\u00e8que', prelevement:'Pr\u00e9l\u00e8vement', carte:'Carte', especes:'Esp\u00e8ces' };
+function _agtFPayeLe(f){ return (f && typeof f.paye_le==='string' && /^\d{4}-\d{2}-\d{2}$/.test(f.paye_le)) ? f.paye_le : ''; }
+// Le règlement d'une référence : réglée quand TOUTES ses lignes le sont ; sa date = la plus tardive ; `aDater`
+// quand une ligne réglée n'a pas de date de paiement (lignes d'avant GTFIX-3) — elle prend alors sa date de facture.
+function _agtRefReglement(slug, ref){
+  var r=String(ref||''), n=0, ok=true, d='', aDater=false, mode='';
+  _agtFacts(slug).forEach(function(f){
+    if(_agtFType(f)==='geste' || String(f.ref||'')!==r) return;
+    n++;
+    if(f.statut!=='payee'){ ok=false; return; }
+    var p=_agtFPayeLe(f);
+    if(!p){ aDater=true; p=String(f.date||''); }
+    if(p>d) d=p;
+    if(!mode && f.mode) mode=String(f.mode);
+  });
+  return (n && ok) ? { date:d, aDater:aDater, mode:mode } : null;
+}
+// La date d'encaissement d'une ligne : celle de son règlement ; un avoir suit le règlement de sa facture (un
+// avoir orphelin, sans facture, garde sa date). Mêmes montants que _agtFVent — seule la DATE change.
+function _agtFEncInfo(slug, f){
+  var v=_agtFVent(slug, f), rien={ enc:0, date:'', aDater:false, mode:'' };
+  if(!v.enc) return rien;
+  if(_agtFType(f)==='geste'){
+    var rg=_agtRefReglement(slug, f.ref);
+    if(rg) return { enc:v.enc, date:rg.date, aDater:rg.aDater, mode:rg.mode };
+    return { enc:v.enc, date:String(f.date||''), aDater:false, mode:'' };
+  }
+  var p=_agtFPayeLe(f);
+  return { enc:v.enc, date:p||String(f.date||''), aDater:!p, mode:String(f.mode||'') };
+}
+// Le reste dû d'une référence, avoirs déduits (GT-B09) — 0 quand elle est réglée.
+function _agtRefReste(slug, ref){
+  var r=String(ref||''), s=0, due=false;
+  _agtFacts(slug).forEach(function(f){
+    if(String(f.ref||'')!==r || _agtFType(f)==='geste') return;
+    if(f.statut!=='payee'){ due=true; s+=Number(f.montant)||0; }
+  });
+  if(!due) return 0;
+  _agtFacts(slug).forEach(function(f){ if(_agtFType(f)==='geste' && String(f.ref||'')===r) s+=Number(f.montant)||0; });
+  return Math.max(0, Math.round(s*100)/100);
+}
+// Les domaines de la facturation : ceux du registre, PUIS ceux qui n'y sont plus mais dont les factures restent
+// (domaine supprimé, GT-B10 : `gtDeleteTenant` garde `billing`). `i` = -1 : ni carte ni geste, mais les
+// totaux, les courbes, l'export et le livre des recettes les comptent. Les domaines internes en sortent.
+function _agtBizSlugs(){
+  var vus={}, out=[];
+  _agtTenants.forEach(function(t,i){ vus[t.slug]=1; if(!_agtInterne(t.slug)) out.push({ slug:t.slug, nom:t.nom, i:i, supprime:false }); });
+  Object.keys(_agtBilling||{}).sort().forEach(function(sl){
+    if(vus[sl] || _agtInterne(sl) || !_agtFacts(sl).length) return;
+    out.push({ slug:sl, nom:sl+' (supprim\u00e9)', i:-1, supprime:true });
+  });
+  return out;
+}
+// La date d'un paiement saisi : une date réelle (« 31/09 » arrive vide, PERDATE-1), jamais dans le futur.
+function _agtPaieDateErr(v, aujourdhui){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))) return 'Date du paiement invalide';
+  if(String(v) > String(aujourdhui)) return 'Un paiement ne se date pas dans le futur';
+  return '';
+}
+// Le prochain abonnement : un mois après une ligne mensuelle, douze après une ligne annuelle (GT-B13).
+function _agtAboProchain(f){
+  var d=_agtD(f&&f.date); if(!d) return null;
+  d.setMonth(d.getMonth()+((f.per==='annuel')?12:1));
+  return d;
+}
 function _agtBizDu(slug){
   var s=0;
   _agtFacts(slug).forEach(function(f){ s+=_agtFVent(slug,f).du; });
@@ -5055,17 +5133,19 @@ function _agtBizAnnee(){
 function _agtBizAnnees(){
   var set={}, cur=new Date().getFullYear();
   set[cur]=1;
-  _agtTenants.forEach(function(t){ _agtFacts(t.slug).forEach(function(f){ var a=_agtFAn(f); if(a) set[a]=1; }); });
+  _agtBizSlugs().forEach(function(x){ _agtFacts(x.slug).forEach(function(f){
+    var a=_agtFAn(f); if(a) set[a]=1;
+    var e=_agtFEncInfo(x.slug, f), d=e.enc?_agtD(e.date):null; if(d) set[d.getFullYear()]=1;   // ★ GTFIX-3 : une année d'encaissements
+  }); });
   return Object.keys(set).map(Number).sort(function(a,b){ return b-a; });
 }
 // Toutes les lignes des clients FACTURABLES, avec leur tenant.
 function _agtBizLignes(an){
   var out=[];
-  _agtTenants.forEach(function(t,i){
-    if(_agtInterne(t.slug)) return;
-    _agtFacts(t.slug).forEach(function(f,k){
+  _agtBizSlugs().forEach(function(x){   // ★ GTFIX-3 : les domaines supprimés aussi (GT-B10)
+    _agtFacts(x.slug).forEach(function(f,k){
       if(an && _agtFAn(f)!==an) return;
-      out.push({ t:t, i:i, f:f, k:k });
+      out.push({ t:{ slug:x.slug, nom:x.nom, supprime:x.supprime }, i:x.i, f:f, k:k });
     });
   });
   return out;
@@ -5082,12 +5162,13 @@ var _AGT_MOIS_L=['J','F','M','A','M','J','J','A','S','O','N','D'];
 
 function _agtBizMois(an){
   var m=[], i;
-  for(i=0;i<12;i++) m.push({ abo:0, inst:0, heures:0, geste:0, fact:0, enc:0 });
-  _agtBizLignes(an).forEach(function(x){
-    var d=_agtD(x.f.date); if(!d) return;
-    var mi=d.getMonth(), v=Number(x.f.montant)||0, ty=_agtFType(x.f);
-    m[mi][ty]+=v; m[mi].fact+=v;
-    m[mi].enc+=_agtFVent(x.t.slug, x.f).enc;
+  for(i=0;i<12;i++) m.push({ abo:0, inst:0, heures:0, geste:0, fact:0, enc:0, aDater:0 });
+  _agtBizLignes(0).forEach(function(x){
+    var v=Number(x.f.montant)||0, ty=_agtFType(x.f), d=_agtD(x.f.date);
+    if(d && d.getFullYear()===an){ m[d.getMonth()][ty]+=v; m[d.getMonth()].fact+=v; }
+    // ★ GTFIX-3 : l'encaissé au mois du RÈGLEMENT, quelle que soit l'année de la facture (GT-B08)
+    var e=_agtFEncInfo(x.t.slug, x.f), de=e.enc?_agtD(e.date):null;
+    if(de && de.getFullYear()===an){ m[de.getMonth()].enc+=e.enc; if(e.aDater) m[de.getMonth()].aDater+=e.enc; }
   });
   return m;
 }
@@ -5205,21 +5286,37 @@ function _agtBizG3(){
 // Les lignes « a traiter » sont produites ici et rendues plus bas : le Radar
 // (lot C) consomme exactement les memes, sans en recalculer une seule.
 function _agtBizTodoRows(){
-  var rows=[], now=new Date();
+  var rows=[], now=new Date(), vues={};
+  // ★ GTFIX-3 : une ligne par RÉFÉRENCE, au reste dû avoir déduit (GT-B09) ; un domaine supprimé n'a pas de geste.
   _agtBizLignes(0).forEach(function(x){
-    var r=_agtFRetard(x.f);
-    if(r>0) rows.push({ c:'#EF4444', ord:0,
+    var r=_agtFRetard(x.f), cle=x.t.slug+'|'+(x.f.ref||'');
+    if(r<=0 || vues[cle]) return;
+    vues[cle]=1;
+    var reste=_agtRefReste(x.t.slug, x.f.ref); if(reste<=0) return;
+    rows.push({ c:'#EF4444', ord:0,
       t:'<b>'+_escHtml(x.t.nom)+'</b> \u2014 '+_escHtml(x.f.ref||'')+' \u00e9chue depuis '+r+' jour'+(r>1?'s':''),
-      m:_agtEur(x.f.montant), b:'Relancer', a:'agtBizRelance('+x.i+','+x.k+')' });
+      m:_agtEur(reste), b:(x.i>=0?'Relancer':''), a:(x.i>=0?'agtBizRelance('+x.i+','+x.k+')':'') });
   });
   _agtBizLignes(0).forEach(function(x){
     if(_agtFRetard(x.f)>0 || x.f.statut==='payee' || _agtFType(x.f)==='geste') return;
     var e=_agtD(_agtFEch(x.f)); if(!e) return;
-    var j=_agtJours(now,e);
-    if(j>=0 && j<=10) rows.push({ c:'#F97316', ord:1,
+    var j=_agtJours(now,e), cle=x.t.slug+'|'+(x.f.ref||'');
+    if(j<0 || j>10 || vues[cle]) return;
+    vues[cle]=1;
+    var reste=_agtRefReste(x.t.slug, x.f.ref); if(reste<=0) return;
+    rows.push({ c:'#F97316', ord:1,
       t:'<b>'+_escHtml(x.t.nom)+'</b> \u2014 '+_escHtml(x.f.ref||'')+' \u00e0 \u00e9ch\u00e9ance dans '+j+' jour'+(j>1?'s':''),
-      m:_agtEur(x.f.montant), b:'Relev\u00e9', a:'agtBizReleve('+x.i+')' });
+      m:_agtEur(reste), b:(x.i>=0?'Relev\u00e9':''), a:(x.i>=0?'agtBizReleve('+x.i+')':'') });
   });
+  // Les paiements sans date (lignes réglées d'avant GTFIX-3) : à dater, sinon le livre des recettes les range
+  // à leur date de facture.
+  var sansDate=_agtBizLignes(0).filter(function(x){ return _agtFType(x.f)!=='geste' && x.f.statut==='payee' && !_agtFPayeLe(x.f); });
+  if(sansDate.length){
+    var p0=sansDate.filter(function(x){ return x.i>=0; })[0];
+    rows.push({ c:'#C4B5FD', ord:4,
+      t:sansDate.length+' paiement'+(sansDate.length>1?'s':'')+' sans date \u2014 \u00e0 dater pour le livre des recettes',
+      m:'', b:(p0?'Dater':''), a:(p0?'agtFactPaye('+p0.i+','+p0.k+')':'') });
+  }
   _agtTenants.forEach(function(t,i){
     if(_agtInterne(t.slug)) return;
     var st=_agtStatutOf(t.slug);
@@ -5229,11 +5326,17 @@ function _agtBizTodoRows(){
         m:_agtEur(_AGT_INST[_agtPlan(t.slug)]), b:'Facturer', a:'agtBizForm('+i+',\'inst\')' });
       return;
     }
+    if(st.cle==='aqualifier'){
+      rows.push({ c:'#9CA3AF', ord:3,
+        t:'<b>'+_escHtml(t.nom)+'</b> \u2014 \u00e0 qualifier : aucune fiche commerciale (formule, essai, statut)',
+        m:'', b:'Fiche', a:'agtShowFiche(\''+_escHtml(t.slug)+'\')' });
+      return;
+    }
     if(st.cle!=='actif') return;
-    var last=null;
+    var last=null, lastF=null;
     _agtFacts(t.slug).forEach(function(f){
       if(_agtFType(f)!=='abo') return;
-      var d=_agtD(f.date); if(d && (!last || d>last)) last=d;
+      var d=_agtD(f.date); if(d && (!last || d>last)){ last=d; lastF=f; }
     });
     if(!last){
       rows.push({ c:'#C9A84C', ord:3,
@@ -5241,9 +5344,9 @@ function _agtBizTodoRows(){
         m:_agtEur(_agtAboPrix(t.slug)), b:'\u00c9mettre', a:'agtBizForm('+i+',\'abo\')' });
       return;
     }
-    var due=new Date(last.getTime()); due.setMonth(due.getMonth()+1);
-    if(due<=now) rows.push({ c:'#C9A84C', ord:3,
-      t:'<b>'+_escHtml(t.nom)+'</b> \u2014 abonnement \u00e0 \u00e9mettre (dernier : '+_agtDateFr(last)+')',
+    var due=_agtAboProchain(lastF);   // ★ GTFIX-3 : un mois, ou douze après une ligne annuelle (GT-B13)
+    if(due && due<=now) rows.push({ c:'#C9A84C', ord:3,
+      t:'<b>'+_escHtml(t.nom)+'</b> \u2014 abonnement \u00e0 \u00e9mettre (dernier : '+_agtDateFr(last)+(lastF.per==='annuel'?', annuel':'')+')',
       m:_agtEur(_agtAboPrix(t.slug)), b:'\u00c9mettre', a:'agtBizForm('+i+',\'abo\')' });
   });
   rows.sort(function(a,b){ return a.ord-b.ord; });
@@ -5264,7 +5367,7 @@ function _agtBizTodo(){
     h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
     h+='<span style="flex:1;min-width:150px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
     h+='<span style="font-size:var(--pt-txt,13px);font-weight:600">'+r.m+'</span>';
-    h+='<button onclick="'+r.a+'" style="background:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.14)':'rgba(255,255,255,0.07)')
+    if(r.b) h+='<button onclick="'+r.a+'" style="background:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.14)':'rgba(255,255,255,0.07)')
       +';border:1px solid '+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.3)':'rgba(255,255,255,0.12)')
       +';border-radius:7px;padding:4px 10px;color:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'#E8C860':'rgba(255,255,255,0.6)')
       +';font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+r.b+'</button>';
@@ -5417,12 +5520,22 @@ function _agtBuildBusiness(){
   _agtTenants.forEach(function(t){
     if(_agtInterne(t.slug)) return;
     var st=_agtStatutOf(t.slug), pr=_agtAboPrix(t.slug);
-    if(st.cle==='actif'){ mrr+=pr; nActif++; } else { pot+=pr; }
+    if(st.cle==='actif'){ mrr+=pr; nActif++; } else if(st.cle!=='aqualifier'){ pot+=pr; }   // ★ GTFIX-3 : « à qualifier » ne compte nulle part (GT-B14)
     if(st.cle==='essai'){ nEssai++; if(st.jours<=7) nExp7++; }
-    duA+=_agtBizDu(t.slug);
-    caA+=_agtBizFactTot(t.slug, an);
-    _agtFacts(t.slug).forEach(function(f){ if(_agtFRetard(f)>0) lateA+=(Number(f.montant)||0); });
   });
+  // ★ GTFIX-3 : le dû, le facturé et les retards de TOUS les domaines facturés, supprimés compris (GT-B10) ;
+  //   les retards au reste dû, avoir déduit, une fois par référence (GT-B09).
+  _agtBizSlugs().forEach(function(x){
+    duA+=_agtBizDu(x.slug);
+    caA+=_agtBizFactTot(x.slug, an);
+    var vus={};
+    _agtFacts(x.slug).forEach(function(f){
+      if(_agtFRetard(f)<=0 || vus[f.ref||'']) return;
+      vus[f.ref||'']=1; lateA+=_agtRefReste(x.slug, f.ref);
+    });
+  });
+  var _mo=_agtBizMois(an), encA=0, aDaterA=0;
+  _mo.forEach(function(o){ encA+=o.enc; aDaterA+=o.aDater; });
 
   var h='<div style="margin:0 0 12px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Revenu r\u00e9current, facturation et encaissements</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px">';
@@ -5430,6 +5543,7 @@ function _agtBuildBusiness(){
   h+=_agtBizKpi(_agtEur(pot)+'<span style="font-size:var(--pt-micro,11px);opacity:.5">/mois</span>','potentiel','#C4B5FD',nEssai+' essai'+(nEssai>1?'s':'')+(nExp7>0?' \u00b7 '+nExp7+' \u2264 7j':''));
   h+=_agtBizKpi(_agtEur(duA),'\u00e0 encaisser',duA>0?'#F97316':'rgba(255,255,255,0.3)',lateA>0?('dont '+_agtEur(lateA)+' en retard'):'aucun retard');
   h+=_agtBizKpi(_agtEur(caA),'factur\u00e9 en '+an,'#E8C860','tous types confondus');
+  h+=_agtBizKpi(_agtEur(encA),'encaiss\u00e9 en '+an,'#86EFAC',aDaterA?('dont '+_agtEur(aDaterA)+' \u00e0 dater'):'\u00e0 la date de paiement');
   h+='</div>';
   h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);line-height:1.6;margin:8px 0 16px">'
     +'Un abonnement annuel (2 mois offerts) se saisit en <b>une seule ligne</b> couvrant 12 mois, pas en douze. '
@@ -5531,12 +5645,14 @@ function _agtBuildBusiness(){
           +(geste?'':' \u00b7 \u00e9ch\u00e9ance '+_agtDateFr(_agtFEch(f))+(ret>0?' <b style="color:#FCA5A5">retard '+ret+' j</b>':''))+'</div>';
         o+='</div>';
         o+='<span style="font-size:var(--pt-txt,13px);font-weight:600;color:'+(geste?'#C4B5FD':(paye?'#86EFAC':'#E8E8E0'))+'">'+_agtEur(f.montant)+'</span>';
+        // ★ GTFIX-3 : la périodicité d'un abonnement se règle sur sa ligne (GT-B13)
+        if(_agtFType(f)==='abo') o+='<button onclick="agtBizPer('+i+','+k+')" title="P\u00e9riodicit\u00e9 de l\u2019abonnement" style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;color:rgba(255,255,255,0.55);font-size:var(--pt-micro,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(f.per==='annuel'?'annuel':'mensuel')+'</button>';
         o+= geste
           ? '<span style="font-size:10px;border-radius:6px;padding:2px 8px;background:rgba(196,181,253,0.10);border:1px solid rgba(196,181,253,0.28);color:#C4B5FD">remise</span>'
           : '<button onclick="agtFactPaye('+i+','+k+')" style="background:'+(paye?'rgba(134,239,172,0.1)':(ret>0?'rgba(239,68,68,0.1)':'rgba(255,255,255,0.06)'))
             +';border:1px solid '+(paye?'rgba(134,239,172,0.25)':(ret>0?'rgba(239,68,68,0.3)':'rgba(255,255,255,0.12)'))
             +';border-radius:6px;padding:2px 8px;color:'+(paye?'#86EFAC':(ret>0?'#FCA5A5':'rgba(255,255,255,0.5)'))
-            +';font-size:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(paye?'pay\u00e9e':(ret>0?'en retard':'\u00e0 encaisser'))+'</button>';
+            +';font-size:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(paye?('pay\u00e9e'+(_agtFPayeLe(f)?' le '+_agtDateFr(f.paye_le):' \u00b7 \u00e0 dater')):(ret>0?'en retard':'\u00e0 encaisser'))+'</button>';
         if(!geste) o+='<button onclick="agtBizRecap('+i+','+k+')" title="R\u00e9capitulatif imprimable" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;color:rgba(255,255,255,0.5);font-size:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">PDF</button>';
         o+='<button onclick="agtFactDel('+i+','+k+')" style="background:'+(arm?'rgba(239,68,68,0.18)':'none')+';border:none;border-radius:6px;padding:2px 7px;color:'+(arm?'#FCA5A5':'rgba(255,255,255,0.2)')+';font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(arm?'confirmer ?':'\u2715')+'</button>';
         return o+'</div>';
@@ -5582,6 +5698,7 @@ function _agtBuildBusiness(){
     h+='<div id="agt-biz-rw'+i+'"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">R\u00e9f\u00e9rence</div><input id="agt-biz-ref'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:monospace;box-sizing:border-box"></div>';
     h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Date</div><input id="agt-biz-dat'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
     h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">\u00c9ch\u00e9ance</div><input id="agt-biz-ech'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
+    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">P\u00e9riodicit\u00e9 (abonnement)</div><select id="agt-biz-per'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif)"><option value="mensuel">Mensuel</option><option value="annuel">Annuel (12 mois)</option></select></div>';
     h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Montant HT</div><input id="agt-biz-mnt'+i+'" type="number" step="0.01" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
     h+='</div>';
     h+='<div id="agt-biz-cw'+i+'" style="display:none;margin-bottom:8px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">S\u2019applique \u00e0</div>'+_agtBizCibleSel(i,t.slug,'')+'</div>';
@@ -5599,6 +5716,7 @@ function _agtBuildBusiness(){
 
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">';
   h+='<button onclick="agtBizCsv()" style="background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:7px 13px;color:#E8C860;font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Exporter toutes les lignes en CSV</button>';
+  h+='<button onclick="agtBizLivre()" style="background:rgba(134,239,172,0.12);border:1px solid rgba(134,239,172,0.3);border-radius:10px;padding:9px 14px;color:#86EFAC;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Livre des recettes '+_agtBizAnnee()+'</button>';   // ★ GTFIX-3 (D6)
   h+='</div>';
   return h;
 }
@@ -5607,8 +5725,9 @@ function _agtBuildBusiness(){
 // pas repris par Safari sur un champ date, et la reference se calcule.
 function _agtBizNextRef(){
   var an=new Date().getFullYear(), seq=0;
-  _agtTenants.forEach(function(t){
-    _agtFacts(t.slug).forEach(function(f){
+  // ★ GTFIX-3 : TOUTES les factures de `billing`, domaines supprimés compris — un numéro n'est jamais repris (GT-B10).
+  Object.keys(_agtBilling||{}).forEach(function(sl){
+    _agtFacts(sl).forEach(function(f){
       var m=String(f.ref||'').match(/(\d{4})$/);
       if(m){ var n=parseInt(m[1],10); if(n>seq) seq=n; }
     });
@@ -5711,13 +5830,15 @@ async function agtFactAdd(i){
   if(ty!=='geste' && m<0){ showToast('Un montant n\u00e9gatif se saisit en \u00ab Geste \u00bb','#B85A1A'); return; }
   if(!_agtBilling[t.slug]) _agtBilling[t.slug]={};
   if(!Array.isArray(_agtBilling[t.slug].fact)) _agtBilling[t.slug].fact=[];
-  _agtBilling[t.slug].fact.push({
+  var _ligneNeuve={
     ref:r, type:ty, date:d||_agtIso(new Date()),
     echeance:(ty==='geste'?'':ec), montant:m,
     libelle:lb||_AGT_TY[ty].lbl,
     statut:(ty==='geste'?'applique':'emise'),
     ts:new Date().toISOString()
-  });
+  };
+  if(ty==='abo' && ((document.getElementById('agt-biz-per'+i)||{}).value)==='annuel') _ligneNeuve.per='annuel';   // ★ GTFIX-3 (GT-B13)
+  _agtBilling[t.slug].fact.push(_ligneNeuve);
   if(await _agtSaveBilling(t.slug)){
     showToast(''+_AGT_TY[ty].lbl+' '+r+' enregistr\u00e9'+(ty==='heures'?'es':''),'#3D6B27');
     agtLogAccess(t.slug, _AGT_TY[ty].lbl+' '+r+' \u00b7 '+_agtEur(m), '\uD83E\uDDFE', 'commercial');
@@ -5725,13 +5846,66 @@ async function agtFactAdd(i){
   }
 }
 
+// ★★ GTFIX-3 (§512) — LE PAIEMENT SE SAISIT : sa date réelle (celle du virement, pas celle du clic) et son
+//   mode de règlement — deux des six mentions du livre des recettes (GT-B08). Une ligne réglée se rouvre pour
+//   corriger sa date, ou pour annuler le paiement.
 async function agtFactPaye(i,k){
   var t=_agtTenants[i]; if(!t) return;
   var f=_agtFacts(t.slug)[k]; if(!f) return;
   if(_agtFType(f)==='geste'){ showToast('Un geste commercial ne s\u2019encaisse pas','#B85A1A'); return; }
-  f.statut = (f.statut==='payee') ? 'emise' : 'payee';
-  if(f.statut==='payee') f.paye_le=_agtIso(new Date()); else delete f.paye_le;
-  if(await _agtSaveBilling(t.slug)){ agtRenderBody(); _agtBizFill(); }
+  var paye=(f.statut==='payee'), auj=_agtIso(new Date());
+  var montant=paye ? _agtFEncInfo(t.slug, f).enc : _agtRefReste(t.slug, f.ref);
+  var modes=Object.keys(_AGT_MODES).map(function(m){ return '<option value="'+m+'"'+(((f.mode&&_AGT_MODES[f.mode])?f.mode:'virement')===m?' selected':'')+'>'+_AGT_MODES[m]+'</option>'; }).join('');
+  var champ='width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:10px 12px;color:#F0E8DC;font-size:var(--pt-txt,13px);font-family:var(--font-ui,Outfit,sans-serif);color-scheme:dark';
+  var bouton='padding:11px 14px;border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)';
+  var ex=document.getElementById('agt-paie-ov'); if(ex) ex.remove();
+  var ov=document.createElement('div'); ov.id='agt-paie-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
+  ov.innerHTML='<div role="dialog" aria-modal="true" aria-label="Paiement" style="width:100%;max-width:400px;background:rgba(18,14,28,0.98);border-radius:18px;border:1px solid rgba(134,239,172,0.25);padding:20px">'
+    +'<div style="font-size:15px;font-weight:600;color:#fff">'+(paye?'Paiement enregistr\u00e9':'Enregistrer le paiement')+'</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.5);margin-top:4px">'+_escHtml(t.nom)+' \u00b7 '+_escHtml(f.ref||'')+' \u00b7 <b style="color:#86EFAC">'+_agtEur(montant)+'</b>'+(paye?' encaiss\u00e9s':' \u00e0 encaisser, avoirs d\u00e9duits')+'</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);margin:14px 0 5px">Re\u00e7u le</div>'
+    +'<input id="agt-paie-date" type="date" max="'+auj+'" value="'+(_agtFPayeLe(f)||auj)+'" style="'+champ+'">'
+    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);margin:12px 0 5px">Mode de r\u00e8glement</div>'
+    +'<select id="agt-paie-mode" style="'+champ+'">'+modes+'</select>'
+    +'<div id="agt-paie-err" style="display:none;color:#FCA5A5;font-size:var(--pt-micro,12px);margin-top:10px"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">'
+    +'<button onclick="document.getElementById(\'agt-paie-ov\').remove()" style="flex:1;'+bouton+';background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7)">Fermer</button>'
+    +'<button onclick="_agtPaieValider('+i+','+k+')" style="flex:1.4;'+bouton+';border:none;background:#86EFAC;color:#0C1A0A">'+(paye?'Corriger':'Enregistrer')+'</button></div>'
+    +(paye?'<button onclick="_agtPaieAnnuler('+i+','+k+')" style="width:100%;margin-top:8px;'+bouton+';background:none;border:1px solid rgba(239,68,68,0.3);color:#FCA5A5">Annuler le paiement</button>':'')
+    +'</div>';
+  document.body.appendChild(ov);
+}
+window._agtPaieValider=async function(i,k){
+  var t=_agtTenants[i]; if(!t) return;
+  var f=_agtFacts(t.slug)[k]; if(!f) return;
+  var d=((document.getElementById('agt-paie-date')||{}).value)||'', mo=((document.getElementById('agt-paie-mode')||{}).value)||'';
+  var err=_agtPaieDateErr(d, _agtIso(new Date())) || (_AGT_MODES[mo]?'':'Mode de r\u00e8glement inconnu');
+  var el=document.getElementById('agt-paie-err');
+  if(err){ if(el){ el.textContent=err; el.style.display='block'; } return; }
+  f.statut='payee'; f.paye_le=d; f.mode=mo;
+  if(await _agtSaveBilling(t.slug)){
+    var ov=document.getElementById('agt-paie-ov'); if(ov) ov.remove();
+    showToast((f.ref||'Facture')+' r\u00e9gl\u00e9e le '+_agtDateFr(d)+' \u00b7 '+_AGT_MODES[mo],'#3D6B27');
+    agtRenderBody(); _agtBizFill();
+  }
+};
+window._agtPaieAnnuler=async function(i,k){
+  var t=_agtTenants[i]; if(!t) return;
+  var f=_agtFacts(t.slug)[k]; if(!f) return;
+  f.statut='emise'; delete f.paye_le; delete f.mode;
+  if(await _agtSaveBilling(t.slug)){
+    var ov=document.getElementById('agt-paie-ov'); if(ov) ov.remove();
+    showToast((f.ref||'Facture')+' : paiement annul\u00e9, la ligne quitte le livre des recettes','#B85A1A');
+    agtRenderBody(); _agtBizFill();
+  }
+};
+// La périodicité d'une ligne d'abonnement : mensuelle ⇄ annuelle (douze mois, une seule ligne).
+async function agtBizPer(i,k){
+  var t=_agtTenants[i]; if(!t) return;
+  var f=_agtFacts(t.slug)[k]; if(!f || _agtFType(f)!=='abo') return;
+  if(f.per==='annuel') delete f.per; else f.per='annuel';
+  if(await _agtSaveBilling(t.slug)){ showToast((f.ref||'Abonnement')+' : '+(f.per==='annuel'?'annuel (douze mois)':'mensuel'),'#3D6B27'); agtRenderBody(); _agtBizFill(); }
 }
 
 async function agtFactDel(i,k){
@@ -5829,16 +6003,21 @@ function agtBizRecap(i,k){
   var t=_agtTenants[i]; if(!t) return;
   var f=_agtFacts(t.slug)[k]; if(!f) return;
   var ty=_agtFType(f);
+  // ★ GTFIX-3 : les avoirs de la référence figurent, et le net à payer est le reste dû (GT-B09).
+  var _av=(ty==='geste')?[]:_agtFacts(t.slug).filter(function(g){ return _agtFType(g)==='geste' && String(g.ref||'')===String(f.ref||''); });
+  var _avL=_av.map(function(g){ return '<tr><td>'+_escHtml(g.libelle||'Avoir')+'</td><td>Avoir</td><td class="r">'+_agtEur(g.montant)+'</td></tr>'; }).join('');
+  var _net=Math.round(((Number(f.montant)||0)+_av.reduce(function(s2,g){ return s2+(Number(g.montant)||0); },0))*100)/100;
   var corps='<div class="wm">DOCUMENT DE TRAVAIL \u2014 r\u00e9capitulatif. Ne tient pas lieu de facture.</div>'
     +'<h1>GUERETTECH</h1><div class="em">'+_AGT_EDITEUR+'</div>'
     +'<div class="ti">R\u00e9capitulatif '+_escHtml(f.ref||'')+'</div>'
     +'<div class="em"><b>'+_escHtml(t.nom)+'</b> \u00b7 \u00e9tabli le '+_agtDateFr(f.date)+'</div>'
     +'<table><thead><tr><th>Objet</th><th>Nature</th><th class="r">Montant HT</th></tr></thead><tbody>'
     +'<tr><td>'+_escHtml(f.libelle||_AGT_TY[ty].lbl)+'</td><td>'+_AGT_TY[ty].lbl+'</td>'
-    +'<td class="r">'+_agtEur(f.montant)+'</td></tr></tbody></table>'
-    +'<div class="tot"><span>Total HT</span><span>'+_agtEur(f.montant)+'</span></div>'
-    +'<div class="em">TVA non applicable \u00b7 net \u00e0 payer '+_agtEur(f.montant)
-    +(ty==='geste'?'':' \u00b7 \u00e9ch\u00e9ance le '+_agtDateFr(_agtFEch(f)))+'</div>';
+    +'<td class="r">'+_agtEur(f.montant)+'</td></tr>'+_avL+'</tbody></table>'
+    +'<div class="tot"><span>Total HT</span><span>'+_agtEur(_net)+'</span></div>'
+    +'<div class="em">TVA non applicable \u00b7 '+(f.statut==='payee'
+      ? ('r\u00e9gl\u00e9'+(_agtFPayeLe(f)?' le '+_agtDateFr(f.paye_le):'')+(_AGT_MODES[f.mode]?' par '+_AGT_MODES[f.mode].toLowerCase():''))
+      : ('net \u00e0 payer '+_agtEur(_agtRefReste(t.slug, f.ref))+(ty==='geste'?'':' \u00b7 \u00e9ch\u00e9ance le '+_agtDateFr(_agtFEch(f)))))+'</div>';
   _agtDocOuvrir('R\u00e9capitulatif '+(f.ref||''), corps);
 }
 
@@ -5849,9 +6028,12 @@ function agtBizRelance(i,k){
   var f=_agtFacts(t.slug)[k]; if(!f) return;
   var ret=_agtFRetard(f);
   var suj='Relance \u2014 '+(f.ref||'facture')+' \u00b7 '+t.nom;
+  // ★ GTFIX-3 : la relance réclame le RESTE DÛ, avoir déduit (GT-B09) — 495 € et non 990 €.
+  var reste=_agtRefReste(t.slug, f.ref), brut=Number(f.montant)||0;
   var txt='Bonjour,\n\nSauf erreur de ma part, la facture '+(f.ref||'')+' du '+_agtDateFr(f.date)
-    +' d\u2019un montant de '+_agtEur(f.montant)+' arrivait \u00e0 \u00e9ch\u00e9ance le '+_agtDateFr(_agtFEch(f))
-    +(ret>0?(', soit il y a '+ret+' jour'+(ret>1?'s':'')):'')+'.\n\n'
+    +' arrivait \u00e0 \u00e9ch\u00e9ance le '+_agtDateFr(_agtFEch(f))
+    +(ret>0?(', soit il y a '+ret+' jour'+(ret>1?'s':'')):'')+'. Il reste '+_agtEur(reste)+' \u00e0 r\u00e9gler'
+    +(reste<brut?(' (facture de '+_agtEur(brut)+', avoir d\u00e9duit)'):'')+'.\n\n'
     +'Pourriez-vous me confirmer sa prise en charge ? Si le r\u00e8glement est d\u00e9j\u00e0 parti, merci de ne pas tenir compte de ce message.\n\n'
     +'Bien cordialement,\nNicolas Gu\u00e9ret \u2014 GUERETTECH\n';
   var href='mailto:?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt);
@@ -5865,9 +6047,11 @@ function agtBizCsv(){
   if(typeof window.dlFile!=='function'){ showToast('T\u00e9l\u00e9chargement indisponible sur cet appareil','#C0392B'); return; }
   var q=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
   var n=function(v){ return String(Number(v)||0).replace('.',','); };
-  var lignes=['Client;Slug;Reference;Nature;Libelle;Date;Echeance;Montant HT;Statut;Retard (j);Interne'];
-  var tot=0;
-  _agtTenants.forEach(function(t){
+  // ★ GTFIX-3 : la date et le mode du paiement, le reste dû par référence, et les domaines supprimés (GT-B08, B10).
+  var lignes=['Client;Slug;Reference;Nature;Libelle;Date;Echeance;Montant HT;Statut;Payee le;Mode;Reste du (reference);Retard (j);Interne;Domaine supprime'];
+  var tot=0, dom=_agtTenants.map(function(t){ return { slug:t.slug, nom:t.nom, supprime:false }; });
+  _agtBizSlugs().forEach(function(x){ if(x.supprime) dom.push(x); });
+  dom.forEach(function(t){
     var inte=_agtInterne(t.slug);
     _agtFacts(t.slug).forEach(function(f){
       var ty=_agtFType(f);
@@ -5875,13 +6059,57 @@ function agtBizCsv(){
       lignes.push([ q(t.nom), q(t.slug), q(f.ref||''), q(_AGT_TY[ty].lbl), q(f.libelle||''),
         q(_agtDateFr(f.date)), q(ty==='geste'?'':_agtDateFr(_agtFEch(f))), n(f.montant),
         q(ty==='geste'?'applique':(f.statut==='payee'?'payee':'emise')),
-        String(_agtFRetard(f)), q(inte?'oui':'non') ].join(';'));
+        q(ty!=='geste'&&_agtFPayeLe(f)?_agtDateFr(f.paye_le):''), q(ty!=='geste'?(_AGT_MODES[f.mode]||''):''),
+        n(ty==='geste'?0:_agtRefReste(t.slug, f.ref)),
+        String(_agtFRetard(f)), q(inte?'oui':'non'), q(t.supprime?'oui':'non') ].join(';'));
     });
   });
   if(lignes.length===1){ showToast('Aucune ligne \u00e0 exporter','#B85A1A'); return; }
   var jour=_agtIso(new Date());
   window.dlFile('\uFEFF'+lignes.join('\r\n'), 'guerettech_facturation_'+jour+'.csv', 'text/csv;charset=utf-8');
   showToast(''+(lignes.length-1)+' ligne'+(lignes.length>2?'s':'')+' export\u00e9e'+(lignes.length>2?'s':'')+' \u00b7 '+_agtEur(tot)+' hors interne','#3D6B27');
+}
+
+// ★★ GTFIX-3 (§512) — LE LIVRE DES RECETTES (décision D6 du 01/11) : une ligne par encaissement, dans l'ordre
+//   des dates de règlement, avec ses six mentions (date d'encaissement, numéro de facture, client, nature,
+//   montant encaissé — avoirs déduits —, mode de règlement). Une facture réglée sans date (d'avant GTFIX-3)
+//   y figure à sa date de facture, marquée « à saisir ».
+function _agtLivreLignes(an){
+  var par={}, out=[];
+  _agtBizSlugs().forEach(function(x){
+    _agtFacts(x.slug).forEach(function(f){
+      var e=_agtFEncInfo(x.slug, f); if(!e.enc) return;
+      var d=_agtD(e.date); if(!d || d.getFullYear()!==an) return;
+      var cle=x.slug+'|'+String(f.ref||'')+'|'+e.date, o=par[cle];
+      if(!o){ o=par[cle]={ date:e.date, ref:String(f.ref||''), client:x.nom, natures:[], montant:0, mode:e.mode, aDater:false }; out.push(o); }
+      o.montant+=e.enc;
+      if(e.aDater) o.aDater=true;
+      if(!o.mode && e.mode) o.mode=e.mode;
+      var nat=(_AGT_TY[_agtFType(f)]||{}).lbl||'';
+      if(_agtFType(f)!=='geste' && o.natures.indexOf(nat)<0) o.natures.push(nat);
+    });
+  });
+  out.forEach(function(o){ o.montant=Math.round(o.montant*100)/100; o.nature=o.natures.join(', '); delete o.natures; });
+  out.sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:(a.ref<b.ref?-1:(a.ref>b.ref?1:0))); });
+  return out;
+}
+function agtBizLivre(){
+  if(typeof window.dlFile!=='function'){ showToast('T\u00e9l\u00e9chargement indisponible sur cet appareil','#C0392B'); return; }
+  var an=_agtBizAnnee(), L=_agtLivreLignes(an);
+  if(!L.length){ showToast('Aucun encaissement en '+an,'#B85A1A'); return; }
+  var q=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
+  var n=function(v){ return String(Number(v)||0).replace('.',','); };
+  var lignes=['Date d\u2019encaissement;N\u00b0 de facture;Client;Nature;Montant encaiss\u00e9 (\u20ac);Mode de r\u00e8glement;Remarque'];
+  var tot=0, aD=0;
+  L.forEach(function(o){
+    tot+=o.montant; if(o.aDater) aD++;
+    lignes.push([ q(_agtDateFr(o.date)), q(o.ref), q(o.client), q(o.nature), n(o.montant), q(_AGT_MODES[o.mode]||''),
+      q(o.aDater?'date de paiement \u00e0 saisir (date de facture)':'') ].join(';'));
+  });
+  tot=Math.round(tot*100)/100;
+  lignes.push([ '', '', '', q('Total encaiss\u00e9 en '+an), n(tot), '', '' ].join(';'));
+  window.dlFile('\uFEFF'+lignes.join('\r\n'), 'guerettech_livre_recettes_'+an+'.csv', 'text/csv;charset=utf-8');
+  showToast('Livre des recettes '+an+' : '+L.length+' encaissement'+(L.length>1?'s':'')+' \u00b7 '+_agtEur(tot)+(aD?(' \u00b7 '+aD+' \u00e0 dater'):''),'#3D6B27');
 }
 
 
@@ -6122,6 +6350,8 @@ window.agtBizReleve      = agtBizReleve;
 window.agtBizRecap       = agtBizRecap;
 window.agtBizRelance     = agtBizRelance;
 window.agtBizCsv         = agtBizCsv;
+window.agtBizLivre       = agtBizLivre;   // ★ GTFIX-3 (§512)
+window.agtBizPer         = agtBizPer;
 window.agtBizAbo         = agtBizAbo;
 window.agtBizCible       = agtBizCible;
 window.agtBizRattache    = agtBizRattache;

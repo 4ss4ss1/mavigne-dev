@@ -925,6 +925,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtfix1.mjs --contre'],
   ['node scripts/mv-harnais-gtfix2.mjs'],          // GTFIX-2 (§511) : le verrou au-dessus de tout, la fiche client en lecture seule (D1), le cache mémoire sur gt.html
   ['node scripts/mv-harnais-gtfix2.mjs --contre'],
+  ['node scripts/mv-harnais-gtfix3.mjs'],          // GTFIX-3 (§512) : l'argent juste — encaissé à la date du règlement, reste dû net, livre des recettes, domaines supprimés, périodicité
+  ['node scripts/mv-harnais-gtfix3.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────
