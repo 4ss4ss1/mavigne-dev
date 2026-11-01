@@ -284,6 +284,27 @@ function _agtSessTick(){
   el.textContent=txt;
 }
 
+// ★★ GTFIX-2 (§511) — LE VERROU COUVRE TOUT (GT-B05). Il était au plan 9500, sous les fenêtres de la
+//   console (fiche client, équipe, journal, erreurs, préparation : 9999 à 10001) : au bout de 15 minutes,
+//   une fiche ouverte restait visible ET utilisable au-dessus de lui. Désormais : le verrou passe tout en
+//   haut (console.html), il est remis à la racine de la page, et TOUT le reste devient `inert` — ni clic,
+//   ni clavier, ni lecteur d'écran derrière lui. Seuls les éléments rendus inertes ICI sont rendus au
+//   déverrouillage (un élément déjà inerte avant le verrou le reste).
+var _agtInertes = [];
+function _agtInerte(on){
+  var ov = document.getElementById('agt-lock');
+  if (on) {
+    if (ov && ov.parentNode !== document.body) document.body.appendChild(ov);
+    _agtInerte(false);
+    Array.prototype.slice.call(document.body.children).forEach(function(el){
+      if (el === ov || el.tagName === 'SCRIPT' || el.hasAttribute('inert')) return;
+      el.setAttribute('inert', ''); _agtInertes.push(el);
+    });
+  } else {
+    _agtInertes.forEach(function(el){ el.removeAttribute('inert'); });
+    _agtInertes = [];
+  }
+}
 function _agtLock(raison){
   _agtLocked=true;
   clearTimeout(_agtIdleT);
@@ -298,6 +319,7 @@ function _agtLock(raison){
   // iOS + champ pose apres coup : la valeur s'assigne EN JS, jamais par attribut.
   if(pwd){ pwd.value=''; }
   if(ov){ ov.style.display='flex'; }
+  _agtInerte(true);
   _agtSessTick();
   setTimeout(function(){ var p=document.getElementById('agt-lock-pwd'); if(p) p.focus(); }, 120);
 }
@@ -337,6 +359,7 @@ async function agtUnlock(){
     }
     pwd.value='';
     _agtLocked=false;
+    _agtInerte(false);
     var ov=document.getElementById('agt-lock');
     if(ov) ov.style.display='none';
     if(btn){ btn.disabled=false; btn.textContent='D\u00e9verrouiller'; }
@@ -3118,36 +3141,41 @@ async function agtDeleteTenantConfirm(slug){
 // ⚠️ fbAdminWrite = setDoc BRUT (pas de garde §11b) → la garde 25% + la
 //    confirmation "SUPPRIMER" par item sont portées ICI.
 // ══════════════════════════════════════════════════════════════════════════
-var _FC_SLUG='', _FC_TAB='dom', _FC={}, _FC_BASE={};
-var _FC_GUARD_FLOOR=0.25;  // bloque si le contenu chute SOUS 25% de la baseline
+var _FC_SLUG='', _FC_TAB='dom', _FC={};
 var _FC_ROLES=['admin','ouvrier','tractoriste','saisonnier','pilotage'];
 var _FC_TABS=[['dom','\uD83C\uDFDB\uFE0F Domaine'],['parcelles','\uD83C\uDF47 Parcelles'],['membres','\uD83D\uDC65 Membres'],['taches','\u2713 T\u00e2ches'],['tracteurs_list','\uD83D\uDE9C Tracteurs'],['saisons','\uD83D\uDCC5 Saisons'],['abo','\uD83D\uDCB3 Abonnement']];
 var _FC_INP_STYLE='width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:9px;padding:9px 11px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box';
 var _FC_SEL_STYLE=_FC_INP_STYLE;
 
-function _fcClone(o){ return JSON.parse(JSON.stringify(o==null?null:o)); }
 function _fcArr(v){ return Array.isArray(v)?v:[]; }
 function _fcSecTitle(t){ return {dom:'Domaine',parcelles:'Parcelles & secteurs m\u00e9t\u00e9o',membres:'Membres & r\u00f4les',taches:'T\u00e2ches & heures/ha',tracteurs_list:'Tracteurs',saisons:'Saisons',abo:'Abonnement'}[t]||''; }
-function _fcCollLabel(c){ return {parcelles:'les parcelles',membres:'les membres',taches:'les t\u00e2ches',tracteurs_list:'les tracteurs',saisons:'les saisons'}[c]||c; }
-function _fcItemLabel(coll,i){ var a=_FC[coll]||[],o=a[i]||{}; if(coll==='membres') return o.nom||o.email||'ce membre'; return o.nom||'cet \u00e9l\u00e9ment'; }
 function _fcHint(html){ return '<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
 function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:rgba(255,255,255,0.25);font-size:var(--pt-txt,13px)">'+txt+'</div>'; }
 
 function _fcActiveCount(coll){ var a=_FC[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
-function _fcBaseCount(coll){ var a=_FC_BASE[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
 
-function _fcInp(coll,i,field,val,type,ph){
-  type=type||'text';
-  var fn=(type==='number')?'_fcSetNum':'_fcSetField';
-  return '<input type="'+type+'"'+(ph?' placeholder="'+_escHtml(ph)+'"':'')+' value="'+_escHtml(String(val==null?'':val))+'" oninput="'+fn+'(\''+coll+'\','+i+',\''+field+'\',this.value)" style="'+_FC_INP_STYLE+'">';
+// ★★★ GTFIX-2 (§511, décision D1 du 01/11) — LES DONNÉES DU DOMAINE SONT EN LECTURE SEULE DANS LA FICHE.
+//   Parcelles, membres, tâches, tracteurs et saisons s'éditaient ici en champs libres, puis `_fcSave`
+//   réécrivait la copie lue à l'ouverture (GT-B03 : les saisies du client faites entre-temps disparaissaient)
+//   et renommait sans suivre la règle de renommage (GT-B04 : une parcelle renommée perdait contour, registre
+//   phyto, sessions, cave, tournées). On les modifie désormais sur les VRAIS écrans du domaine, dans la
+//   préparation (PREP-1), avec leurs règles. La fiche garde ce qui appartient à GUERETTECH : le domaine
+//   (nom, coordonnées de repli — écriture en transaction depuis GTFIX-1), l'abonnement, les modules, l'essai.
+function _fcLectureSeule(){
+  return '<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.28);border-radius:12px;padding:12px 14px;margin-bottom:14px">'
+    +'<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.75);line-height:1.5"><b style="color:#F0E8DC">Lecture seule.</b> Ces donn\u00e9es se modifient sur les vrais \u00e9crans du domaine, avec leurs r\u00e8gles : le renommage qui suit tout l\u2019historique, les gardes anti-perte, les identifiants.'
+    +'<div style="margin-top:10px"><button onclick="_fcPreparer()" style="padding:9px 14px;border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:#C9A84C;color:#0C1A0A">Modifier dans la pr\u00e9paration</button></div></div></div>';
 }
-function _fcDelBtn(coll,i){
-  return '<button onclick="_fcAskDel(\''+coll+'\','+i+')" title="Supprimer" style="width:34px;height:34px;border-radius:9px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#FCA5A5;font-size:15px;cursor:pointer;line-height:1;padding:0">\u00d7</button>';
+// Une ligne de tableau en lecture : des cases de texte, échappées, jamais un champ.
+function _fcLigne(cols, cases){
+  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.82)">'
+    + cases.map(function(c){ return '<div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c+'</div>'; }).join('') + '</div>';
 }
-function _fcAddBtn(coll,label){
-  return '<button onclick="_fcAddRow(\''+coll+'\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.07);border:1px dashed rgba(139,92,246,0.3);border-radius:11px;padding:11px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:500;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">+ '+_escHtml(label)+'</button>';
+function _fcEntete(cols, noms){
+  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;padding:0 12px 6px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4)">'
+    + noms.map(function(n){ return '<span>'+n+'</span>'; }).join('') + '</div>';
 }
-
+function _fcTxt(v, vide){ var s = (v == null) ? '' : String(v).trim(); return s ? _escHtml(s) : '<span style="color:rgba(255,255,255,0.3)">'+(vide||'\u2014')+'</span>'; }
 // ── Sections ────────────────────────────────────────────────────────────────
 function _fcSecDom(){
   var c=_FC.config||{};
@@ -3164,20 +3192,14 @@ function _fcSecDom(){
 }
 
 function _fcSecParc(){
-  var hdr='<div style="display:grid;grid-template-columns:1.4fr .7fr .9fr 1.1fr 34px;gap:8px;padding:0 10px 6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em"><span>Nom (climat)</span><span>Surf. ha</span><span>Statut</span><span>Commune</span><span></span></div>';
-  var rows=_FC.parcelles.length?_FC.parcelles.map(function(p,i){
+  var cols='1.6fr .7fr .8fr 1.2fr';
+  var rows=_FC.parcelles.length?_FC.parcelles.map(function(p){
     var commNom=(p.commune&&p.commune.nom)?p.commune.nom:((typeof p.commune==='string')?p.commune:'');
-    var statSel='<select onchange="_fcSetField(\'parcelles\','+i+',\'statut\',this.value)" style="'+_FC_SEL_STYLE+'"><option value="active"'+(p.statut!=='Arrachee'?' selected':'')+'>active</option><option value="Arrachee"'+(p.statut==='Arrachee'?' selected':'')+'>Arrachee</option></select>';
-    return '<div style="display:grid;grid-template-columns:1.4fr .7fr .9fr 1.1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:9px 10px;margin-bottom:7px">'
-      + _fcInp('parcelles',i,'nom',p.nom,'text','climat / lieu-dit')
-      + _fcInp('parcelles',i,'surface',p.surface,'number','ha')
-      + statSel
-      + '<input type="text" placeholder="commune" value="'+_escHtml(commNom)+'" oninput="_fcSetCommune('+i+',this.value)" style="'+_FC_INP_STYLE+'">'
-      + _fcDelBtn('parcelles',i)
-      + '</div>';
+    var arr=p.statut==='Arrachee';
+    return _fcLigne(cols,[_fcTxt(p.nom,'sans nom'), (typeof p.surface==='number'?_escHtml(String(p.surface).replace('.',','))+'\u00a0ha':_fcTxt('')),
+      (arr?'<span style="color:#E88F82">arrach\u00e9e</span>':'active'), _fcTxt(commNom,'sans commune')]);
   }).join(''):_fcEmpty('Aucune parcelle');
-  return _fcHint('\u00c9dit\u00e9 dans <code>mavigne_{slug}/parcelles</code>. Statut arrach\u00e9 = <b>Arrachee</b> (sans accent). Le repli GPS d\'une commune se g\u00e9ocode dans l\'app (BAN) ; ici on \u00e9dite l\'\u00e9tiquette / lieu-dit.')
-    + hdr + rows + _fcAddBtn('parcelles','Ajouter une parcelle') + _fcSecteursHtml();
+  return _fcLectureSeule() + _fcEntete(cols,['Nom (climat)','Surface','Statut','Commune']) + rows + _fcSecteursHtml();
 }
 
 function _fcSecteursHtml(){
@@ -3195,70 +3217,45 @@ function _fcSecteursHtml(){
 }
 
 function _fcSecMbr(){
-  var rows=_FC.membres.length?_FC.membres.map(function(m,i){
+  var rows=_FC.membres.length?_FC.membres.map(function(m){
     var roles=Array.isArray(m.roles)?m.roles:Object.keys(m.roles||{}).filter(function(r){return m.roles[r];});
-    var chips=_FC_ROLES.map(function(r){
-      var onr=roles.indexOf(r)>=0, col=_ROLE_COLORS[r]||'#8B5CF6';
-      return '<span onclick="_fcToggleRole('+i+',\''+r+'\')" style="cursor:pointer;font-size:var(--pt-lbl,10.5px);font-weight:600;padding:4px 9px;border-radius:8px;user-select:none;border:1px solid '+col+(onr?'':'44')+';background:'+(onr?col+'33':'transparent')+';color:'+(onr?col:'rgba(255,255,255,0.4)')+'">'+r+'</span>';
-    }).join(' ');
-    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:8px">'
-      +'<div style="display:grid;grid-template-columns:1fr 34px;gap:8px;align-items:start"><div style="min-width:0">'
-      + _fcInp('membres',i,'nom',m.nom,'text','Pr\u00e9nom')
-      +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u2709 '+_escHtml(m.email||'\u2014')+'</div></div>'
-      + _fcDelBtn('membres',i)
-      +'</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">'+chips+'</div></div>';
+    // Les rôles en texte : une pastille faite à la main de plus ferait remonter le cliquet de CHARTE-4 — la console
+    //   prendra le jeu de pastilles commun avec sa refonte (GT-UI-3).
+    var chips=roles.length?'<span style="color:rgba(255,255,255,0.7);font-size:var(--pt-micro,12px)">'+roles.map(function(r){ return _escHtml(r); }).join(' \u00b7 ')+'</span>'
+      :'<span style="color:rgba(255,255,255,0.3);font-size:var(--pt-micro,12px)">aucun r\u00f4le</span>';
+    var inactif=String(m.statut||'actif').toLowerCase()!=='actif';
+    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,13px);color:#F0E8DC;font-weight:600"><span>'+_fcTxt(m.nom,'sans nom')+'</span>'
+      +(inactif?'<span style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);font-weight:500">inactif</span>':'')+'</div>'
+      +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_fcTxt(m.email,'sans adresse')+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">'+chips+'</div></div>';
   }).join(''):_fcEmpty('Aucun membre');
-  var addBtn='<button onclick="_fcAddRow(\'membres\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.35);border-radius:11px;padding:11px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">+ Ajouter un compte (Auth)</button>';
-  return _fcHint('La cr\u00e9ation de compte passe par la Cloud Function (Auth + claims). <b>Retirer</b> un membre ici l\'enl\u00e8ve de la liste mais ne supprime pas son compte de connexion. Changer un r\u00f4le lecture seule (saisonnier / pilotage) n\u00e9cessite aussi de r\u00e9g\u00e9n\u00e9rer le compte.')
-    + rows + addBtn;
+  return _fcLectureSeule() + _fcHint('Les comptes de connexion (cr\u00e9ation, nouveau mot de passe) restent dans <b>Membres</b>, sur la carte du domaine : ils passent par le serveur.') + rows;
 }
 
 function _fcSecTache(){
-  var TYPES=[['simple','Simple'],['pass','Passages \u00d72'],['niv','Niveaux \u00d73']];
-  var SAIS=['Hiver','Printemps','\u00c9t\u00e9','Automne'];
-  var hdr='<div style="display:grid;grid-template-columns:1.5fr .6fr 1fr 1.1fr 34px;gap:8px;padding:0 10px 6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em"><span>T\u00e2che</span><span>h/ha</span><span>Saison</span><span>Type</span><span></span></div>';
-  var rows=_FC.taches.length?_FC.taches.map(function(t,i){
-    var saisOpts=SAIS.map(function(s){return '<option'+(t.saison===s?' selected':'')+'>'+s+'</option>';}).join('');
-    var typeOpts=TYPES.map(function(tp){return '<option value="'+tp[0]+'"'+(t.type===tp[0]?' selected':'')+'>'+tp[1]+'</option>';}).join('');
-    return '<div style="display:grid;grid-template-columns:1.5fr .6fr 1fr 1.1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:9px 10px;margin-bottom:7px">'
-      + _fcInp('taches',i,'nom',t.nom,'text','Nom')
-      + _fcInp('taches',i,'hha',t.hha,'number','h/ha')
-      + '<select onchange="_fcSetField(\'taches\','+i+',\'saison\',this.value)" style="'+_FC_SEL_STYLE+'">'+saisOpts+'</select>'
-      + '<select onchange="_fcSetField(\'taches\','+i+',\'type\',this.value)" style="'+_FC_SEL_STYLE+'">'+typeOpts+'</select>'
-      + _fcDelBtn('taches',i)
-      + '</div>';
+  var cols='1.6fr .6fr 1fr 1fr';
+  var TYPES={simple:'Simple',pass:'Passages \u00d72',niv:'Niveaux \u00d73'};
+  var rows=_FC.taches.length?_FC.taches.map(function(t){
+    return _fcLigne(cols,[_fcTxt(t.nom,'sans nom'), (typeof t.hha==='number'?_escHtml(String(t.hha).replace('.',',')):_fcTxt('')), _fcTxt(t.saison), _fcTxt(TYPES[t.type]||t.type)]);
   }).join(''):_fcEmpty('Aucune t\u00e2che');
-  return _fcHint('Catalogue propre au domaine (<code>mavigne_{slug}/taches</code>) \u2014 pilote la charge &amp; l\'ETP. <b>Note :</b> v\u00e9rifier que l\'app lit ce doc par tenant (sinon <code>TACHES_CATALOGUE</code> reste le d\u00e9faut).')
-    + hdr + rows + _fcAddBtn('taches','Ajouter une t\u00e2che');
+  return _fcLectureSeule() + _fcEntete(cols,['T\u00e2che','h/ha','Saison','Type']) + rows;
 }
 
 function _fcSecTrac(){
-  var hdr='<div style="display:grid;grid-template-columns:1.2fr 1fr 34px;gap:8px;padding:0 10px 6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em"><span>Nom</span><span>Mod\u00e8le</span><span></span></div>';
-  var rows=_FC.tracteurs_list.length?_FC.tracteurs_list.map(function(t,i){
-    return '<div style="display:grid;grid-template-columns:1.2fr 1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:9px 10px;margin-bottom:7px">'
-      + _fcInp('tracteurs_list',i,'nom',t.nom,'text','Nom')
-      + _fcInp('tracteurs_list',i,'modele',t.modele,'text','Mod\u00e8le')
-      + _fcDelBtn('tracteurs_list',i)
-      + '</div>';
+  var cols='1.2fr 1fr';
+  var rows=_FC.tracteurs_list.length?_FC.tracteurs_list.map(function(t){
+    return _fcLigne(cols,[_fcTxt(t.nom,'sans nom'), _fcTxt(t.modele)]);
   }).join(''):_fcEmpty('Aucun tracteur');
-  return _fcHint('Parc mat\u00e9riel (<code>mavigne_{slug}/tracteurs_list</code>). Compteur GNR &amp; r\u00e9visions se renseignent ensuite dans le module Tracteur.')
-    + hdr + rows + _fcAddBtn('tracteurs_list','Ajouter un tracteur');
+  return _fcLectureSeule() + _fcEntete(cols,['Nom','Mod\u00e8le']) + rows;
 }
 
 function _fcSecSais(){
-  var hdr='<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr auto 34px;gap:8px;padding:0 10px 6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em"><span>Nom</span><span>D\u00e9but</span><span>Fin</span><span>Active</span><span></span></div>';
-  var rows=_FC.saisons.length?_FC.saisons.map(function(s,i){
-    var act=s.active?'background:rgba(61,107,39,0.18);border:1px solid rgba(61,107,39,0.4);color:#6BA34A':'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4)';
-    return '<div style="display:grid;grid-template-columns:1.2fr 1fr 1fr auto 34px;gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:9px 10px;margin-bottom:7px">'
-      + _fcInp('saisons',i,'nom',s.nom,'text','Nom')
-      + _fcInp('saisons',i,'debut',s.debut,'date')
-      + _fcInp('saisons',i,'fin',s.fin,'date')
-      + '<span onclick="_fcSetActive('+i+')" style="cursor:pointer;font-size:var(--pt-lbl,10.5px);font-weight:600;padding:7px 10px;border-radius:8px;white-space:nowrap;'+act+'">'+(s.active?'\u25cf active':'activer')+'</span>'
-      + _fcDelBtn('saisons',i)
-      + '</div>';
+  var cols='1.2fr 1fr 1fr .7fr';
+  var rows=_FC.saisons.length?_FC.saisons.map(function(s){
+    return _fcLigne(cols,[_fcTxt(s.nom,'sans nom'), _fcTxt(s.debut), _fcTxt(s.fin), (s.active?'<span style="color:#6BA34A">active</span>':'<span style="color:rgba(255,255,255,0.3)">\u2014</span>')]);
   }).join(''):_fcEmpty('Aucune saison');
-  return _fcHint('Les dates d\u00e9but/fin rattachent les sessions par leur date et bornent le calcul de charge.')
-    + hdr + rows + _fcAddBtn('saisons','Ajouter une saison');
+  return _fcLectureSeule() + _fcEntete(cols,['Nom','D\u00e9but','Fin','']) + rows;
 }
 
 // Socle modules par formule (doit rester aligné sur _canModule côté firebase.js)
@@ -3444,8 +3441,9 @@ function _fcRenderSection(){
   else if(t==='saisons') html=_fcSecSais();
   else if(t==='abo') html=_fcSecAbo();
   body.innerHTML='<div style="font-size:var(--pt-micro,11px);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);font-weight:600;margin:2px 0 14px">'+_fcSecTitle(t)+'</div>'+html;
+  // ★ GTFIX-2 (D1) : « Enregistrer » n'existe que là où la fiche écrit encore (Domaine, Abonnement).
+  var sb=document.getElementById('agt-fc-save'); if(sb) sb.style.display=(t==='dom'||t==='abo')?'':'none';
 }
-function _fcRenderSecteurs(){ var el=document.getElementById('agt-fc-secteurs'); if(el) el.outerHTML=_fcSecteursHtml(); }
 function _fcSyncSum(){
   var s=document.getElementById('agt-fc-sum'); if(!s) return;
   var plan=_FC.plan||'domaine';
@@ -3463,96 +3461,15 @@ function _fcSyncSum(){
   s.innerHTML=h;
 }
 
-// ── Édition (setters appelés depuis les handlers inline → window.*) ──────────
-window._fcSetField=function(coll,i,field,val){ if(_FC[coll]&&_FC[coll][i]) _FC[coll][i][field]=val; };
-window._fcSetNum=function(coll,i,field,val){ if(_FC[coll]&&_FC[coll][i]){ var n=parseFloat(val); _FC[coll][i][field]=isNaN(n)?0:n; } };
-window._fcSetCommune=function(i,val){
-  var p=_FC.parcelles&&_FC.parcelles[i]; if(!p) return;
-  val=(val||'').trim();
-  if(!val){ if(p.commune) delete p.commune; }
-  else { var prev=(p.commune&&typeof p.commune==='object')?p.commune:{}; var o={nom:val}; if(typeof prev.lat==='number') o.lat=prev.lat; if(typeof prev.lng==='number') o.lng=prev.lng; p.commune=o; }
-  _fcRenderSecteurs();
-};
-window._fcToggleRole=function(i,r){
-  var m=_FC.membres&&_FC.membres[i]; if(!m) return;
-  var roles=Array.isArray(m.roles)?m.roles:Object.keys(m.roles||{}).filter(function(x){return m.roles[x];});
-  var k=roles.indexOf(r); if(k<0) roles.push(r); else roles.splice(k,1);
-  m.roles=roles; _fcRenderSection();
-};
-window._fcSetActive=function(i){ (_FC.saisons||[]).forEach(function(s,k){ s.active=(k===i); }); _fcRenderSection(); };
 window._fcTab=function(id){ _FC_TAB=id; _fcRenderTabs(); _fcRenderSection(); };
-window._fcAddRow=function(coll){
-  if(coll==='membres'){ showToast('Cr\u00e9ation de compte \u2192 gestion des membres','#1A4A7A'); if(window.agtShowMembres) window.agtShowMembres(_FC_SLUG); return; }
-  var o;
-  if(coll==='parcelles') o={nom:'',surface:0,statut:'active'};
-  else if(coll==='taches') o={nom:'',hha:0,saison:'Printemps',type:'simple'};
-  else if(coll==='tracteurs_list') o={id:'trac'+Date.now()+'_'+Math.floor(Math.random()*1000),nom:'',modele:'',type:'',traitementOnly:false};
-  else if(coll==='saisons') o={nom:'',debut:'',fin:'',active:false};
-  else return;
-  (_FC[coll]=_FC[coll]||[]).push(o);
-  _fcRenderTabs(); _fcRenderSection(); _fcSyncSum();
+// ★ GTFIX-2 (§511, D1) — « Modifier dans la préparation » : la fiche se ferme, la préparation s'ouvre
+//   (avec sa feuille de vérification, sa trace au journal d'accès et son bandeau).
+window._fcPreparer=function(){
+  var s=_FC_SLUG, ov=document.getElementById('agt-fiche-ov');
+  if(ov) ov.remove();
+  if(s && typeof agtPrepOuvrir==='function') agtPrepOuvrir(s);
 };
 
-// ── Suppression item : confirmation "SUPPRIMER" (z-index > Fiche) ────────────
-window._fcAskDel=function(coll,i){
-  var label=_fcItemLabel(coll,i);
-  var ex=document.getElementById('agt-fcdel-ov'); if(ex) ex.remove();
-  var ov=document.createElement('div'); ov.id='agt-fcdel-ov';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
-  ov.innerHTML='<div style="width:100%;max-width:410px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(239,68,68,0.3);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
-    +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px"><div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px">\uD83D\uDDD1\uFE0F</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:#fff">Supprimer ?</div></div>'
-    +'<p style="font-size:var(--pt-txt,13px);line-height:1.55;color:rgba(255,255,255,0.65);margin:0 0 6px">Retirer <b style="color:#FCA5A5">'+_escHtml(label)+'</b> de la liste. La suppression est appliqu\u00e9e \u00e0 l\'enregistrement de la section.</p>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:12px 0 6px">Pour confirmer, tape <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#FCA5A5;font-weight:600">SUPPRIMER</code></div>'
-    +'<input id="agt-fcdel-inp" type="text" autocomplete="off" placeholder="SUPPRIMER" oninput="_fcDelCheck()" style="'+_FC_INP_STYLE+'">'
-    +'<div style="display:flex;gap:9px;margin-top:16px">'
-    +'<button onclick="document.getElementById(\'agt-fcdel-ov\').remove()" style="flex:1;padding:12px;border-radius:11px;font-size:var(--pt-txt,13px);font-weight:500;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55)">Annuler</button>'
-    +'<button id="agt-fcdel-btn" disabled onclick="_fcDelConfirm(\''+coll+'\','+i+')" style="flex:1.6;padding:12px;border-radius:11px;font-size:var(--pt-txt,13px);font-weight:700;cursor:not-allowed;opacity:.5;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#B91C1C,#EF4444);color:#fff">Supprimer</button>'
-    +'</div></div>';
-  document.body.appendChild(ov);
-  setTimeout(function(){ var el=document.getElementById('agt-fcdel-inp'); if(el) el.focus(); },50);
-};
-window._fcDelCheck=function(){
-  var inp=document.getElementById('agt-fcdel-inp'), btn=document.getElementById('agt-fcdel-btn');
-  if(!inp||!btn) return;
-  var ok=inp.value.trim().toUpperCase()==='SUPPRIMER';
-  btn.disabled=!ok; btn.style.opacity=ok?'1':'.5'; btn.style.cursor=ok?'pointer':'not-allowed';
-};
-window._fcDelConfirm=function(coll,i){
-  var inp=document.getElementById('agt-fcdel-inp');
-  if(!inp||inp.value.trim().toUpperCase()!=='SUPPRIMER') return;
-  if(_FC[coll]) _FC[coll].splice(i,1);
-  var ov=document.getElementById('agt-fcdel-ov'); if(ov) ov.remove();
-  _fcRenderTabs(); _fcRenderSection(); _fcSyncSum();
-  showToast('\u00c9l\u00e9ment retir\u00e9 \u2014 pense \u00e0 enregistrer la section','#7A4F2E');
-};
-
-// ── Garde anti-écrasement 25% (filet catastrophe au moment de l'écriture) ────
-function _fcGuardBlock(coll,before,after){
-  var ex=document.getElementById('agt-fcguard-ov'); if(ex) ex.remove();
-  var ov=document.createElement('div'); ov.id='agt-fcguard-ov';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
-  ov.innerHTML='<div style="width:100%;max-width:420px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(239,68,68,0.3);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
-    +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px"><div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px">\u26a0\uFE0F</div><div style="font-size:var(--pt-sm,16px);font-weight:700;color:#fff">\u00c9criture refus\u00e9e</div></div>'
-    +'<p style="font-size:var(--pt-txt,13px);line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px">L\'enregistrement ferait passer <b style="color:#FCA5A5">'+_fcCollLabel(coll)+'</b> de <b style="color:#FCA5A5">'+before+'</b> \u00e0 <b style="color:#FCA5A5">'+after+'</b> \u2014 une chute sous le seuil de <b>25 %</b>. Rien n\'est \u00e9crit, le serveur reste intact.</p>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;line-height:1.6">Garde anti-\u00e9crasement (\u00a711b) port\u00e9e dans la Fiche client. Pour retirer beaucoup d\'\u00e9l\u00e9ments volontairement, fais-le en plusieurs fois.</div>'
-    +'<button onclick="document.getElementById(\'agt-fcguard-ov\').remove()" style="width:100%;margin-top:18px;padding:12px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">Revenir</button>'
-    +'</div>';
-  document.body.appendChild(ov);
-}
-
-// ── Enregistrement par section ──────────────────────────────────────────────
-window._fcSave=async function(coll){
-  var before=_fcBaseCount(coll), after=_fcActiveCount(coll);
-  if(before>0 && after < before*_FC_GUARD_FLOOR){ _fcGuardBlock(coll,before,after); return; }
-  try{
-    if(!window.fbAdminWrite) throw new Error('fbAdminWrite indisponible');
-    var ok=await window.fbAdminWrite(_FC_SLUG,coll,_FC[coll]);
-    if(ok===false) throw new Error('\u00e9criture refus\u00e9e par Firestore');
-    _FC_BASE[coll]=_fcClone(_FC[coll]);
-    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 '+_fcCollLabel(coll)+' enregistr\u00e9','\uD83D\uDCBE');
-    showToast(''+_fcSecTitle(coll)+' enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
-  }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
-};
 window._fcSaveDom=async function(){
   var nom=(document.getElementById('agt-fc-nom')||{value:''}).value.trim();
   var lat=parseFloat((document.getElementById('agt-fc-lat')||{value:''}).value);
@@ -3606,7 +3523,7 @@ window._fcSaveAbo=async function(){
 window._fcSaveCurrent=function(){
   if(_FC_TAB==='dom') return _fcSaveDom();
   if(_FC_TAB==='abo') return _fcSaveAbo();
-  return _fcSave(_FC_TAB);
+  return _fcPreparer();   // ★ GTFIX-2 (D1) : les autres onglets sont en lecture seule
 };
 
 // ── Chargement + overlay ────────────────────────────────────────────────────
@@ -3637,7 +3554,6 @@ async function _fcLoad(slug){
     cliStatus:(typeof cli.status==='string')?cli.status:'',
     activatedAt:(typeof cli.activated_at==='string')?cli.activated_at:''
   };
-  _FC_BASE=_fcClone(_FC);
   _fcRenderTabs(); _fcRenderSection(); _fcSyncSum();
 }
 window._fcReload=function(){ if(_FC_SLUG){ _fcLoad(_FC_SLUG); showToast('Recharg\u00e9 depuis Firestore','#1A4A7A'); } };
@@ -3658,7 +3574,7 @@ window.agtShowFiche=async function(slug){
     +'<div style="position:fixed;left:0;right:0;bottom:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(0deg,#0A0812 65%,transparent);display:flex;justify-content:center">'
     +'<div style="max-width:780px;width:100%;display:flex;gap:10px;justify-content:flex-end">'
     +'<button onclick="_fcReload()" style="padding:12px 18px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">\u21ba Recharger</button>'
-    +'<button onclick="_fcSaveCurrent()" style="padding:12px 22px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:#fff;box-shadow:0 6px 18px rgba(139,92,246,0.3)">\uD83D\uDCBE Enregistrer la section</button>'
+    +'<button id="agt-fc-save" onclick="_fcSaveCurrent()" style="padding:12px 22px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:#fff;box-shadow:0 6px 18px rgba(139,92,246,0.3)">\uD83D\uDCBE Enregistrer la section</button>'
     +'</div></div>';
   document.body.appendChild(ov);
   if(typeof agtLogAccess==='function') agtLogAccess(slug,'Ouverture Fiche client','\uD83D\uDDC2\uFE0F');

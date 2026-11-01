@@ -1,0 +1,33 @@
+{
+  "lot": "GTFIX-2",
+  "section": "§511",
+  "base": "8a642acfef6be027c44a509fbd61b881b46057e9",
+  "inclut": [],
+  "date": "2026-11-01",
+  "tutos": {
+    "ok": true,
+    "empreinte": "26c1e016d0ee55d9937556b7813e72c06e9c7af0f92cd53b60104e1ef693955a",
+    "date": "2026-11-01T20:06:14.120Z",
+    "joues": {
+      "téléphone": 8,
+      "ordinateur": 8,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "051f8131120831ebcf5c338a08e3b0d1dbb0fbb3e862988acda74371e1239552",
+    "CLAUDE.md": "ce06d956ac09c3a27e7eeebc27555822d8c4ed0200522ac0c099539c5abd8626",
+    "docs/claude/INDEX.md": "59942a01fc6346fb7b1f50460ec50ae91362bba6542f9f74d2cce5152892350a",
+    "docs/claude/chantiers-480-529.md": "4eb7d4c966f1c834d88eb8f41b65f71cc7d758899f94f65d3cabaa442cce60a4",
+    "docs/claude/journal.md": "f547bd2aade8929534658e770842855ed8c737364f67669d2ceae87f5dcff2ae",
+    "scripts/harnais-claude-md.mjs": "0b114bec89a85741e179aac0569ab3fc0be7aff1537922c8e020531f142843ff",
+    "scripts/mv-harnais-gtfix1.mjs": "ba576301d07799ecceb067c2532b31034313f9bf8b4fa58af3f05e210fef3f42",
+    "scripts/mv-harnais-liste.mjs": "8d8f66cd9b82bde79368fc89ce76765df706c636db9294200b43e2ca26b732ed",
+    "src/admin-gt.js": "7763bc715e9b080a1d022ef1818a9ecb1b9d3d787164a52331be14ea09f4623e",
+    "src/firebase.js": "7c47387a6a6855a107ab996764ef17c660c2315f444766e792a61174c6920714",
+    "src/gt/console.html": "334d8281fad35f5c73b87cc7294c67b5f0cd27595f72448c88a72848d053929e",
+    "scripts/mv-harnais-gtfix2.mjs": "c331ee6f407e4950a845fa07b95c51b6d4e78fbd432aea46e1b325472d7b2577"
+  }
+}

@@ -155,11 +155,20 @@ const _MV_EMU = DEBUG && (window.__MV_USE_EMULATOR || new URLSearchParams(locati
 // facturees chutent. Repli automatique du SDK en cache MEMOIRE si IndexedDB est refuse
 // (navigation privee, 2e onglet, quota) -> jamais bloquant.
 // ATTENTION : ne rien changer au chemin emulateur (DEV/E2E) -- il reste inerte en prod.
+// ★★ GTFIX-2 (§511) — LA CONSOLE GT (gt.html) NE GARDE RIEN DES DOMAINES DANS LE NAVIGATEUR (GT-B25).
+//   Le cache persistant gardait dans IndexedDB les documents de TOUS les domaines lus par la console —
+//   équipes, parcelles, journaux d'erreurs, facturation, prospects — après la fin de la session. Sans
+//   effet dans la fenêtre privée de la procédure GT, mais rien n'empêchait d'ouvrir gt.html dans une
+//   fenêtre normale. Repérée par son adresse, ou par le verrou que seule gt.html contient.
+// ⚠ On ne vide PAS l'ancien cache : il est partagé, sur le même appareil, avec l'appli du domaine.
+const _MV_PAGE_GT = typeof document !== 'undefined'
+  && (/\/gt\.html$/.test(location.pathname) || !!document.getElementById('agt-lock'));
 const db = (function () {
   if (_MV_EMU) return initializeFirestore(app, { experimentalForceLongPolling: true });
   // ★★ TUTO-2 (§359) — un entraînement ne rejoint JAMAIS le cache partagé entre onglets : avec le panneau d'entraînement à
   //   côté de l'appli, deux fenêtres tournent en même temps, et celle d'entraînement a une mémoire remplacée (boot.js).
   if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });
+  if (_MV_PAGE_GT) return initializeFirestore(app, { localCache: memoryLocalCache() });
   try {
     return initializeFirestore(app, {
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),

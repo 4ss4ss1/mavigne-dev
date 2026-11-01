@@ -340,10 +340,11 @@ function statiques(S) {
   r.push([gt.indexOf('fbAdminWriteGT(') === -1, '★★ la console n’appelle plus fbAdminWriteGT (toute écriture GT passe par une transaction)']);
   r.push([gt.indexOf('_agtWriteClients') === -1, '★ _agtWriteClients a disparu (une fonction morte est une invitation)']);
   const ecr = gt.split('\n').filter(l => l.indexOf('fbAdminWrite(') !== -1);
-  const permis = [/fbAdminWrite\(slug, 'kml_polygons', p\.sortie\)/, /fbAdminWrite\(slug, 'parcelles', fusion\)/, /fbAdminWrite\(_FC_SLUG,coll,_FC\[coll\]\)/,
+  // ★ GTFIX-2 (§511) : la fiche client ne réécrit plus les données du domaine (D1) — `_fcSave` est parti.
+  const permis = [/fbAdminWrite\(slug, 'kml_polygons', p\.sortie\)/, /fbAdminWrite\(slug, 'parcelles', fusion\)/,
     /fbAdminWrite\(slug, 'tracteurs_list', _agtIns\.mach\)/, /fbAdminWrite\(slug, 'kml_polygons', _agtIns\.parc\.map/];
-  r.push([ecr.length === 5 && ecr.every(l => permis.some(p => p.test(l))),
-    '★ fbAdminWrite ne reste qu’aux 5 exceptions nommées (KML relu au serveur ×2, fiche client → GTFIX-2, installation d’un domaine neuf ×2) — trouvé ' + ecr.length]);
+  r.push([ecr.length === 4 && ecr.every(l => permis.some(p => p.test(l))),
+    '★ fbAdminWrite ne reste qu’aux 4 exceptions nommées (KML relu au serveur ×2, installation d’un domaine neuf ×2) — trouvé ' + ecr.length]);
   // Les écrivains seulement : les fenêtres d'affichage (Config, Journal, Erreurs) lisent encore avec un repli —
   // une lecture ratée y est affichée comme vide (GT-B12, GTFIX-4), mais rien n'est écrit derrière.
   const ecrivains = ['agtSaveAddMembre', 'agtLotGo', 'agtSaveConfig', 'agtKmlSave'].map(n => fonction(S.gt, n, 'src/admin-gt.js'))
