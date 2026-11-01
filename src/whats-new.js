@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.57', d: '2026-11-01', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Les stades dans le Pilotage, et un tuto',
+      desc: "En saison, la vue Terrain du Pilotage montre «\u00a0Où en est la vigne\u00a0»\u00a0: le stade qui domine, les parcelles à noter et la prochaine date prévue, avec un bouton vers le relevé. Et le tuto «\u00a0Comment faire pour noter le stade d’une parcelle\u00a0?\u00a0» montre le geste pas à pas." },
+  ] },
   { v: '10.56', d: '2026-11-01', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Ce qui vient : la floraison et la véraison prévues',
       desc: "Dans l’onglet «\u00a0Stades\u00a0», «\u00a0Ce qui vient\u00a0» additionne les températures moyennes depuis le 1er mars, les compare à l’an dernier, et donne la date probable de la pleine floraison et de la véraison du Pinot noir et du Chardonnay (modèle GFV, seuils publiés), à une semaine près. Une pleine floraison notée recale la véraison." },

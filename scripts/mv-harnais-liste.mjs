@@ -843,6 +843,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-phenoa.mjs --contre'],
   ['node scripts/mv-harnais-pheno1b.mjs'],             // PHENO-1B (§507) : la somme de températures, la prévision GFV recalée, « Ce qui vient »
   ['node scripts/mv-harnais-pheno1b.mjs --contre'],
+  ['node scripts/mv-harnais-pheno1c.mjs'],             // PHENO-1C (§508) : « Où en est la vigne » dans le cockpit, le tuto « noter le stade »
+  ['node scripts/mv-harnais-pheno1c.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair
   ['node scripts/mv-harnais-cfg1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles

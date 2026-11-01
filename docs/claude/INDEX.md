@@ -561,3 +561,4 @@
 | 505 | 505. ★★★ PHENO-1A — LE STADE PAR PARCELLE, LA VUE « STADES » ; UN DOCUMENT NEUF, `pheno`, ÉCRIT PAR L’ADMIN… | `docs/claude/chantiers-480-529.md` |
 | 506 | 506. ★★ PHENO-1A2 — LE RELEVÉ DES STADES, EN SAISON : DEUX APPUIS AU TÉLÉPHONE, UN CLIC SUR ORDINATEUR, PAR… | `docs/claude/chantiers-480-529.md` |
 | 507 | 507. ★★ PHENO-1B — CE QUI VIENT : LA SOMME DE TEMPÉRATURES ET LA PRÉVISION GFV, RECALÉE PAR LES STADES NOTÉ… | `docs/claude/chantiers-480-529.md` |
+| 508 | 508. ★★ PHENO-1C — « OÙ EN EST LA VIGNE » DANS LE COCKPIT, LE TUTO « NOTER LE STADE » (01/11 — `src/app.js`… | `docs/claude/chantiers-480-529.md` |

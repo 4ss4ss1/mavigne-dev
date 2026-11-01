@@ -13,7 +13,7 @@ const enDur = b => sansVar(b.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   T('une carte de travail dit l’état de la tâche choisie, avec les mêmes gestes (_pvActions)',
-    S.app.includes('const _pvInnerT=_pCarteTache(p,hasDrae?draeInfo:null,_proxPill);') && S.app.includes('<div class="pc-left" onclick="openDP(\'${_escAttr(p.nom)}\')">${_pvInnerT}</div>${_pvAct}'));
+    S.app.includes('const _pvInnerT=_pCarteTache(p,hasDrae?draeInfo:null,_proxPill);') && S.app.includes('<div class="pc-left" data-tuto="parc.ligne" onclick="openDP(\'${_escAttr(p.nom)}\')">${_pvInnerT}</div>${_pvAct}'));
   T('_pCarteTache : rang, nom, état, délai de réentrée, proximité', S.app.includes('function _pCarteTache(p,drae,prox){') && S.app.includes("var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(prox||'');"));
   T('le bloc PARC-2 est posé après PARC-1, sous 1 024 px, par jetons seulement (' + dur.length + ')',
     B.length > 3000 && S.css.indexOf('★ PARC-2 (§275)') > S.css.indexOf('★ FIN PARC-1') && B.includes('@media (max-width:1023px){') && dur.length === 0);

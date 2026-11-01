@@ -7524,9 +7524,9 @@ function renderParcelles(){
     if(_pvAct){
       // PARC-2 (§275) : au téléphone, une tâche choisie → la carte dit l'état de CETTE tâche ; le pourcentage revient sur « toutes ».
       const _pvInnerT=_pCarteTache(p,hasDrae?draeInfo:null,_proxPill);
-      return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" onclick="openDP('${_escAttr(p.nom)}')">${_pvInnerT}</div>${_pvAct}</div></div>`;
+      return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" data-tuto="parc.ligne" onclick="openDP('${_escAttr(p.nom)}')">${_pvInnerT}</div>${_pvAct}</div></div>`;
     }
-    return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
+    return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" data-tuto="parc.ligne" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
   }).join('');
   _pProchaineMarque(_prioLocked);   // ★ ARRIVEE-2 (§338) : « Prochaine », avant les barres — la fin de la fonction reste intacte (mv-harnais-cible)
   if(_pDesk())_pFicheSync(data);   // PARC-1 : AVANT les barres et la carte, pour laisser intacte la fin que vise mv-harnais-cible
@@ -7579,7 +7579,7 @@ function _pRow(p,cl,etat,drae,prox,cep){
     droite='<span class="prow-pct">'+cl.pct+'\u00a0%</span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span>';
   }
   var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(!tache&&etat[1]!=='neutre'?_mvBadge(etat[0],etat[1]):'')+(prox||'');
-  return '<div class="prow'+(act?' pcard-qv':'')+'" role="option" aria-selected="'+(p.nom===_pSelNom)+'" data-nom="'+_escAttr(p.nom)+'" onclick="_pSel(this.dataset.nom)">'
+  return '<div class="prow'+(act?' pcard-qv':'')+'" data-tuto="parc.ligne" role="option" aria-selected="'+(p.nom===_pSelNom)+'" data-nom="'+_escAttr(p.nom)+'" onclick="_pSel(this.dataset.nom)">'
     +'<div class="prow-g"><div class="prow-t">'+_pOrdPill(p.nom)+'<span class="prow-nom">'+_escHtml(p.nom)+'</span></div>'+sous+(b?'<div class="prow-b">'+b+'</div>':'')+'</div>'
     +'<div class="prow-d" onclick="event.stopPropagation()">'+droite+'</div></div>';
 }
@@ -7598,6 +7598,7 @@ function _pFicheHtml(p){
   var act=(pTacheFilter!=='toutes')?_pvActions(p):'';
   var h='<div class="pfx-hd"><div class="pfx-id"><h2 class="pfx-t">'+_escHtml(p.nom)+'</h2><div class="pfx-tags">'+tags+'</div></div>'
     +'<div class="pfx-act">'+act+'<button type="button" class="pfx-btn" onclick="openDP(\''+_escAttr(p.nom)+'\')">Fiche compl\u00e8te</button></div></div>';
+  var _phH=(typeof _phenoFicheHtml==='function')?_phenoFicheHtml(p):''; if(_phH) h+='<div class="mvencadre dp-pheno pfx-pheno">'+_phH+'</div>';   // ★ PHENO-1C (§508) : le stade dans la fiche à droite, sur ordinateur
   // FORME-1 (§301) : la forme de la parcelle, tirée de son contour (utils.js) ; rien quand elle n'en a pas.
   var _fo=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,170,'pfxf'):'';
   if(_fo)h+='<div class="mv-forme pfx-forme">'+_fo+'</div>';
@@ -10505,10 +10506,10 @@ function _phenoNoter(nom){
   s.textContent=der?('Dernier stade not\u00e9\u00a0: '+_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e';
   var auj=todayStr();
   var h='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){
-    return '<button type="button" class="phn-b'+(_phenoB===x[0]?' on':'')+'" role="radio" aria-checked="'+(_phenoB===x[0])+'" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>';
+    return '<button type="button" class="phn-b'+(_phenoB===x[0]?' on':'')+'" role="radio" aria-checked="'+(_phenoB===x[0])+'" data-tuto="phn.stade" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>';
   }).join('')+'</div>';
   h+='<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>';
-  h+='<button type="button" class="mbtn verte" id="phn-ok" onclick="_phenoEnregistrer()"'+(_phenoB==null?' disabled':'')+'>Enregistrer le stade</button>';
+  h+='<button type="button" class="mbtn verte" id="phn-ok" data-tuto="phn.ok" onclick="_phenoEnregistrer()"'+(_phenoB==null?' disabled':'')+'>Enregistrer le stade</button>';
   c.innerHTML=h; openOv('ovPheno');
 }
 function _phenoChoisir(b){
@@ -10526,14 +10527,21 @@ function _phenoEnregistrer(){
 function _phenoRafraichir(){
   var v=document.getElementById('pwrapstades'); if(v&&v.classList.contains('vis')) _phenoRendreVue();
   if(_phenoP) _phenoFiche(_phenoP);
+  if(typeof _pDesk==='function'&&_pDesk()&&typeof renderParcelles==='function'){ var pl=document.getElementById('pwrapliste'); if(pl&&pl.classList.contains('vis')) renderParcelles(); }   // ★ PHENO-1C : la fiche à droite, sur ordinateur
+}
+function _phenoFicheHtml(p){
+  // ★ PHENO-1C (§508) : le même bloc dans la fiche du téléphone (#dp-pheno) et dans la fiche à droite, sur ordinateur (_pFicheHtml).
+  if(!p) return '';
+  var der=_phenoDernier(p), adm=_phenoAdm();
+  if(!der&&!adm) return '';
+  return '<div class="dp-pheno-l"><div class="dp-pheno-k">Stade</div><div class="dp-pheno-v" data-tuto="dp.stade.v">'+_escHtml(der?(_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e')+'</div></div>'
+    +(adm?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-tuto="dp.stade" data-nom="'+_escAttr(p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">Noter le stade</button>':'');
 }
 function _phenoFiche(p){
   var el=document.getElementById('dp-pheno'); if(!el||!p) return;
-  var der=_phenoDernier(p), adm=_phenoAdm();
-  if(!der&&!adm){ el.style.display='none'; el.innerHTML=''; return; }
-  el.style.display='';
-  el.innerHTML='<div class="dp-pheno-l"><div class="dp-pheno-k">Stade</div><div class="dp-pheno-v">'+_escHtml(der?(_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e')+'</div></div>'
-    +(adm?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-nom="'+_escAttr(p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">Noter le stade</button>':'');
+  var h=_phenoFicheHtml(p);
+  if(!h){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display=''; el.innerHTML=h;
 }
 // ★ PHENO-1A2 (§506) — LE RELEVÉ DE SAISON (docs/maquettes : maquette-pheno-saisie-v1, validée par Nico le 31/10). En saison (mars à
 //   septembre), la vue Stades est un relevé : une ligne par parcelle ; au téléphone, un appui sur la ligne puis un sur le stade (le suivant
@@ -10620,10 +10628,31 @@ function _phenoClim(jours){
 }
 function _phenoJours(j){ var o={}; if(j&&j.daily&&Array.isArray(j.daily.time)) j.daily.time.forEach(function(d,i){ var v=j.daily.temperature_2m_mean[i]; if(v!=null) o[d]=v; }); return o; }
 var _phenoTempEnCours=null;
+function _phenoCle(g,an){ return 'mvPhenoT1:'+Number(g.lat).toFixed(3)+','+Number(g.lng).toFixed(3)+':'+an; }
+// ★ PHENO-1C (§508) — le résumé que montre Pilotage › Aujourd'hui › Terrain (la maquette) : le stade dominant, les parcelles à noter, la
+//   prochaine date prévue — tirée des températures déjà gardées sur l'appareil (le cockpit ne fait aucune requête). Hors saison : rien.
+function _phenoResume(){
+  var auj=todayStr(); if(!_phenoEnSaison(auj)) return null;
+  var an=_phenoAn(), V=_phenoVue(an,auj), notees=V.L.filter(function(x){ return x.e; }), r={ aNoter:V.aNoter.length, notees:notees.length, total:V.L.length, phrase:'', prochaine:null };
+  if(notees.length){
+    var parB={}, tot=0; notees.forEach(function(x){ parB[x.e.b]=(parB[x.e.b]||0)+x.s; tot+=x.s; });
+    var bMax=Object.keys(parB).map(Number).sort(function(a,b){ return (parB[b]-parB[a])||(b-a); })[0], part=tot>0?parB[bMax]/tot:0;
+    r.phrase=_phenoStade(bMax)[1]+' '+(part>=0.95?'sur tout ce qui est not\u00e9':part>=0.7?'sur les trois quarts du domaine not\u00e9':part>=0.45?'sur la moiti\u00e9 du domaine not\u00e9':'sur '+Math.round(part*100)+'\u00a0% du domaine not\u00e9');
+  }
+  var g=(typeof getDomaineGeo==='function')?getDomaineGeo():null, C=null;
+  if(g&&g.lat!=null&&g.lng!=null){ try{ C=JSON.parse(localStorage.getItem(_phenoCle(g,an))||'null'); }catch(e){ C=null; } }
+  if(C&&C.obs){
+    var P=_phenoPrevisions(_phenoCumuls(_phenoSerie(an,C.obs,C.prev,C.clim)),an), best=null;
+    P.forEach(function(x){ [['Pleine floraison',x.flo],['V\u00e9raison',x.ver]].forEach(function(q){ if(q[1].d&&!q[1].vu&&q[1].d>=auj&&(!best||q[1].d<best.d)) best={ lib:q[0]+', '+x.cep, d:q[1].d }; }); });
+    if(best) r.prochaine={ lib:best.lib, quand:'vers '+_phenoJour(best.d)+', \u00e0 une semaine pr\u00e8s' };
+  }
+  return r;
+}
+window._phenoResume=_phenoResume;
 function _phenoTemp(cb){
   var auj=todayStr(), an=auj.slice(0,4), g=(typeof getDomaineGeo==='function')?getDomaineGeo():null;
   if(!g||g.lat==null||g.lng==null){ cb({ err:'Position du domaine inconnue (Réglages)' }); return; }
-  var cle='mvPhenoT1:'+Number(g.lat).toFixed(3)+','+Number(g.lng).toFixed(3)+':'+an, C=null;
+  var cle=_phenoCle(g,an), C=null;
   try{ C=JSON.parse(localStorage.getItem(cle)||'null'); }catch(e){ C=null; }
   if(C&&C.jour===auj&&C.obs){ cb(C); return; }
   if(_phenoTempEnCours){ _phenoTempEnCours.push(cb); return; } _phenoTempEnCours=[cb];

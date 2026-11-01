@@ -82,6 +82,14 @@ function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.cla
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
 // ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
 function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Object.keys(C).forEach(function (k) { n += Object.keys(C[k] || {}).length; }); return n; }
+// ★ PHENO-1C (§508) : le nombre de stades notés cette année (PHENO), pour voir qu'une note vient d'être posée.
+function _phenoN() { var P = window.PHENO || {}, L = P[String(new Date().getFullYear())]; return Array.isArray(L) ? L.length : 0; }
+// ★ PHENO-1C (§508) : la semaine en cours a-t-elle un jour ouvré (lundi à vendredi) dans le mois en cours ?
+function _semaineOuvree(auj) {
+  var d = auj ? new Date(auj + 'T12:00:00') : new Date(), m = d.getMonth(), lun = new Date(d); lun.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  for (var i = 0; i < 5; i++) { var x = new Date(lun); x.setDate(lun.getDate() + i); if (x.getMonth() === m) return true; }
+  return false;
+}
 function _ic(n, t) { return window._mvIcon ? window._mvIcon(n, t || 18) : ''; }
 function _page() { var p = _q('.page.active'); return p ? String(p.id || '').replace(/^page-/, '') : ''; }
 function _tuto(id) { for (var i = 0; i < TU_TUTOS.length; i++) { if (TU_TUTOS[i].id === id) return TU_TUTOS[i]; } return null; }
@@ -167,7 +175,10 @@ var TU_TUTOS = [
   { id: 'cave', titre: 'Comment faire pour noter une journée de cave\u00a0?', fin: 'noter une journée de cave',
     module: 'Planning', pages: ['planning'], pour: 'admin', duree: '1 min', depart: 'home',
     couvre: ['planCaveSheet', 'planCaveMode', 'planCaveApply', 'planCaveRetirer'],
-    avant: function (memo) { memo.cav0 = _caveN(); },
+    // ★ PHENO-1C (§508) — le tuto visait un jour travaillé de la SEMAINE affichée du mois en cours : le dimanche 1er novembre, cette semaine
+    //   ne contenait qu'un dimanche de novembre, le tuto ne trouvait plus de case (vu au rejeu de tous les tutos). Quand la semaine du mois
+    //   n'a aucun jour ouvré, le tuto passe le Planning sur le mois (les mêmes gestes y marchent).
+    avant: function (memo) { memo.cav0 = _caveN(); if (!_semaineOuvree() && typeof window.pl2SetView === 'function') window.pl2SetView('mo'); },
     retenir: ['Planning › Le mois : cochez les cases de ceux qui étaient en cave, puis « Cave » dans la barre.',
               'La journée, le matin ou l’après-midi : la case garde ses heures, la paie ne change pas.',
               'Le Pilotage ne verse plus ces heures aux parcelles validées. Pour défaire : les mêmes cases, « Cave », « Retirer la cave ».'],
@@ -349,7 +360,35 @@ var TU_TUTOS = [
         ok: 'C’est enregistré : le message vert le confirme.' },
       { type: 'regarder', cible: '[data-tuto="mat.ordre"]',
         txt: function () { return 'La mesure prend sa place dans l’ordre de maturité, face à la fourchette visée. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
-    ] }
+    ] },
+  // ★ PHENO-1C (§508) : noter le stade d'une parcelle (administrateur) — le chemin de la fiche, qui marche en toute saison.
+  { id: 'stade', titre: 'Comment faire pour noter le stade d’une parcelle\u00a0?', fin: 'noter le stade d’une parcelle',
+    module: 'Vigne', pages: ['parcelles'], pour: 'admin', duree: '1 min', depart: 'parcelles',   // au téléphone, Parcelles n'est ni dans le dock ni dans « Plus » (un onglet de la Vigne) : le tuto y démarre, comme celui du Journal
+    couvre: ['openDP', '_phenoNoter', '_phenoChoisir', '_phenoEnregistrer'],
+    retenir: ['Depuis la fiche de la parcelle : « Noter le stade », le stade, « Enregistrer ».',
+              'En saison (mars à septembre), l’onglet Stades de Parcelles est un relevé : un appui sur la ligne, un sur le stade.',
+              '« Annuler » rattrape pendant six secondes.'],
+    avant: function (memo) { memo.n0 = _phenoN(); },
+    etapes: [
+      { type: 'toucher', cible: '[data-tuto="parc.ligne"]',
+        txt: function () { return '{T} une parcelle de la liste.'; },
+        fait: function () { var b = _q('[data-tuto="dp.stade"]'); return !!(b && _vis(b)); },   // la fiche du téléphone (ovParcelle) ou la fiche à droite, sur ordinateur
+        ok: 'Sa fiche s’ouvre ; la ligne « Stade » dit le dernier stade noté.' },
+      { type: 'toucher', cible: '[data-tuto="dp.stade"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="dp.stade"]') || 'Noter le stade') + ' ».'; },
+        fait: function () { return _ouvert('ovPheno') && !!_q('[data-tuto="phn.stade"]'); },
+        ok: 'Les stades de la vigne, avec leur code BBCH, du débourrement à la véraison.' },
+      { type: 'toucher', cible: '[data-tuto="phn.stade"][data-b="57"]',
+        txt: function () { return '{T} « Boutons séparés » (57).'; },
+        fait: function () { var b = _q('[data-tuto="phn.stade"][data-b="57"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Le stade est choisi ; la date est celle du jour.' },
+      { type: 'toucher', cible: '[data-tuto="phn.ok"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="phn.ok"]') || 'Enregistrer le stade') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovPheno') && _phenoN() > (memo.n0 || 0); },
+        ok: 'C’est noté : « Annuler » reste six secondes en bas de l’écran.' },
+      { type: 'regarder', cible: '[data-tuto="dp.stade.v"]',
+        txt: function () { return 'La fiche dit maintenant le stade noté. En saison, l’onglet Stades de Parcelles fait la même chose en deux appuis.'; } },
+    ] },
 ];
 
 // ── 4. L'ALLURE : les jetons de l'appli, rien en dur sauf le voile ───────────────────────────────

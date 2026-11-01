@@ -3885,6 +3885,7 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 /* ★ PHENO-1A (§505) — maquette « niveau au-dessus », partie 1 : noter le stade (la fiche, la fenêtre) et la vue « Stades » de Parcelles.
    Cinq teintes du plus tardif au plus précoce : feuilles, boutons, floraison, grappe, véraison. */
 .dp-pheno{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);}
+.pfx-pheno{margin:var(--e-3,12px) 0;}
 .dp-pheno-k{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
 .dp-pheno-v{font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
 .phn-st{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--e-2,8px);margin-bottom:var(--e-3,12px);}
@@ -3962,6 +3963,13 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .phr-tr .phr-ech-pc .phr-e.passe em{color:var(--phc);}
 .phr-resume{padding:var(--e-3,12px) var(--e-4,16px);}   /* la carte du jeu (mvcarte) porte le fond et le bord */
 .phr-ct2{font-family:var(--font-titre,Georgia,serif);font-size:var(--pt-md,20px);font-weight:600;color:var(--texte,#1B1A18);}
+/* ★ PHENO-1C (§508) — la carte « Où en est la vigne » du cockpit (Terrain). */
+.ck-st{display:flex;flex-direction:column;}
+.ck-st-l{display:flex;flex-direction:column;gap:2px;margin:0;padding:var(--e-2,8px) 0;border-top:1px solid var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.ck-st-l:first-child{border-top:0;}
+.ck-st-l b{font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
+.ck-st-fort{font-size:var(--pt-base,15px);font-weight:600;color:var(--texte,#1B1A18);}
+.ck-st-al{color:var(--attention-texte,#975600);font-weight:600;}
 .phr-cqv-n{display:flex;flex-direction:column;gap:2px;margin:var(--e-3,12px) 0 var(--e-2,8px);}
 .phr-cqv-n b{font-size:var(--pt-md,20px);font-weight:600;font-variant-numeric:tabular-nums;color:var(--texte,#1B1A18);}
 .phr-cqv-n span,.phr-cqv-v{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
