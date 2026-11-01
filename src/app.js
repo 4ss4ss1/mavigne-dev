@@ -6009,6 +6009,7 @@ function renderHome(){
   if(htEl)htEl.textContent=nbTravaux;
 
   // Nouveaux widgets personnalisables (v4.34)
+  _phenoAccueil();    // ★ PHENO-1A2 (§506) : la carte « Relevé des stades » en saison (avant les widgets : la fin de renderHome appartient à ACC-2)
   _renderHomeWidgets();
   _homePrioCarte();   // ACC-2 (§277)
 }
@@ -10491,10 +10492,8 @@ function _phenoDernier(p,an){
   return L.length?L[L.length-1]:null;
 }
 function _phenoCepages(p){ return (p&&p.cepages&&p.cepages.length)?p.cepages:(p&&p.cepage?[p.cepage]:[]); }
-function _phenoVoisines(p){
-  var c=_phenoCepages(p)[0]; if(!p||!c) return [];
-  return (window.PARCELLES||[]).filter(function(x){ return x&&x!==p&&x.nom!==p.nom&&x.statut!=='Arrachee'&&_phenoCepages(x)[0]===c&&String(x.commune||'')===String(p.commune||''); });
-}
+// PHENO-1A2 (§506) : le report par cépage et commune est retiré (« les parcelles sont souvent dans des états différents » — Nico, 31/10) ;
+//   le regroupement se fait par cuvée, dans le relevé de la vue Stades.
 function _phenoJour(d){ var x=new Date(String(d)+'T12:00:00'); if(isNaN(x)) return String(d||''); return 'le '+x.getDate()+(x.getDate()===1?'er':'')+' '+_PHENO_MOIS[x.getMonth()]; }
 function _phenoLib(e){ var s=_phenoStade(e&&e.b); return (s?s[2]:'stade')+' ('+(e&&e.b)+')'; }
 function _phenoNoter(nom){
@@ -10504,11 +10503,10 @@ function _phenoNoter(nom){
   var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
   t.textContent=p.nom+' \u00b7 noter le stade';
   s.textContent=der?('Dernier stade not\u00e9\u00a0: '+_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e';
-  var V=_phenoVoisines(p), cp=_phenoCepages(p)[0]||'', auj=todayStr();
+  var auj=todayStr();
   var h='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){
     return '<button type="button" class="phn-b'+(_phenoB===x[0]?' on':'')+'" role="radio" aria-checked="'+(_phenoB===x[0])+'" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>';
   }).join('')+'</div>';
-  if(V.length) h+='<label class="phn-rep"><input type="checkbox" id="phn-rep"><span>Reporter sur les '+_escHtml(cp)+(p.commune?' de '+_escHtml(p.commune):'')+'<small>'+_escHtml(V.map(function(x){ return x.nom; }).join(', '))+' \u00b7 '+V.length+' parcelle'+(V.length>1?'s':'')+'</small></span></label>';
   h+='<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>';
   h+='<button type="button" class="mbtn verte" id="phn-ok" onclick="_phenoEnregistrer()"'+(_phenoB==null?' disabled':'')+'>Enregistrer le stade</button>';
   c.innerHTML=h; openOv('ovPheno');
@@ -10521,17 +10519,9 @@ function _phenoChoisir(b){
 function _phenoEnregistrer(){
   if(!_phenoAdm()||!_phenoP||_phenoB==null||!_phenoStade(_phenoB)) return;
   var auj=todayStr(), d=(document.getElementById('phn-date')||{}).value||auj; if(d>auj) d=auj;
-  var rep=document.getElementById('phn-rep'), cibles=[_phenoP].concat(rep&&rep.checked?_phenoVoisines(_phenoP):[]);
-  var an=String(d).slice(0,4), P=window.PHENO||(window.PHENO={}); if(!Array.isArray(P[an])) P[an]=[];
-  var par=(window.currentUser&&window.currentUser.nom)||'', t=new Date().toISOString(), b=_phenoB;
-  P[an]=P[an].concat(cibles.map(function(x){ return { pid:x.pid||'', nom:x.nom, b:b, d:d, par:par, t:t }; }));
-  saveData('pheno'); closeOv(null,'ovPheno');
-  var n=cibles.length, lib=(_phenoStade(b)||[0,'Stade'])[1];
-  showToastAnnuler(lib+' not\u00e9'+(n>1?' sur '+n+' parcelles':''), function(){
-    var Q=window.PHENO||{}; if(Array.isArray(Q[an])) Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); });
-    saveData('pheno'); _phenoRafraichir();
-  });
-  _phenoRafraichir();
+  var cibles=_phenoCuveeCibles?_phenoCuveeCibles():null;
+  closeOv(null,'ovPheno');
+  _phenoAjouter(cibles&&cibles.length?cibles:[_phenoP], _phenoB, d);
 }
 function _phenoRafraichir(){
   var v=document.getElementById('pwrapstades'); if(v&&v.classList.contains('vis')) _phenoRendreVue();
@@ -10545,47 +10535,138 @@ function _phenoFiche(p){
   el.innerHTML='<div class="dp-pheno-l"><div class="dp-pheno-k">Stade</div><div class="dp-pheno-v">'+_escHtml(der?(_phenoLib(der)+', '+_phenoJour(der.d)):'Aucun stade not\u00e9 cette ann\u00e9e')+'</div></div>'
     +(adm?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-nom="'+_escAttr(p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">Noter le stade</button>':'');
 }
+// ★ PHENO-1A2 (§506) — LE RELEVÉ DE SAISON (docs/maquettes : maquette-pheno-saisie-v1, validée par Nico le 31/10). En saison (mars à
+//   septembre), la vue Stades est un relevé : une ligne par parcelle ; au téléphone, un appui sur la ligne puis un sur le stade (le suivant
+//   mis en avant) ; sur ordinateur, un clic sur l'échelle de la ligne. La date du jour d'office, « Annuler » six secondes. Une bascule
+//   « Par parcelle · Par cuvée » range les parcelles selon les cuvées de la Cave (la plus récente qui les cite) ; « Noter pour la cuvée »
+//   propose un stade à toutes, chacune se décoche. Hors saison, la vue se lit ; on note depuis la fiche. L'affichage est sobre : la
+//   couleur du stade en filet, le code BBCH en chiffres tabulaires dans une pastille teintée, la répartition en une barre fine.
+var _phenoMode='parcelle', _phenoFiltre=false, _phenoOuverte='', _phenoCuv=null;
+function _phenoDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
+function _phenoEnSaison(auj){ var m=Number(String(auj).slice(5,7)); return m>=3&&m<=9; }
+function _phenoGroupe(b){ b=Number(b); return b<=16?1:b<=57?2:b<=65?3:b<=79?4:5; }
+function _phenoDepuis(d,auj){ var n=Math.round((new Date(auj+'T12:00:00')-new Date(String(d)+'T12:00:00'))/86400000); return n<=0?'aujourd\u2019hui':n===1?'hier':n===2?'avant-hier':'il y a '+n+'\u00a0j'; }
+function _phenoCuvees(){
+  var C=((window.CAVE_ELEVAGE&&window.CAVE_ELEVAGE.cuvees)||[]).filter(function(c){ return c&&c.nom&&Array.isArray(c.parcelles)&&c.parcelles.length; })
+    .slice().sort(function(a,b){ return String(b.millesime||b.mil||'').localeCompare(String(a.millesime||a.mil||'')); });
+  var m={}; C.forEach(function(c){ c.parcelles.forEach(function(x){ var n=String((x&&x.nom)||x||'').trim(); if(n&&!m[n]) m[n]=c.nom; }); });
+  return m;
+}
+function _phenoLignes(an,auj){
+  var cuv=_phenoCuvees();
+  return (window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }).map(function(p){
+    var e=_phenoDernier(p,an), age=e?Math.round((new Date(auj+'T12:00:00')-new Date(String(e.d)+'T12:00:00'))/86400000):null;
+    return { p:p, e:e, s:parseFloat(p.surface)||0, cuvee:cuv[p.nom]||'', vieux:!e||age>7 };
+  });
+}
 function _phenoVue(an,auj){
-  var act=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; });
-  var L=act.map(function(p){ return { p:p, e:_phenoDernier(p,an), s:parseFloat(p.surface)||0 }; });
-  var notees=L.filter(function(x){ return x.e; }), ds=notees.map(function(x){ return x.e.d; }).sort();
-  var parB={}; notees.forEach(function(x){ parB[x.e.b]=(parB[x.e.b]||0)+x.s; });
-  var tot=notees.reduce(function(a,x){ return a+x.s; },0), bs=Object.keys(parB).map(Number);
-  var bMax=bs.sort(function(a,b){ return (parB[b]-parB[a])||(b-a); })[0];
-  var plusAv=notees.slice().sort(function(a,b){ return (b.e.b-a.e.b)||String(a.p.nom).localeCompare(String(b.p.nom)); })[0]||null;
-  var mois=Number(String(auj).slice(5,7)), enPousse=mois>=3&&mois<=9, ilYa=function(d){ return Math.round((new Date(auj+'T12:00:00')-new Date(String(d)+'T12:00:00'))/86400000); };
-  var sans=enPousse?L.filter(function(x){ return !x.e||ilYa(x.e.d)>12; }):[];
-  return { act:act, L:L, notees:notees, ds:ds, parB:parB, tot:tot, bMax:bMax, plusAv:plusAv, sans:sans };
+  var L=_phenoLignes(an,auj), notees=L.filter(function(x){ return x.e; });
+  var parB={}, parG={}; notees.forEach(function(x){ parB[x.e.b]=(parB[x.e.b]||0)+x.s; var g=_phenoGroupe(x.e.b); parG[g]=(parG[g]||0)+x.s; });
+  var sansS=L.filter(function(x){ return !x.e; }).reduce(function(a,x){ return a+x.s; },0), tot=L.reduce(function(a,x){ return a+x.s; },0);
+  var der=notees.map(function(x){ return x.e.d; }).sort().pop()||'';
+  return { L:L, parB:parB, parG:parG, sansS:sansS, tot:tot, der:der, aNoter:_phenoEnSaison(auj)?L.filter(function(x){ return x.vieux; }):[] };
+}
+var _PHENO_GROUPES=[[1,'feuilles'],[2,'boutons'],[3,'floraison'],[4,'grappe'],[5,'v\u00e9raison']];
+function _phenoBarre(V){
+  var fsu=function(n){ return String(Math.round(n*10)/10).replace('.',','); }, t=V.tot||1, h='<div class="phr-barre" aria-hidden="true">', l='<div class="phr-barre-l">';
+  _PHENO_GROUPES.forEach(function(g){ var v=V.parG[g[0]]||0; if(v>0){ h+='<i class="phr-g'+g[0]+'" style="width:'+(v/t*100).toFixed(1)+'%"></i>'; l+='<span class="phr-g'+g[0]+'">'+g[1]+' '+fsu(v)+'\u00a0ha</span>'; } });
+  if(V.sansS>0){ h+='<i class="phr-g0" style="width:'+(V.sansS/t*100).toFixed(1)+'%"></i>'; l+='<span class="phr-g0">sans note '+fsu(V.sansS)+'\u00a0ha</span>'; }
+  return h+'</div>'+l+'</div>';
+}
+function _phenoCode(e){ return e?'<span class="phr-code phr-g'+_phenoGroupe(e.b)+'">'+Number(e.b)+'</span>':'<span class="phr-code phr-g0">\u2014</span>'; }
+function _phenoEchelle(x,classe,saison){
+  var cur=x.e?Number(x.e.b):null, idx=_PHENO_STADES.findIndex(function(s){ return s[0]===cur; }), nxt=idx<0?0:Math.min(_PHENO_STADES.length-1,idx+1);
+  var peut=_phenoAdm()&&saison;
+  return '<div class="'+classe+'">'+_PHENO_STADES.map(function(s,i){
+    var k=(cur!=null&&i<idx)?'passe':(i===idx?'actuel':(i===nxt&&peut?'prochain':''));
+    return peut?'<button type="button" class="phr-e '+k+'" data-nom="'+_escAttr(x.p.nom)+'" data-b="'+s[0]+'" onclick="_phenoNoterDirect(this.dataset.nom,+this.dataset.b)" title="'+_escAttr(s[1])+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></button>'
+      :'<span class="phr-e '+k+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></span>';
+  }).join('')+'</div>';
 }
 function _phenoRendreVue(){
   var el=document.getElementById('pstades'); if(!el) return;
-  var an=_phenoAn(), auj=todayStr(), V=_phenoVue(an,auj), fsu=function(n){ return String(Math.round(n*100)/100).replace('.',','); };
-  var h='<div class="phs-t">O\u00f9 en est la vigne</div><div class="phs-s">'+V.act.length+' parcelle'+(V.act.length>1?'s':'')
-    +(V.ds.length?' \u00b7 stades not\u00e9s '+(V.ds[0]===V.ds[V.ds.length-1]?_phenoJour(V.ds[0]):'entre '+_phenoJour(V.ds[0])+' et '+_phenoJour(V.ds[V.ds.length-1])):' \u00b7 aucun stade not\u00e9 en '+an)+'</div>';
-  if(!V.notees.length){
-    el.innerHTML=h+'<div class="phs-vide">'+(_phenoAdm()?'Notez le stade d\u2019une parcelle depuis sa fiche (\u00ab\u00a0Noter le stade\u00a0\u00bb)\u00a0: la mosa\u00efque se remplit, et les parcelles du m\u00eame c\u00e9page peuvent suivre en un geste.':'Aucun stade not\u00e9 pour l\u2019instant\u00a0: l\u2019administrateur les note depuis la fiche des parcelles.')+'</div>';
-    return;
-  }
-  var part=V.tot>0?V.parB[V.bMax]/V.tot:0, mot=part>=0.95?'sur tout ce qui est not\u00e9':part>=0.7?'sur les trois quarts du domaine not\u00e9':part>=0.45?'sur la moiti\u00e9 du domaine not\u00e9':'sur '+Math.round(part*100)+'\u00a0% du domaine not\u00e9';
-  var sM=_phenoStade(V.bMax);
-  var phr=_escHtml((sM?sM[1]:'')+' '+mot);
-  if(V.plusAv&&V.plusAv.e.b>V.bMax) phr+=' \u00b7 le plus avanc\u00e9\u00a0: '+_escHtml(V.plusAv.p.nom)+' ('+_escHtml(_phenoStade(V.plusAv.e.b)[2])+')';
-  h+='<div class="phs-r">'+phr+'</div>';
-  var tri=V.L.slice().sort(function(a,b){ return ((b.e?b.e.b:-1)-(a.e?a.e.b:-1))||String(a.p.nom).localeCompare(String(b.p.nom)); });
-  h+='<div class="phs-m">'+tri.map(function(x){
-    var s=x.e?_phenoStade(x.e.b):null;
-    return '<div class="phs-c'+(s?' phs-g'+_phenoGroupe(x.e.b):' phs-sans')+'"><b>'+_escHtml(x.p.nom)+'</b><span>'+_escHtml(s?(s[2]+' \u00b7 '+s[0]):'sans stade')+'</span></div>';
-  }).join('')+'</div>';
-  var bsAsc=Object.keys(V.parB).map(Number).sort(function(a,b){ return a-b; });
-  h+='<div class="phs-leg">'+bsAsc.map(function(b){ return '<span class="phs-g'+_phenoGroupe(b)+'">'+_escHtml(_phenoStade(b)[2])+'</span>'; }).join('')+'<em>de la plus tardive \u00e0 la plus pr\u00e9coce</em></div>';
-  h+='<div class="phs-k">Par stade, en surface</div><div class="phs-ps">'+bsAsc.slice().reverse().map(function(b){ return '<div><span>'+_escHtml(_phenoStade(b)[1])+' ('+b+')</span><b>'+fsu(V.parB[b])+' ha</b></div>'; }).join('')+'</div>';
-  if(V.sans.length) h+='<div class="phs-al">'+V.sans.length+' parcelle'+(V.sans.length>1?'s':'')+' sans stade depuis 12 jours\u00a0: '+V.sans.map(function(x){
-    return _phenoAdm()?'<button type="button" class="phs-al-b" data-nom="'+_escAttr(x.p.nom)+'" onclick="_phenoNoter(this.dataset.nom)">'+_escHtml(x.p.nom)+'</button>':_escHtml(x.p.nom);
-  }).join(', ')+'</div>';
+  var an=_phenoAn(), auj=todayStr(), saison=_phenoEnSaison(auj), V=_phenoVue(an,auj), desk=_phenoDesk(), adm=_phenoAdm();
+  var h='<div class="phr-tete"><div><div class="phr-t">'+(saison?'Relev\u00e9 des stades':'Stades de l\u2019ann\u00e9e')+'</div><div class="phr-s">'+_escHtml(saison?(V.der?'derni\u00e8re note '+_phenoDepuis(V.der,auj):'aucune note encore cette ann\u00e9e')+(adm?' \u00b7 un appui sur la ligne, un appui sur le stade':''):'hors saison \u2014 on note depuis la fiche de la parcelle')+'</div></div>'
+    +'<div class="phr-mseg" role="group" aria-label="Rangement"><button type="button" class="'+(_phenoMode==='parcelle'?'on':'')+'" data-m="parcelle" onclick="_phenoModeVue(this.dataset.m)">Par parcelle</button><button type="button" class="'+(_phenoMode==='cuvee'?'on':'')+'" data-m="cuvee" onclick="_phenoModeVue(this.dataset.m)">Par cuv\u00e9e</button></div></div>';
+  h+=_phenoBarre(V);
+  if(V.aNoter.length) h+='<div class="phr-outils"><button type="button" class="phr-filtre'+(_phenoFiltre?' on':'')+'" onclick="_phenoFiltreBascule()">\u00c0 noter \u00b7 '+V.aNoter.length+'</button></div>';
+  var L=V.L.filter(function(x){ return !_phenoFiltre||x.vieux; });
+  var ligne=function(x){
+    var e=x.e, s=e?_phenoStade(e.b):null, depuis=e?_phenoDepuis(e.d,auj):'';
+    if(desk) return '<tr class="phr-tr phr-g'+(e?_phenoGroupe(e.b):0)+'"><td class="phr-f"></td><td><b>'+_escHtml(x.p.nom)+'</b><div class="phr-m">'+_escHtml(_phenoCepages(x.p)[0]||'')+'</div></td><td>'+(x.cuvee?_escHtml(x.cuvee):'<span class="phr-m">\u2014</span>')+'</td><td>'+_phenoCode(e)+' <span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span></td><td class="'+(saison&&x.vieux&&e?'phr-vieux':'')+'">'+_escHtml(depuis)+'</td><td>'+_phenoEchelle(x,'phr-ech-pc',saison)+'</td></tr>';
+    var ouv=_phenoOuverte===x.p.nom&&saison&&adm;
+    return '<div class="phr-l phr-g'+(e?_phenoGroupe(e.b):0)+(ouv?' ouverte':'')+'"><button type="button" class="phr-lb" data-nom="'+_escAttr(x.p.nom)+'" onclick="_phenoOuvrir(this.dataset.nom)"'+(saison&&adm?'':' disabled')+'><span class="phr-f"></span><span class="phr-n"><b>'+_escHtml(x.p.nom)+'</b><span class="phr-m">'+_escHtml([_phenoCepages(x.p)[0],x.p.commune].filter(Boolean).join(' \u00b7 '))+'</span></span><span class="phr-st">'+_phenoCode(e)+'<span class="phr-sl">'+_escHtml(s?s[2]:'sans note')+'</span><span class="phr-d'+(saison&&x.vieux&&e?' phr-vieux':'')+'">'+_escHtml(depuis)+'</span></span></button>'
+      +(ouv?'<div class="phr-ouv"><div class="phr-q">Stade atteint</div>'+_phenoEchelle(x,'phr-ech',saison)+'<label class="phr-date"><span>Date</span><input type="date" id="phr-date" value="'+auj+'" max="'+auj+'"></label></div>':'')+'</div>';
+  };
+  var corps='';
+  if(_phenoMode==='cuvee'){
+    var G={}, ordre=[]; L.forEach(function(x){ var k=x.cuvee||''; if(!G[k]){ G[k]=[]; ordre.push(k); } G[k].push(x); });
+    ordre.sort(function(a,b){ return (a===''?1:0)-(b===''?1:0)||a.localeCompare(b); });
+    ordre.forEach(function(k){
+      var xs=G[k], bs=xs.filter(function(x){ return x.e; }).map(function(x){ return Number(x.e.b); }).sort(function(a,b){ return a-b; });
+      var etat=bs.length?((bs[0]===bs[bs.length-1])?_phenoStade(bs[0])[2]+' ('+bs[0]+')':'de '+_phenoStade(bs[0])[2]+' ('+bs[0]+') \u00e0 '+_phenoStade(bs[bs.length-1])[2]+' ('+bs[bs.length-1]+')'):'sans note';
+      var tete='<div class="phr-ct"><div><div class="phr-cn">'+_escHtml(k||'Sans cuv\u00e9e')+'</div><div class="phr-m">'+xs.length+' parcelle'+(xs.length>1?'s':'')+' \u00b7 '+_escHtml(k?etat:'les parcelles qu\u2019aucune cuv\u00e9e de la Cave ne cite')+'</div></div>'+(k&&saison&&adm?'<button type="button" class="phr-ca" data-cuvee="'+_escAttr(k)+'" onclick="_phenoNoterCuvee(this.dataset.cuvee)">Noter pour la cuv\u00e9e</button>':'')+'</div>';
+      corps+=desk?'<tr><td colspan="6" class="phr-ctd">'+tete+'</td></tr>'+xs.map(ligne).join(''):tete+xs.map(ligne).join('');
+    });
+  } else corps=L.map(ligne).join('');
+  if(desk) h+='<div class="phr-pc"><table class="phr-table"><thead><tr><th class="phr-f"></th><th>Parcelle</th><th>Cuv\u00e9e</th><th>Stade</th><th>Depuis</th><th>\u00c9chelle BBCH</th></tr></thead><tbody>'+corps+'</tbody></table>'
+    +'<aside class="phr-cote"><div class="mvcarte phr-resume"><div class="phr-ct2">O\u00f9 en est la vigne</div>'+_phenoBarre(V)+'<div class="phr-k">Par stade, en surface</div>'+Object.keys(V.parB).map(Number).sort(function(a,b){ return b-a; }).map(function(b){ return '<div class="phr-ps"><span>'+_escHtml(_phenoStade(b)[1])+' ('+b+')</span><b>'+String(Math.round(V.parB[b]*100)/100).replace('.',',')+'\u00a0ha</b></div>'; }).join('')+(V.sansS>0?'<div class="phr-ps"><span>Sans note</span><b>'+String(Math.round(V.sansS*100)/100).replace('.',',')+'\u00a0ha</b></div>':'')+'</div></aside></div>';
+  else h+='<div class="phr-liste">'+corps+'</div>';
   el.innerHTML=h;
 }
-function _phenoGroupe(b){ b=Number(b); return b<=16?1:b<=57?2:b<=65?3:b<=79?4:5; }
+function _phenoModeVue(m){ _phenoMode=(m==='cuvee')?'cuvee':'parcelle'; _phenoOuverte=''; _phenoRendreVue(); }
+function _phenoFiltreBascule(){ _phenoFiltre=!_phenoFiltre; _phenoRendreVue(); }
+function _phenoOuvrir(nom){ _phenoOuverte=(_phenoOuverte===nom)?'':nom; _phenoRendreVue(); }
+function _phenoNoterDirect(nom,b){
+  if(!_phenoAdm()||!_phenoStade(b)) return;
+  var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
+  var auj=todayStr(), di=document.getElementById('phr-date'), d=(di&&_phenoOuverte===nom&&di.value)?di.value:auj; if(d>auj) d=auj;
+  _phenoOuverte=''; _phenoAjouter([p],Number(b),d);
+}
+function _phenoAjouter(cibles,b,d){
+  if(!_phenoAdm()||!cibles||!cibles.length||!_phenoStade(b)) return;
+  var an=String(d).slice(0,4), P=window.PHENO||(window.PHENO={}); if(!Array.isArray(P[an])) P[an]=[];
+  var par=(window.currentUser&&window.currentUser.nom)||'', t=new Date().toISOString();
+  P[an]=P[an].concat(cibles.map(function(x){ return { pid:x.pid||'', nom:x.nom, b:Number(b), d:d, par:par, t:t }; }));
+  saveData('pheno');
+  var n=cibles.length, lib=_phenoStade(b)[2]+' ('+Number(b)+')';
+  showToastAnnuler((n>1?n+' parcelles':cibles[0].nom)+' \u00b7 '+lib, function(){
+    var Q=window.PHENO||{}; if(Array.isArray(Q[an])) Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); });
+    saveData('pheno'); _phenoRafraichir();
+  });
+  _phenoRafraichir();
+}
+function _phenoNoterCuvee(cuvee){
+  if(!_phenoAdm()) return;
+  var cuv=_phenoCuvees(), xs=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'&&cuv[p.nom]===cuvee; }); if(!xs.length) return;
+  _phenoP=xs[0]; _phenoB=null; _phenoCuv={ nom:cuvee, noms:xs.map(function(p){ return p.nom; }) };
+  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
+  t.textContent=cuvee+' \u00b7 noter pour la cuv\u00e9e'; s.textContent=xs.length+' parcelle'+(xs.length>1?'s':'')+' \u2014 d\u00e9cochez celles qui n\u2019y sont pas';
+  var auj=todayStr();
+  c.innerHTML='<div class="phn-st" role="radiogroup" aria-label="Stade atteint">'+_PHENO_STADES.map(function(x){ return '<button type="button" class="phn-b" role="radio" aria-checked="false" data-b="'+x[0]+'" onclick="_phenoChoisir(+this.dataset.b)"><span>'+_escHtml(x[1])+'</span><b>'+x[0]+'</b></button>'; }).join('')+'</div>'
+    +'<div class="phn-cuv">'+xs.map(function(p){ var e=_phenoDernier(p); return '<label><input type="checkbox" checked data-nom="'+_escAttr(p.nom)+'"><span>'+_escHtml(p.nom)+'</span><small>'+_escHtml(e?_phenoLib(e):'sans note')+'</small></label>'; }).join('')+'</div>'
+    +'<label class="phn-date"><span>Date</span><input type="date" id="phn-date" value="'+auj+'" max="'+auj+'"></label>'
+    +'<button type="button" class="mbtn verte" id="phn-ok" onclick="_phenoEnregistrer()" disabled>Enregistrer le stade</button>';
+  openOv('ovPheno');
+}
+function _phenoCuveeCibles(){
+  if(!_phenoCuv) return null;
+  var noms=[].slice.call(document.querySelectorAll('#phn-corps .phn-cuv input[type=checkbox]')).filter(function(i){ return i.checked; }).map(function(i){ return i.dataset.nom; });
+  _phenoCuv=null;
+  return (window.PARCELLES||[]).filter(function(p){ return p&&noms.indexOf(p.nom)>=0; });
+}
+function _phenoAccueil(){
+  var el=document.getElementById('home-pheno-note'); if(!el) return;
+  var auj=todayStr();
+  if(!_phenoAdm()||!_phenoEnSaison(auj)){ el.style.display='none'; el.innerHTML=''; return; }
+  var V=_phenoVue(_phenoAn(),auj), n=V.aNoter.length;
+  if(!n){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='';
+  el.innerHTML='<button type="button" class="phr-acc" onclick="_phenoAllerReleve()"><span><b>Relev\u00e9 des stades</b><span>'+n+' parcelle'+(n>1?'s':'')+' \u00e0 noter \u2014 plus de 7 jours sans note</span></span><span class="phr-acc-v">Relever</span></button>';
+}
+function _phenoAllerReleve(){ if(typeof goTo==='function') goTo('parcelles'); _phenoFiltre=true; setTimeout(function(){ switchPTab('stades'); },0); }
 window._phenoNoter=_phenoNoter; window._phenoChoisir=_phenoChoisir; window._phenoEnregistrer=_phenoEnregistrer;
+window._phenoModeVue=_phenoModeVue; window._phenoFiltreBascule=_phenoFiltreBascule; window._phenoOuvrir=_phenoOuvrir; window._phenoNoterDirect=_phenoNoterDirect; window._phenoNoterCuvee=_phenoNoterCuvee; window._phenoAllerReleve=_phenoAllerReleve;
 function switchPTab(tab){
   var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');

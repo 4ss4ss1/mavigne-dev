@@ -665,3 +665,23 @@ Le dernier écran de `docs/maquettes/maquette-ux-v2.html` (« Réglages — l’
 ### 505d. Ce qui reste ouvert
 - **PHENO-1B** : la somme de températures depuis le 1ᵉʳ mars (archive Open-Meteo, en cache dans un document par campagne), la prévision GFV par cépage (seuils publiés : Pinot noir 1 219 et 2 511 °C·j, Chardonnay 1 217 et 2 541), recalée à chaque stade noté, la carte du Pilotage ; le tuto.
 - **À faire sur le poste** : `mv-harnais-rules` (l’émulateur) ; au déploiement, `firebase deploy --only firestore:rules`.
+
+## 506. ★★ PHENO-1A2 — LE RELEVÉ DES STADES, EN SAISON : DEUX APPUIS AU TÉLÉPHONE, UN CLIC SUR ORDINATEUR, PAR CUVÉE (31/10 — `src/app.js` (`_phenoRendreVue`, `_phenoVue`, `_phenoLignes`, `_phenoCuvees`, `_phenoAjouter`, `_phenoNoterDirect`, `_phenoNoterCuvee`, `_phenoCuveeCibles`, `_phenoAccueil`, `_phenoAllerReleve` ; `_phenoVoisines` retirée ; `renderHome`) · `src/styles.css` · `index.html` (`#home-pheno-note`) · `guide/04-vigne.html` · `src/utils.js` (APP 10.55) · `src/whats-new.js` · `public/sw.js` (SW 11.36) · `scripts/mv-harnais-phenoa.mjs` (réécrit) · `scripts/tutos-couverture.json` · `scripts/mv-ux-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PHENO-1A2.json` · base `64e2cdc`)
+
+### 506a. D’où ça vient
+Le retour de Nico sur PHENO-1A (31/10) : « hors saison l’emplacement est bien, mais dès l’entrée en saison il y a beaucoup trop de clics » ; « on ne peut pas regrouper par cépage : les parcelles sont souvent dans des états différents (à la rigueur par cuvée) » ; « on est un logiciel pro : l’affichage et la façon de noter doivent être pro ». Une maquette d’abord (`maquette-pheno-saisie-v1.html`) : **validée telle quelle** ; le relevé dans Stades **et** une carte « à noter » sur l’Accueil Vigne ; le regroupement **par cuvée**.
+
+### 506b. Ce qui change
+- **En saison (mars à septembre), la vue Stades est un relevé** : une ligne par parcelle, son stade (le code BBCH en chiffres tabulaires dans une pastille teintée, son nom), depuis quand. **Au téléphone, deux appuis** : la ligne se déplie sur l’échelle (les stades passés estompés, l’actuel cerclé, **le suivant mis en avant** ; la date changeable sur la ligne dépliée seulement), puis le stade. **Sur ordinateur, un clic** sur l’échelle de la ligne, dans un tableau (parcelle, cuvée, stade, depuis, échelle) avec la répartition à droite. « Annuler » six secondes ; jamais une date dans le futur.
+- **Par cuvée** (`_phenoCuvees`) : chaque parcelle sous la cuvée de la Cave la plus récente qui la cite (millésime décroissant ; noms ou objets) ; « Sans cuvée » en dernier ; l’en-tête dit l’étendue des stades ; **« Noter pour la cuvée »** ouvre la fenêtre avec les parcelles toutes cochées — chacune se décoche. **Le report par cépage et commune de PHENO-1A est retiré.**
+- **« À noter »** : plus de 7 jours sans note en saison — en ambre, filtrable ; **la carte « Relevé des stades »** de l’Accueil Vigne (administrateur, en saison) y mène, le filtre posé. **Hors saison**, la vue se lit ; on note depuis la fiche.
+- **L’affichage** : les tuiles retirées ; la couleur du stade en filet de 4 px ; une barre fine ; le titre de la charte. Six gestes neufs exemptés de tuto, motivés ; le bouton choisi de la bascule en couleurs de surface et de texte (lisible dans les deux thèmes — le contrôle du contraste l’a demandé).
+
+### 506c. Mesuré
+- `mv-harnais-phenoa`, réécrit : 12 assertions — le dernier stade par identifiant, les cuvées (la plus récente l’emporte), noter et Annuler, le refus hors admin, la date de la ligne dépliée seulement et jamais dans le futur, la vue, « à noter » en saison seulement, le document et sa règle, l’écran, l’affichage ; **9/9 mutants**.
+- Chaîne (621 commandes) : deux rouges à moi, suivis — **ACC-2** garde la fin de `renderHome` (les widgets puis sa carte) : l’appel de la carte du relevé passe avant, 10/10 et 9/9 ; **CARTES** compte les cartes « maison » (une classe de carte qui peint son fond elle-même) : le résumé de la vue passe par la carte du jeu (`mvcarte`), 48 ≤ 48. Plus `build-guide --check`, attendu.
+- `test:ux` : vert ; la référence garde 42 pour le Pilotage sur ordinateur (la hausse liée à l’heure, §470e).
+
+### 506d. Ce qui reste ouvert
+- **PHENO-1B** : la somme de températures, la prévision GFV, la carte du Pilotage, le tuto « Comment noter le stade ? ».
+- **À vérifier chez Nico** : deux appuis au téléphone, un clic sur ordinateur, « Noter pour la cuvée », la carte de l’Accueil.

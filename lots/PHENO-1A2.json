@@ -1,0 +1,37 @@
+{
+  "lot": "PHENO-1A2",
+  "section": "§506",
+  "base": "64e2cdca3fb6915df189aeede1c3931c8c46ecf5",
+  "inclut": [],
+  "date": "2026-11-01",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f7809a5f40fbd6c41541f80cc431c5711935fb133d4d99795f306d08e613d98e",
+    "date": "2026-11-01T05:08:45.201Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "1d448e7977c1ea996a6221c950b2207b8ea4a0e66aa8124268b9724de7a46515",
+    "CLAUDE.md": "d0b03564666ed24b1f45a168ab23c0e8aa5e2cd0f4697a528aa4c44785a6d9ed",
+    "docs/claude/INDEX.md": "ee48de0672e11b8c09867e183dcf626385c150b7f897a9ca29b1cf65c9591f98",
+    "docs/claude/chantiers-480-529.md": "ee2daaf8a0d762c7814e2695f5f52c3180cff6a641b0bf77e440103b16902d1d",
+    "docs/claude/journal.md": "d4aa17c890826821362d54ec3f5463bbb90aec09b927cd711931e3d23c561158",
+    "guide/04-vigne.html": "ff3ac31516312abf1f3eab5db1593ea3901e9335d24dbe1a83d2e260dca4e278",
+    "index.html": "820e5835f6f029edb43571f8b8e6b0bc80f1162f5bdb9cff6d9c7cdf6900c03e",
+    "public/sw.js": "ab09caea28e3fc6be3d9d42e21f265aa24317c16a56efa7b0c33f8b718db4fc3",
+    "scripts/harnais-claude-md.mjs": "75e96ca09b726844a9a39ad4c6dc64dec62a2b77156f8a87d73856324c955fa3",
+    "scripts/mv-harnais-phenoa.mjs": "a271319151c5e4dd45e7402acf11d12022bdaf69b77d2f34740ebe9f2bc3432f",
+    "scripts/mv-ux-baseline.json": "90555e703100c86ee2b52d1076e38c4515c87bb78bd3fdb5df5e00d2cb115696",
+    "scripts/tutos-couverture.json": "cc2bf8c75003ad41a044fc6b562517bce75605bd6ddde6ff97c6bd87630a108b",
+    "src/app.js": "fdcfd268d01f87a6ab3a3ff90fe5acbbd63c600fc3762c68fd0a11ac5ff17548",
+    "src/styles.css": "d45f003261bb09963d5fdcf7a60f66d289d880f00405df22d24e582e6e739b7a",
+    "src/utils.js": "61cbd67024980799ee0d9eba0f11c70f886b063919f9c2d6a876b4ad4b227966",
+    "src/whats-new.js": "505654b3b7719d3c4b020c96fcf544a7dc9fac0f4eb9b3c61910fd6aa22abd0c"
+  }
+}

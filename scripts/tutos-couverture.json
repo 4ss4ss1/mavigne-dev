@@ -40,6 +40,12 @@
     "_pl2PlusVa": "PLAN-UX-1 (§501) : une ligne du menu « … » ouvre congés, chaleur, l’année suivante ou « Les gens » — les gestes d’avant",
     "_phenoNoter": "PHENO-1A (§505) : « Noter le stade » (fiche de la parcelle, administrateur) — un tuto « Comment noter le stade ? » viendra avec PHENO-1B, quand la prévision dira à quoi il sert",
     "_phenoChoisir": "PHENO-1A (§505) : choisir le stade dans la fenêtre — un bouton par stade, rien à apprendre",
-    "_phenoEnregistrer": "PHENO-1A (§505) : « Enregistrer le stade », avec Annuler six secondes — le bouton dit ce qu’il fait"
+    "_phenoEnregistrer": "PHENO-1A (§505) : « Enregistrer le stade », avec Annuler six secondes — le bouton dit ce qu’il fait",
+    "_phenoModeVue": "PHENO-1A2 (§506) : la bascule « Par parcelle · Par cuvée » du relevé — rien à apprendre",
+    "_phenoFiltreBascule": "PHENO-1A2 (§506) : le filtre « À noter » du relevé — rien à apprendre",
+    "_phenoOuvrir": "PHENO-1A2 (§506) : déplier une ligne du relevé au téléphone (l’échelle des stades) — un tuto « Comment noter le stade ? » viendra avec PHENO-1B",
+    "_phenoNoterDirect": "PHENO-1A2 (§506) : un appui sur le stade note la parcelle, avec Annuler six secondes — le tuto viendra avec PHENO-1B",
+    "_phenoNoterCuvee": "PHENO-1A2 (§506) : « Noter pour la cuvée » — la fenêtre dit ce qu’elle fait, chaque parcelle se décoche",
+    "_phenoAllerReleve": "PHENO-1A2 (§506) : la carte « Relevé des stades » de l’Accueil mène au relevé — un lien"
   }
 }

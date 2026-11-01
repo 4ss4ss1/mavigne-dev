@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.55', d: '2026-10-31', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Le relevé des stades, en saison',
+      desc: "En saison, l’onglet «\u00a0Stades\u00a0» de Parcelles devient un relevé\u00a0: au téléphone, un appui sur la parcelle puis un sur le stade (le suivant est mis en avant)\u00a0; sur ordinateur, un clic sur l’échelle. La bascule «\u00a0Par cuvée\u00a0» range les parcelles selon les cuvées de la Cave, et «\u00a0Noter pour la cuvée\u00a0» les note ensemble (chacune se décoche). Les parcelles à noter le disent, et une carte sur l’Accueil y mène. Le report par cépage disparaît." },
+  ] },
   { v: '10.54', d: '2026-10-31', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Les stades de la vigne, parcelle par parcelle',
       desc: "Depuis la fiche d’une parcelle, «\u00a0Noter le stade\u00a0» : le stade atteint (du débourrement à la véraison, avec son code BBCH) et la date — et, d’une case, le même stade sur les parcelles du même cépage et de la même commune. L’onglet «\u00a0Stades\u00a0» de Parcelles montre où en est la vigne\u00a0: la mosaïque des parcelles, les surfaces par stade, et celles restées sans stade depuis douze jours." },
