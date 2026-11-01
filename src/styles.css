@@ -3962,6 +3962,15 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .phr-tr .phr-ech-pc .phr-e.passe em{color:var(--phc);}
 .phr-resume{padding:var(--e-3,12px) var(--e-4,16px);}   /* la carte du jeu (mvcarte) porte le fond et le bord */
 .phr-ct2{font-family:var(--font-titre,Georgia,serif);font-size:var(--pt-md,20px);font-weight:600;color:var(--texte,#1B1A18);}
+.phr-cqv-n{display:flex;flex-direction:column;gap:2px;margin:var(--e-3,12px) 0 var(--e-2,8px);}
+.phr-cqv-n b{font-size:var(--pt-md,20px);font-weight:600;font-variant-numeric:tabular-nums;color:var(--texte,#1B1A18);}
+.phr-cqv-n span,.phr-cqv-v{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
+.phr-cqv-v{margin-top:var(--e-2,8px);}
+.phr-prev{display:flex;flex-direction:column;padding:var(--e-2,8px) 0;border-top:1px solid var(--ligne,#E7E6E2);}
+.phr-prev b{font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte,#1B1A18);}
+.phr-prev span{font-size:var(--pt-base,15px);color:var(--texte,#1B1A18);}
+.phr-cqv-pied{margin-top:var(--e-2,8px);}
+#phr-cqv{margin-top:var(--e-3,12px);}
 .phr-ps{display:flex;justify-content:space-between;gap:var(--e-2,8px);padding:var(--e-1,4px) 0;border-top:1px solid var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);}
 .phn-cuv{display:flex;flex-direction:column;margin-bottom:var(--e-3,12px);}
 .phn-cuv label{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:var(--e-2,8px);min-height:44px;border-top:1px solid var(--ligne,#E7E6E2);}

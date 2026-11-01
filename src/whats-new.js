@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.56', d: '2026-11-01', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Ce qui vient : la floraison et la véraison prévues',
+      desc: "Dans l’onglet «\u00a0Stades\u00a0», «\u00a0Ce qui vient\u00a0» additionne les températures moyennes depuis le 1er mars, les compare à l’an dernier, et donne la date probable de la pleine floraison et de la véraison du Pinot noir et du Chardonnay (modèle GFV, seuils publiés), à une semaine près. Une pleine floraison notée recale la véraison." },
+  ] },
   { v: '10.55', d: '2026-10-31', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Le relevé des stades, en saison',
       desc: "En saison, l’onglet «\u00a0Stades\u00a0» de Parcelles devient un relevé\u00a0: au téléphone, un appui sur la parcelle puis un sur le stade (le suivant est mis en avant)\u00a0; sur ordinateur, un clic sur l’échelle. La bascule «\u00a0Par cuvée\u00a0» range les parcelles selon les cuvées de la Cave, et «\u00a0Noter pour la cuvée\u00a0» les note ensemble (chacune se décoche). Les parcelles à noter le disent, et une carte sur l’Accueil y mène. Le report par cépage disparaît." },

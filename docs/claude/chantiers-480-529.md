@@ -685,3 +685,23 @@ Le retour de Nico sur PHENO-1A (31/10) : « hors saison l’emplacement est bien
 ### 506d. Ce qui reste ouvert
 - **PHENO-1B** : la somme de températures, la prévision GFV, la carte du Pilotage, le tuto « Comment noter le stade ? ».
 - **À vérifier chez Nico** : deux appuis au téléphone, un clic sur ordinateur, « Noter pour la cuvée », la carte de l’Accueil.
+
+## 507. ★★ PHENO-1B — CE QUI VIENT : LA SOMME DE TEMPÉRATURES ET LA PRÉVISION GFV, RECALÉE PAR LES STADES NOTÉS (01/11 — `src/app.js` (`_PHENO_GFV`, `_phenoSerie`, `_phenoCumuls`, `_phenoCumulAu`, `_phenoDateSeuil`, `_phenoPrevisions`, `_phenoClim`, `_phenoJours`, `_phenoTemp`, `_phenoCqvHtml`, `_phenoCqvRemplir` ; `_phenoRendreVue`) · `firebase.json` (`connect-src`) · `src/styles.css` · `guide/04-vigne.html` · `src/utils.js` (APP 10.56) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.37) · `scripts/mv-harnais-pheno1b.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-480-529.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PHENO-1B.json` · base `185230c`)
+
+### 507a. D’où ça vient
+La partie 1 de `docs/maquettes/maquette-niveau-au-dessus-v1.html`, « Ce qui vient » : « moyennes journalières depuis le 1ᵉʳ mars, base 0 °C · modèle GFV (Parker et al. 2011, 2013) » ; le cumul et l’écart à l’an dernier ; « Pleine floraison, Pinot noir — vers le 4 juin, à une semaine près », la véraison ; « Seuils publiés : Pinot noir 1 219 et 2 511 °C·j, Chardonnay 1 217 et 2 541. Au-delà des 16 jours de prévision, la moyenne des dix dernières années. Chaque stade noté recale la suite. »
+
+### 507b. Ce qui change
+- **La série** (`_phenoSerie`) : du 1ᵉʳ mars au 31 octobre, chaque jour pris dans l’ordre — **l’observé** (l’archive Open-Meteo jusqu’à la veille), **la prévision** (10 jours passés, 16 à venir — elle comble les jours que l’archive n’a pas encore), **la moyenne des dix dernières années** au même jour ; elle s’arrête au premier jour sans aucune source. **Le cumul** (`_phenoCumuls`) : base 0 °C, un jour sous zéro compte pour rien.
+- **La prévision** (`_phenoPrevisions`) : pour chaque cépage du domaine qui a un seuil publié **dans la maquette** — Pinot noir, Chardonnay, et eux seuls (« aucun seuil publié retenu » pour les autres) —, le jour où le cumul atteint le seuil. **Recalage** : une pleine floraison notée (stade ≥ 65 sur une parcelle du cépage) devient « notée le … » et décale le seuil de véraison de l’écart observé (cumul au jour noté − seuil) ; une véraison notée (≥ 81) devient « notée ».
+- **Les températures** (`_phenoTemp`) : trois requêtes (l’archive de l’année, la prévision, l’archive des dix ans — celle-ci une fois par campagne), délai de 8 s, gardées sur l’appareil (`mvPhenoT1:<position>:<année>`) — **une lecture par jour et par appareil**. En panne : la dernière lecture (« températures de la dernière lecture »), sinon la raison. ★ **Écart à la maquette, dit à Nico** : le cache n’est pas un document Firestore — pas de document ni de règle de plus pour un calcul que chaque appareil refait en une requête.
+- **`firebase.json`** : `https://archive-api.open-meteo.com` rejoint `connect-src` (l’archive n’est pas sur l’hôte de la prévision) — **déployé avec l’hébergement**.
+- **La carte « Ce qui vient »** (`_phenoCqvHtml`) : sous le relevé au téléphone, à droite sur ordinateur ; hors saison, « Le calcul reprend le 1ᵉʳ mars » ; en lecture, en panne, complète (le cumul de la veille, l’écart à l’an dernier, les dates, les seuils).
+
+### 507c. Mesuré
+- `mv-harnais-pheno1b`, sur une saison fabriquée (15 °C chaque jour, dates calculées à la main) : 10 assertions — l’ordre des sources et l’arrêt au premier trou, la base 0 °C, 1 219 °C·j le 21 mai et 2 511 le 15 août, Pinot noir et Chardonnay et pas l’Aligoté, la pleine floraison notée le 11 mai qui décale la véraison de −139 au 6 août, la moyenne par jour de l’année, la carte (complète : 1 275 °C·j et +120 ; hors saison, en lecture, en panne), les requêtes et la garde du jour, la politique de sécurité, la carte posée ; **7/7 mutants** (dont un seuil faux de deux chiffres inversés).
+- `test:ux`, tutos et chaîne : voir la note de livraison.
+
+### 507d. Ce qui reste ouvert
+- **PHENO-1C** : la carte résumée dans Pilotage › Aujourd’hui › Terrain (la maquette), le tuto « Comment noter le stade ? ».
+- **À vérifier chez Nico** : la carte en saison (les dates qu’elle donne pour le domaine), et hors ligne.

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.36
+// MA VIGNE — Service Worker v11.37
+// v11.37 (01/11/2026) — PHENO-1B (§507) : « Ce qui vient » — la somme de températures et la prévision GFV, recalée par les stades notés.
 // v11.36 (31/10/2026) — PHENO-1A2 (§506) : le relevé des stades en saison (deux appuis au téléphone, un clic sur ordinateur), par cuvée, la carte de l'Accueil.
 // v11.35 (31/10/2026) — PHENO-1A (§505) : le stade par parcelle (noté par l'admin, report par cépage et commune), la vue « Stades » de Parcelles.
 // v11.34 (31/10/2026) — REGL-UX-1 (§504) : les Réglages — le domaine en première ligne, les lignes à 48 px, plus de textes à 8-9 px à l'écran.
@@ -4668,7 +4669,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.36';
+const CACHE_NAME   = 'mavigne-v11.37';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4685,7 +4686,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.36 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.37 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4705,7 +4706,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.36 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.37 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

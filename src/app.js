@@ -10583,6 +10583,86 @@ function _phenoEchelle(x,classe,saison){
       :'<span class="phr-e '+k+'"><em>'+s[0]+'</em><span>'+_escHtml(s[2])+'</span></span>';
   }).join('')+'</div>';
 }
+// ★ PHENO-1B (§507) — CE QUI VIENT (maquette-niveau-au-dessus-v1, partie 1) : la somme de températures depuis le 1er mars (moyennes
+//   journalières, base 0 °C — le modèle GFV, Parker et al. 2011, 2013) et la prévision de pleine floraison et de véraison par cépage, sur
+//   les seuils publiés que porte la maquette (Pinot noir 1 219 et 2 511 °C·j, Chardonnay 1 217 et 2 541) — pas d'autre cépage sans
+//   seuil publié. Les températures : l'archive Open-Meteo jusqu'à la veille, la prévision sur 16 jours, puis la moyenne des dix dernières
+//   années. Une requête par jour et par appareil (gardée sur l'appareil). Chaque stade noté recale la suite : une pleine floraison notée
+//   remplace la prévision de floraison et décale le seuil de véraison de l'écart observé.
+var _PHENO_GFV={ 'pinot noir':[1219,2511], 'chardonnay':[1217,2541] };
+var _PHENO_GFV_NOM={ 'pinot noir':'Pinot noir', 'chardonnay':'Chardonnay' };
+function _phenoNorm(c){ return String(c||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
+function _phenoJourSuiv(d){ var x=new Date(d+'T12:00:00'); x.setDate(x.getDate()+1); return x.toISOString().slice(0,10); }
+function _phenoSerie(an,obs,prev,clim){
+  var out=[], d=an+'-03-01', fin=an+'-10-31';
+  while(d<=fin){ var v=(obs&&obs[d]!=null)?obs[d]:(prev&&prev[d]!=null)?prev[d]:(clim&&clim[d.slice(5)]!=null)?clim[d.slice(5)]:null; if(v==null) break; out.push([d,Number(v)]); d=_phenoJourSuiv(d); }
+  return out;
+}
+function _phenoCumuls(serie){ var c=0; return serie.map(function(x){ c+=Math.max(0,x[1]); return [x[0],c]; }); }
+function _phenoCumulAu(cumuls,d){ var v=null; for(var i=0;i<cumuls.length&&cumuls[i][0]<=d;i++) v=cumuls[i][1]; return v; }
+function _phenoDateSeuil(cumuls,seuil){ for(var i=0;i<cumuls.length;i++){ if(cumuls[i][1]>=seuil) return cumuls[i][0]; } return null; }
+function _phenoPrevisions(cumuls,an){
+  var notes=_phenoListe(an), P=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }), out=[];
+  Object.keys(_PHENO_GFV).forEach(function(k){
+    var ps=P.filter(function(p){ return _phenoCepages(p).some(function(c){ return _phenoNorm(c)===k; }); }); if(!ps.length) return;
+    var pids=ps.map(function(p){ return p.pid||p.nom; });
+    var mien=notes.filter(function(e){ return pids.indexOf(e.pid||e.nom)>=0||ps.some(function(p){ return !e.pid&&e.nom===p.nom; }); });
+    var vu=function(b){ var ds=mien.filter(function(e){ return Number(e.b)>=b; }).map(function(e){ return e.d; }).sort(); return ds[0]||null; };
+    var S=_PHENO_GFV[k], fl=vu(65), ve=vu(81), dec=0;
+    if(fl){ var c=_phenoCumulAu(cumuls,fl); if(c!=null) dec=c-S[0]; }
+    out.push({ cep:_PHENO_GFV_NOM[k], flo:{ d:fl||_phenoDateSeuil(cumuls,S[0]), vu:!!fl }, ver:{ d:ve||_phenoDateSeuil(cumuls,S[1]+dec), vu:!!ve }, dec:Math.round(dec) });
+  });
+  return out;
+}
+function _phenoClim(jours){
+  var acc={}; Object.keys(jours||{}).forEach(function(d){ var k=d.slice(5); if(jours[d]==null) return; (acc[k]=acc[k]||[]).push(Number(jours[d])); });
+  var m={}; Object.keys(acc).forEach(function(k){ m[k]=acc[k].reduce(function(a,b){ return a+b; },0)/acc[k].length; }); return m;
+}
+function _phenoJours(j){ var o={}; if(j&&j.daily&&Array.isArray(j.daily.time)) j.daily.time.forEach(function(d,i){ var v=j.daily.temperature_2m_mean[i]; if(v!=null) o[d]=v; }); return o; }
+var _phenoTempEnCours=null;
+function _phenoTemp(cb){
+  var auj=todayStr(), an=auj.slice(0,4), g=(typeof getDomaineGeo==='function')?getDomaineGeo():null;
+  if(!g||g.lat==null||g.lng==null){ cb({ err:'Position du domaine inconnue (Réglages)' }); return; }
+  var cle='mvPhenoT1:'+Number(g.lat).toFixed(3)+','+Number(g.lng).toFixed(3)+':'+an, C=null;
+  try{ C=JSON.parse(localStorage.getItem(cle)||'null'); }catch(e){ C=null; }
+  if(C&&C.jour===auj&&C.obs){ cb(C); return; }
+  if(_phenoTempEnCours){ _phenoTempEnCours.push(cb); return; } _phenoTempEnCours=[cb];
+  var ll='latitude='+Number(g.lat).toFixed(4)+'&longitude='+Number(g.lng).toFixed(4), hier=new Date(auj+'T12:00:00'); hier.setDate(hier.getDate()-1); hier=hier.toISOString().slice(0,10);
+  var finObs=hier<an+'-10-31'?hier:an+'-10-31', besoinClim=!(C&&C.clim&&C.climAn===an);
+  var avecDelai=function(u){ var ctl=(typeof AbortController==='function')?new AbortController():null, t=ctl?setTimeout(function(){ ctl.abort(); },8000):0;
+    return fetch(u,ctl?{signal:ctl.signal}:undefined).then(function(r){ if(t) clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); };
+  var reqs=[ finObs>=an+'-03-01'?avecDelai('https://archive-api.open-meteo.com/v1/archive?'+ll+'&start_date='+an+'-03-01&end_date='+finObs+'&daily=temperature_2m_mean&timezone=Europe%2FParis'):Promise.resolve(null),
+    avecDelai('https://api.open-meteo.com/v1/forecast?'+ll+'&daily=temperature_2m_mean&past_days=10&forecast_days=16&timezone=Europe%2FParis'),
+    besoinClim?avecDelai('https://archive-api.open-meteo.com/v1/archive?'+ll+'&start_date='+(Number(an)-10)+'-03-01&end_date='+(Number(an)-1)+'-10-31&daily=temperature_2m_mean&timezone=Europe%2FParis'):Promise.resolve(null) ];
+  Promise.all(reqs).then(function(R){
+    var T={ jour:auj, obs:_phenoJours(R[0]), prev:_phenoJours(R[1]), clim:besoinClim?null:C.clim, climAn:an, anPasse:besoinClim?null:C.anPasse };
+    if(besoinClim){ var J=_phenoJours(R[2]); T.clim=_phenoClim(J); var dp=(Number(an)-1)+auj.slice(4), c=0; Object.keys(J).sort().forEach(function(d){ if(d>=(Number(an)-1)+'-03-01'&&d<=dp) c+=Math.max(0,J[d]); }); T.anPasse=c; }
+    try{ localStorage.setItem(cle,JSON.stringify(T)); }catch(e){ if(window.logError) window.logError({ level:'info', msg:'PHENO-1B : températures non gardées sur l’appareil', err:String(e) }); }
+    return T;
+  }).catch(function(e){ return (C&&C.obs)?Object.assign({},C,{ vieux:true }):{ err:'Températures indisponibles (hors ligne ou Open-Meteo injoignable)' }; })
+  .then(function(T){ var L=_phenoTempEnCours||[]; _phenoTempEnCours=null; L.forEach(function(f){ try{ f(T); }catch(e){ if(window.logError) window.logError({ level:'info', msg:'PHENO-1B : affichage de « Ce qui vient »', err:String(e) }); } }); });
+}
+function _phenoFmtN(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0'); }
+function _phenoCqvHtml(T,auj){
+  var tete='<div class="mvcarte phr-resume" id="phr-cqv"><div class="phr-ct2">Ce qui vient</div><div class="phr-m">moyennes journali\u00e8res depuis le 1<sup>er</sup> mars, base 0\u00a0\u00b0C \u00b7 mod\u00e8le GFV (Parker et al. 2011, 2013)</div>';
+  if(!_phenoEnSaison(auj)) return tete+'<div class="phr-cqv-v">Le calcul reprend le 1<sup>er</sup> mars.</div></div>';
+  if(!T) return tete+'<div class="phr-cqv-v phr-m">Lecture des temp\u00e9ratures\u2026</div></div>';
+  if(T.err) return tete+'<div class="phr-cqv-v phr-m">'+_escHtml(T.err)+'</div></div>';
+  var an=auj.slice(0,4), cum=_phenoCumuls(_phenoSerie(an,T.obs,T.prev,T.clim)), hier=new Date(auj+'T12:00:00'); hier.setDate(hier.getDate()-1); hier=hier.toISOString().slice(0,10);
+  var now=_phenoCumulAu(cum,hier), h=tete;
+  if(now!=null){ var ec=(T.anPasse!=null)?Math.round(now-T.anPasse):null;
+    h+='<div class="phr-cqv-n"><b>'+_phenoFmtN(now)+'\u00a0\u00b0C\u00b7j</b>'+(ec!=null?'<span>'+(ec>=0?'+':'\u2212')+_phenoFmtN(Math.abs(ec))+' face \u00e0 l\u2019an dernier \u00e0 la m\u00eame date</span>':'')+'</div>'; }
+  var P=_phenoPrevisions(cum,an);
+  if(!P.length) h+='<div class="phr-m">Aucun c\u00e9page du domaine n\u2019a de seuil publi\u00e9 retenu (Pinot noir, Chardonnay).</div>';
+  P.forEach(function(x){
+    [['Pleine floraison',x.flo],['V\u00e9raison',x.ver]].forEach(function(q){
+      var d=q[1].d; h+='<div class="phr-prev"><b>'+_escHtml(q[0]+', '+x.cep)+'</b><span>'+(d?_escHtml((q[1].vu?'not\u00e9e ':'vers ')+_phenoJour(d)+(q[1].vu?'':', \u00e0 une semaine pr\u00e8s')):'au-del\u00e0 du 31 octobre')+'</span></div>';
+    });
+  });
+  h+='<div class="phr-m phr-cqv-pied">Seuils publi\u00e9s\u00a0: Pinot noir 1\u00a0219 et 2\u00a0511\u00a0\u00b0C\u00b7j, Chardonnay 1\u00a0217 et 2\u00a0541. Au-del\u00e0 des 16 jours de pr\u00e9vision, la moyenne des dix derni\u00e8res ann\u00e9es. Chaque stade not\u00e9 recale la suite.'+(T.vieux?' (Temp\u00e9ratures de la derni\u00e8re lecture.)':'')+'</div>';
+  return h+'</div>';
+}
+function _phenoCqvRemplir(){ var auj=todayStr(); if(!_phenoEnSaison(auj)) return; _phenoTemp(function(T){ var el=document.getElementById('phr-cqv'); if(el) el.outerHTML=_phenoCqvHtml(T,auj); }); }
 function _phenoRendreVue(){
   var el=document.getElementById('pstades'); if(!el) return;
   var an=_phenoAn(), auj=todayStr(), saison=_phenoEnSaison(auj), V=_phenoVue(an,auj), desk=_phenoDesk(), adm=_phenoAdm();
@@ -10610,9 +10690,10 @@ function _phenoRendreVue(){
     });
   } else corps=L.map(ligne).join('');
   if(desk) h+='<div class="phr-pc"><table class="phr-table"><thead><tr><th class="phr-f"></th><th>Parcelle</th><th>Cuv\u00e9e</th><th>Stade</th><th>Depuis</th><th>\u00c9chelle BBCH</th></tr></thead><tbody>'+corps+'</tbody></table>'
-    +'<aside class="phr-cote"><div class="mvcarte phr-resume"><div class="phr-ct2">O\u00f9 en est la vigne</div>'+_phenoBarre(V)+'<div class="phr-k">Par stade, en surface</div>'+Object.keys(V.parB).map(Number).sort(function(a,b){ return b-a; }).map(function(b){ return '<div class="phr-ps"><span>'+_escHtml(_phenoStade(b)[1])+' ('+b+')</span><b>'+String(Math.round(V.parB[b]*100)/100).replace('.',',')+'\u00a0ha</b></div>'; }).join('')+(V.sansS>0?'<div class="phr-ps"><span>Sans note</span><b>'+String(Math.round(V.sansS*100)/100).replace('.',',')+'\u00a0ha</b></div>':'')+'</div></aside></div>';
-  else h+='<div class="phr-liste">'+corps+'</div>';
+    +'<aside class="phr-cote"><div class="mvcarte phr-resume"><div class="phr-ct2">O\u00f9 en est la vigne</div>'+_phenoBarre(V)+'<div class="phr-k">Par stade, en surface</div>'+Object.keys(V.parB).map(Number).sort(function(a,b){ return b-a; }).map(function(b){ return '<div class="phr-ps"><span>'+_escHtml(_phenoStade(b)[1])+' ('+b+')</span><b>'+String(Math.round(V.parB[b]*100)/100).replace('.',',')+'\u00a0ha</b></div>'; }).join('')+(V.sansS>0?'<div class="phr-ps"><span>Sans note</span><b>'+String(Math.round(V.sansS*100)/100).replace('.',',')+'\u00a0ha</b></div>':'')+'</div>'+_phenoCqvHtml(null,auj)+'</aside></div>';
+  else h+='<div class="phr-liste">'+corps+'</div>'+_phenoCqvHtml(null,auj);   // ★ PHENO-1B (§507) : « Ce qui vient » sous le relevé au téléphone
   el.innerHTML=h;
+  _phenoCqvRemplir();
 }
 function _phenoModeVue(m){ _phenoMode=(m==='cuvee')?'cuvee':'parcelle'; _phenoOuverte=''; _phenoRendreVue(); }
 function _phenoFiltreBascule(){ _phenoFiltre=!_phenoFiltre; _phenoRendreVue(); }
