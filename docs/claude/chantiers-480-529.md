@@ -861,3 +861,30 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - **Dater les paiements d’avant le lot** : « À traiter » les compte et ouvre le premier (« Dater ») ; jusque-là, le livre les range à leur date de facture.
 - **Un domaine supprimé** se voit dans les totaux, l’export et le livre, mais n’a pas de carte : ses factures ne se modifient plus depuis la console (ni paiement, ni relance) — à reprendre avec la facturation de GT-UI-4 si le cas se présente.
 - **Le contact de facturation** (D5) n’existe pas encore : la relance part toujours sans destinataire (GT-UI-3).
+
+## 513. ★★★ GTFIX-4 — CE QUI MENTAIT ENCORE : TOUT SE LIT EN PARALLÈLE, UNE LECTURE RATÉE SE DIT, UNE PORTE, UN ÉCRAN DE CONFIG (01/11 — `src/admin-gt.js` · `src/firebase.js` · `scripts/mv-harnais-gtfix4.mjs` (neuf) · `scripts/mv-harnais-gtfix1.mjs` · `scripts/mv-harnais-liste.mjs` — base `574364a` « gtfix3 » — APP 10.58 et SW 11.39 inchangés)
+
+### 513a. D’où ça vient
+- **Le plan en 11 lots** (§28 « ★ CONSOLE GT ») : GTFIX-4, le dernier des quatre lots de correction — « suite » de Nico, le 01/11.
+- **L’audit** (`docs/maquettes/audit-console-gt-2026-11-01.md`) : **GT-B11** la console se chargeait une lecture après l’autre (≈ 30 allers-retours, 220 à 30 clients), et un geste de lead rechargeait tout ; **GT-B12** une lecture ratée s’affichait « 0 membre, 0 parcelle » ; **GT-B15** le compteur des codes d’essai, plus tenu par personne depuis GT-1 ; **GT-B16** « Accéder » ouvrait l’écran de connexion du domaine et notait un accès qui n’avait pas eu lieu ; **GT-B17** deux écrans de config ; **GT-B21** les compteurs figés après un geste ; **GT-B22** une barre de saison vide sur chaque carte ; **GT-B23** les icônes du journal en toutes lettres ; **GT-B24** la fenêtre Erreurs : doublons et « il y a 312 h ».
+
+### 513b. Ce qui change
+- **Le chargement** (`renderAdminGT`) : le registre (`tenants` et `clients`) d’abord, puis tout le reste d’un seul tenant — les sept clés de chaque domaine (`_AGT_CLES_DOM`), les six documents GT, les dernières connexions et les demandes du site — **en parallèle**. Chaque lecture passe au serveur et LÈVE en cas d’échec (`fbAdminLire` ; `fbGtLire`, neuf, pour un document de `_guerettech`) ; elle garde son état — faite, absente, en échec.
+- **Une lecture ratée se dit** : un domaine se construit depuis ses lectures (`_agtDomaineDepuisLectures`) — une clé en échec donne `null`, affiché « — », jamais 0, et `echecs` la nomme (la carte : « Lecture impossible : membres — chiffres manquants ») ; une clé absente (domaine neuf) n’est pas un échec. **Un bandeau en tête de chaque onglet** (`_agtBandeauLectures`) dit ce qui n’a pas pu être lu — le registre, la facturation, le journal, les domaines en partie — « Ce qui en dépend manque à l’écran — ce n’est pas zéro », avec « Relire ». Un registre illisible ne se réduit plus en silence au seul domaine de référence.
+- **Les compteurs suivent chaque geste** (`_agtMajCompteurs`, appelée par `agtRenderBody` et par le chargement) : l’en-tête, les pastilles Incidents, Radar et Leads, et le voyant du bas — qui repasse au vert. Le statut ou la note d’un lead se mettent à jour sur place, sans tout recharger.
+- **Une seule porte** : « Accéder » est parti (`agtAccedeTenant` supprimée) ; « Préparer » entre dans les données d’un domaine ; « Copier le lien d’invitation » copie son adresse.
+- **Un seul écran de config** : « Config » ouvre la fiche › Domaine, qui reçoit l’acceptation CGU + DPA (`_agtCguHtml`) ; la fenêtre Config (`agtShowConfig`, `agtSaveConfig`) est partie ; la règle unique `_agtMutConfigDomaine` reste.
+- **Le reste** : la barre de saison vide retirée ; le journal d’accès dessine ses icônes (`_agtIco`) ; la fenêtre Erreurs lit au serveur (une lecture ratée se dit), fusionne ce poste et le domaine une fois par erreur (`_agtErrFusion`) et donne l’âge en jours (`_agtRelTime`) ; l’usage d’un code d’essai se lit au journal, où le serveur le note (`_agtEntreesCode`) — `agtUpdateEssaiAccess`, mort, retiré (l’appel d’`app.js` est gardé par un test d’existence).
+
+### 513c. Mesuré
+- `mv-harnais-gtfix4` (neuf) : **20 assertions, 12/12 mutants** — les fonctions pures jouées sur des données (une lecture en échec, une clé absente, des entrées de journal, des erreurs en double, le bandeau), le reste lu dans les sources.
+- `mv-harnais-gtfix1` suit : `agtSaveConfig` n’est plus un écrivain à contrôler.
+- ⚠️ **Rattrapé pendant le lot** : la fenêtre Config retirée emportait `_agtMutConfigDomaine`, dont dépend la fiche › Domaine — le preflight (C23) l’a vu, elle est rendue mot pour mot.
+- **La chaîne**, premier passage (635 commandes) : un rouge — `mv-harnais-typo` : « aucun module n’enfle de plus de 5 % en un lot », `admin-gt.js` 388 → 409 Ko. Le barème datait d’avant GTFIX-1 : la croissance est celle des quatre lots (celui-ci n’ajoute que 1,4 Ko). **La question du découpage est posée** : la console se découpera avec sa coquille neuve (GT-UI-1). Barème regravé (`--baseline`) : les tailles de tous les modules mises à jour, et les comptes de tailles en dur ne font que baisser (`admin-gt.js` 105 → 99, `app.js` 97 → 85, …). **Second passage, sur le code final : 635 commandes, 0 rouge (790 s).**
+- **Tutos concernés** : aucun (8 tutos, aucun ne touche ce changement).
+- Hors liste : `harnais-sec7-contre` rougit sur des repères absents d’`app.js` et `utils.js`, que ce lot ne touche pas.
+
+### 513d. Ce qui reste ouvert
+- **Les quatre GTFIX sont faits.** Restent **GT-SUIVI-1** (le suivi des incidents dans `_guerettech/suivi`, la version dans chaque erreur : bump APP + SW) et **GT-UI-1 à 6** (la nouvelle console, d’après `docs/maquettes/maquette-console-gt-v1.html` — à ouvrir et comparer avant chaque lot, MAQ-1).
+- **`admin-gt.js` pèse 409 Ko** : le découper en fichiers par écran avec GT-UI-1.
+- **Le chargement est en parallèle mais pas encore progressif** : l’écran s’affiche quand tout est lu (« Chargement… » jusque-là) — la coquille de GT-UI-1 affichera au fil de l’eau.

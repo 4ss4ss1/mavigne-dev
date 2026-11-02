@@ -347,7 +347,8 @@ function statiques(S) {
     '★ fbAdminWrite ne reste qu’aux 4 exceptions nommées (KML relu au serveur ×2, installation d’un domaine neuf ×2) — trouvé ' + ecr.length]);
   // Les écrivains seulement : les fenêtres d'affichage (Config, Journal, Erreurs) lisent encore avec un repli —
   // une lecture ratée y est affichée comme vide (GT-B12, GTFIX-4), mais rien n'est écrit derrière.
-  const ecrivains = ['agtSaveAddMembre', 'agtLotGo', 'agtSaveConfig', 'agtKmlSave'].map(n => fonction(S.gt, n, 'src/admin-gt.js'))
+  // ★ GTFIX-4 (§513) : la fenêtre Config (agtSaveConfig) est partie — un seul écran, la fiche › Domaine (_fcSaveDom).
+  const ecrivains = ['agtSaveAddMembre', 'agtLotGo', 'agtKmlSave'].map(n => fonction(S.gt, n, 'src/admin-gt.js'))
     .concat(['_fcSaveDom', '_fcSaveAbo'].map(n => { const i = S.gt.search(new RegExp('window\\.' + n + '\\s*=\\s*async function')); const k = S.gt.indexOf('\n};', i); return i < 0 || k < 0 ? 'fbAdminRead( introuvable' : S.gt.slice(i, k); }));
   r.push([ecrivains.every(c => c.indexOf('fbAdminRead(') === -1), '★★ aucun écrivain ne relit plus par fbAdminRead (lecture ratée prise pour du vide)']);
   r.push([!/fbAdminReadGT\('tenants'\)\)?\s*\|\|\s*\{\}/.test(gt) && gt.indexOf("['marchand-grillot'];\n    var clients") === -1,

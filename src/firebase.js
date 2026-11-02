@@ -3064,6 +3064,12 @@ window.fbAdminLire = async function (tenantSlug, key) {
   var snap = await getDocFromServer(doc(db, 'mavigne_' + tenantSlug, key));
   return { existe: snap.exists(), valeur: snap.exists() ? snap.data().value : undefined };
 };
+// ★ GTFIX-4 (§513) — la même, pour un document de `_guerettech` : la console dit une lecture ratée au lieu
+//   d'afficher un registre réduit, une facturation vide, un journal vide.
+window.fbGtLire = async function (key) {
+  var snap = await getDocFromServer(doc(db, '_guerettech', key));
+  return { existe: snap.exists(), valeur: snap.exists() ? snap.data() : null };
+};
 
 // ════ SEC-GT — session GUERETTECH : vérité serveur + session non persistante ════
 //

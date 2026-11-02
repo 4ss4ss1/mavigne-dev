@@ -166,6 +166,32 @@ var _AGT_LVL = {
 };
 var _AGT_CAT = { firebase:'Firebase', network:'Réseau', runtime:'JS Runtime', ui:'Interface', auth:'Auth' };
 
+// ★ GTFIX-4 (§513) — un domaine construit depuis ses lectures : une clé lue en échec donne `null` (affiché
+//   « — »), jamais 0 ; `echecs` les nomme. Une clé absente n'est pas un échec (domaine neuf).
+var _AGT_CLES_DOM=['config','membres','parcelles','error_log','support_reports','saisons','appareils'];
+function _agtDomaineDepuisLectures(slug, L){
+  var v=function(k){ return (L[k]&&L[k].etat==='ok')?L[k].v:null; };
+  var ko=function(k){ return !!(L[k]&&L[k].etat==='echec'); };
+  var cfg=v('config'), mbr=v('membres'), prc=v('parcelles'), errs=v('error_log'), reps=v('support_reports'), sai=v('saisons'), app=v('appareils');
+  var errList=Array.isArray(errs)?errs:[], repList=Array.isArray(reps)?reps:[];
+  var act=Array.isArray(sai)?sai.filter(function(x){ return x && x.active; })[0]:null;
+  return {
+    slug:slug,
+    nom:(cfg&&cfg.domaine_nom)?cfg.domaine_nom:slug,
+    membres:ko('membres')?null:(Array.isArray(mbr)?mbr.filter(function(m){return m.statut!=='inactif'&&m.statut!=='Inactif';}).length:0),
+    parcelles:ko('parcelles')?null:(Array.isArray(prc)?prc.filter(function(p){return p.statut!=='Arrachee';}).length:0),
+    saison:act?act.nom:'\u2014',
+    errors:errList,
+    errorsOpen:errList.filter(function(e){return !e.resolved;}).length,
+    errorsCrit:errList.filter(function(e){return e.level==='critical'&&!e.resolved;}).length,
+    reports:repList,
+    reportsOpen:repList.filter(function(r){return !r.resolved;}).length,
+    appareils:(app&&typeof app==='object'&&!Array.isArray(app))?app:{},
+    echecs:_AGT_CLES_DOM.filter(ko)
+  };
+}
+var _agtLecturesKo=[];
+
 function _agtRelTime(iso){
   var d=(Date.now()-new Date(iso))/1000;
   if(d<60)    return 'il y a '+Math.floor(d)+'s';
@@ -232,7 +258,7 @@ async function _agtGuard(force){
 // et a la fermeture de session : un panneau qu'on quitte ne doit rien laisser
 // derriere lui, y compris dans le DOM d'un onglet reste ouvert.
 function _agtWipe(){
-  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={};
+  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={}; _agtLecturesKo=[];
   _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[];
   _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null; _agtLeadOpen=null;
   var b=document.getElementById('agt-body');
@@ -409,130 +435,58 @@ async function renderAdminGT(){
   if(!body)return;
   body.innerHTML='<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">Chargement…</div>';
 
-  // Charger tenants
-  var gtData=window.fbAdminReadGT?await window.fbAdminReadGT('tenants'):null;
-  var slugs=(gtData&&Array.isArray(gtData.slugs)&&gtData.slugs.length>0)?gtData.slugs:['marchand-grillot'];
-  // Toujours inclure marchand-grillot dans la liste
+  // ★★ GTFIX-4 (§513) — TOUT SE LIT EN PARALLÈLE, ET UNE LECTURE RATÉE SE DIT (GT-B11, GT-B12).
+  //   Avant : sept lectures par domaine puis huit lectures GT, l'une après l'autre (≈ 30 allers-retours
+  //   aujourd'hui, 220 à 30 clients) ; et une lecture ratée (fbAdminRead → null) affichée « 0 membre,
+  //   0 parcelle », un registre illisible réduit au seul domaine de référence. Les lectures passent au
+  //   serveur (fbAdminLire, fbGtLire : elles LÈVENT) et gardent leur état — faite, absente, en échec.
+  _agtLecturesKo=[];
+  var _gt=function(cle){
+    return (window.fbGtLire ? window.fbGtLire(cle) : Promise.reject(new Error('fbGtLire indisponible')))
+      .then(function(r){ return { etat:r.existe?'ok':'absent', v:r.existe?r.valeur:null }; },
+            function(){ _agtLecturesKo.push(cle); return { etat:'echec', v:null }; });
+  };
+  var _dom=function(slug, cle){
+    return (window.fbAdminLire ? window.fbAdminLire(slug, cle) : Promise.reject(new Error('fbAdminLire indisponible')))
+      .then(function(r){ return { etat:r.existe?'ok':'absent', v:r.existe?r.valeur:null }; },
+            function(){ return { etat:'echec', v:null }; });
+  };
+  var _reg=await Promise.all([_gt('tenants'), _gt('clients')]);
+  var gtData=_reg[0].v;
+  var slugs=(gtData&&Array.isArray(gtData.slugs)&&gtData.slugs.length>0)?gtData.slugs.slice():['marchand-grillot'];
   if(slugs.indexOf('marchand-grillot')<0) slugs.unshift('marchand-grillot');
-  // AXE A — le registre de vente vit dans _guerettech/clients (GT-only).
-  // On le memorise tel quel : aucune ecriture ne part d'ici (ce doc est lisible
-  // PUBLIQUEMENT par la regle d'unicite des slugs — voir _agtBuildBusiness).
+  // AXE A — le registre de vente vit dans _guerettech/clients (GT-only). Mémorisé tel quel : aucune
+  // écriture ne part d'ici (ce doc est lisible PUBLIQUEMENT par la règle d'unicité des slugs).
   _agtSlugs   = slugs.slice();
-  _agtClients = await _agtReadClients();
-
-  _agtTenants=[];
-  for(var i=0;i<slugs.length;i++){
-    var slug=slugs[i];
-    var cfg  = window.fbAdminRead?await window.fbAdminRead(slug,'config'):null;
-    var mbr  = window.fbAdminRead?await window.fbAdminRead(slug,'membres'):null;
-    var prc  = window.fbAdminRead?await window.fbAdminRead(slug,'parcelles'):null;
-    var errs = window.fbAdminRead?await window.fbAdminRead(slug,'error_log'):null;
-    var errList = Array.isArray(errs)?errs:[];
-    var reps = window.fbAdminRead?await window.fbAdminRead(slug,'support_reports'):null;
-    var repList = Array.isArray(reps)?reps:[];
-    var saisonData = window.fbAdminRead?await window.fbAdminRead(slug,'saisons'):null;
-    var appareils = window.fbAdminRead?await window.fbAdminRead(slug,'appareils'):null;   // VER-1 : le parc
-    var _saisonActive=(Array.isArray(saisonData)&&saisonData.find(function(s){return s.active;}));
-    var saisonNom=_saisonActive?_saisonActive.nom:'—';
-    _agtTenants.push({
-      slug:slug,
-      nom:(cfg&&cfg.domaine_nom)?cfg.domaine_nom:slug,
-      membres:Array.isArray(mbr)?mbr.filter(function(m){return m.statut!=='inactif'&&m.statut!=='Inactif';}).length:0,
-      parcelles:Array.isArray(prc)?prc.filter(function(p){return p.statut!=='Arrachee';}).length:0,
-      saison:saisonNom,
-      errors:errList,
-      errorsOpen:errList.filter(function(e){return !e.resolved;}).length,
-      errorsCrit:errList.filter(function(e){return e.level==='critical'&&!e.resolved;}).length,
-      reports:repList,
-      reportsOpen:repList.filter(function(r){return !r.resolved;}).length,
-      appareils:(appareils&&typeof appareils==='object'&&!Array.isArray(appareils))?appareils:{}
-    });
-  }
-
-  // Charger access log
-  var logData = window.fbAdminReadGT?await window.fbAdminReadGT('access_log'):null;
-  _agtAccessLog = (logData&&Array.isArray(logData.value))?logData.value:(Array.isArray(logData)?logData:[]);
-
-  // Charger dernières connexions clients (Firebase Auth) — GT-only, non bloquant
-  _agtConnexions = {};
-  try {
-    if(window._fbLastConnections){
-      var _cnx = await window._fbLastConnections(slugs);
-      _agtConnexions = (_cnx && _cnx.tenants) ? _cnx.tenants : {};
-    }
-  } catch(e){ if(DEBUG) console.warn('[agt] connexions', e && e.code); }
-
-  // Charger tokens d'essai
-  var tokData = window.fbAdminReadGT?await window.fbAdminReadGT('demo_tokens'):null;
-  _agtEssais = (tokData&&Array.isArray(tokData.value))?tokData.value:[];
-
-  // Charger stats démo visite guidée
-  var dsData = window.fbAdminReadGT?await window.fbAdminReadGT('demo_stats'):null;
-  _agtDemoStats = (dsData&&dsData.visite)?dsData.visite:null;
-  // Signalements avant connexion (tenant inconnu)
-  // AXE A — facturation : doc GT-only DEDIE. Surtout pas dans `tenants`, qui est
-  // en lecture publique. Format {value:{slug:{fact:[...],note}}}.
-  var _bil = window.fbAdminReadGT ? await window.fbAdminReadGT('billing') : null;
-  _agtBilling = (_bil && _bil.value && typeof _bil.value==='object') ? _bil.value : {};
+  _agtClients = _agtRegClients(gtData, _reg[1].v);
+  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports'];
+  var _tout=await Promise.all([
+    Promise.all(slugs.map(function(slug){ return Promise.all(_AGT_CLES_DOM.map(function(k){ return _dom(slug, k); })); })),
+    Promise.all(_AUTRES.map(_gt)),
+    // Dernières connexions (Firebase Auth) — GT-only, non bloquant
+    window._fbLastConnections ? Promise.resolve().then(function(){ return window._fbLastConnections(slugs); })
+      .catch(function(e){ _agtLecturesKo.push('connexions'); if(DEBUG) console.warn('[agt] connexions', e && e.code); return null; }) : Promise.resolve(null),
+    // AXE A — demandes entrantes du formulaire public (collection `leads`, écrite par submitLead seul)
+    window._fbReadLeads ? Promise.resolve().then(function(){ return window._fbReadLeads(); })
+      .catch(function(){ _agtLecturesKo.push('leads'); return null; }) : Promise.resolve(null)
+  ]);
+  _agtTenants=slugs.map(function(slug, i){
+    var L={}; _AGT_CLES_DOM.forEach(function(k, j){ L[k]=_tout[0][i][j]; });
+    return _agtDomaineDepuisLectures(slug, L);
+  });
+  var GT={}; _AUTRES.forEach(function(k, j){ GT[k]=_tout[1][j].v; });
+  _agtAccessLog  = (GT.access_log&&Array.isArray(GT.access_log.value))?GT.access_log.value:[];
+  _agtConnexions = (_tout[2] && _tout[2].tenants) ? _tout[2].tenants : {};
+  _agtEssais     = (GT.demo_tokens&&Array.isArray(GT.demo_tokens.value))?GT.demo_tokens.value:[];
+  _agtDemoStats  = (GT.demo_stats&&GT.demo_stats.visite)?GT.demo_stats.visite:null;
+  // AXE A — facturation : doc GT-only DÉDIÉ, jamais dans `tenants` (lecture publique).
+  _agtBilling = (GT.billing && GT.billing.value && typeof GT.billing.value==='object') ? GT.billing.value : {};
   _agtBillingNoter(_agtBilling);   // ★ GTFIX-1 : la base de comparaison de chaque domaine
-
-  // AXE A — demandes entrantes du formulaire public. La collection `leads` est
-  // ecrite par la seule Cloud Function submitLead (write:if false cote client) :
-  // le statut commercial ne peut donc PAS y vivre, il va dans leads_status.
-  _agtLeads = window._fbReadLeads ? await window._fbReadLeads() : null;
-  var _lst = window.fbAdminReadGT ? await window.fbAdminReadGT('leads_status') : null;
-  _agtLeadSt = (_lst && _lst.value && typeof _lst.value==='object') ? _lst.value : {};
+  _agtLeads  = _tout[3];
+  _agtLeadSt = (GT.leads_status && GT.leads_status.value && typeof GT.leads_status.value==='object') ? GT.leads_status.value : {};
   _agtLeadStNoter(_agtLeadSt);   // ★ GTFIX-1 : la base de comparaison de chaque fiche
-
-  var repGT = window.fbAdminReadGT?await window.fbAdminReadGT('support_reports'):null;
-  _agtReportsGT = (repGT&&Array.isArray(repGT.value))?repGT.value:[];
-  // Badge essais actifs
-  // Badge Leads : uniquement les demandes jamais traitees.
-  var _lbadge=document.getElementById('agt-lead-badge');
-  var _ln=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length;
-  if(_lbadge){
-    _lbadge.textContent=_ln;
-    _lbadge.style.display=_ln>0?'inline-block':'none';
-  }
-
-  // Stats band
-  var totalMbr     = _agtTenants.reduce(function(s,t){return s+t.membres;},0);
-  var totalPrc     = _agtTenants.reduce(function(s,t){return s+t.parcelles;},0);
-  var totalErrOpen = _agtTenants.reduce(function(s,t){return s+t.errorsOpen;},0);
-  var totalErrCrit = _agtTenants.reduce(function(s,t){return s+t.errorsCrit;},0);
-  var sv0=document.getElementById('agt-sv0'), sv1=document.getElementById('agt-sv1'),
-      sv2=document.getElementById('agt-sv2'), sv3=document.getElementById('agt-sv3');
-  if(sv0)sv0.textContent=_agtTenants.length;
-  if(sv1)sv1.textContent=totalMbr;
-  if(sv2)sv2.textContent=totalPrc;
-  if(sv3){sv3.textContent=totalErrOpen;sv3.style.color=totalErrCrit>0?'#EF4444':totalErrOpen>0?'#F97316':'#C4B5FD';}
-
-  // Lot C — deux badges seulement : Incidents (erreurs + signalements) et Radar
-  // (tout ce qui demande une action). Les badges Erreurs / Support / Essais ont
-  // disparu d'index.html avec leurs onglets.
-  var totalRepOpen=_agtTenants.reduce(function(s,t){return s+(t.reportsOpen||0);},0)+(_agtReportsGT||[]).filter(function(r){return !r.resolved;}).length;
-  var ibadge=document.getElementById('agt-inc-badge');
-  var _ni=totalErrOpen+totalRepOpen;
-  if(ibadge){
-    ibadge.textContent=_ni;
-    ibadge.style.display=_ni>0?'inline-block':'none';
-    ibadge.style.background=totalErrCrit>0?'#EF4444':'';
-  }
-  var rbadge=document.getElementById('agt-radar-badge');
-  if(rbadge){
-    var _nr=0;
-    try{ _nr=_agtRadarRows().length; }
-    catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'radar non calcule',detail:(e&&e.message)||String(e)}); }
-    rbadge.textContent=_nr;
-    rbadge.style.display=_nr>0?'inline-block':'none';
-    rbadge.style.background=totalErrCrit>0?'#EF4444':'';
-  }
-
-  // Barre basse — alerte critique
-  var statusEl=document.getElementById('agt-bottom-status');
-  if(statusEl&&totalErrCrit>0){
-    statusEl.outerHTML='<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>';
-  }
+  _agtReportsGT = (GT.support_reports&&Array.isArray(GT.support_reports.value))?GT.support_reports.value:[];
+  _agtMajCompteurs();
 
   agtRenderBody();
 }
@@ -698,18 +652,88 @@ function _agtEphyCard(){
 }
 
 // ─── Rendu du corps selon l'onglet actif ─────────────────────────────────────
+// ★ GTFIX-4 (§513) — LES COMPTEURS SUIVENT CHAQUE GESTE (GT-B21) : l'en-tête, les pastilles des onglets et le
+//   voyant du bas n'étaient calculés qu'au chargement complet — une erreur traitée laissait « 3 » partout.
+function _agtMajCompteurs(){
+  // Badge essais actifs
+  // Badge Leads : uniquement les demandes jamais traitees.
+  var _lbadge=document.getElementById('agt-lead-badge');
+  var _ln=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length;
+  if(_lbadge){
+    _lbadge.textContent=_ln;
+    _lbadge.style.display=_ln>0?'inline-block':'none';
+  }
+
+  // Stats band
+  var totalMbr     = _agtTenants.reduce(function(s,t){return s+t.membres;},0);
+  var totalPrc     = _agtTenants.reduce(function(s,t){return s+t.parcelles;},0);
+  var totalErrOpen = _agtTenants.reduce(function(s,t){return s+t.errorsOpen;},0);
+  var totalErrCrit = _agtTenants.reduce(function(s,t){return s+t.errorsCrit;},0);
+  var sv0=document.getElementById('agt-sv0'), sv1=document.getElementById('agt-sv1'),
+      sv2=document.getElementById('agt-sv2'), sv3=document.getElementById('agt-sv3');
+  if(sv0)sv0.textContent=_agtTenants.length;
+  if(sv1)sv1.textContent=totalMbr;
+  if(sv2)sv2.textContent=totalPrc;
+  if(sv3){sv3.textContent=totalErrOpen;sv3.style.color=totalErrCrit>0?'#EF4444':totalErrOpen>0?'#F97316':'#C4B5FD';}
+
+  // Lot C — deux badges seulement : Incidents (erreurs + signalements) et Radar
+  // (tout ce qui demande une action). Les badges Erreurs / Support / Essais ont
+  // disparu d'index.html avec leurs onglets.
+  var totalRepOpen=_agtTenants.reduce(function(s,t){return s+(t.reportsOpen||0);},0)+(_agtReportsGT||[]).filter(function(r){return !r.resolved;}).length;
+  var ibadge=document.getElementById('agt-inc-badge');
+  var _ni=totalErrOpen+totalRepOpen;
+  if(ibadge){
+    ibadge.textContent=_ni;
+    ibadge.style.display=_ni>0?'inline-block':'none';
+    ibadge.style.background=totalErrCrit>0?'#EF4444':'';
+  }
+  var rbadge=document.getElementById('agt-radar-badge');
+  if(rbadge){
+    var _nr=0;
+    try{ _nr=_agtRadarRows().length; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'radar non calcule',detail:(e&&e.message)||String(e)}); }
+    rbadge.textContent=_nr;
+    rbadge.style.display=_nr>0?'inline-block':'none';
+    rbadge.style.background=totalErrCrit>0?'#EF4444':'';
+  }
+
+  // Barre basse — alerte critique
+  var statusEl=document.getElementById('agt-bottom-status');
+  if(statusEl){
+    // ★ GTFIX-4 : dans les DEUX sens — le voyant rouge redevenait jamais vert sans recharger (GT-B21).
+    statusEl.outerHTML = totalErrCrit>0
+      ? '<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>'
+      : '<div id="agt-bottom-status" style="width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>';
+  }
+}
+
+// ★ GTFIX-4 (§513) — le bandeau des lectures ratées, en tête de chaque onglet : ce qui manque n'est pas zéro.
+var _AGT_LECT_NOMS = { tenants:'le registre des domaines', clients:'les fiches commerciales', access_log:'le journal d\u2019acc\u00e8s',
+  demo_tokens:'les codes d\u2019essai', demo_stats:'la d\u00e9mo publique', billing:'la facturation', leads_status:'le suivi des leads',
+  support_reports:'les signalements GT', connexions:'les derni\u00e8res connexions', leads:'les demandes du site' };
+function _agtBandeauLectures(){
+  var dom=(_agtTenants||[]).filter(function(t){ return t.echecs && t.echecs.length; });
+  if(!_agtLecturesKo.length && !dom.length) return '';
+  var parts=_agtLecturesKo.map(function(k){ return _AGT_LECT_NOMS[k]||k; });
+  if(dom.length) parts.push(dom.length+' domaine'+(dom.length>1?'s':'')+' en partie ('+dom.map(function(t){ return t.nom; }).join(', ')+')');
+  return '<div role="alert" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.32);border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:var(--pt-txt,13px);color:#FCA5A5;line-height:1.5">'
+    +'<span style="flex:1;min-width:200px"><b>Lecture impossible</b> : '+_escHtml(parts.join(' ; '))+'. Ce qui en d\u00e9pend manque \u00e0 l\u2019\u00e9cran \u2014 ce n\u2019est pas z\u00e9ro.</span>'
+    +'<button onclick="renderAdminGT()" style="background:rgba(239,68,68,0.16);border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:7px 12px;color:#FCA5A5;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Relire</button></div>';
+}
+
 function agtRenderBody(){
   var body=document.getElementById('agt-body');
   if(!body)return;
   // Lot C — 6 onglets. Les anciennes cles restent acceptees : elles peuvent
   // survivre dans une session ouverte pendant le deploiement.
-  var tb=_AGT_TAB_MIGR[_agtTab]||_agtTab;
-  if(tb==='radar')     body.innerHTML=_agtBuildRadar();
-  if(tb==='clients')   body.innerHTML=_agtBuildClients();
-  if(tb==='business'){ body.innerHTML=_agtBuildBusiness(); _agtBizFill(); }
-  if(tb==='incidents') body.innerHTML=_agtBuildIncidents();
-  if(tb==='leads')     body.innerHTML=_agtBuildLeads();
-  if(tb==='outils')    body.innerHTML=_agtBuildOutils();
+  var tb=_AGT_TAB_MIGR[_agtTab]||_agtTab, ban=_agtBandeauLectures();
+  if(tb==='radar')     body.innerHTML=ban+_agtBuildRadar();
+  if(tb==='clients')   body.innerHTML=ban+_agtBuildClients();
+  if(tb==='business'){ body.innerHTML=ban+_agtBuildBusiness(); _agtBizFill(); }
+  if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
+  if(tb==='leads')     body.innerHTML=ban+_agtBuildLeads();
+  if(tb==='outils')    body.innerHTML=ban+_agtBuildOutils();
+  _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
 }
 
 function agtSwitchTab(tab){
@@ -1010,17 +1034,17 @@ function _agtBuildClients(){
     h+='<div style="font-size:15px;font-weight:600;color:#fff;display:flex;align-items:center">'+_escHtml(t.nom)+errBadge+'</div>';
     h+='<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.45);margin-top:2px;font-family:monospace">'+_escHtml(t.slug)+'</div>';
     h+=_agtCnxBadge(t.slug);
-    // Barre avancement saison (on utilise 0% si pas de données)
+    if(t.echecs && t.echecs.length) h+='<div style="margin-top:6px;font-size:var(--pt-micro,12px);color:#FCA5A5">Lecture impossible : '+_escHtml(t.echecs.join(', '))+' \u2014 chiffres manquants</div>';   // ★ GTFIX-4 (GT-B12)
+    // ★ GTFIX-4 : la barre d'avancement de saison est partie — elle restait à 0 %, faute de donnée (GT-B22).
     h+='<div style="margin-top:10px">';
     h+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:rgba(255,255,255,0.3)">'+_escHtml(t.saison||'—')+'</span></div>';
-    h+='<div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px"><div style="height:100%;width:0%;background:linear-gradient(90deg,'+_AGT_SAISON+',#F5A0B5);border-radius:2px"></div></div>';
     h+='</div>';
     h+='</div>';
     h+='<div style="font-size:var(--pt-micro,12px);color:rgba(196,181,253,0.3);margin-top:4px;transform:'+(exp?'rotate(180deg)':'none')+';transition:transform .2s">▾</div>';
     h+='</div>';
     // Mini stats
     h+='<div style="display:flex;border-top:1px solid rgba(255,255,255,0.05);padding:8px 0">';
-    var stats=[{v:t.membres,l:'membres'},{v:t.parcelles,l:'parcelles'},{v:t.errorsOpen,l:'erreurs'},{v:_agtAccessLog.filter(function(a){return a.tenant===t.slug;}).length,l:'accès'}];
+    var stats=[{v:(t.membres==null?'\u2014':t.membres),l:'membres'},{v:(t.parcelles==null?'\u2014':t.parcelles),l:'parcelles'},{v:t.errorsOpen,l:'erreurs'},{v:_agtAccessLog.filter(function(a){return a.tenant===t.slug;}).length,l:'accès'}];
     for(var k=0;k<stats.length;k++){
       h+='<div style="flex:1;text-align:center;'+(k<3?'border-right:1px solid rgba(255,255,255,0.05);':'')+'padding:2px 0">';
       h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(255,255,255,0.75)">'+stats[k].v+'</div>';
@@ -1040,14 +1064,16 @@ function _agtBuildClients(){
       h+='<div class="agt-section-lbl" style="margin:12px 0 8px">Actions</div>';
       h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">Fiche client — tout paramétrer</button>';
       h+='<button class="agt-btn" style="width:100%;border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtPrepOuvrir(\''+_escAttr(t.slug)+'\')">Préparer ce domaine — ses écrans, en direct</button>';
+      // ★ GTFIX-4 (§513) — « Accéder » est parti (GT-B16) : il ouvrait l'écran de CONNEXION du domaine dans un nouvel
+      //   onglet (la session GT ne vit que dans le sien) et notait au journal un accès qui n'avait pas eu lieu. Une seule
+      //   porte vers les données d'un domaine : « Préparer ». Le lien du domaine se copie ici.
       h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-      h+='<button class="agt-btn fill" onclick="agtAccedeTenant(\''+t.slug+'\')">Accéder</button>';
-      h+='<button class="agt-btn" onclick="copyTenantLink(\''+t.slug+'\',this)">Invitation</button>';
+      h+='<button class="agt-btn" style="flex:1" onclick="copyTenantLink(\''+t.slug+'\',this)">Copier le lien d\u2019invitation</button>';
       h+='</div>';
       h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
       h+='<button class="agt-btn sm" onclick="agtShowJournal(\''+t.slug+'\')">Journal</button>';
       h+='<button class="agt-btn sm" onclick="agtShowParcelles(\''+t.slug+'\')">Parcelles</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowConfig(\''+t.slug+'\')">Config</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowFiche(\''+t.slug+'\')">Config</button>';   // ★ GTFIX-4 : UN écran de config, la fiche › Domaine (GT-B17)
       h+='<button class="agt-btn sm" onclick="agtShowMembres(\''+t.slug+'\')">Membres</button>';
       h+='<button class="agt-btn sm" onclick="agtShowErreurs(\''+t.slug+'\')">Erreurs'+(t.errorsOpen>0?' ('+t.errorsOpen+')':'')+'</button>';
       h+='</div>';
@@ -1071,18 +1097,8 @@ function _agtBuildClients(){
   return h;
 }
 
-async function agtAccedeTenant(slug){
-  await agtLogAccess(slug,'Accès dashboard','cle');
-  // Inspection support : ouvre le domaine dans un nouvel onglet (même origine → session GT
-  // partagée, gtAdmin lit toutes les données). Pour TESTER l'onboarding comme un prospect
-  // (sans session), utiliser le lien d'invitation en navigation privée.
-  var url = GT_BASE_URL + '/?tenant=' + encodeURIComponent(slug);
-  showToast('Ouverture de '+slug+'…','#3D6B27');
-  try { window.open(url, '_blank', 'noopener'); } catch(e){ location.href = url; }
-}
-
 // ════ PREP-1 — OUVRIR LA PRÉPARATION D'UN DOMAINE (§134) ════
-// ⚠️ « Accéder » ci-dessus ouvre le lien du domaine dans un NOUVEL onglet. Depuis SEC-GT, la
+// ⚠️ « Accéder » (retiré par GTFIX-4, §513) ouvrait le lien du domaine dans un NOUVEL onglet. Depuis SEC-GT, la
 //   session GUERETTECH ne vit que dans son onglet (_fbSessionOnly) : ce nouvel onglet arrive
 //   sur l'écran de connexion du domaine, sans session. « Préparer » entre dans ses écrans,
 //   dans CET onglet. Chevauchement signalé, non tranché (§134).
@@ -1175,7 +1191,7 @@ function _agtBuildLog(){
   for(var i=0;i<Math.min(_agtAccessLog.length,50);i++){
     var e=_agtAccessLog[i];
     h+='<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
-    h+='<div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">'+(e.icon||'')+'</div>';
+    h+='<div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">'+_agtIco(e.icon||'')+'</div>';   // ★ GTFIX-4 : « cle », « crayon » s'écrivaient en toutes lettres (GT-B23)
     h+='<div style="flex:1">';
     h+='<div style="font-size:var(--pt-txt,13px);font-weight:500;color:rgba(255,255,255,0.8)">'+_escHtml(e.action)+'</div>';
     h+='<div style="display:flex;gap:8px;margin-top:3px;align-items:center">';
@@ -2287,56 +2303,6 @@ function agtExportParcJson(slug, jsonParc){
   if(window.showToast) showToast((jsonParc?jsonParc.length:0)+' parcelle(s) exportée(s)','#3D6B27');
 }
 
-async function agtShowConfig(slug) {
-  _agtOverlay(slug, _mvIcon('engrenage',20), 'Config', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>',
-    '<button onclick="agtSaveConfig(\''+slug+'\')" style="width:100%;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:12px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\u2713 Sauvegarder</button>');
-  var cfg = await window.fbAdminRead(slug, 'config') || {};
-  var body = document.getElementById('agt-panel-body');
-  if(!body) return;
-  function _cfgField(label, id, val, type) {
-    type = type || 'text';
-    return '<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">'+label+'</div>'
-      +'<input id="'+id+'" type="'+type+'" value="'+_escHtml(String(val===undefined||val===null?'':val))+'" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-  }
-  body.innerHTML =
-    _cfgField('Nom du domaine',   'cfg-nom',  cfg.domaine_nom||'')
-    +_cfgField('Latitude',        'cfg-lat',  cfg.lat||'',  'number')
-    +_cfgField('Longitude',       'cfg-lon',  cfg.lon||'',  'number')
-    +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding terminé</div>'
-    +'<div style="font-size:var(--pt-txt,13px);color:'+(cfg.onboarding_done?'#3D6B27':'#C0392B')+';font-weight:600">'+(cfg.onboarding_done?'\u2705 Oui':'\u274C Non')+'</div></div>'
-    +_agtCguHtml(cfg, slug)
-    +'<div id="agt-cfg-err" style="display:none;color:#EF4444;font-size:var(--pt-micro,12px);margin-top:6px"></div>';
-}
-
-// ★ GTFIX-1 (§510) — UNE règle pour le nom et les coordonnées d'un domaine, appliquée à la config RELUE.
-//   Avant : `fbAdminRead(…) || {}` — une lecture ratée remplaçait TOUTE la config du domaine par trois
-//   champs ; et la fenêtre Config écrivait 0 pour une case vide (`parseFloat(…) || 0`, GT-B17), là où la
-//   fiche › Domaine n'y touchait pas. Une case vide ne touche plus à rien, dans les deux écrans.
-function _agtMutConfigDomaine(cfg, existe, nom, lat, lon){
-  if (cfg === undefined){ if (existe) throw new Error('config illisible'); cfg = {}; }
-  if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) throw new Error('config illisible');
-  cfg.domaine_nom = nom;
-  if (!isNaN(lat)) cfg.lat = lat;
-  if (!isNaN(lon)) cfg.lon = lon;
-  return cfg;
-}
-async function agtSaveConfig(slug) {
-  var nom = (document.getElementById('cfg-nom')||{value:''}).value.trim();
-  var lat = parseFloat((document.getElementById('cfg-lat')||{value:''}).value);
-  var lon = parseFloat((document.getElementById('cfg-lon')||{value:''}).value);
-  var errEl = document.getElementById('agt-cfg-err');
-  if(!nom) { if(errEl){errEl.textContent='Nom requis';errEl.style.display='block';} return; }
-  try {
-    if(!window.fbAdminMaj) throw new Error('fbAdminMaj indisponible');
-    await window.fbAdminMaj(slug, 'config', function(cfg, existe){ return _agtMutConfigDomaine(cfg, existe, nom, lat, lon); });
-    showToast('Config sauvegard\u00e9e', '#3D6B27');
-    var _ov = document.getElementById('agt-panel-overlay'); if(_ov) _ov.remove();
-  } catch(e) {
-    if(errEl){ errEl.textContent='Rien n\u2019a \u00e9t\u00e9 \u00e9crit : '+((e&&(e.message||e.code))||'lecture impossible'); errEl.style.display='block'; }
-    if(window.logError) window.logError({level:'error',cat:'gt-ecriture',msg:'config non \u00e9crite',detail:(e&&(e.code||e.message))||String(e)});
-  }
-}
-
 // ─── Journal ─────────────────────────────────────────────────────────────────
 async function agtShowJournal(slug) {
   _agtOverlay(slug, _mvIcon('liste',20), 'Journal', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
@@ -2370,13 +2336,20 @@ async function agtShowErreurs(slug) {
   _agtOverlay(slug, _mvIcon('bogue',20), 'Erreurs', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
   // 'erreurs' n'a jamais ete ecrit par personne : la collection reelle est error_log,
   // celle que lit deja le tableau de bord (_agtTenants[].errors).
-  var errLog = await window.fbAdminRead(slug, 'error_log') || [];
+  // ★ GTFIX-4 (§513) — le journal du domaine lu au serveur (une lecture ratée se DIT), fusionné avec celui de ce
+  //   poste UNE fois par erreur — elles s'affichaient en double —, l'âge en jours au-delà de 24 h (GT-B24).
+  var errLog=[], lectureKo=false;
+  try { var _rl=await window.fbAdminLire(slug, 'error_log'); errLog=(_rl.existe&&Array.isArray(_rl.valeur))?_rl.valeur:[]; }
+  catch(_e){ lectureKo=true; }
   var body = document.getElementById('agt-panel-body');
   if(!body) return;
-  // Erreurs locales en complément (ce device uniquement)
-  try { var raw = localStorage.getItem(_ERR_KEY); if(raw) { var local = JSON.parse(raw).filter(function(e){ return e.tenant===slug; }); errLog = local.concat(errLog); } } catch(ex){ console.warn('[agtShowErreurs] local', ex); }
+  var _loc=[];
+  try { var raw = localStorage.getItem(_ERR_KEY); if(raw) _loc = JSON.parse(raw).filter(function(e){ return e.tenant===slug; }); } catch(ex){ console.warn('[agtShowErreurs] local', ex); }
+  errLog = _agtErrFusion(_loc, errLog);
+  if(lectureKo) body.innerHTML = '<div role="alert" style="font-size:var(--pt-txt,13px);color:#FCA5A5;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 12px;margin-bottom:10px">Lecture impossible : le journal du domaine n\u2019a pas pu \u00eatre lu. Seules les erreurs de ce poste sont affich\u00e9es.</div>';
+  if(lectureKo && !errLog.length) return;
   if(!errLog.length) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">\u2705 Aucune erreur enregistr\u00e9e</div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Aucune erreur enregistr\u00e9e</div>';
     return;
   }
   var sorted = errLog.slice().sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
@@ -2389,8 +2362,7 @@ async function agtShowErreurs(slug) {
   sorted.slice(0,30).forEach(function(e){
     var lc = LVL_COLOR[e.level]||'#F97316';
     
-    var diff = e.ts ? Math.floor((Date.now()-new Date(e.ts))/60000) : null;
-    var when = diff===null ? '' : diff<60 ? 'il y a '+diff+'min' : 'il y a '+Math.floor(diff/60)+'h';
+    var when = e.ts ? _agtRelTime(e.ts) : '';   // ★ GTFIX-4 : « il y a 312 h » → « il y a 13 j »
     h += '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+lc+';border-radius:10px;padding:10px 12px;margin-bottom:8px">'
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
       
@@ -2404,7 +2376,17 @@ async function agtShowErreurs(slug) {
       +(e.detail ? '<details style="margin-top:5px"><summary style="font-size:10px;color:rgba(255,255,255,0.3);cursor:pointer">D\u00e9tail</summary><pre style="font-size:10px;color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-all">'+_escHtml(e.detail)+'</pre></details>' : '')
       +'</div></div></div>';
   });
-  body.innerHTML = h;
+  body.innerHTML = (lectureKo ? body.innerHTML : '') + h;
+}
+function _agtErrFusion(locales, domaine){
+  var vus={}, out=[];
+  (locales||[]).concat(domaine||[]).forEach(function(e){
+    if(!e) return;
+    var cle=e.id || (String(e.ts||'')+'|'+String(e.msg||''));
+    if(vus[cle]) return;
+    vus[cle]=1; out.push(e);
+  });
+  return out;
 }
 
 
@@ -2542,7 +2524,8 @@ function _agtBuildEssais(){
       h+='<span style="font-family:monospace;font-size:var(--pt-txt,13px);background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px;color:#E8C860">'+_escHtml(t.code)+'</span>';
       h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+jColor+'">J+'+jRest+' restant'+(jRest>1?'s':'')+'</span>';
       h+='</div>';
-      h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+t.usage_count+' acc\u00e8s'+(t.last_access?' &middot; dernier : '+_agtRelTime(t.last_access):'')+'</div>';
+      var _ec=_agtEntreesCode(t.code, _agtAccessLog);   // ★ GTFIX-4 : l'usage se lit au journal, où le serveur le note (GT-B15)
+      h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+_ec.n+' entr\u00e9e'+(_ec.n>1?'s':'')+' au journal'+(_ec.der?' &middot; derni\u00e8re : '+_agtRelTime(_ec.der):'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:6px;flex-shrink:0">';
       h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,12px);cursor:pointer" title="Copier le code">&#128203;</button>';
@@ -2643,19 +2626,14 @@ function agtCopyEssaiCode(code){
   else showToast(code,'#3D6B27');
 }
 
-// Mise \u00e0 jour des stats d'acc\u00e8s (appel\u00e9e depuis app.js apr\u00e8s login d\u00e9mo r\u00e9ussi)
-window.agtUpdateEssaiAccess = async function(code){
-  // ★ GTFIX-1 : en transaction comme les autres. ⚠ Personne ne l'appelle plus depuis GT-1 (l'appli des
-  //   clients ne charge pas ce fichier) : le compteur réel est dans le journal — GTFIX-4 (GT-B15).
-  if(!window.fbGtMaj) return;
-  try {
-    var _rc=await window.fbGtMaj('demo_tokens',function(d,existe){ return _agtMutCodes(d,existe,function(v){
-      return v.map(function(t){ return (t && t.code===code) ? Object.assign({},t,{ usage_count:(t.usage_count||0)+1, last_access:new Date().toISOString() }) : t; });
-    }); });
-    _agtEssais=_rc.valeur.value;
-  } catch(e) { if(window.logError) window.logError({level:'info',cat:'gt-ecriture',msg:'compteur du code non mis \u00e0 jour',detail:(e&&(e.code||e.message))||String(e)}); }
-};
-
+// ★ GTFIX-4 (§513) — L'USAGE D'UN CODE D'ESSAI SE LIT DANS LE JOURNAL D'ACCÈS, où le SERVEUR le note
+//   (`appendAccessLog` : « Essai CODE — … »). `agtUpdateEssaiAccess` n'était plus appelé par personne depuis GT-1
+//   (l'appli des clients ne charge pas ce fichier) : le compteur restait à 0. Retiré (GT-B15).
+function _agtEntreesCode(code, journal){
+  var n=0, der='';
+  (journal||[]).forEach(function(e){ if(e && e.tenant==='essai:'+code){ n++; if(String(e.ts||'')>der) der=String(e.ts||''); } });
+  return { n:n, der:der };
+}
 
 // ─── KML Upload ──────────────────────────────────────────────────────────────
 
@@ -3188,7 +3166,8 @@ function _fcSecDom(){
     +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding</div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:'+(c.onboarding_done?'#6BA34A':'#FCA5A5')+';padding:9px 0">'+(c.onboarding_done?'\u2705 Termin\u00e9':'\u274c Non termin\u00e9')+'</div></div>'
     + fld('Latitude (repli)','agt-fc-lat',c.lat==null?'':c.lat,'number')
     + fld('Longitude (repli)','agt-fc-lon',c.lon==null?'':c.lon,'number')
-    +'</div>';
+    +'</div>'
+    + _agtCguHtml(c, _FC_SLUG);   // ★ GTFIX-4 : l'acceptation CGU + DPA, qui vivait dans la fenêtre Config
 }
 
 function _fcSecParc(){
@@ -3470,6 +3449,19 @@ window._fcPreparer=function(){
   if(s && typeof agtPrepOuvrir==='function') agtPrepOuvrir(s);
 };
 
+// ★ GTFIX-1 (§510) — UNE règle pour le nom et les coordonnées d'un domaine, appliquée à la config RELUE.
+//   Avant : `fbAdminRead(…) || {}` — une lecture ratée remplaçait TOUTE la config du domaine par trois
+//   champs ; et la fenêtre Config écrivait 0 pour une case vide (`parseFloat(…) || 0`, GT-B17), là où la
+//   fiche › Domaine n'y touchait pas. Une case vide ne touche plus à rien, dans les deux écrans.
+// ★ GTFIX-4 (§513) : la fenêtre Config est partie — il ne reste qu'un écran, la fiche › Domaine (GT-B17).
+function _agtMutConfigDomaine(cfg, existe, nom, lat, lon){
+  if (cfg === undefined){ if (existe) throw new Error('config illisible'); cfg = {}; }
+  if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) throw new Error('config illisible');
+  cfg.domaine_nom = nom;
+  if (!isNaN(lat)) cfg.lat = lat;
+  if (!isNaN(lon)) cfg.lon = lon;
+  return cfg;
+}
 window._fcSaveDom=async function(){
   var nom=(document.getElementById('agt-fc-nom')||{value:''}).value.trim();
   var lat=parseFloat((document.getElementById('agt-fc-lat')||{value:''}).value);
@@ -5604,7 +5596,7 @@ function _agtBuildBusiness(){
 
     h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;align-items:center">';
     h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(inte?'rgba(255,255,255,0.4)':st.color)+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+(inte?'interne':st.label)+'</span>';
-    h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+t.membres+' utilisateur'+(t.membres>1?'s':'')+'</span>';
+    h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(t.membres==null?'\u2014':t.membres)+' utilisateur'+(t.membres>1?'s':'')+'</span>';
     if(!inte && duT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#F97316;background:rgba(249,115,22,0.1);border-radius:20px;padding:3px 9px">'+_agtEur(duT)+' \u00e0 encaisser</span>';
     if(!inte && encT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#86EFAC;background:rgba(134,239,172,0.08);border-radius:20px;padding:3px 9px">'+_agtEur(encT)+' encaiss\u00e9s</span>';
     h+='<span style="flex:1"></span>';
@@ -6286,7 +6278,7 @@ async function agtLeadSet(id,st){
   if(await _agtSaveLeadSt(id)){
     var l=_agtLeadById(id);
     agtLogAccess('', 'Lead ' + ((l&&l.domaine)||id.slice(0,8)) + ' \u2192 ' + _AGT_LEADST[st].l, '\uD83D\uDCE9', 'commercial');
-    renderAdminGT();
+    agtRenderBody();   // ★ GTFIX-4 : mise à jour sur place, plus un rechargement complet (GT-B11)
   }
 }
 
@@ -6298,7 +6290,7 @@ function agtLeadNote(id){
     valeur:cur, type:'texte', btnLabel:'Enregistrer',
     cb:async function(v){
       _agtLeadSt[id]=Object.assign({}, _agtLeadSt[id]||{}, { note:String(v||'').slice(0,500), ts:new Date().toISOString() });
-      if(await _agtSaveLeadSt(id)) renderAdminGT();
+      if(await _agtSaveLeadSt(id)) agtRenderBody();   // ★ GTFIX-4 (GT-B11)
     }
   });
 }
@@ -6365,8 +6357,6 @@ window.agtLeadNote       = agtLeadNote;
 window.agtLeadMail       = agtLeadMail;
 window.agtLeadCopy       = agtLeadCopy;
 window.agtLeadPj         = agtLeadPj;
-window.agtShowConfig     = agtShowConfig;
-window.agtSaveConfig     = agtSaveConfig;
 window.agtShowJournal    = agtShowJournal;
 window.agtShowErreurs    = agtShowErreurs;
 window.agtShowMembres    = agtShowMembres;
@@ -6405,7 +6395,6 @@ window.agtSetErrPer      = agtSetErrPer;
 window.agtErrToggle      = agtErrToggle;
 window.agtErrCopy        = agtErrCopy;
 window.agtResolveGroup   = agtResolveGroup;
-window.agtAccedeTenant   = agtAccedeTenant;
 window.agtPrepOuvrir     = agtPrepOuvrir;
 window.agtResolveError   = agtResolveError;
 window.agtPurgeErrors    = agtPurgeErrors;
