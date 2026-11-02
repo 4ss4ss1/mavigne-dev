@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.41
+// MA VIGNE — Service Worker v11.42
+// v11.42 (02/11/2026) — GT-UI-2 (§517) : l’écran Incidents de la console en tableau (onglets par statut, tri, fiche, « Annuler »), le Radar trié et ses dernières traces (styles.css).
 // v11.41 (02/11/2026) — GT-UI-1 (§516) : la coquille de la console GUERETTECH — barre latérale sur ordinateur, liens directs, recherche Ctrl K (styles.css).
 // v11.40 (02/11/2026) — GT-SUIVI-1 (§515) : chaque erreur remontée porte la version de l’appli (logError) ; le suivi des incidents de la console vit dans _guerettech/suivi.
 // v11.39 (01/11/2026) — PHENO-1D (§509) : noter le stade — la date en un appui, aucun retour en arrière, une question avant les grands sauts ; la commune par son nom ; les calendriers du thème clair.
@@ -4673,7 +4674,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.41';
+const CACHE_NAME   = 'mavigne-v11.42';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4690,7 +4691,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.41 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.42 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4710,7 +4711,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.41 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.42 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

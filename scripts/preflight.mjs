@@ -66,6 +66,10 @@ function listDir(rel, ext) {
 }
 // ★★ GT-1 (§249) — le balisage GUERETTECH a quitté index.html pour deux fragments de gt.html (src/gt/*.html). Pour les
 //   contrôles qui cherchent des ids, des appels ou des caractères dans le HTML, ils font partie du corpus comme index.html.
+// ★★ GT-UI-2 (§517) — les écrans neufs de la console vivent dans src/gt/*.js (GT-UI-1 : coquille.js). Le preflight
+//   ne lisait que src/*.js : une fonction appelée depuis src/gt/ y passait pour morte, un gestionnaire défini là pour
+//   absent, et ces fichiers échappaient à tous les contrôles. Toutes les vérifications lisent désormais les deux.
+function jsSources() { return [...listDir('src', '.js'), ...listDir('src/gt', '.js')]; }
 function htmlGT() { return listDir('src/gt', '.html').map(f => read(f) || '').join('\n'); }
 function lineOf(content, index) {
   return content.slice(0, index).split('\n').length;
@@ -100,7 +104,7 @@ let appVersion = null, swVersion = null;
 // ============================================================================
 function checkSyntax() {
   const files = [
-    ...listDir('src', '.js'),
+    ...jsSources(),
     ...listDir('functions', '.js'),
     ...listDir('scripts', '.mjs'),
     'public/sw.js', 'public/boot.js',
@@ -125,7 +129,7 @@ function checkSyntax() {
 //  C2 — Demi-surrogates isolés (cf. §7 : tronque le fichier à l'écriture).
 // ============================================================================
 function checkSurrogates() {
-  const files = [...listDir('src', '.js'), 'index.html', ...listDir('src/gt', '.html'), 'public/sw.js', 'public/manifest.json'];
+  const files = [...jsSources(), 'index.html', ...listDir('src/gt', '.html'), 'public/sw.js', 'public/manifest.json'];
   for (const rel of files) {
     const c = read(rel);
     if (c == null) continue;
@@ -254,7 +258,7 @@ function flattenJsToHtml(src) {
   return { html: out, marks };
 }
 function checkDivInButtonJs() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const code = read(rel); if (code == null) continue;
     const { html, marks } = flattenJsToHtml(code);
     const re = /<button\b[^>]*>([\s\S]*?)<\/button>/gi;
@@ -367,7 +371,7 @@ const JS_KW = new Set(['if', 'for', 'while', 'switch', 'return', 'function', 'va
   'class', 'super', 'event']);
 
 function checkOnclickWindow() {
-  const allJs = listDir('src', '.js');
+  const allJs = jsSources();
   const exposed = new Set();
   for (const rel of allJs) {
     const raw = read(rel); if (!raw) continue;
@@ -403,7 +407,7 @@ function checkOnclickWindow() {
 //  C7 — const DEBUG manquant (cf. §24 : ReferenceError silencieux).
 // ============================================================================
 function checkDebug() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const raw = read(rel); if (!raw) continue;
     const code = stripComments(raw);
     if (!/\bDEBUG\b/.test(code)) continue;
@@ -417,7 +421,7 @@ function checkDebug() {
 //        Heuristique → AVERTISSEMENT.
 // ============================================================================
 function checkTDZ() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const raw = read(rel); if (!raw) continue;
     const c = blankJsComments(raw);
     const re = /window\.([a-zA-Z_$][\w$]*)\s*=\s*\1\b/g;
@@ -511,7 +515,7 @@ function ratchetCount(key, file, found, label, fix) {
 //        « depuis toujours » : le masquage visait une CLASSE avec getElementById.
 // ============================================================================
 function checkDeadIds() {
-  const srcs = listDir('src', '.js');
+  const srcs = jsSources();
   const html = (read('index.html') || '') + '\n' + htmlGT();   // GT-1 : les ids de la console vivent dans src/gt/*.html
   const allJs = srcs.map(f => read(f) || '').join('\n');
   const corpus = allJs + '\n' + html;
@@ -581,7 +585,7 @@ function checkGuardCoverage() {
   if (!m) { add('WARN', 'src/firebase.js', null, 'C13 : _MV_GUARD_FLOORS introuvable — contrôle des gardes non effectué.'); return; }
   const floors = [...m[1].matchAll(/([\w_]+)\s*:/g)].map(x => x[1]);
   const written = new Map();
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const c = blankJsComments(read(rel) || '');
     for (const re of [/fbSave\(\s*['"]([\w_]+)['"]/g, /_?saveData\(\s*['"]([\w_]+)['"]/g])
       for (const x of c.matchAll(re)) if (!written.has(x[1])) written.set(x[1], rel);
@@ -601,7 +605,7 @@ function checkGuardCoverage() {
 //        des mois et aux refus de lecture d'être invisibles.
 // ============================================================================
 function checkEmptyCatch() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const c = blankJsComments(read(rel) || '');
     const n = (c.match(/catch\s*\([^)]*\)\s*\{\s*\}/g) || []).length;
     ratchetCount('C14_empty_catch', rel, n, 'catch {} vide (erreur avalée sans trace)',
@@ -613,7 +617,7 @@ function checkEmptyCatch() {
 //  C15 — Fonction déclarée que personne n'appelle (ni JS, ni onclick, ni HTML).
 // ============================================================================
 function checkDeadFunctions() {
-  const srcs = listDir('src', '.js');
+  const srcs = jsSources();
   const corpus = srcs.map(f => read(f) || '').join('\n') + '\n' + (read('index.html') || '') + '\n' + htmlGT();   // GT-1 : onclick de la console
   // Deux pièges, tous deux rencontrés en vrai :
   //
@@ -649,7 +653,7 @@ function checkDeadFunctions() {
 //        s'afficher — la fonction échoue alors en silence (cf. §22).
 // ============================================================================
 function checkNativeDialogs() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const c = blankJsComments(read(rel) || '');
     let n = 0;
     for (const kind of ['confirm', 'alert', 'prompt'])
@@ -666,7 +670,7 @@ function checkNativeDialogs() {
 //        C7 ne voit que les modules qui UTILISENT DEBUG sans le déclarer.
 // ============================================================================
 function checkDebugDeclared() {
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const c = stripComments(read(rel) || '');
     if (/\b(const|let|var)\s+DEBUG\b/.test(c)) continue;
     add('WARN', rel, null, 'Aucun `const DEBUG` dans ce module → le premier if(DEBUG) ajouté lèvera un ReferenceError silencieux. Déclarer en tête : const DEBUG = location.hostname === \'localhost\' || location.hostname === \'127.0.0.1\';');
@@ -701,7 +705,7 @@ function checkUnescaped() {
   const grp = '(?:' + XSS_FIELDS.join('|') + ')';
   const reTpl = new RegExp('\\$\\{\\s*([A-Za-z_$][\\w$.\\[\\]]{0,50}?\\.' + grp + ')\\s*\\}', 'g');
   const reCat = new RegExp('[\'"]\\s*\\+\\s*([A-Za-z_$][\\w$.\\[\\]]{0,50}?\\.' + grp + ')\\s*\\+\\s*[\'"]', 'g');
-  for (const rel of listDir('src', '.js')) {
+  for (const rel of jsSources()) {
     const c = blankJsComments(read(rel) || '');
     let n = 0;
     for (const re of [reTpl, reCat]) {
@@ -845,8 +849,8 @@ function checkPaiePrivacy() {
 //     ou explicitement pris sur `window.`.
 //  ★ C'est la regle qui manquait, et elle aurait attrape les deux incidents.
 function checkHelpersOrphelins() {
-  const CORPUS_JS = listDir('src', '.js').map(x => read(x) || '').join('\n');
-  for (const f of listDir('src', '.js')) {
+  const CORPUS_JS = jsSources().map(x => read(x) || '').join('\n');
+  for (const f of jsSources()) {
     const brut = read(f); if (!brut) continue;
     const src = stripComments(brut);
     /* Declare dans le fichier : function _x, var/let/const _x =, ou _x = function */
@@ -902,7 +906,7 @@ const WIN_NATIF = new Set(['scrollTo', 'open', 'location', 'setTimeout', 'addEve
 function checkAideEtVisite() {
   const app = read('src/app.js'), ut = (read('src/utils.js') + '\n' + read('src/whats-new.js')), pil = read('src/pilotage.js');
   const idx = read('index.html');
-  const jsFiles = listDir('src', '.js');
+  const jsFiles = jsSources();
   const corpus = jsFiles.map(f => read(f) || '').join('\n') + '\n' + (idx || '');
 
   // ── a) Une cle d'onglet RETIREE ne doit plus etre demandee ailleurs. ──
@@ -1057,7 +1061,7 @@ const C23_GLOB = new Set(['window', 'document', 'console', 'Math', 'JSON', 'Obje
   'localStorage', 'sessionStorage', 'navigator', 'location', 'history', 'alert', 'confirm', 'prompt']);
 
 function checkHandlerScope() {
-  const allJs = listDir('src', '.js');
+  const allJs = jsSources();
   // Ce qui est joignable : l'union de ce que TOUS les fichiers assignent a
   // window. Un gestionnaire de reglages.js peut nommer une fonction exposee par
   // app.js — ne regarder qu'un fichier fabriquerait de faux positifs.
@@ -1558,7 +1562,7 @@ function c24Bounds(mask, i) {
 }
 
 function checkXssRatchet() {
-  const rels = listDir('src', '.js');
+  const rels = jsSources();
   const corpus = [];
   for (const rel of rels) {
     const src = read(rel);

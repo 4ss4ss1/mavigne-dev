@@ -115,7 +115,8 @@ function statiques(S) {
   const rr = fonction(S.gt, 'agtResolveReport');
   const iA = rr.indexOf('await window.fbResolveReport('), iF = rr.search(/flip\((t\.reports|_agtReportsGT)\)/);
   r.push([iA > 0 && iF > iA && /catch\(e\)\{[^}]*return; \}/.test(rr), '★★ un signalement n’est « résolu » qu’APRÈS la réponse du serveur (GT-B19)']);
-  r.push([fonction(S.gt, '_agtBuildIncidents').indexOf('_agtSuiviLigne(g)') !== -1 || S.gt.indexOf("h+=_agtSuiviLigne(g);") !== -1, 'chaque incident montre sa priorité, son statut, sa note et ses versions']);
+  // ★ GT-UI-2 (§517) : la ligne de suivi passe à l'écran Incidents (src/gt/incidents.js) par ce que la console expose.
+  r.push([S.gt.indexOf('ligneSuivi:function(g){ return _agtSuiviLigne(g); }') !== -1, 'chaque incident montre sa priorité, son statut, sa note et ses versions']);
   const sl = fonction(S.gt, '_agtSuiviLigne');
   r.push([/\['P1','P2','P3','P4'\]/.test(sl) && sl.indexOf('agtSuiviStatut(') !== -1 && sl.indexOf('agtSuiviNote(') !== -1 && sl.indexOf('revenu apr') !== -1, 'la ligne : P1 à P4, la suggérée en pointillé, le statut, la note, « revenu après clôture »']);
   r.push([/suivi:'le suivi des incidents'/.test(S.gt), 'une lecture ratée du suivi se dit au bandeau']);

@@ -935,6 +935,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtsuivi1.mjs --contre'],
   ['node scripts/mv-harnais-gtui1.mjs'],           // GT-UI-1 (§516) : la coquille de la console — barre latérale sur ordinateur, liens directs, recherche Ctrl K
   ['node scripts/mv-harnais-gtui1.mjs --contre'],
+  ['node scripts/mv-harnais-gtui2.mjs'],           // GT-UI-2 (§517) : l'écran Incidents en tableau (statuts, tri, fiche, « Annuler »), le Radar trié et ses traces
+  ['node scripts/mv-harnais-gtui2.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

@@ -1,0 +1,39 @@
+{
+  "lot": "GT-UI-2",
+  "section": "§517",
+  "base": "31d8807fd91e18754491d9d63ee53c90742dbf76",
+  "inclut": [],
+  "date": "2026-11-02",
+  "tutos": {
+    "ok": true,
+    "empreinte": "c7740dd8a7d39907a38c36b36d211b9e15c5cde6cbe08b97e00a73eba1e6a249",
+    "date": "2026-11-02T19:15:01.407Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "454aad48924bd091a8907d2bfcc83ba86e155e251c9dba450c1b05a93f4959c0",
+    "CLAUDE.md": "d74b4443ba95ae5b38e0d066515d64d22daaad5b40e85d223a8127ad735c85e8",
+    "docs/claude/INDEX.md": "e16097f4136bad21abf9851a971f041857fd5f21d08eeb99019d8cf85ba93a69",
+    "docs/claude/chantiers-480-529.md": "643afddadc0a25395a9ab6374c71c2b747182907f80aeb2462f27213f1892398",
+    "docs/claude/journal.md": "31ee8eb9159bae8f6ad58bfd4132a8ba37915810d61233c255577293dbe666bb",
+    "public/sw.js": "70916f0bc87fe8daf69382f9ca2d58e0f4ac46b13e8aaa41bc8d042ced65ee4c",
+    "scripts/harnais-claude-md.mjs": "cbd85794296832983e3c2206a31476189cb3bde9b927279e70b0607c0dccce5e",
+    "scripts/mv-harnais-cote1.mjs": "0a68e121e4d01843ce84ec4d54619f34103b52a56f0174ea855bab60322321fe",
+    "scripts/mv-harnais-gtsuivi1.mjs": "9571316a8e162b730c03f6687953477e8c92201aaf171e014cb5f39119810376",
+    "scripts/mv-harnais-liste.mjs": "255850c0d11e96d686ad343ce6215e2f07976ff71bd6ccfbd093d00405073bcb",
+    "scripts/mv-harnais-pastilles.mjs": "911f348d75174cad9b2a8c0076716d8c7f5cc4ce4ce5332fceed4708d692851f",
+    "scripts/preflight.mjs": "edd3881ca9da71164919826ac06dc158bf47da2729addef11eda5ad4b0d5b23a",
+    "src/admin-gt.js": "516addc591b6274af7377cb4084082b8ad6b7d487dc98dc25bf591e186dde90c",
+    "src/gt.js": "543e14bb97da7ffeb0df568a685a22f68d958d57de6643d74d1f52f1e5eb0acc",
+    "src/gt/coquille.js": "05bb6042eb45fee099d9aa4c92d7f25984537e8c49999161b07b35d7c35c7079",
+    "src/styles.css": "891701cc996de59574ea43ba31ae318010b6b48a5ba0c647843e3b537074f14e",
+    "scripts/mv-harnais-gtui2.mjs": "bf982ba63e0dfe17d58056aa91a4f59cb7351a73313e7ece56b6102ca370537c",
+    "src/gt/incidents.js": "20e60b492b4e6f42c99cab2880eac22420a671c27ec41fbc21ae4b40f5759410"
+  }
+}

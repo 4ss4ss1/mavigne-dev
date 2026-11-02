@@ -975,3 +975,34 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - **GT-UI-2** — Radar et Incidents d’après la maquette : le suivi de GT-SUIVI-1 en tableau trié (priorité, statut, versions, « revenu »), les tickets saisis à la main, les liens entre incidents, les signalements suivis ; et ces deux écrans sur la charte claire et sombre.
 - **La charte claire et sombre** et les fenêtres par `openOv` (GT-B29) écran par écran ; le découpage d’`admin-gt.js` dans `src/gt/` au fil des écrans.
 - **Ctrl K ne cherche pas encore dans les fiches** (parcelles, membres) : à voir avec l’écran Clients (GT-UI-3).
+
+## 517. ★★★ GT-UI-2 — L’ÉCRAN INCIDENTS EN TABLEAU, LE RADAR TRIÉ, « ANNULER » APRÈS CHAQUE GESTE (02/11 — `src/gt/incidents.js` (neuf) · `src/gt.js` · `src/gt/coquille.js` · `src/admin-gt.js` · `src/styles.css` · `public/sw.js` · `scripts/preflight.mjs` · `scripts/mv-harnais-gtui2.mjs` (neuf) · `scripts/mv-harnais-gtsuivi1.mjs` · `scripts/mv-harnais-cote1.mjs` · `scripts/mv-harnais-liste.mjs` — base `31d8807` « gtui1 » — APP 10.59 inchangé, **SW 11.41 → 11.42**)
+
+### 517a. D’où ça vient
+- **Le plan en 11 lots** (§28 « ★ CONSOLE GT ») : GT-UI-2 — « suite » de Nico, le 02/11. **La maquette ouverte et comparée** (MAQ-1) : ses Incidents en tableau (onglets par statut, priorité suggérée et expliquée, tri sur chaque colonne, recherche, actions groupées, notes, versions, régressions, « Annuler » après chaque geste, la fiche à côté), son Radar (« À traiter » triable, les dernières traces).
+- **L’audit** : GT-B20 (aucun tri, aucune recherche, listes coupées sans page suivante) pour les incidents.
+
+### 517b. Ce qui change
+- **L’écran Incidents › Erreurs techniques** vit dans **`src/gt/incidents.js`** (chargé par `gt.js` après la coquille) et lit la console par `window._agtIncDonnees()` (en lecture : les groupes, le suivi, la priorité suggérée, la ligne de suivi, la santé du journal) ; il agit par les gestes publics (`agtSuiviPrio`, `agtSuiviStatut`, `agtSuiviLot`, `agtResolveGroup`, `agtErrCopy`, `agtPurgeErrors`) et redessine par `agtRenderBody` (exposé).
+  - **Les onglets par statut** (`ongletDe`) : Ouverts, À livrer (corrigé), À vérifier (livré), Clos, Tous — **un incident clos qui revient repasse dans les ouverts** (« revenu »).
+  - **La recherche** sans accents ni casse (message, catégorie, clients, écrans) ; **les filtres** P1 à P4, client, source (domaines, ce poste), période (7, 30, 90 jours, toujours).
+  - **Le tableau** : Priorité (confirmée, sinon la suggérée en pointillé avec sa raison) · Incident (message, catégorie, clients) · Fois · Dernière · Statut ; **tri sur chaque colonne**, dans les deux sens, stable (`aria-sort`) ; 300 lignes au plus, la suite se dit.
+  - **La sélection** (cases) : « Clore », ou une priorité, pour toutes d’un coup — **une transaction** (`agtSuiviLot`).
+  - **La fiche de l’incident** (une ligne cliquée, ou Entrée) : à droite sur ordinateur (collée en défilant), au-dessus au téléphone — la ligne de suivi (P1 à P4, statut, note, versions), les repères (domaines, fois et personnes, première et dernière fois, écrans, versions), les huit dernières occurrences (domaine, écran, version, détail), « Clore l’incident », « Copier pour le développeur ».
+  - **« Annuler »** huit secondes après chaque geste du suivi (`_agtAnnulable`) : `agtSuiviPrio` (qui accepte maintenant une priorité vide), `agtSuiviStatut`, `agtResolveGroup` et la sélection gardent ce qu’ils remplacent et le remettent.
+  - **La carte d’un client** mène à ses incidents par `agtIncVoirClient` ; **la recherche (Ctrl K)** ouvre la fiche d’un incident (`agtIncOuvrir`).
+- **L’ancien écran est parti d’`admin-gt.js`** : `_agtBuildErrors`, `_agtErrFiltres`, `agtErrToggle`, `agtSetErrFilter`, `agtSetErrSrc`, `agtSetErrPer`, `agtSetErrTenant` et leurs états — le fichier maigrit (428 → 423 Ko).
+- **Le Radar** : chaque ligne a son type (Incident, Signalement, Facturation, Lead, Client) ; « Par priorité » (l’ordre d’urgence) ou « Par type » (puis l’urgence) — `_agtRadarTrier` ; **les dernières traces** (cinq entrées du journal d’accès, icônes dessinées, « Tout le journal »).
+- ★★ **Le preflight lit aussi `src/gt/*.js`** (`jsSources()`, à la place de `listDir('src', '.js')` partout) : depuis GT-UI-1, ces fichiers échappaient à tous ses contrôles — une fonction appelée de là passait pour morte, un gestionnaire défini là pour absent. Il a aussitôt trouvé dans `incidents.js` un `catch` muet et neuf valeurs posées dans des gestionnaires sans `_escAttr` : corrigés.
+- **La feuille** (`styles.css`) : le tableau, la fiche, la barre « Annuler », les traces — sur l’échelle d’espacement, les rayons et les crans de la charte ; palette sombre de la console.
+
+### 517c. Mesuré
+- `mv-harnais-gtui2` (neuf) : **18 assertions, 11/11 mutants** — les vraies fonctions de `incidents.js` jouées sur sept incidents (un critique confirmé P2, un clos revenu, un corrigé, un livré, un traité ancien, un de ce poste, un au message et à l’identifiant piégés), le vrai tri du Radar, et le câblage.
+- `mv-harnais-gtsuivi1` suit (la ligne de suivi passe par ce que la console expose) ; `mv-harnais-cote1` : la barre « Annuler » exemptée (console GT seulement).
+- **La chaîne**, premier passage (643 commandes) : trois rouges, tous de ce lot. `mv-harnais-boutons` (66 classes de boutons « maison » pour 65) : la classe neuve `.agt-inc-btn` remplacée par le bouton de la console, `.agt-btn` (+ `.agt-inc-court`, sans fond). `mv-harnais-pastilles --contre` : l’ancien écran parti emportait cinq pastilles faites à la main (56 → 51) — la pastille injectée ne dépassait plus le plafond : **plafond baissé à 51**. **Second passage, sur le code final : 643 commandes, 0 rouge.**
+- **Tutos concernés** : aucun ; **le côte à côte rejoué** (la feuille touchée) sur les sources finales, aux trois tailles : vert.
+
+### 517d. Ce qui reste ouvert
+- **GT-UI-3** — l’écran Clients d’après la maquette : le tableau trié par santé, la fiche à onglets (ensemble, factures, incidents, appareils, accès, réglages) ; **D5** : les contacts de facturation (`_guerettech/clients`), pour que la relance parte avec son destinataire.
+- **Les tickets saisis à la main**, les liens entre incidents, les signalements dans le même tableau.
+- **La charte claire et sombre** de toute la console, quand tous ses écrans liront des jetons.

@@ -30,11 +30,6 @@ var _agtTab        = 'radar';    // lot C : le Radar est la page d'accueil
 // deploiement peut porter une ancienne cle — on la fait atterrir au bon endroit.
 var _AGT_TAB_MIGR  = { errors:'incidents', reports:'incidents', log:'outils', essais:'outils', kml:'outils' };
 var _agtExpandedT  = null;
-var _agtErrFilter  = 'all';
-var _agtErrSrc     = 'clients';  // 'clients' | 'local' | 'all' — par defaut on
-                                 // regarde les DOMAINES, pas le journal de ce poste
-var _agtErrPer     = 30;         // fenetre en jours, 0 = depuis toujours
-var _agtErrOpen    = null;       // empreinte du groupe deplie
 var _agtEssais     = [];  // tokens d'essai 30j
 var _agtDemoStats  = null;  // stats démo visite guidée {connexions,uniques,last,jours}
 // ── SEC-GTC — LE REGISTRE COMMERCIAL QUITTE LE DOCUMENT PUBLIC ─────────────
@@ -129,7 +124,6 @@ var _agtKmlLu       = '';      // '' | 'load' | 'ok' | 'err' — état de cette 
 var _agtKmlCreerF   = true;    // créer aussi la fiche des parcelles nouvelles
 var _agtKmlConfirm  = false;   // case du geste destructif, remise à zéro à chaque changement
 var _agtKmlBusy     = false;
-var _agtErrTenant  = 'all';
 var _agtAccessLog  = [];
 // --- AXE A : registre de vente + demandes entrantes ---
 var _agtClients    = {};  // _guerettech/clients.clients[slug] : {plan,trialDays,status,created_at,trialExp}
@@ -513,7 +507,7 @@ function _agtRadarRows(){
   _agtTenants.forEach(function(t,i){
     if(t.errorsCrit>0) rows.push({ c:'#EF4444', ord:10,
       t:'<b>'+_escHtml(t.nom)+'</b> \u2014 '+t.errorsCrit+' erreur'+(t.errorsCrit>1?'s':'')+' critique'+(t.errorsCrit>1?'s':''),
-      m:'', b:'Voir', a:'agtSwitchTab(\'incidents\')' });
+      m:'', b:'Voir', a:'agtSwitchTab(\'incidents\')', ty:'Incident' });
   });
   var repOpen=[];
   _agtTenants.forEach(function(t){ (t.reports||[]).forEach(function(r){ if(!r.resolved) repOpen.push({n:t.nom,r:r}); }); });
@@ -521,20 +515,20 @@ function _agtRadarRows(){
   if(repOpen.length) rows.push({ c:'#F97316', ord:11,
     t:repOpen.length+' signalement'+(repOpen.length>1?'s':'')+' en attente \u2014 '
       +_escHtml(repOpen.slice(0,2).map(function(x){ return x.n; }).join(', '))+(repOpen.length>2?'\u2026':''),
-    m:'', b:'Traiter', a:'agtSetIncTab(\'rep\')' });
+    m:'', b:'Traiter', a:'agtSetIncTab(\'rep\')', ty:'Signalement' });
 
   // 2. Commercial : on reprend TELLES QUELLES les lignes de l'onglet Business.
   //    Une seule definition de « facture en retard » dans tout le panneau.
   _agtBizTodoRows().forEach(function(r){
     var ord = (r.ord===0) ? 12 : (r.ord===1 ? 22 : (r.ord===2 ? 21 : 23));
-    rows.push({ c:r.c, ord:ord, t:r.t, m:r.m, b:r.b, a:r.a });
+    rows.push({ c:r.c, ord:ord, t:r.t, m:r.m, b:r.b, a:r.a, ty:'Facturation' });
   });
 
   // 3. Demandes entrantes jamais traitees.
   var neufs=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; });
   if(neufs.length) rows.push({ c:'#C4B5FD', ord:20,
     t:neufs.length+' demande'+(neufs.length>1?'s':'')+' du site sans r\u00e9ponse',
-    m:'', b:'Ouvrir', a:'agtSwitchTab(\'leads\')' });
+    m:'', b:'Ouvrir', a:'agtSwitchTab(\'leads\')', ty:'Lead' });
 
   // 4. Silence : un domaine abonne qui ne se connecte plus est un client qui part.
   _agtTenants.forEach(function(t,i){
@@ -545,15 +539,24 @@ function _agtRadarRows(){
     var j=Math.round((now-d.getTime())/86400000);
     if(j>=_AGT_SILENCE_J) rows.push({ c:'#B8913A', ord:30,
       t:'<b>'+_escHtml(t.nom)+'</b> \u2014 plus aucune connexion depuis '+j+' jours',
-      m:'', b:'Fiche', a:'agtGoClient(\''+t.slug+'\')' });
+      m:'', b:'Fiche', a:'agtGoClient(\''+t.slug+'\')', ty:'Client' });
   });
 
   rows.sort(function(a,b){ return a.ord-b.ord; });
   return rows;
 }
 
+// ★ GT-UI-2 (§517) — le Radar se trie par priorité (l'ordre d'urgence) ou par type ; il montre les dernières traces.
+var _agtRadarTri='prio';
+function agtRadarTri(v){ _agtRadarTri=(v==='type')?'type':'prio'; agtRenderBody(); }
+function _agtRadarTrier(rows, tri){
+  if(tri!=='type') return rows;
+  return rows.map(function(r,i){ return { r:r, i:i }; }).sort(function(a,b){
+    var x=String(a.r.ty||''), y=String(b.r.ty||''); return x<y?-1:(x>y?1:(a.r.ord-b.r.ord)||(a.i-b.i));
+  }).map(function(o){ return o.r; });
+}
 function _agtBuildRadar(){
-  var rows=_agtRadarRows();
+  var rows=_agtRadarTrier(_agtRadarRows(), _agtRadarTri);
   var mrr=0, duT=0, incid=0, neufs=0;
   _agtTenants.forEach(function(t){
     if(!_agtInterne(t.slug) && _agtStatutOf(t.slug).cle==='actif') mrr+=_agtAboPrix(t.slug);
@@ -573,6 +576,8 @@ function _agtBuildRadar(){
 
   h+='<div style="margin:0 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">'
     +(rows.length?('\u00c0 traiter \u2014 '+rows.length):'\u00c0 traiter')+'</div>';
+  if(rows.length>1) h+='<div style="display:flex;gap:8px;margin:0 0 8px">'+[['prio','Par priorit\u00e9'],['type','Par type']].map(function(o){
+    return '<button class="agt-chip'+(_agtRadarTri===o[0]?' on':'')+'" aria-pressed="'+(_agtRadarTri===o[0])+'" onclick="agtRadarTri(\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div>';   // ★ GT-UI-2
 
   if(!rows.length){
     h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:26px;text-align:center">'
@@ -596,6 +601,17 @@ function _agtBuildRadar(){
 
   h+='<div style="margin:18px 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Le produit vu du dehors</div>';
   h+=_agtVisiteCard();
+  h+=_agtRadarTraces();   // ★ GT-UI-2 : les dernières traces
+  return h;
+}
+function _agtRadarTraces(){
+  var L=(_agtAccessLog||[]).slice(0,5);
+  if(!L.length) return '';
+  var h='<div style="margin:18px 0 8px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Derni\u00e8res traces</div>';
+  h+='<div class="agt-traces">'+L.map(function(e){
+    return '<div class="agt-trace"><span class="agt-trace-ic" aria-hidden="true">'+_agtIco(e.icon||'')+'</span><span class="agt-trace-t">'+_escHtml(e.action||'')
+      +'<span class="agt-trace-s">'+_escHtml(e.tenant||'')+'</span></span><span class="agt-trace-q">'+(e.ts?_escHtml(_agtRelTime(e.ts)):'')+'</span></div>';
+  }).join('')+'<button class="agt-chip" onclick="agtSwitchTab(\'outils\')">Tout le journal</button></div>';
   return h;
 }
 
@@ -624,7 +640,8 @@ function _agtBuildIncidents(){
   h+='<button class="agt-chip'+((_agtIncTab==='err')?' on':'')+'" onclick="agtSetIncTab(\'err\')">Erreurs techniques <span style="opacity:.6">'+nErr+'</span></button>';
   h+='<button class="agt-chip'+((_agtIncTab==='rep')?' on':'')+'" onclick="agtSetIncTab(\'rep\')">Signalements clients <span style="opacity:.6">'+nRep+'</span></button>';
   h+='</div>';
-  return h+((_agtIncTab==='rep') ? _agtBuildReports() : _agtBuildErrors());
+  // ★ GT-UI-2 (§517) : les erreurs en tableau, dessinées par src/gt/incidents.js à partir de ce que la console expose.
+  return h+((_agtIncTab==='rep') ? _agtBuildReports() : (window._agtIncidentsVue ? window._agtIncidentsVue(window._agtIncDonnees()) : ''));
 }
 
 // ─── Onglet OUTILS ──────────────────────────────────────────────────────────
@@ -779,8 +796,6 @@ function agtToggleTenant(slug){
   agtRenderBody();
 }
 
-function agtSetErrFilter(f){ _agtErrFilter=f; agtRenderBody(); }
-function agtSetErrTenant(t){ _agtErrTenant=t; agtRenderBody(); }
 
 async function agtResolveReport(id, slug){
   // ★ GT-SUIVI-1 (§515) — « résolu » APRÈS la réponse du serveur, plus avant : l'écran ne dit plus « résolu »
@@ -994,7 +1009,7 @@ function _agtFicheIncid(t){
     c+='</div>';
   });
   if(errs.length>4) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">+ '+(errs.length-4)+' autre'+(errs.length>5?'s':'')+'</div>';
-  c+='<button onclick="event.stopPropagation();agtSetErrTenant(\''+t.slug+'\');agtSwitchTab(\'incidents\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:7px 0 0">Ouvrir dans Incidents</button>';
+  c+='<button onclick="event.stopPropagation();agtIncVoirClient(\''+t.slug+'\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:7px 0 0">Ouvrir dans Incidents</button>';
   return _agtFicheSec('Incidents', c);
 }
 function _agtFicheAcces(slug){
@@ -1331,16 +1346,47 @@ function _agtSuiviLigne(g){
     +(s.livreEn?(' \u00b7 livr\u00e9 en '+_escHtml(s.livreEn)):'')+'</div>';
   return h;
 }
+// ★ GT-UI-2 (§517) — CHAQUE GESTE DU SUIVI SE DÉFAIT (« Annuler », la maquette) : on garde ce qu'il remplace, et
+//   la barre « Annuler » (src/gt/incidents.js) le remet. Une priorité vide (« ») retire la priorité confirmée.
+function _agtSuiviAvant(cle){ var s=_agtSuivi[cle]||{}; return { prio:s.prio||'', statut:s.statut||'nouveau', closLe:s.closLe||'' }; }
+function _agtProposerAnnuler(texte, cle, avant){
+  if(!window._agtAnnulable) return;
+  window._agtAnnulable(texte, function(){ _agtSuiviMaj(cle, avant).then(function(ok){ if(ok) agtRenderBody(); }); });
+}
 window.agtSuiviPrio=function(gid, p){
-  var g=_agtErrGroupById(gid); if(!g || ['P1','P2','P3','P4'].indexOf(p)<0) return;
-  _agtSuiviMaj(g.key, { prio:p }).then(function(ok){ if(ok) agtRenderBody(); });
+  var g=_agtErrGroupById(gid); if(!g || ['P1','P2','P3','P4',''].indexOf(p)<0) return Promise.resolve(false);
+  var avant=_agtSuiviAvant(g.key);
+  return _agtSuiviMaj(g.key, { prio:p }).then(function(ok){
+    if(ok){ agtRenderBody(); _agtProposerAnnuler(p?('Priorit\u00e9 '+p+' pos\u00e9e'):'Priorit\u00e9 retir\u00e9e', g.key, { prio:avant.prio }); }
+    return ok;
+  });
 };
 window.agtSuiviStatut=function(gid, st){
-  var g=_agtErrGroupById(gid); if(!g || !_AGT_SUIVI_ST[st]) return;
-  var patch={ statut:st }, now=new Date().toISOString();
+  var g=_agtErrGroupById(gid); if(!g || !_AGT_SUIVI_ST[st]) return Promise.resolve(false);
+  var patch={ statut:st }, now=new Date().toISOString(), avant=_agtSuiviAvant(g.key);
   if(_AGT_SUIVI_FIN[st]) patch.closLe=now;
   if(st==='livre'){ patch.livreLe=now; patch.livreEn=String(window.APP_VERSION||''); }
-  _agtSuiviMaj(g.key, patch).then(function(ok){ if(ok){ agtRenderBody(); if(_AGT_SUIVI_FIN[st]) showToast('Incident '+_AGT_SUIVI_ST[st].toLowerCase(),'#3D6B27'); } });
+  return _agtSuiviMaj(g.key, patch).then(function(ok){
+    if(ok){ agtRenderBody(); _agtProposerAnnuler('Statut : '+_AGT_SUIVI_ST[st], g.key, { statut:avant.statut, closLe:avant.closLe }); }
+    return ok;
+  });
+};
+// Plusieurs incidents d'un coup (la sélection de l'écran) : UNE transaction, et « Annuler » rend chacun à son état.
+window.agtSuiviLot=async function(gids, patch){
+  var cles=[], avants={};
+  (gids||[]).forEach(function(gid){ var g=_agtErrGroupById(gid); if(g && !avants[g.key]){ cles.push(g.key); avants[g.key]=_agtSuiviAvant(g.key); } });
+  if(!cles.length) return false;
+  var chaine=function(fpatch){ return function(d, existe){ var r=null; cles.forEach(function(k, i){ r=_agtMutSuivi(i===0?d:r, i===0?existe:true, k, fpatch(k), new Date().toISOString()); }); return r; }; };
+  try{
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var r=await window.fbGtMaj('suivi', chaine(function(){ return patch; }));
+    _agtSuivi=r.valeur.value; _agtAppliquerSuivi(); agtRenderBody();
+    if(window._agtAnnulable) window._agtAnnulable(cles.length+' incident'+(cles.length>1?'s':'')+' mis \u00e0 jour', function(){
+      window.fbGtMaj('suivi', chaine(function(k){ var a=avants[k]; return ('prio' in patch) ? { prio:a.prio } : { statut:a.statut, closLe:a.closLe }; }))
+        .then(function(r2){ _agtSuivi=r2.valeur.value; _agtAppliquerSuivi(); agtRenderBody(); }, function(e){ _agtEchecEcriture(e, 'Suivi des incidents'); });
+    });
+    return true;
+  }catch(e){ _agtEchecEcriture(e, 'Suivi des incidents'); return false; }
 };
 window.agtSuiviNote=function(gid){
   var g=_agtErrGroupById(gid); if(!g || !window.openPrompt) return;
@@ -1464,145 +1510,7 @@ function _agtErrSante(){
   return h+'</div>';
 }
 
-function _agtErrFiltres(base, tenantCnt){
-  var h='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px">';
-  [['all','Toutes'],['open','Ouvertes'],['critical','Critiques']].forEach(function(p){
-    h+='<button class="agt-chip'+((_agtErrFilter===p[0])?' on':'')+'" onclick="agtSetErrFilter(\''+p[0]+'\')">'+p[1]+'</button>';
-  });
-  h+='</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px">';
-  [['clients','Domaines clients'],['local','Mon poste'],['all','Les deux']].forEach(function(p){
-    h+='<button class="agt-chip'+((_agtErrSrc===p[0])?' on':'')+'" onclick="agtSetErrSrc(\''+p[0]+'\')">'+p[1]+'</button>';
-  });
-  h+='</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px">';
-  [[7,'7 jours'],[30,'30 jours'],[0,'Depuis toujours']].forEach(function(p){
-    h+='<button class="agt-chip'+((_agtErrPer===p[0])?' on':'')+'" onclick="agtSetErrPer('+p[0]+')">'+p[1]+'</button>';
-  });
-  h+='</div>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
-  h+='<button class="agt-chip'+((_agtErrTenant==='all')?' on':'')+'" onclick="agtSetErrTenant(\'all\')">Tous <span style="opacity:.6">'+base.length+'</span></button>';
-  _agtTenants.forEach(function(t){
-    var n=tenantCnt[t.slug]||0;
-    h+='<button class="agt-chip'+((_agtErrTenant===t.slug)?' on':'')+'" onclick="agtSetErrTenant(\''+t.slug+'\')" style="'+(n===0?'opacity:.45':'')+'">'
-      +_escHtml(t.slug)+' <span style="opacity:.6">'+n+'</span></button>';
-  });
-  h+='</div>';
-  return h;
-}
 
-function _agtBuildErrors(){
-  var merged=_agtErrMerged();
-  var now=Date.now();
-
-  // Perimetre : niveau + source + periode. Le filtre CLIENT s'applique apres,
-  // pour que chaque pastille puisse afficher son propre compteur.
-  var base=merged.filter(function(e){
-    if(_agtErrFilter==='open'     && e.resolved)           return false;
-    if(_agtErrFilter==='critical' && e.level!=='critical')  return false;
-    if(_agtErrSrc==='clients'     && e._src!=='firebase')   return false;
-    if(_agtErrSrc==='local'       && e._src!=='local')      return false;
-    if(_agtErrPer>0){
-      var d=_agtD(e.ts);
-      if(!d || (now-d.getTime())>_agtErrPer*86400000)       return false;
-    }
-    return true;
-  });
-  var tenantCnt={};
-  base.forEach(function(e){ var s=e._tenantSlug||e.tenant; if(s) tenantCnt[s]=(tenantCnt[s]||0)+1; });
-
-  var visible=base.filter(function(e){
-    return _agtErrTenant==='all' || (e._tenantSlug||e.tenant)===_agtErrTenant;
-  });
-  var groupes=_agtErrGroupes(visible);
-
-  var openCnt=merged.filter(function(e){ return !e.resolved; }).length;
-  var critCnt=merged.filter(function(e){ return e.level==='critical'&&!e.resolved; }).length;
-
-  var h='<div style="display:flex;gap:8px;margin-bottom:12px">';
-  h+='<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#fff">'+groupes.length+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Probl\u00e8mes distincts</div></div>';
-  h+='<div style="flex:1;background:rgba(249,115,22,0.07);border-radius:12px;padding:10px 8px;text-align:center;border:1px solid '+(openCnt>0?'rgba(249,115,22,0.2)':'transparent')+'"><div style="font-size:22px;font-weight:700;color:#F97316">'+openCnt+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Occurrences ouvertes</div></div>';
-  h+='<div style="flex:1;background:'+(critCnt>0?'rgba(239,68,68,0.08)':'rgba(255,255,255,0.05)')+';border-radius:12px;padding:10px 8px;text-align:center;border:1px solid '+(critCnt>0?'rgba(239,68,68,0.2)':'transparent')+'"><div style="font-size:22px;font-weight:700;color:#EF4444">'+critCnt+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Critiques</div></div>';
-  h+='</div>';
-
-  h+=_agtErrSante();
-  h+='<div class="agt-infobox">'+_mvIcon('info',16)+' Niveaux <b>critical \u00b7 error \u00b7 warning</b> remont\u00e9s dans le domaine. Le niveau <i>info</i> reste local, il n\u2019appara\u00eet ici que sous \u00ab Mon poste \u00bb.</div>';
-  h+=_agtErrFiltres(base, tenantCnt);
-
-  if(!groupes.length){
-    return h+'<div style="text-align:center;padding:32px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">\u2705 Rien pour ce filtre</div>';
-  }
-
-  groupes.slice(0,40).forEach(function(g){
-    var m=_AGT_LVL[g.level]||_AGT_LVL.error;
-    var clos=(g.nOpen===0), ouvert=(_agtErrOpen===g.id);
-    var noms=Object.keys(g.tenants);
-    var pages=Object.keys(g.pages), users=Object.keys(g.users);
-
-    h+='<div style="background:'+(clos?'rgba(255,255,255,0.025)':m.bg)+';border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+(clos?'rgba(255,255,255,0.08)':m.color)+';border-radius:10px;padding:10px 12px;margin-bottom:8px;opacity:'+(clos?'0.55':'1')+'">';
-    h+='<div style="display:flex;align-items:flex-start;gap:8px">';
-    h+='<span style="flex-shrink:0;margin-top:1px;display:inline-flex">'+_mvIcon(m.icon,16)+'</span>';
-    h+='<div style="flex:1;min-width:0">';
-    h+='<div style="color:#E8E8E0;font-size:var(--pt-micro,12px);font-weight:600;line-height:1.45">'+_escHtml(g.msg)+'</div>';
-
-    h+='<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">';
-    if(g.n>1) h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;background:rgba(255,255,255,0.10);border-radius:5px;padding:1px 7px;color:#E8E8E0">\u00d7'+g.n+'</span>';
-    h+='<span style="font-size:10px;background:rgba(255,255,255,0.07);border-radius:5px;padding:1px 6px;color:rgba(255,255,255,0.45)">'+_escHtml(_AGT_CAT[g.cat]||g.cat||'\u2014')+'</span>';
-    noms.slice(0,4).forEach(function(nm){
-      h+='<span style="font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);border-radius:5px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">'
-        +_escHtml(nm)+(g.tenants[nm]>1?(' \u00d7'+g.tenants[nm]):'')+'</span>';
-    });
-    if(noms.length>4) h+='<span style="font-size:10px;color:rgba(255,255,255,0.28)">+'+(noms.length-4)+'</span>';
-    if(g.loc>0 && g.fb>0) h+='<span style="font-size:9px;background:rgba(255,255,255,0.05);border-radius:4px;padding:1px 5px;color:rgba(255,255,255,0.3)">'+g.fb+' domaine \u00b7 '+g.loc+' local</span>';
-    else if(g.loc>0)      h+='<span style="font-size:9px;background:rgba(255,255,255,0.05);border-radius:4px;padding:1px 5px;color:rgba(255,255,255,0.3)">mon poste</span>';
-    h+='</div>';
-
-    h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);margin-top:5px">';
-    h+= (g.n>1 && g.first && g.last && g.first.getTime()!==g.last.getTime())
-      ? ('du '+_agtDateFr(g.first)+' \u00e0 il y a '+_agtRelTime(g.last.toISOString()))
-      : (g.last?('il y a '+_agtRelTime(g.last.toISOString())):'\u2014');
-    if(g.nOpen>0 && g.nOpen<g.n) h+=' \u00b7 '+g.nOpen+' non trait\u00e9e'+(g.nOpen>1?'s':'');
-    if(pages.length) h+=' \u00b7 \u00e9cran '+_escHtml(pages.slice(0,3).join(', '));
-    if(users.length) h+=' \u00b7 '+_escHtml(users.slice(0,3).join(', '));
-    h+='</div>';
-    h+=_agtSuiviLigne(g);   // ★ GT-SUIVI-1 : priorité, statut, note, versions
-    h+='</div>';
-
-    h+='<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">';
-    if(g.nOpen>0)
-      h+='<button onclick="agtResolveGroup(\''+g.id+'\')" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:7px;color:#86EFAC;font-size:var(--pt-micro,11px);padding:5px 9px;cursor:pointer;white-space:nowrap;font-family:var(--font-ui,Outfit,sans-serif)">\u2713 R\u00e9solu'+(g.nOpen>1?(' \u00d7'+g.nOpen):'')+'</button>';
-    h+='<button onclick="agtErrCopy(\''+g.id+'\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:rgba(255,255,255,0.5);font-size:var(--pt-lbl,10.5px);padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:var(--font-ui,Outfit,sans-serif)">Copier</button>';
-    h+='</div></div>';
-
-    // Detail : occurrences et pile technique.
-    h+='<button onclick="agtErrToggle(\''+g.id+'\')" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:7px 0 0">'
-      +(ouvert?'\u2013 Replier':'+ D\u00e9tail technique')+'</button>';
-    if(ouvert){
-      var det='';
-      for(var q=0;q<g.items.length && !det;q++) det=g.items[q].detail||'';
-      if(det) h+='<pre style="font-size:10px;color:rgba(255,255,255,0.45);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;margin:6px 0 0;overflow-x:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6">'+_escHtml(det.slice(0,900))+'</pre>';
-      h+='<div style="margin-top:6px">';
-      g.items.slice(0,12).forEach(function(e){
-        h+='<div style="display:flex;gap:8px;align-items:center;padding:3px 0;font-size:10px;color:rgba(255,255,255,0.32);flex-wrap:wrap">';
-        h+='<span style="font-family:monospace">'+_escHtml(e.id||'')+'</span>';
-        h+='<span>'+_agtDateFr(e.ts)+'</span>';
-        h+='<span>'+_escHtml(e._tenantNom||'?')+'</span>';
-        h+='<span style="flex:1"></span>';
-        h+='<span style="color:'+(e.resolved?'rgba(134,239,172,0.5)':'rgba(249,115,22,0.6)')+'">'+(e.resolved?'trait\u00e9e':'ouverte')+'</span>';
-        h+='</div>';
-      });
-      if(g.items.length>12) h+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:3px">+ '+(g.items.length-12)+' autre'+(g.items.length>13?'s':'')+'</div>';
-      h+='</div>';
-    }
-    h+='</div>';
-  });
-
-  if(groupes.length>40) h+='<div style="text-align:center;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);padding:6px">'+(groupes.length-40)+' probl\u00e8me(s) de plus \u2014 affinez les filtres</div>';
-  if(merged.some(function(e){ return e.resolved; })){
-    h+='<button onclick="agtPurgeErrors()" style="width:100%;margin-top:8px;background:rgba(239,68,68,0.06);border:1px dashed rgba(239,68,68,0.2);border-radius:10px;padding:10px;font-size:var(--pt-micro,12px);color:rgba(252,165,165,0.4);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\uD83D\uDDD1\uFE0F Purger les erreurs r\u00e9solues</button>';
-  }
-  return h;
-}
 
 // ── Actions de groupe ───────────────────────────────────────────────────────
 // Retrouve un groupe depuis son empreinte, sans dependre de l'ordre d'affichage
@@ -1612,9 +1520,6 @@ function _agtErrGroupById(gid){
   for(var i=0;i<all.length;i++) if(all[i].id===gid) return all[i];
   return null;
 }
-function agtErrToggle(gid){ _agtErrOpen=(_agtErrOpen===gid)?null:gid; agtRenderBody(); }
-function agtSetErrSrc(v){ _agtErrSrc=v; agtRenderBody(); }
-function agtSetErrPer(v){ _agtErrPer=v; agtRenderBody(); }
 
 // Resout TOUT le groupe. Un seul passage sur le localStorage et UNE SEULE
 // ecriture par domaine, la ou N appels a agtResolveError en feraient N.
@@ -1637,8 +1542,10 @@ async function agtResolveGroup(gid){
 
   // ★★ GT-SUIVI-1 (§515) : l'incident se CLÔT dans _guerettech/suivi — plus rien n'est écrit dans le journal
   //   du domaine (GT-B07). Une occurrence arrivée après la clôture le rouvrira.
+  var _avant=_agtSuiviAvant(g.key);   // ★ GT-UI-2 : pour « Annuler »
   if(await _agtSuiviMaj(g.key, { statut:'clos', closLe:new Date().toISOString() })){
     agtRenderBody();
+    _agtProposerAnnuler('Incident clos', g.key, { statut:_avant.statut, closLe:_avant.closLe });
     var n=Object.keys(ids).length;
     showToast('Incident clos \u00b7 '+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
   }
@@ -1750,7 +1657,7 @@ async function saveAddTenant() {
 // ── Journal des erreurs — actions ────────────────────────────────────────────
 // agtRenderErrorLog() a ete supprime : il visait #agt-error-log, un element qui
 // n'existe plus dans index.html, et ne lisait que le localStorage de CE poste.
-// Le tableau de bord vivant est _agtBuildErrors(), qui fusionne le localStorage et
+// Le tableau de bord vivant est l'écran Incidents (src/gt/incidents.js, GT-UI-2), qui fusionne le localStorage et
 // les error_log de tous les domaines.
 
 
@@ -6502,6 +6409,15 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+window.agtRadarTri       = agtRadarTri;   // GT-UI-2
+window.agtRenderBody     = agtRenderBody;   // ★ GT-UI-2 : les écrans de src/gt/ redessinent par elle
+// ★ GT-UI-2 (§517) — ce que l'écran Incidents (src/gt/incidents.js) LIT de la console, et rien d'autre.
+window._agtIncDonnees = function(){
+  return { groupes:_agtErrGroupes(_agtErrMerged()), suivi:_agtSuivi, st:_AGT_SUIVI_ST, fin:_AGT_SUIVI_FIN,
+    prio:function(g){ return _agtPrioSuggeree(g); }, cat:_AGT_CAT, ligneSuivi:function(g){ return _agtSuiviLigne(g); },
+    sante:_agtErrSante(), esc:_escHtml, relTime:_agtRelTime, dateFr:_agtDateFr,
+    noms:(_agtTenants||[]).reduce(function(o,t){ o[t.slug]=t.nom; return o; },{}) };
+};
 // ★ GT-UI-1 (§516) — ce que la coquille (src/gt/coquille.js) LIT de la console, et rien d'autre.
 window._agtOngletCourant = function(){ return _agtTab; };
 window._agtEstVerrouille = function(){ return !!_agtLocked; };
@@ -6520,11 +6436,6 @@ window.agtSetIncTab      = agtSetIncTab;
 window.agtSetOutTab      = agtSetOutTab;
 window.agtResolveReport  = agtResolveReport;
 window.agtToggleTenant   = agtToggleTenant;
-window.agtSetErrFilter   = agtSetErrFilter;
-window.agtSetErrTenant   = agtSetErrTenant;
-window.agtSetErrSrc      = agtSetErrSrc;
-window.agtSetErrPer      = agtSetErrPer;
-window.agtErrToggle      = agtErrToggle;
 window.agtErrCopy        = agtErrCopy;
 window.agtResolveGroup   = agtResolveGroup;
 window.agtPrepOuvrir     = agtPrepOuvrir;

@@ -5,7 +5,7 @@
 // un lien direct par écran et par fiche, une recherche partout (Ctrl K). Ce fichier porte ce qui ne touche
 // PAS aux données : les routes et la palette. Il ne lit la console que par ce qu'elle expose en lecture
 // (window._agtOngletCourant, _agtEstVerrouille, _agtPaletteDonnees) et n'agit que par ses gestes publics
-// (agtSwitchTab, agtShowFiche, agtErrToggle, renderAdminGT, agtLockNow, agtBizLivre, agtBizCsv).
+// (agtSwitchTab, agtShowFiche, agtIncOuvrir, renderAdminGT, agtLockNow, agtBizLivre, agtBizCsv).
 // ⚠️ Chargé par src/gt.js APRÈS admin-gt.js, sur gt.html seulement — l'appli des clients ne le voit pas.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -69,7 +69,7 @@ export function entreesPalette(d, q, max) {
     tout.push({ titre: c.nom || c.slug, sous: c.slug, type: 'Client', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('clients'); if (window.agtShowFiche) window.agtShowFiche(c.slug); } });
   });
   (d.incidents || []).forEach(function (g) {
-    tout.push({ titre: g.msg || '(sans message)', sous: g.n + ' fois' + (g.ouvert ? '' : ' \u00b7 trait\u00e9'), type: 'Incident', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('incidents'); if (window.agtErrToggle) window.agtErrToggle(g.id); } });
+    tout.push({ titre: g.msg || '(sans message)', sous: g.n + ' fois' + (g.ouvert ? '' : ' \u00b7 trait\u00e9'), type: 'Incident', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('incidents'); if (window.agtIncOuvrir) window.agtIncOuvrir(g.id); } });   // GT-UI-2 : la fiche de l'incident
   });
   (d.factures || []).forEach(function (f) {
     tout.push({ titre: f.ref, sous: f.slug, type: 'Facture', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('business'); } });
