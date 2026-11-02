@@ -29,7 +29,6 @@ var _agtTab        = 'radar';    // lot C : le Radar est la page d'accueil
 // Lot C : les 8 onglets deviennent 6. Une session ouverte pendant le
 // deploiement peut porter une ancienne cle — on la fait atterrir au bon endroit.
 var _AGT_TAB_MIGR  = { errors:'incidents', reports:'incidents', log:'outils', essais:'outils', kml:'outils' };
-var _agtExpandedT  = null;
 var _agtEssais     = [];  // tokens d'essai 30j
 var _agtDemoStats  = null;  // stats démo visite guidée {connexions,uniques,last,jours}
 // ── SEC-GTC — LE REGISTRE COMMERCIAL QUITTE LE DOCUMENT PUBLIC ─────────────
@@ -616,15 +615,8 @@ function _agtRadarTraces(){
 }
 
 function agtGoClient(slug){
-  _agtExpandedT=slug;
-  agtSwitchTab('clients');
-  setTimeout(function(){
-    var b=document.getElementById('agt-body');
-    if(!b) return;
-    var card=b.querySelector('.agt-card-actions');
-    if(card){ try{ card.scrollIntoView({behavior:'smooth',block:'center'}); }
-      catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'scroll fiche client',detail:(e&&e.message)||String(e)}); } }
-  },60);
+  // ★ GT-UI-3 : la fiche du client, à côté du tableau.
+  if(window.agtCliOuvrir) window.agtCliOuvrir(slug); else agtSwitchTab('clients');
 }
 
 // ─── Onglet INCIDENTS ───────────────────────────────────────────────────────
@@ -791,10 +783,6 @@ function agtSwitchTab(tab){
   agtRenderBody();
 }
 
-function agtToggleTenant(slug){
-  _agtExpandedT=(_agtExpandedT===slug)?null:slug;
-  agtRenderBody();
-}
 
 
 async function agtResolveReport(id, slug){
@@ -890,14 +878,6 @@ function _agtCnxFmt(isoStr){
 }
 function _agtCnxColor(v){ return (typeof v==='string' && /^#[0-9a-fA-F]{3,8}$/.test(v)) ? v : '#8B5CF6'; }
 
-function _agtCnxBadge(slug){
-  var c=_agtConnexions[slug];
-  if(!c) return '';  // pas encore chargé / indisponible
-  var f=_agtCnxFmt(c.last);
-  var label = c.last ? ('Dernière connexion · '+f.txt) : 'Aucune connexion';
-  return '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:var(--pt-micro,11px);font-weight:600;padding:3px 9px;border-radius:8px;background:'+f.bg+';color:'+f.c+'">'
-       + '<span style="width:6px;height:6px;border-radius:50%;background:'+f.dot+'"></span>'+label+'</div>';
-}
 
 function _agtCnxSection(slug){
   var c=_agtConnexions[slug];
@@ -1060,87 +1040,9 @@ function _agtFicheAppareils(t){
 }
 
 function _agtBuildClients(){
-  var h='';
-  // La carte E-Phy a demenage dans Outils (lot C) : c'est de la maintenance de
-  // referentiel, elle n'a rien a faire en tete de la liste des clients.
-  h+='<div class="agt-section-lbl">Tenants actifs — '+_agtTenants.length+'</div>';
-  for(var j=0;j<_agtTenants.length;j++){
-    var t=_agtTenants[j];
-    var exp=(_agtExpandedT===t.slug);
-    var dot=t.errorsCrit>0?'#EF4444':t.errorsOpen>0?'#F97316':t.membres>0?'#22C55E':'#B8913A';
-    var dotGlow=t.errorsCrit>0?'rgba(239,68,68,0.5)':t.errorsOpen>0?'rgba(249,115,22,0.5)':t.membres>0?'rgba(34,197,94,0.4)':'rgba(184,145,58,0.3)';
-    var borderColor=t.errorsCrit>0?'rgba(239,68,68,0.22)':t.errorsOpen>0?'rgba(249,115,22,0.18)':'rgba(139,92,246,0.12)';
-    var errBadge=t.errorsOpen>0?('<span style="font-size:10px;background:'+(t.errorsCrit>0?'rgba(239,68,68,0.15)':'rgba(249,115,22,0.12)')+';border:1px solid '+(t.errorsCrit>0?'rgba(239,68,68,0.35)':'rgba(249,115,22,0.3)')+';border-radius:6px;padding:2px 7px;color:'+(t.errorsCrit>0?'#FCA5A5':'#FED7AA')+';font-weight:600;margin-left:8px">&#9888; '+t.errorsOpen+'</span>'):'';
-
-    h+='<div class="agt-card" style="border-color:'+borderColor+'">';
-    // Header carte
-    h+='<div class="agt-card-hd" onclick="agtToggleTenant(\''+t.slug+'\')">';
-    h+='<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';box-shadow:0 0 6px '+dotGlow+';flex-shrink:0;margin-top:6px"></div>';
-    h+='<div style="flex:1">';
-    h+='<div style="font-size:15px;font-weight:600;color:#fff;display:flex;align-items:center">'+_escHtml(t.nom)+errBadge+'</div>';
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.45);margin-top:2px;font-family:monospace">'+_escHtml(t.slug)+'</div>';
-    h+=_agtCnxBadge(t.slug);
-    if(t.echecs && t.echecs.length) h+='<div style="margin-top:6px;font-size:var(--pt-micro,12px);color:#FCA5A5">Lecture impossible : '+_escHtml(t.echecs.join(', '))+' \u2014 chiffres manquants</div>';   // ★ GTFIX-4 (GT-B12)
-    // ★ GTFIX-4 : la barre d'avancement de saison est partie — elle restait à 0 %, faute de donnée (GT-B22).
-    h+='<div style="margin-top:10px">';
-    h+='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:10px;color:rgba(255,255,255,0.3)">'+_escHtml(t.saison||'—')+'</span></div>';
-    h+='</div>';
-    h+='</div>';
-    h+='<div style="font-size:var(--pt-micro,12px);color:rgba(196,181,253,0.3);margin-top:4px;transform:'+(exp?'rotate(180deg)':'none')+';transition:transform .2s">▾</div>';
-    h+='</div>';
-    // Mini stats
-    h+='<div style="display:flex;border-top:1px solid rgba(255,255,255,0.05);padding:8px 0">';
-    var stats=[{v:(t.membres==null?'\u2014':t.membres),l:'membres'},{v:(t.parcelles==null?'\u2014':t.parcelles),l:'parcelles'},{v:t.errorsOpen,l:'erreurs'},{v:_agtAccessLog.filter(function(a){return a.tenant===t.slug;}).length,l:'accès'}];
-    for(var k=0;k<stats.length;k++){
-      h+='<div style="flex:1;text-align:center;'+(k<3?'border-right:1px solid rgba(255,255,255,0.05);':'')+'padding:2px 0">';
-      h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(255,255,255,0.75)">'+stats[k].v+'</div>';
-      h+='<div style="font-size:9px;color:rgba(255,255,255,0.2);margin-top:1px">'+stats[k].l+'</div>';
-      h+='</div>';
-    }
-    h+='</div>';
-    // Panel actions (expandable)
-    if(exp){
-      h+='<div class="agt-card-actions">';
-      h+=_agtCnxSection(t.slug);
-      // ── Fiche 360 (lot C) : tout ce qui concerne CE client, sans changer d'onglet.
-      h+=_agtFicheBiz(t.slug);
-      h+=_agtFicheIncid(t);
-      h+=_agtFicheAcces(t.slug);
-      h+=_agtFicheAppareils(t);   /* VER-1 */
-      h+='<div class="agt-section-lbl" style="margin:12px 0 8px">Actions</div>';
-      h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">Fiche client — tout paramétrer</button>';
-      h+='<button class="agt-btn" style="width:100%;border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtPrepOuvrir(\''+_escAttr(t.slug)+'\')">Préparer ce domaine — ses écrans, en direct</button>';
-      // ★ GTFIX-4 (§513) — « Accéder » est parti (GT-B16) : il ouvrait l'écran de CONNEXION du domaine dans un nouvel
-      //   onglet (la session GT ne vit que dans le sien) et notait au journal un accès qui n'avait pas eu lieu. Une seule
-      //   porte vers les données d'un domaine : « Préparer ». Le lien du domaine se copie ici.
-      h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-      h+='<button class="agt-btn" style="flex:1" onclick="copyTenantLink(\''+t.slug+'\',this)">Copier le lien d\u2019invitation</button>';
-      h+='</div>';
-      h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
-      h+='<button class="agt-btn sm" onclick="agtShowJournal(\''+t.slug+'\')">Journal</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowParcelles(\''+t.slug+'\')">Parcelles</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowFiche(\''+t.slug+'\')">Config</button>';   // ★ GTFIX-4 : UN écran de config, la fiche › Domaine (GT-B17)
-      h+='<button class="agt-btn sm" onclick="agtShowMembres(\''+t.slug+'\')">Membres</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowErreurs(\''+t.slug+'\')">Erreurs'+(t.errorsOpen>0?' ('+t.errorsOpen+')':'')+'</button>';
-      h+='</div>';
-      if(t.slug==='marchand-grillot'){
-        h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.28);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px">Domaine de production — suppression désactivée</div>';
-      } else {
-        h+='<button class="agt-btn" style="width:100%;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.28);color:#FCA5A5;margin-bottom:8px" onclick="agtDeleteTenant(\''+t.slug+'\')">Supprimer le domaine</button>';
-      }
-      h+='<div style="font-size:10px;color:rgba(196,181,253,0.25);padding:6px 8px;background:rgba(139,92,246,0.06);border-radius:6px;line-height:1.5">Cet accès sera enregistré dans le log GUERETTECH</div>';
-      h+='</div>';
-    }
-    h+='</div>';
-  }
-  h+='<button style="width:100%;background:none;border:1px dashed rgba(139,92,246,0.28);border-radius:16px;color:rgba(196,181,253,0.4);font-size:var(--pt-txt,13px);font-weight:500;padding:14px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px" onclick="openOv(\'ovAddTenant\')">';
-  h+='<span style="width:22px;height:22px;border-radius:50%;background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:var(--pt-base,14px);color:#8B5CF6">+</span> Nouveau client</button>';
-  // Le chemin normal : le dossier du client remplit l'installation, et le domaine s'ouvre
-  // AVEC ses parcelles dedans. « Nouveau client » ci-dessus reste le chemin manuel — il
-  // se contente de r\u00e9server un slug et de laisser le client d\u00e9rouler l'assistant lui-m\u00eame.
-  h+='<button style="width:100%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.32);border-radius:16px;color:#C9A84C;font-size:var(--pt-txt,13px);font-weight:600;padding:14px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px" onclick="agtOpenInstall()">';
-  h+='<span>'+_mvIcon('pousse',16)+'</span> Installer un domaine depuis un dossier</button>';
-  return h;
+  // ★ GT-UI-3 (§518) : le tableau des clients (trié par santé) et sa fiche à onglets, dessinés par src/gt/clients.js
+  //   à partir de ce que la console expose (_agtCliDonnees). L'ancienne liste de cartes dépliables est partie.
+  return window._agtClientsVue ? window._agtClientsVue(window._agtCliDonnees()) : '';
 }
 
 // ════ PREP-1 — OUVRIR LA PRÉPARATION D'UN DOMAINE (§134) ════
@@ -5350,6 +5252,16 @@ function _agtBizTodoRows(){
         m:'', b:'Fiche', a:'agtShowFiche(\''+_escHtml(t.slug)+'\')' });
       return;
     }
+    // ★★ GT-UI-3 (§518) — LA RELANCE D'UN ESSAI ÉCHU EST À DÉCIDER (Nico, 02/11 : « les relances partent que si je
+    //   décide de les faire partir »). Quinze jours après la fin d'un essai jamais reconduit — la règle de trialWatch,
+    //   qui ne l'envoie plus lui-même et te prévient par mail —, tant qu'elle n'est pas notée faite.
+    if(st.cle==='echu'){
+      var _rj=_agtRelanceEssaiJours(_agtCli(t.slug));
+      if(_rj>=0) rows.push({ c:'#F97316', ord:1,
+        t:'<b>'+_escHtml(t.nom)+'</b> \u2014 essai \u00e9chu depuis '+_rj+' jours, jamais reconduit : relance \u00e0 faire',
+        m:'', b:'Pr\u00e9parer la relance', a:'agtRelanceEssai(\''+_escAttr(t.slug)+'\')' });
+      return;
+    }
     if(st.cle!=='actif') return;
     var last=null, lastF=null;
     _agtFacts(t.slug).forEach(function(f){
@@ -6041,6 +5953,54 @@ function agtBizRecap(i,k){
 
 // Relance : brouillon de mail SANS destinataire (aucune adresse client n'est
 // stockee dans la config d'un domaine) — Nico complete le destinataire.
+// ════ GT-UI-3 (§518) — LES CONTACTS (D5) ET LA RELANCE D'ESSAI À DÉCIDER ════
+// ★★★ Une relance ne part JAMAIS seule (Nico, 02/11). Les deux relances de la console ouvrent un BROUILLON dans ta
+//   messagerie (`mailto:`) : rien ne part sans ton « Envoyer ». Le contact de facturation (D5, dans
+//   _guerettech/clients, GT seul) ne fait que les adresser.
+var _AGT_RELANCE_ESSAI_J = 15;   // ⚠ le même nombre que le serveur (functions/claims.js, TRIAL_RELANCE_D) : le harnais gtui3 compare
+// Stricte, parce qu'elle va dans un lien « mailto: » : ni « ? », ni « & », ni « = » (sinon un « ?bcc= » glisserait un destinataire).
+function _agtEmailValide(e){ return /^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(String(e||'')); }
+function _agtContactEmail(slug){ var c=(_agtCli(slug)||{}).contact||{}; return _agtEmailValide(c.email) ? String(c.email) : ''; }
+// Les jours écoulés depuis la fin d'un essai jamais reconduit, quand la relance est due et pas encore faite ; -1 sinon.
+function _agtRelanceEssaiJours(c, maintenant){
+  c=c||{};
+  var exp=(typeof c.trialExp==='number') ? c.trialExp : (Date.parse(c.trialExp||'')||0);
+  if(!exp || (c.trialRenewals>0) || c.relanceFaite) return -1;
+  var j=Math.floor(((maintenant||Date.now())-exp)/86400000);
+  return (j>=_AGT_RELANCE_ESSAI_J) ? j : -1;
+}
+function _agtRelanceEssaiTexte(nom){
+  return { sujet:'Votre domaine sur Ma Vigne \u2014 '+nom,
+    corps:'Bonjour,\n\nVotre essai de Ma Vigne s\u2019est termin\u00e9 il y a deux semaines. Votre domaine est toujours l\u00e0, avec vos parcelles, votre \u00e9quipe et tout ce que vous y avez saisi : rien n\u2019a \u00e9t\u00e9 effac\u00e9. Vous pouvez toujours tout consulter, simplement plus rien modifier.\n\n'
+      +'Si le moment \u00e9tait mal choisi, dites-le moi : je peux vous rouvrir l\u2019\u00e9criture le temps qu\u2019il faut. Et si l\u2019outil ne vous a pas convaincu, dites-le moi aussi \u2014 savoir ce qui a manqu\u00e9 m\u2019est utile.\n\n'
+      +'R\u00e9pondez simplement \u00e0 ce message, ou appelez-moi.\n\nNicolas Gu\u00e9ret\nMa Vigne \u2014 GUERETTECH\n06 99 42 48 59\nmavigneapp.fr' };
+}
+async function _agtCliNoter(slug, fn){
+  var r=await _agtMajRegistre(function(clients){ var x=Object.assign({}, clients[slug]||{}); fn(x); clients[slug]=x; });
+  if(r && r.clients && r.clients.clients) _agtClients=r.clients.clients;
+  return r;
+}
+async function agtRelanceEssai(slug){
+  var t=(_agtTenants||[]).filter(function(x){ return x.slug===slug; })[0]; if(!t) return;
+  var tx=_agtRelanceEssaiTexte(t.nom||slug);
+  try{ window.location.href='mailto:'+_agtContactEmail(slug)+'?subject='+encodeURIComponent(tx.sujet)+'&body='+encodeURIComponent(tx.corps); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto relance essai',detail:(e&&e.message)||String(e)}); }
+  try{
+    await _agtCliNoter(slug, function(x){ x.relanceFaite=new Date().toISOString(); });
+    agtRenderBody();
+    if(window._agtAnnulable) window._agtAnnulable('Relance not\u00e9e pr\u00e9par\u00e9e', function(){
+      _agtCliNoter(slug, function(x){ delete x.relanceFaite; }).then(function(){ agtRenderBody(); }, function(e){ _agtEchecEcriture(e,'Relance'); });
+    });
+  }catch(e){ _agtEchecEcriture(e,'Relance'); }
+}
+async function agtCliContactEnregistrer(slug, c){
+  var x={ nom:String((c&&c.nom)||'').trim().slice(0,120), email:String((c&&c.email)||'').trim().slice(0,160), tel:String((c&&c.tel)||'').trim().slice(0,40) };
+  if(x.email && !_agtEmailValide(x.email)){ showToast('Adresse e-mail invalide','#C0392B'); return false; }
+  try{
+    await _agtCliNoter(slug, function(y){ y.contact=x; });
+    showToast('Contact enregistr\u00e9','#3D6B27'); agtRenderBody(); return true;
+  }catch(e){ _agtEchecEcriture(e,'Contact du client'); return false; }
+}
 function agtBizRelance(i,k){
   var t=_agtTenants[i]; if(!t) return;
   var f=_agtFacts(t.slug)[k]; if(!f) return;
@@ -6054,7 +6014,8 @@ function agtBizRelance(i,k){
     +(reste<brut?(' (facture de '+_agtEur(brut)+', avoir d\u00e9duit)'):'')+'.\n\n'
     +'Pourriez-vous me confirmer sa prise en charge ? Si le r\u00e8glement est d\u00e9j\u00e0 parti, merci de ne pas tenir compte de ce message.\n\n'
     +'Bien cordialement,\nNicolas Gu\u00e9ret \u2014 GUERETTECH\n';
-  var href='mailto:?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt);
+  // ★ GT-UI-3 (D5) : le brouillon arrive adressé au contact de facturation s'il est connu — il ne part pas seul.
+  var href='mailto:'+_agtContactEmail(t.slug)+'?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt);
   try{ window.location.href=href; }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto relance',detail:(e&&e.message)||String(e)}); }
 }
@@ -6409,6 +6370,31 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+// ★ GT-UI-3 (§518) — ce que l'écran Clients (src/gt/clients.js) LIT de la console, et rien d'autre.
+window._agtCliDonnees = function(){
+  return {
+    clients:(_agtTenants||[]).map(function(t){
+      var st=_agtStatutOf(t.slug), c=_agtCli(t.slug)||{}, cnx=_agtConnexions[t.slug], vus={}, retard=0;
+      _agtFacts(t.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retard++; } });
+      return { slug:t.slug, nom:t.nom, statut:st.cle, statutLabel:st.label, interne:_agtInterne(t.slug),
+        du:_agtBizDu(t.slug), retard:retard, prix:(st.cle==='actif'?_agtAboPrix(t.slug):0),
+        incidents:(t.errorsOpen||0)+(t.reportsOpen||0), crit:t.errorsCrit||0, membres:t.membres, parcelles:t.parcelles,
+        echecs:t.echecs||[], derniere:(cnx&&cnx.last)||'', contact:(c.contact&&typeof c.contact==='object')?c.contact:{},
+        relanceJours:_agtRelanceEssaiJours(c) };
+    }),
+    panneau:function(slug, onglet){
+      var t=(_agtTenants||[]).filter(function(x){ return x.slug===slug; })[0]; if(!t) return '';
+      if(onglet==='factures') return _agtFicheBiz(slug);
+      if(onglet==='incidents') return _agtFicheIncid(t);
+      if(onglet==='appareils') return _agtFicheAppareils(t);
+      if(onglet==='acces') return _agtCnxSection(slug)+_agtFicheAcces(slug);
+      return '';
+    },
+    esc:_escHtml, eur:_agtEur, relTime:_agtRelTime, silenceJ:_AGT_SILENCE_J
+  };
+};
+window.agtRelanceEssai   = agtRelanceEssai;   // GT-UI-3
+window.agtCliContactEnregistrer = agtCliContactEnregistrer;
 window.agtRadarTri       = agtRadarTri;   // GT-UI-2
 window.agtRenderBody     = agtRenderBody;   // ★ GT-UI-2 : les écrans de src/gt/ redessinent par elle
 // ★ GT-UI-2 (§517) — ce que l'écran Incidents (src/gt/incidents.js) LIT de la console, et rien d'autre.
@@ -6435,7 +6421,6 @@ window.agtGoClient       = agtGoClient;
 window.agtSetIncTab      = agtSetIncTab;
 window.agtSetOutTab      = agtSetOutTab;
 window.agtResolveReport  = agtResolveReport;
-window.agtToggleTenant   = agtToggleTenant;
 window.agtErrCopy        = agtErrCopy;
 window.agtResolveGroup   = agtResolveGroup;
 window.agtPrepOuvrir     = agtPrepOuvrir;

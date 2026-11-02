@@ -806,8 +806,10 @@ exports.gtSetTenantPlan = onCall({ region: REGION, enforceAppCheck: true, timeou
 // doit reprendre la main, pas le client qui doit y penser. A l'echeance, le client
 // passe en LECTURE SEULE : il garde tout, il voit tout, il n'ecrit plus. Nicolas peut
 // reconduire UNE fois, ce qui redonne 15 jours et declenche un mail « appelle-le ».
-// Quinze jours apres une expiration jamais reconduite, un mail de relance part CHEZ
-// LE CLIENT : le contact n'a pas eu lieu, on le provoque.
+// Quinze jours apres une expiration jamais reconduite, une relance est A FAIRE : le contact n'a pas eu
+// lieu. ★ GT-UI-3 (§518, Nico le 02/11 : « les relances partent que si je décide de les faire partir ») —
+// PLUS RIEN NE PART CHEZ LE CLIENT : Nicolas recoit « Relance a faire », avec l'adresse et le texte propose,
+// et la console la met dans « A traiter » (« Preparer la relance » ouvre le brouillon, adresse).
 //
 // ⚠️ CE QUI FAIT FOI, ET CE QUI N'EN EST QU'UNE COPIE
 //    Ce qui GELE le client, c'est le claim `trial_until`, pose sur chaque membre.
@@ -1030,41 +1032,36 @@ exports.trialWatch = onSchedule(
               'L\u2019essai de ' + slug + ' est arrivé à échéance : le domaine est en lecture seule.',
               'Rien n\u2019est perdu — toutes ses données sont là, il les consulte normalement.',
               reste
-                ? 'Reconduction possible, une seule fois, depuis l\u2019onglet Abonnement.'
-                : 'Reconduction déjà utilisée. Sans conversion, une relance partira chez le client dans '
-                  + TRIAL_RELANCE_D + ' jours.',
+                ? 'Reconduction possible, une seule fois, depuis l\u2019onglet Abonnement. Sans reconduction ni conversion, une relance te sera propos\u00e9e dans '
+                  + TRIAL_RELANCE_D + ' jours \u2014 rien ne part chez le client sans toi.'
+                : 'Reconduction déjà utilisée.',
             ], slug),
           });
           m.exp = now; poses++;
         }
 
-        // ③ J+15 sec — le contact n'a pas eu lieu, on le provoque CHEZ LE CLIENT.
-        //    Condition exacte demandee : « en cas d'absence de contact entre J15 et J30 ».
-        //    Le systeme ne sait pas si un coup de fil a eu lieu ; ce qu'il sait, c'est si
-        //    la reconduction a ete faite. C'est ca, la trace du contact.
+        // ③ J+15 sec — le contact n'a pas eu lieu : une relance est À FAIRE.
+        //    Condition d'origine : « en cas d'absence de contact entre J15 et J30 ». Le systeme ne sait pas
+        //    si un coup de fil a eu lieu ; ce qu'il sait, c'est si la reconduction a ete faite.
+        //    ★★ GT-UI-3 (§518, décision de Nico le 02/11) : RIEN NE PART CHEZ LE CLIENT. Nicolas recoit
+        //    « Relance a faire » — l'adresse de l'admin si on la trouve, et le texte propose a copier ; la
+        //    console la met dans « A traiter ». Un seul mail par essai (m.relance garde la date).
         const secheresse = (now - exp) / DAY_MS;
         const jamaisReconduit = ((typeof cli.trialRenewals === 'number') ? cli.trialRenewals : 0) === 0;
         if (secheresse >= TRIAL_RELANCE_D && jamaisReconduit && !m.relance) {
           const who = await _trialAdminMail(db, slug);
-          if (who) {
-            await db.collection(MAIL_COLLECTION).add({
-              to:      [who.email],
-              replyTo: GT_EMAIL,
-              message: _trialMailRelance(cli.nom || slug),
-            });
-            await db.collection(MAIL_COLLECTION).add({
-              to: [GT_EMAIL],
-              message: _trialMailNico('\u{1F4EC} Relance envoy\u00e9e \u2014 ' + slug, [
-                'Quinze jours de lecture seule sans reconduction : une relance vient de partir chez '
-                  + (who.nom || who.email) + ' (' + who.email + ').',
-                'Elle dit que ses données sont intactes et propose de rouvrir l\u2019écriture.',
-                'S\u2019il répond, c\u2019est le moment de conclure.',
-              ], slug),
-            });
-            m.relance = now; poses += 2;
-          } else {
-            logger.warn('[trialWatch] ' + slug + ' : aucune adresse admin, relance impossible');
-          }
+          const proposee = _trialMailRelance(cli.nom || slug);
+          await db.collection(MAIL_COLLECTION).add({
+            to: [GT_EMAIL],
+            message: _trialMailNico('\u{1F4EC} Relance \u00e0 faire \u2014 ' + slug, [
+              'Quinze jours de lecture seule sans reconduction : une relance est \u00e0 faire chez '
+                + (who ? ((who.nom || who.email) + ' (' + who.email + ')') : 'ce client (aucune adresse admin trouv\u00e9e)') + '.',
+              'Rien n\u2019est parti chez le client : c\u2019est toi qui d\u00e9cides. Dans la console, \u00ab \u00c0 traiter \u00bb \u2192 \u00ab Pr\u00e9parer la relance \u00bb ouvre le brouillon.',
+              'Le texte propos\u00e9 (sujet : ' + proposee.subject + ') :',
+              proposee.text,
+            ], slug),
+          });
+          m.relance = now; poses += 1;
         }
       } catch (e) {
         // ⚠️ Un domaine qui echoue ne doit pas emporter les suivants.

@@ -34,7 +34,7 @@ const MIGREES = ['pf-tag', 'pf-tag-sup', 'pf-tag-al', 'plan-badge', 'plan-badge-
 const EXEMPTIONS = [
   { selecteur: '.sdp-tag small', raison: 'le second rang d’une pastille de session (la mesure sous l’écart) : un petit texte, pas une pastille' }
 ];
-const PLAFOND_MAIN = 51;   // GT-UI-2 (§517) : 56 → 51, l'ancien écran Incidents (ses badges faits à la main) parti. CHARTE-4c (§378) : les pastilles faites à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille
+const PLAFOND_MAIN = 49;   // GT-UI-3 (§518) : 51 → 49, les cartes dépliables des clients parties. GT-UI-2 (§517) : 56 → 51, l'ancien écran Incidents (ses badges faits à la main) parti. CHARTE-4c (§378) : les pastilles faites à la main (petit bloc arrondi dont le fond, une marge de 0 à 3 px et la taille
                          //   du texte sont écrits sur place) — relevé après en avoir rendu 34 au jeu ; ne peut que baisser (F)
 const PLAFOND = 88;   // CHARTE-4a (§374) : relevé au premier passage (92) ; ne peut que baisser. CHARTE-4b (§377) : 92 → 91. JEQ-1 (§421) : 91 → 90 (le compteur de la barre). COMPT-4 (§486) : 90 → 88 (.tpc-pill et .trac-parc-pill, partis avec la bande des pastilles)
 const ALLURE = /^(background(-color|-image)?|color|border(-(color|width|style|radius|top|bottom|left|right))?|box-shadow|font|font-(size|weight|family)|padding(-[a-z]+)?|height|min-height|line-height|text-transform|letter-spacing)$/;

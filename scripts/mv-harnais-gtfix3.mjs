@@ -49,7 +49,7 @@ function blocVar(src, nom) {
   }
   throw new Error('accolade non fermée : ' + nom);
 }
-const FN = ['_agtEur', '_agtD', '_agtDateFr', '_agtCli', '_agtPlan', '_agtStatutOf', '_agtFacts', '_agtFType', '_agtIso', '_agtJours',
+const FN = ['_agtEur', '_agtD', '_agtDateFr', '_agtCli', '_agtEmailValide', '_agtContactEmail', '_agtPlan', '_agtStatutOf', '_agtFacts', '_agtFType', '_agtIso', '_agtJours',
   '_agtFEch', '_agtFRetard', '_agtFAn', '_agtInterne', '_agtRefEtat', '_agtFVent', '_agtFPayeLe', '_agtRefReglement', '_agtFEncInfo',
   '_agtRefReste', '_agtBizSlugs', '_agtPaieDateErr', '_agtAboProchain', '_agtBizDu', '_agtBizEnc', '_agtBizFactTot', '_agtBizAnnee',
   '_agtBizLignes', '_agtBizMois', '_agtBizTodoRows', '_agtLivreLignes', 'agtBizLivre', 'agtBizCsv', '_agtBizNextRef',

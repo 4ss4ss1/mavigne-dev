@@ -23,7 +23,7 @@ import { readFileSync } from 'node:fs';
 
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
-const SRC = { gt: lire('src/admin-gt.js'), fb: lire('src/firebase.js') };
+const SRC = { gt: lire('src/admin-gt.js'), fb: lire('src/firebase.js'), cli: lire('src/gt/clients.js') };   // GT-UI-3 : la fiche du client vit dans clients.js
 
 function fonction(src, nom) {
   const m = new RegExp('^(?:async\\s+)?function ' + nom + '\\s*\\(', 'm').exec(src);
@@ -111,9 +111,10 @@ function statiques(S) {
   r.push([fonction(S.gt, 'agtLeadSet').indexOf('renderAdminGT()') === -1 && fonction(S.gt, 'agtLeadNote').indexOf('renderAdminGT()') === -1, '★ un geste de lead ne recharge plus toute la console']);
   r.push([S.gt.indexOf('agtAccedeTenant') === -1, '★★ « Accéder » est parti : plus de faux accès au journal (GT-B16)']);
   r.push([S.gt.indexOf("width:0%;background:linear-gradient(90deg,'+_AGT_SAISON") === -1, 'plus de barre de saison vide (GT-B22)']);
-  r.push([/onclick="agtShowFiche\(\\''\+t\.slug\+'\\'\)">Config<\/button>/.test(S.gt) && !/agtShowConfig|agtSaveConfig/.test(S.gt), '★★ un seul écran de config : « Config » ouvre la fiche › Domaine (GT-B17)']);
+  // ★ GT-UI-3 (§518) : la carte du domaine est partie ; la fiche du client (src/gt/clients.js) mène à la fiche complète.
+  r.push([S.cli.indexOf("onclick=\"agtShowFiche(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl") !== -1 && !/agtShowConfig|agtSaveConfig/.test(S.gt + S.cli), '★★ un seul écran de config : la fiche complète (Domaine), plus de fenêtre Config (GT-B17)']);
   r.push([fonction(S.gt, '_fcSecDom').indexOf('_agtCguHtml(c, _FC_SLUG)') !== -1 && /_agtMutConfigDomaine\(cfg,existe,nom,lat,lon\)/.test(S.gt), 'la fiche › Domaine garde la règle de config et l’acceptation CGU + DPA']);
-  r.push([/var stats=\[\{v:\(t\.membres==null\?'\\u2014':t\.membres\),l:'membres'\}/.test(S.gt) && S.gt.indexOf("Lecture impossible : '+_escHtml(t.echecs.join(', '))") !== -1, 'la carte d’un domaine dit « — » et nomme ce qui n’a pas pu être lu']);
+  r.push([S.cli.indexOf("(c.parcelles == null ? '\\u2014' : c.parcelles)") !== -1 && S.cli.indexOf("if (c.echecs && c.echecs.length) r.push('lecture impossible');") !== -1, 'la fiche d’un domaine dit « — » et sa santé nomme une lecture impossible (GT-UI-3 ; avant, la carte)']);
   r.push([fonction(S.gt, '_agtBuildLog').indexOf("_agtIco(e.icon||'')") !== -1, 'le journal d’accès dessine ses icônes (GT-B23)']);
   const er = fonction(S.gt, 'agtShowErreurs');
   r.push([er.indexOf("fbAdminLire(slug, 'error_log')") !== -1 && er.indexOf('_agtErrFusion(') !== -1 && er.indexOf('_agtRelTime(e.ts)') !== -1 && er.indexOf("Math.floor(diff/60)+'h'") === -1,
@@ -154,6 +155,6 @@ mord('★ le voyant ne repasse plus au vert', 'gt', ": '<div id=\"agt-bottom-sta
 mord('★ une note de lead recharge tout', 'gt', "      if(await _agtSaveLeadSt(id)) agtRenderBody();   // ★ GTFIX-4 (GT-B11)", "      if(await _agtSaveLeadSt(id)) renderAdminGT();", 'statiques');
 mord('★ le journal réécrit les icônes en toutes lettres', 'gt', "font-size:15px\">'+_agtIco(e.icon||'')+'</div>';", "font-size:15px\">'+(e.icon||'')+'</div>';", 'statiques');
 mord('★ « il y a 312 h » revient', 'gt', "    var when = e.ts ? _agtRelTime(e.ts) : '';", "    var diff = e.ts ? Math.floor((Date.now()-new Date(e.ts))/60000) : null; var when = diff===null ? '' : 'il y a '+Math.floor(diff/60)+'h';", 'statiques');
-mord('★ « Config » rouvre une seconde fenêtre', 'gt', "onclick=\"agtShowFiche(\\''+t.slug+'\\')\">Config</button>", "onclick=\"agtShowConfig(\\''+t.slug+'\\')\">Config</button>", 'statiques');
+mord('★ « Config » rouvre une seconde fenêtre', 'cli', "onclick=\"agtShowFiche(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl", "onclick=\"agtShowConfig(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl", 'statiques');
 console.log('\n' + '─'.repeat(30) + '\n  ' + okC.length + ' vert · ' + koC.length + ' ROUGE\n' + '─'.repeat(30));
 process.exit(koC.length ? 1 : 0);

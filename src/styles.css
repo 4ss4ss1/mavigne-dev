@@ -1544,6 +1544,17 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-trace-s{display:block;color:rgba(255,255,255,0.45);font-size:var(--pt-micro,12px);}
 .agt-trace-q{flex-shrink:0;color:rgba(255,255,255,0.45);font-size:var(--pt-micro,12px);}
 .agt-traces .agt-chip{align-self:flex-start;margin-top:4px;}
+/* ★ GT-UI-3 (§518) — L'ÉCRAN CLIENTS (src/gt/clients.js) : la santé dite par sa couleur et son mot (pas une
+   pastille), le contact de facturation, la note des brouillons. Le reste reprend le tableau et la fiche de GT-UI-2. */
+.agt-sante{font-family:var(--font-ui);font-size:var(--pt-micro,12px);font-weight:700;}
+.agt-sante.risque{color:#FCA5A5;}
+.agt-sante.surveiller{color:#FDBA74;}
+.agt-sante.bonne{color:#86EFAC;}
+.agt-sante.hors{color:rgba(255,255,255,0.5);font-weight:500;}
+.agt-cli-note{margin:0 0 8px;font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55);line-height:1.5;}
+.agt-cli-contact{display:grid;grid-template-columns:1fr;gap:8px;}
+.agt-cli-contact .agt-inc-court{justify-self:start;}
+.agt-btn.agt-cli-danger{color:#FCA5A5;border-color:rgba(239,68,68,0.35);}
 .agt-bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:600px;width:100%;padding:0 16px 24px;pointer-events:none;z-index:10;}
 .agt-bottom-inner{background:rgba(26,20,40,0.92);backdrop-filter:blur(12px);border:1px solid rgba(139,92,246,0.2);border-radius:14px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;pointer-events:all;}
 

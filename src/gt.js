@@ -9,3 +9,4 @@ import './app.js';
 import './admin-gt.js';
 import './gt/coquille.js';   // GT-UI-1 (§516) : la barre latérale, les liens directs, la recherche (Ctrl K)
 import './gt/incidents.js';  // GT-UI-2 (§517) : l'écran Incidents en tableau, sa fiche, « Annuler »
+import './gt/clients.js';    // GT-UI-3 (§518) : l'écran Clients en tableau par santé, sa fiche à onglets, le contact

@@ -937,6 +937,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtui1.mjs --contre'],
   ['node scripts/mv-harnais-gtui2.mjs'],           // GT-UI-2 (§517) : l'écran Incidents en tableau (statuts, tri, fiche, « Annuler »), le Radar trié et ses traces
   ['node scripts/mv-harnais-gtui2.mjs --contre'],
+  ['node scripts/mv-harnais-gtui3.mjs'],           // GT-UI-3 (§518) : l'écran Clients par santé, le contact (D5), les relances à décider (jamais d'envoi seul)
+  ['node scripts/mv-harnais-gtui3.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

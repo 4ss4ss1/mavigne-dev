@@ -37,6 +37,7 @@ import { readFileSync } from 'node:fs';
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SRC = {
+  cli: readFileSync(new URL('../src/gt/clients.js', import.meta.url), 'utf8'),   // GT-UI-3 : la fiche du client
   app: lire('src/app.js'), fb: lire('src/firebase.js'), utils: lire('src/utils.js'),
   gt: lire('src/admin-gt.js'), regl: lire('src/reglages.js')
 };
@@ -272,7 +273,8 @@ function statiques(S) {
     '★ _mvPrepTenant reste VISIBLE du preflight (C23) : aucun faux commentaire bloc ne l’avale']);
   const po = fonction(S.gt, 'agtPrepOuvrir', 'src/admin-gt.js');
   r.push([/window\.agtPrepOuvrir\s*=\s*agtPrepOuvrir;/.test(S.gt), 'agtPrepOuvrir est joignable depuis la carte']);
-  r.push([S.gt.indexOf("onclick=\"agtPrepOuvrir(\\''+_escAttr(t.slug)+'\\')\"") !== -1, 'le bouton de la carte échappe le domaine (_escAttr)']);
+  // ★ GT-UI-3 (§518) : la carte est partie ; « Préparer ce domaine » vit dans la fiche du client (src/gt/clients.js).
+  r.push([(S.cli || '').indexOf("onclick=\"agtPrepOuvrir(\\'' + _escAttr(c.slug) + '\\')\"") !== -1, 'le bouton de la fiche du client échappe le domaine (_escAttr)']);
   r.push([po.indexOf('agtLogAccess(') === -1 && po.indexOf('_agtLogAccessLu(') !== -1,
     '★★ l’ouverture trace par le journal RELU, jamais par agtLogAccess']);
   r.push([po.indexOf('innerHTML') === -1 && fonction(S.app, '_mvPrepBandeau', 'src/app.js').indexOf('innerHTML') === -1,
