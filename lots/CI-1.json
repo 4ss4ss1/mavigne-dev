@@ -1,0 +1,23 @@
+{
+  "lot": "CI-1",
+  "section": "§514",
+  "base": "dd10cfece7df55b5901eb1dbc9579b55480984b1",
+  "inclut": [],
+  "date": "2026-11-02",
+  "tutos": null,
+  "fichiers": {
+    ".github/workflows/ci.yml": "0ffa607589e136f4c095fada1994850677c1e44c2d15b18a9fc2e5652a05fc13",
+    ".mv-base": "6cb280faf6a70e376b7f67c034cc06db70b45d21e5bfdf173790e413babe8e06",
+    "CLAUDE.md": "f6674b729296fc4b1ed1f5fdc54c23106ee1ca379be562139d2d70bb910cca37",
+    "docs/claude/INDEX.md": "f4670b3cf8e8b1544290f54a72b37d57c309eba6336f568b14de2ad986b7143d",
+    "docs/claude/chantiers-480-529.md": "8d4500843e8315861c75edae83f6b7ff80e558ce11718d3a7c440dcf095f73a8",
+    "docs/claude/journal.md": "8a058bfc5f023ccea33169521e1ebce34edf47b8f48ce20e212164fea0c5a5a8",
+    "scripts/harnais-claude-md.mjs": "76b03696da387a38a4ed92e3a8523210f355670be837d2dc80f9c658fe05cfdb",
+    "scripts/mv-harnais-gabarit2.mjs": "3267ac59e6e40dd91f78cd773f34405a789b4b3490ef7625d238a2774bdd446c",
+    "scripts/mv-harnais-liste.mjs": "cd1608ce2dab2ca2e8887e3da21a2e72bb1742183d0a4a634d3fdb36fec91ac1",
+    "scripts/mv-harnais-tuto9.mjs": "814607f640726064c49afb0e7864b1bb466fd538b327eab08fe2d9478ea1127a",
+    "scripts/mv-tutos-jeu.mjs": "658adbc196a3aa7e80611ad82de03d4ac781c57d87b5923d66f514c9e20db12e",
+    "scripts/mv-harnais-ci1.mjs": "c9b479f2aac41cc2e9a998e8110b7f2638b5ee519453d50c9cee10e395871f60",
+    "scripts/mv-tutos-partie.mjs": "6326d7b7c560e58acb49b60746c08e41fcda994efc10a09612576aedf1ee0e4d"
+  }
+}

@@ -37,8 +37,9 @@ function jouer(S) {
   t('④ plus aucune police Cormorant écrite dans pilotage.js', !/--font-titre/.test(S.pil));
   let pkg = {}; try { pkg = JSON.parse(S.pkg); } catch (e) { pkg = {}; }
   t('⑤ npm run test:gabarit joue le contrôle au rendu', (pkg.scripts || {})['test:gabarit'] === 'node scripts/mv-gabarit-rendu.mjs');
-  const iT = S.ci.indexOf('run: npm run test:tutos'), iG = S.ci.indexOf('run: npm run test:gabarit');
-  t('⑤ la CI le joue sur le build, après les tutos', iT > 0 && iG > iT);
+  // CI-1 (§514) : le gabarit a quitté le job des tutos pour le job « mesures » — il se joue sur le build de SON job.
+  const iG = S.ci.indexOf('run: npm run test:gabarit'), iB = S.ci.lastIndexOf('run: npm run build', iG);
+  t('⑤ la CI le joue sur le build de son job', iG > 0 && iB > 0 && !/\n  [A-Za-z0-9_-]+:\s*\n/.test(S.ci.slice(iB, iG)));
   t('⑥ le contrôle au rendu a sa contre-épreuve (cinq défauts posés à l’écran)', /const CONTRE = process\.argv\.includes\('--contre'\)/.test(S.rendu) && /const DEFAUTS = /.test(S.rendu) && /attendus = \[/.test(S.rendu));
   t('⑦ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-gabarit2.mjs'") > 0 && S.liste.indexOf("mv-harnais-gabarit2.mjs --contre'") > 0);
 }

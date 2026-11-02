@@ -929,6 +929,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtfix3.mjs --contre'],
   ['node scripts/mv-harnais-gtfix4.mjs'],          // GTFIX-4 (§513) : ce qui mentait encore — chargement en parallèle, lectures ratées dites, une porte, un écran de config, compteurs à jour
   ['node scripts/mv-harnais-gtfix4.mjs --contre'],
+  ['node scripts/mv-harnais-ci1.mjs'],             // CI-1 (§514) : la CI en six jobs qui démarrent ensemble — les tutos en parties (un sur deux, un par un), gabarit et UX à part, chaque job son build
+  ['node scripts/mv-harnais-ci1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

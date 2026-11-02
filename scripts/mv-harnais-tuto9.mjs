@@ -91,7 +91,9 @@ async function jouer(S) {
   /* ══ 3. TEST:TUTOS JOUE TOUT, SOUS LE BON NOM ══ */
   const jeu = sansCommentaires(S.jeu);
   t('chaque ligne porte le tuto JOUÉ', jeu.includes("const lib = ecran.nom + ' · ' + id + ' · '") && !jeu.includes("ecran.nom + ' · ' + liste[i]"));
-  t('la vraie liste est rejouée en entier, sans refaire ce qui est fait', /if \(faits\.has\(id\)\) continue;/.test(jeu) && /a = liste; i = -1;/.test(jeu));
+  //   CI-1 (§514) : la liste se lit dans l'appli AVANT de jouer (lireListe) — plus de premier tuto joué pour la connaître.
+  t('la vraie liste est lue dans l’appli, puis jouée en entier sans refaire ce qui est fait', /if \(faits\.has\(id\)\) continue;/.test(jeu)
+    && /if \(!liste\) liste = await lireListe\(navigateur, base\);/.test(jeu) && /window\._mvTutoListe\(\)/.test(jeu));
   t('on compte : un tuto non joué est un rouge', /joues\[ecran\.nom\] !== liste\.length\) \{ rouges\+\+;/.test(jeu));
   t('un build plus ancien que les sources est refusé', /sourcesPlusRecentes\('\.', join\(DIR, 'version\.json'\)\)/.test(jeu) && /if \(vieux\.length\) \{ console\.error\([^\n]*process\.exit\(2\); \}/.test(jeu));
   t('le rapport dit sur quelles sources les tutos ont été rejoués', /writeFileSync\('rapports\/tutos\.json'/.test(jeu) && /empreinte = empreinteSources\('\.'\)/.test(jeu));
@@ -132,6 +134,7 @@ const DEFAUTS = [
   ['une correction d’avant le tuto compte', (S) => ({ ...S, tutos: S.tutos.replace("String(x.eqCorr.le || '') >= t0", "String(x.eqCorr.le || '') !== ''") })],
   ['test:tutos affiche de nouveau un tuto sous le nom d’un autre', (S) => ({ ...S, jeu: S.jeu.replace("const lib = ecran.nom + ' · ' + id + ' · '", "const lib = ecran.nom + ' · ' + liste[i] + ' · '") })],
   ['plus de compte des tutos joués', (S) => ({ ...S, jeu: S.jeu.replace('if (joues[ecran.nom] !== liste.length) { rouges++;', 'if (false) {') })],
+  ['la liste n’est plus lue dans l’appli (CI-1)', (S) => ({ ...S, jeu: S.jeu.replace('if (!liste) liste = await lireListe(navigateur, base);', "if (!liste) liste = ['equipes'];") })],
   ['un build périmé passe', (S) => ({ ...S, jeu: S.jeu.replace("if (vieux.length) { console.error(", "if (false) { console.error(") })],
   ['la marque ne regarde plus les tutos', (S) => ({ ...S, marque: S.marque.replace('if (toucheAppli(Object.keys(fichiers))) {', 'if (false) {') })],
   ['la marque accepte un rapport d’autres sources', (S) => ({ ...S, marque: S.marque.replace('if (rap.empreinte !== emp) {', 'if (false) {') })],

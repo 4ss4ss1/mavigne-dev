@@ -9,10 +9,22 @@
 #     functions -> backfill -> hosting -> rules. La CI allume le feu vert ou
 #     rouge, elle ne touche pas au levier. Aucun secret n'est necessaire ici.
 #
-#  Trois jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
-#    · controles : la liste unique -> build -> smoke    (LISTE-1, §190)
-#    · e2e       : les 10 pages, login DOM reel           (~5 min)
-#    · rules     : firestore.rules sur l'emulateur        (RULES-1, §189)
+#  ★ CI-1 (§514) — SIX JOBS EN PARALLELE, AUCUN PRES DE SA LIMITE.
+#    Jusqu'au 02/11, UN job enchainait controles, build, smoke, tutos, gabarit
+#    et experience d'usage : 20 a 22 min de travail pour une limite de 20.
+#    GitHub le coupait a la limite — « annule », gris, jamais rouge — dans les
+#    tutos, le gabarit ou l'UX selon la machine du jour : apres planux1
+#    (31/10), treize envois sans un verdict complet au vert. Le meme travail,
+#    reparti sur six machines qui demarrent ensemble :
+#    · controles   : la liste unique -> build -> smoke  (LISTE-1, §190)  ~7 min
+#    · tutos 1 et 2 : un tuto sur deux chacun, un par un (TUTO-1, §358)   ~8 min
+#    · mesures     : build -> gabarit du Pilotage -> experience d'usage   ~6 min
+#    · e2e         : les 10 pages, login DOM reel                         ~2 min
+#    · rules       : firestore.rules sur l'emulateur (RULES-1, §189)     ~2 min
+#    Le rouge dit tout de suite lequel a casse. Aucun job n'attend un autre.
+#    ⚠️ Une etape lourde de plus : dans le job qui a de la place, ou un job de
+#       plus — jamais un job au-dela de 12 min. Relire d'abord les durees,
+#       etape par etape, dans l'onglet Actions (CLAUDE.md §6b, CI-1).
 # ============================================================================
 
 name: CI
@@ -24,6 +36,9 @@ on:
 
 # Un nouveau push sur la meme branche annule le run precedent : pas de file
 # d'attente quand on pousse trois commits d'affilee.
+# ⚠️ CI-1 (§514) : c'est desormais le SEUL gris normal — un envoi remplace par
+#    un plus recent. Un gris sans envoi plus recent = un job coupe par sa
+#    limite : relire ses durees, il faut le decouper.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -77,15 +92,106 @@ jobs:
 
       # L'app boote-t-elle vraiment ? Le type de bug que node --check ne voit pas.
       # PHENO-1D (§509) : une limite a l'etape — un smoke bloque (10 a 11 min en CI jusqu'ici) doit rougir ICI,
-      # pas faire couper les tutos par la limite de 20 min du job.
+      # pas faire couper le job par sa limite (un job coupe est gris, jamais rouge).
       - name: Smoke — l'app demarre sans exception
         timeout-minutes: 4
         run: npm run test:smoke
 
-      # TUTO-1 (§358) : chaque tuto est rejoue tout seul (telephone et ordinateur) sur le build.
-      # Un tuto qui ne va plus au bout = un ecran a change sans que son tuto suive : la mise en ligne attend.
+      # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
+      - name: Garder le build en cas d'echec
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: dist-echec
+          path: dist/
+          retention-days: 5
+
+  # ==========================================================================
+  # ★ CI-1 (§514) — LES TUTOS, SUR DEUX MACHINES.
+  # TUTO-1 (§358) : chaque tuto est rejoue tout seul (telephone et ordinateur)
+  # sur le build. Un tuto qui ne va plus au bout = un ecran a change sans que
+  # son tuto suive : la mise en ligne attend.
+  # D'un seul tenant, 11 min 15 s le 01/11 pour 8 tutos — et un tuto de plus,
+  # pres d'une minute de plus. Chaque machine joue un tuto sur deux de la vraie
+  # liste, UN PAR UN : jamais plusieurs tutos a la fois sur une machine, la
+  # charge seule fait rougir (CHARGE-1, §391). La derniere partie joue en plus
+  # le cote a cote et le vieux boot.js.
+  # Une machine de plus : ajouter son numero a `part`, rien d'autre — le total
+  # (strategy.job-total) suit tout seul.
+  tutos:
+    name: Tutos — partie ${{ matrix.part }} sur ${{ strategy.job-total }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false          # une partie rouge n'arrete pas l'autre : on veut voir tous les rouges
+      matrix:
+        part: [1, 2]
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          # ⚠️ fetch-depth 0 — sans l'historique complet, `git log -1 -- <fichier>`
+          # rend la date de HEAD pour TOUS les fichiers : mv-sitemap.mjs ne peut
+          # plus dater les pages et se met en veille (13/09, §122b).
+          fetch-depth: 0
+
+      - name: Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      # CI-1 (§514) : chaque job qui joue un navigateur construit le sien (25 s),
+      # plutot que de passer le build d'un job a l'autre : aucune attente, aucun
+      # job qui depend d'un autre. --ignore-scripts : sans lui, `prebuild`
+      # rejouerait toute la liste des controles ici (mv-harnais-portes le garde).
+      - name: Build
+        run: npm run build --ignore-scripts
+
+      - name: Chromium pour les tutos
+        run: npx playwright install --with-deps chromium
+
       - name: Tutos — chacun rejoue jusqu'au bout
-        run: npm run test:tutos
+        run: npm run test:tutos -- --part ${{ matrix.part }}/${{ strategy.job-total }}
+
+  # ==========================================================================
+  # ★ CI-1 (§514) — LES MESURES A L'ECRAN, SUR UNE MACHINE A ELLES.
+  mesures:
+    name: Gabarit du Pilotage · Experience d'usage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          # ⚠️ fetch-depth 0 — sans l'historique complet, `git log -1 -- <fichier>`
+          # rend la date de HEAD pour TOUS les fichiers : mv-sitemap.mjs ne peut
+          # plus dater les pages et se met en veille (13/09, §122b).
+          fetch-depth: 0
+
+      - name: Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      # CI-1 (§514) : chaque job qui joue un navigateur construit le sien (25 s),
+      # plutot que de passer le build d'un job a l'autre : aucune attente, aucun
+      # job qui depend d'un autre. --ignore-scripts : sans lui, `prebuild`
+      # rejouerait toute la liste des controles ici (mv-harnais-portes le garde).
+      - name: Build
+        run: npm run build --ignore-scripts
+
+      - name: Chromium pour les mesures
+        run: npx playwright install --with-deps chromium
 
       # GABARIT-2 (§456) : le Pilotage mesuré à l'écran — une police, trois graisses, huit tailles, un style par rôle,
       # des jauges de 10 px, des cartes arrondies à 12. Une pièce qui reprend sa propre taille fait rougir la mise en ligne.
@@ -97,15 +203,6 @@ jobs:
       # qu'à la référence fait rougir la mise en ligne ; une baisse se regrave (npm run test:ux -- --baseline).
       - name: Expérience d'usage — le cliquet mesuré sur le build
         run: npm run test:ux
-
-      # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
-      - name: Garder le build en cas d'echec
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: dist-echec
-          path: dist/
-          retention-days: 5
 
   # ==========================================================================
   e2e:

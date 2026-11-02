@@ -22,12 +22,17 @@
    ★ TUTO-10 (§425) : npm run test:tutos -- --concernes  ne rejoue que les tutos que le changement touche (l'aiguillage,
    scripts/mv-tutos-concernes.mjs), le côte à côte si sa mise en page est touchée, tout si le moteur l'est. Sans l'option
    (la CI, après chaque envoi) : TOUT, comme avant — le filet.
+   ★ CI-1 (§514) : npm run test:tutos -- --part k/N  ne joue que les tutos de rang k, k + N, k + 2N… de la vraie liste, un
+   par un (scripts/mv-tutos-partie.mjs) : la CI répartit les tutos sur N machines (ci.yml, job « tutos »). La liste se lit
+   dans l'appli AVANT de jouer ; la dernière partie joue en plus le côte à côte et le vieux boot.js ; une partie n'écrit
+   pas rapports/tutos.json (la marque d'un lot veut tous les tutos sur un même poste). Une option mal formée arrête tout.
    ─────────────────────────────────────────────────────────────────────────── */
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { empreinteSources, sourcesPlusRecentes } from './mv-tutos-empreinte.mjs';
 import { depuisGit, texte as texteConcernes } from './mv-tutos-concernes.mjs';
+import { partie, maPartie, derniere } from './mv-tutos-partie.mjs';
 import { join, extname, resolve } from 'node:path';
 
 const DIR = resolve(process.argv.includes('--dir') ? process.argv[process.argv.indexOf('--dir') + 1] : 'dist');
@@ -299,7 +304,29 @@ async function jouerCote(navigateur, base, l, h) {
   return { ok: !!(a && b && f) && !erreurs.length, erreurs, lib: a ? ('panneau ' + Math.round(a.vw - a.pL) + ' px, appli jusqu’à ' + Math.round(a.appR) + ', bouton touchable, anneau visible, barre ' + (a.rail ? 'dépliée' : 'repliée') + ', rien dessous') : '' };
 }
 
+// ★ CI-1 (§514) — LA VRAIE LISTE, LUE DANS L'APPLI AVANT DE JOUER. TUTO-9 la lisait à la fin du premier tuto joué
+//   (« equipes ») : une machine qui ne joue qu'une partie des tutos n'a pas à en jouer un autre pour la connaître. tutos.js est
+//   importé par app.js : _mvTutoListe existe dès que l'appli démarre, entraînement ou pas. Vide ou illisible → null (un rouge).
+async function lireListe(navigateur, base) {
+  const ctx = await navigateur.newContext({ serviceWorkers: 'block', locale: 'fr-FR' });
+  await ctx.route('**/*', (route) => (route.request().url().startsWith(base) ? route.continue() : route.abort()));
+  const page = await ctx.newPage();
+  let l = null;
+  for (let essai = 0; essai < 3 && !l; essai++) {   // une navigation pendant l'attente (l'appli qui se recharge) : on relit
+    try {
+      if (!essai) await page.goto(base, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => typeof window._mvTutoListe === 'function', null, { timeout: DELAI });
+      l = await page.evaluate(() => window._mvTutoListe());
+    } catch (e) { await page.waitForTimeout(500); }
+  }
+  await ctx.close();
+  return Array.isArray(l) && l.length ? l : null;
+}
+
 async function main() {
+  // ★ CI-1 (§514) — --part k/N : une option mal formée arrête tout, avant le moindre navigateur.
+  const PART = partie(process.argv);
+  if (PART.erreur) { console.error(c.r('\u2716 ' + PART.erreur)); process.exit(2); }
   let pw;
   try { pw = await import('playwright'); } catch (e) { console.error(c.r('✖ Playwright absent : npm i -D playwright && npx playwright install chromium')); process.exit(2); }
   if (!existsSync(DIR)) { console.error(c.r('✖ ' + DIR + ' absent : lancer npm run build d\u2019abord')); process.exit(2); }
@@ -317,23 +344,27 @@ async function main() {
     { nom: 'téléphone', ctx: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } },
     { nom: 'ordinateur', ctx: { viewport: { width: 1280, height: 860 } } },
   ];
-  console.log(c.b('MA VIGNE — Les tutos rejoués sur le build') + c.dim('  (' + base + ')'));
+  console.log(c.b('MA VIGNE — Les tutos rejoués sur le build') + (PART.n > 1 ? c.b(' — partie ' + PART.k + ' sur ' + PART.n) : '') + c.dim('  (' + base + ')'));
   // ★ TUTO-9 (§423) — CHAQUE TUTO, SUR CHAQUE ÉCRAN, SOUS SON VRAI NOM. La liste se lisait dans l'appli au premier tuto
   //   joué (« equipes »), et ce premier résultat s'affichait sous le nom du PREMIER de la liste : depuis qu'ACCV-4 a mis
   //   « jequipe » en tête, le téléphone affichait « jequipe ✓ 5/5 » pour… « equipes », et ne jouait jamais « jequipe ».
-  //   On rejoue la vraie liste en entier (sans refaire ce qui est fait), chaque ligne porte le tuto JOUÉ, et on COMPTE :
+  //   On joue la vraie liste en entier (sans refaire ce qui est fait), chaque ligne porte le tuto JOUÉ, et on COMPTE :
   //   un tuto non joué est un rouge (§25 : compter les sites lus, pas seulement vérifier qu'un motif existe).
+  //   ★ CI-1 (§514) : la liste se lit AVANT de jouer (lireListe) — plus de tuto « equipes » joué d'abord pour la connaître —,
+  //   puis se réduit à la partie de cette machine. Tout ce qui suit (écrans, panneau, miroir, compte) ne voit que la partie.
   let liste = (aig && !aig.tous) ? aig.ids.slice() : null, rouges = 0;   // TUTO-10 : la liste de l'aiguillage, ou la vraie liste lue dans l'appli
+  if (!liste) liste = await lireListe(navigateur, base);
+  if (!liste) { rouges++; liste = []; console.log(c.r('  ✗ ') + 'la liste des tutos n\u2019a pas pu être lue dans l\u2019appli'); }
+  const toute = liste.length;
+  liste = maPartie(liste, PART);   // CI-1 : la partie de cette machine (1/1 : toute la liste)
+  if (PART.n > 1) console.log(c.dim('  partie ' + PART.k + '/' + PART.n + ' : ' + liste.length + ' tuto(s) sur ' + toute + ' — ' + (liste.join(', ') || 'aucun')));
   const joues = {};
   for (const ecran of ECRANS) {
     const faits = new Set();
-    let a = liste || ['equipes'];
-    for (let i = 0; i < a.length; i++) {
-      const id = a[i];
+    for (const id of liste) {
       if (faits.has(id)) continue;
       const r = await jouer(navigateur, base, id, ecran);
       faits.add(id);
-      if (!liste && r.etat && r.etat.liste && r.etat.liste.length) { liste = r.etat.liste.slice(); a = liste; i = -1; }
       const lib = ecran.nom + ' · ' + id + ' · ' + (r.etat ? (r.etat.etape + '/' + r.etat.total + ' étapes') : '?') + ' · ' + (r.ms / 1000).toFixed(1) + ' s · porte : ' + ((r.etat && r.etat.bloques) || 0) + ' appel(s) retenu(s)';
       if (r.ok) console.log(c.g('  ✓ ') + lib);
       else {
@@ -346,7 +377,6 @@ async function main() {
     }
     joues[ecran.nom] = faits.size;
   }
-  if (!liste) { rouges++; liste = []; console.log(c.r('  ✗ ') + 'la liste des tutos n\u2019a pas pu être lue dans l\u2019appli'); }
   for (const ecran of ECRANS) if (joues[ecran.nom] !== liste.length) { rouges++; console.log(c.r('  ✗ ') + ecran.nom + ' : ' + joues[ecran.nom] + ' tuto(s) joué(s) pour ' + liste.length + ' dans l\u2019appli'); }
   for (let i = 0; i < liste.length; i++) {
     const r = await jouerCadre(navigateur, base, liste[i]);
@@ -360,23 +390,30 @@ async function main() {
     else { rouges++; console.log(c.r('  ✗ ') + 'miroir · ' + liste[i]); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
   }
   joues['côte à côte'] = 0;
-  for (const [l, h] of ((!aig || aig.cote) ? [[1280, 800], [1536, 864], [1920, 1080]] : [])) {   // TUTO-10 : si sa mise en page est touchée
-    const r = await jouerCote(navigateur, base, l, h);
-    joues['côte à côte']++;
-    if (r.ok) console.log(c.g('  ✓ ') + 'côte à côte · ' + l + ' × ' + h + ' · ' + r.lib);
-    else { rouges++; console.log(c.r('  ✗ ') + 'côte à côte · ' + l + ' × ' + h); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
-  }
-  if (!aig || aig.tous) {   // TUTO-10 : le bac à sable n'est rejoué que si tout est concerné
-    const r = await jouerVieuxBoot(navigateur, base);
-    if (r.ok) console.log(c.g('  ✓ ') + 'boot.js d\u2019une version précédente · le panneau refuse et le dit ; ni entraînement, ni appli');
-    else { rouges++; console.log(c.r('  ✗ ') + 'boot.js d\u2019une version précédente'); r.erreurs.forEach((e) => console.log('      ' + e)); }
-  }
+  if (derniere(PART)) {   // CI-1 (§514) : les vérifications d'ensemble, une seule fois — sur la dernière partie
+    for (const [l, h] of ((!aig || aig.cote) ? [[1280, 800], [1536, 864], [1920, 1080]] : [])) {   // TUTO-10 : si sa mise en page est touchée
+      const r = await jouerCote(navigateur, base, l, h);
+      joues['côte à côte']++;
+      if (r.ok) console.log(c.g('  ✓ ') + 'côte à côte · ' + l + ' × ' + h + ' · ' + r.lib);
+      else { rouges++; console.log(c.r('  ✗ ') + 'côte à côte · ' + l + ' × ' + h); r.erreurs.slice(0, 6).forEach((e) => console.log('      ' + e)); }
+    }
+    if (!aig || aig.tous) {   // TUTO-10 : le bac à sable n'est rejoué que si tout est concerné
+      const r = await jouerVieuxBoot(navigateur, base);
+      if (r.ok) console.log(c.g('  ✓ ') + 'boot.js d\u2019une version précédente · le panneau refuse et le dit ; ni entraînement, ni appli');
+      else { rouges++; console.log(c.r('  ✗ ') + 'boot.js d\u2019une version précédente'); r.erreurs.forEach((e) => console.log('      ' + e)); }
+    }
+  } else console.log(c.dim('  côte à côte et vieux boot.js : joués par la partie ' + PART.n + '/' + PART.n));
   await navigateur.close(); srv.close();
   // ★ TUTO-9 (§423) — LE RAPPORT : sur QUELLES sources les tutos ont été rejoués. scripts/mv-lot-marque.mjs le lit : pas de
   //   marque de lot — donc pas de zip — sans tutos rejoués, au vert, sur les fichiers tels qu'ils partent.
-  try { mkdirSync('rapports', { recursive: true }); writeFileSync('rapports/tutos.json', JSON.stringify({ ok: !rouges, rouges, empreinte, date: new Date().toISOString(), tutos: liste, joues, mode: (!aig || aig.tous) ? 'tous' : 'concernes', cote: !aig || aig.cote }, null, 2) + '\n'); }
-  catch (e) { rouges++; console.log(c.r('  ✗ rapport non écrit : ' + e.message)); }
-  console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur')) + '\n');
+  //   ★ CI-1 (§514) : une PARTIE n'écrit pas le rapport — il dirait « tous les tutos » pour une partie d'entre eux, et la marque
+  //   d'un lot le croirait. Le rapport se fait sur un même poste : tous les tutos, ou --concernes.
+  if (PART.n > 1) console.log(c.dim('  partie ' + PART.k + '/' + PART.n + ' : pas de rapport (rapports/tutos.json) \u2014 la marque d\u2019un lot veut tous les tutos sur un même poste'));
+  else {
+    try { mkdirSync('rapports', { recursive: true }); writeFileSync('rapports/tutos.json', JSON.stringify({ ok: !rouges, rouges, empreinte, date: new Date().toISOString(), tutos: liste, joues, mode: (!aig || aig.tous) ? 'tous' : 'concernes', cote: !aig || aig.cote }, null, 2) + '\n'); }
+    catch (e) { rouges++; console.log(c.r('  ✗ rapport non écrit : ' + e.message)); }
+  }
+  console.log('\n  ' + (rouges ? c.r(rouges + ' tuto(s) ne vont plus au bout : l\u2019écran a changé, le tuto doit suivre') : c.g('chaque tuto va au bout, sans rien envoyer au serveur' + (PART.n > 1 ? ' (partie ' + PART.k + ' sur ' + PART.n + ')' : ''))) + '\n');
   process.exit(rouges ? 1 : 0);
 }
 main().catch((e) => { console.error(c.r('✖ ' + (e && e.stack || e))); process.exit(1); });
