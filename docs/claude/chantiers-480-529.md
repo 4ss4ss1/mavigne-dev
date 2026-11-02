@@ -948,3 +948,30 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - **GT-UI-1 à GT-UI-6** : la nouvelle console d’après `docs/maquettes/maquette-console-gt-v1.html` (l’ouvrir et comparer avant chaque lot, MAQ-1) — GT-UI-2 y reprend le suivi : tickets saisis, liens, signalements suivis, régressions par version.
 - **Les erreurs d’avant 10.59** ne disent pas leur version : « version non dite » jusqu’à ce qu’elles sortent du journal.
 - **`submitReport`** (serveur) relit puis réécrit les signalements sans transaction.
+
+## 516. ★★★ GT-UI-1 — LA COQUILLE DE LA CONSOLE : UNE BARRE LATÉRALE SUR ORDINATEUR, UN LIEN DIRECT PAR ÉCRAN, LA RECHERCHE CTRL K (02/11 — `src/gt/coquille.js` (neuf) · `src/gt.js` · `src/gt/console.html` · `src/styles.css` · `src/admin-gt.js` · `public/sw.js` · `scripts/mv-harnais-gtui1.mjs` (neuf) · `scripts/mv-harnais-gtsuivi1.mjs` · `scripts/mv-harnais-liste.mjs` — base `ee29c55` « gtsuivi1 » — APP 10.59 inchangé, **SW 11.40 → 11.41**)
+
+### 516a. D’où ça vient
+- **Le plan en 11 lots** (§28 « ★ CONSOLE GT ») : le premier des six GT-UI — « suite » de Nico, le 02/11. **La maquette ouverte et comparée avant le lot** (MAQ-1) : `docs/maquettes/maquette-console-gt-v1.html` — sa barre latérale (la marque, « Rechercher Ctrl K », trois familles d’écrans, la session en bas), un lien direct par écran et par fiche, la recherche partout.
+- **L’audit** (`docs/maquettes/audit-console-gt-2026-11-01.md`) : **GT-B27** la mise en page du téléphone étirée sur un grand écran ; **GT-B31** pas de lien direct. **D7** : « Business » devient « Facturation ».
+
+### 516b. Ce qui change
+- **Sur ordinateur (≥ 1100 px, `styles.css`)** : `#page-admin-gt` passe en grille — la barre latérale (`.agt-side`, 236 px) à gauche, l’en-tête et le contenu à droite, le contenu centré sur 1180 px ; les onglets du haut et la barre flottante du bas s’effacent, leur rôle passe à la barre. **Au téléphone, rien ne change.**
+- **La barre latérale** (`console.html`) : la marque ; « Rechercher » (`agtPalette`, `aria-keyshortcuts="Control+K"`) ; Support (Radar, Incidents), Commercial (Clients, Facturation, Leads), Système (Outils) — « Santé du système » viendra avec GT-UI-5 ; en bas, la session (le minuteur du verrou et la fin de session, copiés par `_agtSessTick`) et « Verrouiller » (`agtLockNow`). Ses nombres (`_agtCompteursBarre`, appelée par `_agtMajCompteurs`) : les mêmes que les pastilles des onglets, et les factures en retard (une fois par référence). Changer d’onglet (`agtSwitchTab`) : la barre (`aria-current`), le titre de l’en-tête et le lien direct suivent.
+- **Les liens directs** (`src/gt/coquille.js`) : `#radar`, `#incidents`, `#clients`, `#clients/<slug>` (la fiche), `#facturation` (l’onglet interne reste `business`), `#leads`, `#outils`. Chaque onglet écrit le sien (`history.replaceState` : l’historique ne s’empile pas) ; la route d’arrivée s’applique après le premier chargement complet (`_agtRouteAppliquer`), et à chaque `hashchange` — **jamais sous le verrou**, et un slug lu dans l’adresse n’atteint la console que s’il a la forme d’un slug (`slugValide`). `Object.prototype` ne fait pas une route (`toString` ne mène nulle part).
+- **La recherche** (Ctrl K ou Cmd K, la console ouverte ; jamais sous le verrou) : une palette au-dessus des fenêtres de la console, sous le verrou — les clients (la fiche), les incidents (l’écran et le détail), les factures, les leads, les six écrans et quatre commandes (actualiser, verrouiller, le livre des recettes, l’export comptable) ; sans accents ni casse, le début d’un mot passe devant (`plier`, `rang`, `entreesPalette`) ; ↑ ↓, Entrée, Échap.
+- **D7** : « Facturation » au lieu de « Business » dans les onglets, la barre et le titre.
+- **Le code neuf vit dans `src/gt/coquille.js`**, chargé par `src/gt.js` après `admin-gt.js` (gt.html seulement) : il ne lit la console que par trois accès exposés en lecture — `_agtOngletCourant`, `_agtEstVerrouille`, `_agtPaletteDonnees` — et n’agit que par ses gestes publics. Premier pas du découpage d’`admin-gt.js`.
+- **Ce qui ne change pas encore** : la console reste sombre (ses écrans écrivent leurs couleurs en dur) ; la charte claire et sombre, les fenêtres par `openOv` (GT-B29) et le découpage du gros fichier viendront écran par écran.
+
+### 516c. Mesuré
+- `mv-harnais-gtui1` (neuf) : **16 assertions, 10/10 mutants** — les vraies routes et la vraie recherche de `coquille.js` jouées hors navigateur (adresses cassées, slugs douteux, verrou, rangs), le câblage lu dans `console.html`, `styles.css`, `admin-gt.js`, `gt.js`.
+- `mv-harnais-gtsuivi1` suit : sa montée se lit dans l’historique (le SW monte encore avec les lots suivants).
+- `mv-harnais-typo` : deux tailles écrites en dur dans la feuille neuve passées sur les crans de la charte (`--pt-md`, `--pt-sm`).
+- **La chaîne**, premier passage (641 commandes) : trois rouges, tous de la feuille neuve — `mv-harnais-echelle` (des marges hors de l’échelle 2 · 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 : remises dessus), `mv-harnais-jetons` (des rayons écrits en dur qui doublaient un pas : `--r-sm`, `--r-md`, `--r-lg`), `mv-harnais-cote1` (la palette, couche fixe plein écran, ni rangée ni exemptée : **exemptée**, console GT seulement, jamais pendant un tuto). **Second passage, sur le code final : 641 commandes, 0 rouge (838 s).**
+- **Tutos concernés** : aucun ; **le côte à côte rejoué** (la feuille touchée) sur les sources finales, aux trois tailles : vert.
+
+### 516d. Ce qui reste ouvert
+- **GT-UI-2** — Radar et Incidents d’après la maquette : le suivi de GT-SUIVI-1 en tableau trié (priorité, statut, versions, « revenu »), les tickets saisis à la main, les liens entre incidents, les signalements suivis ; et ces deux écrans sur la charte claire et sombre.
+- **La charte claire et sombre** et les fenêtres par `openOv` (GT-B29) écran par écran ; le découpage d’`admin-gt.js` dans `src/gt/` au fil des écrans.
+- **Ctrl K ne cherche pas encore dans les fiches** (parcelles, membres) : à voir avec l’écran Clients (GT-UI-3).

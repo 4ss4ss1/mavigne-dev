@@ -119,8 +119,9 @@ function statiques(S) {
   const sl = fonction(S.gt, '_agtSuiviLigne');
   r.push([/\['P1','P2','P3','P4'\]/.test(sl) && sl.indexOf('agtSuiviStatut(') !== -1 && sl.indexOf('agtSuiviNote(') !== -1 && sl.indexOf('revenu apr') !== -1, 'la ligne : P1 à P4, la suggérée en pointillé, le statut, la note, « revenu après clôture »']);
   r.push([/suivi:'le suivi des incidents'/.test(S.gt), 'une lecture ratée du suivi se dit au bandeau']);
-  r.push([/export const APP_VERSION = '10\.59';/.test(S.ut) && /export const WHATS_NEW = \[\n  \{ v: '10\.59', d: '[0-9-]+', items: \[\] \},/.test(S.wn)
-    && /const CACHE_NAME   = 'mavigne-v11\.40';/.test(S.sw), 'la montée : APP 10.59 (rien à annoncer), SW 11.40']);
+  // ★ GT-UI-1 (§516) : la montée de CE lot se lit dans l'historique (les lots suivants montent encore).
+  r.push([/\n  \{ v: '10\.59', d: '[0-9-]+', items: \[\] \},   \/\/ GT-SUIVI-1/.test(S.wn) && /\/\/ v11\.40 \(02\/11\/2026\) — GT-SUIVI-1/.test(S.sw),
+    'la montée de ce lot : l’entrée 10.59 (rien à annoncer), le SW 11.40 dans l’historique']);
   return r;
 }
 

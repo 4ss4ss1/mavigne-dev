@@ -7,3 +7,4 @@
 // appuie — l'ordre que suivait app.js n'imposait rien d'autre : admin-gt.js ne lit ses dépendances qu'à l'usage.
 import './app.js';
 import './admin-gt.js';
+import './gt/coquille.js';   // GT-UI-1 (§516) : la barre latérale, les liens directs, la recherche (Ctrl K)

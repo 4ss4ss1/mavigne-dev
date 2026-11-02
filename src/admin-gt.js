@@ -296,7 +296,7 @@ function _agtSessArm(){
 function _agtSessTick(){
   var el=document.getElementById('agt-sess-timer');
   if(!el) return;
-  if(_agtLocked){ el.textContent='\u00b7 verrouill\u00e9'; return; }
+  if(_agtLocked){ el.textContent='\u00b7 verrouill\u00e9'; var _sl=document.getElementById('agt-side-sess'); if(_sl) _sl.textContent='Session verrouill\u00e9e'; return; }
   var reste=Math.max(0, _AGT_IDLE_MS-(Date.now()-_agtIdleLast));
   var mn=Math.ceil(reste/60000);
   var txt='\u00b7 verrou dans '+mn+' min';
@@ -308,6 +308,7 @@ function _agtSessTick(){
     txt+=' \u00b7 session jusqu\u2019\u00e0 '+p(h.getHours())+':'+p(h.getMinutes());
   }
   el.textContent=txt;
+  var _ss=document.getElementById('agt-side-sess'); if(_ss) _ss.textContent='Session GUERETTECH '+txt;   // ★ GT-UI-1 : la barre latérale
 }
 
 // ★★ GTFIX-2 (§511) — LE VERROU COUVRE TOUT (GT-B05). Il était au plan 9500, sous les fenêtres de la
@@ -489,6 +490,7 @@ async function renderAdminGT(){
   _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
   _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
   _agtMajCompteurs();
+  if(window._agtRouteAppliquer) setTimeout(window._agtRouteAppliquer, 0);   // ★ GT-UI-1 : la route d'arrivée (#incidents, #clients/<slug>…)
 
   agtRenderBody();
 }
@@ -707,6 +709,20 @@ function _agtMajCompteurs(){
       ? '<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>'
       : '<div id="agt-bottom-status" style="width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>';
   }
+  _agtCompteursBarre();   // ★ GT-UI-1
+}
+// ★ GT-UI-1 (§516) — les nombres de la barre latérale : les mêmes que les pastilles des onglets, plus les clients
+//   et les factures en retard (une fois par référence).
+function _agtCompteursBarre(){
+  var pose=function(id, n){ var e=document.getElementById(id); if(e) e.textContent=(n>0)?String(n):''; };
+  var lire=function(id){ var e=document.getElementById(id); return (e && e.style.display!=='none') ? (parseInt(e.textContent,10)||0) : 0; };
+  pose('agt-side-n-radar', lire('agt-radar-badge'));
+  pose('agt-side-n-incidents', lire('agt-inc-badge'));
+  pose('agt-side-n-leads', lire('agt-lead-badge'));
+  pose('agt-side-n-clients', 0);
+  var retard=0;
+  if(typeof _agtBizSlugs==='function') _agtBizSlugs().forEach(function(x){ var vus={}; _agtFacts(x.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retard++; } }); });
+  pose('agt-side-n-business', retard);
 }
 
 // ★ GTFIX-4 (§513) — le bandeau des lectures ratées, en tête de chaque onglet : ce qui manque n'est pas zéro.
@@ -739,6 +755,7 @@ function agtRenderBody(){
   _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
 }
 
+var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', outils:'Outils' };
 function agtSwitchTab(tab){
   _agtTab=tab;
   document.querySelectorAll('.agt-tab').forEach(function(b){
@@ -747,6 +764,13 @@ function agtSwitchTab(tab){
     var isCrit=(tab==='incidents'||tab==='radar')&&_agtTenants.reduce(function(s,t){return s+t.errorsCrit;},0)>0;
     b.classList.toggle('crit',isActive&&isCrit);
   });
+  // ★ GT-UI-1 (§516) : la barre latérale, le titre de l'écran et le lien direct suivent l'onglet.
+  document.querySelectorAll('.agt-side-it').forEach(function(b){
+    var on=b.dataset.tab===tab; b.classList.toggle('active',on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  var _hn=document.querySelector('#page-admin-gt .agt-hdr-name'); if(_hn && _AGT_NOMS_ONGLETS[tab]) _hn.textContent=_AGT_NOMS_ONGLETS[tab];
+  if(window._agtRouteNoter) window._agtRouteNoter(tab);
   agtRenderBody();
 }
 
@@ -6478,6 +6502,19 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+// ★ GT-UI-1 (§516) — ce que la coquille (src/gt/coquille.js) LIT de la console, et rien d'autre.
+window._agtOngletCourant = function(){ return _agtTab; };
+window._agtEstVerrouille = function(){ return !!_agtLocked; };
+window._agtPaletteDonnees = function(){
+  var factures=[];
+  Object.keys(_agtBilling||{}).forEach(function(sl){ _agtFacts(sl).forEach(function(f){ if(f && f.ref) factures.push({ ref:String(f.ref), slug:sl }); }); });
+  return {
+    clients:(_agtTenants||[]).map(function(t){ return { slug:t.slug, nom:t.nom }; }),
+    incidents:_agtErrGroupes(_agtErrMerged()).slice(0,200).map(function(g){ return { id:g.id, msg:g.msg, n:g.n, ouvert:g.nOpen>0 }; }),
+    factures:factures,
+    leads:(_agtLeads||[]).map(function(l){ return { nom:(l && (l.domaine||l.nom))||'' }; })
+  };
+};
 window.agtGoClient       = agtGoClient;
 window.agtSetIncTab      = agtSetIncTab;
 window.agtSetOutTab      = agtSetOutTab;

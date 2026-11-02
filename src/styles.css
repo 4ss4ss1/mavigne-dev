@@ -1434,6 +1434,45 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-infobox{background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);line-height:1.6;}
 .agt-chip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 11px;color:rgba(255,255,255,0.3);font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;font-family:var(--font-ui);}
 .agt-chip.on{background:rgba(139,92,246,0.18);border-color:rgba(139,92,246,0.5);color:#C4B5FD;}
+/* ★★ GT-UI-1 (§516) — LA COQUILLE DE LA CONSOLE SUR ORDINATEUR (GT-B27 : la mise en page du téléphone étirée sur
+   un grand écran). Une barre latérale à gauche, l'en-tête et le contenu à droite, le contenu centré sur 1180 px ; les
+   onglets du haut et la barre flottante du bas s'effacent (leur rôle passe à la barre latérale). Au téléphone, rien ne
+   change. Palette sombre de la console : la charte claire et sombre viendra écran par écran (GT-UI-2 à 6). */
+.agt-side{display:none;}
+@media (min-width:1100px){
+  #page-admin-gt.active{display:grid;grid-template-columns:236px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);}
+  #page-admin-gt .agt-side{display:flex;flex-direction:column;gap:8px;grid-column:1;grid-row:1 / span 2;min-height:0;overflow-y:auto;background:#120E1C;border-right:1px solid rgba(255,255,255,0.08);padding:16px 12px 16px;}
+  #page-admin-gt .agt-hdr{grid-column:2;grid-row:1;}
+  #page-admin-gt .agt-body{grid-column:2;grid-row:2;min-height:0;padding:20px max(24px, calc((100% - 1180px) / 2)) 40px;}
+  #page-admin-gt .agt-tabs,#page-admin-gt .agt-bottom-bar{display:none;}
+}
+.agt-side-marque{display:flex;flex-direction:column;padding:2px 8px 12px;}
+.agt-side-titre{font-family:var(--font-titre);font-size:var(--pt-md,20px);font-weight:600;color:#F4ECD8;line-height:1.1;}
+.agt-side-sous{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.5);margin-top:2px;}
+.agt-side-cherche{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-bottom:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-lg,12px);padding:8px 12px;color:rgba(255,255,255,0.66);font-family:var(--font-ui);font-size:var(--pt-txt,13px);cursor:pointer;}
+.agt-side-cherche kbd{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.18);border-radius:var(--r-sm,6px);padding:2px 8px;}
+.agt-side-nav{display:flex;flex-direction:column;gap:2px;flex:1;}
+.agt-side-lbl{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.06em;padding:12px 12px 4px;}
+.agt-side-it{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:40px;background:none;border:none;border-radius:var(--r-lg,12px);padding:8px 12px;color:rgba(255,255,255,0.72);font-family:var(--font-ui);font-size:var(--pt-txt,13px);font-weight:500;text-align:left;cursor:pointer;}
+.agt-side-it:hover{background:rgba(255,255,255,0.05);}
+.agt-side-it.active{background:rgba(139,92,246,0.16);color:#E9E3FF;font-weight:600;}
+.agt-side-n{font-family:var(--font-ui);font-size:var(--pt-micro,12px);font-weight:700;color:#FDBA74;}
+.agt-side-n:empty{display:none;}
+.agt-side-sess{border-top:1px solid rgba(255,255,255,0.08);padding:12px 8px 4px;display:flex;flex-direction:column;gap:8px;}
+.agt-side-sess-t{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55);line-height:1.5;}
+.agt-side-verrou{align-self:flex-start;background:none;border:1px solid rgba(196,181,253,0.35);border-radius:var(--r-md,8px);padding:8px 12px;color:#C4B5FD;font-family:var(--font-ui);font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;}
+/* La palette (Ctrl K) — au-dessus des fenêtres de la console, sous le verrou (qui la rend inerte). */
+.agt-pal-fond{position:fixed;inset:0;z-index:10010;background:rgba(6,4,12,0.72);display:flex;justify-content:center;align-items:flex-start;padding:12vh 16px 16px;}
+.agt-pal{width:100%;max-width:620px;background:#17121F;border:1px solid rgba(196,181,253,0.28);border-radius:var(--r-lg,12px);box-shadow:0 24px 60px rgba(0,0,0,0.5);overflow:hidden;font-family:var(--font-ui);}
+.agt-pal-q{width:100%;box-sizing:border-box;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);padding:16px 20px;color:#F0E8DC;font-family:var(--font-ui);font-size:var(--pt-sm,16px);outline:none;}
+.agt-pal-liste{list-style:none;margin:0;padding:8px;max-height:52vh;overflow-y:auto;}
+.agt-pal-it{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-radius:var(--r-md,8px);cursor:pointer;color:rgba(255,255,255,0.8);font-size:var(--pt-txt,13px);}
+.agt-pal-it.on{background:rgba(139,92,246,0.2);color:#fff;}
+.agt-pal-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.agt-pal-s{color:rgba(255,255,255,0.45);font-size:var(--pt-micro,12px);}
+.agt-pal-k{flex-shrink:0;color:rgba(255,255,255,0.5);font-size:var(--pt-micro,12px);}
+.agt-pal-vide{padding:12px 12px;color:rgba(255,255,255,0.5);font-size:var(--pt-txt,13px);}
+.agt-pal-pied{border-top:1px solid rgba(255,255,255,0.08);padding:8px 16px;color:rgba(255,255,255,0.45);font-size:var(--pt-micro,12px);}
 .agt-bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:600px;width:100%;padding:0 16px 24px;pointer-events:none;z-index:10;}
 .agt-bottom-inner{background:rgba(26,20,40,0.92);backdrop-filter:blur(12px);border:1px solid rgba(139,92,246,0.2);border-radius:14px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;pointer-events:all;}
 

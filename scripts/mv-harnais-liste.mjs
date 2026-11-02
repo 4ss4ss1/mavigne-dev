@@ -933,6 +933,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ci1.mjs --contre'],
   ['node scripts/mv-harnais-gtsuivi1.mjs'],        // GT-SUIVI-1 (§515) : le suivi des incidents dans _guerettech/suivi, la version dans chaque erreur, « résolu » après le serveur
   ['node scripts/mv-harnais-gtsuivi1.mjs --contre'],
+  ['node scripts/mv-harnais-gtui1.mjs'],           // GT-UI-1 (§516) : la coquille de la console — barre latérale sur ordinateur, liens directs, recherche Ctrl K
+  ['node scripts/mv-harnais-gtui1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

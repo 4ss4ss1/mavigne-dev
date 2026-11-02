@@ -2,6 +2,25 @@
      « MV-GT:CONSOLE » d'index.html. L'appli des clients (index.html) ne contient pas ce balisage. -->
 <!-- ══════ PAGE ADMIN GUERETTECH ══════ -->
 <div class="page" id="page-admin-gt">
+  <!-- ★★ GT-UI-1 (§516) — LA BARRE LATÉRALE, sur ordinateur seulement (styles.css : ≥ 1100 px) ; au téléphone, les
+       onglets du haut restent. La maquette v1 (docs/maquettes/maquette-console-gt-v1.html) : la marque, la recherche
+       (Ctrl K, src/gt/coquille.js), trois familles d'écrans, la session en bas. « Santé du système » viendra avec GT-UI-5. -->
+  <aside class="agt-side" id="agt-side" aria-label="Console GUERETTECH">
+    <div class="agt-side-marque"><span class="agt-side-titre">Ma Vigne</span><span class="agt-side-sous">Console GUERETTECH</span></div>
+    <button class="agt-side-cherche" onclick="agtPalette()" aria-keyshortcuts="Control+K"><span>Rechercher</span><kbd>Ctrl K</kbd></button>
+    <nav class="agt-side-nav" aria-label="Écrans">
+      <div class="agt-side-lbl">Support</div>
+      <button class="agt-side-it active" data-tab="radar" onclick="agtSwitchTab('radar')"><span>Radar</span><span class="agt-side-n" id="agt-side-n-radar"></span></button>
+      <button class="agt-side-it" data-tab="incidents" onclick="agtSwitchTab('incidents')"><span>Incidents</span><span class="agt-side-n" id="agt-side-n-incidents"></span></button>
+      <div class="agt-side-lbl">Commercial</div>
+      <button class="agt-side-it" data-tab="clients" onclick="agtSwitchTab('clients')"><span>Clients</span><span class="agt-side-n" id="agt-side-n-clients"></span></button>
+      <button class="agt-side-it" data-tab="business" onclick="agtSwitchTab('business')"><span>Facturation</span><span class="agt-side-n" id="agt-side-n-business"></span></button>
+      <button class="agt-side-it" data-tab="leads" onclick="agtSwitchTab('leads')"><span>Leads</span><span class="agt-side-n" id="agt-side-n-leads"></span></button>
+      <div class="agt-side-lbl">Système</div>
+      <button class="agt-side-it" data-tab="outils" onclick="agtSwitchTab('outils')"><span>Outils</span></button>
+    </nav>
+    <div class="agt-side-sess"><div class="agt-side-sess-t" id="agt-side-sess">Session GUERETTECH</div><button class="agt-side-verrou" onclick="agtLockNow()">Verrouiller</button></div>
+  </aside>
   <div class="agt-hdr">
     <div class="agt-hdr-inner">
       <div class="agt-hdr-top">
@@ -26,7 +45,7 @@
     <div class="agt-tabs" id="agt-tabs">
       <button class="agt-tab active" data-tab="radar" onclick="agtSwitchTab('radar')">Radar <span id="agt-radar-badge" style="display:none" class="agt-err-badge"></span></button>
       <button class="agt-tab" data-tab="clients" onclick="agtSwitchTab('clients')">Clients</button>
-      <button class="agt-tab" data-tab="business" onclick="agtSwitchTab('business')">Business</button>
+      <button class="agt-tab" data-tab="business" onclick="agtSwitchTab('business')">Facturation</button>
       <button class="agt-tab" data-tab="incidents" onclick="agtSwitchTab('incidents')">Incidents <span id="agt-inc-badge" style="display:none" class="agt-err-badge"></span></button>
       <button class="agt-tab" data-tab="leads" onclick="agtSwitchTab('leads')">Leads <span id="agt-lead-badge" style="display:none" class="agt-err-badge"></span></button>
       <button class="agt-tab" data-tab="outils" onclick="agtSwitchTab('outils')">Outils</button>
