@@ -220,7 +220,7 @@ try {
     + 'var _mem = {};\n'
     + 'globalThis.localStorage = { getItem(k){ return _mem[k] || null; }, setItem(k,v){ _mem[k] = v; } };\n'
     + 'globalThis.window = { fbAppendError(e){ envois.push(e); } };\n'
-    + "var _ERR_KEY = 'k', _ERR_MAX = 50, _ERR_SENT = {}, _ERR_SENT_N = 0, _ERR_SENT_MAX = 50, _ERR_DEDUP_MS = 60000;\n"
+    + "var APP_VERSION = '0.0'; var _ERR_KEY = 'k', _ERR_MAX = 50, _ERR_SENT = {}, _ERR_SENT_N = 0, _ERR_SENT_MAX = 50, _ERR_DEDUP_MS = 60000;\n"
     + lvlDecl + '\n'
     + 'var _mvSuppressToastCapture = false;\n'
     + "function _errCurrentPage(){ return 'p'; }\n"

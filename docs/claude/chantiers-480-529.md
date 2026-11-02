@@ -920,3 +920,31 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - **Le premier passage complet** (§28 › 1) : six jobs, leurs durées ; si l’un dépasse 12 min, le découper (une machine de plus pour les tutos : ajouter `3` à `part`).
 - **Un rouge au gabarit ou à l’UX** peut être un défaut d’avant ce lot, caché par la coupure depuis le 31/10 — à instruire comme tel.
 - **Non fait, à peser** : garder Chromium en cache entre les passages (20 à 35 s par job, cinq jobs) — du temps de machine, pas du temps d’attente.
+
+## 515. ★★★ GT-SUIVI-1 — LE SUIVI DES INCIDENTS VIT CHEZ GUERETTECH, CHAQUE ERREUR DIT SA VERSION (02/11 — `src/admin-gt.js` · `src/utils.js` · `src/whats-new.js` · `public/sw.js` · `index.html` · `scripts/mv-harnais-gtsuivi1.mjs` (neuf) · `scripts/mv-harnais-gtfix1.mjs` · `scripts/mv-harnais-pheno1d.mjs` · `scripts/mv-harnais-avale.mjs` · `scripts/mv-harnais-liste.mjs` — base `6b2ca2a` « ci1 » — **APP 10.58 → 10.59, SW 11.39 → 11.40**)
+
+### 515a. D’où ça vient
+- **Le plan en 11 lots** (§28 « ★ CONSOLE GT ») : GT-SUIVI-1 suit les quatre GTFIX — « suite » de Nico, le 02/11. Écrit d’abord sur `dd10cfe`, **reposé sur `6b2ca2a`** (CI-1, §514, poussé entre-temps : il ne touchait aucun fichier de code de ce lot ; la doc, la liste des harnais et le compteur des sections ont été refaits par-dessus).
+- **L’audit** (`docs/maquettes/audit-console-gt-2026-11-01.md`, R3 et R4) : **GT-B07** « Traiter » écrivait dans le journal d’erreurs DU DOMAINE (GTFIX-1 l’avait mis en transaction ; la console écrivait encore chez le client pour son propre suivi) ; **GT-B18** une erreur remontée ne disait pas sa version — impossible de savoir si elle est revenue après un correctif ; **GT-B19** « résolu » s’affichait avant la réponse du serveur. **Décision D2** : priorités P1 à P4, suggérées puis confirmées.
+
+### 515b. Ce qui change
+- **`_guerettech/suivi`** (couvert par la règle `_guerettech/{document=**}` : GUERETTECH seul — aucune règle neuve) : `{ value: { <signature>: { prio, statut, note, closLe, livreLe, livreEn, maj } } }`. La signature est celle du regroupement (`_agtErrKey` : gravité, catégorie, message normalisé). Écrit en transaction par la porte de GTFIX-1 (`_agtSuiviMaj` → `fbGtMaj('suivi', …)`, `_agtMutSuivi` complète la fiche sans écraser ses autres champs).
+- **Traiter clôt l’incident** (`agtResolveGroup`, et `agtResolveError` pour une occurrence : son incident entier) : `statut: 'clos'`, `closLe` — **plus rien n’est écrit dans le journal du domaine** (les occurrences gardées sur ce poste, dans `localStorage`, se marquent comme avant). `_agtErrTenantIdx`, devenue sans appelant, est retirée (le preflight l’a vue).
+- **Le « traité » de chaque occurrence se calcule en mémoire** (`_agtAppliquerSuivi`, au chargement, après chaque écriture du suivi et après la purge) : traité si traité avant ce lot (`resolved`, gardé dans `_resolvedOrig`) OU si son incident est clos ou sans suite et qu’elle est arrivée AVANT la clôture (`_agtErrTraiteeParSuivi`). **Une occurrence plus récente rouvre l’incident** : « revenu après clôture ». « Livré, à vérifier » ne clôt pas. Les 34 lectures de `resolved` de la console restent justes sans être touchées.
+- **La ligne de suivi de chaque incident** (`_agtSuiviLigne`, sous son en-tête) : P1 à P4 — la suggérée en pointillé, avec sa raison (`_agtPrioSuggeree` : critique P1, information P4, plusieurs domaines ou dix fois et récent P2, le reste P3) —, le statut (Nouveau, Qualifié, En cours, Corrigé à livrer, Livré à vérifier — qui note la version —, Clos, Sans suite), la note, les versions vues.
+- **Chaque erreur dit sa version** (`logError`, `utils.js` : `v: APP_VERSION`) ; les erreurs d’avant le lot se disent « version non dite ».
+- **Un signalement n’est « résolu » qu’après la réponse du serveur** (`agtResolveReport`) ; un échec le laisse ouvert et le dit.
+- **La purge** retire aussi les occurrences closes par le suivi (`_agtMutErreurs` reçoit leurs identifiants) — la seule écriture qui reste dans le journal d’un domaine : un geste de ménage, confirmé.
+- **Le bandeau des lectures ratées** nomme le suivi s’il n’a pas pu être lu.
+- **La montée** : `logError` vit dans `utils.js` et doit atteindre les appareils (règle du doute, §25) — APP 10.59 (`utils.js`, et dans `index.html` : le pied de page, l’en-tête de module, l’étiquette, le badge des nouveautés, le `?v=` de `boot.js`), SW 11.40 (en-tête, `CACHE_NAME`, les deux `console.log`) ; `WHATS_NEW` s’ouvre sur 10.59 avec `items: []` (un lot GT n’a rien à annoncer à un vigneron).
+
+### 515c. Mesuré
+- `mv-harnais-gtsuivi1` (neuf) : **14 assertions, 9/9 mutants** — les vraies fonctions du suivi jouées sur des occurrences (avant et après une clôture, « livré », « sans suite », les « traité » d’avant le lot, deux passages), la mutation d’une fiche, la priorité suggérée à une date fixée ; le câblage lu dans `admin-gt.js`, `utils.js`, `whats-new.js`, `sw.js`.
+- **Suivent ce lot** : `mv-harnais-gtfix1` (l’ancre de la purge) ; `mv-harnais-pheno1d` (il attendait les nouveautés ouvertes sur 10.58 : il cherche maintenant l’entrée 10.58 où qu’elle soit) ; `mv-harnais-avale` (son bac à sable du vrai `logError` reçoit `APP_VERSION`).
+- **La chaîne**, sur `dd10cfe` : un premier passage arrêté au preflight (la version montée à moitié : quatre endroits d’`index.html`, le `?v=` de `boot.js`, les deux `console.log` de `sw.js` ; `_agtErrTenantIdx` sans appelant), puis 4 rouges (`pheno1d`, `avale` et leurs contre-épreuves) — tous corrigés.
+- **Reposé sur `6b2ca2a`** (CI-1) : **639 commandes, 0 rouge**. Tutos concernés : aucun (8 tutos, aucun ne touche ce changement).
+
+### 515d. Ce qui reste ouvert
+- **GT-UI-1 à GT-UI-6** : la nouvelle console d’après `docs/maquettes/maquette-console-gt-v1.html` (l’ouvrir et comparer avant chaque lot, MAQ-1) — GT-UI-2 y reprend le suivi : tickets saisis, liens, signalements suivis, régressions par version.
+- **Les erreurs d’avant 10.59** ne disent pas leur version : « version non dite » jusqu’à ce qu’elles sortent du journal.
+- **`submitReport`** (serveur) relit puis réécrit les signalements sans transaction.

@@ -127,7 +127,7 @@ function jouer(S) {
     && S.css.includes('.phr-e.prochain{border-color:var(--accent,#7A2850);background:var(--accent-doux,') && S.css.includes('.phr-ech-pc .phr-e.actuel em{color:var(--sur-inverse,#F5F4F1);}'));
   t('⑧ le smoke hermétique sur le serveur local et sa garde de temps ; sa limite d’étape en CI ; les nouveautés 10.58',
     S.smoke.includes("if (!URL_ARG) return (u.startsWith(baseUrl) || u.startsWith('data:') || u.startsWith('blob:')) ? route.continue() : route.abort();") && S.smoke.includes("const GARDE_MS = parseInt(getArg('--garde', '120000'), 10);")
-    && /- name: Smoke — l'app demarre sans exception\n {8}timeout-minutes: 4\n/.test(S.ci) && /export const WHATS_NEW = \[\n  \{ v: '10\.58'/.test(S.wn) && S.wn.includes('Le stade ne revient jamais en arri\u00e8re'));
+    && /- name: Smoke — l'app demarre sans exception\n {8}timeout-minutes: 4\n/.test(S.ci) && /\n  \{ v: '10\.58', d: '2026-11-01', items: \[\n/.test(S.wn) && S.wn.includes('Le stade ne revient jamais en arri\u00e8re'));
   t('⑧ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pheno1d.mjs'") > 0 && S.liste.indexOf("mv-harnais-pheno1d.mjs --contre'") > 0);
 }
 if (!CONTRE) {

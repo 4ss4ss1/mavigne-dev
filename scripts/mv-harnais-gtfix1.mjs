@@ -435,7 +435,7 @@ await mord('★ le journal ne se garde plus par la date', 'gt',
 await mord('★ la console et le serveur divergent (plafond)', 'gt',
   "var _AGT_AL_JOURS = 365, _AGT_AL_MAX = 2000;", "var _AGT_AL_JOURS = 365, _AGT_AL_MAX = 100;", 'jrnServeur');
 await mord('★★ traiter une erreur repart de la copie (purge totale)', 'gt',
-  "  if (purge) return liste.filter(function(e){ return !(e && e.resolved); });", "  if (purge) return [];", 'errPurge');
+  "  if (purge) return liste.filter(function(e){ return !(e && (e.resolved || ids[e.id])); });", "  if (purge) return [];", 'errPurge');
 await mord('★★ la config écrit 0 pour une case vide (GT-B17)', 'gt',
   "  if (!isNaN(lat)) cfg.lat = lat;", "  cfg.lat = lat || 0;", 'cfgChamps');
 await mord('★ la config d’une forme inconnue est écrasée', 'gt',

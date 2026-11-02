@@ -1,0 +1,29 @@
+{
+  "lot": "GT-SUIVI-1",
+  "section": "§515",
+  "base": "6b2ca2a80764577102bb372a0a2f3b3bcf8da923",
+  "inclut": [],
+  "date": "2026-11-02",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "2d401a175ea68434064fa8f973b1b5ed7a86bc0d34d5093771027a1a0fa32406",
+    "CLAUDE.md": "6d401399b39c201c4a4bfb3327f4905bd6b28c808766124f5adbc82c038a24b0",
+    "docs/claude/INDEX.md": "e1fc9b2a3edcd5b814cea4e702c30e7bb18f3eb9199d314cb6da79d50a8af4ca",
+    "docs/claude/chantiers-480-529.md": "0b863698584f6b73ade6bf9ac6a6307ee6631874e7a5ba50490517041d9ad69c",
+    "docs/claude/journal.md": "f4c9dac8dcee04bab7018d388917c9e848edbc1c8d04d91bac951e169c5580a2",
+    "index.html": "e385edcc2b82ecf5c8eaa83e8f0841321f8be1bcf392c85b8835d309df2fdf8a",
+    "public/sw.js": "ff11bd992a9a226d8401e65f04a6a60352b2102823cb68290048152527d025c2",
+    "scripts/harnais-claude-md.mjs": "84ad856d157826cca7b43625142731bbfbc6025240633c52d2ca13048f5a885d",
+    "scripts/mv-harnais-avale.mjs": "25e62cb2e1ddd012b4ef7b8b6b9d5978c816f3219e46174187854e4368ef3d75",
+    "scripts/mv-harnais-gtfix1.mjs": "4da6332cb66afe9b2422dcaf4b68e20cadd95cba2887315a209d8e3ab209e667",
+    "scripts/mv-harnais-liste.mjs": "955f61e7193105872493c1e5e9a114f0993340d715ee5390e861d1e60c7ac644",
+    "scripts/mv-harnais-pheno1d.mjs": "a07c9add3626071d74aed065846681b41f958dd3d7f2a3846a60c87ff27cacbd",
+    "src/admin-gt.js": "beca2dba0ae5058ba438ad20c20dcc8a96ddaf79b2d01c12751f095584666ee3",
+    "src/utils.js": "cafb54e991624241d06b6b0269ccd07af265efd88700fcd9eb96278c7c8bda8c",
+    "src/whats-new.js": "3d1bc246f99b8a44c16b4e5ee40e35f17a2f3cf460ded08c7cc92d6318772a2c",
+    "scripts/mv-harnais-gtsuivi1.mjs": "82bb982646843f9c14da0dcb892e247cceecb3437ab98740c464879e808abacb"
+  }
+}

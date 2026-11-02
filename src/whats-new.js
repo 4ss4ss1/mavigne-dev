@@ -7,6 +7,7 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.59', d: '2026-11-02', items: [] },   // GT-SUIVI-1 (§515) : chaque erreur remontée porte la version de l’appli ; le suivi des incidents vit chez GUERETTECH — rien ne change pour un client
   { v: '10.58', d: '2026-11-01', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Noter le stade : la date en un appui',
       desc: "La fenêtre «\u00a0Noter le stade\u00a0» a ses marges, le code BBCH en couleur devant chaque stade, le dernier noté cerclé et le suivant signalé. La date se choisit d’un appui\u00a0: Aujourd’hui, Hier, Avant-hier ou Autre (le calendrier du téléphone), jamais dans le futur, écrite en toutes lettres dessous. Dans l’onglet «\u00a0Stades\u00a0», une seule date vaut pour toute la tournée\u00a0: «\u00a0Observé aujourd’hui\u00a0» en haut de la liste\u00a0; changée, elle passe en orange, et sur ordinateur aussi on peut noter à une autre date." },

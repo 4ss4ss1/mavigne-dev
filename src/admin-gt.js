@@ -258,7 +258,7 @@ async function _agtGuard(force){
 // et a la fermeture de session : un panneau qu'on quitte ne doit rien laisser
 // derriere lui, y compris dans le DOM d'un onglet reste ouvert.
 function _agtWipe(){
-  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={}; _agtLecturesKo=[];
+  _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={}; _agtLecturesKo=[]; _agtSuivi={};
   _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[];
   _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null; _agtLeadOpen=null;
   var b=document.getElementById('agt-body');
@@ -459,7 +459,7 @@ async function renderAdminGT(){
   // écriture ne part d'ici (ce doc est lisible PUBLIQUEMENT par la règle d'unicité des slugs).
   _agtSlugs   = slugs.slice();
   _agtClients = _agtRegClients(gtData, _reg[1].v);
-  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports'];
+  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi'];
   var _tout=await Promise.all([
     Promise.all(slugs.map(function(slug){ return Promise.all(_AGT_CLES_DOM.map(function(k){ return _dom(slug, k); })); })),
     Promise.all(_AUTRES.map(_gt)),
@@ -486,6 +486,8 @@ async function renderAdminGT(){
   _agtLeadSt = (GT.leads_status && GT.leads_status.value && typeof GT.leads_status.value==='object') ? GT.leads_status.value : {};
   _agtLeadStNoter(_agtLeadSt);   // ★ GTFIX-1 : la base de comparaison de chaque fiche
   _agtReportsGT = (GT.support_reports&&Array.isArray(GT.support_reports.value))?GT.support_reports.value:[];
+  _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
+  _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
   _agtMajCompteurs();
 
   agtRenderBody();
@@ -710,7 +712,8 @@ function _agtMajCompteurs(){
 // ★ GTFIX-4 (§513) — le bandeau des lectures ratées, en tête de chaque onglet : ce qui manque n'est pas zéro.
 var _AGT_LECT_NOMS = { tenants:'le registre des domaines', clients:'les fiches commerciales', access_log:'le journal d\u2019acc\u00e8s',
   demo_tokens:'les codes d\u2019essai', demo_stats:'la d\u00e9mo publique', billing:'la facturation', leads_status:'le suivi des leads',
-  support_reports:'les signalements GT', connexions:'les derni\u00e8res connexions', leads:'les demandes du site' };
+  support_reports:'les signalements GT', connexions:'les derni\u00e8res connexions', leads:'les demandes du site',
+  suivi:'le suivi des incidents' };
 function _agtBandeauLectures(){
   var dom=(_agtTenants||[]).filter(function(t){ return t.echecs && t.echecs.length; });
   if(!_agtLecturesKo.length && !dom.length) return '';
@@ -756,12 +759,16 @@ function agtSetErrFilter(f){ _agtErrFilter=f; agtRenderBody(); }
 function agtSetErrTenant(t){ _agtErrTenant=t; agtRenderBody(); }
 
 async function agtResolveReport(id, slug){
+  // ★ GT-SUIVI-1 (§515) — « résolu » APRÈS la réponse du serveur, plus avant : l'écran ne dit plus « résolu »
+  //   d'un signalement dont l'écriture a échoué (GT-B19).
+  try{
+    if(!window.fbResolveReport) throw new Error('fbResolveReport indisponible');
+    await window.fbResolveReport(id, slug);
+  }catch(e){ if(window.showToast) showToast('Résolution non enregistrée — réessayez','#E07060'); return; }
   var flip=function(list){ (list||[]).forEach(function(r){ if(r.id===id) r.resolved=true; }); };
   if(slug){ _agtTenants.forEach(function(t){ if(t.slug===slug){ flip(t.reports); t.reportsOpen=(t.reports||[]).filter(function(r){return !r.resolved;}).length; } }); }
   else { flip(_agtReportsGT); }
   agtRenderBody();
-  try{ if(window.fbResolveReport) await window.fbResolveReport(id, slug); }
-  catch(e){ if(window.showToast) showToast('Résolution non enregistrée — réessayez','#E07060'); }
 }
 
 // ★★ GTFIX-1 (§510) — LE JOURNAL D'ACCÈS : relu et complété dans la même transaction, gardé UN AN par
@@ -1224,6 +1231,103 @@ function _agtErrHash(s){
 function _agtErrNorm(m){ return String(m||'').trim().replace(/\d{3,}/g,'#').slice(0,160); }
 function _agtErrKey(e){ return (e.level||'error')+'|'+(e.cat||'')+'|'+_agtErrNorm(e.msg); }
 
+// ════ GT-SUIVI-1 (§515) — LE SUIVI DES INCIDENTS VIT CHEZ GUERETTECH ════
+// ★★★ L'audit du 01/11 (GT-B07) : « Traiter » réécrivait le journal d'erreurs DU DOMAINE pour y marquer `resolved` —
+//   GTFIX-1 l'a mis en transaction (plus rien ne se perd), mais la console écrivait encore chez le client pour son
+//   propre suivi. Désormais le suivi vit dans `_guerettech/suivi` (règle `_guerettech/{document=**}` : GUERETTECH
+//   seul) : une fiche par incident — sa signature `_agtErrKey` —, avec sa priorité P1 à P4 (suggérée, puis
+//   confirmée : décision D2), son statut, sa note, sa date de clôture.
+//   Une occurrence est TRAITÉE quand son incident est clos ou sans suite ET qu'elle est arrivée AVANT la clôture ;
+//   une occurrence plus récente rouvre l'incident (« revenu après clôture »). Les `resolved` d'avant ce lot comptent.
+var _agtSuivi = {};
+var _AGT_SUIVI_ST = { nouveau:'Nouveau', qualifie:'Qualifi\u00e9', en_cours:'En cours', corrige:'Corrig\u00e9, \u00e0 livrer',
+  livre:'Livr\u00e9, \u00e0 v\u00e9rifier', clos:'Clos', sans_suite:'Sans suite' };
+var _AGT_SUIVI_FIN = { clos:1, sans_suite:1 };
+function _agtErrTraiteeParSuivi(e, suivi){
+  var s=suivi && suivi[_agtErrKey(e)];
+  return !!(s && _AGT_SUIVI_FIN[s.statut] && s.closLe && String(e.ts||'') <= String(s.closLe));
+}
+// Le « traité » de chaque occurrence en mémoire = son drapeau d'origine OU la clôture de son incident.
+function _agtAppliquerSuivi(){
+  (_agtTenants||[]).forEach(function(t){
+    (t.errors||[]).forEach(function(e){
+      if(e._resolvedOrig===undefined) e._resolvedOrig=!!e.resolved;
+      e.resolved = e._resolvedOrig || _agtErrTraiteeParSuivi(e, _agtSuivi);
+    });
+    _agtErrRecount(t);
+  });
+}
+// La mutation d'une fiche — pure, la transaction peut la rejouer. Document absent = suivi neuf.
+function _agtMutSuivi(d, existe, cle, patch, maintenant){
+  var v;
+  if(!existe) v={};
+  else if(d && d.value && typeof d.value==='object' && !Array.isArray(d.value)) v=d.value;
+  else throw new Error('suivi illisible');
+  v[cle]=Object.assign({}, v[cle]||{}, patch, { maj:maintenant });
+  return { value:v };
+}
+async function _agtSuiviMaj(cle, patch){
+  try{
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var r=await window.fbGtMaj('suivi', function(d, existe){ return _agtMutSuivi(d, existe, cle, patch, new Date().toISOString()); });
+    _agtSuivi=r.valeur.value;
+    _agtAppliquerSuivi();
+    return true;
+  }catch(e){ _agtEchecEcriture(e, 'Suivi de l\u2019incident'); return false; }
+}
+// La priorité suggérée (décision D2) — dite avec sa raison, jamais imposée : critique → P1 ; information → P4 ;
+// plusieurs domaines ou dix occurrences, et récent → P2 ; le reste → P3.
+function _agtPrioSuggeree(g, maintenant){
+  var nDom=Object.keys(g.tenants||{}).length, recent=!!(g.last && ((maintenant||Date.now())-g.last.getTime()) < 3*86400000);
+  if(g.level==='critical') return { p:'P1', pourquoi:'critique' };
+  if(g.level==='info') return { p:'P4', pourquoi:'information' };
+  if((nDom>=2 || g.n>=10) && recent) return { p:'P2', pourquoi:(nDom>=2?(nDom+' domaines'):(g.n+' fois'))+', r\u00e9cent' };
+  return { p:'P3', pourquoi:(g.level==='warning'?'avertissement':'erreur isol\u00e9e') };
+}
+function _agtSuiviLigne(g){
+  var s=_agtSuivi[g.key]||{}, sg=_agtPrioSuggeree(g), st=_AGT_SUIVI_ST[s.statut]?s.statut:'nouveau';
+  var vers=Object.keys(g.versions||{}).sort(), revenu=!!(s.closLe && _AGT_SUIVI_FIN[s.statut] && g.nOpen>0);
+  var bouton='border-radius:7px;font-size:var(--pt-lbl,10.5px);padding:4px 9px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)';
+  var h='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px">';
+  ['P1','P2','P3','P4'].forEach(function(p){
+    var on=(s.prio===p), sug=(!s.prio && sg.p===p);
+    h+='<button onclick="agtSuiviPrio(\''+g.id+'\',\''+p+'\')" title="'+(sug?('Sugg\u00e9r\u00e9e : '+_escAttr(sg.pourquoi)):('Priorit\u00e9 '+p))+'" style="'+bouton
+      +';background:'+(on?'rgba(196,181,253,0.22)':'none')+';border:1px '+(sug?'dashed':'solid')+' '+(on||sug?'rgba(196,181,253,0.6)':'rgba(255,255,255,0.14)')
+      +';color:'+(on?'#F0E8DC':'rgba(255,255,255,0.55)')+';font-weight:'+(on?'700':'500')+'">'+p+'</button>';
+  });
+  if(!s.prio) h+='<span style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35)">sugg\u00e9r\u00e9e '+sg.p+' \u00b7 '+_escHtml(sg.pourquoi)+'</span>';
+  h+='<select onchange="agtSuiviStatut(\''+g.id+'\',this.value)" aria-label="Statut de l\u2019incident" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:7px;color:#F0E8DC;font-size:var(--pt-lbl,10.5px);padding:4px 6px;font-family:var(--font-ui,Outfit,sans-serif)">'
+    +Object.keys(_AGT_SUIVI_ST).map(function(k){ return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+_AGT_SUIVI_ST[k]+'</option>'; }).join('')+'</select>';
+  h+='<button onclick="agtSuiviNote(\''+g.id+'\')" style="'+bouton+';background:none;border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.55)">'+(s.note?'Note':'+ Note')+'</button>';
+  if(revenu) h+='<span style="font-size:var(--pt-lbl,10.5px);color:#FCA5A5;font-weight:600">revenu apr\u00e8s cl\u00f4ture</span>';
+  h+='</div>';
+  if(s.note) h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.55);margin-top:5px;white-space:pre-wrap">'+_escHtml(s.note)+'</div>';
+  h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);margin-top:4px">'
+    +(vers.length?('version'+(vers.length>1?'s':'')+' '+_escHtml(vers.join(', '))):'version non dite (erreurs d\u2019avant 10.59)')
+    +(s.livreEn?(' \u00b7 livr\u00e9 en '+_escHtml(s.livreEn)):'')+'</div>';
+  return h;
+}
+window.agtSuiviPrio=function(gid, p){
+  var g=_agtErrGroupById(gid); if(!g || ['P1','P2','P3','P4'].indexOf(p)<0) return;
+  _agtSuiviMaj(g.key, { prio:p }).then(function(ok){ if(ok) agtRenderBody(); });
+};
+window.agtSuiviStatut=function(gid, st){
+  var g=_agtErrGroupById(gid); if(!g || !_AGT_SUIVI_ST[st]) return;
+  var patch={ statut:st }, now=new Date().toISOString();
+  if(_AGT_SUIVI_FIN[st]) patch.closLe=now;
+  if(st==='livre'){ patch.livreLe=now; patch.livreEn=String(window.APP_VERSION||''); }
+  _agtSuiviMaj(g.key, patch).then(function(ok){ if(ok){ agtRenderBody(); if(_AGT_SUIVI_FIN[st]) showToast('Incident '+_AGT_SUIVI_ST[st].toLowerCase(),'#3D6B27'); } });
+};
+window.agtSuiviNote=function(gid){
+  var g=_agtErrGroupById(gid); if(!g || !window.openPrompt) return;
+  var cur=(_agtSuivi[g.key]||{}).note||'';
+  window.openPrompt({
+    titre:'Note de l\u2019incident', sub:'Visible uniquement dans ce panneau.',
+    valeur:cur, type:'texte', btnLabel:'Enregistrer',
+    cb:async function(v){ if(await _agtSuiviMaj(g.key, { note:String(v||'').slice(0,500) })) agtRenderBody(); }
+  });
+};
+
 // Fusion des deux sources, dedoublonnee par id. Firebase d'abord : une erreur
 // presente des deux cotes est bien celle du domaine.
 function _agtErrMerged(){
@@ -1256,7 +1360,7 @@ function _agtErrGroupes(list){
     if(!g){
       g=map[k]={ key:k, id:_agtErrHash(k), level:e.level||'error', cat:e.cat||'',
                  msg:e.msg||'', n:0, nOpen:0, nCrit:0, first:null, last:null,
-                 tenants:{}, pages:{}, users:{}, loc:0, fb:0, items:[] };
+                 tenants:{}, pages:{}, users:{}, versions:{}, loc:0, fb:0, items:[] };
       out.push(g);
     }
     g.n++;
@@ -1267,6 +1371,7 @@ function _agtErrGroupes(list){
     g.tenants[tn]=(g.tenants[tn]||0)+1;
     if(e.page) g.pages[e.page]=1;
     if(e.user && e.user!=='\u2014') g.users[e.user]=1;
+    if(e.v) g.versions[String(e.v)]=1;   // ★ GT-SUIVI-1 (GT-B18)
     if(e._src==='local') g.loc++; else g.fb++;
     g.items.push(e);
   });
@@ -1436,6 +1541,7 @@ function _agtBuildErrors(){
     if(pages.length) h+=' \u00b7 \u00e9cran '+_escHtml(pages.slice(0,3).join(', '));
     if(users.length) h+=' \u00b7 '+_escHtml(users.slice(0,3).join(', '));
     h+='</div>';
+    h+=_agtSuiviLigne(g);   // ★ GT-SUIVI-1 : priorité, statut, note, versions
     h+='</div>';
 
     h+='<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">';
@@ -1494,6 +1600,7 @@ async function agtResolveGroup(gid){
   var ids={};
   g.items.forEach(function(e){ if(!e.resolved && e.id) ids[e.id]=true; });
 
+  // Les occurrences gardées sur CE poste (localStorage) se marquent ici, comme avant.
   try{
     var raw=localStorage.getItem(_ERR_KEY);
     var log=raw?JSON.parse(raw):[];
@@ -1504,25 +1611,20 @@ async function agtResolveGroup(gid){
     if(window.logError) window.logError({level:'info',cat:'ui',msg:'journal local non mis a jour',detail:(e&&e.message)||String(e)});
   }
 
-  // ★ GTFIX-1 (§510) : le journal de chaque domaine est RELU dans la transaction. Avant, la copie
-  //   chargée à l'ouverture était réécrite : les erreurs remontées depuis disparaissaient (GT-B07).
-  var touches=_agtTenants.filter(function(t){
-    return Array.isArray(t.errors) && t.errors.some(function(e){ return ids[e.id] && !e.resolved; });
-  });
-  var echec=0;
-  for(var i=0;i<touches.length;i++){
-    if(!(await _agtErrEcrire(touches[i], ids, false))) echec++;
+  // ★★ GT-SUIVI-1 (§515) : l'incident se CLÔT dans _guerettech/suivi — plus rien n'est écrit dans le journal
+  //   du domaine (GT-B07). Une occurrence arrivée après la clôture le rouvrira.
+  if(await _agtSuiviMaj(g.key, { statut:'clos', closLe:new Date().toISOString() })){
+    agtRenderBody();
+    var n=Object.keys(ids).length;
+    showToast('Incident clos \u00b7 '+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
   }
-  agtRenderBody();
-  var n=Object.keys(ids).length;
-  if(!echec) showToast(''+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
 }
 // Marque traitées (ids) ou purge les traitées (purge) DANS le journal relu du domaine ; la mémoire du
 // panneau prend ensuite la valeur réellement écrite — erreurs arrivées entre-temps comprises.
 function _agtMutErreurs(liste, existe, ids, purge){
   if (liste === undefined){ if (existe) throw new Error('journal d\u2019erreurs illisible'); return undefined; }
   if (!Array.isArray(liste)) throw new Error('journal d\u2019erreurs illisible');
-  if (purge) return liste.filter(function(e){ return !(e && e.resolved); });
+  if (purge) return liste.filter(function(e){ return !(e && (e.resolved || ids[e.id])); });   // ★ GT-SUIVI-1 : et les occurrences closes par le suivi
   return liste.map(function(e){ return (e && ids[e.id]) ? Object.assign({}, e, { resolved:true }) : e; });
 }
 async function _agtErrEcrire(t, ids, purge){
@@ -1627,15 +1729,6 @@ async function saveAddTenant() {
 // Le tableau de bord vivant est _agtBuildErrors(), qui fusionne le localStorage et
 // les error_log de tous les domaines.
 
-// Retrouve le domaine porteur d'une erreur -> index dans _agtTenants, -1 sinon.
-function _agtErrTenantIdx(id) {
-  for (var i = 0; i < _agtTenants.length; i++) {
-    var arr = _agtTenants[i].errors;
-    if (!Array.isArray(arr)) continue;
-    for (var j = 0; j < arr.length; j++) { if (arr[j] && arr[j].id === id) return i; }
-  }
-  return -1;
-}
 
 // Recompte les compteurs d'un domaine apres reecriture de son error_log.
 function _agtErrRecount(t) {
@@ -1655,11 +1748,11 @@ async function agtResolveError(id) {
     })));
   } catch(e) { console.warn('[agtResolveError] local', e); }
 
-  var idx = _agtErrTenantIdx(id);
-  if (idx >= 0) {
-    var ids = {}; ids[id] = true;
-    await _agtErrEcrire(_agtTenants[idx], ids, false);   // ★ GTFIX-1 : relu dans la transaction
-  }
+  // ★ GT-SUIVI-1 (§515) : traiter une occurrence, c'est clore SON incident (la même signature, partout) — dans
+  //   _guerettech/suivi, plus dans le journal du domaine (GT-B07).
+  var e = null;
+  _agtTenants.forEach(function(t){ (t.errors||[]).forEach(function(x){ if(x && x.id===id) e=x; }); });
+  if (e) await _agtSuiviMaj(_agtErrKey(e), { statut:'clos', closLe:new Date().toISOString() });
   agtRenderBody();
 }
 
@@ -1685,8 +1778,10 @@ async function _agtDoPurgeErrors() {
   for (var i = 0; i < _agtTenants.length; i++) {
     var t = _agtTenants[i];
     if (!Array.isArray(t.errors) || !t.errors.some(function(e){ return e.resolved; })) continue;
-    if (!(await _agtErrEcrire(t, {}, true))) echec++;
+    var _ids = {}; t.errors.forEach(function(e){ if(e && e.resolved && e.id) _ids[e.id] = true; });   // ★ GT-SUIVI-1
+    if (!(await _agtErrEcrire(t, _ids, true))) echec++;
   }
+  _agtAppliquerSuivi();
   if (!echec) showToast('Erreurs trait\u00e9es supprim\u00e9es', '#3D6B27');
   agtRenderBody();
 }
