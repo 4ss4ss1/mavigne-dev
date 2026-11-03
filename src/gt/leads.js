@@ -32,6 +32,12 @@ export function sousTitre(l, maintenant) {
   }
   return [lieu, ha, age].filter(Boolean).join(' \u00b7 ');
 }
+// La pastille de relance d'une carte (la maquette) : « Relance en retard de N jours » ou « Relancer le jj/mm ».
+export function relancePastille(l, d) {
+  if (!l.relance || l.st === 'installe' || l.st === 'perdu') return '';
+  if (l.retard > 0) return '<span class="mvpas mvpas-statut mvpas-retard">Relance en retard de ' + l.retard + ' jour' + (l.retard > 1 ? 's' : '') + '</span>';
+  return '<span class="mvpas mvpas-statut mvpas-afaire">Relancer le ' + String(l.relance).slice(8, 10) + '/' + String(l.relance).slice(5, 7) + '</span>';
+}
 export function chercher(leads, q) {
   q = plier(q).trim();
   if (!q) return leads || [];
@@ -55,6 +61,11 @@ function fiche(l, d) {
     ['Mise en route', l.mer || ''], ['Parcellaire', l.parcellaire ? 'joint' : '']].filter(function (x) { return x[1]; });
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Ce que le domaine a dit</div><dl class="agt-inc-dl">' + lignes.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>'
     + (l.message ? '<pre class="agt-fac-relance" style="margin-top:8px">' + esc(l.message) + '</pre>' : '') + '</div>';
+  h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Relancer le</div><div class="agt-inc-outils">'
+    + '<input id="agt-lead-rel" class="agt-inc-sel" type="date" aria-label="Date de relance" value="' + esc(l.relance || '') + '">'
+    + '<button class="agt-btn agt-inc-court" onclick="agtLeadRelance(\'' + _escAttr(l._id) + '\',(document.getElementById(\'agt-lead-rel\')||{}).value||\'\')">Enregistrer</button>'
+    + (l.relance ? '<button class="agt-btn agt-inc-court" onclick="agtLeadRelance(\'' + _escAttr(l._id) + '\',\'\')">Retirer</button>' : '') + '</div>'
+    + '<p class="agt-cli-note">Le jour venu, un mail \u00ab Relance \u00e0 faire \u00bb vous arrive et le Radar la remonte ; rien ne part chez le prospect.</p></div>';
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Note</div>' + (l.note ? '<p class="agt-cli-note" style="white-space:pre-wrap">' + esc(l.note) + '</p>' : '<p class="agt-cli-note">Aucune note.</p>')
     + '<button class="agt-btn agt-inc-court" onclick="agtLeadNote(\'' + _escAttr(l._id) + '\')">' + (l.note ? 'Modifier la note' : '+ Note') + '</button></div>';
   h += '<div class="agt-inc-actions"><button class="agt-btn fill agt-inc-court" onclick="agtLeadMail(\'' + _escAttr(l._id) + '\')">R\u00e9pondre</button>'
@@ -76,7 +87,7 @@ export function vue(d) {
         + cols[k].map(function (l) {
           return '<div class="mvcarte-fond agt-leads-fiche' + (l._id === E.ouvert ? ' on' : '') + '" tabindex="0" onclick="agtLeadsOuvrir(\'' + _escAttr(l._id) + '\')" onkeydown="if(event.key===\'Enter\')agtLeadsOuvrir(\'' + _escAttr(l._id) + '\')">'
             + '<b>' + esc(l.domaine || 'Demande sans nom') + '</b><span class="agt-tbl-sous">' + esc(sousTitre(l)) + '</span>'
-            + (l.note ? '<span class="agt-leads-note">' + esc(String(l.note).split('\n')[0].slice(0, 90)) + '</span>' : '') + '</div>';
+            + (l.note ? '<span class="agt-leads-note">' + esc(String(l.note).split('\n')[0].slice(0, 90)) + '</span>' : '') + relancePastille(l, d) + '</div>';
         }).join('') + '</section>';
     }).join('') + '</div>';
   } else {

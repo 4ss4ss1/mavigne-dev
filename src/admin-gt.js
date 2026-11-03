@@ -129,6 +129,7 @@ var _agtClients    = {};  // _guerettech/clients.clients[slug] : {plan,trialDays
 var _agtSlugs      = [];  // memorise pour ne JAMAIS reecrire tenants sans ses slugs
 var _agtBilling    = {};  // _guerettech/billing {value:{slug:{fact:[...],note}}}  <- JAMAIS dans tenants
 var _agtLeads      = null; // null = pas encore lu / refuse ; [] = lu et vide
+var _agtSante      = {};  // ★ GT-UI-6 (§521) : _guerettech/sante — le dernier passage de chaque tâche planifiée (functions/sante.js)
 var _agtLeadSt     = {};  // _guerettech/leads_status {value:{id:{st,note,ts}}}
 // --- SEC-GT : session ---
 var _AGT_IDLE_MS   = 15*60*1000;  // verrouillage apres 15 min sans interaction
@@ -250,7 +251,7 @@ async function _agtGuard(force){
 // derriere lui, y compris dans le DOM d'un onglet reste ouvert.
 function _agtWipe(){
   _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={}; _agtLecturesKo=[]; _agtSuivi={};
-  _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[];
+  _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[]; _agtSante={};
   _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null;
   var b=document.getElementById('agt-body');
   if(b) b.innerHTML='';
@@ -452,7 +453,7 @@ async function renderAdminGT(){
   // écriture ne part d'ici (ce doc est lisible PUBLIQUEMENT par la règle d'unicité des slugs).
   _agtSlugs   = slugs.slice();
   _agtClients = _agtRegClients(gtData, _reg[1].v);
-  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi'];
+  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi','sante'];   // ★ GT-UI-6 : sante
   var _tout=await Promise.all([
     Promise.all(slugs.map(function(slug){ return Promise.all(_AGT_CLES_DOM.map(function(k){ return _dom(slug, k); })); })),
     Promise.all(_AUTRES.map(_gt)),
@@ -479,6 +480,7 @@ async function renderAdminGT(){
   _agtLeadSt = (GT.leads_status && GT.leads_status.value && typeof GT.leads_status.value==='object') ? GT.leads_status.value : {};
   _agtLeadStNoter(_agtLeadSt);   // ★ GTFIX-1 : la base de comparaison de chaque fiche
   _agtReportsGT = (GT.support_reports&&Array.isArray(GT.support_reports.value))?GT.support_reports.value:[];
+  _agtSante = (GT.sante && typeof GT.sante==='object') ? GT.sante : {};   // ★ GT-UI-6
   _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
   _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
   _agtMajCompteurs();
@@ -528,6 +530,13 @@ function _agtRadarRows(){
   if(neufs.length) rows.push({ c:'#C4B5FD', ord:20,
     t:neufs.length+' demande'+(neufs.length>1?'s':'')+' du site sans r\u00e9ponse',
     m:'', b:'Ouvrir', a:'agtSwitchTab(\'leads\')', ty:'Lead' });
+  // ★ GT-UI-6 (§521) : une relance de lead dont la date est passée remonte, même pour un lead « Répondu » (la maquette).
+  (_agtLeads||[]).forEach(function(l){
+    var e=_agtLeadSt[l._id]||{}, r=_agtLeadRelanceRetard(Object.assign({ st:_agtLeadStOf(l._id) }, e));
+    if(r<0) return;
+    rows.push({ c:(r>0?'#F97316':'#C4B5FD'), ord:(r>0?19:21), t:'<b>'+_escHtml(l.domaine||'Demande du site')+'</b> \u2014 relance '+(r>0?('en retard de '+r+' jour'+(r>1?'s':'')):'pr\u00e9vue aujourd\u2019hui'),
+      m:'', b:'R\u00e9pondre', a:'agtSwitchTab(\'leads\');agtLeadsOuvrir(\''+_escAttr(l._id)+'\')', ty:'Lead' });
+  });
 
   // 4. Silence : un domaine abonne qui ne se connecte plus est un client qui part.
   _agtTenants.forEach(function(t,i){
@@ -604,15 +613,20 @@ function _agtRadarPrio(r){
 }
 // La santé du système, avec ce que la console sait déjà ; les sauvegardes et les tâches planifiées viennent avec GT-UI-6.
 function _agtRadarSante(){
-  var cur=String(window.APP_VERSION||''), tot=0, aJour=0, crit=0;
+  // ★ GT-UI-6 (§521) : l'état écrit par les tâches planifiées elles-mêmes (_guerettech/sante), les appareils, la version.
+  var cur=String(window.APP_VERSION||''), fmt=Number(window.MV_FORMAT)||0, tot=0, aJour=0, bloq=0, crit=0;
   var cmpV=function(a,b){ var x=String(a||'0').split('.').map(Number), y=String(b||'0').split('.').map(Number);
     for(var i=0;i<Math.max(x.length,y.length);i++){ var d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
-  _agtTenants.forEach(function(t){ var A=t.appareils||{}; Object.keys(A).forEach(function(k){ tot++; if(cmpV((A[k]||{}).v,cur)>=0) aJour++; }); crit+=(t.errorsCrit||0); });
-  return '<section class="mvcarte-fond agt-carte"><div class="agt-carte-tete"><h2 class="agt-carte-titre">Sant\u00e9 du syst\u00e8me</h2></div><div class="agt-carte-corps"><ul class="agt-sante-liste">'
-    +'<li>Version en ligne<small>APP '+_escHtml(cur)+'</small></li>'
-    +'<li class="'+(tot && aJour<tot?'attention':'')+'">Appareils \u00e0 jour<small>'+aJour+' sur '+tot+'</small></li>'
+  _agtTenants.forEach(function(t){ var A=t.appareils||{}; Object.keys(A).forEach(function(k){ var a=A[k]||{}; tot++; if((Number(a.f)||0)<fmt) bloq++; else if(cmpV(a.v,cur)>=0) aJour++; }); crit+=(t.errorsCrit||0); });
+  var ligne=function(cle, lib, maxH){
+    var e=_agtSante[cle], et='attention', sous='en attente du premier passage';
+    if(e && e.quand){ var h=(Date.now()-Date.parse(e.quand))/3600000; et=(e.ok===false)?'alerte':(h>maxH?'attention':''); sous=_agtRelTime(e.quand)+(e.detail?(' \u00b7 '+e.detail):''); }
+    return '<li class="'+et+'">'+lib+'<small>'+_escHtml(sous)+'</small></li>';
+  };
+  return '<section class="mvcarte-fond agt-carte"><div class="agt-carte-tete"><h2 class="agt-carte-titre">Sant\u00e9 du syst\u00e8me</h2><button class="agt-tete-second" onclick="agtSwitchTab(\'sante\')">D\u00e9tail</button></div><div class="agt-carte-corps"><ul class="agt-sante-liste">'
+    +ligne('sauvegarde','Sauvegarde de la base',26)+ligne('export','Export de secours',26)+ligne('ephy','Catalogue E-Phy',194)+ligne('mails','File des e-mails',2)
+    +'<li class="'+(bloq?'alerte':(tot && aJour<tot?'attention':''))+'">Appareils<small>'+aJour+' \u00e0 jour sur '+tot+(bloq?(' \u00b7 '+bloq+' bloqu\u00e9'+(bloq>1?'s':'')):'')+' \u00b7 APP '+_escHtml(cur)+'</small></li>'
     +'<li class="'+(crit?'alerte':'')+'">Erreurs critiques ouvertes<small>'+crit+'</small></li>'
-    +'<li class="attention">Sauvegardes, E-Phy, e-mails<small>leur \u00e9tat arrive avec GT-UI-6</small></li>'
     +'</ul></div></section>';
 }
 function _agtRadarTraces(){
@@ -745,6 +759,8 @@ function _agtCompteursBarre(){
   var retard=0;
   if(typeof _agtBizSlugs==='function') _agtBizSlugs().forEach(function(x){ var vus={}; _agtFacts(x.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retard++; } }); });
   pose('agt-side-n-business', retard);
+  var malS=0; [['sauvegarde',26],['export',26],['ephy',194],['mails',2]].forEach(function(x){ var e=_agtSante[x[0]]; if(e && e.quand && (e.ok===false || (Date.now()-Date.parse(e.quand))/3600000>x[1])) malS++; });
+  pose('agt-side-n-sante', malS);   // ★ GT-UI-6 : une tâche en échec ou en retard
 }
 
 // ★ GTFIX-4 (§513) — le bandeau des lectures ratées, en tête de chaque onglet : ce qui manque n'est pas zéro.
@@ -773,12 +789,13 @@ function agtRenderBody(){
   if(tb==='business'){ body.innerHTML=ban+(window._agtFacturationVue ? window._agtFacturationVue(window._agtFacDonnees()) : ''); _agtBizFill(); }   // ★ GT-UI-5 : src/gt/facturation.js
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
   if(tb==='leads')     body.innerHTML=ban+(window._agtLeadsVue ? window._agtLeadsVue(window._agtLeadsDonnees()) : '');   // ★ GT-UI-5 : src/gt/leads.js
+  if(tb==='sante')     body.innerHTML=ban+(window._agtSanteVue ? window._agtSanteVue(window._agtSanteDonnees()) : '');   // ★ GT-UI-6 : src/gt/sante.js
   if(tb==='outils')    body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildOutils()+'</div>';   // GT-UI-6
   _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
   _agtEntete(tb);   // ★ GT-UI-4 : les résumés suivent les gestes
 }
 
-var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', outils:'Outils' };
+var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', sante:'Sant\u00e9 du syst\u00e8me', outils:'Outils' };
 // ★★ GT-UI-4 (§519) — L'EN-TÊTE DE LA MAQUETTE : le titre de l'écran, son résumé, la fraîcheur du chargement, l'action
 //   principale. Recalculé à chaque onglet et à chaque rendu (les résumés suivent les gestes).
 var _agtCharge=0;
@@ -789,6 +806,7 @@ function _agtResume(tab){
   if(tab==='clients'){ var mrr=0, n=0; _agtTenants.forEach(function(t){ if(_agtInterne(t.slug)) return; n++; if(_agtStatutOf(t.slug).cle==='actif') mrr+=_agtAboPrix(t.slug); }); return n+' domaine'+(n>1?'s':'')+' \u00b7 '+_agtEur(mrr)+' par mois'; }
   if(tab==='business'){ var nf=0; Object.keys(_agtBilling||{}).forEach(function(sl){ nf+=_agtFacts(sl).length; }); return nf+' facture'+(nf>1?'s':'')+' \u00b7 num\u00e9rotation continue sur toutes les factures'; }
   if(tab==='leads'){ var nl=(_agtLeads||[]).length, nn=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length; return nl+' demande'+(nl>1?'s':'')+(nn?' \u00b7 '+nn+' sans r\u00e9ponse':''); }
+  if(tab==='sante') return 'sauvegardes, synchronisations, e-mails, versions';
   if(tab==='outils') return 'journal d\u2019acc\u00e8s, codes d\u2019essai, contours';
   return '';
 }
@@ -5835,6 +5853,24 @@ function _agtLeadById(id){
   return (_agtLeads||[]).filter(function(l){ return l._id===id; })[0]||null;
 }
 
+// ★★ GT-UI-6 (§521) — « RELANCER LE » (Nico, 03/11) : une date dans la fiche d'une demande ; le jour venu, trialWatch
+//   prévient Nicolas par mail et le Radar la remonte. Une date vide la retire. RIEN NE PART CHEZ LE PROSPECT.
+async function agtLeadRelance(id, date){
+  date=String(date||'');
+  if(date && !/^\d{4}-\d{2}-\d{2}$/.test(date)){ showToast('Date invalide','#B85A1A'); return; }
+  var e=Object.assign({}, _agtLeadSt[id]||{});
+  if(date) e.relance=date; else delete e.relance;
+  _agtLeadSt[id]=e;
+  if(await _agtSaveLeadSt(id)){ showToast(date?('Relance pr\u00e9vue le '+_agtDateFr(date)):'Relance retir\u00e9e','#3D6B27'); agtRenderBody(); }
+}
+// Les jours de retard d'une relance de lead (-1 : pas due, ou demande close).
+function _agtLeadRelanceRetard(e, maintenant){
+  e=e||{};
+  if(!e.relance || e.st==='installe' || e.st==='perdu') return -1;
+  var t=Date.parse(e.relance+'T00:00:00'); if(!t) return -1;
+  var j=Math.floor(((maintenant||Date.now())-t)/86400000);
+  return j>=0 ? j : -1;
+}
 async function agtLeadSet(id,st){
   if(!_AGT_LEADST[st]) return;
   _agtLeadSt[id]=Object.assign({}, _agtLeadSt[id]||{}, { st:st, ts:new Date().toISOString() });
@@ -5944,6 +5980,13 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+window.agtLeadRelance    = agtLeadRelance;   // GT-UI-6
+// ★ GT-UI-6 (§521) — ce que l'écran « Santé du système » (src/gt/sante.js) LIT.
+window._agtSanteDonnees = function(){
+  return { sante:_agtSante||{}, version:String(window.APP_VERSION||''), format:Number(window.MV_FORMAT)||0,
+    domaines:(_agtTenants||[]).map(function(t){ return { nom:t.nom, appareils:t.appareils||{} }; }),
+    esc:_escHtml, relTime:function(x){ return x ? ('il y a '+_agtRelTime(x)) : ''; } };
+};
 // ★ GT-UI-5 (§520) — ce que l'écran Facturation (src/gt/facturation.js) LIT : le moteur de GTFIX-3, rien recalculé là-bas.
 window._agtFacDonnees = function(){
   var an=_agtBizAnnee(), m=_agtBizMois(an), mf=[0,0,0,0,0,0,0,0,0,0,0,0], fac=[], mrr=0, du=0, retard=0, ech30=0, auj=Date.now();
@@ -5978,7 +6021,7 @@ window._agtFacDonnees = function(){
 };
 // ★ GT-UI-5 (§520) — ce que l'écran Leads (src/gt/leads.js) LIT.
 window._agtLeadsDonnees = function(){
-  return { leads:_agtLeadsSorted().map(function(l){ var e=_agtLeadSt[l._id]||{}; return Object.assign({}, l, { st:_agtLeadStOf(l._id), note:String(e.note||'') }); }),
+  return { leads:_agtLeadsSorted().map(function(l){ var e=_agtLeadSt[l._id]||{}, st=_agtLeadStOf(l._id); return Object.assign({}, l, { st:st, note:String(e.note||''), relance:String(e.relance||''), retard:_agtLeadRelanceRetard(Object.assign({}, e, { st:st })) }); }),
     st:Object.keys(_AGT_LEADST).reduce(function(o,k){ o[k]=_AGT_LEADST[k].l; return o; },{}), esc:_escHtml, dateFr:function(x){ return x ? _agtDateFr(x) : '\u2014'; } };
 };
 window._agtBizFill       = _agtBizFill;   // la nouvelle fiche pré-remplit son formulaire

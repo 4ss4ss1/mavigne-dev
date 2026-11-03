@@ -1,0 +1,47 @@
+{
+  "lot": "GT-UI-6",
+  "section": "§521",
+  "base": "3eff0ce53a30aa125d644c179ebf0807d6d0145a",
+  "inclut": [],
+  "date": "2026-11-03",
+  "tutos": {
+    "ok": true,
+    "empreinte": "6eff29f9886f6f82b5323ed92a196ef0f4b3de38177a79504dbc282457f0571d",
+    "date": "2026-11-03T16:48:34.607Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "c3e5969d5825cb38c039c05123bb8571b1c8b2641848db5acab31dc1c492a6a8",
+    "CLAUDE.md": "31d998ec9b6efe89e9be4d80cc064fc62a8b0118d2df0601df8e9c5826488fb8",
+    "docs/claude/INDEX.md": "c98cb4d2c3b3c5eace06ff60329086928fd8d1141fe7ee3b0104b8fe606f64c6",
+    "docs/claude/chantiers-480-529.md": "b01624230cf1e3dd2079bc420f65d8686f4eff522613d7cbb552266236075e18",
+    "docs/claude/journal.md": "6c4ec7a73b3cb5b2ef1130f46068f0cea8997e80750e6da180348e92d0e506a1",
+    "functions/claims.js": "3b99f2a948239b6f9b7e6b192169d8d05967109be88ce26a509a7c5627c8d50c",
+    "functions/ephy.js": "3a14f23a9d3d1c995fe1efb8c756fb44beae1ebdddf452c0f823527b1fb5975b",
+    "functions/index.js": "470494b0673eea55884d959b98a8e2f099df20a50ab46c1068ff076d3609f0a8",
+    "public/sw.js": "392a7e069d5bd5d6b0037110569a3b560f9c6ac2d7b4caa2da7f0df62977f088",
+    "scripts/harnais-claude-md.mjs": "17b9afd2dbfdb8327acb454a99cf84caa2f87bddaaa31d0660ae4d5ae589f738",
+    "scripts/mv-harnais-ephy-mfsc.mjs": "16f6c94a453ea8d28c1145e876858514341b48168053242cbcbcaae1f21c87bc",
+    "scripts/mv-harnais-gtfix1.mjs": "64bd8f78b9757e4fc00ade9851a6611d5f8eaf07e283a71f4c419ca164c10b75",
+    "scripts/mv-harnais-gtfix4.mjs": "924f9bf7fcd9f19123c7fd03a5c313dbc65c0e7b43ddfba2a3cc8f056c99e0e8",
+    "scripts/mv-harnais-gtsuivi1.mjs": "da6da246092568ea563070811a614d60f70cc364a0df973b98c6457e5bb22738",
+    "scripts/mv-harnais-liste.mjs": "d15f83e70b4aef01854f825ab0e1bbd7796a1b88c77edd637c0579d50a822a56",
+    "scripts/mv-icones-baseline.json": "9501e77ee2b1b2144e6272f268e4bdf9049821cb5bc8d9a6b28eb45dcc1fff4e",
+    "scripts/mv-jetons-baseline.json": "00ef0ed55592164039c62188e12148e2a179b44c9cdce018170255cda8cd2e7c",
+    "src/admin-gt.js": "885faf70d0e6c77e63c5638552ef14a6e5ec60def746c324b9e2226c227b022e",
+    "src/gt.js": "38939616e606344ee4cf0b32368e1bc1d0b556abe35f857c3efc5e7fb49e5bc4",
+    "src/gt/console.html": "6e70f8d9a81c42bb8fccf785787aa1b8ad369504fc2428f5dc00e4642880cc9a",
+    "src/gt/coquille.js": "a545a88d872db82fd7008224205a87aad8d3513c7847bf1fe892fe6355b8e501",
+    "src/gt/leads.js": "949659507a7cb953dfda2d5d4ddb161416160f31aa3dee70ab431c8adf287fe6",
+    "src/styles.css": "2e9fe2ce00fa60a08ac7086e46b7231084b82d2e11f3f92e38df6ba65554cb42",
+    "functions/sante.js": "5da8a4359efa2e4b3a5b98f2ce3b7aa3fe60be868a7918378055534af115fcb9",
+    "scripts/mv-harnais-gtui6.mjs": "e93c2a1a86aef6eb46919c17c61f377ff3c7909a9e289bb646c44b3a57ac2c68",
+    "src/gt/sante.js": "8a9767cfc367cbee1b9f9a2202aea96e3d70d433097c1345fbe640acce55b1f8"
+  }
+}

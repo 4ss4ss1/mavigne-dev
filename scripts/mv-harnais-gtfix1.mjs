@@ -358,7 +358,7 @@ function statiques(S) {
   // ★ GTFIX-3 (§512) : la saisie du paiement, son annulation et la périodicité écrivent aussi — chaque appel nomme son domaine.
   const appelsFact = (gt.match(/_agtSaveBilling\(/g) || []).length - 1, nommes = (gt.match(/_agtSaveBilling\(t\.slug\)/g) || []).length;
   r.push([!/_agtSaveBilling\(\s*\)/.test(gt) && appelsFact >= 7 && nommes === appelsFact, 'chaque écriture de facturation nomme son domaine (' + nommes + ' sur ' + appelsFact + ')']);
-  r.push([!/_agtSaveLeadSt\(\s*\)/.test(gt) && (gt.match(/await _agtSaveLeadSt\(id\)/g) || []).length === 3, 'les 3 écritures de leads nomment leur fiche']);
+  r.push([!/_agtSaveLeadSt\(\s*\)/.test(gt) && (gt.match(/await _agtSaveLeadSt\(id\)/g) || []).length === 4, 'les 4 écritures de leads nomment leur fiche (GT-UI-6 : « relancer le »)']);
   r.push([/_agtBillingNoter\(_agtBilling\);\s*\/\/ ★ GTFIX-1/.test(S.gt) && /_agtLeadStNoter\(_agtLeadSt\);\s*\/\/ ★ GTFIX-1/.test(S.gt),
     'la base de comparaison est notée au chargement (facturation, leads)']);
   r.push([/_agtBillingBase=\{\}/.test(gt) && /_agtLeadStBase=\{\}/.test(gt), 'la sortie de session efface aussi les bases de comparaison']);

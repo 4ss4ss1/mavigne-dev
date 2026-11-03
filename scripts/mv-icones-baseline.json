@@ -1,7 +1,7 @@
 {
-  "total": 623,
+  "total": 596,
   "modules": {
-    "app": 79,
+    "app": 76,
     "utils": 67,
     "whats-new": 10,
     "pilotage": 62,
@@ -12,7 +12,7 @@
     "tracteur": 3,
     "phyto": 10,
     "reserve": 14,
-    "admin-gt": 62,
+    "admin-gt": 47,
     "firebase": 13,
     "onboarding": 15,
     "index.html": 1,
@@ -33,7 +33,7 @@
     "guide/15-glossaire.html": 0,
     "guide/_layout.html": 0,
     "public/demarrage.html": 71,
-    "public/logiciel-vigne.html": 10,
+    "public/logiciel-vigne.html": 1,
     "public/essai.html": 12,
     "public/mise-en-route.html": 2
   }

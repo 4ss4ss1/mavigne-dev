@@ -1614,6 +1614,24 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-leads-fiche{display:flex;flex-direction:column;gap:4px;padding:12px;cursor:pointer;font-family:var(--font-ui);font-size:var(--pt-txt,13px);color:var(--texte);}
 .agt-leads-fiche.on{outline:2px solid var(--accent);outline-offset:-1px;}
 .agt-leads-note{color:var(--texte-med);font-size:var(--pt-micro,12px);}
+/* ★ GT-UI-6 (§521) — « SANTÉ DU SYSTÈME » DE LA MAQUETTE : cinq états (le point dit bon, en retard, en échec, en
+   attente), les versions du parc en barres (en ligne, ancienne, bloquée), « Avant le déploiement général ». */
+.agt-sante-rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px;margin:0 0 16px;}
+.agt-sante-bloc{display:flex;flex-direction:column;gap:4px;padding:12px 16px;font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;}
+.agt-sante-bloc b{display:flex;align-items:center;gap:8px;font-size:var(--pt-txt,13px);color:var(--texte);}
+.agt-sante-bloc b::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ok);}
+.agt-sante-bloc.attention b::before{background:var(--attention);}
+.agt-sante-bloc.alerte b::before{background:var(--danger);}
+.agt-sante-bloc.attente b::before,.agt-sante-bloc.neutre b::before{background:var(--texte-pale);}
+.agt-sante-etat{color:var(--danger-texte);font-weight:600;}
+.agt-sante-bloc.attente .agt-sante-etat{color:var(--texte-doux);}
+.agt-sante-grille{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;}
+@media (min-width:1100px){ .agt-sante-grille{grid-template-columns:1fr 1fr;} }
+.agt-sante-v{display:grid;grid-template-columns:56px 1fr 32px;gap:12px;align-items:center;margin:0 0 8px;font-family:var(--font-ui);font-size:var(--pt-txt,13px);color:var(--texte);font-variant-numeric:tabular-nums;}
+.agt-sante-piste{height:8px;background:var(--bg-doux);border-radius:var(--r-full,999px);overflow:hidden;}
+.agt-sante-piste span{display:block;height:100%;border-radius:var(--r-full,999px);background:var(--accent);}
+.agt-sante-piste span.ancien{background:var(--attention);}
+.agt-sante-piste span.bloque{background:var(--danger);}
 /* les écrans encore à l'ancien rendu (Facturation, Leads, Outils, Signalements) : leur fond sombre d'origine, encadré,
    jusqu'à leur refonte (GT-UI-5, GT-UI-6) — leurs couleurs écrites en dur restent lisibles. */
 .agt-ancien{background:#0F0B16;color:#E8E8E0;border-radius:var(--r-lg,12px);padding:16px;}

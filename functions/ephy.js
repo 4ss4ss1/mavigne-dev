@@ -453,14 +453,25 @@ async function runSync() {
 }
 
 // ── Exports ───────────────────────────────────────────────────────────────
+const { noterSante } = require('./sante');   // ★ GT-UI-6 (§521) : l'état du catalogue, pour la console
+async function _syncEtNoter() {
+  try {
+    const s = await runSync();
+    await noterSante('ephy', { ok: true, detail: (s && s.count ? s.count : 0) + ' produits' });
+    return s;
+  } catch (err) {
+    await noterSante('ephy', { ok: false, detail: 'échec : ' + ((err && err.message) || String(err)) });
+    throw err;
+  }
+}
 exports.syncEphyVigne = onSchedule(
   { schedule: 'every wednesday 05:00', timeZone: 'Europe/Paris', region: REGION, memory: '1GiB', timeoutSeconds: 300, retryCount: 1 },
-  async () => { await runSync(); }
+  async () => { await _syncEtNoter(); }
 );
 exports.syncEphyVigneNow = onCall(
   { region: REGION, enforceAppCheck: true, memory: '1GiB', timeoutSeconds: 300 },
   async (req) => {
     if (!req.auth || !(req.auth.token && req.auth.token.gtAdmin)) throw new HttpsError('permission-denied', 'Réservé à GUERETTECH (gtAdmin).');
-    try { return await runSync(); } catch (e) { logger.error('syncEphyVigneNow', e); throw new HttpsError('internal', e.message || 'Échec synchro E-Phy'); }
+    try { return await _syncEtNoter(); } catch (e) { logger.error('syncEphyVigneNow', e); throw new HttpsError('internal', e.message || 'Échec synchro E-Phy'); }
   }
 );

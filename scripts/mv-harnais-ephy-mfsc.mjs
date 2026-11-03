@@ -103,6 +103,8 @@ function copieDefaut(source, remplacements, calcAbs) {
   let s = fs.readFileSync(source, 'utf8');
   for (const [a, b] of remplacements) { if (!s.includes(a)) throw new Error('défaut impossible à poser, ancre absente : ' + a); s = s.split(a).join(b); }
   if (calcAbs) s = s.split("require('./ephy-calc')").join('require(' + JSON.stringify(calcAbs) + ')');
+  // GT-UI-6 (§521) : ephy.js note son état par ./sante — la copie mutée, écrite ailleurs, le retrouve par son chemin absolu.
+  s = s.split("require('./sante')").join('require(' + JSON.stringify(path.join(R, 'functions', 'sante.js')) + ')');
   const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'mv-ephy-')), path.basename(source));
   fs.writeFileSync(f, s);
   return f;

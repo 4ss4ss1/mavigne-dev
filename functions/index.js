@@ -31,6 +31,8 @@ function todayISO() {
 //    gcloud firestore import gs://BUCKET/backups/firestore/DATE
 //    Rétention : 7 jours via règle GCS lifecycle (voir README)
 // ══════════════════════════════════════════════════════════════
+const { noterSante } = require('./sante');   // ★ GT-UI-6 (§521) : l'état des tâches planifiées, pour la console
+
 exports.dailyFirestoreExport = onSchedule(
   {
     schedule:      '0 2 * * *',
@@ -53,8 +55,10 @@ exports.dailyFirestoreExport = onSchedule(
         collectionIds:  [],   // vide = toutes les collections
       });
       logger.info('[Backup] Export lancé', { operation: op.name });
+      await noterSante('sauvegarde', { ok: true, detail: 'export lancé · gardé 7 jours' });
     } catch (err) {
       logger.error('[Backup] Échec export Firestore natif', err);
+      await noterSante('sauvegarde', { ok: false, detail: 'échec : ' + ((err && err.message) || String(err)) });
       throw err;   // déclenche le retry automatique Cloud Scheduler
     }
   }
@@ -88,6 +92,7 @@ exports.weeklyTenantJsonBackup = onSchedule(
 
     if (tenantCols.length === 0) {
       logger.warn('[Backup] Aucun tenant trouvé (préfixe : mavigne_)');
+      await noterSante('export', { ok: false, detail: 'aucun domaine trouvé' });
       return;
     }
     logger.info(`[Backup] ${tenantCols.length} tenant(s) : ${
@@ -145,6 +150,7 @@ exports.weeklyTenantJsonBackup = onSchedule(
     }
 
     logger.info(`[Backup] Terminé — ${ok}/${tenantCols.length} tenant(s) exporté(s)`);
+    await noterSante('export', { ok: ok === tenantCols.length, detail: ok + ' domaine(s) sur ' + tenantCols.length + ' · gardés ' + JSON_RETAIN_DAYS + ' jours' });
   }
 );
 Object.assign(exports, require('./claims'));

@@ -943,6 +943,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtui4.mjs --contre'],
   ['node scripts/mv-harnais-gtui5.mjs'],           // GT-UI-5 (§520) : Facturation et Leads sur la maquette (l'argent du moteur de GTFIX-3, rien recalculé)
   ['node scripts/mv-harnais-gtui5.mjs --contre'],
+  ['node scripts/mv-harnais-gtui6.mjs'],           // GT-UI-6 (§521) : Santé du système (l'état écrit par les tâches planifiées), la relance d'un lead à sa date (un mail à Nicolas seulement)
+  ['node scripts/mv-harnais-gtui6.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

@@ -12,7 +12,7 @@
 // ── Les routes (GT-B31 : « pas de lien direct ») ──────────────────────────────
 //   #radar · #incidents · #clients · #clients/<slug> (la fiche) · #facturation · #leads · #outils
 //   L'onglet interne de la facturation s'appelle encore `business` (D7 : le libellé seul change).
-var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', outils: 'outils' };
+var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', sante: 'sante', outils: 'outils' };   // GT-UI-6 : #sante
 export function lireRoute(hash) {
   var h = String(hash || '').replace(/^#/, '');
   try { h = decodeURIComponent(h); } catch (e) { h = ''; }
@@ -58,7 +58,7 @@ var COMMANDES = [
   { titre: 'Livre des recettes (CSV)', type: 'Commande', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('business'); if (window.agtBizLivre) window.agtBizLivre(); } },
   { titre: 'Export comptable (CSV)', type: 'Commande', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab('business'); if (window.agtBizCsv) window.agtBizCsv(); } }
 ].concat(Object.keys(ROUTES).map(function (v) {
-  var noms = { radar: 'Radar', incidents: 'Incidents', clients: 'Clients', facturation: 'Facturation', leads: 'Leads', outils: 'Outils' };
+  var noms = { radar: 'Radar', incidents: 'Incidents', clients: 'Clients', facturation: 'Facturation', leads: 'Leads', sante: 'Sant\u00e9 du syst\u00e8me', outils: 'Outils' };
   return { titre: 'Aller à : ' + noms[v], type: 'Écran', faire: function () { if (window.agtSwitchTab) window.agtSwitchTab(ROUTES[v]); } };
 }));
 // Les entrées de la palette pour une recherche — au plus `max`, les meilleures d'abord, l'ordre d'origine à rang égal.

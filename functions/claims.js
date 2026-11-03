@@ -1074,7 +1074,52 @@ exports.trialWatch = onSchedule(
       try { await db.doc(TRIAL_MAILS_DOC).set({ value: marks }, { merge: false }); }
       catch (e) { logger.error('[trialWatch] marqueurs non écrits — RISQUE DE DOUBLON DEMAIN', e); }
     }
-    logger.info('[trialWatch] ' + Object.keys(clients).length + ' domaine(s) examiné(s), ' + poses + ' mail(s) en file');
+    // ★★ GT-UI-6 (§521) — LA RELANCE D'UN LEAD À SA DATE (Nico, 03/11). La fiche d'une demande porte « relancer le »
+    //   (`_guerettech/leads_status`, value.<id>.relance) ; le jour venu, si la demande n'est ni installée ni sans suite,
+    //   Nicolas reçoit « Relance à faire — <domaine> ». RIEN NE PART CHEZ LE PROSPECT (GT-UI-3). Une fois par date :
+    //   `relanceVue` garde la date déjà signalée ; une nouvelle date redonne un mail.
+    let posesLeads = 0;
+    try {
+      const refSt = db.doc('_guerettech/leads_status');
+      const snSt = await refSt.get();
+      const val = (snSt.exists && snSt.data() && snSt.data().value) || {};
+      const auj = new Date(now + 2 * 3600000).toISOString().slice(0, 10);   // Paris, à 8 h 05
+      const dus = Object.keys(val).filter((id) => {
+        const e2 = val[id] || {};
+        return typeof e2.relance === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e2.relance) && e2.relance <= auj
+          && e2.st !== 'installe' && e2.st !== 'perdu' && e2.relanceVue !== e2.relance;
+      });
+      if (dus.length) {
+        const noms = {};
+        const ls = await db.collection('leads').get();
+        ls.forEach((d) => { noms[d.id] = String((d.data() || {}).domaine || ''); });
+        for (const id of dus) {
+          const e2 = val[id];
+          const lignes = [
+            'La relance pr\u00e9vue le ' + e2.relance.split('-').reverse().join('/') + ' est due'
+              + (e2.st === 'repondu' ? ' (la demande est \u00ab R\u00e9pondu \u00bb)' : '') + '.',
+            'Rien n\u2019est parti chez le prospect : c\u2019est toi qui d\u00e9cides. Dans la console, Leads \u2192 la fiche \u2192 \u00ab R\u00e9pondre \u00bb ouvre le brouillon.',
+          ];
+          await db.collection(MAIL_COLLECTION).add({ to: [GT_EMAIL], message: {
+            subject: '\u{1F4EC} Relance \u00e0 faire \u2014 ' + (noms[id] || 'une demande du site'),
+            text: lignes.join('\n'),
+            html: '<div style="font-family:system-ui,Arial,sans-serif;max-width:520px;color:#14110D;font-size:15px;line-height:1.6">'
+              + lignes.map((l) => '<p style="margin:0 0 8px">' + _trialEsc(l) + '</p>').join('') + '</div>',
+          } });
+          posesLeads += 1;
+        }
+        await db.runTransaction(async (tx) => {
+          const s2 = await tx.get(refSt);
+          const d2 = (s2.exists && s2.data()) || {};
+          const v2 = Object.assign({}, d2.value || {});
+          dus.forEach((id) => { if (v2[id] && v2[id].relance === val[id].relance) v2[id] = Object.assign({}, v2[id], { relanceVue: val[id].relance }); });
+          tx.set(refSt, Object.assign({}, d2, { value: v2 }));
+        });
+      }
+    } catch (e) {
+      logger.error('[trialWatch] relances des leads : ' + ((e && e.message) || String(e)));
+    }
+    logger.info('[trialWatch] ' + Object.keys(clients).length + ' domaine(s) examiné(s), ' + poses + ' mail(s) en file, ' + posesLeads + ' relance(s) de lead');
   }
 );
 
@@ -2290,6 +2335,8 @@ async function appendAccessLog(db, code, action) {
 const MAIL_STUCK_MIN  = 15;   // au-delà, un document non remis est anormal
 const MAIL_SCAN_LIMIT = 300;  // la file est petite ; plafond de sécurité
 
+const { noterSante } = require('./sante');   // ★ GT-UI-6 (§521)
+
 exports.mailQueueWatchdog = onSchedule(
   {
     schedule:       '7 * * * *',   // toutes les heures, à hh:07
@@ -2306,16 +2353,22 @@ exports.mailQueueWatchdog = onSchedule(
       snap = await db.collection(MAIL_COLLECTION).limit(MAIL_SCAN_LIMIT).get();
     } catch (e) {
       console.error('[mailQueueWatchdog] lecture de la file impossible', e);
+      await noterSante('mails', { ok: false, detail: 'lecture de la file impossible' });
       return;
     }
 
     const stuck  = [];  // écrits depuis la pose de createdAt, non remis ou en erreur
     const legacy = [];  // antérieurs au suivi : non remis, âge inconnu
+    let dernier = 0;    // ★ GT-UI-6 : le dernier envoi réussi, pour la console
     snap.forEach((doc) => {
       const d   = doc.data() || {};
       const del = d.delivery || null;
       const st  = (del && del.state) ? String(del.state) : '';
-      if (st === 'SUCCESS') return;
+      if (st === 'SUCCESS') {
+        const fin = (del && del.endTime && typeof del.endTime.toMillis === 'function') ? del.endTime.toMillis() : 0;
+        if (fin > dernier) dernier = fin;
+        return;
+      }
       const it = {
         id:    doc.id,
         state: st || '(aucun champ delivery)',
@@ -2326,6 +2379,12 @@ exports.mailQueueWatchdog = onSchedule(
       if (ms < cutoff) stuck.push(it);
     });
 
+    await noterSante('mails', {
+      ok: !stuck.length,
+      dernier: dernier ? new Date(dernier).toISOString() : '',
+      detail: stuck.length ? (stuck.length + ' bloqué(s) depuis plus de ' + MAIL_STUCK_MIN + ' min')
+        : (legacy.length ? (legacy.length + ' ancien(s) non remis') : 'rien en attente'),
+    });
     if (stuck.length) {
       console.error('[mailQueueWatchdog] file e-mail bloquée : ' + stuck.length
         + ' document(s) non remis depuis plus de ' + MAIL_STUCK_MIN + ' min'
