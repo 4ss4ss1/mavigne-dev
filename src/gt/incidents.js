@@ -60,6 +60,26 @@ export function trier(liste, d, e) {
     return a.i - b.i;
   }).map(function (x) { return x.g; });
 }
+// ★ GT-UI-4 (§519) — la fiche de la maquette : les quatorze derniers jours (une barre par jour, aujourd'hui à droite)…
+export function histo14(g, maintenant) {
+  var j0 = new Date(maintenant || Date.now()); j0.setHours(0, 0, 0, 0);
+  var n = []; for (var i = 0; i < 14; i++) n.push(0);
+  (g.items || []).forEach(function (e) {
+    var t = Date.parse(e && e.ts); if (!t) return;
+    var dj = new Date(t); dj.setHours(0, 0, 0, 0);
+    var k = 13 - Math.round((j0 - dj) / 86400000);
+    if (k >= 0 && k < 14) n[k]++;
+  });
+  return n;
+}
+// … et ce qui y est lié : les autres incidents OUVERTS d'un même domaine, les plus urgents d'abord (trois au plus).
+export function lies(g, groupes, d) {
+  var noms = Object.keys(g.tenants || {});
+  var L = (groupes || []).filter(function (x) { return x.id !== g.id && x.nOpen > 0 && Object.keys(x.tenants || {}).some(function (t) { return noms.indexOf(t) >= 0; }); });
+  return trier(L, d, { tri: 'prio', sens: 1 }).slice(0, 3);
+}
+var PRIO_COUL = { P1: 'mvpas-rouge', P2: 'mvpas-orange', P3: 'mvpas-gris', P4: 'mvpas-gris' };
+var ST_COUL = { nouveau: 'mvpas-retard', qualifie: 'mvpas-afaire', en_cours: 'mvpas-surveiller', corrige: 'mvpas-encours', livre: 'mvpas-encours', clos: 'mvpas-fait', sans_suite: 'mvpas-fait' };
 export function compteOnglets(groupes, d) {
   var n = { ouverts: 0, alivrer: 0, averifier: 0, clos: 0, tous: groupes.length };
   groupes.forEach(function (g) { n[ongletDe(g, d)]++; });
@@ -79,6 +99,15 @@ function fiche(g, d) {
     + '<button class="agt-inc-x" onclick="agtIncOuvrir(\'\')" aria-label="Fermer la fiche">\u00d7</button></div>';
   h += '<h3 class="agt-inc-fiche-titre">' + esc(g.msg || '(sans message)') + '</h3>';
   h += '<div class="agt-inc-bloc">' + d.ligneSuivi(g) + '</div>';
+  var hs = histo14(g), max = Math.max.apply(null, hs.concat([1]));
+  h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Les 14 derniers jours</div><div class="agt-histo" aria-label="Occurrences des quatorze derniers jours">'
+    + hs.map(function (v) { return '<span' + (v ? '' : ' class="zero"') + ' style="height:' + (v ? Math.max(8, Math.round(v / max * 100)) : 4) + '%" title="' + v + '"></span>'; }).join('')
+    + '</div><div class="agt-histo-pied"><span>il y a 13 jours</span><span>aujourd\u2019hui</span></div></div>';
+  var li = lies(g, d.groupes, d);
+  if (li.length) h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Li\u00e9 \u00e0</div><ul class="agt-lies">' + li.map(function (x) {
+    var px = prioDe(x, d);
+    return '<li tabindex="0" onclick="agtIncOuvrir(\'' + _escAttr(x.id) + '\')"><span class="mvpas mvpas-type ' + PRIO_COUL[px.p] + (px.confirmee ? '' : ' agt-sugg') + '">' + px.p + '</span><span>' + esc(x.msg || '') + '</span><span class="mvpas mvpas-statut ' + ST_COUL[statutDe(x, d)] + '">' + esc(d.st[statutDe(x, d)] || '') + '</span></li>';
+  }).join('') + '</ul></div>';
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Rep\u00e8res</div><dl class="agt-inc-dl">'
     + '<dt>Domaines</dt><dd>' + (noms.length ? noms.map(function (n) { return esc(n) + (g.tenants[n] > 1 ? ' \u00d7' + g.tenants[n] : ''); }).join(', ') : '\u2014') + '</dd>'
     + '<dt>Fois</dt><dd>' + g.n + (gens.length ? ' \u00b7 ' + gens.length + ' personne' + (gens.length > 1 ? 's' : '') : '') + (g.nOpen < g.n ? ' \u00b7 ' + g.nOpen + ' non trait\u00e9e' + (g.nOpen > 1 ? 's' : '') : '') + '</dd>'
@@ -107,7 +136,7 @@ export function vue(d) {
   }).join('') + '</div>';
   h += '<div class="agt-inc-outils">'
     + '<input id="agt-inc-q" class="agt-inc-q" type="search" placeholder="Chercher un message, un client, un \u00e9cran" aria-label="Chercher un incident" value="' + esc(E.q) + '" oninput="agtIncCherche(this.value)">'
-    + '<span class="agt-inc-prios">' + ['P1', 'P2', 'P3', 'P4'].map(function (p) { return '<button class="agt-inc-pf' + (E.prios[p] ? ' on' : '') + '" aria-pressed="' + !!E.prios[p] + '" onclick="agtIncPrioFiltre(\'' + _escAttr(p) + '\')">' + p + '</button>'; }).join('') + '</span>'
+    + ['P1', 'P2', 'P3', 'P4'].map(function (p) { return '<button class="mvpas mvpas-filtre' + (E.prios[p] ? ' on' : '') + '" aria-pressed="' + !!E.prios[p] + '" onclick="agtIncPrioFiltre(\'' + _escAttr(p) + '\')">' + p + '</button>'; }).join('')
     + '<select class="agt-inc-sel" aria-label="Client" onchange="agtIncFiltre(\'client\',this.value)"><option value="">Tous les clients</option>' + Object.keys(clients).sort().map(function (c) { return '<option value="' + esc(c) + '"' + (E.client === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>'
     + '<select class="agt-inc-sel" aria-label="Source" onchange="agtIncFiltre(\'source\',this.value)"><option value="">Toutes les sources</option><option value="domaines"' + (E.source === 'domaines' ? ' selected' : '') + '>Domaines</option><option value="poste"' + (E.source === 'poste' ? ' selected' : '') + '>Ce poste</option></select>'
     + '<select class="agt-inc-sel" aria-label="P\u00e9riode" onchange="agtIncFiltre(\'periode\',this.value)">' + [[0, 'Depuis toujours'], [7, '7 jours'], [30, '30 jours'], [90, '90 jours']].map(function (p) { return '<option value="' + p[0] + '"' + (E.periode === p[0] ? ' selected' : '') + '>' + p[1] + '</option>'; }).join('') + '</select>'
@@ -128,11 +157,11 @@ export function vue(d) {
       var p = prioDe(g, d), st = statutDe(g, d), noms = Object.keys(g.tenants || {});
       h += '<tr class="' + (g.id === E.ouvert ? 'on' : '') + (g.nOpen === 0 ? ' traite' : '') + '" tabindex="0" onclick="agtIncOuvrir(\'' + _escAttr(g.id) + '\')" onkeydown="if(event.key===\'Enter\')agtIncOuvrir(\'' + _escAttr(g.id) + '\')">'
         + '<td class="agt-tbl-case" onclick="event.stopPropagation()"><input type="checkbox" aria-label="S\u00e9lectionner" onchange="agtIncSel(\'' + _escAttr(g.id) + '\',this.checked)"' + (E.sel[g.id] ? ' checked' : '') + '></td>'
-        + '<td><span class="agt-prio ' + p.p.toLowerCase() + (p.confirmee ? '' : ' sugg') + '" title="' + (p.confirmee ? 'Priorit\u00e9 confirm\u00e9e' : 'Sugg\u00e9r\u00e9e : ' + esc(d.prio(g).pourquoi)) + '">' + p.p + '</span></td>'
+        + '<td><span class="mvpas mvpas-type ' + PRIO_COUL[p.p] + (p.confirmee ? '' : ' agt-sugg') + ' agt-prio ' + p.p.toLowerCase() + (p.confirmee ? '' : ' sugg') + '" title="' + (p.confirmee ? 'Priorit\u00e9 confirm\u00e9e' : 'Sugg\u00e9r\u00e9e : ' + esc(d.prio(g).pourquoi)) + '">' + p.p + '</span></td>'
         + '<td class="agt-tbl-titre"><span class="agt-tbl-msg">' + esc(g.msg || '(sans message)') + '</span><span class="agt-tbl-sous">' + esc((d.cat || {})[g.cat] || g.cat || '') + (noms.length ? ' \u00b7 ' + esc(noms.slice(0, 3).join(', ')) + (noms.length > 3 ? ' +' + (noms.length - 3) : '') : '') + '</span></td>'
         + '<td class="agt-tbl-n">' + g.n + '</td>'
         + '<td>' + (g.last ? esc(d.relTime(g.last.toISOString())) : '\u2014') + '</td>'
-        + '<td><span class="agt-st ' + st + '">' + esc(d.st[st] || st) + '</span>' + (revenu(g, d) ? ' <span class="agt-revenu">revenu</span>' : '') + '</td></tr>';
+        + '<td><span class="mvpas mvpas-statut ' + ST_COUL[st] + '">' + esc(d.st[st] || st) + '</span>' + (revenu(g, d) ? ' <span class="agt-revenu">revenu</span>' : '') + '</td></tr>';
     });
     h += '</tbody></table>';
     if (liste.length > 300) h += '<div class="agt-inc-vide">300 premiers sur ' + liste.length + ' \u2014 affinez la recherche.</div>';

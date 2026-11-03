@@ -15,6 +15,9 @@ export var ONGLETS_FICHE = [['ensemble', 'Ensemble'], ['factures', 'Factures'], 
 var E = { filtre: 'tous', q: '', tri: 'sante', sens: 1, ouvert: '', onglet: 'ensemble' };
 // Une valeur posée dans un gestionnaire inline passe par _escAttr (C24b) — celle de l'appli quand elle est chargée.
 function _escAttr(v) { return (typeof window !== 'undefined' && window._escAttr) ? window._escAttr(v) : String(v == null ? '' : v).replace(/[\\'"<>&]/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
+// ★ GT-UI-4 (§519) — les pastilles communes de la charte (.mvpas), comme la maquette.
+var ST_COUL = { actif: 'mvpas-type mvpas-vert', essai: 'mvpas-type mvpas-orange', echu: 'mvpas-type mvpas-rouge', pending: 'mvpas-type mvpas-violet', aqualifier: 'mvpas-type mvpas-gris' };
+var SANTE_COUL = { risque: 'mvpas-retard', surveiller: 'mvpas-surveiller', bonne: 'mvpas-fait', hors: 'mvpas-afaire' };
 function plier(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 
 // ── Les fonctions pures (le harnais gtui3 les joue) ──────────────────────────
@@ -83,7 +86,9 @@ function fiche(c, d) {
     return '<button role="tab" aria-selected="' + (E.onglet === o[0]) + '" class="agt-inc-onglet' + (E.onglet === o[0] ? ' on' : '') + '" onclick="agtCliOnglet(\'' + _escAttr(o[0]) + '\')">' + o[1] + '</button>';
   }).join('') + '</div>';
   if (E.onglet === 'ensemble') {
-    h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Sant\u00e9</div><div><span class="agt-sante ' + h0.cle + '">' + esc(h0.label) + '</span>'
+    h += '<div class="agt-inc-bloc"><div class="agt-cli-lecture"><span aria-hidden="true">\ud83d\udd12</span><div><b>Les donn\u00e9es du domaine sont en lecture.</b> Parcelles, \u00e9quipe, t\u00e2ches, tracteurs et saisons se modifient sur leurs vrais \u00e9crans, avec leurs r\u00e8gles (renommage, gardes anti-perte).'
+      + '<div style="margin-top:8px"><button class="agt-btn fill agt-inc-court" onclick="agtPrepOuvrir(\'' + _escAttr(c.slug) + '\')">Pr\u00e9parer ce domaine</button></div></div></div></div>';
+    h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Sant\u00e9</div><div><span class="mvpas mvpas-statut ' + SANTE_COUL[h0.cle] + ' agt-sante ' + h0.cle + '">' + esc(h0.label) + '</span>'
       + (h0.pourquoi.length ? ' \u2014 ' + esc(h0.pourquoi.join(' \u00b7 ')) : '') + '</div></div>';
     h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Rep\u00e8res</div><dl class="agt-inc-dl">'
       + '<dt>Abonnement</dt><dd>' + (c.prix ? esc(d.eur(c.prix)) + ' par mois' : '\u2014') + '</dd>'
@@ -99,6 +104,10 @@ function fiche(c, d) {
       + '<button class="agt-btn fill agt-inc-court" onclick="agtCliContact(\'' + _escAttr(c.slug) + '\')">Enregistrer le contact</button></div></div>';
     if (c.relanceJours >= 0) h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Relance d\u2019essai</div><p class="agt-cli-note">Essai \u00e9chu depuis ' + c.relanceJours + ' jours, jamais reconduit. Le brouillon s\u2019ouvre dans votre messagerie' + (ct.email ? ', adress\u00e9 \u00e0 ' + esc(ct.email) : '') + ' ; c\u2019est vous qui l\u2019envoyez.</p>'
       + '<button class="agt-btn fill agt-inc-court" onclick="agtRelanceEssai(\'' + _escAttr(c.slug) + '\')">Pr\u00e9parer la relance</button></div>';
+    var chr = (d.chronologie ? d.chronologie(c.slug) : []) || [];
+    if (chr.length) h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Chronologie</div><ul class="agt-chrono">' + chr.map(function (x) {
+      return '<li class="' + esc(x.type) + '"><span><b>' + esc(x.titre) + '</b><time>' + esc(d.dateFr ? d.dateFr(x.quand) : x.quand) + '</time></span></li>';
+    }).join('') + '</ul></div>';
     h += '<div class="agt-inc-actions"><button class="agt-btn fill agt-inc-court" onclick="agtPrepOuvrir(\'' + _escAttr(c.slug) + '\')">Pr\u00e9parer ce domaine</button>'
       + '<button class="agt-btn agt-inc-court" onclick="agtShowFiche(\'' + _escAttr(c.slug) + '\')">Fiche compl\u00e8te</button>'
       + '<button class="agt-btn agt-inc-court" onclick="copyTenantLink(\'' + _escAttr(c.slug) + '\',this)">Copier le lien d\u2019invitation</button></div>';
@@ -109,7 +118,7 @@ function fiche(c, d) {
       }).join('') + '</div></div>'
       + '<div class="agt-inc-bloc"><button class="agt-btn agt-inc-court agt-cli-danger" onclick="agtDeleteTenant(\'' + _escAttr(c.slug) + '\')">Supprimer le domaine</button></div>';
   } else {
-    h += '<div class="agt-inc-bloc">' + d.panneau(c.slug, E.onglet) + '</div>';
+    h += '<div class="agt-inc-bloc"><div class="agt-ancien">' + d.panneau(c.slug, E.onglet) + '</div></div>';   // GT-UI-4 : ces blocs gardent leur ancien rendu, encadré
     if (E.onglet === 'incidents') h += '<button class="agt-btn agt-inc-court" onclick="agtIncVoirClient(\'' + _escAttr(c.slug) + '\')">Voir dans Incidents</button>';
   }
   return h + '</aside>';
@@ -119,8 +128,7 @@ export function vue(d) {
   var n = compteFiltres(tout), liste = trier(filtrer(tout, E), E, null, d.silenceJ);
   var ouvert = E.ouvert ? tout.filter(function (c) { return c.slug === E.ouvert; })[0] : null;
   var h = '<div class="agt-inc">';
-  h += '<div class="agt-inc-outils"><button class="agt-btn fill agt-inc-court" onclick="agtOpenInstall()">Installer un domaine</button>'
-    + '<button class="agt-btn agt-inc-court" onclick="openOv(\'ovAddTenant\')">Nouveau client</button></div>';
+  // ★ GT-UI-4 : « Installer un domaine » et « Nouveau client » passent dans l'en-tête de l'écran (la maquette).
   h += '<div class="agt-inc-onglets" role="tablist">' + FILTRES.map(function (f) {
     return '<button role="tab" aria-selected="' + (E.filtre === f[0]) + '" class="agt-inc-onglet' + (E.filtre === f[0] ? ' on' : '') + '" onclick="agtCliFiltre(\'' + _escAttr(f[0]) + '\')">' + f[1] + ' <span>' + n[f[0]] + '</span></button>';
   }).join('') + '</div>';
@@ -135,9 +143,9 @@ export function vue(d) {
       var s = santeDe(c, null, d.silenceJ);
       h += '<tr class="' + (c.slug === E.ouvert ? 'on' : '') + '" tabindex="0" onclick="agtCliOuvrir(\'' + _escAttr(c.slug) + '\')" onkeydown="if(event.key===\'Enter\')agtCliOuvrir(\'' + _escAttr(c.slug) + '\')">'
         + '<td class="agt-tbl-titre"><span class="agt-tbl-msg">' + esc(c.nom) + '</span><span class="agt-tbl-sous">' + esc(c.slug) + ((c.contact || {}).nom ? ' \u00b7 ' + esc(c.contact.nom) : '') + '</span></td>'
-        + '<td>' + esc(c.statutLabel) + '</td>'
+        + '<td><span class="mvpas ' + (c.interne ? 'mvpas-etiquette' : (ST_COUL[c.statut] || 'mvpas-etiquette')) + '">' + esc(c.statutLabel) + '</span></td>'
         + '<td class="agt-tbl-n">' + (c.du ? esc(d.eur(c.du)) : '\u2014') + '</td>'
-        + '<td><span class="agt-sante ' + s.cle + '">' + esc(s.label) + '</span>' + (s.pourquoi.length ? '<span class="agt-tbl-sous">' + esc(s.pourquoi.join(' \u00b7 ')) + '</span>' : '') + '</td>'
+        + '<td><span class="mvpas mvpas-statut ' + SANTE_COUL[s.cle] + ' agt-sante ' + s.cle + '">' + esc(s.label) + '</span>' + (s.pourquoi.length ? '<span class="agt-tbl-sous">' + esc(s.pourquoi.join(' \u00b7 ')) + '</span>' : '') + '</td>'
         + '<td class="agt-tbl-n">' + (c.incidents || '\u2014') + '</td>'
         + '<td>' + (c.derniere ? esc(d.relTime(c.derniere)) : 'jamais') + '</td></tr>';
     });

@@ -301,6 +301,7 @@ function _agtSessTick(){
     txt+=' \u00b7 session jusqu\u2019\u00e0 '+p(h.getHours())+':'+p(h.getMinutes());
   }
   el.textContent=txt;
+  _agtMajFraicheur();   // ★ GT-UI-4 : « À jour, il y a … »
   var _ss=document.getElementById('agt-side-sess'); if(_ss) _ss.textContent='Session GUERETTECH '+txt;   // ★ GT-UI-1 : la barre latérale
 }
 
@@ -483,6 +484,7 @@ async function renderAdminGT(){
   _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
   _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
   _agtMajCompteurs();
+  _agtCharge=Date.now(); _agtEntete(_AGT_TAB_MIGR[_agtTab]||_agtTab);   // ★ GT-UI-4 : la fraîcheur, le résumé
   if(window._agtRouteAppliquer) setTimeout(window._agtRouteAppliquer, 0);   // ★ GT-UI-1 : la route d'arrivée (#incidents, #clients/<slug>…)
 
   agtRenderBody();
@@ -555,63 +557,76 @@ function _agtRadarTrier(rows, tri){
   }).map(function(o){ return o.r; });
 }
 function _agtBuildRadar(){
+  // ★★ GT-UI-4 (§519) — LE RADAR DE LA MAQUETTE : quatre chiffres, « À traiter » en tableau (priorité, type, quoi, montant,
+  //   geste), et à côté la santé du système et les dernières traces.
   var rows=_agtRadarTrier(_agtRadarRows(), _agtRadarTri);
-  var mrr=0, duT=0, incid=0, neufs=0;
+  var mrr=0, duT=0, retardT=0, incid=0, crit=0, nAbo=0, nEssai=0;
   _agtTenants.forEach(function(t){
-    if(!_agtInterne(t.slug) && _agtStatutOf(t.slug).cle==='actif') mrr+=_agtAboPrix(t.slug);
-    if(!_agtInterne(t.slug)) duT+=_agtBizDu(t.slug);
-    incid+=(t.errorsOpen||0)+(t.reportsOpen||0);
+    var st=_agtStatutOf(t.slug);
+    if(!_agtInterne(t.slug) && st.cle==='actif'){ mrr+=_agtAboPrix(t.slug); nAbo++; }
+    if(!_agtInterne(t.slug) && st.cle==='essai') nEssai++;
+    incid+=(t.errorsOpen||0)+(t.reportsOpen||0); crit+=(t.errorsCrit||0);
   });
+  _agtBizSlugs().forEach(function(x){ duT+=_agtBizDu(x.slug); var vus={}; _agtFacts(x.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retardT+=_agtRefReste(x.slug, f.ref); } }); });
   incid+=(_agtReportsGT||[]).filter(function(r){ return !r.resolved; }).length;
-  neufs=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length;
-  var actifs=_agtTenants.filter(function(t){ return !_agtInterne(t.slug) && _agtStatutOf(t.slug).cle==='actif'; }).length;
-
-  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin-bottom:14px">';
-  h+=_agtBizKpi(actifs,'clients abonn\u00e9s','#86EFAC',_agtEur(mrr)+'/mois');
-  h+=_agtBizKpi(_agtEur(duT),'\u00e0 encaisser',duT>0?'#F97316':'rgba(255,255,255,0.3)','');
-  h+=_agtBizKpi(incid,'incidents ouverts',incid>0?'#EF4444':'rgba(255,255,255,0.3)','erreurs + signalements');
-  h+=_agtBizKpi(neufs,'demandes du site',neufs>0?'#C4B5FD':'rgba(255,255,255,0.3)','sans r\u00e9ponse');
+  var neufs=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length;
+  var kpi=function(l,v,sous,alerte){ return '<div class="mvcarte-fond agt-kpi"><div class="agt-kpi-l">'+l+'</div><div class="agt-kpi-v">'+v+'</div><div class="agt-kpi-s'+(alerte?' alerte':'')+'">'+sous+'</div></div>'; };
+  var h='<div class="agt-radar"><div class="agt-kpis">'
+    +kpi('Revenu mensuel', _agtEur(mrr), nAbo+' abonn\u00e9'+(nAbo>1?'s':'')+(nEssai?(' \u00b7 '+nEssai+' essai'+(nEssai>1?'s':'')):''), false)
+    +kpi('\u00c0 encaisser', _agtEur(duT), retardT?('dont '+_agtEur(retardT)+' en retard'):'rien en retard', retardT>0)
+    +kpi('Incidents ouverts', String(incid), crit?(crit+' critique'+(crit>1?'s':'')):'aucun critique', crit>0)
+    +kpi('Demandes du site', String(neufs), neufs?'sans r\u00e9ponse':'toutes trait\u00e9es', neufs>0)
+    +'</div><div class="agt-radar-grille">';
+  h+='<section class="mvcarte-fond agt-carte"><div class="agt-carte-tete"><h2 class="agt-carte-titre">\u00c0 traiter <span class="mvpas mvpas-compteur">'+rows.length+'</span></h2>';
+  if(rows.length>1) h+='<div class="agt-inc-outils" style="margin:0">'+[['prio','Priorit\u00e9'],['type','Type']].map(function(o){
+    return '<button class="mvpas mvpas-filtre'+(_agtRadarTri===o[0]?' on':'')+'" aria-pressed="'+(_agtRadarTri===o[0])+'" onclick="agtRadarTri(\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div>';
   h+='</div>';
-
-  h+='<div style="margin:0 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">'
-    +(rows.length?('\u00c0 traiter \u2014 '+rows.length):'\u00c0 traiter')+'</div>';
-  if(rows.length>1) h+='<div style="display:flex;gap:8px;margin:0 0 8px">'+[['prio','Par priorit\u00e9'],['type','Par type']].map(function(o){
-    return '<button class="agt-chip'+(_agtRadarTri===o[0]?' on':'')+'" aria-pressed="'+(_agtRadarTri===o[0])+'" onclick="agtRadarTri(\''+o[0]+'\')">'+o[1]+'</button>'; }).join('')+'</div>';   // ★ GT-UI-2
-
   if(!rows.length){
-    h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:26px;text-align:center">'
-      +'<div style="font-size:var(--pt-txt,13px);color:rgba(134,239,172,0.7);font-weight:600">Rien \u00e0 traiter aujourd\u2019hui.</div>'
-      +'<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.28);margin-top:5px">Aucune erreur critique, aucun signalement, aucune facture en retard.</div></div>';
+    h+='<div class="agt-inc-vide">Rien \u00e0 traiter aujourd\u2019hui : aucune erreur critique, aucun signalement, aucune facture en retard.</div>';
   } else {
-    var urgent=rows.some(function(r){ return r.c==='#EF4444'; });
-    h+='<div style="background:'+(urgent?'rgba(239,68,68,0.05)':'rgba(255,255,255,0.04)')
-      +';border:1px solid '+(urgent?'rgba(239,68,68,0.2)':'rgba(255,255,255,0.1)')+';border-radius:12px;padding:12px 14px">';
-    rows.forEach(function(r,i){
-      h+='<div style="display:flex;align-items:center;gap:9px;padding:8px 0;flex-wrap:wrap'
-        +(i<rows.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
-      h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
-      h+='<span style="flex:1;min-width:160px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
-      if(r.m) h+='<span style="font-size:var(--pt-txt,13px);font-weight:600">'+r.m+'</span>';
-      if(r.b) h+='<button onclick="'+r.a+'" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:4px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+r.b+'</button>';
-      h+='</div>';
+    var COUL={ P1:'mvpas-rouge', P2:'mvpas-orange', P3:'mvpas-gris', P4:'mvpas-gris' };
+    h+='<div class="agt-tbl-cadre nu"><table class="agt-tbl"><thead><tr><th style="padding:8px 12px">Priorit\u00e9</th><th style="padding:8px 12px">Type</th><th style="padding:8px 12px">Quoi</th><th style="padding:8px 12px"></th><th style="padding:8px 12px"></th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var p=_agtRadarPrio(r);
+      h+='<tr><td><span class="mvpas mvpas-type '+COUL[p]+'">'+p+'</span></td><td><span class="mvpas mvpas-etiquette">'+_escHtml(r.ty||'')+'</span></td>'
+        +'<td>'+r.t+'</td><td class="agt-tbl-n">'+(r.m||'')+'</td>'
+        +'<td>'+(r.b?'<button class="agt-btn agt-inc-court" onclick="'+r.a+'">'+r.b+'</button>':'')+'</td></tr>';
     });
-    h+='</div>';
+    h+='</tbody></table></div>';
   }
-
-  h+='<div style="margin:18px 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Le produit vu du dehors</div>';
-  h+=_agtVisiteCard();
-  h+=_agtRadarTraces();   // ★ GT-UI-2 : les dernières traces
+  h+='</section><div style="display:flex;flex-direction:column;gap:16px">'+_agtRadarSante()+_agtRadarTraces()+'</div></div>';
+  h+='<div class="agt-ancien" style="margin-top:16px">'+_agtVisiteCard()+'</div></div>';   // ★ GT-UI-4 : la visite de la démo, encore à l'ancien rendu
   return h;
+}
+// La priorité d'une ligne du Radar : sa couleur d'urgence, puis son rang.
+function _agtRadarPrio(r){
+  if(r.c==='#EF4444') return 'P1';
+  if(r.c==='#F97316') return 'P2';
+  return (r.ord<=22) ? 'P2' : ((r.ord<=29) ? 'P3' : 'P4');
+}
+// La santé du système, avec ce que la console sait déjà ; les sauvegardes et les tâches planifiées viennent avec GT-UI-6.
+function _agtRadarSante(){
+  var cur=String(window.APP_VERSION||''), tot=0, aJour=0, crit=0;
+  var cmpV=function(a,b){ var x=String(a||'0').split('.').map(Number), y=String(b||'0').split('.').map(Number);
+    for(var i=0;i<Math.max(x.length,y.length);i++){ var d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
+  _agtTenants.forEach(function(t){ var A=t.appareils||{}; Object.keys(A).forEach(function(k){ tot++; if(cmpV((A[k]||{}).v,cur)>=0) aJour++; }); crit+=(t.errorsCrit||0); });
+  return '<section class="mvcarte-fond agt-carte"><div class="agt-carte-tete"><h2 class="agt-carte-titre">Sant\u00e9 du syst\u00e8me</h2></div><div class="agt-carte-corps"><ul class="agt-sante-liste">'
+    +'<li>Version en ligne<small>APP '+_escHtml(cur)+'</small></li>'
+    +'<li class="'+(tot && aJour<tot?'attention':'')+'">Appareils \u00e0 jour<small>'+aJour+' sur '+tot+'</small></li>'
+    +'<li class="'+(crit?'alerte':'')+'">Erreurs critiques ouvertes<small>'+crit+'</small></li>'
+    +'<li class="attention">Sauvegardes, E-Phy, e-mails<small>leur \u00e9tat arrive avec GT-UI-6</small></li>'
+    +'</ul></div></section>';
 }
 function _agtRadarTraces(){
   var L=(_agtAccessLog||[]).slice(0,5);
-  if(!L.length) return '';
-  var h='<div style="margin:18px 0 8px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Derni\u00e8res traces</div>';
-  h+='<div class="agt-traces">'+L.map(function(e){
+  var h='<section class="mvcarte-fond agt-carte"><div class="agt-carte-tete"><h2 class="agt-carte-titre">Derni\u00e8res traces</h2>'
+    +'<button class="agt-tete-second" onclick="agtSwitchTab(\'outils\')">Journal</button></div><div class="agt-carte-corps"><div class="agt-traces">';
+  if(!L.length) h+='<div class="agt-cli-note">Aucune trace.</div>';
+  h+=L.map(function(e){
     return '<div class="agt-trace"><span class="agt-trace-ic" aria-hidden="true">'+_agtIco(e.icon||'')+'</span><span class="agt-trace-t">'+_escHtml(e.action||'')
       +'<span class="agt-trace-s">'+_escHtml(e.tenant||'')+'</span></span><span class="agt-trace-q">'+(e.ts?_escHtml(_agtRelTime(e.ts)):'')+'</span></div>';
-  }).join('')+'<button class="agt-chip" onclick="agtSwitchTab(\'outils\')">Tout le journal</button></div>';
-  return h;
+  }).join('');
+  return h+'</div></div></section>';
 }
 
 function agtGoClient(slug){
@@ -629,11 +644,11 @@ function _agtBuildIncidents(){
   var nRep=_agtTenants.reduce(function(s,t){ return s+(t.reportsOpen||0); },0)
     +(_agtReportsGT||[]).filter(function(r){ return !r.resolved; }).length;
   var h='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
-  h+='<button class="agt-chip'+((_agtIncTab==='err')?' on':'')+'" onclick="agtSetIncTab(\'err\')">Erreurs techniques <span style="opacity:.6">'+nErr+'</span></button>';
-  h+='<button class="agt-chip'+((_agtIncTab==='rep')?' on':'')+'" onclick="agtSetIncTab(\'rep\')">Signalements clients <span style="opacity:.6">'+nRep+'</span></button>';
+  h+='<button class="mvpas mvpas-filtre'+((_agtIncTab==='err')?' on':'')+'" aria-pressed="'+(_agtIncTab==='err')+'" onclick="agtSetIncTab(\'err\')">Erreurs techniques <span class="mvpas mvpas-compteur">'+nErr+'</span></button>';
+  h+='<button class="mvpas mvpas-filtre'+((_agtIncTab==='rep')?' on':'')+'" aria-pressed="'+(_agtIncTab==='rep')+'" onclick="agtSetIncTab(\'rep\')">Signalements clients <span class="mvpas mvpas-compteur">'+nRep+'</span></button>';
   h+='</div>';
   // ★ GT-UI-2 (§517) : les erreurs en tableau, dessinées par src/gt/incidents.js à partir de ce que la console expose.
-  return h+((_agtIncTab==='rep') ? _agtBuildReports() : (window._agtIncidentsVue ? window._agtIncidentsVue(window._agtIncDonnees()) : ''));
+  return h+((_agtIncTab==='rep') ? '<div class="agt-ancien">'+_agtBuildReports()+'</div>' : (window._agtIncidentsVue ? window._agtIncidentsVue(window._agtIncDonnees()) : ''));
 }
 
 // ─── Onglet OUTILS ──────────────────────────────────────────────────────────
@@ -744,9 +759,9 @@ function _agtBandeauLectures(){
   if(!_agtLecturesKo.length && !dom.length) return '';
   var parts=_agtLecturesKo.map(function(k){ return _AGT_LECT_NOMS[k]||k; });
   if(dom.length) parts.push(dom.length+' domaine'+(dom.length>1?'s':'')+' en partie ('+dom.map(function(t){ return t.nom; }).join(', ')+')');
-  return '<div role="alert" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.32);border-radius:12px;padding:11px 14px;margin-bottom:12px;font-size:var(--pt-txt,13px);color:#FCA5A5;line-height:1.5">'
+  return '<div role="alert" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--danger-doux);border:1px solid var(--danger);border-radius:var(--r-lg,12px);padding:12px 16px;margin-bottom:12px;font-size:var(--pt-txt,13px);color:var(--danger-texte);line-height:1.5">'
     +'<span style="flex:1;min-width:200px"><b>Lecture impossible</b> : '+_escHtml(parts.join(' ; '))+'. Ce qui en d\u00e9pend manque \u00e0 l\u2019\u00e9cran \u2014 ce n\u2019est pas z\u00e9ro.</span>'
-    +'<button onclick="renderAdminGT()" style="background:rgba(239,68,68,0.16);border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:7px 12px;color:#FCA5A5;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Relire</button></div>';
+    +'<button class="agt-tete-second" onclick="renderAdminGT()">Relire</button></div>';   // ★ GT-UI-4 : sur la charte
 }
 
 function agtRenderBody(){
@@ -757,14 +772,46 @@ function agtRenderBody(){
   var tb=_AGT_TAB_MIGR[_agtTab]||_agtTab, ban=_agtBandeauLectures();
   if(tb==='radar')     body.innerHTML=ban+_agtBuildRadar();
   if(tb==='clients')   body.innerHTML=ban+_agtBuildClients();
-  if(tb==='business'){ body.innerHTML=ban+_agtBuildBusiness(); _agtBizFill(); }
+  if(tb==='business'){ body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildBusiness()+'</div>'; _agtBizFill(); }   // ★ GT-UI-4 : refait en GT-UI-5
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
-  if(tb==='leads')     body.innerHTML=ban+_agtBuildLeads();
-  if(tb==='outils')    body.innerHTML=ban+_agtBuildOutils();
+  if(tb==='leads')     body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildLeads()+'</div>';   // GT-UI-5
+  if(tb==='outils')    body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildOutils()+'</div>';   // GT-UI-6
   _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
+  _agtEntete(tb);   // ★ GT-UI-4 : les résumés suivent les gestes
 }
 
 var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', outils:'Outils' };
+// ★★ GT-UI-4 (§519) — L'EN-TÊTE DE LA MAQUETTE : le titre de l'écran, son résumé, la fraîcheur du chargement, l'action
+//   principale. Recalculé à chaque onglet et à chaque rendu (les résumés suivent les gestes).
+var _agtCharge=0;
+function _agtResume(tab){
+  var ouvertsInc=_agtTenants.reduce(function(s2,t){ return s2+(t.errorsOpen||0)+(t.reportsOpen||0); },0)+(_agtReportsGT||[]).filter(function(r){ return !r.resolved; }).length;
+  if(tab==='radar') return 'ce qui demande un geste aujourd\u2019hui';
+  if(tab==='incidents') return ouvertsInc+' ouvert'+(ouvertsInc>1?'s':'')+' \u00b7 erreurs remont\u00e9es et signalements';
+  if(tab==='clients'){ var mrr=0, n=0; _agtTenants.forEach(function(t){ if(_agtInterne(t.slug)) return; n++; if(_agtStatutOf(t.slug).cle==='actif') mrr+=_agtAboPrix(t.slug); }); return n+' domaine'+(n>1?'s':'')+' \u00b7 '+_agtEur(mrr)+' par mois'; }
+  if(tab==='business'){ var nf=0; Object.keys(_agtBilling||{}).forEach(function(sl){ nf+=_agtFacts(sl).length; }); return nf+' facture'+(nf>1?'s':'')+' \u00b7 num\u00e9rotation continue sur toutes les factures'; }
+  if(tab==='leads'){ var nl=(_agtLeads||[]).length, nn=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length; return nl+' demande'+(nl>1?'s':'')+(nn?' \u00b7 '+nn+' sans r\u00e9ponse':''); }
+  if(tab==='outils') return 'journal d\u2019acc\u00e8s, codes d\u2019essai, contours';
+  return '';
+}
+function _agtActions(tab){
+  if(tab==='clients') return '<button class="agt-tete-second" onclick="openOv(\'ovAddTenant\')">Nouveau client</button><button class="agt-tete-principal" onclick="agtOpenInstall()">Installer un domaine</button>';
+  if(tab==='business') return '<button class="agt-tete-second" onclick="agtBizLivre()">Livre des recettes</button>';
+  return '';
+}
+function _agtMajFraicheur(){
+  var el=document.getElementById('agt-maj'); if(!el) return;
+  if(!_agtCharge){ el.textContent=''; return; }
+  var mn=Math.floor((Date.now()-_agtCharge)/60000);
+  el.textContent= mn<1 ? '\u00c0 jour, \u00e0 l\u2019instant' : ('\u00c0 jour, il y a '+mn+' min');
+}
+function _agtEntete(tab){
+  var t=document.getElementById('agt-titre'), so=document.getElementById('agt-sous'), ac=document.getElementById('agt-tete-actions');
+  if(t && _AGT_NOMS_ONGLETS[tab]) t.textContent=_AGT_NOMS_ONGLETS[tab];
+  if(so) so.textContent=_agtResume(tab);
+  if(ac) ac.innerHTML=_agtActions(tab);
+  _agtMajFraicheur();
+}
 function agtSwitchTab(tab){
   _agtTab=tab;
   document.querySelectorAll('.agt-tab').forEach(function(b){
@@ -779,6 +826,7 @@ function agtSwitchTab(tab){
     if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
   });
   var _hn=document.querySelector('#page-admin-gt .agt-hdr-name'); if(_hn && _AGT_NOMS_ONGLETS[tab]) _hn.textContent=_AGT_NOMS_ONGLETS[tab];
+  _agtEntete(tab);   // ★ GT-UI-4
   if(window._agtRouteNoter) window._agtRouteNoter(tab);
   agtRenderBody();
 }
@@ -1226,26 +1274,23 @@ function _agtPrioSuggeree(g, maintenant){
   return { p:'P3', pourquoi:(g.level==='warning'?'avertissement':'erreur isol\u00e9e') };
 }
 function _agtSuiviLigne(g){
+  // ★ GT-UI-4 (§519) : sur la charte de la maquette — la priorité en boutons (la suggérée dite), le statut en pastilles
+  //   à choisir, la note, les versions. Les gestes restent ceux de GT-SUIVI-1 (annulables depuis GT-UI-2).
   var s=_agtSuivi[g.key]||{}, sg=_agtPrioSuggeree(g), st=_AGT_SUIVI_ST[s.statut]?s.statut:'nouveau';
   var vers=Object.keys(g.versions||{}).sort(), revenu=!!(s.closLe && _AGT_SUIVI_FIN[s.statut] && g.nOpen>0);
-  var bouton='border-radius:7px;font-size:var(--pt-lbl,10.5px);padding:4px 9px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)';
-  var h='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px">';
+  var h='<div class="agt-inc-h4">Priorit\u00e9</div><div class="agt-inc-outils">';
   ['P1','P2','P3','P4'].forEach(function(p){
     var on=(s.prio===p), sug=(!s.prio && sg.p===p);
-    h+='<button onclick="agtSuiviPrio(\''+g.id+'\',\''+p+'\')" title="'+(sug?('Sugg\u00e9r\u00e9e : '+_escAttr(sg.pourquoi)):('Priorit\u00e9 '+p))+'" style="'+bouton
-      +';background:'+(on?'rgba(196,181,253,0.22)':'none')+';border:1px '+(sug?'dashed':'solid')+' '+(on||sug?'rgba(196,181,253,0.6)':'rgba(255,255,255,0.14)')
-      +';color:'+(on?'#F0E8DC':'rgba(255,255,255,0.55)')+';font-weight:'+(on?'700':'500')+'">'+p+'</button>';
+    h+='<button class="mvpas mvpas-filtre'+(on?' on':'')+(sug?' agt-sugg':'')+'" aria-pressed="'+on+'" title="'+(sug?('Sugg\u00e9r\u00e9e : '+_escAttr(sg.pourquoi)):('Priorit\u00e9 '+p))+'" onclick="agtSuiviPrio(\''+_escAttr(g.id)+'\',\''+p+'\')">'+p+'</button>';
   });
-  if(!s.prio) h+='<span style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35)">sugg\u00e9r\u00e9e '+sg.p+' \u00b7 '+_escHtml(sg.pourquoi)+'</span>';
-  h+='<select onchange="agtSuiviStatut(\''+g.id+'\',this.value)" aria-label="Statut de l\u2019incident" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:7px;color:#F0E8DC;font-size:var(--pt-lbl,10.5px);padding:4px 6px;font-family:var(--font-ui,Outfit,sans-serif)">'
-    +Object.keys(_AGT_SUIVI_ST).map(function(k){ return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+_AGT_SUIVI_ST[k]+'</option>'; }).join('')+'</select>';
-  h+='<button onclick="agtSuiviNote(\''+g.id+'\')" style="'+bouton+';background:none;border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.55)">'+(s.note?'Note':'+ Note')+'</button>';
-  if(revenu) h+='<span style="font-size:var(--pt-lbl,10.5px);color:#FCA5A5;font-weight:600">revenu apr\u00e8s cl\u00f4ture</span>';
-  h+='</div>';
-  if(s.note) h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.55);margin-top:5px;white-space:pre-wrap">'+_escHtml(s.note)+'</div>';
-  h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);margin-top:4px">'
-    +(vers.length?('version'+(vers.length>1?'s':'')+' '+_escHtml(vers.join(', '))):'version non dite (erreurs d\u2019avant 10.59)')
-    +(s.livreEn?(' \u00b7 livr\u00e9 en '+_escHtml(s.livreEn)):'')+'</div>';
+  h+='</div><p class="agt-cli-note">'+(s.prio?('Priorit\u00e9 confirm\u00e9e : '+s.prio+'.'):('Pas encore confirm\u00e9e. Sugg\u00e9r\u00e9e : <b>'+sg.p+'</b> \u2014 '+_escHtml(sg.pourquoi)+'.'))+'</p>';
+  h+='<div class="agt-inc-h4">Statut</div><div class="agt-inc-outils">'+Object.keys(_AGT_SUIVI_ST).map(function(k){
+    return '<button class="mvpas mvpas-filtre'+(k===st?' on':'')+'" aria-pressed="'+(k===st)+'" onclick="agtSuiviStatut(\''+_escAttr(g.id)+'\',\''+k+'\')">'+_AGT_SUIVI_ST[k]+'</button>';
+  }).join('')+'</div>';
+  if(revenu) h+='<p class="agt-cli-note"><span class="agt-revenu">revenu apr\u00e8s cl\u00f4ture</span> \u2014 une occurrence est arriv\u00e9e depuis.</p>';
+  h+='<div class="agt-inc-outils"><button class="agt-btn agt-inc-court" onclick="agtSuiviNote(\''+_escAttr(g.id)+'\')">'+(s.note?'Modifier la note':'+ Note')+'</button>'
+    +'<span class="agt-cli-note">'+(vers.length?('version'+(vers.length>1?'s':'')+' '+_escHtml(vers.join(', '))):'version non dite (erreurs d\u2019avant 10.59)')+(s.livreEn?(' \u00b7 livr\u00e9 en '+_escHtml(s.livreEn)):'')+'</span></div>';
+  if(s.note) h+='<p class="agt-cli-note" style="white-space:pre-wrap">'+_escHtml(s.note)+'</p>';
   return h;
 }
 // ★ GT-UI-2 (§517) — CHAQUE GESTE DU SUIVI SE DÉFAIT (« Annuler », la maquette) : on garde ce qu'il remplace, et
@@ -6390,7 +6435,20 @@ window._agtCliDonnees = function(){
       if(onglet==='acces') return _agtCnxSection(slug)+_agtFicheAcces(slug);
       return '';
     },
-    esc:_escHtml, eur:_agtEur, relTime:_agtRelTime, silenceJ:_AGT_SILENCE_J
+    // ★ GT-UI-4 (§519) — la chronologie de la maquette : factures émises et payées, incidents, accès (huit au plus).
+    chronologie:function(slug){
+      var L=[];
+      _agtFacts(slug).forEach(function(f){
+        var ty=_agtFType(f); if(ty==='geste') return;
+        L.push({ quand:String(f.date||''), type:'facture', titre:'Facture '+(f.ref||'')+' \u00e9mise, '+String((_AGT_TY[ty]||{}).lbl||'').toLowerCase()+', '+_agtEur(f.montant) });
+        if(f.statut==='payee' && _agtFPayeLe(f)) L.push({ quand:f.paye_le, type:'facture', titre:(f.ref||'')+' pay\u00e9e'+(_AGT_MODES[f.mode]?(' par '+_AGT_MODES[f.mode].toLowerCase()):'') });
+      });
+      var t=(_agtTenants||[]).filter(function(x){ return x.slug===slug; })[0];
+      if(t) _agtErrGroupes((t.errors||[]).map(function(e){ return Object.assign({}, e, { _tenantNom:t.nom }); })).slice(0,5).forEach(function(gg){ if(gg.last) L.push({ quand:gg.last.toISOString().slice(0,10), type:'incident', titre:gg.msg }); });
+      (_agtAccessLog||[]).filter(function(e){ return e && e.tenant===slug; }).slice(0,5).forEach(function(e){ L.push({ quand:String(e.ts||'').slice(0,10), type:'acces', titre:String(e.action||'') }); });
+      return L.filter(function(x){ return x.quand; }).sort(function(a,b){ return a.quand<b.quand?1:(a.quand>b.quand?-1:0); }).slice(0,8);
+    },
+    esc:_escHtml, eur:_agtEur, relTime:_agtRelTime, dateFr:_agtDateFr, silenceJ:_AGT_SILENCE_J
   };
 };
 window.agtRelanceEssai   = agtRelanceEssai;   // GT-UI-3

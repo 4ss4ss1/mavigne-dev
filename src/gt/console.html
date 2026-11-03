@@ -7,30 +7,38 @@
        (Ctrl K, src/gt/coquille.js), trois familles d'écrans, la session en bas. « Santé du système » viendra avec GT-UI-5. -->
   <aside class="agt-side" id="agt-side" aria-label="Console GUERETTECH">
     <div class="agt-side-marque"><span class="agt-side-titre">Ma Vigne</span><span class="agt-side-sous">Console GUERETTECH</span></div>
-    <button class="agt-side-cherche" onclick="agtPalette()" aria-keyshortcuts="Control+K"><span>Rechercher</span><kbd>Ctrl K</kbd></button>
+    <button class="agt-side-cherche" onclick="agtPalette()" aria-keyshortcuts="Control+K"><span><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg> Rechercher</span><kbd>Ctrl K</kbd></button>
     <nav class="agt-side-nav" aria-label="Écrans">
       <div class="agt-side-lbl">Support</div>
-      <button class="agt-side-it active" data-tab="radar" onclick="agtSwitchTab('radar')"><span>Radar</span><span class="agt-side-n" id="agt-side-n-radar"></span></button>
-      <button class="agt-side-it" data-tab="incidents" onclick="agtSwitchTab('incidents')"><span>Incidents</span><span class="agt-side-n" id="agt-side-n-incidents"></span></button>
+      <button class="agt-side-it active" data-tab="radar" onclick="agtSwitchTab('radar')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cible"></use></svg><span>Radar</span><span class="agt-side-n mvpas mvpas-compteur mvpas-alerte" id="agt-side-n-radar"></span></button>
+      <button class="agt-side-it" data-tab="incidents" onclick="agtSwitchTab('incidents')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg><span>Incidents</span><span class="agt-side-n mvpas mvpas-compteur mvpas-alerte" id="agt-side-n-incidents"></span></button>
       <div class="agt-side-lbl">Commercial</div>
-      <button class="agt-side-it" data-tab="clients" onclick="agtSwitchTab('clients')"><span>Clients</span><span class="agt-side-n" id="agt-side-n-clients"></span></button>
-      <button class="agt-side-it" data-tab="business" onclick="agtSwitchTab('business')"><span>Facturation</span><span class="agt-side-n" id="agt-side-n-business"></span></button>
-      <button class="agt-side-it" data-tab="leads" onclick="agtSwitchTab('leads')"><span>Leads</span><span class="agt-side-n" id="agt-side-n-leads"></span></button>
+      <button class="agt-side-it" data-tab="clients" onclick="agtSwitchTab('clients')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg><span>Clients</span><span class="agt-side-n" id="agt-side-n-clients"></span></button>
+      <button class="agt-side-it" data-tab="business" onclick="agtSwitchTab('business')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg><span>Facturation</span><span class="agt-side-n mvpas mvpas-compteur mvpas-fort" id="agt-side-n-business"></span></button>
+      <button class="agt-side-it" data-tab="leads" onclick="agtSwitchTab('leads')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-enveloppe"></use></svg><span>Leads</span><span class="agt-side-n mvpas mvpas-compteur mvpas-fort" id="agt-side-n-leads"></span></button>
       <div class="agt-side-lbl">Système</div>
-      <button class="agt-side-it" data-tab="outils" onclick="agtSwitchTab('outils')"><span>Outils</span></button>
+      <button class="agt-side-it" data-tab="outils" onclick="agtSwitchTab('outils')"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg><span>Outils</span></button>
     </nav>
     <div class="agt-side-sess"><div class="agt-side-sess-t" id="agt-side-sess">Session GUERETTECH</div><button class="agt-side-verrou" onclick="agtLockNow()">Verrouiller</button></div>
   </aside>
   <div class="agt-hdr">
     <div class="agt-hdr-inner">
+      <!-- ★★ GT-UI-4 (§519) — L'EN-TÊTE DE LA MAQUETTE : le titre de l'écran, son résumé, la fraîcheur, Actualiser, l'action
+           principale (admin-gt.js, _agtEntete). L'ancien en-tête et sa bande de chiffres restent dans le balisage, cachés
+           (styles.css) : le Radar porte désormais ces chiffres. -->
+      <div class="agt-tete">
+        <div class="agt-tete-txt"><h1 class="agt-tete-titre" id="agt-titre">Radar</h1><span class="agt-tete-sous" id="agt-sous"></span></div>
+        <div class="agt-tete-act"><span class="agt-tete-maj" id="agt-maj" aria-live="polite"></span>
+          <button class="agt-tete-icone" onclick="renderAdminGT()" aria-label="Actualiser" title="Actualiser"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg></button>
+          <span class="agt-tete-act" id="agt-tete-actions"></span>
+          <button class="agt-tete-icone" onclick="goHub()" aria-label="Retour &#224; l&#8217;accueil" title="Accueil"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg></button>
+        </div>
+      </div>
       <div class="agt-hdr-top">
         <span class="mod-header-icon">&#x1F347;</span>
         <div class="mod-header-titles">
           <div class="agt-hdr-title">Ma Vigne &middot; Admin</div>
           <div class="agt-hdr-name">Dashboard clients</div>
-        </div>
-        <div class="mvu-actions">
-          <button class="mod-home-btn" onclick="goHub()">&#x2302;</button>
         </div>
       </div>
       <div class="agt-stats">

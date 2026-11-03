@@ -179,7 +179,8 @@ function statiques(src) {
   r.push([fonction(src, 'agtBizRecap').indexOf('_agtRefReste(') !== -1, 'le récapitulatif imprimé dit le net à payer (reste dû)']);
   r.push([fonction(src, '_agtBuildBusiness').indexOf('_agtRefReste(') !== -1 && fonction(src, '_agtBuildBusiness').indexOf('_agtBizSlugs()') !== -1,
     'les chiffres du haut : retards nets, domaines supprimés compris']);
-  r.push([/if\(r\.b\) h\+='<button onclick="'\+r\.a\+'"/.test(src) && (src.match(/if\(r\.b\) h\+='<button onclick="'\+r\.a\+'"/g) || []).length === 2,
+  // ★ GT-UI-4 (§519) : le Radar de la maquette dessine son geste dans une cellule — la même garde, autrement écrite.
+  r.push([(src.match(/if\(r\.b\) h\+='<button onclick="'\+r\.a\+'"/g) || []).length === 1 && src.indexOf("(r.b?'<button class=\"agt-btn agt-inc-court\" onclick=\"'+r.a+'\">'+r.b+'</button>':'')") !== -1,
     'une ligne sans geste n’affiche pas de bouton vide (Radar, À traiter)']);
   return r;
 }
