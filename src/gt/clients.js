@@ -118,7 +118,7 @@ function fiche(c, d) {
       }).join('') + '</div></div>'
       + '<div class="agt-inc-bloc"><button class="agt-btn agt-inc-court agt-cli-danger" onclick="agtDeleteTenant(\'' + _escAttr(c.slug) + '\')">Supprimer le domaine</button></div>';
   } else {
-    h += '<div class="agt-inc-bloc"><div class="agt-ancien">' + d.panneau(c.slug, E.onglet) + '</div></div>';   // GT-UI-4 : ces blocs gardent leur ancien rendu, encadré
+    h += '<div class="agt-inc-bloc">' + d.panneau(c.slug, E.onglet) + '</div>';   // ★ GT-UI-7 : ces blocs sont passés sur la charte
     if (E.onglet === 'incidents') h += '<button class="agt-btn agt-inc-court" onclick="agtIncVoirClient(\'' + _escAttr(c.slug) + '\')">Voir dans Incidents</button>';
   }
   return h + '</aside>';

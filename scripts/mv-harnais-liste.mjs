@@ -945,6 +945,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtui5.mjs --contre'],
   ['node scripts/mv-harnais-gtui6.mjs'],           // GT-UI-6 (§521) : Santé du système (l'état écrit par les tâches planifiées), la relance d'un lead à sa date (un mail à Nicolas seulement)
   ['node scripts/mv-harnais-gtui6.mjs --contre'],
+  ['node scripts/mv-harnais-gtui7.mjs'],           // GT-UI-7 (§522) : toute la console sur la charte (plus de couleur pour fond sombre, plus de cadre ancien), le journal en tableau, les écrans téléphone
+  ['node scripts/mv-harnais-gtui7.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

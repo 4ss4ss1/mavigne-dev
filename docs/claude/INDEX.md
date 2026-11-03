@@ -575,3 +575,4 @@
 | 519 | 519. ★★★ GT-UI-4 — LA CONSOLE SUR LA MAQUETTE : LA CHARTE CLAIRE ET SOMBRE, L’EN-TÊTE, LES PASTILLES, LE RA… | `docs/claude/chantiers-480-529.md` |
 | 520 | 520. ★★★ GT-UI-5 — FACTURATION ET LEADS SUR LA MAQUETTE (03/11 — `src/gt/facturation.js` (neuf) · `src/gt/l… | `docs/claude/chantiers-480-529.md` |
 | 521 | 521. ★★★ GT-UI-6 — « SANTÉ DU SYSTÈME » : L’ÉTAT ÉCRIT PAR LES TÂCHES PLANIFIÉES ; LA RELANCE D’UN LEAD À S… | `docs/claude/chantiers-480-529.md` |
+| 522 | 522. ★★★ GT-UI-7 — TOUTE LA CONSOLE SUR LA CHARTE ; SES ÉCRANS TÉLÉPHONE — FIN DU CHANTIER « CONSOLE GT » (… | `docs/claude/chantiers-480-529.md` |

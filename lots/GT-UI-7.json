@@ -1,0 +1,37 @@
+{
+  "lot": "GT-UI-7",
+  "section": "§522",
+  "base": "a961cb16e8f3522932f4a65d4cdc58d718861a3e",
+  "inclut": [],
+  "date": "2026-11-03",
+  "tutos": {
+    "ok": true,
+    "empreinte": "71c2cc7130f6bc8b117f575a6b29500fbc844e2586dfaf7cced6902946e1f32f",
+    "date": "2026-11-03T19:59:47.541Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "c4c8da76a3264c6f351263d86a5fe771b835029e8d63f9acb901d3672e095ec6",
+    "CLAUDE.md": "110e22016e6ca9ca8425c4279550ed5e1e71a5db65f8b62b92f3e4c5c2fa092e",
+    "docs/claude/INDEX.md": "d01d09d838f30e0eaeb3303b7ef35506ba43a0558f61790679a7e17ad358993e",
+    "docs/claude/chantiers-480-529.md": "d28fc5d5c8861a60a39571caa12d2c87d1cb94b736725de9eee37e5da1f4d061",
+    "docs/claude/journal.md": "cb0ad68916f49ae819f4f0ec5f6571a909738ef857457783b224dace383407fc",
+    "public/sw.js": "859d2d3826d6109c157301b804e6f21df713bd28fdf6b57025ddbd3d329f575e",
+    "scripts/harnais-claude-md.mjs": "0ef2a62425120d5bf80107b9d8f31cc20f50ce405617511db85fbdf7abb06662",
+    "scripts/mv-harnais-cote1.mjs": "649e45d7c02eaab7731e374a063baffa1521bfe68eaec78edbfa7a0eee640e18",
+    "scripts/mv-harnais-gtfix4.mjs": "db51641dd1764d3f089b122d9162fe78d421baa68bb5c7aff80bd161496cae94",
+    "scripts/mv-harnais-gtui4.mjs": "56966d7d2d68d23ea3584bf0009e9028b56862b7f52e55e88db77dc26ebfff7e",
+    "scripts/mv-harnais-liste.mjs": "3384c51edbfc1c09f77c93463b347739f3375d0b589cbf882208a434ed0211d2",
+    "scripts/mv-harnais-pastilles.mjs": "8f7ddbb516683dd3cdf95605dc30f9de7f45c2875774864957c1276b43397cdd",
+    "src/admin-gt.js": "6b3b3318cdea1cbfddaee7b81f71d95c69e6438678d2c4800b7354f32aba5fc4",
+    "src/gt/clients.js": "345ca2b45f27dd29058674ee8a02629049bb38ed9bec13ed6c608b4651a315ed",
+    "src/styles.css": "e47837d8dba50d8ebdacec64ff9b1d02c87d169546e4d7ffcc8cb25d265fca67",
+    "scripts/mv-harnais-gtui7.mjs": "ab725c7a7e91fc4a3c458fa08e9becd94182b4e273cadb6b00d2bb5e875a4dd4"
+  }
+}

@@ -32,7 +32,7 @@ function fonction(src, nom) {
   }
   throw new Error('accolade non fermée : ' + nom);
 }
-const bloc = css => { const i = css.indexOf('/* ★★★ GT-UI-4 (§519)'), j = css.indexOf('.agt-ancien{', i); return i < 0 || j < 0 ? '' : css.slice(i, j); };
+const bloc = css => { const i = css.indexOf('/* ★★★ GT-UI-4 (§519)'), j = css.indexOf('/* ★ GT-UI-5 (§520)', i); return i < 0 || j < 0 ? '' : css.slice(i, j); };   // GT-UI-7 : le cadre .agt-ancien est parti
 function monterInc(inc) {
   const fin = inc.indexOf("// ── Les gestes de l'écran");
   return new Function(inc.slice(0, fin).replace(/^export (var|function) /gm, '$1 ') + '\nreturn { histo14, lies, trier };')();
@@ -69,8 +69,8 @@ function statiques(S) {
   r.push([B.length > 0 && enDur.length === 0, '★★★ la feuille de la console suit la charte : aucune couleur en dur hors des replis (' + enDur.length + ')']);
   r.push([/#page-admin-gt\{background:var\(--bg-app\);color:var\(--texte\);\}/.test(B) && /\.agt-side-it\.active\{background:var\(--accent-doux\);color:var\(--accent-texte\)/.test(B) && /\.agt-tbl th\{position:sticky;top:0;background:var\(--bg-doux\)/.test(B),
     '★★ le fond, la barre latérale et les tableaux de la maquette — clair, et sombre avec la charte']);
-  r.push([/\.agt-ancien\{background:#0F0B16;color:#E8E8E0;/.test(S.css) && ['outils'].every(t => new RegExp("if\\(tb==='" + t + "'\\)[^\\n]*'<div class=\"agt-ancien\">'").test(S.gt)) && /window\._agtFacturationVue \? window\._agtFacturationVue\(window\._agtFacDonnees\(\)\)/.test(S.gt) && /window\._agtLeadsVue \? window\._agtLeadsVue\(window\._agtLeadsDonnees\(\)\)/.test(S.gt) && /'<div class="agt-ancien">'\+_agtBuildReports\(\)\+'<\/div>'/.test(S.gt),
-    '★★ les écrans pas encore refaits restent lisibles, encadrés (Outils, Signalements) ; Facturation et Leads ont leur écran neuf (GT-UI-5)']);
+  r.push([!/agt-ancien\{|class=\\?"agt-ancien/.test(S.css + S.gt + S.cli) && /window\._agtFacturationVue \? window\._agtFacturationVue\(window\._agtFacDonnees\(\)\)/.test(S.gt) && /if\(tb==='outils'\)\s+body\.innerHTML=ban\+_agtBuildOutils\(\);/.test(S.gt),
+    '★★ plus aucun écran encadré à l’ancien rendu : toute la console est sur la charte (GT-UI-7)']);
   r.push([/<h1 class="agt-tete-titre" id="agt-titre">/.test(S.html) && /id="agt-sous"/.test(S.html) && /id="agt-maj"/.test(S.html) && /onclick="renderAdminGT\(\)" aria-label="Actualiser"/.test(S.html) && /id="agt-tete-actions"/.test(S.html),
     '★★ l’en-tête de la maquette : titre, résumé, fraîcheur, Actualiser, l’action principale']);
   r.push([fonction(S.gt, 'agtSwitchTab').indexOf('_agtEntete(tab)') !== -1 && fonction(S.gt, 'agtRenderBody').indexOf('_agtEntete(tb)') !== -1 && fonction(S.gt, '_agtSessTick').indexOf('_agtMajFraicheur()') !== -1,
@@ -107,7 +107,7 @@ function mord(titre, fichier, ancre, remplace, essai) {
   else { koC.push(titre); console.log('  ROUGE  ' + titre + ' → PASSÉ INAPERÇU'); }
 }
 mord('★★★ une couleur sombre écrite en dur revient', 'css', '#page-admin-gt{background:var(--bg-app);color:var(--texte);}', '#page-admin-gt{background:#0F1319;color:var(--texte);}', 'statiques');
-mord('★★ Outils n’est plus encadré', 'gt', "body.innerHTML=ban+'<div class=\"agt-ancien\">'+_agtBuildOutils()+'</div>';", "body.innerHTML=ban+_agtBuildOutils();", 'statiques');
+mord('★★ un écran retrouve le cadre de l’ancien rendu', 'gt', "body.innerHTML=ban+_agtBuildOutils();", "body.innerHTML=ban+'<div class=\"agt-ancien\">'+_agtBuildOutils()+'</div>';", 'statiques');
 mord('★★ l’en-tête ne suit plus l’onglet', 'gt', "  _agtEntete(tab);   // ★ GT-UI-4\n", '', 'statiques');
 mord('★★ la priorité redevient une pastille maison', 'inc', "'<td><span class=\"mvpas mvpas-type ' + PRIO_COUL[p.p]", "'<td><span class=\"' + PRIO_COUL[p.p]", 'statiques');
 mord('★★ les jours comptent aussi l’avant-veille du quinzième', 'inc', "    if (k >= 0 && k < 14) n[k]++;", "    if (k < 14) n[Math.max(0, k)]++;", 'jours');

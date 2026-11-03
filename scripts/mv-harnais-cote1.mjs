@@ -19,6 +19,7 @@ const SAIN = { tutos: lire('src/tutos.js'), coq: lire('src/coquille.js'), css: l
   autres: SRC.filter((f) => fs.existsSync(f)).map(lire).join('\n') };
 // Les couches fixes posées sur toute la largeur qui n'ont pas à suivre le panneau — chacune avec sa raison.
 const EXEMPT = {
+  '.agt-inc-corps.avec-fiche .agt-inc-fiche': 'GT-UI-7 (§522) : la fiche ouverte de la console GUERETTECH, plein écran au téléphone — gt.html seulement, jamais pendant un tuto',
   '.agt-annuler': 'GT-UI-2 (§517) : la barre « Annuler » de la console GUERETTECH — gt.html seulement, huit secondes après un geste du suivi',
   '.agt-pal-fond': 'GT-UI-1 (§516) : la recherche (Ctrl K) de la console GUERETTECH — gt.html seulement, jamais dans l’appli d’un domaine ni pendant un tuto',
   'body.pl2-plus-ouvert #page-planning .pl2-plus-voile': 'PLAN-UX-1 (§501) : le voile du menu « … » du Planning, au téléphone seulement',

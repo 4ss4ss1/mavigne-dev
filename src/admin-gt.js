@@ -427,7 +427,7 @@ async function renderAdminGT(){
 
   var body=document.getElementById('agt-body');
   if(!body)return;
-  body.innerHTML='<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">Chargement…</div>';
+  body.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--texte-doux);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">Chargement…</div>';
 
   // ★★ GTFIX-4 (§513) — TOUT SE LIT EN PARALLÈLE, ET UNE LECTURE RATÉE SE DIT (GT-B11, GT-B12).
   //   Avant : sept lectures par domaine puis huit lectures GT, l'une après l'autre (≈ 30 allers-retours
@@ -602,7 +602,7 @@ function _agtBuildRadar(){
     h+='</tbody></table></div>';
   }
   h+='</section><div style="display:flex;flex-direction:column;gap:16px">'+_agtRadarSante()+_agtRadarTraces()+'</div></div>';
-  h+='<div class="agt-ancien" style="margin-top:16px">'+_agtVisiteCard()+'</div></div>';   // ★ GT-UI-4 : la visite de la démo, encore à l'ancien rendu
+  h+='<div style="margin-top:16px">'+_agtVisiteCard()+'</div></div>';   // ★ GT-UI-7 : la visite de la démo, sur la charte
   return h;
 }
 // La priorité d'une ligne du Radar : sa couleur d'urgence, puis son rang.
@@ -660,7 +660,7 @@ function _agtBuildIncidents(){
   h+='<button class="mvpas mvpas-filtre'+((_agtIncTab==='rep')?' on':'')+'" aria-pressed="'+(_agtIncTab==='rep')+'" onclick="agtSetIncTab(\'rep\')">Signalements clients <span class="mvpas mvpas-compteur">'+nRep+'</span></button>';
   h+='</div>';
   // ★ GT-UI-2 (§517) : les erreurs en tableau, dessinées par src/gt/incidents.js à partir de ce que la console expose.
-  return h+((_agtIncTab==='rep') ? '<div class="agt-ancien">'+_agtBuildReports()+'</div>' : (window._agtIncidentsVue ? window._agtIncidentsVue(window._agtIncDonnees()) : ''));
+  return h+((_agtIncTab==='rep') ? _agtBuildReports() : (window._agtIncidentsVue ? window._agtIncidentsVue(window._agtIncDonnees()) : ''));
 }
 
 // ─── Onglet OUTILS ──────────────────────────────────────────────────────────
@@ -669,24 +669,23 @@ function _agtBuildIncidents(){
 var _agtOutTab='ephy';
 function agtSetOutTab(k){ _agtOutTab=k; agtRenderBody(); }
 function _agtBuildOutils(){
-  var vues=[['ephy','Catalogue E-Phy'],['kml','Import KML'],['log','Journal d\u2019acc\u00e8s'],['demo','D\u00e9mo & codes']];
-  var h='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
-  vues.forEach(function(v){
-    h+='<button class="agt-chip'+((_agtOutTab===v[0])?' on':'')+'" onclick="agtSetOutTab(\''+v[0]+'\')">'+v[1]+'</button>';
-  });
-  h+='</div>';
-  if(_agtOutTab==='kml')  return h+_agtBuildKml();
-  if(_agtOutTab==='log')  return h+_agtBuildLog();
-  if(_agtOutTab==='demo') return h+_agtBuildEssais();
-  return h+_agtEphyCard();
+  // ★ GT-UI-7 (§522) : les sous-onglets soulignés de la maquette ; le journal d'accès d'abord.
+  var vues=[['log','Journal d\u2019acc\u00e8s'],['ephy','Catalogue E-Phy'],['kml','Import KML'],['demo','D\u00e9mo et codes']];
+  var h='<div class="agt-inc"><div class="agt-inc-onglets" role="tablist">'+vues.map(function(v){
+    return '<button role="tab" aria-selected="'+(_agtOutTab===v[0])+'" class="agt-inc-onglet'+((_agtOutTab===v[0])?' on':'')+'" onclick="agtSetOutTab(\''+v[0]+'\')">'+v[1]+'</button>';
+  }).join('')+'</div>';
+  if(_agtOutTab==='kml')  return h+_agtBuildKml()+'</div>';
+  if(_agtOutTab==='ephy') return h+_agtEphyCard()+'</div>';
+  if(_agtOutTab==='demo') return h+_agtBuildEssais()+'</div>';
+  return h+_agtBuildLog()+'</div>';
 }
 // Extrait de l'onglet Clients : la maintenance du catalogue n'a rien a y faire.
 function _agtEphyCard(){
-  var h='<div class="agt-card" style="border-color:rgba(34,197,94,0.18)"><div style="padding:14px 16px">';
-  h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#fff;display:flex;align-items:center;gap:8px">\uD83C\uDF3F Catalogue E-Phy (ANSES)</div>';
-  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.6;margin:6px 0 12px">R\u00e9f\u00e9rentiel officiel partag\u00e9 par tous les domaines \u00b7 mise \u00e0 jour auto chaque mercredi. Forcer une resynchronisation imm\u00e9diate :</div>';
-  h+='<button class="agt-btn fill" style="width:100%;background:#1F7A3D;border-color:rgba(34,197,94,0.4)" onclick="agtSyncEphy(this)">\uD83D\uDD04 Resynchroniser maintenant</button>';
-  h+='<div id="agt-ephy-status" style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;line-height:1.5"></div>';
+  var h='<div class="agt-card" style="border-color:var(--ok)"><div style="padding:14px 16px">';
+  h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--sur-accent);display:flex;align-items:center;gap:8px">\uD83C\uDF3F Catalogue E-Phy (ANSES)</div>';
+  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6;margin:6px 0 12px">R\u00e9f\u00e9rentiel officiel partag\u00e9 par tous les domaines \u00b7 mise \u00e0 jour auto chaque mercredi. Forcer une resynchronisation imm\u00e9diate :</div>';
+  h+='<button class="agt-btn fill" style="width:100%;background:#1F7A3D;border-color:var(--ok)" onclick="agtSyncEphy(this)">\uD83D\uDD04 Resynchroniser maintenant</button>';
+  h+='<div id="agt-ephy-status" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:center;margin-top:8px;line-height:1.5"></div>';
   h+='</div></div>';
   return h;
 }
@@ -742,8 +741,8 @@ function _agtMajCompteurs(){
   if(statusEl){
     // ★ GTFIX-4 : dans les DEUX sens — le voyant rouge redevenait jamais vert sans recharger (GT-B21).
     statusEl.outerHTML = totalErrCrit>0
-      ? '<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>'
-      : '<div id="agt-bottom-status" style="width:8px;height:8px;border-radius:50%;background:#22C55E;box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>';
+      ? '<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:var(--danger-texte);background:var(--danger-doux);border:1px solid var(--danger);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>'
+      : '<div id="agt-bottom-status" style="width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(34,197,94,0.6)"></div>';
   }
   _agtCompteursBarre();   // ★ GT-UI-1
 }
@@ -790,7 +789,7 @@ function agtRenderBody(){
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
   if(tb==='leads')     body.innerHTML=ban+(window._agtLeadsVue ? window._agtLeadsVue(window._agtLeadsDonnees()) : '');   // ★ GT-UI-5 : src/gt/leads.js
   if(tb==='sante')     body.innerHTML=ban+(window._agtSanteVue ? window._agtSanteVue(window._agtSanteDonnees()) : '');   // ★ GT-UI-6 : src/gt/sante.js
-  if(tb==='outils')    body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildOutils()+'</div>';   // GT-UI-6
+  if(tb==='outils')    body.innerHTML=ban+_agtBuildOutils();   // ★ GT-UI-7 : sur la charte
   _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
   _agtEntete(tb);   // ★ GT-UI-4 : les résumés suivent les gestes
 }
@@ -959,21 +958,21 @@ function _agtCnxSection(slug){
     var rightAbs = m.lastActive ? f.abs : (m.hasAccount ? 'compte créé, non ouvert' : 'pas de compte Auth');
     var rightCol = m.lastActive ? f.c : (m.hasAccount ? '#8B8398' : 'rgba(255,255,255,0.3)');
     var col=_agtCnxColor(m.couleur);
-    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ligne,#E7E6E2)">';
     h+='<div style="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:'+col+'"></div>';
     h+='<div style="flex:1;min-width:0">';
-    h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(255,255,255,0.85)">'+_escHtml(m.nom)+'</div>';
+    h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">'+_escHtml(m.nom)+'</div>';
     if(Array.isArray(m.roles)&&m.roles.length){
       h+='<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">';
       for(var r=0;r<m.roles.length;r++){
-        h+='<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);border:1px solid rgba(255,255,255,0.08)">'+_escHtml(m.roles[r])+'</span>';
+        h+='<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne,#E7E6E2)">'+_escHtml(m.roles[r])+'</span>';
       }
       h+='</div>';
     }
     h+='</div>';
     h+='<div style="text-align:right;flex-shrink:0">';
     h+='<div style="font-size:var(--pt-micro,12px);font-weight:600;color:'+rightCol+'">'+_escHtml(right)+'</div>';
-    h+='<div style="font-size:10px;color:rgba(255,255,255,0.28);margin-top:2px">'+_escHtml(rightAbs)+'</div>';
+    h+='<div style="font-size:10px;color:var(--texte-doux);margin-top:2px">'+_escHtml(rightAbs)+'</div>';
     h+='</div>';
     h+='</div>';
   }
@@ -987,8 +986,8 @@ function _agtCnxSection(slug){
 // journal GT — qui n'a plus d'onglet a lui mais reste consultable ici, la ou
 // la question se pose vraiment : « qui est alle chez ce client, et quand ? ».
 function _agtFicheSec(titre, corps){
-  return '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">'
-    +'<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.32);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">'+titre+'</div>'
+  return '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--ligne,#E7E6E2)">'
+    +'<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">'+titre+'</div>'
     +corps+'</div>';
 }
 function _agtFicheBiz(slug){
@@ -997,18 +996,18 @@ function _agtFicheBiz(slug){
   var fs=_agtFacts(slug), du=_agtBizDu(slug), enc=_agtBizEnc(slug), inte=_agtInterne(slug);
   var c='';
   if(inte){
-    c='<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.3)">Domaine interne \u2014 hors facturation.</div>';
+    c='<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">Domaine interne \u2014 hors facturation.</div>';
     return _agtFicheSec('Facturation', c);
   }
   c+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
-  c+='<span style="font-size:var(--pt-lbl,12px);font-weight:600;color:'+(du>0?'#F97316':'#86EFAC')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'
+  c+='<span style="font-size:var(--pt-lbl,12px);font-weight:600;color:'+(du>0?'#F97316':'#86EFAC')+';background:var(--bg-doux);border-radius:20px;padding:3px 9px">'
     +(du>0?(_agtEur(du)+' \u00e0 encaisser'):'compte sold\u00e9')+'</span>';
-  if(enc>0) c+='<span style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+_agtEur(enc)+' encaiss\u00e9s</span>';
+  if(enc>0) c+='<span style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);background:var(--bg-doux);border-radius:20px;padding:3px 9px">'+_agtEur(enc)+' encaiss\u00e9s</span>';
   var _rm=_agtAboRemise(slug);
-  c+='<span style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(_AGT_PLANL[_agtPlan(slug)]||'')+' \u00b7 '+_agtEur(_agtAboPrix(slug))+'/mois'+(_rm?(' \u00b7 '+_escHtml(_rm.motif||'remis\u00e9')):'')+'</span>';
+  c+='<span style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);background:var(--bg-doux);border-radius:20px;padding:3px 9px">'+(_AGT_PLANL[_agtPlan(slug)]||'')+' \u00b7 '+_agtEur(_agtAboPrix(slug))+'/mois'+(_rm?(' \u00b7 '+_escHtml(_rm.motif||'remis\u00e9')):'')+'</span>';
   c+='</div>';
   if(!fs.length){
-    c+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25)">Aucune ligne enregistr\u00e9e.</div>';
+    c+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Aucune ligne enregistr\u00e9e.</div>';
   } else {
     var ord=fs.map(function(f,k){ return k; }).sort(function(a,b){
       return String(fs[b].date||'').localeCompare(String(fs[a].date||''));
@@ -1017,17 +1016,17 @@ function _agtFicheBiz(slug){
       var f=fs[k], ty=_AGT_TY[_agtFType(f)], ret=_agtFRetard(f);
       c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
       c+='<span style="width:13px;height:13px;border-radius:3px;background:'+ty.col+';color:#0B0F14;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+ty.ini+'</span>';
-      c+='<span style="font-family:monospace;color:rgba(255,255,255,0.5)">'+_escHtml(f.ref||'')+'</span>';
-      c+='<span style="color:rgba(255,255,255,0.28)">'+_agtDateFr(f.date)+'</span>';
+      c+='<span style="font-family:monospace;color:var(--texte-med)">'+_escHtml(f.ref||'')+'</span>';
+      c+='<span style="color:var(--texte-doux)">'+_agtDateFr(f.date)+'</span>';
       c+='<span style="flex:1"></span>';
       c+='<span style="font-weight:600;color:'+(ret>0?'#FCA5A5':(f.statut==='payee'?'rgba(134,239,172,0.7)':'rgba(255,255,255,0.6)'))+'">'+_agtEur(f.montant)+(ret>0?(' \u00b7 retard '+ret+' j'):'')+'</span>';
       c+='</div>';
     });
-    if(fs.length>3) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">+ '+(fs.length-3)+' autre'+(fs.length>4?'s':'')+'</div>';
+    if(fs.length>3) c+='<div style="font-size:10px;color:var(--texte-doux);padding-top:2px">+ '+(fs.length-3)+' autre'+(fs.length>4?'s':'')+'</div>';
   }
   c+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:7px">';
-  if(idx>=0) c+='<button onclick="event.stopPropagation();agtSwitchTab(\'business\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:0">Ouvrir Business</button>';
-  if(idx>=0 && fs.length) c+='<button onclick="event.stopPropagation();agtBizReleve('+idx+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:0">Relev\u00e9 de compte</button>';
+  if(idx>=0) c+='<button onclick="event.stopPropagation();agtSwitchTab(\'business\')" style="background:none;border:none;color:var(--accent-texte);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:0">Ouvrir Business</button>';
+  if(idx>=0 && fs.length) c+='<button onclick="event.stopPropagation();agtBizReleve('+idx+')" style="background:none;border:none;color:var(--accent-texte);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:0">Relev\u00e9 de compte</button>';
   c+='</div>';
   return _agtFicheSec('Facturation', c);
 }
@@ -1043,33 +1042,33 @@ function _agtFicheIncid(t){
          :'Rien d\u2019ouvert \u2014 mais aucune connexion enregistr\u00e9e, donc rien \u00e0 conclure')+'</div>';
     return _agtFicheSec('Incidents', c);
   }
-  if(reps.length) c+='<div style="font-size:var(--pt-lbl,12px);color:#F97316;font-weight:600;margin-bottom:6px">'+reps.length+' signalement'+(reps.length>1?'s':'')+' en attente</div>';
+  if(reps.length) c+='<div style="font-size:var(--pt-lbl,12px);color:var(--attention-texte);font-weight:600;margin-bottom:6px">'+reps.length+' signalement'+(reps.length>1?'s':'')+' en attente</div>';
   errs.slice(0,4).forEach(function(e){
     var m=_AGT_LVL[e.level]||_AGT_LVL.error;
     c+='<div style="display:flex;align-items:center;gap:7px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
     c+='<span style="width:6px;height:6px;border-radius:50%;background:'+m.color+';flex-shrink:0"></span>';
-    c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(e.msg||'')+'</span>';
-    c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(e.ts)+'</span>';
+    c+='<span style="flex:1;min-width:120px;color:var(--texte-med);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(e.msg||'')+'</span>';
+    c+='<span style="color:var(--texte-doux)">'+_agtRelTime(e.ts)+'</span>';
     c+='</div>';
   });
-  if(errs.length>4) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">+ '+(errs.length-4)+' autre'+(errs.length>5?'s':'')+'</div>';
-  c+='<button onclick="event.stopPropagation();agtIncVoirClient(\''+t.slug+'\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:7px 0 0">Ouvrir dans Incidents</button>';
+  if(errs.length>4) c+='<div style="font-size:10px;color:var(--texte-doux);padding-top:2px">+ '+(errs.length-4)+' autre'+(errs.length>5?'s':'')+'</div>';
+  c+='<button onclick="event.stopPropagation();agtIncVoirClient(\''+t.slug+'\')" style="background:none;border:none;color:var(--accent-texte);font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:7px 0 0">Ouvrir dans Incidents</button>';
   return _agtFicheSec('Incidents', c);
 }
 function _agtFicheAcces(slug){
   var l=(_agtAccessLog||[]).filter(function(a){ return a.tenant===slug; });
   var c='';
   if(!l.length){
-    c='<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.28)">Aucun acc\u00e8s enregistr\u00e9.</div>';
+    c='<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux)">Aucun acc\u00e8s enregistr\u00e9.</div>';
   } else {
     l.slice(0,5).forEach(function(a){
       c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
       c+='<span style="flex-shrink:0;display:inline-flex">'+_agtIco(a.icon)+'</span>';
-      c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.5)">'+_escHtml(a.action||'')+'</span>';
-      c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(a.ts)+'</span>';
+      c+='<span style="flex:1;min-width:120px;color:var(--texte-med)">'+_escHtml(a.action||'')+'</span>';
+      c+='<span style="color:var(--texte-doux)">'+_agtRelTime(a.ts)+'</span>';
       c+='</div>';
     });
-    if(l.length>5) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">'+l.length+' au total \u00b7 conserv\u00e9s 90 jours</div>';
+    if(l.length>5) c+='<div style="font-size:10px;color:var(--texte-doux);padding-top:2px">'+l.length+' au total \u00b7 conserv\u00e9s 90 jours</div>';
   }
   return _agtFicheSec('Acc\u00e8s GUERETTECH', c);
 }
@@ -1085,20 +1084,20 @@ function _agtFicheAppareils(t){
     for(var i=0;i<Math.max(x.length,y.length);i++){ var d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; };
   var c='';
   if(!ids.length){
-    c='<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.28)">Aucun appareil enregistr\u00e9 (se remplit \u00e0 la prochaine connexion de chacun).</div>';
+    c='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Aucun appareil enregistr\u00e9 (se remplit \u00e0 la prochaine connexion de chacun).</div>';
   } else {
     var L=ids.map(function(k){ return A[k]||{}; }).sort(function(a,b){ return String(b.ts||'').localeCompare(String(a.ts||'')); });
     var nVieux=L.filter(function(a){ return cmpV(a.v,cur)<0; }).length;
-    if(nVieux) c+='<div style="font-size:var(--pt-micro,11px);color:#FBBF24;padding-bottom:4px">'+nVieux+' appareil'+(nVieux>1?'s':'')+' sur une version ant\u00e9rieure \u00e0 '+_escHtml(cur)+'</div>';
+    if(nVieux) c+='<div style="font-size:var(--pt-micro,11px);color:var(--attention-texte);padding-bottom:4px">'+nVieux+' appareil'+(nVieux>1?'s':'')+' sur une version ant\u00e9rieure \u00e0 '+_escHtml(cur)+'</div>';
     L.slice(0,12).forEach(function(a){
       var vieux=cmpV(a.v,cur)<0, bloque=(Number(a.f)||0)<fcur;
       c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
-      c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.55)">'+_escHtml(a.nom||'?')+' \u00b7 '+_escHtml((a.sys||'')+' '+(a.nav||''))+(a.installe?' \u00b7 install\u00e9e':'')+'</span>';
+      c+='<span style="flex:1;min-width:120px;color:var(--texte-med)">'+_escHtml(a.nom||'?')+' \u00b7 '+_escHtml((a.sys||'')+' '+(a.nav||''))+(a.installe?' \u00b7 install\u00e9e':'')+'</span>';
       c+='<span style="color:'+(bloque?'#F87171':(vieux?'#FBBF24':'rgba(255,255,255,0.45)'))+';font-weight:600">v'+_escHtml(a.v||'?')+(bloque?' \u00b7 bloqu\u00e9e':'')+'</span>';
-      c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(a.ts)+'</span>';
+      c+='<span style="color:var(--texte-doux)">'+_agtRelTime(a.ts)+'</span>';
       c+='</div>';
     });
-    if(L.length>12) c+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);padding-top:2px">'+L.length+' appareils au total</div>';
+    if(L.length>12) c+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);padding-top:2px">'+L.length+' appareils au total</div>';
   }
   return _agtFicheSec('Appareils', c);
 }
@@ -1151,14 +1150,14 @@ async function agtPrepOuvrir(slug){
 
   var ex=document.getElementById('agt-prep-ov'); if(ex) ex.remove();
   var el=function(tag,css,txt){ var x=document.createElement(tag); if(css) x.style.cssText=css; if(txt!=null) x.textContent=txt; return x; };
-  var ov=el('div','position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)');
+  var ov=el('div','position:fixed;inset:0;background:var(--voile,rgba(16,15,13,0.4));z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)');
   ov.id='agt-prep-ov';
-  var bx=el('div','width:100%;max-width:440px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(139,92,246,0.35);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)');
-  bx.appendChild(el('div','font-size:var(--pt-sm,16px);font-weight:700;color:#fff','Pr\u00e9parer '+nom));
-  bx.appendChild(el('div','font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.7);margin-top:3px;font-family:monospace',slug));
+  var bx=el('div','width:100%;max-width:440px;background:var(--bg-card);border-radius:20px;border:1px solid var(--ligne-forte);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)');
+  bx.appendChild(el('div','font-size:var(--pt-sm,16px);font-weight:700;color:var(--texte)','Pr\u00e9parer '+nom));
+  bx.appendChild(el('div','font-size:var(--pt-micro,11px);color:var(--accent-texte);margin-top:3px;font-family:monospace',slug));
   var ligne=function(k,v,alerte){
-    var r=el('div','display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:var(--pt-txt,13px)');
-    r.appendChild(el('span','color:rgba(255,255,255,0.55)',k));
+    var r=el('div','display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--ligne,#E7E6E2);font-size:var(--pt-txt,13px)');
+    r.appendChild(el('span','color:var(--texte-med)',k));
     r.appendChild(el('span','color:'+(alerte?'#FCA5A5':'rgba(255,255,255,0.88)')+';font-weight:600;text-align:right',v));
     return r;
   };
@@ -1167,14 +1166,14 @@ async function agtPrepOuvrir(slug){
   lst.appendChild(ligne('En attente dans cette fen\u00eatre', nFile>0?(nFile+' modif. \u00b7 '+(qt||'origine inconnue')):'rien', nFile>0&&qt!==slug));
   lst.appendChild(ligne('Derni\u00e8re connexion de son \u00e9quipe', cnx, false));
   bx.appendChild(lst);
-  bx.appendChild(el('p','font-size:var(--pt-txt,13px);line-height:1.6;color:rgba(255,255,255,0.7);margin:0 0 10px','Tu entres dans ses \u00e9crans, en administrateur. Ce que tu enregistres part directement dans son domaine, au nom de GUERETTECH. Les validations et le journal restent \u00e0 son \u00e9quipe.'));
+  bx.appendChild(el('p','font-size:var(--pt-txt,13px);line-height:1.6;color:var(--texte);margin:0 0 10px','Tu entres dans ses \u00e9crans, en administrateur. Ce que tu enregistres part directement dans son domaine, au nom de GUERETTECH. Les validations et le journal restent \u00e0 son \u00e9quipe.'));
   if(sessOk && resteMn<30) bx.appendChild(el('p','font-size:var(--pt-micro,11px);line-height:1.5;color:#E8A45A;margin:0 0 10px','Moins de 30 min de session : l\u2019\u00e9criture s\u2019arr\u00eatera 2 min avant la fin.'));
-  if(refus) bx.appendChild(el('div','font-size:var(--pt-txt,13px);line-height:1.6;color:#FCA5A5;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:11px;padding:11px 13px;margin-bottom:6px',refus));
+  if(refus) bx.appendChild(el('div','font-size:var(--pt-txt,13px);line-height:1.6;color:var(--danger-texte);background:var(--danger-doux);border:1px solid var(--danger);border-radius:11px;padding:11px 13px;margin-bottom:6px',refus));
   var pied=el('div','display:flex;gap:10px;margin-top:16px');
-  var non=el('button','flex:1;padding:12px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65)','Annuler');
+  var non=el('button','flex:1;padding:12px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med)','Annuler');
   non.type='button';
   non.addEventListener('click', function(){ ov.remove(); });
-  var oui=el('button','flex:1.4;padding:12px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:#fff','Ouvrir la pr\u00e9paration');
+  var oui=el('button','flex:1.4;padding:12px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:var(--texte)','Ouvrir la pr\u00e9paration');
   oui.type='button';
   if(refus){ oui.disabled=true; oui.style.opacity='0.4'; oui.style.cursor='not-allowed'; }
   oui.addEventListener('click', async function(){
@@ -1193,24 +1192,34 @@ async function agtPrepOuvrir(slug){
 }
 
 // ─── Onglet Accès log ─────────────────────────────────────────────────────────
+// ★ GT-UI-7 (§522) — LE JOURNAL D'ACCÈS EN TABLEAU (la maquette) : date, domaine, action, type ; une recherche, un
+//   filtre par type ; le plus récent d'abord. Gardé un an, par la date (GTFIX-1).
+var _agtLogQ='', _agtLogType='';
+var _AGT_LOG_TYPES={ donnees:['Acc\u00e8s aux donn\u00e9es','mvpas mvpas-statut mvpas-surveiller'], commercial:['Geste commercial','mvpas mvpas-etiquette'], systeme:['Syst\u00e8me','mvpas mvpas-etiquette'] };
+function agtLogFiltre(k, v){ if(k==='q') _agtLogQ=String(v||''); else _agtLogType=String(v||''); agtRenderBody();
+  if(k==='q'){ var i=document.getElementById('agt-log-q'); if(i){ i.focus(); try{ i.setSelectionRange(_agtLogQ.length,_agtLogQ.length); }catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'curseur du journal',detail:(e&&e.message)||String(e)}); } } } }
 function _agtBuildLog(){
-  var h='<div class="agt-section-lbl">Log d\'accès GT — '+(_agtAccessLog.length)+' entrée(s)</div>';
-  h+='<div class="agt-infobox">Accès enregistrés conformément aux CGU (support/maintenance). Gardés un an, par la date.</div>';
-  if(!_agtAccessLog.length){
-    h+='<div style="text-align:center;padding:28px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucun accès enregistré</div>';
-    return h;
-  }
-  for(var i=0;i<Math.min(_agtAccessLog.length,50);i++){
-    var e=_agtAccessLog[i];
-    h+='<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
-    h+='<div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">'+_agtIco(e.icon||'')+'</div>';   // ★ GTFIX-4 : « cle », « crayon » s'écrivaient en toutes lettres (GT-B23)
-    h+='<div style="flex:1">';
-    h+='<div style="font-size:var(--pt-txt,13px);font-weight:500;color:rgba(255,255,255,0.8)">'+_escHtml(e.action)+'</div>';
-    h+='<div style="display:flex;gap:8px;margin-top:3px;align-items:center">';
-    h+='<span style="font-size:10px;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.2);border-radius:4px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">'+_escHtml(e.tenant)+'</span>';
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.2)">'+_agtRelTime(e.ts)+'</span>';
-    h+='</div></div></div>';
-  }
+  var noms={}; (_agtTenants||[]).forEach(function(t){ noms[t.slug]=t.nom; });
+  var plier=function(x){ return String(x||'').toLowerCase().normalize('NFD').replace(/\p{M}/gu,''); }, q=plier(_agtLogQ).trim();   // les accents par leur propriété Unicode (pas de caractère hors de la police dans le source)
+  var L=(_agtAccessLog||[]).filter(function(e){
+    var ty=_AGT_LOG_TYPES[e.type]?e.type:'systeme';
+    if(_agtLogType && ty!==_agtLogType) return false;
+    return !q || plier([e.action, e.tenant, noms[e.tenant]].join(' ')).indexOf(q)>=0;
+  }).sort(function(x,y){ return String(y.ts||'')<String(x.ts||'')?-1:1; });
+  var h='<div class="agt-inc-outils"><input id="agt-log-q" class="agt-inc-q" type="search" placeholder="Chercher une action, un domaine" aria-label="Chercher dans le journal" value="'+_escHtml(_agtLogQ)+'" oninput="agtLogFiltre(\'q\',this.value)">'
+    +'<select class="agt-inc-sel" aria-label="Type" onchange="agtLogFiltre(\'type\',this.value)"><option value="">Tous les types</option>'
+    +Object.keys(_AGT_LOG_TYPES).map(function(k){ return '<option value="'+k+'"'+(_agtLogType===k?' selected':'')+'>'+_AGT_LOG_TYPES[k][0]+'</option>'; }).join('')+'</select>'
+    +'<span class="agt-cli-note" style="margin:0">Gardés un an, par la date. Chaque \u00e9criture relit le journal avant d\u2019ajouter sa ligne.</span></div>';
+  if(!L.length) return h+'<div class="agt-tbl-cadre"><div class="agt-inc-vide">Aucune trace'+((q||_agtLogType)?' pour ces filtres':'')+'.</div></div>';
+  h+='<div class="agt-tbl-cadre"><table class="agt-tbl"><thead><tr><th style="padding:8px 12px" aria-sort="descending">Date</th><th style="padding:8px 12px">Domaine</th><th style="padding:8px 12px">Action</th><th style="padding:8px 12px">Type</th></tr></thead><tbody>';
+  L.slice(0,300).forEach(function(e){
+    var ty=_AGT_LOG_TYPES[e.type]?e.type:'systeme', d=e.ts?new Date(e.ts):null;
+    h+='<tr><td style="white-space:nowrap">'+(d?(_agtDateFr(e.ts)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')):'\u2014')+'</td>'
+      +'<td>'+_escHtml(noms[e.tenant]||e.tenant||'GUERETTECH')+'</td><td>'+_escHtml(e.action||'')+'</td>'
+      +'<td><span class="'+_AGT_LOG_TYPES[ty][1]+'">'+_AGT_LOG_TYPES[ty][0]+'</span></td></tr>';
+  });
+  h+='</tbody></table></div>';
+  if(L.length>300) h+='<p class="agt-cli-note">300 premi\u00e8res lignes sur '+L.length+' \u2014 affinez la recherche.</p>';
   return h;
 }
 
@@ -1445,8 +1454,8 @@ function _agtCopyFb(txt,msg){
 // « Zero erreur » n'a de sens que si le domaine s'est connecte. Sinon on ne
 // sait rien du tout — et c'est exactement le cas qu'il faut voir.
 function _agtErrSante(){
-  var h='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:12px">';
-  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:8px">Remont\u00e9e par domaine</div>';
+  var h='<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:12px;padding:12px 14px;margin-bottom:12px">';
+  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:8px">Remont\u00e9e par domaine</div>';
   _agtTenants.forEach(function(t,i){
     var arr=Array.isArray(t.errors)?t.errors:[];
     var open=arr.filter(function(e){ return !e.resolved; }).length;
@@ -1461,11 +1470,11 @@ function _agtErrSante(){
     else if(cnxLast){ col='#86EFAC'; txt='aucune erreur remont\u00e9e'; }
     else {            col='rgba(255,255,255,0.3)'; txt='aucune connexion \u2014 rien \u00e0 conclure'; }
     h+='<div style="display:flex;align-items:center;gap:9px;padding:6px 0;flex-wrap:wrap'
-      +(i<_agtTenants.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
+      +(i<_agtTenants.length-1?';border-bottom:1px solid var(--ligne,#E7E6E2)':'')+'">';
     h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+col+'"></span>';
-    h+='<span style="flex:1;min-width:130px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.75)">'+_escHtml(t.nom)+'</span>';
+    h+='<span style="flex:1;min-width:130px;font-size:var(--pt-txt,13px);color:var(--texte)">'+_escHtml(t.nom)+'</span>';
     h+='<span style="font-size:var(--pt-lbl,12px);font-weight:600;color:'+col+'">'+txt+'</span>';
-    h+='<span style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);min-width:120px;text-align:right">'
+    h+='<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);min-width:120px;text-align:right">'
       +(last?('derni\u00e8re '+_agtRelTime(last.toISOString())):'\u2014')
       +(cnxLast?(' \u00b7 vu '+_agtRelTime(cnxLast.toISOString())):'')+'</span>';
     h+='</div>';
@@ -1690,21 +1699,21 @@ async function agtShowMembres(slug) {
   var ov = document.createElement('div');
   ov.id = 'agt-mbr-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,18,0.96);z-index:9999;display:flex;flex-direction:column;font-family:var(--font-ui,Outfit,sans-serif);';
-  ov.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid rgba(139,92,246,0.15)">'
+  ov.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--ligne-forte)">'
     + '<div style="display:flex;align-items:center;gap:10px">'
-    + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px">\uD83D\uDC65</div>'
-    + '<div><div style="font-size:15px;font-weight:600;color:#fff">Membres</div>'
-    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    + '<div style="width:32px;height:32px;border-radius:10px;background:var(--accent-doux);border:1px solid var(--ligne-forte);display:flex;align-items:center;justify-content:center;font-size:15px">\uD83D\uDC65</div>'
+    + '<div><div style="font-size:15px;font-weight:600;color:var(--texte)">Membres</div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     + '</div>'
-    + '<button onclick="document.getElementById(\'agt-mbr-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
+    + '<button onclick="document.getElementById(\'agt-mbr-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
     + '</div>'
     + '<div id="agt-mbr-body" style="flex:1;overflow-y:auto;padding:16px 20px">'
-    + '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>'
+    + '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement\u2026</div>'
     + '</div>'
-    + '<div style="padding:14px 20px;border-top:1px solid rgba(139,92,246,0.12)">'
+    + '<div style="padding:14px 20px;border-top:1px solid var(--ligne-forte)">'
     + '<div style="display:flex;gap:8px">'
-    + '<button onclick="agtOpenAddMembre(\''+slug+'\')" style="flex:1;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:12px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">+ Un membre</button>'
-    + '<button onclick="agtOpenLotMembres(\''+slug+'\')" style="flex:1;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:12px;color:#C9A84C;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\uD83D\uDC65 Toute l\u2019\u00e9quipe</button>'
+    + '<button onclick="agtOpenAddMembre(\''+slug+'\')" style="flex:1;background:var(--accent-doux);border:1px solid var(--ligne-forte);border-radius:12px;color:var(--accent-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">+ Un membre</button>'
+    + '<button onclick="agtOpenLotMembres(\''+slug+'\')" style="flex:1;background:var(--attention-doux);border:1px solid var(--attention);border-radius:12px;color:var(--attention-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\uD83D\uDC65 Toute l\u2019\u00e9quipe</button>'
     + '</div>'
     + '</div>';
   document.body.appendChild(ov);
@@ -1716,7 +1725,7 @@ async function agtRefreshMembres(slug) {
   if(!body) return;
   var mbr = window.fbAdminRead ? await window.fbAdminRead(slug, 'membres') : null;
   if(!Array.isArray(mbr) || mbr.length === 0) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Aucun membre trouv\u00e9</div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucun membre trouv\u00e9</div>';
     return;
   }
   var actifs   = mbr.filter(function(m){ return m.statut!=='inactif'&&m.statut!=='Inactif'; });
@@ -1728,24 +1737,24 @@ async function agtRefreshMembres(slug) {
     var roleHtml = roles.map(function(r){
       return '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:'+(_ROLE_COLORS[r]||'#555')+'22;color:'+(_ROLE_COLORS[r]||'#aaa')+';border:1px solid '+(_ROLE_COLORS[r]||'#555')+'44">'+r+'</span>';
     }).join('');
-    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
-      +'<div style="width:40px;height:40px;border-radius:12px;background:'+couleur+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,16px);font-weight:700;color:#fff;flex-shrink:0">'+initiale+'</div>'
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--ligne,#E7E6E2)">'
+      +'<div style="width:40px;height:40px;border-radius:12px;background:'+couleur+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,16px);font-weight:700;color:var(--texte);flex-shrink:0">'+initiale+'</div>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#fff">'+_escHtml(m.nom||'\u2014')+'</div>'
-      +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin:2px 0">'+_escHtml(m.email||'\u2014')+'</div>'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">'+_escHtml(m.nom||'\u2014')+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:2px 0">'+_escHtml(m.email||'\u2014')+'</div>'
       +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'+roleHtml+'</div>'
       +'</div>'
       // Sortie de secours : la fen\u00eatre de remise des identifiants ne s'affiche qu'une fois.
       // \u26a0\ufe0f L'adresse passe par data-mail, jamais par une interpolation dans onclick.
       +'<button data-mail="'+_escHtml(m.email||'')+'" onclick="agtResetPwd(\''+slug+'\', this.dataset.mail, this)" '
-      +'style="flex:none;font-size:var(--pt-micro,11px);background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.28);color:#C9A84C;border-radius:6px;padding:6px 10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);white-space:nowrap;min-height:32px">'
+      +'style="flex:none;font-size:var(--pt-micro,11px);background:var(--attention-doux);border:1px solid var(--attention);color:var(--attention-texte);border-radius:6px;padding:6px 10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);white-space:nowrap;min-height:32px">'
       +_mvIcon('cle',16)+' Nouveau mot de passe</button>'
       +'</div>';
   }
-  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actifs.length+' actif'+(actifs.length>1?'s':'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actifs.length+' actif'+(actifs.length>1?'s':'')+'</div>';
   h += actifs.map(_mbrCard).join('');
   if(inactifs.length > 0) {
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.25);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 10px">'+inactifs.length+' inactif'+(inactifs.length>1?'s':'')+'</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 10px">'+inactifs.length+' inactif'+(inactifs.length>1?'s':'')+'</div>';
     h += '<div style="opacity:0.5">'+inactifs.map(_mbrCard).join('')+'</div>';
   }
   body.innerHTML = h;
@@ -1755,19 +1764,19 @@ function agtOpenAddMembre(slug) {
   var body = document.getElementById('agt-mbr-body');
   if(!body) return;
   var chipsHtml = ['admin','ouvrier','tractoriste','saisonnier'].map(function(r){
-    return '<span id="agt-chip-'+r+'" onclick="this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#555')+'33\':\'transparent\';this.style.color=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#aaa')+'\':\'rgba(255,255,255,0.4)\'" style="cursor:pointer;font-size:var(--pt-micro,11px);font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid '+(_ROLE_COLORS[r]||'#555')+'55;color:rgba(255,255,255,0.4);background:transparent;transition:all .15s">'+r+'</span>';
+    return '<span id="agt-chip-'+r+'" onclick="this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#555')+'33\':\'transparent\';this.style.color=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#aaa')+'\':\'rgba(255,255,255,0.4)\'" style="cursor:pointer;font-size:var(--pt-micro,11px);font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid '+(_ROLE_COLORS[r]||'#555')+'55;color:var(--texte-doux);background:transparent;transition:all .15s">'+r+'</span>';
   }).join('');
   body.innerHTML = '<div style="padding:4px 0 16px">'
-    +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(196,181,253,0.7);margin-bottom:14px">\u2192 Nouveau membre</div>'
-    +'<input id="agt-add-nom"   type="text"     placeholder="Pr\u00e9nom" autocomplete="off" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
-    +'<input id="agt-add-email" type="email"    placeholder="Email"  autocomplete="off" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
-    +'<input id="agt-add-pwd"   type="password" placeholder="Mot de passe \u2014 laissez vide pour le g\u00e9n\u00e9rer" autocomplete="new-password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
-    +'<div style="margin-bottom:14px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:8px">R\u00f4les</div>'
+    +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--accent-texte);margin-bottom:14px">\u2192 Nouveau membre</div>'
+    +'<input id="agt-add-nom"   type="text"     placeholder="Pr\u00e9nom" autocomplete="off" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
+    +'<input id="agt-add-email" type="email"    placeholder="Email"  autocomplete="off" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
+    +'<input id="agt-add-pwd"   type="password" placeholder="Mot de passe \u2014 laissez vide pour le g\u00e9n\u00e9rer" autocomplete="new-password" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:10px;padding:11px 14px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);margin-bottom:10px;box-sizing:border-box">'
+    +'<div style="margin-bottom:14px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px">R\u00f4les</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+chipsHtml+'</div></div>'
-    +'<div id="agt-add-err" style="display:none;color:#EF4444;font-size:var(--pt-micro,12px);margin-bottom:10px"></div>'
+    +'<div id="agt-add-err" style="display:none;color:var(--danger-texte);font-size:var(--pt-micro,12px);margin-bottom:10px"></div>'
     +'<div style="display:flex;gap:8px">'
-    +'<button onclick="agtRefreshMembres(\''+slug+'\')" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
-    +'<button id="agt-add-btn" onclick="agtSaveAddMembre(\''+slug+'\')" style="flex:2;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:10px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\u2713 Cr\u00e9er le compte</button>'
+    +'<button onclick="agtRefreshMembres(\''+slug+'\')" style="flex:1;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;color:var(--texte-med);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
+    +'<button id="agt-add-btn" onclick="agtSaveAddMembre(\''+slug+'\')" style="flex:2;background:var(--accent-doux);border:1px solid var(--ligne-forte);border-radius:10px;color:var(--accent-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">\u2713 Cr\u00e9er le compte</button>'
     +'</div></div>';
 }
 
@@ -1944,49 +1953,49 @@ function _agtLotRender() {
   var E = window._escHtml || function (x) { return String(x == null ? '' : x); };
   var cv = _agtLot.conv || _agtLotConv(_agtLot.exist, _agtLot.slug);
   var h = '<div style="padding:4px 0 16px">'
-    + '<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(196,181,253,0.7);margin-bottom:6px">\u2192 Toute l\u2019\u00e9quipe</div>'
-    + '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:12px">'
+    + '<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--accent-texte);margin-bottom:6px">\u2192 Toute l\u2019\u00e9quipe</div>'
+    + '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.6;margin-bottom:12px">'
     + 'Un membre par ligne. <b>Pr\u00e9nom</b>, ou <b>Pr\u00e9nom;r\u00f4le</b>, ou <b>Pr\u00e9nom;adresse;r\u00f4le</b>. '
     + 'Un collage depuis un tableur passe aussi. Sans r\u00f4le indiqu\u00e9\u00a0: ouvrier.</div>'
     + '<div style="font-size:var(--pt-micro,12px);color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;'
     + 'border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:12px;line-height:1.55">'
     + 'Le DPA se signe <b>avant</b> la cr\u00e9ation des comptes des salari\u00e9s.</div>'
     + '<textarea id="agt-lot-txt" rows="7" placeholder="Paul;admin&#10;Lucie&#10;Marie;marie@domaine.fr;ouvrier tractoriste" '
-    + 'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);'
-    + 'border-radius:10px;padding:11px 14px;font-size:var(--pt-sm,16px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);line-height:1.5;resize:vertical"></textarea>'
-    + '<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px">'
-    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.45);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">Adresses de connexion</div>'
-    + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.5);font-family:ui-monospace,Menlo,monospace">'
+    + 'style="width:100%;box-sizing:border-box;background:var(--bg-doux);border:1px solid var(--ligne-forte);'
+    + 'border-radius:10px;padding:11px 14px;font-size:var(--pt-sm,16px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);line-height:1.5;resize:vertical"></textarea>'
+    + '<div style="margin-top:12px;padding:10px 12px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px">'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">Adresses de connexion</div>'
+    + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:var(--pt-txt,13px);color:var(--texte-med);font-family:ui-monospace,Menlo,monospace">'
     + '<span>pr\u00e9nom.</span>'
-    + '<input id="agt-lot-part" style="flex:1 1 130px;min-width:0;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 10px;font-size:var(--pt-sm,16px);color:#fff;font-family:inherit">'
+    + '<input id="agt-lot-part" style="flex:1 1 130px;min-width:0;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:8px;padding:7px 10px;font-size:var(--pt-sm,16px);color:var(--texte);font-family:inherit">'
     + '<span>@</span>'
-    + '<select id="agt-lot-dom" style="background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 8px;font-size:var(--pt-sm,16px);color:#fff;font-family:inherit">'
+    + '<select id="agt-lot-dom" style="background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:8px;padding:7px 8px;font-size:var(--pt-sm,16px);color:var(--texte);font-family:inherit">'
     + '<option value="mavigneapp.fr">mavigneapp.fr</option><option value="mavigne.app">mavigne.app</option></select>'
     + '</div>'
-    + '<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.3);margin-top:7px;line-height:1.5">'
+    + '<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:7px;line-height:1.5">'
     + (cv.deduite ? 'Reprise des adresses d\u00e9j\u00e0 en place chez ce domaine.'
                   : 'Aucune adresse \u00e0 recopier\u00a0: le slug sert de d\u00e9part.')
     + ' Elles ne re\u00e7oivent aucun message.</div>'
     + '</div>'
     + '<div style="display:flex;gap:8px;margin-top:10px">'
-    + '<button onclick="agtRefreshMembres(\'' + _agtLot.slug + '\')" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
-    + '<button onclick="agtLotPreview()" style="flex:2;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:10px;color:#C9A84C;font-size:var(--pt-txt,13px);font-weight:600;padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Voir ce qui sera cr\u00e9\u00e9</button>'
+    + '<button onclick="agtRefreshMembres(\'' + _agtLot.slug + '\')" style="flex:1;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;color:var(--texte-med);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
+    + '<button onclick="agtLotPreview()" style="flex:2;background:var(--attention-doux);border:1px solid var(--attention);border-radius:10px;color:var(--attention-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Voir ce qui sera cr\u00e9\u00e9</button>'
     + '</div>';
 
   if (_agtLot.lignes.length) {
     var aCreer = _agtLot.lignes.filter(function (x) { return !x.bloque; });
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">Apercu</div>';
-    h += '<div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">';
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">Apercu</div>';
+    h += '<div style="border:1px solid var(--ligne,#E7E6E2);border-radius:10px;overflow:hidden">';
     _agtLot.lignes.forEach(function (x) {
       var col = x.bloque ? 'rgba(255,255,255,0.25)' : '#fff';
-      h += '<div style="padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.05)">'
+      h += '<div style="padding:9px 12px;border-bottom:1px solid var(--ligne,#E7E6E2)">'
         + '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">'
         + '<span style="font-size:13.5px;font-weight:600;color:' + col + '">' + E(x.nom) + '</span>'
         + x.roles.map(function (r) {
             return '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:' + (_ROLE_COLORS[r] || '#555') + '22;color:' + (_ROLE_COLORS[r] || '#aaa') + '">' + E(r) + '</span>';
           }).join('')
         + '</div>'
-        + '<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.35);margin-top:2px">' + E(x.email)
+        + '<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:2px">' + E(x.email)
         + (x.fictive && !x.bloque ? ' \u00b7 identifiant, pas une bo\u00eete' : '') + '</div>'
         + (x.bloque ? '' : _agtLotModsLigne(x.roles))
         + (x.bloque ? '<div style="font-size:var(--pt-lbl,12px);color:#E0A46A;margin-top:3px">\u2298 ' + E(x.bloque) + '</div>' : '')
@@ -1994,10 +2003,10 @@ function _agtLotRender() {
     });
     h += '</div>';
     if (aCreer.length) {
-      h += '<button id="agt-lot-go" onclick="agtLotGo()" style="width:100%;margin-top:12px;background:#3D6B27;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;padding:14px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:52px">'
+      h += '<button id="agt-lot-go" onclick="agtLotGo()" style="width:100%;margin-top:12px;background:#3D6B27;border:none;border-radius:12px;color:var(--sur-accent);font-size:15px;font-weight:600;padding:14px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:52px">'
         + 'Cr\u00e9er ' + aCreer.length + ' compte' + (aCreer.length > 1 ? 's' : '') + '</button>';
     } else {
-      h += '<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.4);margin-top:12px;text-align:center">Rien \u00e0 cr\u00e9er.</div>';
+      h += '<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:12px;text-align:center">Rien \u00e0 cr\u00e9er.</div>';
     }
   }
   h += '</div>';
@@ -2033,9 +2042,9 @@ function _agtLotModsLigne(roles) {
   var md = null;
   try { md = window._mvModsDefaut ? window._mvModsDefaut(roles) : null; } catch (e) { md = null; }
   var ks = md ? Object.keys(md) : [];
-  if (!ks.length) return '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.28);margin-top:3px">Tous les modules visibles</div>';
+  if (!ks.length) return '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">Tous les modules visibles</div>';
   var noms = ks.map(function (k) { return _AGT_MOD_LBL[k] || k; }).join(', ');
-  return '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.32);margin-top:3px">'
+  return '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">'
     + _mvIcon('oeil',16)+' Masqu\u00e9s\u00a0: ' + noms + ' \u00b7 <span style="opacity:.7">modifiable dans R\u00e9glages</span></div>';
 }
 
@@ -2117,33 +2126,33 @@ function _agtLotCredsHtml() {
   var E = window._escHtml || function (x) { return String(x == null ? '' : x); };
   var h = '<div style="padding:4px 0 16px">';
   if (_agtLot.creds.length) {
-    h += '<div style="font-size:15px;font-weight:600;color:#86EFAC;margin-bottom:4px">' + _agtLot.creds.length + ' compte' + (_agtLot.creds.length > 1 ? 's cr\u00e9\u00e9s' : ' cr\u00e9\u00e9') + '</div>'
+    h += '<div style="font-size:15px;font-weight:600;color:var(--ok-texte);margin-bottom:4px">' + _agtLot.creds.length + ' compte' + (_agtLot.creds.length > 1 ? 's cr\u00e9\u00e9s' : ' cr\u00e9\u00e9') + '</div>'
       + '<div style="font-size:var(--pt-txt,13px);color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;border-radius:0 8px 8px 0;padding:9px 12px;margin:10px 0 14px;line-height:1.55">'
       + 'Ces mots de passe ne sont enregistr\u00e9s <b>nulle part</b>. Cet \u00e9cran ferm\u00e9, ils n\u2019existent plus. '
       + 'Chacun devra le remplacer \u00e0 sa premi\u00e8re connexion.</div>'
-      + '<div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">';
+      + '<div style="border:1px solid var(--ligne,#E7E6E2);border-radius:10px;overflow:hidden">';
     _agtLot.creds.forEach(function (c) {
-      h += '<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05)">'
-        + '<div style="font-size:13.5px;font-weight:600;color:#fff">' + E(c.nom) + '</div>'
-        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.55);margin-top:2px;word-break:break-all;user-select:all">' + E(c.mail) + '</div>'
-        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:15px;color:#C9A84C;margin-top:3px;user-select:all">' + E(c.pwd) + '</div>'
+      h += '<div style="padding:10px 12px;border-bottom:1px solid var(--ligne,#E7E6E2)">'
+        + '<div style="font-size:13.5px;font-weight:600;color:var(--texte)">' + E(c.nom) + '</div>'
+        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:var(--pt-txt,13px);color:var(--texte-med);margin-top:2px;word-break:break-all;user-select:all">' + E(c.mail) + '</div>'
+        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--attention-texte);margin-top:3px;user-select:all">' + E(c.pwd) + '</div>'
         + '</div>';
     });
     h += '</div>'
       + '<div style="display:flex;gap:8px;margin-top:12px">'
-      + '<button onclick="agtLotCopy()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.7);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Copier</button>'
-      + '<button onclick="agtLotPrint()" style="flex:1;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:10px;color:#C9A84C;font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Imprimer</button>'
+      + '<button onclick="agtLotCopy()" style="flex:1;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;color:var(--texte);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Copier</button>'
+      + '<button onclick="agtLotPrint()" style="flex:1;background:var(--attention-doux);border:1px solid var(--attention);border-radius:10px;color:var(--attention-texte);font-size:var(--pt-txt,13px);padding:11px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Imprimer</button>'
       + '</div>';
   }
   if (_agtLot.err.length) {
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">'
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">'
       + _agtLot.err.length + ' \u00e9chec' + (_agtLot.err.length > 1 ? 's' : '') + '</div>';
     _agtLot.err.forEach(function (e) {
-      h += '<div style="font-size:var(--pt-txt,13px);color:#E0A46A;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
+      h += '<div style="font-size:var(--pt-txt,13px);color:#E0A46A;padding:6px 0;border-bottom:1px solid var(--ligne,#E7E6E2)">'
         + E(e.nom) + ' \u2014 ' + E(e.msg) + '</div>';
     });
   }
-  h += '<button onclick="agtRefreshMembres(\'' + _agtLot.slug + '\')" style="width:100%;margin-top:16px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:12px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Revenir \u00e0 l\u2019\u00e9quipe</button>';
+  h += '<button onclick="agtRefreshMembres(\'' + _agtLot.slug + '\')" style="width:100%;margin-top:16px;background:var(--accent-doux);border:1px solid var(--ligne-forte);border-radius:12px;color:var(--accent-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Revenir \u00e0 l\u2019\u00e9quipe</button>';
   h += '</div>';
   return h;
 }
@@ -2206,16 +2215,16 @@ function _agtOverlay(slug, icon, titre, bodyHtml, footerHtml) {
   ov.id = 'agt-panel-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,18,0.96);z-index:9999;display:flex;flex-direction:column;font-family:var(--font-ui,Outfit,sans-serif);';
   ov.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid rgba(139,92,246,0.15)">'
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--ligne-forte)">'
     +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px">'+icon+'</div>'
-    +'<div><div style="font-size:15px;font-weight:600;color:#fff">'+titre+'</div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    +'<div style="width:32px;height:32px;border-radius:10px;background:var(--accent-doux);border:1px solid var(--ligne-forte);display:flex;align-items:center;justify-content:center;font-size:15px">'+icon+'</div>'
+    +'<div><div style="font-size:15px;font-weight:600;color:var(--texte)">'+titre+'</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     +'</div>'
-    +'<button onclick="document.getElementById(\'agt-panel-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
+    +'<button onclick="document.getElementById(\'agt-panel-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
     +'</div>'
     +'<div id="agt-panel-body" style="flex:1;overflow-y:auto;padding:16px 20px">'+bodyHtml+'</div>'
-    +(footerHtml ? '<div style="padding:14px 20px;border-top:1px solid rgba(139,92,246,0.12)">'+footerHtml+'</div>' : '');
+    +(footerHtml ? '<div style="padding:14px 20px;border-top:1px solid var(--ligne-forte)">'+footerHtml+'</div>' : '');
   document.body.appendChild(ov);
 }
 
@@ -2226,27 +2235,27 @@ async function agtShowParcelles(slug) {
   var ov = document.createElement('div');
   ov.id = 'agt-prc-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,18,0.96);z-index:9999;display:flex;flex-direction:column;font-family:var(--font-ui,Outfit,sans-serif);';
-  ov.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid rgba(139,92,246,0.15)">'
+  ov.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--ligne-forte)">'
     + '<div style="display:flex;align-items:center;gap:10px">'
-    + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px"></div>'
-    + '<div><div style="font-size:15px;font-weight:600;color:#fff">Parcelles</div>'
-    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    + '<div style="width:32px;height:32px;border-radius:10px;background:var(--accent-doux);border:1px solid var(--ligne-forte);display:flex;align-items:center;justify-content:center;font-size:15px"></div>'
+    + '<div><div style="font-size:15px;font-weight:600;color:var(--texte)">Parcelles</div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     + '</div>'
-    + '<button onclick="document.getElementById(\'agt-prc-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>'
+    + '<button onclick="document.getElementById(\'agt-prc-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>'
     + '</div>'
     + '<div id="agt-prc-body" style="flex:1;overflow-y:auto;padding:16px 20px">'
-    + '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement…</div>'
+    + '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement…</div>'
     + '</div>'
-    + '<div id="agt-prc-foot" style="padding:14px 20px;border-top:1px solid rgba(139,92,246,0.12);display:none;gap:8px">'
-    + '<button id="agt-prc-copy" style="flex:1;background:#7C4DD6;border:none;border-radius:12px;color:#fff;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Copier les noms</button>'
-    + '<button id="agt-prc-json" style="flex:1;background:transparent;border:1px solid rgba(139,92,246,0.4);border-radius:12px;color:#C4B5FD;font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Export JSON</button>'
+    + '<div id="agt-prc-foot" style="padding:14px 20px;border-top:1px solid var(--ligne-forte);display:none;gap:8px">'
+    + '<button id="agt-prc-copy" style="flex:1;background:#7C4DD6;border:none;border-radius:12px;color:var(--sur-accent);font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Copier les noms</button>'
+    + '<button id="agt-prc-json" style="flex:1;background:transparent;border:1px solid var(--ligne-forte);border-radius:12px;color:var(--accent-texte);font-size:var(--pt-txt,13px);font-weight:600;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Export JSON</button>'
     + '</div>';
   document.body.appendChild(ov);
   var prc = window.fbAdminRead ? await window.fbAdminRead(slug, 'parcelles') : null;
   var body = document.getElementById('agt-prc-body');
   if(!body) return;
   if(!Array.isArray(prc) || prc.length === 0) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Aucune parcelle en base<br><span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.2)">(parcellaire pas encore importé)</span></div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucune parcelle en base<br><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">(parcellaire pas encore importé)</span></div>';
     return;
   }
   var actives = prc.filter(function(p){ return p && p.statut!=='Arrachee'; });
@@ -2255,12 +2264,12 @@ async function agtShowParcelles(slug) {
   function _ha(x){ var v=_num(x); return v===null?'':((v<1?v.toFixed(3):v.toFixed(2))+' ha'); }
   function _prcRow(p, dim){
     var s=_ha(p.surface);
-    return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)'+(dim?';opacity:.45':'')+'">'
-      +'<span style="font-size:var(--pt-txt,13px);color:#fff;font-family:monospace'+(dim?';text-decoration:line-through':'')+'">'+_escHtml(p.nom||'—')+'</span>'
-      +(dim?'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">arrachée</span>':'<span style="font-size:var(--pt-micro,12px);color:rgba(196,181,253,0.6)">'+s+'</span>')
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--ligne,#E7E6E2)'+(dim?';opacity:.45':'')+'">'
+      +'<span style="font-size:var(--pt-txt,13px);color:var(--texte);font-family:monospace'+(dim?';text-decoration:line-through':'')+'">'+_escHtml(p.nom||'—')+'</span>'
+      +(dim?'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">arrachée</span>':'<span style="font-size:var(--pt-micro,12px);color:var(--accent-texte)">'+s+'</span>')
       +'</div>';
   }
-  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actives.length+' active'+(actives.length>1?'s':'')+(arrach.length?' · '+arrach.length+' arrachée'+(arrach.length>1?'s':''):'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actives.length+' active'+(actives.length>1?'s':'')+(arrach.length?' · '+arrach.length+' arrachée'+(arrach.length>1?'s':''):'')+'</div>';
   h += actives.map(function(p){return _prcRow(p,false);}).join('');
   if(arrach.length) h += arrach.map(function(p){return _prcRow(p,true);}).join('');
   body.innerHTML = h;
@@ -2294,27 +2303,27 @@ function agtExportParcJson(slug, jsonParc){
 
 // ─── Journal ─────────────────────────────────────────────────────────────────
 async function agtShowJournal(slug) {
-  _agtOverlay(slug, _mvIcon('liste',20), 'Journal', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
+  _agtOverlay(slug, _mvIcon('liste',20), 'Journal', '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
   var journal = await window.fbAdminRead(slug, 'journal') || [];
   var body = document.getElementById('agt-panel-body');
   if(!body) return;
   if(!Array.isArray(journal) || journal.length === 0) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Aucune entr\u00e9e de journal</div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucune entr\u00e9e de journal</div>';
     return;
   }
   var sorted = journal.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' entr\u00e9e'+(sorted.length>1?'s':'')+' \u2014 20 derni\u00e8res affich\u00e9es</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' entr\u00e9e'+(sorted.length>1?'s':'')+' \u2014 20 derni\u00e8res affich\u00e9es</div>';
   sorted.slice(0,20).forEach(function(e){
     var parcelles = Array.isArray(e.parcelles) ? e.parcelles.join(', ') : (e.parcelle||'');
     var qui = Array.isArray(e.qui) ? e.qui.join(', ') : (e.qui||'');
-    h += '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
+    h += '<div style="padding:10px 0;border-bottom:1px solid var(--ligne,#E7E6E2)">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
-      +'<span style="font-size:var(--pt-micro,12px);font-weight:600;color:#C4B5FD">'+_escHtml(e.date||'\u2014')+'</span>'
-      +'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px">'+_escHtml(e.tache||'\u2014')+'</span>'
+      +'<span style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--accent-texte)">'+_escHtml(e.date||'\u2014')+'</span>'
+      +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);background:var(--bg-doux);padding:2px 8px;border-radius:6px">'+_escHtml(e.tache||'\u2014')+'</span>'
       +'</div>'
-      +(parcelles ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);margin-bottom:2px">\uD83C\uDF31 '+_escHtml(parcelles)+'</div>' : '')
-      +(qui       ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(qui)+'</div>' : '')
-      +(e.note    ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);margin-top:3px;font-style:italic">'+_escHtml(e.note)+'</div>' : '')
+      +(parcelles ? '<div style="font-size:var(--pt-micro,11px);color:var(--texte-med);margin-bottom:2px">\uD83C\uDF31 '+_escHtml(parcelles)+'</div>' : '')
+      +(qui       ? '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">\uD83D\uDC64 '+_escHtml(qui)+'</div>' : '')
+      +(e.note    ? '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;font-style:italic">'+_escHtml(e.note)+'</div>' : '')
       +'</div>';
   });
   body.innerHTML = h;
@@ -2322,7 +2331,7 @@ async function agtShowJournal(slug) {
 
 // ─── Erreurs ─────────────────────────────────────────────────────────────────
 async function agtShowErreurs(slug) {
-  _agtOverlay(slug, _mvIcon('bogue',20), 'Erreurs', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
+  _agtOverlay(slug, _mvIcon('bogue',20), 'Erreurs', '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement\u2026</div>', null);
   // 'erreurs' n'a jamais ete ecrit par personne : la collection reelle est error_log,
   // celle que lit deja le tableau de bord (_agtTenants[].errors).
   // ★ GTFIX-4 (§513) — le journal du domaine lu au serveur (une lecture ratée se DIT), fusionné avec celui de ce
@@ -2335,10 +2344,10 @@ async function agtShowErreurs(slug) {
   var _loc=[];
   try { var raw = localStorage.getItem(_ERR_KEY); if(raw) _loc = JSON.parse(raw).filter(function(e){ return e.tenant===slug; }); } catch(ex){ console.warn('[agtShowErreurs] local', ex); }
   errLog = _agtErrFusion(_loc, errLog);
-  if(lectureKo) body.innerHTML = '<div role="alert" style="font-size:var(--pt-txt,13px);color:#FCA5A5;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 12px;margin-bottom:10px">Lecture impossible : le journal du domaine n\u2019a pas pu \u00eatre lu. Seules les erreurs de ce poste sont affich\u00e9es.</div>';
+  if(lectureKo) body.innerHTML = '<div role="alert" style="font-size:var(--pt-txt,13px);color:var(--danger-texte);background:var(--danger-doux);border:1px solid var(--danger);border-radius:10px;padding:10px 12px;margin-bottom:10px">Lecture impossible : le journal du domaine n\u2019a pas pu \u00eatre lu. Seules les erreurs de ce poste sont affich\u00e9es.</div>';
   if(lectureKo && !errLog.length) return;
   if(!errLog.length) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Aucune erreur enregistr\u00e9e</div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucune erreur enregistr\u00e9e</div>';
     return;
   }
   var sorted = errLog.slice().sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
@@ -2347,22 +2356,22 @@ async function agtShowErreurs(slug) {
      `border-left:3px solid LVL_COLOR[e.level]` sur la meme carte : le glyphe
      la disait une seconde fois. Une pastille de couleur l'aurait dite une
      TROISIEME. Meme raisonnement que le bandeau de confirmation (§45b). */
-  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' erreur'+(sorted.length>1?'s':'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' erreur'+(sorted.length>1?'s':'')+'</div>';
   sorted.slice(0,30).forEach(function(e){
     var lc = LVL_COLOR[e.level]||'#F97316';
     
     var when = e.ts ? _agtRelTime(e.ts) : '';   // ★ GTFIX-4 : « il y a 312 h » → « il y a 13 j »
-    h += '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+lc+';border-radius:10px;padding:10px 12px;margin-bottom:8px">'
+    h += '<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-left:3px solid '+lc+';border-radius:10px;padding:10px 12px;margin-bottom:8px">'
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
       
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:#E8E8E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
+      +'<div style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
       +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'
-      +(e.page ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">'+_mvIcon('document',16)+' '+_escHtml(e.page)+'</span>' : '')
-      +(e.user ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(e.user)+'</span>' : '')
-      +(when   ? '<span style="font-size:10px;color:rgba(255,255,255,0.25)">'+_mvIcon('chrono',16)+' '+when+'</span>' : '')
+      +(e.page ? '<span style="font-size:10px;color:var(--texte-doux)">'+_mvIcon('document',16)+' '+_escHtml(e.page)+'</span>' : '')
+      +(e.user ? '<span style="font-size:10px;color:var(--texte-doux)">\uD83D\uDC64 '+_escHtml(e.user)+'</span>' : '')
+      +(when   ? '<span style="font-size:10px;color:var(--texte-doux)">'+_mvIcon('chrono',16)+' '+when+'</span>' : '')
       +'</div>'
-      +(e.detail ? '<details style="margin-top:5px"><summary style="font-size:10px;color:rgba(255,255,255,0.3);cursor:pointer">D\u00e9tail</summary><pre style="font-size:10px;color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-all">'+_escHtml(e.detail)+'</pre></details>' : '')
+      +(e.detail ? '<details style="margin-top:5px"><summary style="font-size:10px;color:var(--texte-doux);cursor:pointer">D\u00e9tail</summary><pre style="font-size:10px;color:var(--texte-doux);background:var(--voile,rgba(16,15,13,0.4));border-radius:6px;padding:8px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-all">'+_escHtml(e.detail)+'</pre></details>' : '')
       +'</div></div></div>';
   });
   body.innerHTML = (lectureKo ? body.innerHTML : '') + h;
@@ -2397,14 +2406,14 @@ function _agtVisiteCard(){
   var jours=s.jours||{}, maxv=1, days=[], JJ=['D','L','M','M','J','V','S'];
   for(var i=6;i>=0;i--){ var dt=new Date(); dt.setDate(dt.getDate()-i); var k=_mvISO(dt); var v=jours[k]||0; days.push({v:v,lbl:JJ[dt.getDay()]}); if(v>maxv)maxv=v; }
   var bars='';
-  days.forEach(function(d){ var hp=Math.max(3,Math.round((d.v/maxv)*100)); bars+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;background:linear-gradient(to top,#C9A84C,#E8C860);border-radius:3px 3px 0 0;height:'+hp+'%;opacity:'+(d.v?1:0.22)+'"></div></div><div style="font-size:9px;color:rgba(255,255,255,0.3)">'+d.lbl+'</div><div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:600">'+d.v+'</div></div>'; });
-  var h='<div class="agt-card" style="border-color:rgba(201,168,76,0.25);margin-bottom:16px"><div style="padding:14px 16px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:var(--pt-sm,16px)">\uD83C\uDF47</span><span style="font-size:var(--pt-txt,13px);font-weight:700;color:#E8C860">D\u00e9mo visite guid\u00e9e</span><span style="font-size:10px;color:rgba(255,255,255,0.28);margin-left:auto">?demo=visite</span></div>';
+  days.forEach(function(d){ var hp=Math.max(3,Math.round((d.v/maxv)*100)); bars+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;background:linear-gradient(to top,#C9A84C,#E8C860);border-radius:3px 3px 0 0;height:'+hp+'%;opacity:'+(d.v?1:0.22)+'"></div></div><div style="font-size:9px;color:var(--texte-doux)">'+d.lbl+'</div><div style="font-size:9px;color:var(--texte-med);font-weight:600">'+d.v+'</div></div>'; });
+  var h='<div class="agt-card" style="border-color:var(--attention);margin-bottom:16px"><div style="padding:14px 16px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:var(--pt-sm,16px)">\uD83C\uDF47</span><span style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--attention-texte)">D\u00e9mo visite guid\u00e9e</span><span style="font-size:10px;color:var(--texte-doux);margin-left:auto">?demo=visite</span></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:var(--pt-lg,24px);font-weight:600;color:#F0E8DC">'+cnx+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:3px">connexions</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:var(--pt-lg,24px);font-weight:600;color:#C4B5FD">'+uniq+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:3px">visiteurs uniques</div></div>';
+  h+='<div style="background:var(--bg-doux);border-radius:10px;padding:12px;text-align:center"><div style="font-size:var(--pt-lg,24px);font-weight:600;color:var(--texte)">'+cnx+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">connexions</div></div>';
+  h+='<div style="background:var(--bg-doux);border-radius:10px;padding:12px;text-align:center"><div style="font-size:var(--pt-lg,24px);font-weight:600;color:var(--accent-texte)">'+uniq+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">visiteurs uniques</div></div>';
   h+='</div>';
-  h+='<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:7px">7 derniers jours \u00b7 derni\u00e8re visite : '+lastTxt+'</div>';
+  h+='<div style="font-size:10px;color:var(--texte-doux);margin-bottom:7px">7 derniers jours \u00b7 derni\u00e8re visite : '+lastTxt+'</div>';
   h+='<div style="display:flex;align-items:flex-end;gap:5px;height:62px">'+bars+'</div>';
   h+='</div></div>';
   return h;
@@ -2427,37 +2436,37 @@ function _agtBuildReports(){
 
   var h='';
   h+='<div style="display:flex;gap:8px;margin-bottom:14px">';
-  h+='<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#fff">'+total+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Total</div></div>';
-  h+='<div style="flex:1;background:rgba(249,115,22,0.07);border-radius:12px;padding:10px 8px;text-align:center;border:1px solid '+(open>0?'rgba(249,115,22,0.2)':'transparent')+'"><div style="font-size:22px;font-weight:700;color:#F97316">'+open+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Ouverts</div></div>';
-  h+='<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#C4B5FD">'+pre+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Avant login</div></div>';
+  h+='<div style="flex:1;background:var(--bg-doux);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--texte)">'+total+'</div><div style="font-size:10px;color:var(--texte-doux);margin-top:4px">Total</div></div>';
+  h+='<div style="flex:1;background:var(--attention-doux);border-radius:12px;padding:10px 8px;text-align:center;border:1px solid '+(open>0?'rgba(249,115,22,0.2)':'transparent')+'"><div style="font-size:22px;font-weight:700;color:var(--attention-texte)">'+open+'</div><div style="font-size:10px;color:var(--texte-doux);margin-top:4px">Ouverts</div></div>';
+  h+='<div style="flex:1;background:var(--bg-doux);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--accent-texte)">'+pre+'</div><div style="font-size:10px;color:var(--texte-doux);margin-top:4px">Avant login</div></div>';
   h+='</div>';
   h+='<div class="agt-infobox">Signalements envoyés par les membres depuis les Réglages ou la page de connexion. Le contexte technique (page, appareil, dernières erreurs) est joint automatiquement.</div>';
 
   if(!merged.length){
-    h+='<div style="text-align:center;padding:32px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucun signalement pour le moment</div>';
+    h+='<div style="text-align:center;padding:32px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucun signalement pour le moment</div>';
     return h;
   }
   merged.slice(0,40).forEach(function(r){
     var accent=r.resolved?'rgba(255,255,255,0.08)':'#B5621A';
     var tenantTag=r._tenantSlug
-      ? '<span style="font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);border-radius:5px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">'+_escHtml(r._tenantNom||'?')+'</span>'
-      : '<span style="font-size:10px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);border-radius:5px;padding:1px 6px;color:#E6D08A;font-weight:600">Avant connexion</span>';
+      ? '<span style="font-size:10px;background:var(--accent-doux);border:1px solid var(--ligne-forte);border-radius:5px;padding:1px 6px;color:var(--accent-texte);font-weight:600">'+_escHtml(r._tenantNom||'?')+'</span>'
+      : '<span style="font-size:10px;background:var(--attention-doux);border:1px solid var(--attention);border-radius:5px;padding:1px 6px;color:var(--attention-texte);font-weight:600">Avant connexion</span>';
     var roles=(Array.isArray(r.roles)&&r.roles.length)?(' · '+_escHtml(r.roles.join(', '))):'';
     var recent=(Array.isArray(r.recentErrors)&&r.recentErrors.length)
       ? r.recentErrors.map(function(e){return '['+_escHtml(e.level||'?')+'] '+_escHtml(e.msg||'')+' — '+_escHtml(e.page||'');}).join('<br>')
       : 'aucune';
-    h+='<div style="background:'+(r.resolved?'rgba(255,255,255,0.025)':'rgba(255,255,255,0.04)')+';border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+accent+';border-radius:10px;padding:11px 13px;margin-bottom:9px;opacity:'+(r.resolved?'0.55':'1')+'">';
+    h+='<div style="background:'+(r.resolved?'rgba(255,255,255,0.025)':'rgba(255,255,255,0.04)')+';border:1px solid var(--ligne,#E7E6E2);border-left:3px solid '+accent+';border-radius:10px;padding:11px 13px;margin-bottom:9px;opacity:'+(r.resolved?'0.55':'1')+'">';
     h+='<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">';
     h+='<div style="flex:1;min-width:0">';
-    h+='<div style="color:#E8E8E0;font-size:var(--pt-txt,13px);font-weight:500;line-height:1.5">« '+_escHtml(r.desc||'')+' »</div>';
+    h+='<div style="color:var(--texte);font-size:var(--pt-txt,13px);font-weight:500;line-height:1.5">« '+_escHtml(r.desc||'')+' »</div>';
     h+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center">';
     h+=tenantTag;
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">'+_escHtml(r.user||'—')+roles+'</span>';
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">'+_escHtml(r.page||'—')+'</span>';
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.28)">'+_escHtml(_agtRelTime(r.ts))+'</span>';
+    h+='<span style="font-size:10px;color:var(--texte-doux)">'+_escHtml(r.user||'—')+roles+'</span>';
+    h+='<span style="font-size:10px;color:var(--texte-doux)">'+_escHtml(r.page||'—')+'</span>';
+    h+='<span style="font-size:10px;color:var(--texte-doux)">'+_escHtml(_agtRelTime(r.ts))+'</span>';
     h+='</div>';
-    h+='<details style="margin-top:9px"><summary style="font-size:10px;color:rgba(196,181,253,0.6);cursor:pointer;list-style:none">Contexte technique ›</summary>';
-    h+='<div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:1.7;margin-top:6px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:8px">';
+    h+='<details style="margin-top:9px"><summary style="font-size:10px;color:var(--accent-texte);cursor:pointer;list-style:none">Contexte technique ›</summary>';
+    h+='<div style="font-size:10px;color:var(--texte-doux);line-height:1.7;margin-top:6px;padding:8px 10px;background:var(--voile,rgba(16,15,13,0.4));border-radius:8px">';
     h+=_escHtml(r.ua||'—')+'<br>';
     h+='Version app : '+_escHtml(r.appVersion||'—')+'<br>';
     h+='Reçu : '+_escHtml((r.ts||'').replace('T',' ').slice(0,19))+'<br>';
@@ -2479,46 +2488,46 @@ function _agtBuildEssais(){
   var actifs =_agtEssais.filter(function(t){return t.actif&&new Date(t.expires_at).getTime()>now;});
   var expires=_agtEssais.filter(function(t){return !t.actif||new Date(t.expires_at).getTime()<=now;});
 
-  var h='<div style="margin:0 0 14px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Codes d\'acc\u00e8s essai 30 jours</div>';
+  var h='<div style="margin:0 0 14px;font-size:var(--pt-micro,11px);color:var(--texte-doux);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Codes d\'acc\u00e8s essai 30 jours</div>';
 
   // Stats
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#C4B5FD">'+actifs.length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">actifs</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#E8C860">'+_agtEssais.filter(function(t){return t.actif&&(new Date(t.expires_at).getTime()-now)<5*86400*1000&&new Date(t.expires_at).getTime()>now;}).length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">expirent dans 5j</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:rgba(255,255,255,0.3)">'+expires.length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">expir\u00e9s</div></div>';
+  h+='<div style="background:var(--bg-doux);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:var(--accent-texte)">'+actifs.length+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">actifs</div></div>';
+  h+='<div style="background:var(--bg-doux);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:var(--attention-texte)">'+_agtEssais.filter(function(t){return t.actif&&(new Date(t.expires_at).getTime()-now)<5*86400*1000&&new Date(t.expires_at).getTime()>now;}).length+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">expirent dans 5j</div></div>';
+  h+='<div style="background:var(--bg-doux);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:var(--texte-doux)">'+expires.length+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px">expir\u00e9s</div></div>';
   h+='</div>';
 
   // Formulaire cr\u00e9ation
-  h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-bottom:16px">';
-  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.06em;margin-bottom:10px">+ G\u00e9n\u00e9rer un code d\'acc\u00e8s</div>';
+  h+='<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:12px;padding:14px;margin-bottom:16px">';
+  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-med);font-weight:600;letter-spacing:.06em;margin-bottom:10px">+ G\u00e9n\u00e9rer un code d\'acc\u00e8s</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:8px;padding:8px 10px;color:var(--texte);font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:8px;padding:8px 10px;color:var(--texte);font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
   h+='</div>';
   h+='<button onclick="agtCreateEssai()" style="background:#C9A84C;border:none;border-radius:10px;padding:9px 18px;color:#0C1A0A;font-size:var(--pt-micro,12px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">G\u00e9n\u00e9rer le code</button>';
   h+='</div>';
 
   // Liste essais actifs
   if(actifs.length>0){
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.06em;margin-bottom:8px">Essais actifs</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);letter-spacing:.06em;margin-bottom:8px">Essais actifs</div>';
     actifs.forEach(function(t){
       var exp=new Date(t.expires_at);
       var jRest=Math.max(0,Math.ceil((exp.getTime()-now)/86400000));
       var jColor=jRest<=5?'#E8C860':jRest<=15?'#C4B5FD':'#86EFAC';
-      h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;margin-bottom:8px">';
+      h+='<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;padding:12px;margin-bottom:8px">';
       h+='<div style="display:flex;align-items:flex-start;gap:10px">';
       h+='<div style="flex:1;min-width:0">';
-      h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:#E8E8E0;margin-bottom:4px">'+_escHtml(t.prospect||'(sans nom)')+'</div>';
+      h+='<div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);margin-bottom:4px">'+_escHtml(t.prospect||'(sans nom)')+'</div>';
       h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">';
-      h+='<span style="font-family:monospace;font-size:var(--pt-txt,13px);background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px;color:#E8C860">'+_escHtml(t.code)+'</span>';
+      h+='<span style="font-family:monospace;font-size:var(--pt-txt,13px);background:var(--bg-doux);padding:2px 8px;border-radius:6px;color:var(--attention-texte)">'+_escHtml(t.code)+'</span>';
       h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+jColor+'">J+'+jRest+' restant'+(jRest>1?'s':'')+'</span>';
       h+='</div>';
       var _ec=_agtEntreesCode(t.code, _agtAccessLog);   // ★ GTFIX-4 : l'usage se lit au journal, où le serveur le note (GT-B15)
-      h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+_ec.n+' entr\u00e9e'+(_ec.n>1?'s':'')+' au journal'+(_ec.der?' &middot; derni\u00e8re : '+_agtRelTime(_ec.der):'')+'</div>';
+      h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+_ec.n+' entr\u00e9e'+(_ec.n>1?'s':'')+' au journal'+(_ec.der?' &middot; derni\u00e8re : '+_agtRelTime(_ec.der):'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:6px;flex-shrink:0">';
-      h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,12px);cursor:pointer" title="Copier le code">&#128203;</button>';
-      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;color:#FCA5A5;font-size:var(--pt-micro,12px);cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
+      h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:8px;padding:6px 10px;color:var(--texte-med);font-size:var(--pt-micro,12px);cursor:pointer" title="Copier le code">&#128203;</button>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:var(--danger-doux);border:1px solid var(--danger);border-radius:8px;padding:6px 10px;color:var(--danger-texte);font-size:var(--pt-micro,12px);cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
       h+='</div>';
       h+='</div></div>';
     });
@@ -2526,19 +2535,19 @@ function _agtBuildEssais(){
 
   // Liste essais expir\u00e9s
   if(expires.length>0){
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.2);letter-spacing:.06em;margin:12px 0 8px">Expir\u00e9s</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);letter-spacing:.06em;margin:12px 0 8px">Expir\u00e9s</div>';
     expires.forEach(function(t){
-      h+='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin-bottom:6px;opacity:.55;display:flex;align-items:center;gap:10px">';
-      h+='<span style="font-family:monospace;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.3)">'+_escHtml(t.code)+'</span>';
-      h+='<span style="flex:1;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.3)">'+_escHtml(t.prospect||'')+'</span>';
-      h+='<span style="font-size:var(--pt-micro,11px);color:rgba(239,68,68,0.6)">expir\u00e9</span>';
-      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:var(--pt-micro,12px);cursor:pointer">&#128465;</button>';
+      h+='<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;padding:10px 12px;margin-bottom:6px;opacity:.55;display:flex;align-items:center;gap:10px">';
+      h+='<span style="font-family:monospace;font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+_escHtml(t.code)+'</span>';
+      h+='<span style="flex:1;font-size:var(--pt-micro,12px);color:var(--texte-doux)">'+_escHtml(t.prospect||'')+'</span>';
+      h+='<span style="font-size:var(--pt-micro,11px);color:var(--danger-texte)">expir\u00e9</span>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:var(--texte-doux);font-size:var(--pt-micro,12px);cursor:pointer">&#128465;</button>';
       h+='</div>';
     });
   }
 
   if(_agtEssais.length===0){
-    h+='<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucun essai cr\u00e9\u00e9 pour l\'instant</div>';
+    h+='<div style="text-align:center;padding:30px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Aucun essai cr\u00e9\u00e9 pour l\'instant</div>';
   }
   return h;
 }
@@ -2741,11 +2750,11 @@ function _agtKmlPlan(base, fiches) {
 function _agtBuildKml() {
   var h = '<div style="padding:0 0 20px">';
   h += '<div class="agt-section-title" style="margin-bottom:6px">Import KML</div>';
-  h += '<p style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les contours de parcelles d\'un domaine client depuis son fichier KML Google Earth. Un fichier partiel complète le parcellaire, il ne le remplace pas.</p>';
+  h += '<p style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.6;margin:0 0 16px">Charger les contours de parcelles d\'un domaine client depuis son fichier KML Google Earth. Un fichier partiel complète le parcellaire, il ne le remplace pas.</p>';
 
   // Sélecteur domaine — `selected` sur l'état, sinon agtRenderBody perd le choix
-  h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Domaine cible</div>';
-  h += '<select id="agt-kml-slug" class="ov-input" style="margin-bottom:14px;background:#1A1428;color:#E8DFF8;border-color:rgba(196,181,253,0.2)" onchange="agtKmlSlugChange(this)">';
+  h += '<div class="fl" style="color:var(--texte-med)">Domaine cible</div>';
+  h += '<select id="agt-kml-slug" class="ov-input" style="margin-bottom:14px;background:var(--bg-card);color:var(--texte);border-color:var(--ligne-forte)" onchange="agtKmlSlugChange(this)">';
   h += '<option value="">— Choisir un domaine —</option>';
   _agtTenants.forEach(function (t) {
     h += '<option value="' + t.slug + '"' + (t.slug === _agtKmlSlug ? ' selected' : '') + '>' + _escHtml(t.nom) + ' (' + t.slug + ')</option>';
@@ -2756,9 +2765,9 @@ function _agtBuildKml() {
   if (_agtKmlSlug) h += _agtKmlEtatHtml();
 
   // Input fichier
-  h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Fichier .kml</div>';
+  h += '<div class="fl" style="color:var(--texte-med)">Fichier .kml</div>';
   h += '<input id="agt-kml-file" type="file" accept=".kml,.xml" ';
-  h += 'style="color:rgba(255,255,255,0.6);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);';
+  h += 'style="color:var(--texte-med);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);';
   h += 'margin-bottom:14px;width:100%;box-sizing:border-box" ';
   h += 'onchange="agtKmlFileChange(this)">';
 
@@ -2769,10 +2778,10 @@ function _agtBuildKml() {
   _agtTenants.forEach(function (t) {
     h += '<div id="agt-kml-row-' + t.slug + '" style="display:flex;align-items:center;';
     h += 'justify-content:space-between;padding:10px 14px;border-radius:8px;';
-    h += 'background:rgba(255,255,255,0.04);margin-bottom:6px">';
+    h += 'background:var(--bg-doux);margin-bottom:6px">';
     h += '<div>';
-    h += '<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.8);font-weight:500">' + _escHtml(t.nom) + '</div>';
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace">' + t.slug + '</div>';
+    h += '<div style="font-size:var(--pt-txt,13px);color:var(--texte);font-weight:500">' + _escHtml(t.nom) + '</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-family:monospace">' + t.slug + '</div>';
     h += '</div>';
     h += '<button style="font-size:var(--pt-micro,11px);background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.25);';
     h += 'color:#4A9FC8;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);white-space:nowrap" ';
@@ -2788,12 +2797,12 @@ function _agtBuildKml() {
 function _agtKmlEtatHtml() {
   var h = '';
   if (_agtKmlLu === 'load') {
-    return '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45)">Lecture de la base…</div>';
+    return '<div style="background:var(--bg-doux);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:var(--pt-micro,12px);color:var(--texte-med)">Lecture de la base…</div>';
   }
   if (_agtKmlLu === 'err') {
     return '<div style="background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.35);border-radius:10px;padding:11px 13px;margin-bottom:14px">'
       + '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#E07060;margin-bottom:4px">Base illisible</div>'
-      + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.55);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
+      + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-med);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
   }
   if (_agtKmlLu !== 'ok') return '';
 
@@ -2806,15 +2815,15 @@ function _agtKmlEtatHtml() {
   if (!nb && _agtKmlSlug === 'marchand-grillot') {
     return '<div style="background:rgba(142,47,38,0.18);border:1px solid rgba(224,112,96,0.45);border-radius:10px;padding:12px 14px;margin-bottom:14px">'
       + '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#E88B7C;margin-bottom:5px">Ce domaine tire ses contours de l\'application</div>'
-      + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.6);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
+      + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-med);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
   }
 
   h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:14px">';
-  h += '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.7)">';
-  h += nb ? ('<b style="color:#6FBEE0">' + nb + '</b> contour' + (nb > 1 ? 's' : '') + ' en base') : 'Aucun contour en base';
-  h += ' · <b style="color:#6FBEE0">' + nf + '</b> fiche' + (nf > 1 ? 's' : '') + ' de parcelle';
+  h += '<div style="font-size:var(--pt-micro,12px);color:var(--texte)">';
+  h += nb ? ('<b style="color:var(--texte-med)">' + nb + '</b> contour' + (nb > 1 ? 's' : '') + ' en base') : 'Aucun contour en base';
+  h += ' · <b style="color:var(--texte-med)">' + nf + '</b> fiche' + (nf > 1 ? 's' : '') + ' de parcelle';
   h += '</div>';
-  if (!nb) h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.6;margin-top:4px">Ce fichier sera le premier parcellaire de ce domaine.</div>';
+  if (!nb) h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6;margin-top:4px">Ce fichier sera le premier parcellaire de ce domaine.</div>';
   h += '</div>';
   return h;
 }
@@ -2831,7 +2840,7 @@ function _agtKmlApercuHtml() {
   h += '<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#6BA34A;margin-bottom:8px">';
   h += _agtKmlPolygons.length + ' contour' + (_agtKmlPolygons.length > 1 ? 's' : '');
   h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
-  h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);line-height:1.8;';
+  h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-med);line-height:1.8;';
   h += 'max-height:150px;overflow-y:auto;font-family:monospace">';
   _agtKmlPolygons.slice(0, 14).forEach(function (x) {
     h += _escHtml(x.name) + ' · ' + x.pts.length + ' pts · ' + _agtGeoArea(x.pts).toFixed(2) + ' ha<br>';
@@ -2840,13 +2849,13 @@ function _agtKmlApercuHtml() {
   h += '</div></div>';
 
   if (!_agtKmlSlug) {
-    h += '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);padding:4px 0 10px">Choisissez un domaine cible pour voir ce que cette écriture va changer.</div>';
+    h += '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);padding:4px 0 10px">Choisissez un domaine cible pour voir ce que cette écriture va changer.</div>';
     return h;
   }
   if (!lu) return h;
 
   // Les deux gestes
-  h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Que faire des contours déjà en base ?</div>';
+  h += '<div class="fl" style="color:var(--texte-med)">Que faire des contours déjà en base ?</div>';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
   h += _agtKmlModeBtn('merge', 'Compléter', 'Les contours absents du fichier sont conservés. Un contour de même nom prend la forme du fichier.');
   h += _agtKmlModeBtn('replace', 'Tout remplacer', 'La base ne garde que ce fichier. Tout contour absent du fichier disparaît de la carte.');
@@ -2876,14 +2885,14 @@ function _agtKmlApercuHtml() {
   //    le nom) et n'existe dans AUCUN autre écran. Livrer l'un sans l'autre, c'est
   //    livrer une parcelle à moitié.
   if (p.fichesAcreer.length) {
-    h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.035);margin-bottom:10px;cursor:pointer">';
+    h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:var(--bg-doux);margin-bottom:10px;cursor:pointer">';
     h += '<input type="checkbox"' + (_agtKmlCreerF ? ' checked' : '') + ' onchange="agtKmlCreerF(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#6BA34A;flex:none">';
-    h += '<div><div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.82)">Créer aussi la fiche de ' + p.fichesAcreer.length + ' parcelle' + (p.fichesAcreer.length > 1 ? 's' : '') + '</div>';
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">';
+    h += '<div><div style="font-size:var(--pt-txt,13px);color:var(--texte)">Créer aussi la fiche de ' + p.fichesAcreer.length + ' parcelle' + (p.fichesAcreer.length > 1 ? 's' : '') + '</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:2px">';
     h += p.fichesAcreer.map(function (x) { return _escHtml(x.name) + ' — ' + _agtGeoArea(x.pts).toFixed(2) + ' ha'; }).join(' · ');
     h += '<br>Sans sa fiche, une parcelle sort en gris sur la carte et n\'apparaît dans aucun écran. La surface est calculée sur le contour et reste modifiable dans Réglages.</div></div></label>';
   } else if (p.nouveaux.length) {
-    h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55)">Les parcelles ajoutées ont déjà leur fiche dans ce domaine. Rien d\'autre à créer.</div>';
+    h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:var(--pt-micro,12px);color:var(--texte-med)">Les parcelles ajoutées ont déjà leur fiche dans ce domaine. Rien d\'autre à créer.</div>';
   }
 
   // Garde-fou du geste destructif
@@ -2891,7 +2900,7 @@ function _agtKmlApercuHtml() {
     h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(142,47,38,0.15);margin-bottom:10px;cursor:pointer">';
     h += '<input type="checkbox"' + (_agtKmlConfirm ? ' checked' : '') + ' onchange="agtKmlConfirmSet(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#E07060;flex:none">';
     h += '<div><div style="font-size:var(--pt-txt,13px);color:#E88B7C">Je comprends que ' + p.perdus.length + ' contour' + (p.perdus.length > 1 ? 's' : '') + ' vont disparaître de la carte</div>';
-    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">Les fiches de ces parcelles ne sont pas supprimées — seule leur forme sur la carte est perdue.</div></div></label>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:2px">Les fiches de ces parcelles ne sont pas supprimées — seule leur forme sur la carte est perdue.</div></div></label>';
   }
 
   // Le bouton
@@ -2902,7 +2911,7 @@ function _agtKmlApercuHtml() {
       : 'Enregistrer — ' + p.sortie.length + ' contours au total');
   h += '<button onclick="agtKmlSave()"' + (bloque ? ' disabled' : '') + ' style="width:100%;padding:13px;border-radius:10px;';
   h += 'border:none;font-size:var(--pt-base,14px);font-weight:700;font-family:var(--font-ui,Outfit,sans-serif);cursor:' + (bloque ? 'not-allowed' : 'pointer') + ';';
-  h += 'background:' + (_agtKmlMode === 'replace' ? '#8E2F26' : '#3D6B27') + ';color:white;margin-bottom:8px;opacity:' + (bloque ? '0.45' : '1') + '">' + lib + '</button>';
+  h += 'background:' + (_agtKmlMode === 'replace' ? '#8E2F26' : '#3D6B27') + ';color:var(--texte);margin-bottom:8px;opacity:' + (bloque ? '0.45' : '1') + '">' + lib + '</button>';
   return h;
 }
 
@@ -2914,8 +2923,8 @@ function _agtKmlModeBtn(m, titre, desc) {
     + 'font-family:var(--font-ui,Outfit,sans-serif);border:1px solid ' + bd + ';background:' + bg + '">'
     // ⚠️ <span> et non <div> : un <div> dans un <button> est invalide en HTML5 (§24).
     //    Le display:block leur rend la mise en page d'un bloc sans la balise interdite.
-    + '<span style="display:block;font-size:var(--pt-txt,13px);font-weight:700;color:#fff;margin-bottom:3px">' + titre + '</span>'
-    + '<span style="display:block;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);line-height:1.5">' + desc + '</span></button>';
+    + '<span style="display:block;font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);margin-bottom:3px">' + titre + '</span>'
+    + '<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-med);line-height:1.5">' + desc + '</span></button>';
 }
 
 function _agtKmlPill(txt, col, bg, bd) {
@@ -2925,9 +2934,9 @@ function _agtKmlPill(txt, col, bg, bd) {
 
 function _agtKmlRow(nom, sub, tag, col, bg) {
   return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'
-    + 'padding:9px 12px;border-radius:9px;background:rgba(255,255,255,0.035);margin-bottom:5px">'
-    + '<div><div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.82)">' + _escHtml(nom) + '</div>'
-    + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace">' + _escHtml(sub) + '</div></div>'
+    + 'padding:9px 12px;border-radius:9px;background:var(--bg-doux);margin-bottom:5px">'
+    + '<div><div style="font-size:var(--pt-txt,13px);color:var(--texte)">' + _escHtml(nom) + '</div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-family:monospace">' + _escHtml(sub) + '</div></div>'
     + '<span style="font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;'
     + 'padding:3px 8px;border-radius:5px;white-space:nowrap;color:' + col + ';background:' + bg + '">' + tag + '</span></div>';
 }
@@ -3018,7 +3027,7 @@ async function agtCheckKml(slug, btn) {
         if (Array.isArray(data) && data.length > 0) {
           btn2.outerHTML = '<span style="font-size:var(--pt-micro,11px);color:#6BA34A;font-weight:600">' + data.length + ' polygones</span>';
         } else {
-          btn2.outerHTML = '<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">— KML statique</span>';
+          btn2.outerHTML = '<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">— KML statique</span>';
         }
       }
     }
@@ -3034,24 +3043,24 @@ function agtDeleteTenant(slug){
   if(existing) existing.remove();
   var ov=document.createElement('div');
   ov.id='agt-deltenant-overlay';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.85);backdrop-filter:blur(3px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
+  ov.style.cssText='position:fixed;inset:0;background:var(--voile,rgba(16,15,13,0.4));backdrop-filter:blur(3px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
   var sg=_escHtml(slug);
   ov.innerHTML=
-     '<div style="width:100%;max-width:410px;background:rgba(18,14,28,0.97);border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
+     '<div style="width:100%;max-width:410px;background:var(--bg-card);border:1px solid var(--danger);border-radius:20px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
     +'<div style="display:flex;align-items:center;gap:11px">'
-    +'<div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px"></div>'
-    +'<div style="font-size:var(--pt-sm,16px);font-weight:700;color:#fff">Supprimer le domaine</div>'
+    +'<div style="width:38px;height:38px;border-radius:11px;background:var(--danger-doux);border:1px solid var(--danger);display:flex;align-items:center;justify-content:center;font-size:18px"></div>'
+    +'<div style="font-size:var(--pt-sm,16px);font-weight:700;color:var(--texte)">Supprimer le domaine</div>'
     +'</div>'
-    +'<div style="font-size:var(--pt-txt,13px);line-height:1.55;color:rgba(255,255,255,0.6);margin-top:12px">Tu vas <b style="color:#FCA5A5">effacer définitivement</b> le domaine <b style="color:#FCA5A5">'+sg+'</b>. Cette action est <b style="color:#FCA5A5">irréversible</b>.</div>'
-    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.5);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;margin:12px 0;line-height:1.7">Seront supprimés : tous les <b>comptes de connexion</b> des membres, parcelles, journal, sessions, traitements, planning, cave, tâches, saisons, config, et l\'entrée du registre.</div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Pour confirmer, tape le nom exact : <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#C4B5FD;font-weight:600">'+sg+'</code></div>'
-    +'<input id="agt-del-slug" type="text" autocomplete="off" placeholder="nom du domaine" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Mot de passe de suppression</div>'
-    +'<input id="agt-del-pwd" type="password" autocomplete="new-password" placeholder="••••••••" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">'
-    +'<div id="agt-del-err" style="display:none;color:#FCA5A5;font-size:var(--pt-micro,12px);margin-top:10px"></div>'
+    +'<div style="font-size:var(--pt-txt,13px);line-height:1.55;color:var(--texte-med);margin-top:12px">Tu vas <b style="color:var(--danger-texte)">effacer définitivement</b> le domaine <b style="color:var(--danger-texte)">'+sg+'</b>. Cette action est <b style="color:var(--danger-texte)">irréversible</b>.</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-med);background:var(--danger-doux);border:1px solid var(--danger);border-radius:11px;padding:11px 13px;margin:12px 0;line-height:1.7">Seront supprimés : tous les <b>comptes de connexion</b> des membres, parcelles, journal, sessions, traitements, planning, cave, tâches, saisons, config, et l\'entrée du registre.</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:14px 0 6px">Pour confirmer, tape le nom exact : <code style="background:var(--bg-doux);padding:1px 7px;border-radius:4px;color:var(--accent-texte);font-weight:600">'+sg+'</code></div>'
+    +'<input id="agt-del-slug" type="text" autocomplete="off" placeholder="nom du domaine" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:10px;padding:11px 13px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:14px 0 6px">Mot de passe de suppression</div>'
+    +'<input id="agt-del-pwd" type="password" autocomplete="new-password" placeholder="••••••••" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:10px;padding:11px 13px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">'
+    +'<div id="agt-del-err" style="display:none;color:var(--danger-texte);font-size:var(--pt-micro,12px);margin-top:10px"></div>'
     +'<div style="display:flex;gap:9px;margin-top:18px">'
-    +'<button onclick="document.getElementById(\'agt-deltenant-overlay\').remove()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:11px;color:rgba(255,255,255,0.55);font-size:var(--pt-txt,13px);font-weight:500;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
-    +'<button id="agt-del-btn" disabled onclick="agtDeleteTenantConfirm(\''+slug+'\')" style="flex:1.7;border:none;border-radius:11px;color:#fff;font-size:var(--pt-txt,13px);font-weight:700;padding:12px;cursor:not-allowed;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(127,16,32,0.4);opacity:.55">Supprimer le domaine</button>'
+    +'<button onclick="document.getElementById(\'agt-deltenant-overlay\').remove()" style="flex:1;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:11px;color:var(--texte-med);font-size:var(--pt-txt,13px);font-weight:500;padding:12px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Annuler</button>'
+    +'<button id="agt-del-btn" disabled onclick="agtDeleteTenantConfirm(\''+slug+'\')" style="flex:1.7;border:none;border-radius:11px;color:var(--texte);font-size:var(--pt-txt,13px);font-weight:700;padding:12px;cursor:not-allowed;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(127,16,32,0.4);opacity:.55">Supprimer le domaine</button>'
     +'</div>'
     +'</div>';
   document.body.appendChild(ov);
@@ -3111,13 +3120,13 @@ async function agtDeleteTenantConfirm(slug){
 var _FC_SLUG='', _FC_TAB='dom', _FC={};
 var _FC_ROLES=['admin','ouvrier','tractoriste','saisonnier','pilotage'];
 var _FC_TABS=[['dom','\uD83C\uDFDB\uFE0F Domaine'],['parcelles','\uD83C\uDF47 Parcelles'],['membres','\uD83D\uDC65 Membres'],['taches','\u2713 T\u00e2ches'],['tracteurs_list','\uD83D\uDE9C Tracteurs'],['saisons','\uD83D\uDCC5 Saisons'],['abo','\uD83D\uDCB3 Abonnement']];
-var _FC_INP_STYLE='width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:9px;padding:9px 11px;font-size:var(--pt-txt,13px);color:#fff;font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box';
+var _FC_INP_STYLE='width:100%;background:var(--bg-doux);border:1px solid var(--ligne-forte);border-radius:9px;padding:9px 11px;font-size:var(--pt-txt,13px);color:var(--texte);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box';
 var _FC_SEL_STYLE=_FC_INP_STYLE;
 
 function _fcArr(v){ return Array.isArray(v)?v:[]; }
 function _fcSecTitle(t){ return {dom:'Domaine',parcelles:'Parcelles & secteurs m\u00e9t\u00e9o',membres:'Membres & r\u00f4les',taches:'T\u00e2ches & heures/ha',tracteurs_list:'Tracteurs',saisons:'Saisons',abo:'Abonnement'}[t]||''; }
-function _fcHint(html){ return '<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
-function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:rgba(255,255,255,0.25);font-size:var(--pt-txt,13px)">'+txt+'</div>'; }
+function _fcHint(html){ return '<div style="font-size:var(--pt-lbl,12px);color:var(--texte-doux);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
+function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">'+txt+'</div>'; }
 
 function _fcActiveCount(coll){ var a=_FC[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
 
@@ -3129,30 +3138,30 @@ function _fcActiveCount(coll){ var a=_FC[coll]||[]; if(coll==='parcelles') retur
 //   préparation (PREP-1), avec leurs règles. La fiche garde ce qui appartient à GUERETTECH : le domaine
 //   (nom, coordonnées de repli — écriture en transaction depuis GTFIX-1), l'abonnement, les modules, l'essai.
 function _fcLectureSeule(){
-  return '<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.28);border-radius:12px;padding:12px 14px;margin-bottom:14px">'
-    +'<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.75);line-height:1.5"><b style="color:#F0E8DC">Lecture seule.</b> Ces donn\u00e9es se modifient sur les vrais \u00e9crans du domaine, avec leurs r\u00e8gles : le renommage qui suit tout l\u2019historique, les gardes anti-perte, les identifiants.'
+  return '<div style="display:flex;gap:12px;align-items:flex-start;background:var(--attention-doux);border:1px solid var(--attention);border-radius:12px;padding:12px 14px;margin-bottom:14px">'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte);line-height:1.5"><b style="color:var(--texte)">Lecture seule.</b> Ces donn\u00e9es se modifient sur les vrais \u00e9crans du domaine, avec leurs r\u00e8gles : le renommage qui suit tout l\u2019historique, les gardes anti-perte, les identifiants.'
     +'<div style="margin-top:10px"><button onclick="_fcPreparer()" style="padding:9px 14px;border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:#C9A84C;color:#0C1A0A">Modifier dans la pr\u00e9paration</button></div></div></div>';
 }
 // Une ligne de tableau en lecture : des cases de texte, échappées, jamais un champ.
 function _fcLigne(cols, cases){
-  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.82)">'
+  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;align-items:center;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:var(--pt-txt,13px);color:var(--texte)">'
     + cases.map(function(c){ return '<div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c+'</div>'; }).join('') + '</div>';
 }
 function _fcEntete(cols, noms){
-  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;padding:0 12px 6px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4)">'
+  return '<div style="display:grid;grid-template-columns:'+cols+';gap:8px;padding:0 12px 6px;font-size:var(--pt-micro,12px);color:var(--texte-doux)">'
     + noms.map(function(n){ return '<span>'+n+'</span>'; }).join('') + '</div>';
 }
-function _fcTxt(v, vide){ var s = (v == null) ? '' : String(v).trim(); return s ? _escHtml(s) : '<span style="color:rgba(255,255,255,0.3)">'+(vide||'\u2014')+'</span>'; }
+function _fcTxt(v, vide){ var s = (v == null) ? '' : String(v).trim(); return s ? _escHtml(s) : '<span style="color:var(--texte-doux)">'+(vide||'\u2014')+'</span>'; }
 // ── Sections ────────────────────────────────────────────────────────────────
 function _fcSecDom(){
   var c=_FC.config||{};
   function fld(lbl,id,val,type){
-    return '<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">'+lbl+'</div><input id="'+id+'" type="'+(type||'text')+'" value="'+_escHtml(String(val==null?'':val))+'" style="'+_FC_INP_STYLE+'"></div>';
+    return '<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">'+lbl+'</div><input id="'+id+'" type="'+(type||'text')+'" value="'+_escHtml(String(val==null?'':val))+'" style="'+_FC_INP_STYLE+'"></div>';
   }
   return _fcHint('Le centre m\u00e9t\u00e9o r\u00e9el se calcule sur le centro\u00efde des parcelles ; ces coordonn\u00e9es ne servent que de repli.')
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
     + fld('Nom du domaine','agt-fc-nom',c.domaine_nom||'')
-    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding</div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:'+(c.onboarding_done?'#6BA34A':'#FCA5A5')+';padding:9px 0">'+(c.onboarding_done?'\u2705 Termin\u00e9':'\u274c Non termin\u00e9')+'</div></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Onboarding</div><div style="font-size:var(--pt-txt,13px);font-weight:600;color:'+(c.onboarding_done?'#6BA34A':'#FCA5A5')+';padding:9px 0">'+(c.onboarding_done?'\u2705 Termin\u00e9':'\u274c Non termin\u00e9')+'</div></div>'
     + fld('Latitude (repli)','agt-fc-lat',c.lat==null?'':c.lat,'number')
     + fld('Longitude (repli)','agt-fc-lon',c.lon==null?'':c.lon,'number')
     +'</div>'
@@ -3176,11 +3185,11 @@ function _fcSecteursHtml(){
   act.forEach(function(p){ var nom=(p.commune&&p.commune.nom)?p.commune.nom:((typeof p.commune==='string'&&p.commune)?p.commune:''); var k=(nom||'').trim()||'__none__'; m[k]=(m[k]||0)+1; });
   var keys=Object.keys(m).filter(function(k){return k!=='__none__';});
   var on=keys.length>=2;
-  var chips=Object.keys(m).map(function(k){ var lbl=(k==='__none__')?'\u2014 sans secteur':k; return '<span style="font-size:var(--pt-micro,11px);background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:6px 11px;color:rgba(255,255,255,0.6)"><b style="color:#fff">'+_escHtml(lbl)+'</b> \u00b7 '+m[k]+' parc.</span>'; }).join(' ');
-  var badge=on?'background:rgba(61,107,39,0.18);border:1px solid rgba(61,107,39,0.4);color:#6BA34A':'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)';
+  var chips=Object.keys(m).map(function(k){ var lbl=(k==='__none__')?'\u2014 sans secteur':k; return '<span style="font-size:var(--pt-micro,11px);background:var(--voile,rgba(16,15,13,0.4));border:1px solid var(--ligne,#E7E6E2);border-radius:9px;padding:6px 11px;color:var(--texte-med)"><b style="color:var(--texte)">'+_escHtml(lbl)+'</b> \u00b7 '+m[k]+' parc.</span>'; }).join(' ');
+  var badge=on?'background:rgba(61,107,39,0.18);border:1px solid rgba(61,107,39,0.4);color:#6BA34A':'background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-doux)';
   return '<div id="agt-fc-secteurs" style="background:linear-gradient(135deg,rgba(61,107,39,0.12),rgba(139,92,246,0.06));border:1px solid rgba(61,107,39,0.25);border-radius:13px;padding:13px;margin-top:14px">'
-    +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:#A8D08A;display:flex;align-items:center;gap:8px">\uD83D\uDDFA\uFE0F Secteurs m\u00e9t\u00e9o <span style="font-size:10px;border-radius:999px;padding:2px 9px;font-weight:600;'+badge+'">'+(on?'cartes par secteur activ\u00e9es':'m\u00e9t\u00e9o unique du domaine')+'</span></div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:6px">'+keys.length+' commune'+(keys.length>1?'s':'')+' active'+(keys.length>1?'s':'')+' \u00b7 cartes empil\u00e9es sur l\'accueil d\u00e8s \u22652 communes.</div>'
+    +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ok-texte);display:flex;align-items:center;gap:8px">\uD83D\uDDFA\uFE0F Secteurs m\u00e9t\u00e9o <span style="font-size:10px;border-radius:999px;padding:2px 9px;font-weight:600;'+badge+'">'+(on?'cartes par secteur activ\u00e9es':'m\u00e9t\u00e9o unique du domaine')+'</span></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px">'+keys.length+' commune'+(keys.length>1?'s':'')+' active'+(keys.length>1?'s':'')+' \u00b7 cartes empil\u00e9es sur l\'accueil d\u00e8s \u22652 communes.</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:9px">'+chips+'</div></div>';
 }
 
@@ -3189,13 +3198,13 @@ function _fcSecMbr(){
     var roles=Array.isArray(m.roles)?m.roles:Object.keys(m.roles||{}).filter(function(r){return m.roles[r];});
     // Les rôles en texte : une pastille faite à la main de plus ferait remonter le cliquet de CHARTE-4 — la console
     //   prendra le jeu de pastilles commun avec sa refonte (GT-UI-3).
-    var chips=roles.length?'<span style="color:rgba(255,255,255,0.7);font-size:var(--pt-micro,12px)">'+roles.map(function(r){ return _escHtml(r); }).join(' \u00b7 ')+'</span>'
-      :'<span style="color:rgba(255,255,255,0.3);font-size:var(--pt-micro,12px)">aucun r\u00f4le</span>';
+    var chips=roles.length?'<span style="color:var(--texte);font-size:var(--pt-micro,12px)">'+roles.map(function(r){ return _escHtml(r); }).join(' \u00b7 ')+'</span>'
+      :'<span style="color:var(--texte-doux);font-size:var(--pt-micro,12px)">aucun r\u00f4le</span>';
     var inactif=String(m.statut||'actif').toLowerCase()!=='actif';
-    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px 12px;margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,13px);color:#F0E8DC;font-weight:600"><span>'+_fcTxt(m.nom,'sans nom')+'</span>'
-      +(inactif?'<span style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);font-weight:500">inactif</span>':'')+'</div>'
-      +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.4);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_fcTxt(m.email,'sans adresse')+'</div>'
+    return '<div style="background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:12px;padding:11px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,13px);color:var(--texte);font-weight:600"><span>'+_fcTxt(m.nom,'sans nom')+'</span>'
+      +(inactif?'<span style="font-size:var(--pt-micro,12px);color:var(--texte-med);font-weight:500">inactif</span>':'')+'</div>'
+      +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_fcTxt(m.email,'sans adresse')+'</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">'+chips+'</div></div>';
   }).join(''):_fcEmpty('Aucun membre');
   return _fcLectureSeule() + _fcHint('Les comptes de connexion (cr\u00e9ation, nouveau mot de passe) restent dans <b>Membres</b>, sur la carte du domaine : ils passent par le serveur.') + rows;
@@ -3221,7 +3230,7 @@ function _fcSecTrac(){
 function _fcSecSais(){
   var cols='1.2fr 1fr 1fr .7fr';
   var rows=_FC.saisons.length?_FC.saisons.map(function(s){
-    return _fcLigne(cols,[_fcTxt(s.nom,'sans nom'), _fcTxt(s.debut), _fcTxt(s.fin), (s.active?'<span style="color:#6BA34A">active</span>':'<span style="color:rgba(255,255,255,0.3)">\u2014</span>')]);
+    return _fcLigne(cols,[_fcTxt(s.nom,'sans nom'), _fcTxt(s.debut), _fcTxt(s.fin), (s.active?'<span style="color:#6BA34A">active</span>':'<span style="color:var(--texte-doux)">\u2014</span>')]);
   }).join(''):_fcEmpty('Aucune saison');
   return _fcLectureSeule() + _fcEntete(cols,['Nom','D\u00e9but','Fin','']) + rows;
 }
@@ -3278,11 +3287,11 @@ function _fcRenewHtml(){
   var sous=dispo
     ? 'Redonne '+_FC_TRIAL_DAYS+' jours pleins \u00e0 compter d\u2019aujourd\u2019hui \u2014 pas depuis l\u2019ancienne \u00e9ch\u00e9ance \u2014 et vous envoie un rappel d\u2019appeler le client.'
     : 'D\u00e9j\u00e0 reconduit une fois. Au-del\u00e0, c\u2019est une conversion \u2014 ou le champ ci-dessus, en connaissance de cause.';
-  return '<div id="agt-fc-renew" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.22);border-radius:11px;padding:12px 13px;margin:0 0 13px">'
+  return '<div id="agt-fc-renew" style="background:var(--attention-doux);border:1px solid var(--attention);border-radius:11px;padding:12px 13px;margin:0 0 13px">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-    +'<span style="font-size:var(--pt-txt,13px);font-weight:600;color:#E8D89A">Reconduction de l\u2019essai</span>'
-    +'<span style="font-size:10px;font-weight:600;color:'+(dispo?'#86EFAC':'rgba(255,255,255,0.35)')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:2px 8px">'+faites+' / '+_FC_TRIAL_MAX+'</span></div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:9px">'+sous+'</div>'
+    +'<span style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--attention-texte)">Reconduction de l\u2019essai</span>'
+    +'<span style="font-size:10px;font-weight:600;color:'+(dispo?'#86EFAC':'rgba(255,255,255,0.35)')+';background:var(--bg-doux);border-radius:20px;padding:2px 8px">'+faites+' / '+_FC_TRIAL_MAX+'</span></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-bottom:9px">'+sous+'</div>'
     +'<button id="agt-fc-renew-btn"'+(dispo?'':' disabled')+' onclick="_fcRenewTrial()" style="width:100%;font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px);font-weight:700;border-radius:9px;padding:10px;border:0;cursor:'+(dispo?'pointer':'not-allowed')+';background:'+(dispo?'#C9A84C':'rgba(255,255,255,0.06)')+';color:'+(dispo?'#0C1A0A':'rgba(255,255,255,0.3)')+'">'
     +(dispo?('Reconduire '+_FC_TRIAL_DAYS+' jours'):'Reconduction utilis\u00e9e')+'</button></div>';
 }
@@ -3335,7 +3344,7 @@ function _fcTrialStatusHtml(fc){
   if(exp>0){
     if(exp<=now) return box('rgba(224,112,96,0.08)','rgba(224,112,96,0.28)','rgba(224,112,96,0.15)','','#F0B4A8','rgba(240,180,168,0.7)','Essai expiré le '+_fcTrialFmt(exp),'client en lecture seule — régler un nouvel essai ou convertir');
     var left=Math.max(0,Math.ceil((exp-now)/86400000));
-    var lbl=left>0?('Essai en cours · <span style="color:#E8C860">J-'+left+'</span>'):('Essai en cours · <span style="color:#E8C860">expire aujourd&#39;hui</span>');
+    var lbl=left>0?('Essai en cours · <span style="color:var(--attention-texte)">J-'+left+'</span>'):('Essai en cours · <span style="color:var(--attention-texte)">expire aujourd&#39;hui</span>');
     // ★ « J-4 » ne dit pas ce qui se passe apres. La suite depend d'un seul fait : la
     //   reconduction unique est-elle encore disponible.
     var _rn=(typeof fc.trialRenewals==='number')?fc.trialRenewals:0;
@@ -3359,20 +3368,20 @@ function _fcSecAbo(){
   if(_FC.featOv===undefined){ _FC.featOv={}; var f=(_FC.config&&_FC.config.features)||{}; ['tracteur','planning','pilotage','cave','reserve'].forEach(function(k){ if(f[k]===true||f[k]===false) _FC.featOv[k]=f[k]; }); }
   function opt(v,l){ return '<option value="'+v+'"'+(plan===v?' selected':'')+'>'+l+'</option>'; }
   var css='<style>'
-    +'#agt-fc-mods .agt-mod-row{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 12px;margin-bottom:8px}'
-    +'#agt-fc-mods .agt-mod-row.on{border-color:rgba(139,92,246,0.4)}'
+    +'#agt-fc-mods .agt-mod-row{display:flex;align-items:center;gap:11px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:12px;padding:10px 12px;margin-bottom:8px}'
+    +'#agt-fc-mods .agt-mod-row.on{border-color:var(--ligne-forte)}'
     +'#agt-fc-mods .agt-mod-emoji{font-size:18px;width:24px;text-align:center;flex-shrink:0}'
     +'#agt-fc-mods .agt-mod-txt{flex:1;min-width:0}'
-    +'#agt-fc-mods .agt-mod-name{font-size:var(--pt-txt,13px);font-weight:600;color:#fff}'
-    +'#agt-fc-mods .agt-mod-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}'
+    +'#agt-fc-mods .agt-mod-name{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)}'
+    +'#agt-fc-mods .agt-mod-sub{font-size:10px;color:var(--texte-doux);margin-top:2px}'
     +'#agt-fc-mods .agt-b{display:inline-block;font-size:var(--pt-nano,9.5px);font-weight:600;padding:2px 8px;border-radius:999px;margin-top:5px}'
-    +'#agt-fc-mods .agt-b-herit{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)}'
-    +'#agt-fc-mods .agt-b-on{background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.3);color:#C4B5FD}'
+    +'#agt-fc-mods .agt-b-herit{background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med)}'
+    +'#agt-fc-mods .agt-b-on{background:var(--accent-doux);border:1px solid var(--ligne-forte);color:var(--accent-texte)}'
     +'#agt-fc-mods .agt-b-off{background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);color:#E07060}'
-    +'#agt-fc-mods .agt-mod-reset{font-size:var(--pt-nano,9.5px);color:#C4B5FD;cursor:pointer;text-decoration:underline;margin-left:8px;opacity:.75}'
+    +'#agt-fc-mods .agt-mod-reset{font-size:var(--pt-nano,9.5px);color:var(--accent-texte);cursor:pointer;text-decoration:underline;margin-left:8px;opacity:.75}'
     +'#agt-fc-mods .agt-sw{position:relative;width:42px;height:25px;flex-shrink:0;cursor:pointer;display:inline-block}'
     +'#agt-fc-mods .agt-sw input{opacity:0;width:0;height:0;position:absolute}'
-    +'#agt-fc-mods .agt-sw-tr{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.14);transition:.18s}'
+    +'#agt-fc-mods .agt-sw-tr{position:absolute;inset:0;border-radius:999px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);transition:.18s}'
     +'#agt-fc-mods .agt-sw-kn{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#cfc7dd;transition:.18s}'
     +'#agt-fc-mods .agt-sw input:checked + .agt-sw-tr{background:linear-gradient(135deg,#7C4DD6,#8B5CF6);border-color:transparent}'
     +'#agt-fc-mods .agt-sw input:checked + .agt-sw-tr .agt-sw-kn{transform:translateX(17px);background:#fff}'
@@ -3381,11 +3390,11 @@ function _fcSecAbo(){
     +_fcHint('La <b>formule</b> (claim, posée sur tous les membres) reste le socle commercial. Les <b>cases</b> affinent module par module : seuls les <b>écarts</b> à la formule sont enregistrés — changer la formule refait suivre les modules non forcés.')
     +_fcTrialStatusHtml(_FC)
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
-    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:rgba(255,255,255,0.45)">0</b> = convertir en payant.</div></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:var(--texte-doux);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:var(--texte-med)">0</b> = convertir en payant.</div></div>'
     +'</div>'
     +_fcRenewHtml()
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin:8px 0 9px">Modules visibles par ce client</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 9px">Modules visibles par ce client</div>'
     +'<div id="agt-fc-mods">'+_fcModsHtml()+'</div>';
 }
 
@@ -3394,7 +3403,7 @@ function _fcRenderTabs(){
   var el=document.getElementById('agt-fiche-tabs'); if(!el) return;
   el.innerHTML=_FC_TABS.map(function(tb){
     var id=tb[0], onn=(id===_FC_TAB), n='';
-    if(['parcelles','membres','taches','tracteurs_list','saisons'].indexOf(id)>=0) n=' <span style="font-size:10px;background:rgba(255,255,255,0.1);border-radius:7px;padding:0 6px;min-width:18px;text-align:center;display:inline-block">'+_fcActiveCount(id)+'</span>';
+    if(['parcelles','membres','taches','tracteurs_list','saisons'].indexOf(id)>=0) n=' <span style="font-size:10px;background:var(--bg-doux);border-radius:7px;padding:0 6px;min-width:18px;text-align:center;display:inline-block">'+_fcActiveCount(id)+'</span>';
     return '<button onclick="_fcTab(\''+id+'\')" style="flex-shrink:0;padding:9px 13px;border-radius:11px;font-size:var(--pt-txt,13px);font-weight:'+(onn?'600':'500')+';cursor:pointer;white-space:nowrap;font-family:var(--font-ui,Outfit,sans-serif);border:1px solid '+(onn?'rgba(139,92,246,0.4)':'rgba(255,255,255,0.06)')+';background:'+(onn?'rgba(139,92,246,0.15)':'rgba(255,255,255,0.04)')+';color:'+(onn?'#C4B5FD':'rgba(255,255,255,0.6)')+'">'+tb[1]+n+'</button>';
   }).join('');
 }
@@ -3408,7 +3417,7 @@ function _fcRenderSection(){
   else if(t==='tracteurs_list') html=_fcSecTrac();
   else if(t==='saisons') html=_fcSecSais();
   else if(t==='abo') html=_fcSecAbo();
-  body.innerHTML='<div style="font-size:var(--pt-micro,11px);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);font-weight:600;margin:2px 0 14px">'+_fcSecTitle(t)+'</div>'+html;
+  body.innerHTML='<div style="font-size:var(--pt-micro,11px);letter-spacing:.08em;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin:2px 0 14px">'+_fcSecTitle(t)+'</div>'+html;
   // ★ GTFIX-2 (D1) : « Enregistrer » n'existe que là où la fiche écrit encore (Domaine, Abonnement).
   var sb=document.getElementById('agt-fc-save'); if(sb) sb.style.display=(t==='dom'||t==='abo')?'':'none';
 }
@@ -3510,7 +3519,7 @@ window._fcSaveCurrent=function(){
 // ── Chargement + overlay ────────────────────────────────────────────────────
 async function _fcLoad(slug){
   var body=document.getElementById('agt-fiche-body');
-  if(body) body.innerHTML='<div style="text-align:center;padding:50px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div>';
+  if(body) body.innerHTML='<div style="text-align:center;padding:50px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement\u2026</div>';
   var R=window.fbAdminRead;
   var cfg=R?await R(slug,'config'):null;
   var prc=R?await R(slug,'parcelles'):null;
@@ -3545,17 +3554,17 @@ window.agtShowFiche=async function(slug){
   var ov=document.createElement('div'); ov.id='agt-fiche-ov';
   ov.style.cssText='position:fixed;inset:0;background:radial-gradient(120% 80% at 50% -10%,#16102a 0%,#0F0A1A 45%,#0A0812 100%);z-index:9999;display:flex;flex-direction:column;font-family:var(--font-ui,Outfit,sans-serif)';
   ov.innerHTML=
-     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 13px;border-bottom:1px solid rgba(139,92,246,0.15)">'
-    +'<div style="display:flex;align-items:center;gap:11px;min-width:0"><div style="width:34px;height:34px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.28);display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,16px);flex-shrink:0">\uD83D\uDDC2\uFE0F</div>'
-    +'<div><div style="font-size:15px;font-weight:600;color:#fff">Fiche client</div><div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.6);margin-top:2px;font-family:monospace">'+_escHtml(slug)+'</div></div></div>'
-    +'<button onclick="document.getElementById(\'agt-fiche-ov\').remove()" style="min-width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:var(--pt-sm,16px);cursor:pointer">\u2715</button></div>'
-    +'<div id="agt-fc-sum" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.18)"></div>'
-    +'<div id="agt-fiche-tabs" style="display:flex;gap:6px;overflow-x:auto;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05)"></div>'
-    +'<div id="agt-fiche-body" style="flex:1;overflow-y:auto;padding:18px 20px 96px"><div style="text-align:center;padding:50px;color:rgba(255,255,255,0.3);font-size:var(--pt-txt,13px)">Chargement\u2026</div></div>'
+     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 13px;border-bottom:1px solid var(--ligne-forte)">'
+    +'<div style="display:flex;align-items:center;gap:11px;min-width:0"><div style="width:34px;height:34px;border-radius:10px;background:var(--accent-doux);border:1px solid var(--ligne-forte);display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,16px);flex-shrink:0">\uD83D\uDDC2\uFE0F</div>'
+    +'<div><div style="font-size:15px;font-weight:600;color:var(--texte)">Fiche client</div><div style="font-size:var(--pt-micro,11px);color:var(--accent-texte);margin-top:2px;font-family:monospace">'+_escHtml(slug)+'</div></div></div>'
+    +'<button onclick="document.getElementById(\'agt-fiche-ov\').remove()" style="min-width:40px;height:40px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med);font-size:var(--pt-sm,16px);cursor:pointer">\u2715</button></div>'
+    +'<div id="agt-fc-sum" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 20px;border-bottom:1px solid var(--ligne,#E7E6E2);background:var(--voile,rgba(16,15,13,0.4))"></div>'
+    +'<div id="agt-fiche-tabs" style="display:flex;gap:6px;overflow-x:auto;padding:12px 16px;border-bottom:1px solid var(--ligne,#E7E6E2)"></div>'
+    +'<div id="agt-fiche-body" style="flex:1;overflow-y:auto;padding:18px 20px 96px"><div style="text-align:center;padding:50px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Chargement\u2026</div></div>'
     +'<div style="position:fixed;left:0;right:0;bottom:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(0deg,#0A0812 65%,transparent);display:flex;justify-content:center">'
     +'<div style="max-width:780px;width:100%;display:flex;gap:10px;justify-content:flex-end">'
-    +'<button onclick="_fcReload()" style="padding:12px 18px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">\u21ba Recharger</button>'
-    +'<button id="agt-fc-save" onclick="_fcSaveCurrent()" style="padding:12px 22px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:#fff;box-shadow:0 6px 18px rgba(139,92,246,0.3)">\uD83D\uDCBE Enregistrer la section</button>'
+    +'<button onclick="_fcReload()" style="padding:12px 18px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte-med)">\u21ba Recharger</button>'
+    +'<button id="agt-fc-save" onclick="_fcSaveCurrent()" style="padding:12px 22px;border-radius:12px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:var(--texte);box-shadow:0 6px 18px rgba(139,92,246,0.3)">\uD83D\uDCBE Enregistrer la section</button>'
     +'</div></div>';
   document.body.appendChild(ov);
   if(typeof agtLogAccess==='function') agtLogAccess(slug,'Ouverture Fiche client','\uD83D\uDDC2\uFE0F');
@@ -3569,9 +3578,9 @@ function _agtCguHtml(cfg, slug){
   // client (fail-closed : tout admin sans preuve à jour est bloqué par l'écran d'acceptation).
   // Plus aucun geste à armer côté GT. La preuve vit hors tenant (_mv_signatures/{slug}) et un
   // reçu horodaté part par e-mail (au client + à GUERETTECH) à chaque acceptation.
-  return '<div style="margin:14px 0 10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08)">'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Acceptation CGU + DPA</div>'
-    +'<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.7);line-height:1.5">Automatique &#224; la 1<sup>re</sup> ouverture par le client (bloquant). Un re&#231;u horodat&#233; est envoy&#233; par e-mail &#224; chaque acceptation.</div>'
+  return '<div style="margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--ligne,#E7E6E2)">'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Acceptation CGU + DPA</div>'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte);line-height:1.5">Automatique &#224; la 1<sup>re</sup> ouverture par le client (bloquant). Un re&#231;u horodat&#233; est envoy&#233; par e-mail &#224; chaque acceptation.</div>'
     +'</div>';
 }
 window.agtShowParcelles  = agtShowParcelles;
@@ -5310,7 +5319,7 @@ function _agtBizCibles(slug){
 }
 function _agtBizCibleSel(i, slug, sel){
   var cs=_agtBizCibles(slug);
-  var h='<select id="agt-biz-cib'+i+'" onchange="agtBizCible('+i+')" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">';
+  var h='<select id="agt-biz-cib'+i+'" onchange="agtBizCible('+i+')" style="width:100%;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:8px;padding:8px 9px;color:var(--texte);font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">';
   if(!cs.length) h+='<option value="">Aucune facture \u00e0 remiser</option>';
   cs.forEach(function(c){
     h+='<option value="'+c.k+'"'+((String(sel)===String(c.k))?' selected':'')+'>'
@@ -5485,23 +5494,23 @@ async function agtFactPaye(i,k){
   var paye=(f.statut==='payee'), auj=_agtIso(new Date());
   var montant=paye ? _agtFEncInfo(t.slug, f).enc : _agtRefReste(t.slug, f.ref);
   var modes=Object.keys(_AGT_MODES).map(function(m){ return '<option value="'+m+'"'+(((f.mode&&_AGT_MODES[f.mode])?f.mode:'virement')===m?' selected':'')+'>'+_AGT_MODES[m]+'</option>'; }).join('');
-  var champ='width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:10px 12px;color:#F0E8DC;font-size:var(--pt-txt,13px);font-family:var(--font-ui,Outfit,sans-serif);color-scheme:dark';
+  var champ='width:100%;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:10px;padding:10px 12px;color:var(--texte);font-size:var(--pt-txt,13px);font-family:var(--font-ui,Outfit,sans-serif);color-scheme:dark';
   var bouton='padding:11px 14px;border-radius:10px;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)';
   var ex=document.getElementById('agt-paie-ov'); if(ex) ex.remove();
   var ov=document.createElement('div'); ov.id='agt-paie-ov';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
-  ov.innerHTML='<div role="dialog" aria-modal="true" aria-label="Paiement" style="width:100%;max-width:400px;background:rgba(18,14,28,0.98);border-radius:18px;border:1px solid rgba(134,239,172,0.25);padding:20px">'
-    +'<div style="font-size:15px;font-weight:600;color:#fff">'+(paye?'Paiement enregistr\u00e9':'Enregistrer le paiement')+'</div>'
-    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.5);margin-top:4px">'+_escHtml(t.nom)+' \u00b7 '+_escHtml(f.ref||'')+' \u00b7 <b style="color:#86EFAC">'+_agtEur(montant)+'</b>'+(paye?' encaiss\u00e9s':' \u00e0 encaisser, avoirs d\u00e9duits')+'</div>'
-    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);margin:14px 0 5px">Re\u00e7u le</div>'
+  ov.style.cssText='position:fixed;inset:0;background:var(--voile,rgba(16,15,13,0.4));z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-ui,Outfit,sans-serif)';
+  ov.innerHTML='<div role="dialog" aria-modal="true" aria-label="Paiement" style="width:100%;max-width:400px;background:var(--bg-card);border-radius:18px;border:1px solid var(--ok);padding:20px">'
+    +'<div style="font-size:15px;font-weight:600;color:var(--texte)">'+(paye?'Paiement enregistr\u00e9':'Enregistrer le paiement')+'</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-med);margin-top:4px">'+_escHtml(t.nom)+' \u00b7 '+_escHtml(f.ref||'')+' \u00b7 <b style="color:var(--ok-texte)">'+_agtEur(montant)+'</b>'+(paye?' encaiss\u00e9s':' \u00e0 encaisser, avoirs d\u00e9duits')+'</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-med);margin:14px 0 5px">Re\u00e7u le</div>'
     +'<input id="agt-paie-date" type="date" max="'+auj+'" value="'+(_agtFPayeLe(f)||auj)+'" style="'+champ+'">'
-    +'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.45);margin:12px 0 5px">Mode de r\u00e8glement</div>'
+    +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-med);margin:12px 0 5px">Mode de r\u00e8glement</div>'
     +'<select id="agt-paie-mode" style="'+champ+'">'+modes+'</select>'
-    +'<div id="agt-paie-err" style="display:none;color:#FCA5A5;font-size:var(--pt-micro,12px);margin-top:10px"></div>'
+    +'<div id="agt-paie-err" style="display:none;color:var(--danger-texte);font-size:var(--pt-micro,12px);margin-top:10px"></div>'
     +'<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">'
-    +'<button onclick="document.getElementById(\'agt-paie-ov\').remove()" style="flex:1;'+bouton+';background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7)">Fermer</button>'
-    +'<button onclick="_agtPaieValider('+i+','+k+')" style="flex:1.4;'+bouton+';border:none;background:#86EFAC;color:#0C1A0A">'+(paye?'Corriger':'Enregistrer')+'</button></div>'
-    +(paye?'<button onclick="_agtPaieAnnuler('+i+','+k+')" style="width:100%;margin-top:8px;'+bouton+';background:none;border:1px solid rgba(239,68,68,0.3);color:#FCA5A5">Annuler le paiement</button>':'')
+    +'<button onclick="document.getElementById(\'agt-paie-ov\').remove()" style="flex:1;'+bouton+';background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);color:var(--texte)">Fermer</button>'
+    +'<button onclick="_agtPaieValider('+i+','+k+')" style="flex:1.4;'+bouton+';border:none;background:var(--ok-doux);color:var(--ok-texte)">'+(paye?'Corriger':'Enregistrer')+'</button></div>'
+    +(paye?'<button onclick="_agtPaieAnnuler('+i+','+k+')" style="width:100%;margin-top:8px;'+bouton+';background:none;border:1px solid var(--danger);color:var(--danger-texte)">Annuler le paiement</button>':'')
     +'</div>';
   document.body.appendChild(ov);
 }
@@ -5980,6 +5989,7 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+window.agtLogFiltre      = agtLogFiltre;   // GT-UI-7
 window.agtLeadRelance    = agtLeadRelance;   // GT-UI-6
 // ★ GT-UI-6 (§521) — ce que l'écran « Santé du système » (src/gt/sante.js) LIT.
 window._agtSanteDonnees = function(){
