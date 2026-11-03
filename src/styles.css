@@ -1528,7 +1528,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-tbl-titre{min-width:220px;}
 .agt-tbl-msg{display:block;color:var(--texte);font-weight:600;line-height:1.4;}
 .agt-tbl-sous{display:block;color:var(--texte-doux);font-size:var(--pt-micro,12px);margin-top:2px;}
-.agt-tbl-n{text-align:right;font-variant-numeric:tabular-nums;}
+.agt-tbl-n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.agt-fac .agt-tbl td:first-child{white-space:nowrap;}   /* GT-UI-5 : un numéro de facture ne se coupe pas */
 .mvpas.agt-sugg{background:transparent;border:1px dashed var(--ligne-forte);color:var(--texte-doux);}
 .agt-revenu{color:var(--danger-texte);font-weight:700;font-size:var(--pt-micro,12px);}
 .agt-inc-vide{padding:24px;text-align:center;color:var(--texte-doux);font-family:var(--font-ui);font-size:var(--pt-txt,13px);}
@@ -1587,13 +1588,32 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-sante-liste li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);}
 .agt-sante-liste li.alerte::before{background:var(--danger);}
 .agt-sante-liste li.attention::before{background:var(--attention);}
-.agt-sante-liste small{display:block;color:var(--texte-doux);font-size:var(--pt-micro,12px);}
+.agt-sante-liste small{display:block;grid-column:2;color:var(--texte-doux);font-size:var(--pt-micro,12px);}   /* GT-UI-5 : sous le libellé, pas dans la colonne du point */
 .agt-traces{display:flex;flex-direction:column;gap:8px;}
 .agt-trace{display:flex;align-items:flex-start;gap:12px;font-family:var(--font-ui);font-size:var(--pt-txt,13px);}
 .agt-trace-ic{flex-shrink:0;display:inline-flex;width:20px;justify-content:center;color:var(--texte-doux);}
 .agt-trace-t{flex:1;min-width:0;color:var(--texte);}
 .agt-trace-s{display:block;color:var(--texte-doux);font-size:var(--pt-micro,12px);}
 .agt-trace-q{flex-shrink:0;color:var(--texte-doux);font-size:var(--pt-micro,12px);}
+/* ★ GT-UI-5 (§520) — FACTURATION ET LEADS DE LA MAQUETTE : les barres des encaissements, le paiement saisi dans la fiche,
+   l'aperçu de la relance, le formulaire d'une facture ; les colonnes des demandes. */
+.agt-fac-barres{display:flex;align-items:flex-end;gap:8px;height:160px;}
+.agt-fac-mois{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0;}
+.agt-fac-val{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-med);font-variant-numeric:tabular-nums;}
+.agt-fac-barre{width:100%;background:var(--accent);border-radius:var(--r-xs,4px) var(--r-xs,4px) 0 0;}
+.agt-fac-barre.zero{background:var(--ligne-forte);height:2px !important;}
+.agt-fac-m{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-doux);}
+.agt-fac-champs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.agt-fac-champs label,.agt-fac-form label,.agt-fac-lbl{display:flex;flex-direction:column;gap:4px;font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-doux);}
+.agt-fac-relance{margin:0 0 8px;padding:12px;background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);white-space:pre-wrap;word-break:break-word;font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-med);line-height:1.5;}
+.agt-fac-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0;}
+.agt-fac-large{grid-column:1 / -1;}
+.agt-leads-cols{display:grid;grid-template-columns:repeat(5,minmax(176px,1fr));gap:12px;overflow-x:auto;align-items:start;}
+.agt-leads-col{background:var(--bg-doux);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.agt-leads-col-t{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 0;font-family:var(--font-ui);font-size:var(--pt-txt,13px);font-weight:700;color:var(--texte);}
+.agt-leads-fiche{display:flex;flex-direction:column;gap:4px;padding:12px;cursor:pointer;font-family:var(--font-ui);font-size:var(--pt-txt,13px);color:var(--texte);}
+.agt-leads-fiche.on{outline:2px solid var(--accent);outline-offset:-1px;}
+.agt-leads-note{color:var(--texte-med);font-size:var(--pt-micro,12px);}
 /* les écrans encore à l'ancien rendu (Facturation, Leads, Outils, Signalements) : leur fond sombre d'origine, encadré,
    jusqu'à leur refonte (GT-UI-5, GT-UI-6) — leurs couleurs écrites en dur restent lisibles. */
 .agt-ancien{background:#0F0B16;color:#E8E8E0;border-radius:var(--r-lg,12px);padding:16px;}

@@ -49,11 +49,7 @@ function blocVar(src, nom) {
   }
   throw new Error('accolade non fermée : ' + nom);
 }
-const FN = ['_agtEur', '_agtD', '_agtDateFr', '_agtCli', '_agtEmailValide', '_agtContactEmail', '_agtPlan', '_agtStatutOf', '_agtFacts', '_agtFType', '_agtIso', '_agtJours',
-  '_agtFEch', '_agtFRetard', '_agtFAn', '_agtInterne', '_agtRefEtat', '_agtFVent', '_agtFPayeLe', '_agtRefReglement', '_agtFEncInfo',
-  '_agtRefReste', '_agtBizSlugs', '_agtPaieDateErr', '_agtAboProchain', '_agtBizDu', '_agtBizEnc', '_agtBizFactTot', '_agtBizAnnee',
-  '_agtBizLignes', '_agtBizMois', '_agtBizTodoRows', '_agtLivreLignes', 'agtBizLivre', 'agtBizCsv', '_agtBizNextRef',
-  '_agtAboRemise', '_agtAboPrix', 'agtBizRelance'];
+const FN = ['_agtEur', '_agtD', '_agtDateFr', '_agtCli', '_agtEmailValide', '_agtContactEmail', '_agtRelanceFacture', '_agtPlan', '_agtStatutOf', '_agtFacts', '_agtFType', '_agtIso', '_agtJours', '_agtFEch', '_agtFRetard', '_agtFAn', '_agtInterne', '_agtRefEtat', '_agtFVent', '_agtFPayeLe', '_agtRefReglement', '_agtFEncInfo', '_agtRefReste', '_agtBizSlugs', '_agtPaieDateErr', '_agtAboProchain', '_agtBizDu', '_agtBizEnc', '_agtBizAnnee', '_agtBizLignes', '_agtBizMois', '_agtBizTodoRows', '_agtLivreLignes', 'agtBizLivre', 'agtBizCsv', '_agtBizNextRef', '_agtAboRemise', '_agtAboPrix', 'agtBizRelance'];   // GT-UI-5 : _agtBizFactTot parti(s) avec l’ancien écran
 function bloc(src) {
   return [blocVar(src, '_AGT_TY'), ligneVar(src, '_AGT_INST'), ligneVar(src, '_AGT_ECH_J'), ligneVar(src, '_AGT_PRIX'), ligneVar(src, '_AGT_MODES')]
     .concat(FN.map(n => fonction(src, n))).join('\n');
@@ -169,18 +165,22 @@ const LIB = {
   numerotation: '★ la numérotation compte TOUTES les factures, domaine supprimé compris',
   datePaiement: '★ la date d’un paiement : réelle, jamais dans le futur'
 };
+const SRC_FAC = readFileSync(new URL('../src/gt/facturation.js', import.meta.url), 'utf8');   // GT-UI-5 (§520) : la Facturation neuve
 function statiques(src) {
   const r = [];
   const fp = fonction(src, 'agtFactPaye');
   r.push([fp.indexOf('agt-paie-ov') !== -1 && !/f\.statut\s*=\s*\(f\.statut==='payee'\)/.test(fp), '★★ « payée » ouvre la saisie du paiement (date et mode), plus de bascule à la date du clic']);
   r.push([/window\._agtPaieValider=async function[\s\S]{0,600}_agtPaieDateErr\([\s\S]{0,400}f\.paye_le=d; f\.mode=mo;/.test(src), 'la saisie valide la date puis écrit la date ET le mode']);
-  r.push([/window\.agtBizLivre\s*=\s*agtBizLivre;/.test(src) && src.indexOf('onclick="agtBizLivre()"') !== -1, 'le livre des recettes a son bouton, et sa fonction est exposée']);
-  r.push([/window\.agtBizPer\s*=\s*agtBizPer;/.test(src) && src.indexOf('onclick="agtBizPer(') !== -1, 'la périodicité se règle sur la ligne d’abonnement']);
+  r.push([/window\.agtBizLivre\s*=\s*agtBizLivre;/.test(src) && (src + SRC_FAC).indexOf('onclick="agtBizLivre()"') !== -1,   // GT-UI-5 : le bouton vit dans src/gt/facturation.js
+    'le livre des recettes a son bouton, et sa fonction est exposée']);
+  r.push([/window\.agtBizPer\s*=\s*agtBizPer;/.test(src) && (src + SRC_FAC).indexOf('onclick="agtBizPer(') !== -1, 'la périodicité se règle sur la ligne d’abonnement']);
   r.push([fonction(src, 'agtBizRecap').indexOf('_agtRefReste(') !== -1, 'le récapitulatif imprimé dit le net à payer (reste dû)']);
-  r.push([fonction(src, '_agtBuildBusiness').indexOf('_agtRefReste(') !== -1 && fonction(src, '_agtBuildBusiness').indexOf('_agtBizSlugs()') !== -1,
+  // ★ GT-UI-5 (§520) : l'ancien écran est parti ; ce que lit l'écran neuf (window._agtFacDonnees) prend le reste dû et les domaines supprimés.
+  r.push([/var reste=\(ty==='geste'\)\?0:_agtRefReste\(x\.t\.slug, f\.ref\);/.test(src) && fonction(src, '_agtBizLignes').indexOf('_agtBizSlugs()') !== -1 && /_agtBizLignes\(0\)\.forEach/.test(src),
     'les chiffres du haut : retards nets, domaines supprimés compris']);
   // ★ GT-UI-4 (§519) : le Radar de la maquette dessine son geste dans une cellule — la même garde, autrement écrite.
-  r.push([(src.match(/if\(r\.b\) h\+='<button onclick="'\+r\.a\+'"/g) || []).length === 1 && src.indexOf("(r.b?'<button class=\"agt-btn agt-inc-court\" onclick=\"'+r.a+'\">'+r.b+'</button>':'')") !== -1,
+  r.push([(src.match(/if\(r\.b\) h\+='<button onclick="'\+r\.a\+'"/g) || []).length <= 1 &&   // GT-UI-5 : l'ancienne liste « À traiter » de la Facturation est partie avec son écran
+    src.indexOf("(r.b?'<button class=\"agt-btn agt-inc-court\" onclick=\"'+r.a+'\">'+r.b+'</button>':'')") !== -1,
     'une ligne sans geste n’affiche pas de bouton vide (Radar, À traiter)']);
   return r;
 }

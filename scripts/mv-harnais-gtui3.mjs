@@ -112,7 +112,7 @@ function statiques(S) {
   const r = [];
   const br = fonction(S.gt, 'agtBizRelance'), re = fonction(S.gt, 'agtRelanceEssai');
   const sansEnvoi = c => !/fbGtMaj\(|collection\(|fetch\(|httpsCallable|MAIL_COLLECTION/.test(c);
-  r.push([/window\.location\.href=href;/.test(br) && /var href='mailto:'\+_agtContactEmail\(t\.slug\)\+'\?subject='/.test(br) && sansEnvoi(br), '★★★ la relance de facture n’ouvre qu’un BROUILLON (mailto), adressé au contact — rien ne part sans « Envoyer »']);
+  r.push([/window\.location\.href=href;/.test(br) && /var href='mailto:'\+_agtContactEmail\((?:t|r)\.slug\)\+'\?subject='/.test(br) && sansEnvoi(br), '★★★ la relance de facture n’ouvre qu’un BROUILLON (mailto), adressé au contact — rien ne part sans « Envoyer »']);
   r.push([/window\.location\.href='mailto:'\+_agtContactEmail\(slug\)\+'\?subject='/.test(re) && sansEnvoi(re) && re.indexOf('_agtCliNoter(') !== -1, '★★★ la relance d’essai n’ouvre qu’un BROUILLON, et se note préparée (Annuler la retire)']);
   const tw = S.cl.slice(S.cl.indexOf('// ③ J+15 sec'), S.cl.indexOf('} catch (e) {', S.cl.indexOf('// ③ J+15 sec')));
   r.push([tw.length > 0 && tw.indexOf('to: [GT_EMAIL]') !== -1 && !/to:\s*\[who\.email\]/.test(tw) && tw.indexOf('Relance \\u00e0 faire') !== -1, '★★★ le serveur ne relance plus le client : il prévient Nicolas, « Relance à faire » (trialWatch)']);

@@ -1,8 +1,8 @@
 {
   "src/admin-gt.js": {
-    "dur": 99,
-    "petit": 61,
-    "ko": 409
+    "dur": 71,
+    "petit": 38,
+    "ko": 382
   },
   "src/app.js": {
     "dur": 85,
@@ -57,7 +57,7 @@
   "src/gt.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 1
+    "ko": 2
   },
   "src/ids.js": {
     "dur": 0,
@@ -127,7 +127,7 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 531
+    "ko": 532
   },
   "src/whats-new.js": {
     "dur": 0,
@@ -142,6 +142,6 @@
   "src/styles.css": {
     "dur": 237,
     "petit": 69,
-    "ko": 990
+    "ko": 1009
   }
 }

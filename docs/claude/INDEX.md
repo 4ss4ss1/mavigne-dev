@@ -573,3 +573,4 @@
 | 517 | 517. ★★★ GT-UI-2 — L’ÉCRAN INCIDENTS EN TABLEAU, LE RADAR TRIÉ, « ANNULER » APRÈS CHAQUE GESTE (02/11 — `sr… | `docs/claude/chantiers-480-529.md` |
 | 518 | 518. ★★★ GT-UI-3 — L’ÉCRAN CLIENTS PAR SANTÉ, LE CONTACT DE FACTURATION, AUCUNE RELANCE NE PART SEULE (02/1… | `docs/claude/chantiers-480-529.md` |
 | 519 | 519. ★★★ GT-UI-4 — LA CONSOLE SUR LA MAQUETTE : LA CHARTE CLAIRE ET SOMBRE, L’EN-TÊTE, LES PASTILLES, LE RA… | `docs/claude/chantiers-480-529.md` |
+| 520 | 520. ★★★ GT-UI-5 — FACTURATION ET LEADS SUR LA MAQUETTE (03/11 — `src/gt/facturation.js` (neuf) · `src/gt/l… | `docs/claude/chantiers-480-529.md` |

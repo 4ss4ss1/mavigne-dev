@@ -941,6 +941,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtui3.mjs --contre'],
   ['node scripts/mv-harnais-gtui4.mjs'],           // GT-UI-4 (§519) : la console sur la maquette — la charte claire et sombre, l'en-tête, les pastilles, le Radar en tableau
   ['node scripts/mv-harnais-gtui4.mjs --contre'],
+  ['node scripts/mv-harnais-gtui5.mjs'],           // GT-UI-5 (§520) : Facturation et Leads sur la maquette (l'argent du moteur de GTFIX-3, rien recalculé)
+  ['node scripts/mv-harnais-gtui5.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

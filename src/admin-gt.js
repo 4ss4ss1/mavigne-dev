@@ -130,8 +130,6 @@ var _agtSlugs      = [];  // memorise pour ne JAMAIS reecrire tenants sans ses s
 var _agtBilling    = {};  // _guerettech/billing {value:{slug:{fact:[...],note}}}  <- JAMAIS dans tenants
 var _agtLeads      = null; // null = pas encore lu / refuse ; [] = lu et vide
 var _agtLeadSt     = {};  // _guerettech/leads_status {value:{id:{st,note,ts}}}
-var _agtLeadFilter = 'ouverts';
-var _agtLeadOpen   = null;
 // --- SEC-GT : session ---
 var _AGT_IDLE_MS   = 15*60*1000;  // verrouillage apres 15 min sans interaction
 var _agtIdleT      = null;        // timer de verrouillage
@@ -253,7 +251,7 @@ async function _agtGuard(force){
 function _agtWipe(){
   _agtTenants=[]; _agtClients={}; _agtSlugs=[]; _agtBilling={}; _agtBillingBase={}; _agtLecturesKo=[]; _agtSuivi={};
   _agtLeads=null; _agtLeadSt={}; _agtLeadStBase={}; _agtEssais=[]; _agtAccessLog=[];
-  _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null; _agtLeadOpen=null;
+  _agtConnexions={}; _agtReportsGT=[]; _agtDemoStats=null;
   var b=document.getElementById('agt-body');
   if(b) b.innerHTML='';
   ['agt-sv0','agt-sv1','agt-sv2','agt-sv3'].forEach(function(id){
@@ -772,9 +770,9 @@ function agtRenderBody(){
   var tb=_AGT_TAB_MIGR[_agtTab]||_agtTab, ban=_agtBandeauLectures();
   if(tb==='radar')     body.innerHTML=ban+_agtBuildRadar();
   if(tb==='clients')   body.innerHTML=ban+_agtBuildClients();
-  if(tb==='business'){ body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildBusiness()+'</div>'; _agtBizFill(); }   // ★ GT-UI-4 : refait en GT-UI-5
+  if(tb==='business'){ body.innerHTML=ban+(window._agtFacturationVue ? window._agtFacturationVue(window._agtFacDonnees()) : ''); _agtBizFill(); }   // ★ GT-UI-5 : src/gt/facturation.js
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
-  if(tb==='leads')     body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildLeads()+'</div>';   // GT-UI-5
+  if(tb==='leads')     body.innerHTML=ban+(window._agtLeadsVue ? window._agtLeadsVue(window._agtLeadsDonnees()) : '');   // ★ GT-UI-5 : src/gt/leads.js
   if(tb==='outils')    body.innerHTML=ban+'<div class="agt-ancien">'+_agtBuildOutils()+'</div>';   // GT-UI-6
   _agtMajCompteurs();   // ★ GTFIX-4 (GT-B21)
   _agtEntete(tb);   // ★ GT-UI-4 : les résumés suivent les gestes
@@ -796,7 +794,7 @@ function _agtResume(tab){
 }
 function _agtActions(tab){
   if(tab==='clients') return '<button class="agt-tete-second" onclick="openOv(\'ovAddTenant\')">Nouveau client</button><button class="agt-tete-principal" onclick="agtOpenInstall()">Installer un domaine</button>';
-  if(tab==='business') return '<button class="agt-tete-second" onclick="agtBizLivre()">Livre des recettes</button>';
+  if(tab==='business') return '<button class="agt-tete-principal" onclick="agtFacNouvelle(-1)">+ Nouvelle facture</button>';   // GT-UI-5
   return '';
 }
 function _agtMajFraicheur(){
@@ -4837,7 +4835,6 @@ function _agtEur(n){
   var v=Math.round((Number(n)||0)*100)/100;
   return (v%1===0? String(v) : v.toFixed(2).replace('.',',')) + '\u00a0\u20ac';
 }
-function _agtHexId(id){ return (typeof id==='string' && /^[0-9a-f]{8,64}$/.test(id)) ? id : ''; }
 
 // Une date peut arriver en Timestamp Firestore, en ISO ou en ms.
 function _agtD(v){
@@ -5086,11 +5083,6 @@ function _agtBizEnc(slug){
   _agtFacts(slug).forEach(function(f){ s+=_agtFVent(slug,f).enc; });
   return s;
 }
-function _agtBizFactTot(slug, an){
-  var s=0;
-  _agtFacts(slug).forEach(function(f){ if(!an || _agtFAn(f)===an) s+=(Number(f.montant)||0); });
-  return s;
-}
 function _agtBizAnnee(){
   if(_agtBizAn) return _agtBizAn;
   return new Date().getFullYear();
@@ -5137,115 +5129,15 @@ function _agtBizMois(an){
   });
   return m;
 }
-function _agtMoisCourant(an){
-  var now=new Date();
-  return (an===now.getFullYear()) ? now.getMonth() : 11;
-}
 
 // G1 — cumul de l'annee. SVG en coordonnees 0..100, etire librement : seules
 // des lignes le traversent, et `non-scaling-stroke` garde leur epaisseur.
 // Graduations et mois sont en HTML, donc jamais deformes.
-function _agtBizG1(an){
-  var m=_agtBizMois(an), H=150, i;
-  var cf=[], ce=[], ca=[], sf=0, se=0, sa=0;
-  for(i=0;i<12;i++){ sf+=m[i].fact; se+=m[i].enc; sa+=m[i].abo; cf.push(sf); ce.push(se); ca.push(sa); }
-  var max=Math.max(100, Math.max.apply(null,cf))*1.12;
-  var X=function(k){ return (k*(100/11)).toFixed(2); };
-  var Y=function(v){ return ((1-v/max)*100).toFixed(2); };
-  var poly=function(a){ return a.map(function(v,k){ return (k?'L':'M')+X(k)+' '+Y(v); }).join(' '); };
-  var iN=_agtMoisCourant(an);
-
-  var svg='<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:'+H+'px;display:block">'
-    +'<path d="'+poly(cf)+' L100 100 L0 100 Z" fill="rgba(201,168,76,0.10)"/>'
-    +'<path d="'+poly(ca)+'" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>'
-    +'<path d="'+poly(cf)+'" fill="none" stroke="#C9A84C" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>'
-    +'<path d="'+poly(ce)+'" fill="none" stroke="#86EFAC" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>'
-    +'</svg>';
-
-  var h='<div style="display:flex;font-size:10px;color:rgba(255,255,255,0.3)">';
-  h+='<div style="width:46px;flex-shrink:0;height:'+H+'px;position:relative">'
-    +'<span style="position:absolute;right:6px;top:-5px">'+Math.round(max)+'</span>'
-    +'<span style="position:absolute;right:6px;top:'+(H/2-5)+'px">'+Math.round(max/2)+'</span>'
-    +'<span style="position:absolute;right:6px;top:'+(H-11)+'px">0</span></div>';
-  h+='<div style="flex:1;min-width:0;position:relative;height:'+H+'px">';
-  h+='<div style="position:absolute;inset:0;pointer-events:none">'
-    +'<div style="position:absolute;left:0;right:0;top:0;height:1px;background:rgba(255,255,255,0.07)"></div>'
-    +'<div style="position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,0.07)"></div>'
-    +'<div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(255,255,255,0.10)"></div></div>';
-  h+=svg+'</div></div>';
-  h+='<div style="display:flex"><div style="width:46px;flex-shrink:0"></div><div style="flex:1;display:flex">';
-  for(i=0;i<12;i++)
-    h+='<div style="flex:1;text-align:center;font-size:10px;padding-top:4px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS_L[i]+'</div>';
-  h+='</div></div>';
-  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:6px">Au '+_agtDateFr(new Date())+' \u2014 '
-    +'<b style="color:#E8C860">'+_agtEur(cf[iN])+'</b> factur\u00e9s, <b style="color:#86EFAC">'+_agtEur(ce[iN])+'</b> encaiss\u00e9s'
-    +(cf[iN]-ce[iN]>0?(' \u00b7 '+_agtEur(cf[iN]-ce[iN])+' en attente'):'')+'</div>';
-  return h;
-}
 
 // G2 — facture par mois, par nature. HTML pur : chaque segment est un <div>
 // dont la hauteur est un nombre de pixels calcule ici. Rien ne peut s'etirer.
-function _agtBizG2(an){
-  var m=_agtBizMois(an), HP=104, HN=34, iN=_agtMoisCourant(an);
-  var maxP=1, maxN=1;
-  m.forEach(function(o){
-    var p=o.abo+o.inst+o.heures;
-    if(p>maxP) maxP=p;
-    if(-o.geste>maxN) maxN=-o.geste;
-  });
-  var aucunGeste=!m.some(function(o){ return o.geste<0; });
-  if(aucunGeste) HN=0;
-
-  var h='<div style="display:flex;font-size:10px;color:rgba(255,255,255,0.3)">';
-  h+='<div style="width:40px;flex-shrink:0;position:relative;height:'+(HP+HN+1)+'px">'
-    +'<span style="position:absolute;right:6px;top:-4px">'+Math.round(maxP)+'</span>'
-    +'<span style="position:absolute;right:6px;top:'+(HP-6)+'px">0</span></div>';
-  h+='<div style="flex:1;min-width:0;display:flex;gap:2px">';
-  m.forEach(function(o,i){
-    h+='<div style="flex:1;min-width:0">';
-    h+='<div style="height:'+HP+'px;display:flex;flex-direction:column;justify-content:flex-end">';
-    [['heures','#3B82F6'],['inst','#8B5CF6'],['abo','#C9A84C']].forEach(function(p){
-      var v=o[p[0]]; if(v<=0) return;
-      h+='<div title="'+p[0]+'" style="height:'+Math.max(2,Math.round(v/maxP*HP))+'px;background:'+p[1]+';border-radius:2px 2px 0 0"></div>';
-    });
-    h+='</div>';
-    h+='<div style="height:1px;background:rgba(255,255,255,0.18)"></div>';
-    if(HN>0){
-      h+='<div style="height:'+HN+'px">';
-      if(o.geste<0) h+='<div style="height:'+Math.max(2,Math.round(-o.geste/maxN*HN))+'px;background:#C4B5FD;opacity:.85;border-radius:0 0 2px 2px"></div>';
-      h+='</div>';
-    }
-    h+='<div style="text-align:center;font-size:10px;padding-top:3px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS_L[i]+'</div>';
-    h+='</div>';
-  });
-  h+='</div></div>';
-  return h;
-}
 
 // G3 — solde par client. HTML pur, une ligne par domaine.
-function _agtBizG3(){
-  var cs=_agtTenants.filter(function(t){ return !_agtInterne(t.slug) && _agtFacts(t.slug).length; });
-  if(!cs.length) return '';
-  var max=1;
-  cs.forEach(function(t){
-    var v=Math.max(0,_agtBizEnc(t.slug))+Math.max(0,_agtBizDu(t.slug));
-    if(v>max) max=v;
-  });
-  var h='';
-  cs.forEach(function(t){
-    var e=Math.max(0,_agtBizEnc(t.slug)), d=Math.max(0,_agtBizDu(t.slug));
-    h+='<div style="margin-bottom:10px">';
-    h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">';
-    h+='<span style="flex:1;min-width:0;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(t.nom)+'</span>';
-    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(d>0?'#F97316':'#86EFAC')+'">'+(d>0?(_agtEur(d)+' d\u00fb'):'sold\u00e9')+'</span>';
-    h+='</div>';
-    h+='<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,0.05)">';
-    if(e>0) h+='<div style="width:'+(e/max*100).toFixed(1)+'%;background:#86EFAC"></div>';
-    if(d>0) h+='<div style="width:'+(d/max*100).toFixed(1)+'%;background:#F97316"></div>';
-    h+='</div></div>';
-  });
-  return h;
-}
 
 // ── Bloc « A traiter » : ce qui demande une action aujourd'hui ──────────────
 // Les lignes « a traiter » sont produites ici et rendues plus bas : le Radar
@@ -5328,46 +5220,7 @@ function _agtBizTodoRows(){
   return rows;
 }
 
-function _agtBizTodo(){
-  var rows=_agtBizTodoRows();
-  var urgent=rows.some(function(r){ return r.c==='#EF4444'; });
-  var h='<div style="background:'+(urgent?'rgba(249,115,22,0.06)':'rgba(255,255,255,0.04)')
-    +';border:1px solid '+(urgent?'rgba(249,115,22,0.22)':'rgba(255,255,255,0.1)')+';border-radius:12px;padding:12px 14px;margin-bottom:6px">';
-  if(!rows.length){
-    return h+'<div style="font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.35)">Rien \u00e0 traiter aujourd\u2019hui.</div></div>';
-  }
-  rows.forEach(function(r,i){
-    h+='<div style="display:flex;align-items:center;gap:9px;padding:7px 0;flex-wrap:wrap'
-      +(i<rows.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
-    h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
-    h+='<span style="flex:1;min-width:150px;font-size:var(--pt-txt,13px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
-    h+='<span style="font-size:var(--pt-txt,13px);font-weight:600">'+r.m+'</span>';
-    if(r.b) h+='<button onclick="'+r.a+'" style="background:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.14)':'rgba(255,255,255,0.07)')
-      +';border:1px solid '+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.3)':'rgba(255,255,255,0.12)')
-      +';border-radius:7px;padding:4px 10px;color:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'#E8C860':'rgba(255,255,255,0.6)')
-      +';font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+r.b+'</button>';
-    h+='</div>';
-  });
-  return h+'</div>';
-}
 
-function _agtBizKpi(v,l,c,s){
-  return '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center">'
-    +'<div style="font-size:var(--pt-md,20px);font-weight:600;color:'+c+'">'+v+'</div>'
-    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">'+l+'</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px">'+(s||'')+'</div></div>';
-}
-function _agtBizCard(titre, sous, corps, leg){
-  return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 14px">'
-    +'<div style="font-size:var(--pt-txt,13px);font-weight:600;color:rgba(255,255,255,0.75)">'+titre+'</div>'
-    +'<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);margin-bottom:10px">'+sous+'</div>'
-    +corps
-    +(leg?'<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-top:8px">'+leg+'</div>':'')
-    +'</div>';
-}
-function _agtBizLeg(col,txt){
-  return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:'+col+'"></i>'+txt+'</span>';
-}
 
 
 // ── Tarif reellement facture (lot D, 06/08/2026) ────────────────────────────
@@ -5464,16 +5317,6 @@ function agtBizCible(i){
   if(lb) lb.value='Offre de lancement \u2212 50 % sur '+String(f.libelle||_AGT_TY[_agtFType(f)].lbl).toLowerCase();
 }
 // Select de rattachement, affiche sur la ligne d'un geste orphelin.
-function _agtBizRatSel(i,k,slug){
-  var cs=_agtBizCibles(slug);
-  if(!cs.length) return '<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3)">Aucune facture \u00e0 laquelle rattacher cette remise.</div>';
-  var h='<select onchange="agtBizRattache('+i+','+k+',this.value)" style="width:100%;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.28);border-radius:8px;padding:7px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box">';
-  h+='<option value="">\u2192 Rattacher cette remise \u00e0\u2026</option>';
-  cs.forEach(function(c){
-    h+='<option value="'+c.k+'">'+_escHtml(c.ref)+' \u00b7 '+_escHtml(String(c.lib).slice(0,38))+' \u00b7 '+c.montant+' \u20ac</option>';
-  });
-  return h+'</select>';
-}
 
 // Rattachement d'un geste deja saisi mais tombe a cote (cas vecu en clientele).
 async function agtBizRattache(i,k,val){
@@ -5488,213 +5331,6 @@ async function agtBizRattache(i,k,val){
 }
 
 // ── Rendu de l'onglet ───────────────────────────────────────────────────────
-function _agtBuildBusiness(){
-  var an=_agtBizAnnee();
-  var mrr=0, pot=0, nActif=0, nEssai=0, nExp7=0, duA=0, caA=0, lateA=0;
-
-  _agtTenants.forEach(function(t){
-    if(_agtInterne(t.slug)) return;
-    var st=_agtStatutOf(t.slug), pr=_agtAboPrix(t.slug);
-    if(st.cle==='actif'){ mrr+=pr; nActif++; } else if(st.cle!=='aqualifier'){ pot+=pr; }   // ★ GTFIX-3 : « à qualifier » ne compte nulle part (GT-B14)
-    if(st.cle==='essai'){ nEssai++; if(st.jours<=7) nExp7++; }
-  });
-  // ★ GTFIX-3 : le dû, le facturé et les retards de TOUS les domaines facturés, supprimés compris (GT-B10) ;
-  //   les retards au reste dû, avoir déduit, une fois par référence (GT-B09).
-  _agtBizSlugs().forEach(function(x){
-    duA+=_agtBizDu(x.slug);
-    caA+=_agtBizFactTot(x.slug, an);
-    var vus={};
-    _agtFacts(x.slug).forEach(function(f){
-      if(_agtFRetard(f)<=0 || vus[f.ref||'']) return;
-      vus[f.ref||'']=1; lateA+=_agtRefReste(x.slug, f.ref);
-    });
-  });
-  var _mo=_agtBizMois(an), encA=0, aDaterA=0;
-  _mo.forEach(function(o){ encA+=o.enc; aDaterA+=o.aDater; });
-
-  var h='<div style="margin:0 0 12px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Revenu r\u00e9current, facturation et encaissements</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px">';
-  h+=_agtBizKpi(_agtEur(mrr)+'<span style="font-size:var(--pt-micro,11px);opacity:.5">/mois</span>','r\u00e9current','#86EFAC',nActif+' abonn\u00e9'+(nActif>1?'s':''));
-  h+=_agtBizKpi(_agtEur(pot)+'<span style="font-size:var(--pt-micro,11px);opacity:.5">/mois</span>','potentiel','#C4B5FD',nEssai+' essai'+(nEssai>1?'s':'')+(nExp7>0?' \u00b7 '+nExp7+' \u2264 7j':''));
-  h+=_agtBizKpi(_agtEur(duA),'\u00e0 encaisser',duA>0?'#F97316':'rgba(255,255,255,0.3)',lateA>0?('dont '+_agtEur(lateA)+' en retard'):'aucun retard');
-  h+=_agtBizKpi(_agtEur(caA),'factur\u00e9 en '+an,'#E8C860','tous types confondus');
-  h+=_agtBizKpi(_agtEur(encA),'encaiss\u00e9 en '+an,'#86EFAC',aDaterA?('dont '+_agtEur(aDaterA)+' \u00e0 dater'):'\u00e0 la date de paiement');
-  h+='</div>';
-  h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);line-height:1.6;margin:8px 0 16px">'
-    +'Un abonnement annuel (2 mois offerts) se saisit en <b>une seule ligne</b> couvrant 12 mois, pas en douze. '
-    +'Les domaines marqu\u00e9s <b>interne</b> sortent du r\u00e9current et des totaux.</div>';
-
-  h+='<div style="margin:0 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">\u00c0 traiter</div>';
-  h+=_agtBizTodo();
-
-  // Courbes
-  var annees=_agtBizAnnees();
-  h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0 8px">';
-  h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Courbes de l\u2019ann\u00e9e</span>';
-  annees.forEach(function(a){
-    h+='<button class="agt-chip'+(a===an?' on':'')+'" onclick="agtBizSetAn('+a+')">'+a+'</button>';
-  });
-  h+='</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:8px">';
-  h+=_agtBizCard('Cumul de l\u2019ann\u00e9e',
-      'Ce qui est factur\u00e9 face \u00e0 ce qui est r\u00e9ellement rentr\u00e9. L\u2019\u00e9cart, c\u2019est la tr\u00e9sorerie en attente.',
-      _agtBizG1(an),
-      _agtBizLeg('#C9A84C','Factur\u00e9 cumul\u00e9')+_agtBizLeg('#86EFAC','Encaiss\u00e9 cumul\u00e9')+_agtBizLeg('rgba(255,255,255,0.25)','Abonnements seuls'));
-  h+='</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:8px">';
-  h+=_agtBizCard('Factur\u00e9 par mois','Par nature. Les gestes commerciaux tirent sous la ligne.',
-      _agtBizG2(an),
-      _agtBizLeg('#C9A84C','Abonnement')+_agtBizLeg('#8B5CF6','Installation')+_agtBizLeg('#3B82F6','Heures')+_agtBizLeg('#C4B5FD','Geste'));
-  var g3=_agtBizG3();
-  h+=_agtBizCard('Solde par client','Ce qui est rentr\u00e9, ce qui reste d\u00fb.',
-      g3||'<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.2);padding:14px 0">Aucune ligne enregistr\u00e9e.</div>',
-      g3?(_agtBizLeg('#86EFAC','Encaiss\u00e9')+_agtBizLeg('#F97316','\u00c0 encaisser')):'');
-  h+='</div>';
-
-  h+='<div style="margin:18px 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Clients</div>';
-  if(_agtTenants.length===0){
-    return h+'<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucun client</div>';
-  }
-
-  _agtTenants.forEach(function(t,i){
-    var st=_agtStatutOf(t.slug), plan=_agtPlan(t.slug);
-    var rem=_agtAboRemise(t.slug), pr=_agtAboPrix(t.slug), plein=_AGT_PRIX[plan];
-    var inte=_agtInterne(t.slug), fs=_agtFacts(t.slug);
-    var duT=_agtBizDu(t.slug), encT=_agtBizEnc(t.slug);
-
-    h+='<div style="background:rgba(255,255,255,0.04);border:1px '+(inte?'dashed':'solid')+' rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-bottom:10px'+(inte?';opacity:.72':'')+'">';
-    h+='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">';
-    h+='<div style="flex:1;min-width:140px">';
-    h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#E8E8E0">'+_escHtml(t.nom)+'</div>';
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace;margin-top:2px">'+_escHtml(t.slug)+'</div>';
-    h+='</div><div style="text-align:right">';
-    h+= inte
-      ? '<div style="font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.35)">non factur\u00e9</div>'
-      : ('<div style="font-size:15px;font-weight:600;color:#E8E8E0">'
-          +(rem?('<span style="font-size:var(--pt-micro,12px);font-weight:400;color:rgba(255,255,255,0.3);text-decoration:line-through;margin-right:6px">'+_agtEur(plein)+'</span>'):'')
-          +_agtEur(pr)+'<span style="font-size:var(--pt-micro,11px);opacity:.45">/mois</span></div>');
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:2px">'+(_AGT_PLANL[plan]||plan)+'</div>';
-    if(rem) h+='<div style="font-size:var(--pt-lbl,10.5px);color:#C4B5FD;margin-top:2px">'+_escHtml(rem.motif||'')+'</div>';
-    h+='</div></div>';
-
-    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;align-items:center">';
-    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(inte?'rgba(255,255,255,0.4)':st.color)+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+(inte?'interne':st.label)+'</span>';
-    h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(t.membres==null?'\u2014':t.membres)+' utilisateur'+(t.membres>1?'s':'')+'</span>';
-    if(!inte && duT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#F97316;background:rgba(249,115,22,0.1);border-radius:20px;padding:3px 9px">'+_agtEur(duT)+' \u00e0 encaisser</span>';
-    if(!inte && encT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#86EFAC;background:rgba(134,239,172,0.08);border-radius:20px;padding:3px 9px">'+_agtEur(encT)+' encaiss\u00e9s</span>';
-    h+='<span style="flex:1"></span>';
-    if(!inte) h+='<button onclick="agtBizAbo('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);margin-right:10px" title="Facturer cet abonnement a un tarif different du tarif de la formule">'+(rem?'modifier le tarif remis\u00e9':'appliquer un tarif remis\u00e9')+'</button>';
-    h+='<button onclick="agtBizInterne('+i+')" style="background:none;border:none;color:rgba(255,255,255,0.28);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)" title="Un domaine interne sort du r\u00e9current et des totaux">'+(inte?'compter ce domaine':'marquer interne')+'</button>';
-    h+='</div>';
-
-    if(fs.length>0){
-      // Lot D : on regroupe PAR REFERENCE. Un geste s'affiche sous la facture
-      // qu'il corrige, en retrait, et une ligne « net a payer » dit ce que le
-      // client doit reellement. Les gestes tombes a cote sont isoles en fin de
-      // liste avec de quoi les rattacher : ils ne se voyaient pas et faussaient
-      // le solde (vecu en clientele : presque le double reclame).
-      var refs=[], vus={}, orph=[];
-      fs.forEach(function(f,k){
-        if(_agtFType(f)==='geste') return;
-        var r=String(f.ref||'');
-        if(vus[r]==null){ vus[r]=refs.length; refs.push({ ref:r, lignes:[], gestes:[], date:String(f.date||'') }); }
-        refs[vus[r]].lignes.push(k);
-      });
-      fs.forEach(function(f,k){
-        if(_agtFType(f)!=='geste') return;
-        var r=String(f.ref||'');
-        if(vus[r]!=null) refs[vus[r]].gestes.push(k); else orph.push(k);
-      });
-      refs.sort(function(x,y){ return y.date.localeCompare(x.date); });
-
-      var _ligne=function(k, retrait){
-        var f=fs[k], ty=_AGT_TY[_agtFType(f)], geste=(_agtFType(f)==='geste');
-        var paye=(f.statut==='payee'), ret=_agtFRetard(f), arm=(_agtFactArm===(i+':'+k));
-        var o='<div style="display:flex;align-items:center;gap:9px;padding:7px 0;flex-wrap:wrap'
-          +(retrait?';margin-left:20px;border-left:2px solid rgba(196,181,253,0.25);padding-left:10px':'')+'">';
-        o+='<span title="'+ty.lbl+'" style="width:17px;height:17px;border-radius:4px;flex-shrink:0;background:'+ty.col+';color:#0B0F14;font-size:var(--pt-nano,9.5px);font-weight:700;display:flex;align-items:center;justify-content:center">'+ty.ini+'</span>';
-        o+='<div style="flex:1;min-width:150px">';
-        if(!retrait) o+='<div style="font-family:monospace;font-size:var(--pt-lbl,12px);color:'+(paye?'rgba(255,255,255,0.3)':'#E8C860')+'">'+_escHtml(f.ref||'')
-          +'<span style="font-family:var(--font-ui,Outfit,sans-serif);color:rgba(255,255,255,0.28);margin-left:7px">'+_agtDateFr(f.date)+'</span></div>';
-        o+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35)'+(retrait?'':';margin-top:1px')+'">'+_escHtml(f.libelle||ty.lbl)
-          +(geste?'':' \u00b7 \u00e9ch\u00e9ance '+_agtDateFr(_agtFEch(f))+(ret>0?' <b style="color:#FCA5A5">retard '+ret+' j</b>':''))+'</div>';
-        o+='</div>';
-        o+='<span style="font-size:var(--pt-txt,13px);font-weight:600;color:'+(geste?'#C4B5FD':(paye?'#86EFAC':'#E8E8E0'))+'">'+_agtEur(f.montant)+'</span>';
-        // ★ GTFIX-3 : la périodicité d'un abonnement se règle sur sa ligne (GT-B13)
-        if(_agtFType(f)==='abo') o+='<button onclick="agtBizPer('+i+','+k+')" title="P\u00e9riodicit\u00e9 de l\u2019abonnement" style="background:none;border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;color:rgba(255,255,255,0.55);font-size:var(--pt-micro,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(f.per==='annuel'?'annuel':'mensuel')+'</button>';
-        o+= geste
-          ? '<span style="font-size:10px;border-radius:6px;padding:2px 8px;background:rgba(196,181,253,0.10);border:1px solid rgba(196,181,253,0.28);color:#C4B5FD">remise</span>'
-          : '<button onclick="agtFactPaye('+i+','+k+')" style="background:'+(paye?'rgba(134,239,172,0.1)':(ret>0?'rgba(239,68,68,0.1)':'rgba(255,255,255,0.06)'))
-            +';border:1px solid '+(paye?'rgba(134,239,172,0.25)':(ret>0?'rgba(239,68,68,0.3)':'rgba(255,255,255,0.12)'))
-            +';border-radius:6px;padding:2px 8px;color:'+(paye?'#86EFAC':(ret>0?'#FCA5A5':'rgba(255,255,255,0.5)'))
-            +';font-size:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(paye?('pay\u00e9e'+(_agtFPayeLe(f)?' le '+_agtDateFr(f.paye_le):' \u00b7 \u00e0 dater')):(ret>0?'en retard':'\u00e0 encaisser'))+'</button>';
-        if(!geste) o+='<button onclick="agtBizRecap('+i+','+k+')" title="R\u00e9capitulatif imprimable" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;color:rgba(255,255,255,0.5);font-size:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">PDF</button>';
-        o+='<button onclick="agtFactDel('+i+','+k+')" style="background:'+(arm?'rgba(239,68,68,0.18)':'none')+';border:none;border-radius:6px;padding:2px 7px;color:'+(arm?'#FCA5A5':'rgba(255,255,255,0.2)')+';font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(arm?'confirmer ?':'\u2715')+'</button>';
-        return o+'</div>';
-      };
-
-      h+='<div style="margin-top:11px;border-top:1px solid rgba(255,255,255,0.07);padding-top:4px">';
-      refs.forEach(function(g){
-        h+='<div style="border-top:1px solid rgba(255,255,255,0.045);padding-top:2px">';
-        g.lignes.forEach(function(k){ h+=_ligne(k,false); });
-        g.gestes.forEach(function(k){ h+=_ligne(k,true); });
-        if(g.gestes.length){
-          var net=0;
-          g.lignes.concat(g.gestes).forEach(function(k){ net+=(Number(fs[k].montant)||0); });
-          h+='<div style="display:flex;justify-content:flex-end;gap:10px;padding:2px 0 8px;font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.45)">'
-            +'<span>Net \u00e0 payer</span><b style="color:#E8E8E0">'+_agtEur(net)+'</b></div>';
-        }
-        h+='</div>';
-      });
-      if(orph.length){
-        h+='<div style="border-top:1px solid rgba(249,115,22,0.25);margin-top:6px;padding-top:8px">';
-        h+='<div style="font-size:var(--pt-lbl,10.5px);color:#F97316;font-weight:600;margin-bottom:4px">Remise'+(orph.length>1?'s':'')
-          +' rattach\u00e9e'+(orph.length>1?'s':'')+' \u00e0 aucune facture \u2014 non d\u00e9duite'+(orph.length>1?'s':'')+' du solde</div>';
-        orph.forEach(function(k){
-          h+=_ligne(k,false);
-          h+='<div style="margin:2px 0 10px 20px">'+_agtBizRatSel(i,k,t.slug)+'</div>';
-        });
-        h+='</div>';
-      }
-      h+='</div>';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.07);font-size:var(--pt-micro,12px)">'
-        +'<span style="color:rgba(255,255,255,0.35)">Solde du compte</span>'
-        +'<span style="font-weight:700;color:'+(duT>0?'#F97316':'#86EFAC')+'">'+(duT>0?(_agtEur(duT)+' \u00e0 encaisser'):'sold\u00e9')+'</span></div>';
-    }
-
-    // Formulaire d'ajout, replie
-    h+='<div id="agt-biz-f'+i+'" style="display:none;margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:10px">';
-    h+='<div id="agt-biz-sg'+i+'" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px">';
-    ['abo','inst','heures','geste'].forEach(function(kk){
-      h+='<button data-t="'+kk+'" class="agt-chip'+(( _agtBizTy[t.slug]||'abo')===kk?' on':'')+'" onclick="agtBizTy('+i+',\''+kk+'\')">'+_AGT_TY[kk].lbl+'</button>';
-    });
-    h+='</div>';
-    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:7px;margin-bottom:8px">';
-    h+='<div id="agt-biz-rw'+i+'"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">R\u00e9f\u00e9rence</div><input id="agt-biz-ref'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:monospace;box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Date</div><input id="agt-biz-dat'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">\u00c9ch\u00e9ance</div><input id="agt-biz-ech'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">P\u00e9riodicit\u00e9 (abonnement)</div><select id="agt-biz-per'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px;color:#F0E8DC;font-size:var(--pt-micro,12px);font-family:var(--font-ui,Outfit,sans-serif)"><option value="mensuel">Mensuel</option><option value="annuel">Annuel (12 mois)</option></select></div>';
-    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Montant HT</div><input id="agt-biz-mnt'+i+'" type="number" step="0.01" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-    h+='</div>';
-    h+='<div id="agt-biz-cw'+i+'" style="display:none;margin-bottom:8px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">S\u2019applique \u00e0</div>'+_agtBizCibleSel(i,t.slug,'')+'</div>';
-    h+='<div style="margin-bottom:9px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Libell\u00e9</div><input id="agt-biz-lib'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:var(--pt-sm,16px);font-family:var(--font-ui,Outfit,sans-serif);box-sizing:border-box"></div>';
-    h+='<button onclick="agtFactAdd('+i+')" style="background:#C9A84C;border:none;border-radius:8px;padding:9px 16px;color:#0C1A0A;font-size:var(--pt-micro,12px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Enregistrer la ligne</button>';
-    h+='<div id="agt-biz-hint'+i+'" style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);line-height:1.6;margin-top:8px"></div>';
-    h+='</div>';
-
-    h+='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">';
-    h+='<button onclick="agtBizForm('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:8px 0 0">+ Ajouter une ligne</button>';
-    if(fs.length>0) h+='<button onclick="agtBizReleve('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:8px 0 0">Relev\u00e9 de compte (PDF)</button>';
-    h+='</div>';
-    h+='</div>';
-  });
-
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">';
-  h+='<button onclick="agtBizCsv()" style="background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:7px 13px;color:#E8C860;font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Exporter toutes les lignes en CSV</button>';
-  h+='<button onclick="agtBizLivre()" style="background:rgba(134,239,172,0.12);border:1px solid rgba(134,239,172,0.3);border-radius:10px;padding:9px 14px;color:#86EFAC;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Livre des recettes '+_agtBizAnnee()+'</button>';   // ★ GTFIX-3 (D6)
-  h+='</div>';
-  return h;
-}
 
 // Valeurs par defaut posees EN JS apres innerHTML : un attribut value= ne serait
 // pas repris par Safari sur un champ date, et la reference se calcule.
@@ -5769,7 +5405,7 @@ function agtBizTy(i, k){
   _agtBizTy[t.slug]=k;
   var sg=document.getElementById('agt-biz-sg'+i);
   if(sg) Array.prototype.forEach.call(sg.children, function(b){
-    b.className='agt-chip'+((b.getAttribute('data-t')===k)?' on':'');
+    b.classList.toggle('on', b.getAttribute('data-t')===k);   // ★ GT-UI-5 : garde les classes de la fiche (.mvpas)
   });
   _agtBizFill();
 }
@@ -6046,9 +5682,10 @@ async function agtCliContactEnregistrer(slug, c){
     showToast('Contact enregistr\u00e9','#3D6B27'); agtRenderBody(); return true;
   }catch(e){ _agtEchecEcriture(e,'Contact du client'); return false; }
 }
-function agtBizRelance(i,k){
-  var t=_agtTenants[i]; if(!t) return;
-  var f=_agtFacts(t.slug)[k]; if(!f) return;
+// ★ GT-UI-5 (§520) — le texte d'une relance, à part : la fiche de la facture le montre en aperçu, le brouillon le reprend.
+function _agtRelanceFacture(i,k){
+  var t=_agtTenants[i]; if(!t) return null;
+  var f=_agtFacts(t.slug)[k]; if(!f) return null;
   var ret=_agtFRetard(f);
   var suj='Relance \u2014 '+(f.ref||'facture')+' \u00b7 '+t.nom;
   // ★ GTFIX-3 : la relance réclame le RESTE DÛ, avoir déduit (GT-B09) — 495 € et non 990 €.
@@ -6059,8 +5696,13 @@ function agtBizRelance(i,k){
     +(reste<brut?(' (facture de '+_agtEur(brut)+', avoir d\u00e9duit)'):'')+'.\n\n'
     +'Pourriez-vous me confirmer sa prise en charge ? Si le r\u00e8glement est d\u00e9j\u00e0 parti, merci de ne pas tenir compte de ce message.\n\n'
     +'Bien cordialement,\nNicolas Gu\u00e9ret \u2014 GUERETTECH\n';
+  return { suj:suj, txt:txt, dest:_agtContactEmail(t.slug), slug:t.slug };
+}
+function agtBizRelance(i,k){
+  var r=_agtRelanceFacture(i,k); if(!r) return;
+  var suj=r.suj, txt=r.txt;
   // ★ GT-UI-3 (D5) : le brouillon arrive adressé au contact de facturation s'il est connu — il ne part pas seul.
-  var href='mailto:'+_agtContactEmail(t.slug)+'?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt);
+  var href='mailto:'+_agtContactEmail(r.slug)+'?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt);
   try{ window.location.href=href; }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto relance',detail:(e&&e.message)||String(e)}); }
 }
@@ -6187,118 +5829,7 @@ function _agtLeadsSorted(){
   return a;
 }
 
-function _agtBuildLeads(){
-  var h='<div style="margin:0 0 14px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Demandes re\u00e7ues par le site</div>';
 
-  if(_agtLeads===null){
-    return h+'<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.22);border-radius:12px;padding:16px;font-size:var(--pt-txt,13px);color:#FDBA74;line-height:1.6">'
-      +'Lecture de la collection <span style="font-family:monospace">leads</span> refus\u00e9e ou indisponible. '
-      +'Elle est r\u00e9serv\u00e9e au compte GUERETTECH par les r\u00e8gles Firestore \u2014 v\u00e9rifier la connexion, puis recharger.</div>';
-  }
-
-  var all=_agtLeadsSorted();
-  var cnt={ nouveau:0, repondu:0, mer:0, installe:0, perdu:0 };
-  all.forEach(function(l){ cnt[_agtLeadStOf(l._id)]++; });
-
-  var vus=all.filter(function(l){
-    var st=_agtLeadStOf(l._id);
-    if(_agtLeadFilter==='ouverts')   return st!=='installe' && st!=='perdu';
-    if(_agtLeadFilter==='installes') return st==='installe';
-    return true;
-  });
-
-  function chip(f,l,n){
-    var on=(_agtLeadFilter===f);
-    return '<button onclick="agtLeadFilter(\'' + f + '\')" style="background:'+(on?'rgba(196,181,253,0.15)':'rgba(255,255,255,0.05)')+';border:1px solid '+(on?'rgba(196,181,253,0.35)':'rgba(255,255,255,0.1)')+';border-radius:20px;padding:5px 12px;color:'+(on?'#C4B5FD':'rgba(255,255,255,0.45)')+';font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);margin:0 6px 6px 0">'+l+' ('+n+')</button>';
-  }
-  h+='<div style="margin-bottom:14px">';
-  h+=chip('ouverts','\u00c0 traiter',cnt.nouveau+cnt.repondu+cnt.mer);
-  h+=chip('installes','Install\u00e9s',cnt.installe);
-  h+=chip('tous','Tout',all.length);
-  h+='</div>';
-
-  if(vus.length===0){
-    return h+'<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:var(--pt-txt,13px)">Aucune demande dans ce filtre</div>';
-  }
-
-  vus.forEach(function(l){
-    var id=_agtHexId(l._id);
-    var st=_agtLeadStOf(l._id), sd=_AGT_LEADST[st];
-    var ouvert=(_agtLeadOpen===l._id);
-    var note=(_agtLeadSt[l._id]&&_agtLeadSt[l._id].note)||'';
-
-    h+='<div style="background:rgba(255,255,255,0.04);border:1px solid '+(st==='nouveau'?'rgba(232,200,96,0.28)':'rgba(255,255,255,0.1)')+';border-radius:12px;padding:14px;margin-bottom:10px">';
-    h+='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">';
-    h+='<div style="flex:1;min-width:150px">';
-    h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#E8E8E0">'+_escHtml(l.domaine||'(sans nom)')+'</div>';
-    h+='<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.35);margin-top:3px">'
-      +[_escHtml([l.ville,l.cp].filter(Boolean).join(' ')), _escHtml(l.region||''), l.surface?_escHtml(l.surface)+' ha':'' ]
-        .filter(Boolean).join(' \u00b7 ')+'</div>';
-    h+='</div>';
-    h+='<div style="text-align:right">';
-    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+sd.c+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+sd.l+'</span>';
-    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);margin-top:4px">'+_agtDateFr(l.createdAt)+'</div>';
-    h+='</div></div>';
-
-    h+='<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
-      +_mvIcon('enveloppe',16)+' '+_escHtml(l.email||'')+(l.tel?' \u00b7 '+_escHtml(l.tel):'')+'</div>';
-
-    // ★ Le chemin se dedouble apres la mise en route : les REPONSES arrivent par la
-    //   fonction, les FICHIERS arrivent par mail. Rien ne disait ou en etait le second,
-    //   et un dossier pouvait dormir faute d'un KML sans que l'ecran le montre.
-    if(l.mer){
-      var _pj=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
-      h+='<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">';
-      h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#C4B5FD;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:2px 9px">R\u00e9ponses de mise en route</span>';
-      h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:'+(_pj?'#86EFAC':'#E8C860')+';background:rgba(255,255,255,0.05);border:1px solid '+(_pj?'rgba(134,239,172,0.35)':'rgba(232,200,96,0.35)')+';border-radius:20px;padding:2px 9px">'+(_pj?'Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces attendues')+'</span>';
-      h+='</div>';
-    }
-
-    if(ouvert){
-      var lignes=[
-        ['Utilisateurs', l.users], ['Parcelles', l.nbparc], ['Commune(s)', l.commune],
-        ['Parcellaire', l.parcellaire], ['Permanents', l.perm], ['Saisonniers', l.saiso],
-        ['Engins', l.engins], ['Conduite', l.conduite], ['Cuv\u00e9es', l.cuvees],
-        ['Modules', Array.isArray(l.modules)?l.modules.join(', '):'']
-      ].filter(function(x){ return x[1]; });
-      if(lignes.length){
-        h+='<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:9px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 12px">';
-        lignes.forEach(function(x){
-          h+='<div style="font-size:var(--pt-lbl,12px);color:rgba(255,255,255,0.4)"><span style="color:rgba(255,255,255,0.25)">'+x[0]+'</span> \u00b7 '+_escHtml(String(x[1]))+'</div>';
-        });
-        h+='</div>';
-      }
-      if(l.message){
-        h+='<div style="margin-top:9px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;font-size:var(--pt-micro,12px);color:rgba(255,255,255,0.55);line-height:1.6;white-space:pre-wrap">'+_escHtml(l.message)+'</div>';
-      }
-      if(note){
-        h+='<div style="margin-top:8px;font-size:var(--pt-lbl,12px);color:#C4B5FD">'+_mvIcon('crayon',16)+' '+_escHtml(note)+'</div>';
-      }
-      h+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
-      Object.keys(_AGT_LEADST).forEach(function(k){
-        var on=(st===k);
-        h+='<button onclick="agtLeadSet(\'' + id + '\',\'' + k + '\')" style="background:'+(on?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.04)')+';border:1px solid '+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.1)')+';border-radius:20px;padding:4px 10px;color:'+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.35)')+';font-size:var(--pt-micro,11px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+_AGT_LEADST[k].l+'</button>';
-      });
-      h+='</div>';
-      h+='<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">';
-      h+='<button onclick="agtLeadMail(\'' + id + '\')" style="background:#C9A84C;border:none;border-radius:8px;padding:7px 13px;color:#0C1A0A;font-size:var(--pt-lbl,12px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">R\u00e9pondre</button>';
-      h+='<button onclick="agtLeadCopy(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Copier l\u2019e-mail</button>';
-      h+='<button onclick="agtLeadNote(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">Note</button>';
-      if(l.mer){
-        var _pjb=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
-        h+='<button onclick="agtLeadPj(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid '+(_pjb?'rgba(134,239,172,0.4)':'rgba(232,200,96,0.4)')+';border-radius:8px;padding:7px 13px;color:'+(_pjb?'#86EFAC':'#E8C860')+';font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif)">'+(_pjb?'\u2713 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces re\u00e7ues ?')+'</button>';
-      }
-      h+='</div>';
-    }
-
-    h+='<button onclick="agtLeadOpen(\'' + id + '\')" style="background:none;border:none;color:rgba(196,181,253,0.55);font-size:var(--pt-lbl,12px);cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);padding:8px 0 0">'+(ouvert?'\u2013 Replier':'+ D\u00e9tail')+'</button>';
-    h+='</div>';
-  });
-  return h;
-}
-
-function agtLeadFilter(f){ _agtLeadFilter=f; agtRenderBody(); }
-function agtLeadOpen(id){ _agtLeadOpen=(_agtLeadOpen===id)?null:id; agtRenderBody(); }
 
 function _agtLeadById(id){
   return (_agtLeads||[]).filter(function(l){ return l._id===id; })[0]||null;
@@ -6382,8 +5913,6 @@ window.agtBizRattache    = agtBizRattache;
 window.agtFactAdd        = agtFactAdd;
 window.agtFactPaye       = agtFactPaye;
 window.agtFactDel        = agtFactDel;
-window.agtLeadFilter     = agtLeadFilter;
-window.agtLeadOpen       = agtLeadOpen;
 window.agtLeadSet        = agtLeadSet;
 window.agtLeadNote       = agtLeadNote;
 window.agtLeadMail       = agtLeadMail;
@@ -6415,6 +5944,44 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+// ★ GT-UI-5 (§520) — ce que l'écran Facturation (src/gt/facturation.js) LIT : le moteur de GTFIX-3, rien recalculé là-bas.
+window._agtFacDonnees = function(){
+  var an=_agtBizAnnee(), m=_agtBizMois(an), mf=[0,0,0,0,0,0,0,0,0,0,0,0], fac=[], mrr=0, du=0, retard=0, ech30=0, auj=Date.now();
+  _agtBizLignes(0).forEach(function(x){
+    var f=x.f, ty=_agtFType(f), e=_agtFEncInfo(x.t.slug, f), dd=_agtD(f.date);
+    if(e.enc && dd && dd.getFullYear()===an) mf[dd.getMonth()]+=e.enc;
+    var reste=(ty==='geste')?0:_agtRefReste(x.t.slug, f.ref);
+    fac.push({ i:x.i, k:x.k, slug:x.t.slug, client:x.t.nom, supprime:!!x.t.supprime, interne:_agtInterne(x.t.slug), ref:String(f.ref||''), type:ty,
+      typeLbl:String((_AGT_TY[ty]||{}).lbl||ty), libelle:String(f.libelle||''), date:String(f.date||''), echeance:String(_agtFEch(f)||''), montant:Number(f.montant)||0,
+      reste:reste, statut:String(f.statut||''), retardJ:_agtFRetard(f), payeLe:String(_agtFPayeLe(f)||''), mode:String(f.mode||''),
+      modeLbl:String(_AGT_MODES[f.mode]||''), per:String(f.per||'') });
+  });
+  // les restes par référence (une fois chacune), sur les domaines comptés
+  var vus={};
+  fac.forEach(function(f){
+    if(f.type==='geste' || f.interne || vus[f.slug+'|'+f.ref]) return; vus[f.slug+'|'+f.ref]=1;
+    if(!(f.reste>0) || f.statut==='payee') return;
+    du+=f.reste;
+    if(f.retardJ>0) retard+=f.reste;
+    else { var ech=Date.parse(f.echeance); if(ech && ech-auj<=30*86400000) ech30+=f.reste; }
+  });
+  _agtTenants.forEach(function(t){ if(!_agtInterne(t.slug) && _agtStatutOf(t.slug).cle==='actif') mrr+=_agtAboPrix(t.slug); });
+  return { factures:fac, an:an, annees:_agtBizAnnees(), moisPaiement:m.map(function(x){ return x.enc; }), moisFacture:mf,
+    kpis:{ mrr:mrr, du:du, retard:retard, ech30:ech30 },
+    clients:_agtTenants.map(function(t,i){ return { i:i, slug:t.slug, nom:t.nom, ty:(_agtBizTy[t.slug]||'abo') }; }),
+    types:['abo','inst','heures','geste'].map(function(kk){ return [kk, _AGT_TY[kk].lbl]; }),
+    avoirsDe:function(slug, ref){ var s2=0; _agtFacts(slug).forEach(function(f){ if(_agtFType(f)==='geste' && String(f.ref||'')===String(ref)) s2+=(Number(f.montant)||0); }); return s2; },
+    relance:function(i,k){ return _agtRelanceFacture(i,k); }, cible:function(i){ var t=_agtTenants[i]; return t ? _agtBizCibleSel(i, t.slug, '') : ''; },
+    cibles:function(slug){ return _agtBizCibles(slug); },   // les factures auxquelles rattacher une remise (agtBizRattache)
+    modes:_AGT_MODES, prochaine:_agtBizNextRef(), arme:_agtFactArm, aujourdhui:_agtIso(new Date()),
+    esc:_escHtml, eur:_agtEur, dateFr:function(x){ return x ? _agtDateFr(x) : '\u2014'; }, nombre:function(v){ return Math.round(v).toLocaleString('fr-FR'); } };
+};
+// ★ GT-UI-5 (§520) — ce que l'écran Leads (src/gt/leads.js) LIT.
+window._agtLeadsDonnees = function(){
+  return { leads:_agtLeadsSorted().map(function(l){ var e=_agtLeadSt[l._id]||{}; return Object.assign({}, l, { st:_agtLeadStOf(l._id), note:String(e.note||'') }); }),
+    st:Object.keys(_AGT_LEADST).reduce(function(o,k){ o[k]=_AGT_LEADST[k].l; return o; },{}), esc:_escHtml, dateFr:function(x){ return x ? _agtDateFr(x) : '\u2014'; } };
+};
+window._agtBizFill       = _agtBizFill;   // la nouvelle fiche pré-remplit son formulaire
 // ★ GT-UI-3 (§518) — ce que l'écran Clients (src/gt/clients.js) LIT de la console, et rien d'autre.
 window._agtCliDonnees = function(){
   return {
