@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — le coéquipier du tracteur et le journal, maquette v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--texte-pale:#A3A19B;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);--presse:rgba(28,26,22,.095);
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --rouge:#A0291E;--rouge-pale:#FAEAE8;--orange:#B85A1A;--orange-pale:#FBF0E6;
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--sur-accent:#FFFFFF;--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--ok-texte:#217343;
+  --attention:#A15C00;--attention-doux:rgba(161,92,0,.15);--attention-texte:#975600;
+  --danger:#C2381B;--danger-doux:rgba(194,56,27,.13);--danger-texte:#BA361A;
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --cadran-fond:#1F1E1B;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.17);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --cadran-fond:#0A0A09;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
+  --rouge:#E05545;--rouge-pale:rgba(224,85,69,0.22);--orange:#D4721A;--orange-pale:rgba(212,114,26,0.20);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.17);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.17);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.17);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --cadran-fond:#0A0A09;--cadran-texte:#F5F4F1;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ── page ── */
+.entete{position:sticky;top:0;z-index:20;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete nav a:hover{background:var(--survol)}
+.entete button{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:72ch;margin-bottom:22px;color:var(--texte-med);font-size:var(--pt-base)}
+.intro b{color:var(--texte)}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.mesure{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.mesure .k{font-size:var(--pt-xxl);font-weight:600;line-height:1.05}
+.mesure .k small{font-size:var(--pt-base);font-weight:400;color:var(--texte-med);margin-left:4px}
+.mesure .l{color:var(--texte);font-size:var(--pt-micro);margin-top:6px}
+.mesure .b{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:6px}
+.mesure code,.integ code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.92em;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:4px;padding:0 4px}
+section.ecart{margin:0 0 56px;padding-top:12px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med)}
+.ecart-tete .pourquoi{max-width:78ch;font-size:var(--pt-base)}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:28px 22px;align-items:start}
+@media (min-width:1000px){
+  .ecrans.deux-tel{grid-template-columns:410px 410px;justify-content:start}
+  .ecrans.trois-tel{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ecrans.trois-tel .legende-ecran{min-height:38px}
+}
+.legende-ecran{color:var(--texte-med);font-size:var(--pt-micro);margin:0 0 6px;max-width:400px}
+.legende-ecran b{color:var(--texte);font-weight:600}
+.sous-ecran{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:8px;max-width:400px}
+.demo{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 8px;max-width:400px;overflow-x:auto;scrollbar-width:none;padding:1px 0}
+.demo::-webkit-scrollbar{display:none}
+.demo button{flex:none;font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:6px 10px;min-height:36px;cursor:pointer}
+.demo button.ic{min-width:36px;padding:4px 10px;font-size:16px;line-height:1}
+.demo button:hover{background:var(--survol)}
+.demo button:active{transform:translateY(1px)}
+
+/* ── cadres ── */
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md)}
+.pc-corps{padding:0;overflow-x:auto}
+.tel{width:390px;max-width:100%;min-width:0;margin:0;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.tel.haut{height:812px}
+.tel:focus-visible{outline:3px solid var(--anneau);outline-offset:3px}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 6px;font-size:var(--pt-micro);color:var(--texte-med)}
+.tel-corps{padding:0 12px 14px}
+.tel-dock{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 12px;font-size:10px;color:var(--texte-doux);text-align:center}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+.tel-dock span i{display:block;width:40px;height:28px;margin:0 auto 3px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.tel-dock span.on i{background:var(--accent);border-color:var(--accent)}
+.bande{background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:6px 12px;display:flex;align-items:center;gap:10px}
+.bande .t{font-weight:600;font-size:var(--pt-sm)}
+.bande .s{color:var(--texte-med);font-size:var(--pt-nano);display:block;line-height:1.2}
+.ico{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);display:inline-block;background:var(--bg-doux);flex:none}
+.segment{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);padding:3px;margin:8px 12px}
+.segment span{flex:1;text-align:center;padding:7px 6px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med);min-height:36px;display:flex;align-items:center;justify-content:center}
+.segment span.on{background:var(--bg-card);color:var(--texte);font-weight:600;box-shadow:var(--shadow-sm)}
+
+/* ── pièces ── */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:10px}
+.carte h3{font-size:var(--pt-md);margin-bottom:4px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro);margin-bottom:8px}
+.etiq{display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.02em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne);white-space:nowrap}
+.etiq.ok{background:var(--ok-doux);color:var(--ok-texte);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention-texte);border-color:transparent}
+.etiq.danger{background:var(--danger-doux);color:var(--danger-texte);border-color:transparent}
+.ligne{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--ligne);font-size:var(--pt-base)}
+.ligne:first-child{border-top:0}
+.ligne .nom{font-weight:600;display:block}
+.ligne .sous{color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;display:block}
+.ligne .sous.att{color:var(--attention-texte)}
+.ligne .sous.danger{color:var(--danger-texte)}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:11px 16px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:44px;cursor:pointer;text-align:center;line-height:1.2}
+.bouton:hover{background:var(--survol)}
+.bouton:active{transform:translateY(1px)}
+.bouton.plein{background:var(--accent);color:var(--sur-accent);border-color:var(--accent)}
+.bouton.plein:hover{filter:brightness(1.06)}
+.bouton.plein[disabled]{background:var(--bg-doux);color:var(--texte-pale);border-color:var(--ligne);cursor:not-allowed;filter:none;transform:none}
+.bouton.petit{min-height:40px;padding:8px 12px;font-size:var(--pt-txt);white-space:nowrap;flex:none}
+.lien{background:none;border:0;color:var(--texte-med);font-size:var(--pt-txt);text-decoration:underline;text-underline-offset:3px;min-height:44px;cursor:pointer;padding:0 8px}
+.session{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--accent);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow-sm);margin-top:4px}
+.session .k{font-size:var(--pt-nano);font-weight:600;color:var(--accent-texte);letter-spacing:.02em}
+.session .t{font-family:var(--font-titre);font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+.session .pct{font-size:var(--pt-xxl);font-weight:600;line-height:1}
+.session .ligne-cpt{margin-top:8px;font-size:var(--pt-micro);color:var(--texte-med);display:flex;align-items:center;gap:6px;min-height:20px}
+.session .ligne-cpt.ok{color:var(--ok-texte)}
+.session .ligne-cpt.att{color:var(--attention-texte);font-weight:600}
+.jauge{height:10px;background:var(--bg-doux);border-radius:var(--r-full);overflow:hidden;border:1px solid var(--ligne)}
+.jauge i{display:block;height:100%;background:var(--vert-med)}
+.jauge.att i{background:var(--attention)}
+.jauge.danger i{background:var(--danger)}
+.deux-btn{display:flex;gap:8px;margin-top:12px}
+.deux-btn .bouton{flex:1}
+.kpi-ligne{display:flex;gap:14px;flex-wrap:wrap;color:var(--texte-med);font-size:var(--pt-micro);padding:8px 2px 2px}
+.kpi-ligne b{color:var(--texte);font-size:var(--pt-base);font-weight:600;margin-right:3px}
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.32);transition:opacity .25s cubic-bezier(.22,1,.36,1)}
+.feuille{position:absolute;left:0;right:0;bottom:0;background:var(--bg-card);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:8px 16px 14px;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s}
+.feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.cache{opacity:0;pointer-events:none}
+.feuille.cache{transform:translateY(24px)}
+.toast{position:absolute;left:12px;right:12px;bottom:86px;background:var(--inverse);color:var(--sur-inverse);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md);font-size:var(--pt-base);transition:opacity .25s,transform .3s cubic-bezier(.22,1,.36,1);z-index:5}
+.toast.cache{transform:translateY(10px)}
+.toast .annuler{color:#F1C2D6;font-weight:600;margin-left:auto;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.08);min-height:40px;border:0;cursor:pointer}
+:root[data-theme="dark"] .toast .annuler{color:var(--accent)}
+.toast .temps{height:3px;position:absolute;left:14px;right:14px;bottom:0;background:rgba(127,127,127,.25);border-radius:2px;overflow:hidden}
+.toast .temps i{display:block;height:100%;width:100%;background:#F1C2D6;border-radius:2px;transform-origin:left}
+.toast.court .temps,.toast.court .annuler{display:none}
+.toast.anim .temps i{animation:decompte 6s linear forwards}
+@keyframes decompte{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ── onglet Entretien ── */
+.tchips{display:flex;gap:6px;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}
+.tchips::-webkit-scrollbar{display:none}
+.tchip{flex:none;padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);font-size:var(--pt-txt);min-height:40px;display:inline-flex;align-items:center;gap:6px;color:var(--texte)}
+.tchip.on{background:var(--inverse);color:var(--sur-inverse);border-color:var(--inverse);font-weight:600}
+.pt{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.pt.danger{background:var(--danger)}
+.pt.att{background:var(--attention)}
+.pt.ok{background:var(--ok)}
+.tete-carte{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tete-carte .l{font-size:var(--pt-micro);color:var(--texte-med);font-weight:500}
+.gros{font-size:var(--pt-xxl);font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.gros .ap{color:var(--texte-doux);font-weight:500;margin-right:3px}
+.gros small{font-size:var(--pt-base);color:var(--texte-med);font-weight:500;margin-left:3px}
+.puce-est{display:flex;align-items:flex-start;gap:7px;font-size:var(--pt-micro);color:var(--texte-med);margin-top:4px}
+.puce-est i{flex:none;width:12px;height:0;border-top:2px dashed var(--texte-doux);display:inline-block;margin-top:8px}
+.plan-l{padding:10px 0;border-top:1px solid var(--ligne)}
+.plan-l:first-child{border-top:0;padding-top:2px}
+.plan-l .hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.plan-l .n{font-weight:600;font-size:var(--pt-base)}
+.plan-l .s{color:var(--texte-med);font-size:var(--pt-micro);margin-top:4px}
+.plan-l .jauge{margin-top:8px;height:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:var(--pt-txt);padding:8px 12px;border-radius:var(--r-full);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:40px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chip.on{background:var(--vert);border-color:var(--vert);color:#fff;font-weight:600}
+:root[data-theme="dark"] .chip.on{color:#0D0D0C}
+.groupe{margin-top:12px}
+.groupe > .l{font-size:var(--pt-micro);color:var(--texte-med);margin-bottom:6px;display:block}
+.resultat{margin-top:12px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:10px;padding:10px 12px;font-size:var(--pt-txt)}
+.resultat .l{font-size:var(--pt-micro);color:var(--texte-med)}
+.resultat div + div{margin-top:4px}
+.resultat b{font-weight:600}
+
+/* ── ordinateur ── */
+.pc-deux{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);min-height:560px;min-width:860px}
+.pc-fiche{display:grid;grid-template-columns:150px 210px minmax(0,1fr);min-height:640px;min-width:1100px}
+.rail{background:var(--bg-card);border-right:1px solid var(--ligne);padding:12px}
+.rail .logo{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin-bottom:10px}
+.rail .grp{font-size:var(--pt-nano);color:var(--texte-doux);margin:10px 0 4px}
+.rail .it{padding:7px 8px;border-radius:8px;font-size:var(--pt-txt);display:flex;align-items:center;gap:8px;min-height:36px}
+.rail .it.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.colonne{padding:16px;border-right:1px solid var(--ligne);background:var(--bg-app)}
+.colonne:last-child{border-right:0}
+.colonne.claire{background:var(--bg-card)}
+.colonne h4{margin:0 0 8px;font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600}
+.tliste{background:var(--bg-app);border-right:1px solid var(--ligne);padding:12px 8px}
+.tliste h4{margin:4px 6px 8px;font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600}
+.titem{display:block;padding:9px 10px;border-radius:10px;margin-bottom:4px;border:1px solid transparent}
+.titem.on{background:var(--bg-card);border-color:var(--ligne);box-shadow:var(--shadow-sm)}
+.titem .n{font-weight:600;font-size:var(--pt-txt);display:flex;align-items:center;gap:6px}
+.titem .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.detail{background:var(--bg-card);padding:16px 18px}
+.detail h3{font-size:var(--pt-lg)}
+.grille-2{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:12px}
+.grille-2b{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
+.plan-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 22px}
+.plan-grille .plan-l{border-top:0;padding-top:2px}
+.encadre .tete-enc{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.encadre .tete-enc h5{margin:0}
+.releves td:first-child,.releves td.r,.releves th{white-space:nowrap}
+.encadre{border:1px solid var(--ligne);border-radius:var(--r-lg);padding:12px 14px;background:var(--bg-card)}
+.encadre h5{margin:0 0 8px;font-size:var(--pt-base);font-weight:600}
+.appris{display:grid;gap:8px;font-size:var(--pt-txt);color:var(--texte-med)}
+.appris b{color:var(--texte);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:var(--pt-txt)}
+th{text-align:left;font-size:var(--pt-nano);font-weight:600;color:var(--texte-med);letter-spacing:.02em;padding:6px 8px;border-bottom:1px solid var(--ligne-forte);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--ligne);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr.estime td{background:var(--bg-doux);color:var(--texte-med)}
+tr.manque td{color:var(--texte-doux)}
+tr .act{opacity:0;transition:opacity .2s}
+tr:hover .act,tr:focus-within .act{opacity:1}
+.act a{color:var(--accent-texte);font-size:var(--pt-micro);margin-left:8px;text-decoration:none}
+.graph svg{width:100%;height:auto;display:block}
+.graph text{font-family:var(--font-ui);font-size:11px;fill:var(--texte-doux)}
+.legende-graph{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--pt-micro);color:var(--texte-med);margin-top:6px}
+.legende-graph span{display:inline-flex;align-items:center;gap:6px}
+
+/* ── constat, grands, règles, intégration ── */
+.grands{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.grand{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.grand h3{font-size:var(--pt-md)}
+.grand .cat{font-size:var(--pt-micro);color:var(--texte-doux)}
+.grand p{font-size:var(--pt-txt);color:var(--texte-med)}
+.grand .retenir{margin-top:auto;padding-top:8px;border-top:1px solid var(--ligne);color:var(--texte);font-weight:500}
+.principes{margin-top:14px;background:var(--bg-card);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);padding:14px 18px}
+.principes h3{font-size:var(--pt-md);margin-bottom:6px}
+.principes ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:var(--pt-base)}
+.regles{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.regle{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:16px}
+.regle h3{font-size:var(--pt-md);margin-bottom:6px}
+.regle p{font-size:var(--pt-txt);color:var(--texte-med)}
+.regle .qui{display:inline-block;font-size:var(--pt-nano);font-weight:600;color:var(--accent-texte);background:var(--accent-doux);border-radius:var(--r-full);padding:2px 8px;margin-bottom:8px}
+.pourquoi-pas{margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:900px){.pourquoi-pas{grid-template-columns:1.3fr 1fr}}
+.pourquoi-pas .carte p{font-size:var(--pt-base);color:var(--texte-med);max-width:72ch}
+.pourquoi-pas .carte p + p{margin-top:8px}
+.pourquoi-pas .carte b{color:var(--texte)}
+.integ{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:900px){.integ{grid-template-columns:1fr 1fr}}
+.integ .carte p,.integ .carte li{font-size:var(--pt-txt);color:var(--texte-med)}
+.integ .carte ul{margin:6px 0 0;padding-left:18px;display:grid;gap:6px}
+.integ .carte b{color:var(--texte);font-weight:600}
+.lots{display:grid;gap:8px;margin-top:6px}
+.lot{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;align-items:baseline;font-size:var(--pt-txt);color:var(--texte-med)}
+.lot b{color:var(--texte);font-weight:600}
+footer{color:var(--texte-doux);font-size:var(--pt-micro);border-top:1px solid var(--ligne-forte);padding-top:14px;max-width:90ch}
+@media (max-width:520px){
+  .page{padding:20px 12px 64px}
+  .entete{padding:10px 12px}
+  .tel{border-width:7px;border-radius:32px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ══ COEQ — ajouts de cette maquette (même charte) ══ */
+:root{--acier:#3F6E8C;--acier-doux:rgba(63,110,140,.13);--acier-texte:#335B75}
+:root[data-theme="dark"]{--acier:#7FB0CF;--acier-doux:rgba(127,176,207,.16);--acier-texte:#9CC4DE}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){--acier:#7FB0CF;--acier-doux:rgba(127,176,207,.16);--acier-texte:#9CC4DE} }
+.pc{position:relative}
+.mv-ic{display:inline-block;vertical-align:-3px;flex:none}
+
+/* avatars : une initiale dans un rond, la couleur de la personne */
+.av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex:none;box-shadow:0 0 0 2px var(--bg-card);line-height:1}
+.av.p{width:20px;height:20px;font-size:10px;box-shadow:0 0 0 1.5px var(--bg-card)}
+.av-grp{display:inline-flex;align-items:center;flex:none}
+.av-grp .av + .av{margin-left:-7px}
+.av-m{background:#355C7D}.av-l{background:#B85A1A}.av-h{background:#6B4E9B}.av-i{background:#2A7F62}.av-c{background:#9C3D54}
+.av-x{background:var(--bg-doux);color:var(--texte-doux);box-shadow:0 0 0 2px var(--bg-card),inset 0 0 0 1px var(--ligne-forte)}
+
+/* la feuille de session, au téléphone */
+.tel.app{height:812px}
+.derriere{height:58px;background:var(--bg-app);padding:0 14px;display:flex;align-items:center;gap:10px;color:var(--texte-doux);font-size:var(--pt-micro);filter:saturate(.6);opacity:.55}
+.modal{position:absolute;left:0;right:0;top:86px;bottom:0;background:var(--bg-card);border-radius:22px 22px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.16);display:flex;flex-direction:column;overflow:hidden}
+.modal .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:8px auto 6px;flex:none}
+.defile{overflow-y:auto;flex:1;padding:2px 14px 28px;overscroll-behavior:contain;scrollbar-width:thin}
+.m-titre{font-family:var(--font-titre);font-size:var(--pt-xl);font-weight:600;line-height:1.1}
+.m-sous{color:var(--texte-med);font-size:var(--pt-micro);margin-top:2px}
+.avance{border-radius:12px;background:var(--bg-doux);border:1px solid var(--ligne);padding:10px 12px;margin-top:10px}
+.avance .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.avance .n{font-size:var(--pt-micro);font-weight:600;color:var(--texte-med)}
+.avance .jauge{height:8px}
+.avance .jauge i{background:var(--acier);transition:width .35s cubic-bezier(.22,1,.36,1)}
+.avance .bouton.petit{min-height:36px;padding:6px 12px;background:var(--acier);border-color:var(--acier);color:#fff}
+.encart{display:flex;align-items:center;gap:10px;border:1px solid var(--ligne);border-radius:12px;padding:8px 8px 8px 12px;margin-top:8px;background:var(--bg-card);min-height:56px}
+.encart .txt{flex:1;min-width:0}
+.encart .t{font-weight:600;font-size:var(--pt-base);line-height:1.25}
+.encart .s{color:var(--texte-med);font-size:var(--pt-micro);line-height:1.3}
+.encart .pt-trac{width:9px;height:9px;border-radius:50%;background:var(--vert-med);flex:none;margin:0 2px}
+.encart.neuf{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.encart.flash{animation:flash .9s cubic-bezier(.22,1,.36,1)}
+@keyframes flash{0%{background:var(--accent-doux)}100%{background:var(--bg-card)}}
+.marque-neuf{display:inline-block;font-size:var(--pt-nano);font-weight:600;color:var(--accent-texte);background:var(--accent-doux);border-radius:var(--r-full);padding:1px 7px;margin-left:6px;vertical-align:1px}
+.lbl-sec{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 4px}
+.lbl-sec .l{font-size:var(--pt-micro);font-weight:600;color:var(--texte-doux)}
+.lbl-sec .mini-g{display:flex;gap:6px}
+.mini{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);border-radius:var(--r-full);padding:4px 10px;min-height:32px;color:var(--texte-med);display:inline-flex;align-items:center}
+.prow{display:flex;align-items:center;gap:10px;padding:10px 4px;border:0;border-bottom:1px solid var(--ligne);min-height:56px;cursor:pointer;width:100%;background:none;text-align:left;font:inherit;color:inherit}
+.prow:hover{background:var(--survol)}
+.prow:active{background:var(--presse)}
+.prow .ck{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--ligne-forte);flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.prow .n{font-weight:600;font-size:var(--pt-base);display:block}
+.prow .s{color:var(--texte-med);font-size:var(--pt-micro);display:block}
+.prow .r{margin-left:auto;text-align:right;color:var(--texte-med);font-size:var(--pt-micro);white-space:nowrap;display:flex;align-items:center;gap:8px}
+.jour-g{margin-top:8px;border:1px solid var(--ligne);border-radius:12px;background:var(--bg-card);overflow:hidden}
+.jour-g .hd{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;background:var(--bg-doux);border-bottom:1px solid var(--ligne);min-height:52px}
+.jour-g .hd .txt{flex:1;min-width:0}
+.jour-g .hd .t{font-weight:600;font-size:var(--pt-txt);line-height:1.25}
+.jour-g .hd .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.jour-g .ln{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--ligne);font-size:var(--pt-txt);min-height:44px}
+.jour-g .ln:first-of-type{border-top:0}
+.jour-g .ln .ck{width:20px;height:20px;border-radius:6px;background:var(--vert-med);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.jour-g .ln .n{font-weight:600}
+.jour-g .ln .r{margin-left:auto;color:var(--texte-med);font-size:var(--pt-micro);white-space:nowrap;display:flex;align-items:center;gap:8px}
+.jour-g .trace{font-size:var(--pt-nano);color:var(--accent-texte);padding:0 12px 8px}
+.bouton.corr{min-height:40px;padding:6px 12px;font-size:var(--pt-txt);flex:none}
+
+/* les feuilles « Changer » et « Corriger » */
+.feuille.haute{max-height:calc(100% - 40px);overflow-y:auto;z-index:4;padding-bottom:18px}
+.voile{z-index:3}
+.groupe-t{font-size:var(--pt-micro);color:var(--texte-med);margin:14px 0 6px;display:block}
+.choix{display:grid;gap:6px}
+.opt-r{display:flex;align-items:center;gap:10px;border:1px solid var(--ligne);border-radius:12px;padding:8px 12px;min-height:48px;background:var(--bg-card);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.opt-r:hover{background:var(--survol)}
+.opt-r .rd{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ligne-forte);flex:none}
+.opt-r[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.opt-r[aria-checked="true"] .rd{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 4px var(--bg-card)}
+.opt-r .t{font-weight:600;font-size:var(--pt-base)}
+.opt-r .s{display:block;color:var(--texte-med);font-size:var(--pt-micro);font-weight:400;line-height:1.3}
+.opt-r .bord{margin-left:auto}
+.opt-r[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.opt-r .txt{flex:1;min-width:0}
+.ck-jour{display:flex;align-items:center;gap:10px;padding:8px 2px 4px;font-size:var(--pt-micro);font-weight:600;color:var(--texte-doux);background:none;border:0;width:100%;cursor:pointer;min-height:40px;text-align:left;font-family:inherit}
+.ck-l{display:flex;align-items:center;gap:10px;padding:6px 2px;border:0;border-bottom:1px solid var(--ligne);background:none;width:100%;text-align:left;cursor:pointer;min-height:44px;font:inherit;color:inherit}
+.ck-l:hover,.ck-jour:hover{background:var(--survol)}
+.cb{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--ligne-forte);flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+[aria-checked="true"] > .cb{background:var(--accent);border-color:var(--accent)}
+[aria-checked="mixed"] > .cb{background:var(--accent-doux);border-color:var(--accent)}
+.ck-l .n{font-weight:600}
+.ck-l .r{margin-left:auto;color:var(--texte-med);font-size:var(--pt-micro);display:flex;align-items:center;gap:6px}
+.pied-f{display:grid;gap:2px;margin-top:14px}
+.pied-f .bouton{min-height:48px}
+.resume-f{font-size:var(--pt-micro);color:var(--texte-med);margin-top:10px;line-height:1.4}
+
+/* le journal, au téléphone */
+.j-jour{font-size:var(--pt-micro);font-weight:600;color:var(--texte-doux);margin:14px 2px 6px;display:flex;justify-content:space-between}
+.jl{background:var(--bg-card);border:1px solid var(--ligne);border-left:4px solid var(--vert-med);border-radius:12px;padding:10px 12px;margin-bottom:6px;box-shadow:var(--shadow-sm)}
+.jl.trac{border-left-color:var(--acier)}
+.jl .hd{display:flex;align-items:flex-start;gap:8px}
+.jl .hd .txt{flex:1;min-width:0}
+.jl .t{font-weight:600;font-size:var(--pt-base);line-height:1.25}
+.jl .s{color:var(--texte-med);font-size:var(--pt-micro);line-height:1.3}
+.jl .h{color:var(--texte-doux);font-size:var(--pt-micro);white-space:nowrap}
+.jl .qui{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:var(--pt-txt);min-height:28px}
+.jl .qui .noms{flex:1;min-width:0}
+.jl .dep{background:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);min-height:36px;padding:4px 10px;font-size:var(--pt-micro);color:var(--texte-med);cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
+.jl .dep:hover{background:var(--survol)}
+.jl .dep[aria-expanded="true"] .mv-ic{transform:rotate(180deg)}
+.jl .parcs{margin-top:8px;border-top:1px solid var(--ligne)}
+.jl .pl{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--ligne);font-size:var(--pt-micro)}
+.jl .pl:last-child{border-bottom:0}
+.jl .pl .n{font-weight:600;font-size:var(--pt-txt)}
+.jl .pl .r{margin-left:auto;color:var(--texte-med);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.etiq.trac{background:var(--acier-doux);color:var(--acier-texte);border-color:transparent}
+.jl.avant{border-left-color:var(--danger)}
+.jl.avant .qui{color:var(--danger-texte)}
+
+/* ordinateur */
+.pc-trac{display:grid;grid-template-columns:150px 236px minmax(0,1fr);min-height:660px;min-width:1100px}
+.pc-app{display:grid;grid-template-columns:150px 176px minmax(0,1fr) 340px;min-height:640px;min-width:1180px}
+.filtres{background:var(--bg-app);border-right:1px solid var(--ligne);padding:14px 10px}
+.filtres h4{margin:0 0 6px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;color:var(--texte-doux)}
+.filtres .opt{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:8px;font-size:var(--pt-txt);min-height:36px;width:100%;background:none;border:1px solid transparent;cursor:pointer;font-family:inherit;color:inherit;text-align:left}
+.filtres .opt:hover{background:var(--survol)}
+.filtres .opt.on{background:var(--bg-card);border-color:var(--ligne);font-weight:600}
+.filtres .opt .n{color:var(--texte-doux);font-size:var(--pt-nano)}
+.liste{background:var(--bg-app);border-right:1px solid var(--ligne)}
+.liste .tete{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-card);border-bottom:1px solid var(--ligne)}
+.liste .tete .t{font-weight:600;font-size:var(--pt-sm)}
+.liste .tete .n{color:var(--texte-med);font-size:var(--pt-micro)}
+.lig{display:grid;grid-template-columns:52px 46px minmax(0,1fr) 92px 50px;gap:8px;align-items:center;padding:0 12px;min-height:52px;white-space:nowrap;border:0;border-bottom:1px solid var(--ligne);font-size:var(--pt-txt);background:var(--bg-card);width:100%;text-align:left;cursor:pointer;font-family:inherit;color:inherit}
+.lig:hover{background:var(--survol)}
+.lig.sel{background:var(--accent-doux);box-shadow:inset 3px 0 0 var(--accent)}
+.lig .d{color:var(--texte-doux);font-size:var(--pt-micro)}
+.lig .p{color:var(--texte-med)}
+.lig > span{overflow:hidden;text-overflow:ellipsis}
+.lig small{display:block;font-size:var(--pt-nano);color:var(--texte-doux);line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.lig .h{color:var(--texte-doux);font-size:var(--pt-micro);text-align:right}
+.detail .dl{display:grid;grid-template-columns:108px minmax(0,1fr);gap:6px 12px;font-size:var(--pt-txt);margin-top:12px}
+.detail .dl dt{color:var(--texte-med)}
+.detail .dl dd{margin:0}
+.detail .act-d{display:flex;gap:8px;margin-top:14px}
+.detail .act-d .bouton{flex:1}
+.detail .trace{font-size:var(--pt-micro);color:var(--accent-texte);margin-top:8px}
+.tliste .titem{cursor:default}
+.tliste .grp-t{font-size:var(--pt-nano);color:var(--texte-doux);margin:12px 8px 6px}
+.fiche-tr{background:var(--bg-card);padding:18px 20px}
+.fiche-tr .hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.fiche-tr h3{font-size:var(--pt-xl)}
+.fiche-tr .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.kpi{border:1px solid var(--ligne);border-radius:var(--r-lg);padding:10px 12px;background:var(--bg-card)}
+.kpi .l{font-size:var(--pt-micro);color:var(--texte-med)}
+.kpi .v{font-size:var(--pt-lg);font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:var(--pt-txt);color:var(--texte-med);font-weight:400}
+.kpi .s{font-size:var(--pt-nano);color:var(--texte-doux)}
+.sec-t{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+.cellp{display:flex;align-items:center;gap:8px}
+td .bouton.corr{min-height:36px}
+tr.corrige td{background:var(--accent-doux)}
+.trace-t{display:block;font-size:var(--pt-nano);color:var(--accent-texte)}
+.dlg-voile{position:absolute;inset:0;background:rgba(0,0,0,.32);z-index:6;display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .25s}
+.dlg{width:440px;max-width:100%;max-height:100%;overflow-y:auto;background:var(--bg-card);border-radius:16px;box-shadow:var(--shadow-md);padding:18px 20px}
+.dlg-voile.cache{opacity:0;pointer-events:none}
+.pc .toast{left:auto;right:18px;bottom:18px;width:420px}
+.calc td.r,.calc th.r{font-variant-numeric:tabular-nums}
+.calc tr.tot td{font-weight:600;border-top:1.5px solid var(--ligne-forte)}
+.calc .faux{color:var(--danger-texte)}
+.calc .juste{color:var(--ok-texte)}
+.calc-wrap{overflow-x:auto}
+.decisions{display:grid;gap:10px}
+.dec{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.dec .num-d{font-family:var(--font-titre);font-size:var(--pt-xl);font-weight:600;color:var(--accent-texte);line-height:1}
+.dec h3{font-size:var(--pt-md);margin-bottom:4px}
+.dec p{font-size:var(--pt-txt);color:var(--texte-med);max-width:80ch}
+.dec p + p{margin-top:6px}
+.dec .reco{color:var(--texte);font-weight:500}
+.dec .reco b{color:var(--accent-texte)}
+@media (min-width:1000px){ .ecrans.deux-tel{grid-template-columns:410px 410px} }
+@media (max-width:520px){ .tel.app{height:760px} }
+.grand .src{font-size:var(--pt-nano);color:var(--texte-doux);text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.grand .src:hover{color:var(--texte)}
+.titem .s{display:block}
+tr.tot td{font-weight:600;border-top:1.5px solid var(--ligne-forte)}
+#telA .toast{bottom:16px}
+.modal{top:70px}
+
+.rel-t{font-family:var(--font-titre);font-size:var(--pt-lg);font-weight:600;line-height:1.1}
+.rel-s{color:var(--texte-med);font-size:var(--pt-micro);margin-top:2px}
+/* (c) sur ordinateur : la fenêtre de correction sur deux colonnes */
+.dlg{width:740px}
+.dlg .co-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:22px;align-items:start}
+.dlg .co-col > .groupe-t:first-child{margin-top:12px}
+.pc-app{grid-template-columns:150px 176px minmax(0,1fr) 360px;min-width:1200px}
+
+/* au téléphone : l'en-tête de la maquette ne colle plus, ses liens tiennent sur une ligne qui défile */
+@media (max-width:700px){
+  .entete{position:static}
+  .entete nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0;width:100%;padding-bottom:2px}
+  .entete nav::-webkit-scrollbar{display:none}
+  .entete nav a,.entete nav button{flex:none}
+}
+
+.mini{white-space:nowrap}
+.lbl-sec .l{min-width:0}
+</style>
+</head>
+<body>
+<header class="entete">
+  <div>
+    <h1>Ma Vigne — le coéquipier du tracteur et le journal, maquette v1</h1>
+    <div class="base">Base <span class="num">c559846</span> · APP <span class="num">10.59</span> · SW <span class="num">11.44</span> · 3 novembre 2026 · à ranger dans docs/maquettes/ avec le premier lot</div>
+  </div>
+  <nav aria-label="Sections">
+    <a href="#constat">Constat</a>
+    <a href="#references">Références</a>
+    <a href="#proposition">Proposition</a>
+    <a href="#feuille">Téléphone</a>
+    <a href="#ordinateur">Ordinateur</a>
+    <a href="#calcul">Le calcul</a>
+    <a href="#trancher">À trancher</a>
+    <a href="#integration">Intégration</a>
+    <button type="button" id="theme" onclick="basculer()">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <p class="intro">Aujourd’hui, le coéquipier d’une session tracteur se choisit une fois, à la création, et vaut pour toute la session. Quand il change en cours de route, personne ne peut le dire : le journal, les jalons et le Pilotage comptent faux. <b>Cette maquette donne à chaque parcelle son coéquipier. On le change en un geste pour la suite, on le corrige après coup, et tout ce qui lit la session suit : journal, fiches, jalons, heures et coûts.</b></p>
+
+  <!-- ═══ CONSTAT ═══ -->
+  <section class="ecart" id="constat">
+    <div class="ecart-tete">
+      <h2>Ce qui coince aujourd’hui</h2>
+      <p class="ou">Mesuré dans le code, base c559846 (les fichiers du tracteur, du journal, des jalons et du Pilotage n’ont pas bougé depuis 3534d20). La ligne du journal a été rejouée sur le vrai code d’affichage.</p>
+    </div>
+    <div class="mesures">
+      <div class="mesure"><div class="k">1<small>coéquipier</small></div><div class="l">pour toute la session, choisi à la création. Personne ne peut le changer ensuite : ni le tractoriste dans la feuille, ni l’admin dans « Modifier la session ».</div><div class="b"><code>s.coequipier</code>, posé par <code>saveSession</code> ; <code>openEditSession</code> ne le montre pas.</div></div>
+      <div class="mesure"><div class="k">0<small>ligne</small></div><div class="l">au journal pour la tarière, le semis, le rognage ou le broyage. Seul l’amendement y laisse une trace.</div><div class="b">Un seul écrivain : <code>_ferSyncSessions</code> (phyto.js).</div></div>
+      <div class="mesure"><div class="k">—<small>personne</small></div><div class="l">n’a fait l’amendement, d’après le journal : la ligne s’affiche « — · validé par Marc ». Le coéquipier n’y figure jamais.</div><div class="b"><code>quiHors:true</code> et <code>membresEquipe:[]</code>, voir la ligne ci-dessous.</div></div>
+      <div class="mesure"><div class="k">1<small>er jour</small></div><div class="l">reçoit toutes les heures d’une session de plusieurs jours, et seulement celles du conducteur. La journée du coéquipier passe pour du temps dans les rangs.</div><div class="b"><code>_ecoTracHByParc</code> : la date de la session, <code>se.conducteur</code>.</div></div>
+      <div class="mesure"><div class="k">1<small>personne</small></div><div class="l">retrouvée par le filtre « Qui » du journal : celle qui a validé. Un équipier ne retrouve pas son travail.</div><div class="b"><code>r.qui!==jQui</code> dans <code>renderJournalList</code>.</div></div>
+      <div class="mesure"><div class="k">6<small>écrans</small></div><div class="l">ne montrent que le conducteur : la carte « En cours », la fiche sur ordinateur, « En direct » de l’Accueil et du Pilotage, le rapport du mois, le rapport de saison.</div><div class="b">Le coéquipier n’apparaît que dans la feuille de la session et dans « Vos premières fois ».</div></div>
+      <div class="mesure"><div class="k">0<small>hectare</small></div><div class="l">d’amendement dans le jalon « Hectares d’engrais », et pas de coéquipier proposé d’office pour l’amendement.</div><div class="b"><code>_mvActCoeq</code> : tarière, ensemencement, semis, engrais.</div></div>
+    </div>
+    <div class="ecrans deux-tel" style="margin-top:18px">
+      <div>
+        <p class="legende-ecran"><b>Aujourd’hui</b> — Vigne › Journal, la ligne écrite par une session « Amendement »</p>
+        <div class="jl avant" style="max-width:390px">
+          <div class="hd"><div class="txt"><div class="t">Amendement · Les Charmes</div><div class="s">0,42 ha · fait au tracteur — session « Amendement »</div></div><span class="etiq ok">validé</span></div>
+          <div class="qui"><span class="av-grp"><span class="av av-x">?</span></span><span class="noms">— · validé par Marc</span></div>
+        </div>
+        <p class="sous-ecran">Personne n’est noté comme l’ayant fait. Léo, qui chargeait les sacs, n’apparaît nulle part.</p>
+      </div>
+      <div>
+        <p class="legende-ecran"><b>Proposé</b> — la même journée, une ligne pour la session</p>
+        <div class="jl trac" style="max-width:390px">
+          <div class="hd"><div class="txt"><div class="t">Amendement <span class="etiq trac">au tracteur</span></div><div class="s">3 parcelles · 1,32 ha · 19 sacs</div></div><span class="h">14 h 30</span></div>
+          <div class="qui"><span class="av-grp"><span class="av av-m">M</span><span class="av av-l">L</span></span><span class="noms">Marc et Léo</span></div>
+        </div>
+        <p class="sous-ecran">Les deux noms. Elle se déplie sur ses trois parcelles, et le filtre « Qui » la retrouve pour chacun.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RÉFÉRENCES ═══ -->
+  <section class="ecart" id="references">
+    <div class="ecart-tete">
+      <h2>Ce que font les références</h2>
+      <p class="ou">Logiciels de gestion parcellaire et cahier d’enregistrement des chambres d’agriculture. Résumé de leurs documents en ligne, reformulé.</p>
+    </div>
+    <div class="grands">
+      <article class="grand">
+        <div class="cat">Chambres d’agriculture</div>
+        <h3>Mes Parcelles</h3>
+        <p>Une intervention porte sa main-d’œuvre et son matériel. Il manque quelqu’un dans la liste ? On le complète sans quitter l’intervention.</p>
+        <p class="retenir">Les personnes font partie du passage, au même titre que la machine.</p>
+        <a class="src" href="https://paca-blog.test.mesparcelles.fr/data/documents/support/nouveautes.mesparcelles.automne.2022.pdf" target="_blank" rel="noopener">Source : Nouveautés Mes Parcelles, automne 2022</a>
+      </article>
+      <article class="grand">
+        <div class="cat">Gestion d’exploitation</div>
+        <h3>Agreo (Smag)</h3>
+        <p>Le personnel est créé avec son coût, puis affecté aux interventions. Le matériel aussi.</p>
+        <p class="retenir">Chacun coûte ce qu’il coûte, sur le passage où il était.</p>
+        <a class="src" href="https://smag.tech/app/uploads/2018/11/Plaquette_Agreo_Exploitants_web.pdf" target="_blank" rel="noopener">Source : Plaquette Agreo, formations exploitants</a>
+      </article>
+      <article class="grand">
+        <div class="cat">Gestion d’exploitation</div>
+        <h3>Agrivi</h3>
+        <p>Chaque tâche compte à part les heures des personnes et celles des machines, chacune avec son coût horaire, modifiable dans la tâche elle-même. Les coûts se lisent parcelle par parcelle.</p>
+        <p class="retenir">Les heures des gens et celles du tracteur : deux comptes séparés. On corrige dans la tâche.</p>
+        <a class="src" href="https://www2.agrivi.com/blog/track-work-cost-your-farm-with-agrivi-system" target="_blank" rel="noopener">Source : Agrivi, suivre le coût du travail</a>
+      </article>
+      <article class="grand">
+        <div class="cat">Cahier d’enregistrement</div>
+        <h3>Chambre d’agriculture du Tarn-et-Garonne</h3>
+        <p>La parcelle est l’unité d’intervention. Chaque passage note l’opérateur et le matériel ; à plusieurs, on note qui a fait quoi.</p>
+        <p class="retenir">Le relevé vit avec la parcelle, et dit qui l’a fait.</p>
+        <a class="src" href="https://agri82.chambre-agriculture.fr/fileadmin/user_upload/Occitanie/075_Inst-Tarn-et-Garonne/6-PDF_PAGES_STATIQUES/1-Productions_et_techniques/Arboriculture_et_raisin_de_table/Guides_techniques/cahier_raisintable_2020_web.pdf" target="_blank" rel="noopener">Source : Cahier d’enregistrement raisin de table 2020</a>
+      </article>
+    </div>
+    <div class="principes">
+      <h3>Ce qu’on en retient</h3>
+      <ul>
+        <li>L’équipe fait partie du passage, parcelle par parcelle, comme la machine.</li>
+        <li>Les heures des personnes et celles du tracteur se comptent à part : la main-d’œuvre à chacun, le GNR à la machine.</li>
+        <li>On corrige là où le travail est noté, à tout moment, et la correction laisse une trace.</li>
+        <li>L’historique vit avec la parcelle.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ PROPOSITION ═══ -->
+  <section class="ecart" id="proposition">
+    <div class="ecart-tete">
+      <h2>La proposition</h2>
+      <p class="pourquoi">Six règles. Le tractoriste n’en voit qu’une, la deuxième. Les autres travaillent pour lui, pour toi et pour le Pilotage.</p>
+    </div>
+    <div class="regles">
+      <div class="regle"><span class="qui">Les données</span><h3>Chaque parcelle garde son coéquipier</h3><p>Cocher une parcelle note qui était là. Changer de coéquipier vaut pour la suite ; le passé ne bouge que si on le corrige.</p></div>
+      <div class="regle"><span class="qui">Le tractoriste</span><h3>Changer, en un geste</h3><p>Dans la feuille de la session, sous le tracteur : « Changer », le même geste que pour changer de tracteur. « Depuis ce matin » rattrape un oubli du jour.</p></div>
+      <div class="regle"><span class="qui">L’admin</span><h3>Corriger après coup</h3><p>Les parcelles faites se rangent par jour, et chaque jour dit qui était là. « Corriger » sur un jour ou sur des parcelles choisies, même une fois la session terminée.</p></div>
+      <div class="regle"><span class="qui">Le journal</span><h3>Tout le tracteur au journal</h3><p>Une ligne par session et par jour, qui se déplie sur ses parcelles, avec les deux noms. Le filtre « Qui » retrouve chacun, et la fiche de la parcelle aussi.</p></div>
+      <div class="regle"><span class="qui">Le Pilotage</span><h3>Les heures de chacun, au bon jour</h3><p>Les heures d’une parcelle vont au conducteur et au coéquipier, le jour où elle a été faite. Elles sortent de leur temps dans les rangs et entrent dans le coût de la session.</p></div>
+      <div class="regle"><span class="qui">Les jalons</span><h3>À chacun ses trous</h3><p>Trous de tarière, hectares semés et fertilisés : au coéquipier de chaque parcelle. Une correction les déplace.</p></div>
+    </div>
+    <div class="pourquoi-pas">
+      <div class="carte">
+        <h3>Pourquoi par parcelle, et pas par jour ?</h3>
+        <p>Le jour suffit presque toujours, et c’est ce qu’on affiche. Mais une relève à 10 h 42 coupe la journée en deux : la parcelle est le seul grain qui ne ment jamais. <b>On montre par jour, on enregistre par parcelle.</b></p>
+        <p>Une session d’avant, sans coéquipier par parcelle, se lit comme aujourd’hui : aucune donnée à reprendre.</p>
+      </div>
+      <div class="carte">
+        <h3>Pourquoi le journal lit la session</h3>
+        <p>Les lignes du tracteur se lisent dans la session au moment de l’affichage. <b>Une correction s’y voit aussitôt</b>, sans rien recopier, et les deux ne peuvent pas se contredire.</p>
+        <p>L’amendement garde sa ligne écrite, parce qu’elle valide la tâche ; elle prend l’équipe de la session.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TÉLÉPHONE ═══ -->
+  <section class="ecart" id="feuille">
+    <div class="ecart-tete">
+      <h2>Téléphone — la feuille de la session et le journal</h2>
+      <p class="ou">Où : Tracteur › la session en cours › « Enregistrer l’avancement ». Puis Vigne › Journal. Les deux écrans partagent les mêmes données : ce qui change à gauche se lit à droite.</p>
+      <p class="pourquoi">Le coéquipier rejoint le tracteur dans l’en-tête de la feuille, avec le même bouton « Changer ». Les parcelles faites se rangent par jour, et chaque jour dit qui était là. Essaie : change pour Hugo, puis coche « Champ de la Croix ».</p>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran"><b>Mardi 3 novembre, 10 h 42.</b> Léo part aux réparations avec Inès et Camille ; Hugo prend sa place pour finir l’amendement.</p>
+        <div class="demo" role="group" aria-label="Qui regarde">
+          <button type="button" data-role="trac" aria-pressed="true">Vu par Marc, tractoriste</button>
+          <button type="button" data-role="admin" aria-pressed="false">Vu par Nico, admin</button>
+          <button type="button" data-rejouer="tel">Rejouer</button>
+        </div>
+        <div class="tel app" id="telA">
+          <div class="tel-barre"><span class="num">10:42</span><span>Gevrey · 7 °C</span></div>
+          <div class="derriere">Tracteur · Sessions</div>
+          <div class="modal" role="dialog" aria-label="Session Amendement">
+            <div class="poignee"></div>
+            <div class="defile" id="telA-defile"></div>
+          </div>
+          <div class="voile cache" data-voile></div>
+          <div class="feuille haute cache" data-feuille aria-hidden="true" role="dialog" aria-modal="true"></div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+        <p class="sous-ecran" id="telA-note">Vu par Marc : « Corriger » n’existe que sur aujourd’hui. Le passé, c’est l’admin.</p>
+      </div>
+      <div>
+        <p class="legende-ecran"><b>Vigne › Journal</b> (admin). Les lignes du tracteur se déplient ; le filtre « Qui » retrouve chacun.</p>
+        <div class="demo" aria-hidden="true"><button type="button" tabindex="-1" style="visibility:hidden">·</button></div>
+        <div class="tel app" id="telB">
+          <div class="tel-barre"><span class="num">10:42</span><span>Gevrey · 7 °C</span></div>
+          <div class="bande"><span class="ico"></span><div style="flex:1"><div class="t">Journal</div><span class="s" id="telB-sous">Vigne · campagne 2026-2027</span></div><span class="ico"></span></div>
+          <div class="segment"><span>Accueil</span><span>Parcelles</span><span class="on">Journal</span></div>
+          <div class="defile" id="telB-defile" style="height:640px;padding:0 12px 90px"></div>
+          <div class="tel-dock"><span><i></i>Pilotage</span><span class="on"><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Plus</span></div>
+        </div>
+        <p class="sous-ecran">Touche « Hugo » : seules ses lignes restent, et la ligne du tracteur ne garde que ses parcelles. Le cadre au contour prune, à gauche, est le seul ajout à l’en-tête de la feuille.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ORDINATEUR ═══ -->
+  <section class="ecart" id="ordinateur">
+    <div class="ecart-tete">
+      <h2>Ordinateur — la fiche de la session et le journal</h2>
+      <p class="ou">Où : Tracteur › Sessions, une session terminée. Puis Vigne › Journal en liste-détail (maquette ux-v1).</p>
+      <p class="pourquoi">Le 14 octobre, c’est Hugo qui tenait la tarière, mais la session dit Léo pour les deux jours : on l’avait oublié. Le journal le trahit d’ailleurs, Léo y valide des réparations ce jour-là. « Corriger » sur le 14 : les heures, les trous et le journal suivent.</p>
+    </div>
+    <div class="ecrans">
+      <div>
+        <p class="legende-ecran" style="max-width:none">Ordinateur, 1 366 px — Tracteur › Sessions › Tarière (terminée)</p>
+        <div class="pc" id="pcA"><div class="pc-corps"><div class="pc-trac" id="pcA-corps"></div></div>
+          <div class="dlg-voile cache" data-dlg><div class="dlg" role="dialog" aria-modal="true" data-dlg-corps></div></div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran" style="max-width:none">Ordinateur, 1 366 px — Vigne › Journal</p>
+        <div class="pc" id="pcB"><div class="pc-corps"><div class="pc-app" id="pcB-corps"></div></div>
+          <div class="dlg-voile cache" data-dlg><div class="dlg" role="dialog" aria-modal="true" data-dlg-corps></div></div>
+          <div class="toast cache" data-toast role="status"><span data-toast-t></span><button type="button" class="annuler" data-annuler>Annuler</button><span class="temps"><i></i></span></div>
+        </div>
+        <p class="sous-ecran" style="max-width:72ch">« Au tracteur » et « À la main » s’ajoutent aux filtres. La fiche d’une ligne du tracteur dit qui était là parcelle par parcelle, et renvoie à la session. La fiche de la parcelle (« Derniers passages ») lit les mêmes lignes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LE CALCUL ═══ -->
+  <section class="ecart" id="calcul">
+    <div class="ecart-tete">
+      <h2>Le calcul — la tarière des 13 et 14 octobre</h2>
+      <p class="ou">Ce que le Pilotage compte pour l’équipe de la tarière, aujourd’hui et avec la proposition. Exemple : 7 h prévues au planning chaque jour.</p>
+      <p class="pourquoi">Le mardi, Marc et Léo font 4 h 50 de tarière. Le mercredi, Marc et Hugo font 4 h 10. Le reste de leur journée, ils sont dans les rangs.</p>
+    </div>
+    <div class="calc-wrap">
+      <table class="calc" style="min-width:720px">
+        <thead><tr><th>Qui</th><th>Jour</th><th class="r">Prévu</th><th class="r">Tracteur, aujourd’hui</th><th class="r">Rangs, aujourd’hui</th><th class="r">Tracteur, proposé</th><th class="r">Rangs, proposé</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cellp"><span class="av p av-m">M</span>Marc</span></td><td>mar. 13 oct.</td><td class="r">7 h 00</td><td class="r faux">7 h 00</td><td class="r faux">0 h 00</td><td class="r juste">4 h 50</td><td class="r juste">2 h 10</td></tr>
+          <tr><td><span class="cellp"><span class="av p av-m">M</span>Marc</span></td><td>mer. 14 oct.</td><td class="r">7 h 00</td><td class="r faux">0 h 00</td><td class="r faux">7 h 00</td><td class="r juste">4 h 10</td><td class="r juste">2 h 50</td></tr>
+          <tr><td><span class="cellp"><span class="av p av-l">L</span>Léo</span></td><td>mar. 13 oct.</td><td class="r">7 h 00</td><td class="r faux">0 h 00</td><td class="r faux">7 h 00</td><td class="r juste">4 h 50</td><td class="r juste">2 h 10</td></tr>
+          <tr><td><span class="cellp"><span class="av p av-h">H</span>Hugo</span></td><td>mer. 14 oct.</td><td class="r">7 h 00</td><td class="r faux">0 h 00</td><td class="r faux">7 h 00</td><td class="r juste">4 h 10</td><td class="r juste">2 h 50</td></tr>
+          <tr class="tot"><td>Total</td><td></td><td class="r">28 h 00</td><td class="r">7 h 00</td><td class="r">21 h 00</td><td class="r">18 h 00</td><td class="r">10 h 00</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="integ" style="margin-top:14px">
+      <div class="carte">
+        <h3>Aujourd’hui</h3>
+        <ul>
+          <li><b>Les 9 h de la session tombent toutes sur le mardi</b>, le jour où elle a commencé, et au conducteur seul. Plafonnées à sa journée : 2 h de conduite disparaissent.</li>
+          <li><b>11 h de tarière comptées dans les rangs</b> : le mercredi de Marc, le mardi de Léo, le mercredi de Hugo. Elles vont aux travaux de vigne validés ces jours-là, ou attendent la prochaine validation : ces travaux paraissent plus lents et plus chers qu’en vrai.</li>
+          <li><b>La main-d’œuvre de la session : 9 h</b>, celles de Marc. Le coéquipier ne coûte rien.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Proposé</h3>
+        <ul>
+          <li><b>Chaque parcelle porte son jour</b> (le début du chrono, sinon le jour de la coche) : les heures tombent le jour où elles ont été faites.</li>
+          <li><b>Le coéquipier compte comme le conducteur</b> : ses heures sortent de son temps dans les rangs, le jour même.</li>
+          <li><b>La main-d’œuvre de la session : 18 h</b> — Marc 9 h, Léo 4 h 50, Hugo 4 h 10, chacun à son taux du jour. Le tracteur reste à 9 h : 54 L de GNR, le compteur ne double pas.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px;max-width:90ch">Même règle que le reste du Pilotage : une seule définition de « ce que coûte une session », lue par le coût par parcelle, la courbe d’engagement et le temps vigne. Les jalons suivent la même parcelle : après la correction du 14, Léo a 286 trous de tarière et Hugo 231, au lieu de 517 pour Léo.</p>
+  </section>
+
+  <!-- ═══ À TRANCHER ═══ -->
+  <section class="ecart" id="trancher">
+    <div class="ecart-tete">
+      <h2>À trancher</h2>
+      <p class="ou">Chaque point a sa recommandation. « Go » les prend toutes ; sinon, dis lesquelles changer.</p>
+    </div>
+    <div class="decisions">
+      <div class="dec"><div class="num-d">D1</div><div><h3>Le journal reste dans Vigne</h3><p>Vigne est le module des parcelles, pas celui du travail à la main. Le journal devient l’historique de chaque parcelle, quel que soit l’outil. Le Tracteur garde la machine (sessions, entretien, GNR), Phyto garde ses registres légaux.</p><p class="reco"><b>Recommandé.</b> Les références rangent le passage avec la parcelle.</p></div></div>
+      <div class="dec"><div class="num-d">D2</div><div><h3>Une ligne par session et par jour, qui se déplie</h3><p>Une ligne par parcelle, comme je l’avais écrit, noierait le journal : un broyage, c’est vingt lignes dans la journée. Groupées par session et par jour, elles se déplient ; filtrées sur une parcelle, on ne voit qu’elle.</p><p class="reco"><b>Recommandé.</b></p></div></div>
+      <div class="dec"><div class="num-d">D3</div><div><h3>Les traitements phyto au journal aussi</h3><p>Sans eux, l’historique d’une parcelle reste incomplet. Une ligne par traitement, en lecture, qui renvoie au registre. Le registre reste le document légal ; rien n’y change.</p><p class="reco"><b>Recommandé</b>, dans le lot du journal.</p></div></div>
+      <div class="dec"><div class="num-d">D4</div><div><h3>Qui corrige</h3><p>Le tractoriste change le coéquipier de sa session en cours, pour la suite ou depuis le matin. L’admin corrige tout, sessions terminées comprises — comme l’équipe au journal (21/10).</p><p class="reco"><b>Recommandé.</b></p></div></div>
+      <div class="dec"><div class="num-d">D5</div><div><h3>L’amendement à deux d’office, compté avec l’engrais</h3><p>L’amendement propose un coéquipier d’office, comme l’engrais. Ses hectares comptent dans le même jalon, renommé « Hectares fertilisés ». Les jalons déjà gagnés restent.</p><p class="reco"><b>Recommandé.</b></p></div></div>
+      <div class="dec"><div class="num-d">D6</div><div><h3>Un seul conducteur par session</h3><p>Pas de conducteur par parcelle dans ce chantier : l’admin le change pour toute la session, comme aujourd’hui. Si le conducteur et le coéquipier échangent leur place dans la journée, on en reparlera.</p><p class="reco"><b>Recommandé.</b></p></div></div>
+    </div>
+  </section>
+
+  <!-- ═══ INTÉGRATION ═══ -->
+  <section class="ecart" id="integration">
+    <div class="ecart-tete">
+      <h2>Pour l’intégration</h2>
+      <p class="ou">Ce qu’il faut écrire, et tout ce qui lit la session aujourd’hui (vérifié dans le code).</p>
+    </div>
+    <div class="integ">
+      <div class="carte">
+        <h3>Données</h3>
+        <ul>
+          <li>Chaque parcelle faite garde son coéquipier : <code>co</code> dans <code>parcellesFaites</code> (vide = personne). Posé à la coche, quel que soit le chemin : coche simple, valeur saisie, chrono.</li>
+          <li><code>s.coequipier</code> reste le coéquipier du moment : celui que prendra la prochaine parcelle.</li>
+          <li><b>Avant tout changement, chaque parcelle faite sans <code>co</code> reçoit le coéquipier d’avant.</b> Sans ça, changer pour la suite réécrirait le passé des sessions d’aujourd’hui.</li>
+          <li>Une correction garde sa trace : <code>coCorr</code> (par qui, quand) sur la parcelle, et une ligne dans la boîte noire de la session.</li>
+          <li>Aucune migration : une session sans <code>co</code> se lit comme aujourd’hui.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Calculs : une fonction, lue partout</h3>
+        <ul>
+          <li><code>_trEquipe(s, x)</code> rend le conducteur, le coéquipier et le jour d’une parcelle faite. Le jour : début du chrono, sinon sa fin, sinon le jour de la coche, sinon la date de la session — la règle de FERTI-9, sortie de phyto.js pour servir à tous.</li>
+          <li>Pilotage, <code>_ecoTracHByParc</code> : les heures de chaque parcelle au conducteur et au coéquipier, au jour de la parcelle ; le temps vigne les retire à chacun, le coût les paie à chacun. Les heures du tracteur (GNR, compteur) ne doublent pas.</li>
+          <li>Jalons : trous, hectares semés et fertilisés au coéquipier de chaque parcelle ; sessions et kilomètres enjambés au conducteur, comme aujourd’hui.</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Lecteurs à rebrancher (vérifiés)</h3>
+        <ul>
+          <li><b>tracteur.js</b> : la feuille (encart, jours, coche), <code>saveSession</code>, <code>toggleSessionParcelle</code>, <code>confirmerValidationChamp</code>, la clôture du chrono, la carte « En cours » (<code>_trEncoursHtml</code>), la fiche sur ordinateur (<code>_trFicheHtml</code>), <code>openEditSession</code>.</li>
+          <li><b>jalons.js</b> : <code>_mvJalonsCompteurs</code>, les premières fois, « Ma saison ».</li>
+          <li><b>app.js</b> : le journal (liste, fiche, filtre « Qui »), « Derniers passages » de la fiche parcelle, « Au tracteur » et « En direct » de l’Accueil, le rapport de saison.</li>
+          <li><b>cockpit.js</b> : « En direct » du Pilotage. <b>pilotage.js</b> : <code>_ecoTracHByParc</code> et ses lecteurs.</li>
+          <li><b>phyto.js</b> : <code>_ferSyncSessions</code>, la ligne d’amendement prend l’équipe. <b>reglages.js</b> : le rapport du mois, « Conducteur » devient « Équipe ».</li>
+        </ul>
+      </div>
+      <div class="carte">
+        <h3>Découpage proposé</h3>
+        <div class="lots">
+          <div class="lot"><b>COEQ-2</b><span>Le coéquipier par parcelle : données, « Changer », les jours dans la feuille, « Corriger » (tractoriste et admin), la fiche et la carte. Tutos « Comment faire pour changer de coéquipier ? » et « … pour corriger le coéquipier d’une session ? ».</span></div>
+          <div class="lot"><b>COEQ-3</b><span>Le journal : les lignes du tracteur (et des traitements, si D3), le filtre « Qui » sur toute l’équipe, la fiche sur ordinateur, « Derniers passages ».</span></div>
+          <div class="lot"><b>COEQ-4</b><span>Le calcul : le Pilotage au jour et à la personne, les jalons, les rapports, « En direct ».</span></div>
+        </div>
+        <p class="note" style="margin-top:10px">Chaque lot avec son aide, son guide, son What’s New et ses tutos.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>Maquette v1 du 3 novembre 2026, base c559846. Données fictives du domaine de démonstration. À ranger dans docs/maquettes/ avec COEQ-2.</footer>
+</main>
+
+<script>
+function basculer(){
+  var r=document.documentElement, b=document.getElementById('theme');
+  var sombreSysteme=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var actuel=r.getAttribute('data-theme')||(sombreSysteme?'dark':'light');
+  var suivant=actuel==='dark'?'light':'dark';
+  r.setAttribute('data-theme',suivant);
+  b.textContent=suivant==='dark'?'Clair':'Sombre';
+}
+(function(){
+  'use strict';
+  var bt=document.getElementById('theme');
+  if(bt&&window.matchMedia('(prefers-color-scheme: dark)').matches) bt.textContent='Clair';
+
+  /* ── outils ── */
+  var NBS='\u00a0', AUJ='2026-11-03', LE='3 nov.';
+  var MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var MOIS_L=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var JOURS=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var PERS={'Marc':'m','Léo':'l','Hugo':'h','Inès':'i','Camille':'c'};
+  var COEQS=['Léo','Hugo','Inès','Camille'];
+  var HA={'Les Charmes':0.42,'La Combotte':0.61,'Aux Murgers':0.29,'Vieilles Vignes':0.38,'Les Perrières':0.47,'Champ de la Croix':0.55,'Clos du Moulin':0.73,'Les Cras':0.34,'Aux Échanges':0.26};
+  var IC={
+    check:'<svg class="mv-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12.5 10 17 19 7"/></svg>',
+    chev:'<svg class="mv-ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>',
+    trac:'<svg class="mv-ic" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15V9h7l2 4h4a2 2 0 0 1 2 2"/><path d="M8 9V5h4"/><circle cx="7" cy="17" r="3"/><circle cx="18" cy="17.5" r="2.5"/></svg>'
+  };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  /* la ponctuation française : une espace insécable avant : ; ? ! » et après « */
+  function typo(s){ return String(s).replace(/ ([:;?!»])/g,'\u00a0$1').replace(/« /g,'«\u00a0'); }
+  function copie(o){ return JSON.parse(JSON.stringify(o)); }
+  function dt(iso){ var p=iso.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function jourLong(iso){ if(iso===AUJ) return 'Aujourd’hui'; var x=dt(iso); return cap(JOURS[x.getDay()])+' '+x.getDate()+' '+MOIS_L[x.getMonth()]; }
+  function jourMoyen(iso){ if(iso===AUJ) return 'Aujourd’hui'; var x=dt(iso); return cap(JOURS[x.getDay()])+' '+x.getDate()+' '+MOIS[x.getMonth()]; }
+  function jourCourt(iso){ var x=dt(iso); return JOURS[x.getDay()].slice(0,3)+'. '+x.getDate()+' '+MOIS[x.getMonth()]; }
+  function dateCourte(iso){ var x=dt(iso); return x.getDate()+' '+MOIS[x.getMonth()]; }
+  function ha(x){ return x.toFixed(2).replace('.',',')+NBS+'ha'; }
+  function pl(n,s,p){ return n+NBS+(n>1?(p||s+'s'):s); }
+  function minFr(m){ var h=Math.floor(m/60), mm=m%60; return h+NBS+'h'+NBS+(mm<10?'0':'')+mm; }
+  function hMin(h){ var m=/^(\d+) h (\d+)$/.exec(h||''); return m?(+m[1]*60+ +m[2]):0; }
+  function hFr(h){ return String(h||'').replace(/ h /,NBS+'h'+NBS); }
+  function somme(l,f){ return l.reduce(function(a,x){ return a+f(x); },0); }
+  function av(nom,petit){
+    if(!nom) return '<span class="av av-x'+(petit?' p':'')+'" aria-hidden="true">–</span>';
+    return '<span class="av av-'+PERS[nom]+(petit?' p':'')+'" aria-hidden="true">'+esc(nom.charAt(0))+'</span>';
+  }
+  function avGrp(noms){ return '<span class="av-grp">'+noms.map(function(n){ return av(n); }).join('')+'</span>'; }
+  function etListe(l){ if(l.length<2) return l.join(''); return l.slice(0,-1).join(', ')+' et '+l[l.length-1]; }
+  /* « avec Léo », « avec Léo puis Hugo », « seul », « seul puis avec Hugo » */
+  function avecTxt(l){
+    return l.map(function(n,i){ return n?(((i===0)||!l[i-1])?'avec '+n:n):'seul'; }).join(' puis ');
+  }
+  /* « Marc et Léo », « Marc, avec Léo puis Hugo », « Marc, seul » */
+  function equipeTxt(cond,l){
+    if(l.length===1) return l[0]?(cond+' et '+l[0]):(cond+', seul');
+    return cond+', '+avecTxt(l);
+  }
+
+  /* ── les données (fictives, domaine de démonstration) ── */
+  var AMD0={ act:'Amendement', cond:'Marc', coeq:'Léo', depuis:'depuis lundi', trac:'New Holland T4.90F',
+    faites:[
+      {nom:'Les Charmes',sacs:6,jour:'2026-11-02',h:'8 h 40',co:'Léo'},
+      {nom:'La Combotte',sacs:9,jour:'2026-11-02',h:'10 h 15',co:'Léo'},
+      {nom:'Aux Murgers',sacs:4,jour:'2026-11-02',h:'14 h 30',co:'Léo'},
+      {nom:'Vieilles Vignes',sacs:6,jour:'2026-11-03',h:'8 h 50',co:'Léo'},
+      {nom:'Les Perrières',sacs:7,jour:'2026-11-03',h:'9 h 55',co:'Léo'}],
+    reste:[{nom:'Champ de la Croix',sacs:8},{nom:'Clos du Moulin',sacs:11},{nom:'Les Cras',sacs:5}],
+    heures:['11 h 30','13 h 45','15 h 10'] };
+  var TAR0={ act:'Tarière', cond:'Marc', trac:'New Holland T4.90F', statut:'Terminée',
+    faites:[
+      {nom:'Les Charmes',trous:74,jour:'2026-10-13',h:'8 h 30',min:60,co:'Léo'},
+      {nom:'La Combotte',trous:92,jour:'2026-10-13',h:'9 h 45',min:72,co:'Léo'},
+      {nom:'Aux Murgers',trous:41,jour:'2026-10-13',h:'10 h 40',min:52,co:'Léo'},
+      {nom:'Vieilles Vignes',trous:38,jour:'2026-10-13',h:'13 h 50',min:50,co:'Léo'},
+      {nom:'Les Perrières',trous:41,jour:'2026-10-13',h:'14 h 55',min:56,co:'Léo'},
+      {nom:'Champ de la Croix',trous:63,jour:'2026-10-14',h:'8 h 20',min:62,co:'Léo'},
+      {nom:'Clos du Moulin',trous:97,jour:'2026-10-14',h:'9 h 50',min:88,co:'Léo'},
+      {nom:'Les Cras',trous:39,jour:'2026-10-14',h:'13 h 40',min:54,co:'Léo'},
+      {nom:'Aux Échanges',trous:32,jour:'2026-10-14',h:'14 h 45',min:46,co:'Léo'}] };
+  var VIGNE=[
+    {id:'v1',jour:'2026-11-03',h:'10 h 20',tache:'Réparations',parc:'Clos du Moulin',qui:['Inès','Camille']},
+    {id:'v2',jour:'2026-11-02',h:'16 h 40',tache:'Réparations',parc:'Les Perrières',qui:['Inès','Camille','Hugo']},
+    {id:'v3',jour:'2026-11-02',h:'11 h 05',tache:'Réparations',parc:'Vieilles Vignes',qui:['Inès','Camille']},
+    {id:'v4',jour:'2026-10-14',h:'16 h 15',tache:'Réparations',parc:'La Combotte',qui:['Inès','Camille','Léo']},
+    {id:'v5',jour:'2026-10-13',h:'15 h 50',tache:'Réparations',parc:'Champ de la Croix',qui:['Inès','Camille','Hugo']}];
+  var ETAT={ amd:copie(AMD0), tar:copie(TAR0), role:'trac', filtreB:'', pc:{qui:'',type:'',sel:'tar|2026-10-14'}, ouverts:{} };
+
+  /* ── la session : jours, équipe d’un jour ── */
+  function joursDe(s,asc){
+    var m={}, ordre=[];
+    s.faites.forEach(function(x){ if(!m[x.jour]){ m[x.jour]=[]; ordre.push(x.jour); } m[x.jour].push(x); });
+    ordre.sort(); if(!asc) ordre.reverse();
+    return ordre.map(function(j){ return {jour:j, parcs:m[j]}; });
+  }
+  function coeqsDe(parcs){ var l=[]; parcs.forEach(function(x){ var c=x.co||''; if(l.indexOf(c)<0) l.push(c); }); return l; }
+  function detailP(x){ return x.trous!=null?pl(x.trous,'trou'):pl(x.sacs,'sac'); }
+  function totalP(parcs){
+    if(parcs.length&&parcs[0].trous!=null) return pl(somme(parcs,function(x){ return x.trous; }),'trou');
+    return pl(somme(parcs,function(x){ return x.sacs; }),'sac');
+  }
+  function haDe(parcs){ return somme(parcs,function(x){ return HA[x.nom]||0; }); }
+
+  /* ── les toasts, un par cadre ── */
+  var MINUT={};
+  function toast(cadre,txt,annuler){
+    var root=document.getElementById(cadre); if(!root) return;
+    var el=root.querySelector(':scope > [data-toast]'), t=el.querySelector('[data-toast-t]'), a=el.querySelector('[data-annuler]');
+    clearTimeout(MINUT[cadre]);
+    t.textContent=typo(txt);
+    el.classList.toggle('court',!annuler);
+    a.onclick=annuler?function(){ clearTimeout(MINUT[cadre]); el.classList.add('cache'); annuler(); }:null;
+    el.classList.remove('anim'); void el.offsetWidth; if(annuler) el.classList.add('anim');
+    el.classList.remove('cache');
+    MINUT[cadre]=setTimeout(function(){ el.classList.add('cache'); },annuler?6000:3200);
+  }
+
+  /* ── feuilles (téléphone) et fenêtres (ordinateur) ── */
+  var RETOUR=null;
+  function contenant(cadre){
+    var root=document.getElementById(cadre);
+    if(cadre==='telA') return {root:root, corps:root.querySelector('[data-feuille]'), fond:root.querySelector('[data-voile]'), boite:root.querySelector('[data-feuille]')};
+    return {root:root, corps:root.querySelector('[data-dlg-corps]'), fond:root.querySelector('[data-dlg]'), boite:root.querySelector('[data-dlg]')};
+  }
+  function ouvrirBoite(cadre,html){
+    var c=contenant(cadre);
+    RETOUR=document.activeElement;
+    var tt=c.root.querySelector(':scope > [data-toast]'); if(tt){ clearTimeout(MINUT[cadre]); tt.classList.add('cache'); }
+    c.corps.innerHTML=typo(html);
+    c.fond.classList.remove('cache'); c.boite.classList.remove('cache'); c.boite.setAttribute('aria-hidden','false');
+    var f=c.corps.querySelector('[aria-checked="true"],button:not([disabled])'); if(f) setTimeout(function(){ try{ f.focus({preventScroll:true}); }catch(e){ f.focus(); } },60);
+  }
+  function majBoite(cadre,html){
+    var c=contenant(cadre), act=document.activeElement, cle=act&&act.getAttribute?(act.getAttribute('data-k')||''):'';
+    var sc=c.corps.scrollTop||c.boite.scrollTop||0;
+    c.corps.innerHTML=typo(html);
+    c.boite.scrollTop=sc; c.corps.scrollTop=sc;
+    if(cle){ var n=c.corps.querySelector('[data-k="'+cle.replace(/"/g,'\\"')+'"]'); if(n) try{ n.focus({preventScroll:true}); }catch(e){ n.focus(); } }
+  }
+  function fermerBoite(cadre){
+    var c=contenant(cadre);
+    c.fond.classList.add('cache'); c.boite.classList.add('cache'); c.boite.setAttribute('aria-hidden','true');
+    if(RETOUR&&document.body.contains(RETOUR)) try{ RETOUR.focus({preventScroll:true}); }catch(e){}
+    RETOUR=null; OUVERT=null;
+  }
+  var OUVERT=null;   // {cadre, type:'changer'|'corriger'}
+
+  /* ── « Changer de coéquipier » (téléphone, la session en cours) ── */
+  var CH={sel:'Léo', quand:'maint'};
+  function htmlChanger(){
+    var s=ETAT.amd, auj=s.faites.filter(function(x){ return x.jour===AUJ; });
+    var h='<div class="poignee"></div><div class="rel-t">Changer de coéquipier</div><div class="rel-s">'+esc(s.act)+' · conducteur : '+esc(s.cond)+'</div>';
+    h+='<span class="groupe-t" id="ch-qui">Avec qui ?</span><div class="choix" role="radiogroup" aria-labelledby="ch-qui">';
+    [''].concat(COEQS).forEach(function(n){
+      var on=CH.sel===n;
+      h+='<button type="button" class="opt-r" role="radio" aria-checked="'+on+'" data-k="q:'+esc(n)+'" data-ch-qui="'+esc(n)+'"><span class="rd"></span>'+(n?av(n,true):'')
+        +'<span class="txt"><span class="t">'+(n?esc(n):'Personne')+'</span>'+(n?'':'<span class="s">'+esc(s.cond)+' continue seul</span>')+'</span>'
+        +(n===s.coeq?'<span class="etiq bord">en ce moment</span>':'')+'</button>';
+    });
+    h+='</div><span class="groupe-t" id="ch-quand">À partir de quand ?</span><div class="choix" role="radiogroup" aria-labelledby="ch-quand">';
+    var garde=s.faites.length;
+    h+='<button type="button" class="opt-r" role="radio" aria-checked="'+(CH.quand==='maint')+'" data-k="w:maint" data-ch-quand="maint"><span class="rd"></span><span class="txt"><span class="t">Maintenant</span><span class="s">Les '+pl(garde,'parcelle déjà faite','parcelles déjà faites')+' '+(garde>1?'gardent':'garde')+' leur coéquipier.</span></span></button>';
+    var vide=!auj.length, qui=CH.sel||'personne';
+    h+='<button type="button" class="opt-r" role="radio" aria-checked="'+(CH.quand==='matin')+'" data-k="w:matin" data-ch-quand="matin"'+(vide?' disabled':'')+'><span class="rd"></span><span class="txt"><span class="t">Depuis ce matin</span><span class="s">'
+      +(vide?'Aucune parcelle faite aujourd’hui.':(esc(etListe(auj.map(function(x){ return x.nom; })))+(auj.length>1?' passent':' passe')+' aussi à '+esc(qui)+'.'))+'</span></span></button>';
+    h+='</div>';
+    if(ETAT.role==='admin') h+='<button type="button" class="lien" data-k="autres" data-ch-autres style="padding-left:2px">Choisir d’autres parcelles…</button>';
+    var change=(CH.sel!==s.coeq)||(CH.quand==='matin'&&auj.some(function(x){ return (x.co||'')!==CH.sel; }));
+    var lab=!change?'Choisis une autre personne':((CH.sel?CH.sel:'Sans coéquipier')+', '+(CH.quand==='maint'?'à partir de maintenant':'depuis ce matin'));
+    h+='<div class="pied-f"><button type="button" class="bouton plein" data-k="ok" data-ch-ok'+(change?'':' disabled')+'>'+esc(lab)+'</button><button type="button" class="lien" data-ch-annuler>Annuler</button></div>';
+    return h;
+  }
+  function ouvrirChanger(){ var s=ETAT.amd; CH={sel:s.coeq, quand:'maint'}; OUVERT={cadre:'telA',type:'changer'}; ouvrirBoite('telA',htmlChanger()); }
+  function validerChanger(){
+    var s=ETAT.amd, avant=copie(s);
+    s.faites.forEach(function(x){ if(!('co' in x)) x.co=s.coeq; });   // figer : le passé garde le coéquipier d’avant
+    s.coeq=CH.sel;
+    if(CH.quand==='matin'){ s.faites.forEach(function(x){ if(x.jour===AUJ) x.co=CH.sel; }); s.depuis='depuis ce matin'; }
+    else s.depuis='depuis 10'+NBS+'h'+NBS+'42';
+    var msg='Coéquipier : '+(CH.sel||'personne')+', '+(CH.quand==='maint'?'à partir de maintenant':'depuis ce matin');
+    fermerBoite('telA'); toutRendre(); flashEncart();
+    toast('telA',msg,function(){ ETAT.amd=avant; toutRendre(); });
+  }
+  function flashEncart(){ var e=document.getElementById('telA-eq'); if(e){ e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); } }
+
+  /* ── « Corriger le coéquipier » (les parcelles déjà faites) ── */
+  var CO={cadre:'telA', cle:'amd', sel:null, coches:{}, jour:''};
+  function limite(){ return CO.cadre==='telA'&&ETAT.role==='trac'; }
+  function htmlCorriger(){
+    var s=ETAT[CO.cle], jours=joursDe(s,CO.cle==='tar').filter(function(g){ return !limite()||g.jour===AUJ; });
+    jours.sort(function(a,b){ return (b.jour===CO.jour)-(a.jour===CO.jour); });   // le jour choisi d’abord
+    var h=(CO.cadre==='telA'?'<div class="poignee"></div>':'')+'<div class="rel-t">Corriger le coéquipier</div><div class="rel-s">'+esc(s.act)+' · les parcelles déjà faites</div>';
+    h+='<div class="co-grille"><div class="co-col"><span class="groupe-t" id="co-qui-'+CO.cadre+'">Qui était là ?</span><div class="choix" role="radiogroup" aria-labelledby="co-qui-'+CO.cadre+'">';
+    [''].concat(COEQS).forEach(function(n){
+      var on=CO.sel===n;
+      h+='<button type="button" class="opt-r" role="radio" aria-checked="'+on+'" data-k="q:'+esc(n)+'" data-co-qui="'+esc(n)+'"><span class="rd"></span>'+(n?av(n,true):'')+'<span class="txt"><span class="t">'+(n?esc(n):'Personne')+'</span>'+(n?'':'<span class="s">'+esc(s.cond)+' était seul</span>')+'</span></button>';
+    });
+    h+='</div></div><div class="co-col"><span class="groupe-t">Sur quelles parcelles ?</span>';
+    jours.forEach(function(g){
+      var n=g.parcs.filter(function(x){ return CO.coches[x.nom]; }).length, et=n===0?'false':(n===g.parcs.length?'true':'mixed');
+      h+='<button type="button" class="ck-jour" role="checkbox" aria-checked="'+et+'" data-k="j:'+g.jour+'" data-co-jour="'+g.jour+'"><span class="cb">'+(et==='true'?IC.check:(et==='mixed'?'–':''))+'</span>'+esc(jourMoyen(g.jour))+' · '+esc(avecTxt(coeqsDe(g.parcs)))+'</button>';
+      g.parcs.forEach(function(x){
+        var on=!!CO.coches[x.nom];
+        h+='<button type="button" class="ck-l" role="checkbox" aria-checked="'+on+'" data-k="p:'+esc(x.nom)+'" data-co-p="'+esc(x.nom)+'"><span class="cb">'+(on?IC.check:'')+'</span><span class="n">'+esc(x.nom)+'</span><span class="r">'+detailP(x)+' '+av(x.co,true)+'</span></button>';
+      });
+    });
+    if(limite()) h+='<p class="resume-f">Les autres jours : l’admin, depuis la même feuille ou depuis la fiche de la session.</p>';
+    h+='</div></div>';
+    var choisies=s.faites.filter(function(x){ return CO.coches[x.nom]; }), nb=choisies.length;
+    var change=CO.sel!==null&&choisies.some(function(x){ return (x.co||'')!==CO.sel; });
+    var lab=CO.sel===null?'Choisis qui était là':(nb===0?'Choisis les parcelles':(!change?'Rien ne change':((CO.sel||'Sans coéquipier')+' sur '+pl(nb,'parcelle'))));
+    h+='<p class="resume-f">La correction se voit aussitôt au journal, dans les jalons et dans les heures du Pilotage. Elle est signée : « corrigé par '+(limite()?'Marc':'Nico')+' ».</p>';
+    h+='<div class="pied-f"><button type="button" class="bouton plein" data-k="ok" data-co-ok'+(change?'':' disabled')+'>'+esc(lab)+'</button><button type="button" class="lien" data-co-annuler>Annuler</button></div>';
+    return h;
+  }
+  function ouvrirCorriger(cadre,cle,jour){
+    var s=ETAT[cle]; CO={cadre:cadre, cle:cle, sel:null, coches:{}, jour:jour||''};
+    if(jour) s.faites.forEach(function(x){ if(x.jour===jour) CO.coches[x.nom]=true; });
+    OUVERT={cadre:cadre,type:'corriger'};
+    ouvrirBoite(cadre,htmlCorriger());
+  }
+  function validerCorriger(){
+    var cle=CO.cle, s=ETAT[cle], avant=copie(s), n=0, par=limite()?'Marc':'Nico';
+    s.faites.forEach(function(x){ if(CO.coches[x.nom]&&(x.co||'')!==CO.sel){ x.co=CO.sel; x.coCorr={par:par, le:LE}; n++; } });
+    var cadre=CO.cadre, msg='Coéquipier corrigé : '+(CO.sel||'personne')+' sur '+pl(n,'parcelle');
+    fermerBoite(cadre); toutRendre();
+    toast(cadre,msg,function(){ ETAT[cle]=avant; toutRendre(); });
+  }
+
+  /* ── téléphone A : la feuille de la session ── */
+  function rendreA(){
+    var s=ETAT.amd, el=document.getElementById('telA-defile'); if(!el) return;
+    var fHa=haDe(s.faites), tHa=fHa+haDe(s.reste), nF=s.faites.length, nT=nF+s.reste.length, pct=Math.round(fHa/tHa*100);
+    var h='<div class="m-titre">'+esc(s.act)+'</div><div class="m-sous">Depuis le lundi 2 nov. · préparée par la fertilisation</div>';
+    h+='<div class="avance"><div class="hd"><span class="n">'+nF+'/'+nT+' parcelles · '+ha(fHa)+' sur '+ha(tHa)+'</span><button type="button" class="bouton petit" data-a="enreg">Enregistrer</button></div><div class="jauge"><i style="width:'+pct+'%"></i></div></div>';
+    h+='<div class="encart"><span class="pt-trac" aria-hidden="true"></span><div class="txt"><div class="t">'+esc(s.trac)+'</div><div class="s">Tracteur dédié '+esc(s.act)+'</div></div><button type="button" class="bouton corr" data-a="trac">Changer</button></div>';
+    h+='<div class="encart neuf" id="telA-eq"><span class="av-grp">'+av(s.cond)+av(s.coeq)+'</span><div class="txt"><div class="t">'+esc(s.coeq?(s.cond+', avec '+s.coeq):(s.cond+', seul'))+'</div><div class="s">Coéquipier '+esc(s.depuis)+'</div></div><button type="button" class="bouton corr" data-a="changer" aria-label="Changer de coéquipier">Changer</button></div>';
+    h+='<div class="lbl-sec"><span class="l">Parcelles restantes</span><span class="mini-g"><span class="mini">⊘ Désactiver</span><span class="mini">Voir toutes</span></span></div>';
+    if(!s.reste.length) h+='<p class="note" style="text-align:center;padding:16px 0">Toutes les parcelles sont cochées.</p>';
+    s.reste.forEach(function(p){
+      h+='<button type="button" class="prow" data-a="cocher" data-nom="'+esc(p.nom)+'"><span class="ck"></span><span><span class="n">'+esc(p.nom)+'</span><span class="s">'+pl(p.sacs,'sac')+'</span></span><span class="r">'+ha(HA[p.nom])+'</span></button>';
+    });
+    h+='<div class="lbl-sec"><span class="l">Faites · '+pl(nF,'parcelle')+' · '+ha(fHa)+'<span class="marque-neuf">nouveau</span></span></div>';
+    joursDe(s,false).forEach(function(g){
+      var l=coeqsDe(g.parcs), mixte=l.length>1, peut=(ETAT.role==='admin')||(g.jour===AUJ);
+      h+='<div class="jour-g"><div class="hd"><div class="txt"><div class="t">'+esc(jourMoyen(g.jour))+' · '+esc(avecTxt(l))+'</div><div class="s">'+pl(g.parcs.length,'parcelle')+' · '+ha(haDe(g.parcs))+' · '+totalP(g.parcs)+'</div></div>'
+        +(peut?'<button type="button" class="bouton corr" data-a="corriger" data-jour="'+g.jour+'" aria-label="Corriger le coéquipier du '+esc(jourMoyen(g.jour))+'">Corriger</button>':'')+'</div>';
+      g.parcs.forEach(function(x){
+        h+='<div class="ln"><span class="ck">'+IC.check+'</span><span class="n">'+esc(x.nom)+'</span><span class="r">'+detailP(x)+' · '+hFr(x.h)+(mixte?' '+av(x.co,true):'')+'</span></div>';
+      });
+      var c=g.parcs.filter(function(x){ return x.coCorr; })[0];
+      if(c) h+='<div class="trace">Coéquipier corrigé par '+esc(c.coCorr.par)+', le '+esc(c.coCorr.le)+'</div>';
+      h+='</div>';
+    });
+    el.innerHTML=typo(h);
+    var note=document.getElementById('telA-note');
+    if(note) note.textContent=typo(ETAT.role==='trac'
+      ?'Vu par Marc : « Corriger » n’existe que sur aujourd’hui. Le passé, c’est l’admin.'
+      :'Vu par Nico : « Corriger » sur chaque jour, et « Choisir d’autres parcelles… » dans « Changer ».');
+  }
+  function cocher(nom){
+    var s=ETAT.amd, i=-1;
+    s.reste.forEach(function(p,k){ if(p.nom===nom) i=k; });
+    if(i<0) return;
+    var p=s.reste.splice(i,1)[0];
+    s.faites.push({nom:p.nom, sacs:p.sacs, jour:AUJ, h:s.heures.shift()||'16 h 00', co:s.coeq});
+    toutRendre();
+  }
+
+  /* ── les lignes du journal : la session lue au moment de l’affichage ── */
+  function lignes(qui,type){
+    var L=[];
+    if(type!=='main') ['amd','tar'].forEach(function(cle){
+      var s=ETAT[cle];
+      joursDe(s,false).forEach(function(g){
+        var parcs=g.parcs;
+        if(qui&&qui!==s.cond) parcs=parcs.filter(function(x){ return (x.co||'')===qui; });
+        if(!parcs.length) return;
+        var dern=parcs[parcs.length-1];
+        L.push({type:'trac', id:cle+'|'+g.jour, cle:cle, jour:g.jour, h:dern.h, s:s, parcs:parcs, tous:g.parcs});
+      });
+    });
+    if(type!=='trac') VIGNE.forEach(function(v){ if(!qui||v.qui.indexOf(qui)>=0) L.push({type:'vigne', id:v.id, jour:v.jour, h:v.h, v:v}); });
+    L.sort(function(a,b){ return a.jour<b.jour?1:(a.jour>b.jour?-1:(hMin(b.h)-hMin(a.h))); });
+    return L;
+  }
+  function nbPour(qui,type){ return lignes(qui,type).length; }
+
+  /* ── téléphone B : le journal ── */
+  function rendreB(){
+    var el=document.getElementById('telB-defile'); if(!el) return;
+    var qui=ETAT.filtreB, L=lignes(qui,'');
+    var h='<div class="tchips" role="group" aria-label="Qui" style="padding-top:8px">';
+    [''].concat(['Marc'].concat(COEQS)).forEach(function(n){
+      var on=qui===n;
+      h+='<button type="button" class="tchip'+(on?' on':'')+'" aria-pressed="'+on+'" data-fb="'+esc(n)+'">'+(n?esc(n):'Tous')+' <span class="note" style="color:inherit;opacity:.75">'+nbPour(n,'')+'</span></button>';
+    });
+    h+='</div>';
+    var prec='';
+    L.forEach(function(e){
+      if(e.jour!==prec){ prec=e.jour; var n=L.filter(function(x){ return x.jour===e.jour; }).length; h+='<div class="j-jour"><span>'+esc(jourLong(e.jour))+'</span><span>'+n+'</span></div>'; }
+      if(e.type==='vigne'){
+        var v=e.v;
+        h+='<div class="jl"><div class="hd"><div class="txt"><div class="t">'+esc(v.tache)+' · '+esc(v.parc)+'</div><div class="s">'+ha(HA[v.parc])+' · validé</div></div><span class="h">'+hFr(v.h)+'</span></div>'
+          +'<div class="qui">'+avGrp(v.qui)+'<span class="noms">'+esc(etListe(v.qui))+'</span></div></div>';
+        return;
+      }
+      var s=e.s, l=coeqsDe(e.parcs), noms=[s.cond].concat(l.filter(Boolean)), ouvert=!!ETAT.ouverts['B|'+e.id], mixte=coeqsDe(e.tous).length>1;
+      h+='<div class="jl trac"><div class="hd"><div class="txt"><div class="t">'+esc(s.act)+' <span class="etiq trac">'+IC.trac+' au tracteur</span></div><div class="s">'+pl(e.parcs.length,'parcelle')+' · '+ha(haDe(e.parcs))+' · '+totalP(e.parcs)+'</div></div><span class="h">'+hFr(e.h)+'</span></div>'
+        +'<div class="qui">'+avGrp(noms)+'<span class="noms">'+esc(equipeTxt(s.cond,l))+'</span><button type="button" class="dep" aria-expanded="'+ouvert+'" data-dep="B|'+e.id+'">Parcelles '+IC.chev+'</button></div>';
+      if(ouvert){
+        h+='<div class="parcs">'+e.parcs.map(function(x){ return '<div class="pl"><span class="n">'+esc(x.nom)+'</span><span class="r">'+ha(HA[x.nom])+' · '+detailP(x)+' · '+hFr(x.h)+' '+((mixte||qui)?av(x.co,true):'')+'</span></div>'; }).join('')+'</div>';
+        var c=e.parcs.filter(function(x){ return x.coCorr; })[0];
+        if(c) h+='<div class="note" style="color:var(--accent-texte);margin-top:6px">Coéquipier corrigé par '+esc(c.coCorr.par)+', le '+esc(c.coCorr.le)+'</div>';
+      }
+      h+='</div>';
+    });
+    if(!L.length) h+='<p class="note" style="text-align:center;padding:24px 0">Aucune entrée pour '+esc(qui)+'.</p>';
+    el.innerHTML=typo(h);
+    var sous=document.getElementById('telB-sous'); if(sous) sous.textContent='Vigne · campagne 2026-2027 · '+pl(L.length,'entrée');
+  }
+
+  /* ── ordinateur A : Tracteur › la fiche d’une session terminée ── */
+  function rail(on){
+    var it=function(n){ return '<div class="it'+(n===on?' on':'')+'">'+n+'</div>'; };
+    return '<div class="rail"><div class="logo">Ma Vigne</div><div class="note" style="margin-bottom:8px">Rechercher · Ctrl K</div>'+it('Pilotage')+'<div class="grp">Terrain</div>'+it('Vigne')+it('Tracteur')+it('Phyto')+'<div class="grp">Cave et réserve</div>'+it('Cave')+it('Réserve')+'<div class="grp">Organisation</div>'+it('Planning')+'</div>';
+  }
+  function rendrePcA(){
+    var el=document.getElementById('pcA-corps'); if(!el) return;
+    var s=ETAT.tar, a=ETAT.amd, aPct=Math.round(haDe(a.faites)/(haDe(a.faites)+haDe(a.reste))*100);
+    var h=rail('Tracteur');
+    h+='<div class="tliste"><h4>Sessions</h4><div class="grp-t">En cours</div>'
+      +'<div class="titem"><span class="n">'+esc(a.act)+'</span><span class="s">'+esc(equipeTxt(a.cond,[a.coeq]))+' · '+aPct+'\u00a0%</span></div>'
+      +'<div class="grp-t">Terminées</div>'
+      +'<div class="titem on"><span class="n">'+esc(s.act)+'</span><span class="s">'+esc(equipeTxt(s.cond,coeqsDe(s.faites)))+' · 13 → 14 oct.</span></div>'
+      +'<div class="titem"><span class="n">Broyage</span><span class="s">Marc, seul · 9 oct.</span></div>'
+      +'<div class="titem"><span class="n">Semis</span><span class="s">Marc et Hugo · 2 oct.</span></div></div>';
+    var minT=somme(s.faites,function(x){ return x.min; }), trousT=somme(s.faites,function(x){ return x.trous; }), haT=haDe(s.faites);
+    h+='<div class="fiche-tr"><div class="hd"><div><h3>'+esc(s.act)+'</h3><div class="tags"><span class="etiq">'+esc(s.cond)+'</span><span class="etiq">'+esc(s.trac)+'</span><span class="etiq">13 → 14 oct.</span><span class="etiq ok">'+esc(s.statut)+'</span></div></div><span class="bouton">Ouvrir la session</span></div>';
+    h+='<div class="kpis"><div class="kpi"><div class="l">Parcelles</div><div class="v">'+s.faites.length+'<small>\u00a0sur '+s.faites.length+'</small></div><div class="s">'+ha(haT)+'</div></div>'
+      +'<div class="kpi"><div class="l">Trous de tarière</div><div class="v">'+trousT+'</div><div class="s">saisis parcelle par parcelle</div></div>'
+      +'<div class="kpi"><div class="l">Heures de travail</div><div class="v">'+minFr(minT)+'</div><div class="s">au chrono</div></div>'
+      +'<div class="kpi"><div class="l">GNR</div><div class="v">'+Math.round(minT/60*6)+'<small>\u00a0L</small></div><div class="s">6\u00a0L par heure</div></div></div>';
+    h+='<div class="sec-t">L’équipe <span class="marque-neuf">nouveau</span></div><table><thead><tr><th>Jour</th><th>Conducteur</th><th>Coéquipier</th><th class="r">Parcelles</th><th class="r">Trous</th><th class="r">Heures</th><th></th></tr></thead><tbody>';
+    joursDe(s,true).forEach(function(g){
+      var l=coeqsDe(g.parcs), c=g.parcs.filter(function(x){ return x.coCorr; })[0];
+      h+='<tr'+(c?' class="corrige"':'')+'><td>'+esc(jourCourt(g.jour))+'</td><td><span class="cellp">'+av(s.cond,true)+esc(s.cond)+'</span></td>'
+        +'<td><span class="cellp">'+l.map(function(n){ return av(n,true); }).join('')+esc(avecTxt(l).replace(/^avec /,''))+'</span>'+(c?'<span class="trace-t">corrigé par '+esc(c.coCorr.par)+', le '+esc(c.coCorr.le)+'</span>':'')+'</td>'
+        +'<td class="r">'+g.parcs.length+'</td><td class="r">'+somme(g.parcs,function(x){ return x.trous; })+'</td><td class="r">'+minFr(somme(g.parcs,function(x){ return x.min; }))+'</td>'
+        +'<td class="r"><button type="button" class="bouton corr" data-pa="corriger" data-jour="'+g.jour+'">Corriger</button></td></tr>';
+    });
+    h+='</tbody></table>';
+    var gens=[{n:s.cond, r:'conducteur', m:minT, t:trousT}];
+    COEQS.forEach(function(n){ var p=s.faites.filter(function(x){ return x.co===n; }); if(p.length) gens.push({n:n, r:'coéquipier', m:somme(p,function(x){ return x.min; }), t:somme(p,function(x){ return x.trous; })}); });
+    h+='<div class="sec-t">Par personne <span class="marque-neuf">nouveau</span></div><table><thead><tr><th>Qui</th><th>Rôle</th><th class="r">Heures de main-d’œuvre</th><th class="r">Trous (jalons)</th></tr></thead><tbody>'
+      +gens.map(function(g){ return '<tr><td><span class="cellp">'+av(g.n,true)+esc(g.n)+'</span></td><td>'+g.r+'</td><td class="r">'+minFr(g.m)+'</td><td class="r">'+g.t+'</td></tr>'; }).join('')
+      +'<tr class="tot"><td>Main-d’œuvre de la session</td><td></td><td class="r">'+minFr(somme(gens,function(g){ return g.m; }))+'</td><td></td></tr></tbody></table>';
+    h+='<p class="note" style="margin-top:8px">Le conducteur garde tous les trous et ses kilomètres enjambés ; chaque coéquipier, les trous des parcelles où il était.</p>';
+    h+='</div>';
+    el.innerHTML=typo(h);
+  }
+
+  /* ── ordinateur B : Vigne › Journal, liste et fiche ── */
+  function rendrePcB(){
+    var el=document.getElementById('pcB-corps'); if(!el) return;
+    var F=ETAT.pc, L=lignes(F.qui,F.type);
+    if(!L.some(function(e){ return e.id===F.sel; })) F.sel=L.length?L[0].id:'';
+    var opt=function(attr,val,lab,n,on){ return '<button type="button" class="opt'+(on?' on':'')+'" aria-pressed="'+on+'" '+attr+'="'+esc(val)+'"><span>'+lab+'</span>'+(n!=null?'<span class="n">'+n+'</span>':'')+'</button>'; };
+    var h=rail('Vigne');
+    h+='<div class="filtres"><h4>Qui</h4>';
+    [''].concat(['Marc'].concat(COEQS)).forEach(function(n){ h+=opt('data-pq',n,n?esc(n):'Tous',nbPour(n,F.type),F.qui===n); });
+    h+='<h4 style="margin-top:14px">Type</h4>'+opt('data-pt','','Tout',nbPour(F.qui,''),F.type==='')+opt('data-pt','trac','Au tracteur',nbPour(F.qui,'trac'),F.type==='trac')+opt('data-pt','main','À la main',nbPour(F.qui,'main'),F.type==='main');
+    h+='<h4 style="margin-top:14px">Quand</h4><div class="opt on"><span>Cette campagne</span></div><div class="opt"><span>30 jours</span></div><div class="opt"><span>Dates…</span></div></div>';
+    h+='<div class="liste"><div class="tete"><span class="t">Journal</span><span class="n">'+pl(L.length,'entrée')+' · campagne 2026-2027</span></div>';
+    L.forEach(function(e){
+      var sel=e.id===F.sel;
+      if(e.type==='vigne'){
+        var v=e.v;
+        h+='<button type="button" class="lig'+(sel?' sel':'')+'" aria-pressed="'+sel+'" data-ls="'+esc(e.id)+'"><span class="d">'+esc(dateCourte(v.jour))+'</span>'+avGrp(v.qui.slice(0,2)).replace(/class="av /g,'class="av p ')+'<span><b>'+esc(v.tache)+'</b> <span class="p">· '+esc(v.parc)+'</span><small>'+esc(etListe(v.qui))+'</small></span><span class="etiq ok">validé</span><span class="h">'+hFr(v.h)+'</span></button>';
+      } else {
+        var s=e.s, l=coeqsDe(e.parcs), noms=[s.cond].concat(l.filter(Boolean));
+        h+='<button type="button" class="lig'+(sel?' sel':'')+'" aria-pressed="'+sel+'" data-ls="'+esc(e.id)+'"><span class="d">'+esc(dateCourte(e.jour))+'</span>'+avGrp(noms.slice(0,2)).replace(/class="av /g,'class="av p ')+'<span><b>'+esc(s.act)+'</b> <span class="p">· '+pl(e.parcs.length,'parcelle')+'</span><small>'+esc(equipeTxt(s.cond,l))+'</small></span><span class="etiq trac">'+IC.trac+' tracteur</span><span class="h">'+hFr(e.h)+'</span></button>';
+      }
+    });
+    if(!L.length) h+='<p class="note" style="padding:20px 14px">Aucune entrée avec ces filtres.</p>';
+    h+='</div>';
+    var e=L.filter(function(x){ return x.id===F.sel; })[0];
+    h+='<div class="detail">'+(e?ficheB(e):'<p class="note">Choisis une entrée dans la liste.</p>')+'</div>';
+    el.innerHTML=typo(h);
+  }
+  function ficheB(e){
+    if(e.type==='vigne'){
+      var v=e.v;
+      return '<div class="note">'+esc(jourLong(v.jour))+' · '+hFr(v.h)+'</div><h3>'+esc(v.tache)+' · '+esc(v.parc)+'</h3><div class="note">'+ha(HA[v.parc])+' · validé par '+esc(v.qui[0])+'</div>'
+        +'<dl class="dl"><dt>Équipe</dt><dd>'+esc(etListe(v.qui))+'</dd><dt>Type</dt><dd>À la main</dd></dl>'
+        +'<div class="act-d"><button type="button" class="bouton" data-pb="equipe-v">Équipe</button><button type="button" class="bouton" data-pb="modif">Modifier</button></div>';
+    }
+    var s=e.s, l=coeqsDe(e.parcs), mins=somme(e.parcs,function(x){ return x.min||0; });
+    var coL=l.map(function(n){ var k=e.parcs.filter(function(x){ return (x.co||'')===n; }).length; return '<span class="cellp" style="margin-bottom:4px">'+av(n,true)+(n?esc(n):'personne')+' — '+pl(k,'parcelle')+'</span>'; }).join('');
+    var h='<div class="note">'+esc(jourLong(e.jour))+' · '+hFr(e.parcs[0].h)+' → '+hFr(e.h)+'</div><h3>'+esc(s.act)+' · au tracteur</h3><div class="note">'+pl(e.parcs.length,'parcelle')+' · '+ha(haDe(e.parcs))+' · '+totalP(e.parcs)+'</div>'
+      +'<dl class="dl"><dt>Conducteur</dt><dd><span class="cellp">'+av(s.cond,true)+esc(s.cond)+'</span></dd><dt>Coéquipier</dt><dd>'+coL+'</dd><dt>Tracteur</dt><dd>'+esc(s.trac)+'</dd><dt>Durée</dt><dd>'+(mins?minFr(mins)+' au chrono':'au barème, sans chrono')+'</dd></dl>';
+    h+='<table style="margin-top:12px"><thead><tr><th>Parcelle</th><th class="r">'+(e.parcs[0].trous!=null?'Trous':'Sacs')+'</th><th>Coéquipier</th><th class="r">Heure</th></tr></thead><tbody>'
+      +e.parcs.map(function(x){ return '<tr><td>'+esc(x.nom)+'</td><td class="r">'+(x.trous!=null?x.trous:x.sacs)+'</td><td><span class="cellp">'+av(x.co,true)+(x.co?esc(x.co):'—')+'</span></td><td class="r">'+hFr(x.h)+'</td></tr>'; }).join('')+'</tbody></table>';
+    var c=e.parcs.filter(function(x){ return x.coCorr; })[0];
+    if(c) h+='<div class="trace">Coéquipier corrigé par '+esc(c.coCorr.par)+', le '+esc(c.coCorr.le)+'</div>';
+    h+='<div class="act-d"><button type="button" class="bouton" data-pb="equipe" data-cle="'+e.cle+'" data-jour="'+e.jour+'">Équipe</button><button type="button" class="bouton" data-pb="session">Ouvrir la session</button></div>';
+    return h;
+  }
+
+  /* ── tout se redessine depuis les mêmes données ── */
+  function toutRendre(){ rendreA(); rendreB(); rendrePcA(); rendrePcB(); }
+
+  /* ── les gestes ── */
+  function surCadre(id,fn){ var r=document.getElementById(id); if(r) r.addEventListener('click',function(ev){ var t=ev.target.closest('button'); if(t&&r.contains(t)) fn(t,ev); }); }
+  surCadre('telA',function(b){
+    var a=b.getAttribute('data-a');
+    if(a==='changer') return ouvrirChanger();
+    if(a==='cocher') return cocher(b.getAttribute('data-nom'));
+    if(a==='corriger') return ouvrirCorriger('telA','amd',b.getAttribute('data-jour'));
+    if(a==='enreg') return toast('telA','Avancement enregistré',null);
+    if(a==='trac') return toast('telA','« Changer de tracteur » reste tel quel',null);
+    if(b.hasAttribute('data-ch-qui')){ CH.sel=b.getAttribute('data-ch-qui'); return majBoite('telA',htmlChanger()); }
+    if(b.hasAttribute('data-ch-quand')){ if(!b.disabled){ CH.quand=b.getAttribute('data-ch-quand'); majBoite('telA',htmlChanger()); } return; }
+    if(b.hasAttribute('data-ch-ok')){ if(!b.disabled) validerChanger(); return; }
+    if(b.hasAttribute('data-ch-annuler')||b.hasAttribute('data-co-annuler')) return fermerBoite('telA');
+    if(b.hasAttribute('data-ch-autres')){ CO={cadre:'telA', cle:'amd', sel:null, coches:{}, jour:''}; OUVERT={cadre:'telA',type:'corriger'}; return majBoite('telA',htmlCorriger()); }
+    gestesCorriger(b);
+  });
+  function gestesCorriger(b){
+    var cadre=CO.cadre;
+    if(b.hasAttribute('data-co-qui')){ CO.sel=b.getAttribute('data-co-qui'); return majBoite(cadre,htmlCorriger()); }
+    if(b.hasAttribute('data-co-p')){ var n=b.getAttribute('data-co-p'); if(CO.coches[n]) delete CO.coches[n]; else CO.coches[n]=true; return majBoite(cadre,htmlCorriger()); }
+    if(b.hasAttribute('data-co-jour')){
+      var j=b.getAttribute('data-co-jour'), ps=ETAT[CO.cle].faites.filter(function(x){ return x.jour===j; }), tous=ps.every(function(x){ return CO.coches[x.nom]; });
+      ps.forEach(function(x){ if(tous) delete CO.coches[x.nom]; else CO.coches[x.nom]=true; });
+      return majBoite(cadre,htmlCorriger());
+    }
+    if(b.hasAttribute('data-co-ok')){ if(!b.disabled) validerCorriger(); return; }
+    if(b.hasAttribute('data-co-annuler')) return fermerBoite(cadre);
+  }
+  surCadre('telB',function(b){
+    if(b.hasAttribute('data-fb')){ ETAT.filtreB=b.getAttribute('data-fb'); rendreB(); var x=document.querySelector('#telB [data-fb="'+ETAT.filtreB.replace(/"/g,'\\"')+'"]'); if(x) x.focus({preventScroll:true}); return; }
+    if(b.hasAttribute('data-dep')){ var k=b.getAttribute('data-dep'); ETAT.ouverts[k]=!ETAT.ouverts[k]; rendreB(); var y=document.querySelector('#telB [data-dep="'+k+'"]'); if(y) y.focus({preventScroll:true}); }
+  });
+  surCadre('pcA',function(b){
+    if(b.getAttribute('data-pa')==='corriger') return ouvrirCorriger('pcA','tar',b.getAttribute('data-jour'));
+    gestesCorriger(b);
+  });
+  surCadre('pcB',function(b){
+    if(b.hasAttribute('data-pq')){ ETAT.pc.qui=b.getAttribute('data-pq'); return rendrePcB(); }
+    if(b.hasAttribute('data-pt')){ ETAT.pc.type=b.getAttribute('data-pt'); return rendrePcB(); }
+    if(b.hasAttribute('data-ls')){ ETAT.pc.sel=b.getAttribute('data-ls'); rendrePcB(); var z=document.querySelector('#pcB [data-ls="'+ETAT.pc.sel+'"]'); if(z) z.focus({preventScroll:true}); return; }
+    var p=b.getAttribute('data-pb');
+    if(p==='equipe') return ouvrirCorriger('pcB',b.getAttribute('data-cle'),b.getAttribute('data-jour'));
+    if(p==='equipe-v') return toast('pcB','L’équipe d’une validation se corrige déjà ainsi (21/10)',null);
+    if(p==='session') return toast('pcB','Ouvre la fiche de la session, dans le Tracteur',null);
+    if(p==='modif') return toast('pcB','« Modifier » reste tel quel',null);
+    gestesCorriger(b);
+  });
+  ['telA','pcA','pcB'].forEach(function(id){
+    var r=document.getElementById(id); if(!r) return;
+    var fond=id==='telA'?r.querySelector('[data-voile]'):r.querySelector('[data-dlg]');
+    fond.addEventListener('click',function(ev){ if(ev.target===fond) fermerBoite(id); });
+  });
+  document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'&&OUVERT){ fermerBoite(OUVERT.cadre); } });
+  document.querySelectorAll('[data-role]').forEach(function(b){
+    b.addEventListener('click',function(){
+      ETAT.role=b.getAttribute('data-role');
+      document.querySelectorAll('[data-role]').forEach(function(x){ x.setAttribute('aria-pressed',String(x===b)); });
+      if(OUVERT&&OUVERT.cadre==='telA') fermerBoite('telA');
+      rendreA();
+    });
+  });
+  document.querySelectorAll('[data-rejouer]').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(OUVERT) fermerBoite(OUVERT.cadre);
+      ETAT.amd=copie(AMD0); ETAT.filtreB=''; ETAT.ouverts={};
+      toutRendre();
+    });
+  });
+  toutRendre();
+})();
+
+</script>
+</body>
+</html>

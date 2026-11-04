@@ -436,6 +436,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-jalons.mjs --contre', 'jalons-calcul-et-memoire'],
   ['node scripts/mv-harnais-coeq1.mjs', 'coequipier-tracteur'],   // COEQ-1 (§343) : le coéquipier, choisi avec l'activité
   ['node scripts/mv-harnais-coeq1.mjs --contre', 'coequipier-tracteur'],
+  ['node scripts/mv-harnais-coeq2.mjs', 'coequipier-tracteur'],   // COEQ-2 (§523) : le coéquipier, parcelle par parcelle
+  ['node scripts/mv-harnais-coeq2.mjs --contre', 'coequipier-tracteur'],
   ['node scripts/mv-harnais-presence1.mjs', 'presence-notee-chai'],   // PRESENCE-1 (§344) : « Ta présence est notée »
   ['node scripts/mv-harnais-presence1.mjs --contre', 'presence-notee-chai'],
   ['node scripts/mv-harnais-premieres1.mjs', 'premieres-fois'],   // PREMIERES-1 (§345) : « Vos premières fois »

@@ -9,6 +9,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          showToast, _escHtml, _escAttr, tNom, logError, dreEffectif
 , _mvBadge, _mvIcon, _actIcone, _mvSetIcon } from './utils.js';
 import './compteur.js';   // ★ COMPT-6 (§488) : le compteur des tracteurs (COMPT-1 à 5), sorti de ce fichier
+import './coequipier.js';   // ★ COEQ-2 (§523) : le coéquipier par parcelle (« Changer », « Corriger », les jours), sorti d'ici comme le compteur
 
 // ── Flag debug (console.log silencieux en prod — manquait après extraction du module) ──
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -1500,7 +1501,8 @@ function _trEncoursHtml(s){
   var fait=act.filter(function(p){ return faites.indexOf(p.nom)>=0; }).reduce(function(a,p){ return a+(parseFloat(p.surface)||0); },0);
   var trac=(TRACTEURS_LIST||[]).find(function(t){ return t.id===s.tracteurId; });
   var peut=(typeof isTractoriste==='function'&&isTractoriste())||(typeof isAdmin==='function'&&isAdmin());
-  var meta=[s.conducteur||'', trac?trac.nom:'', s.date?('depuis le '+_fmtDate(s.date)):''].filter(Boolean).join(' \u00b7 ');
+  var meta=[(s.conducteur||'')+(s.coequipier?' et '+s.coequipier:''), trac?trac.nom:'',   // COEQ-2 (§523) : l'équipe du moment
+    s.date?('depuis le '+_fmtDate(s.date)):''].filter(Boolean).join(' \u00b7 ');
   return '<div class="trx" data-sid="'+_escAttr(s.id)+'">'
     +'<div class="trx-hd"><div><div class="trx-k">En cours</div><div class="trx-t">'+_escHtml(s.activite||'Session')+'</div><div class="trx-m">'+_escHtml(meta)+'</div></div><div class="trx-pct">'+pct+'\u00a0%</div></div>'
     +'<div class="trx-barre" aria-hidden="true"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'
@@ -1652,7 +1654,8 @@ var _relOuvrir=function(){ return _cpt('_relOuvrir',arguments,undefined); };
 var _trRelever=function(){ return _cpt('_trRelever',arguments,undefined); };
 var _trSdOuvert=function(){ return _cpt('_trSdOuvert',arguments,undefined); };
 var _trRelevePassage=function(){ return _cpt('_trRelevePassage',arguments,undefined); };
-if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, closeOv:_closeOv, fmtDate:_fmtDate, gnrField:_gnrField, gnrNum:_gnrNum, gnrTodayISO:_gnrTodayISO,
+if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, chrSurf:_chrSurf, sdNorm:_sdNorm, chrTrace:_chrTrace, renderSDParcelles:renderSDParcelles, openSessionDetail:openSessionDetail,   // COEQ-2 (§523)
+  closeOv:_closeOv, fmtDate:_fmtDate, gnrField:_gnrField, gnrNum:_gnrNum, gnrTodayISO:_gnrTodayISO,
   openOv:_openOv, saveData:_saveData, trHeuresFr:_trHeuresFr, getTracteurSel:getTracteurSel, renderEntretiens:renderEntretiens, renderTracteur:renderTracteur,
   selId:function(){ return _tracSelId; }, onglet:function(){ return _tracOnglet; } };
 function renderTracteur(){
@@ -2117,6 +2120,7 @@ function _chrPoserBloc(s,bloc,ms,t0,t1){
     var mes=Math.round((_chrMes(o)+(aberrante?0:part))*10)/10;
     var e={nom:nom,t0:(o&&o.t0)?Math.min(o.t0,t0):t0,t1:t1,ps:0,grp:n,mes:mes,n:(o?(o.n||1):0)+1};
     if(o&&o.data)e.data=o.data;
+    if(o&&Object.prototype.hasOwnProperty.call(o,'co')){ e.co=o.co; if(o.coCorr)e.coCorr=o.coCorr; } else if(!o&&typeof window._trStampCo==='function') window._trStampCo(s,e);   // COEQ-2 (§523)
     var motif=aberrante||_chrSuspectTotal(s,nom,mes);
     if(motif){e.ecarte=motif;r.ecartees.push(nom);r.minKo+=part;r.motif=r.motif||motif;}
     else{e.dmin=mes;r.minOk+=part;}
@@ -2486,6 +2490,11 @@ function _trFicheHtml(s){
   h+='<div class="trf-kpis trf-kpis-2"><div class="trf-kpi"><span class="l">Heures de travail</span><span class="v">'+_trHeuresFr(hh)+'<small>\u00a0h</small></span>'
     +'<span class="trf-s">'+(mn.total?(mn.bar?(mn.mes?_trHeuresFr(mn.mes/60)+'\u00a0h au chrono, '+_trHeuresFr(mn.bar/60)+'\u00a0h au barème':'au barème, sans chrono'):'au chrono'):'rien de mesuré')+'</span></div>'
     +'<div class="trf-kpi"><span class="l">GNR</span><span class="v">'+Math.round(hh*lh)+'<small>\u00a0L</small></span><span class="trf-s">'+_trHeuresFr(lh)+'\u00a0L par heure'+(regle?'':', valeur par défaut')+'</span></div></div>';
+  if(typeof window._trSessADeux==='function'&&window._trSessADeux(s)){   // COEQ-2 (§523) : l'équipe, jour par jour ; « Corriger » ouvre la feuille (admin)
+    var _jr=window._trJoursDe(s).slice().reverse(), _ad=isAdmin();
+    if(_jr.length) h+='<section class="trf-sec"><div class="trf-sec-t">L\u2019\u00e9quipe</div><div class="sdeq-tab-w"><table class="sdeq-tab"><thead><tr><th>Jour</th><th>Conducteur</th><th>Co\u00e9quipier</th><th class="r">Parcelles</th>'+(_ad?'<th></th>':'')+'</tr></thead><tbody>'
+      +_jr.map(function(g){ var cc=g.parcs.filter(function(x){ return x.coCorr; })[0]; return '<tr><td>'+_escHtml(window._trJourTxt(g.jour))+'</td><td>'+_escHtml(s.conducteur||'')+'</td><td>'+_escHtml(window._trAvecTxt(window._trEqDuJour(s,g.parcs)).replace(/^avec /,''))+(cc?'<span class="sdeq-trace">corrig\u00e9 par '+_escHtml(cc.coCorr.par||'?')+'</span>':'')+'</td><td class="r">'+g.parcs.length+'</td>'+(_ad?'<td class="r"><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-sdeq="fiche-corr" data-sid="'+_escAttr(s.id)+'" data-j="'+g.jour+'">Corriger</button></td>':'')+'</tr>'; }).join('')+'</tbody></table></div></section>';
+  }
   h+='<section class="trf-sec"><div class="trf-sec-t">Parcelles</div><div class="trf-parcs">'+actives.map(function(p){ return '<span class="trf-p'+(done.indexOf(p.nom)>=0?' fait':'')+'">'+_escHtml(p.nom)+'</span>'; }).join('')+'</div></section>';
   h+='<section class="trf-sec"><div class="trf-sec-t">Note</div><p class="trf-note">'+(s.note?_escHtml(s.note):'<span class="trf-rien">Aucune note sur cette session.</span>')+'</p></section>';
   return h;
@@ -2520,8 +2529,10 @@ function openSessionDetail(id){
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   document.getElementById('sd-titre').textContent=s.activite;
   var _sdPq=document.getElementById('sd-pq');if(_sdPq)_sdPq.innerHTML=window._mvPqBtn?window._mvPqBtn(s.activite,'trac'):'';   // POURQUOI-1 (§336)
-  document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur||''}${s.coequipier?' et '+s.coequipier:''}`;   // COEQ-1 (§343) : « … · Marc et Léo »   // ROB-2 : jamais « undefined »
+  var _aDeux=(typeof window._trSessADeux==='function')&&window._trSessADeux(s);
+  document.getElementById('sd-meta').textContent=_aDeux?_fmtDate(s.date):`${_fmtDate(s.date)} · ${s.conducteur||''}`;   // COEQ-2 (§523) : à deux, l'équipe a son encart   // ROB-2 : jamais « undefined »
   renderSDTracEncart();
+  if(typeof window.renderSDEqEncart==='function'){ window.renderSDEqEncart(); window.closeSdEq(); }   // COEQ-2 (§523)
   closeSdTracPicker();
   updateSDSkipBtn();
   _chrRestaurer(id);
@@ -2641,7 +2652,7 @@ function renderSDParcelles(){
   }
   const btn=document.getElementById('sd-show-done-btn');
   if(btn){btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';btn.classList.toggle('on',!!sdShowDone);btn.setAttribute('aria-pressed',sdShowDone?'true':'false');}
-  if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Toutes les parcelles sont cochées</div>';_renderChronoBar();_sdRenderHist();return;}
+  if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Toutes les parcelles sont cochées</div>';_renderChronoBar();if(typeof window._sdRenderFaites==='function')window._sdRenderFaites();_sdRenderHist();return;}
   // Activité courante pour savoir si il y a un champ custom
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
   var hasChamp=!!(act&&act.champCustom&&act.champCustom.label);
@@ -2685,6 +2696,7 @@ function renderSDParcelles(){
   _renderChronoBar();_renderChronoJour();
   var _lb=document.getElementById('sd-parc-lbl');
   if(_lb)_lb.textContent=_tri.src?('Parcelles \u2014 '+_tri.src):'Parcelles restantes';
+  if(typeof window._sdRenderFaites==='function') window._sdRenderFaites();   // COEQ-2 (§523) : les parcelles faites, jour par jour
   _sdRenderHist();
 }
 function toggleSDShowDone(){sdShowDone=!sdShowDone;renderSDParcelles();}
@@ -2773,6 +2785,7 @@ function toggleSessionParcelle(nom,row){
   _sdNorm(s);
   s.parcellesFaites.push({nom:nom});
   _trCocheJour(s,nom);   // FERTI-9 (§499) : la parcelle porte le jour où elle est faite
+  if(typeof window._trStampCo==='function') window._trStampCo(s,s.parcellesFaites[s.parcellesFaites.length-1]);   // COEQ-2 (§523) : le coéquipier du moment
   _chrTrace(s,'coche',nom);
   _saveData('sessions');renderSessionProgress();renderSDParcelles();
 }
@@ -2808,7 +2821,7 @@ function _trCocheJour(s,nom){
 var _SD_GESTES={debut:'d\u00e9but',reprise:'reprise \u2014 le temps s\u2019ajoute',ajout:'ajout\u00e9e au bloc',fin:'fin',
   interrompt:'interrompue',reprend:'reprise apr\u00e8s la pause',dejeuner:'pause d\u00e9jeuner',finjour:'fin de journ\u00e9e',
   decoche:'d\u00e9coch\u00e9e',coche:'coch\u00e9e',valeur:'coch\u00e9e',desactive:'d\u00e9sactiv\u00e9e',reactive:'r\u00e9activ\u00e9e',
-  retabli:'r\u00e9tablie',ferme:'chrono ferm\u00e9 \u2014 une autre session a commenc\u00e9'};
+  retabli:'r\u00e9tablie',coeq:'co\u00e9quipier chang\u00e9',coeqcorr:'co\u00e9quipier corrig\u00e9',ferme:'chrono ferm\u00e9 \u2014 une autre session a commenc\u00e9'};
 function _sdRenderHist(){
   var host=document.getElementById('sd-hist');if(!host)return;
   var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
@@ -2823,6 +2836,8 @@ function _sdRenderHist(){
     if(ev.e==='fin')quoi='fin \u2014 '+_chrFmtDur(ev.m||0)+(ev.mo?(', \u00e9cart\u00e9e ('+(_CHR_MOTIFS[ev.mo]||ev.mo)+')'):'')+(ev.c?' \u00b7 ajout\u00e9 \u00e0 la fois d\u2019avant':'');
     if(ev.e==='interrompt'&&ev.m)quoi+=' apr\u00e8s '+_chrFmtDur(ev.m);
     if(ev.e==='valeur'&&ev.v)quoi+=' \u2014 '+ev.v;
+    if(ev.e==='coeq')quoi+=' \u2014 '+(ev.a||'')+' \u2192 '+(ev.b||'');   // COEQ-2 (§523)
+    if(ev.e==='coeqcorr'&&ev.b)quoi+=' \u2014 '+ev.b;
     var btn=(ev.e==='decoche'&&ev.x&&ev.p&&!faits[ev.p])?'<button type="button" class="sd-hist-b" data-t="'+ev.t+'">R\u00e9tablir</button>':'';
     return '<div class="sd-hist-r"><span class="sd-hist-h">'+hh+'</span><span class="sd-hist-q">'
       +(ev.p?'<b>'+_escHtml(ev.p)+'</b> \u2014 ':'')+_escHtml(quoi)+(ev.u?' <i>'+_escHtml(ev.u)+'</i>':'')+'</span>'+btn+'</div>';
@@ -2861,7 +2876,9 @@ function confirmerValidationChamp(){
   // SESS-1 : deux validations de la même parcelle (double appui) ne font plus deux lignes.
   _sdNorm(s);
   var _jv=s.parcellesFaites.findIndex(function(x){return _chrNom(x)===_ocvNomParcelle;});
-  if(_jv>=0)s.parcellesFaites[_jv]={nom:_ocvNomParcelle,data:data};else s.parcellesFaites.push({nom:_ocvNomParcelle,data:data});
+  var _ne={nom:_ocvNomParcelle,data:data}, _ve=_jv>=0?s.parcellesFaites[_jv]:null;   // COEQ-2 (§523) : réécrite, la parcelle garde son coéquipier
+  if(_ve&&typeof _ve==='object'){ if(Object.prototype.hasOwnProperty.call(_ve,'co')) _ne.co=_ve.co; if(_ve.coCorr) _ne.coCorr=_ve.coCorr; } else if(typeof window._trStampCo==='function') window._trStampCo(s,_ne);
+  if(_jv>=0)s.parcellesFaites[_jv]=_ne;else s.parcellesFaites.push(_ne);
   _trCocheJour(s,_ocvNomParcelle);   // FERTI-9 (§499)
   _chrTrace(s,'valeur',_ocvNomParcelle,{v:val});
   if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/confirmerValidationChamp'); } }
@@ -3038,7 +3055,7 @@ function _mvActCoeq(act){
   if(act.coequipier===true) return true;
   if(act.coequipier===false) return false;
   var s=String(act.nom||'').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^a-z]/g,'');
-  return s==='tariere'||s==='ensemencement'||s==='semis'||s==='engrais';
+  return s==='tariere'||s==='ensemencement'||s==='semis'||s==='engrais'||s==='amendement';   // COEQ-2 (§523), D5 : l'amendement aussi
 }
 window._mvActCoeq=_mvActCoeq;
 function _sessCoeqRender(){
@@ -3056,6 +3073,9 @@ function _sessCoeqRender(){
 }
 function pickCoeq(el){ document.querySelectorAll('#s-coeq-pick .pchk').forEach(function(x){ x.classList.remove('sel','acre'); }); el.classList.add('sel','acre'); }
 window.pickCoeq=pickCoeq;
+
+// ★★ COEQ-2 (§523) : le coéquipier PAR PARCELLE vit dans src/coequipier.js (importé en tête, comme le compteur) — la feuille
+//   « Changer / Corriger », l'encart, les jours. Ce fichier l'appelle par window (_trStampCo, renderSDEqEncart, _sdRenderFaites…).
 function openNewSession(){
   if(DEBUG) console.log('openNewSession appelé, currentUser=', currentUser, 'isTractoriste=', isTractoriste());
   if(!isTractoriste()){showToast('Réservé aux tractoristes','#C0392B');return;}

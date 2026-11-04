@@ -1,0 +1,42 @@
+{
+  "lot": "COEQ-2",
+  "section": "§523",
+  "base": "4dfc5b74ddc51316ca029fcb3eed4e772f36ddd6",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "ok": true,
+    "empreinte": "a12071bc400769a2b26d5d8c821e629954ac0c09f49852ef6e64acd1909b53ee",
+    "date": "2026-11-04T03:49:28.673Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "cad3f10febcd45687b9381b3d975e2dd98da7eca238b4e1f9110f356755f8216",
+    "CLAUDE.md": "00488eaf1748a3714276cd860fc84ad5605dff28571c2b2a45634e3013819e52",
+    "docs/claude/INDEX.md": "91c5b7ac4f88364169d1ee58af4eb6f934e90f54471e19576551e552ff219959",
+    "docs/claude/chantiers-480-529.md": "05c61f7a050ef36e492d04d0b671c041fd6f7215790224cecb5c39e13077a7fe",
+    "docs/claude/journal.md": "616bd0ca8b45345b07bbd6708a370d4021fbb718c662a854281a867dfa682352",
+    "docs/maquettes/LISEZMOI.md": "f657c696318193362b930c9b5f1db1e13335282d0c5de69a19bdef3c9760342e",
+    "guide/06-tracteur.html": "4f800851d38160df4f87b5e04c12fd2da78e3e6592f4e221ec728fe71e0062c3",
+    "index.html": "83e44e01d4c1545af6a00bd332f30eb7f4e9d2500f283cb3bdb4c2565f64ee7b",
+    "public/sw.js": "40866b1d895271fda45925de25df6405dd3ba711b2a7a37f4731847418adff03",
+    "scripts/harnais-claude-md.mjs": "f085cd0ef4d6e0799e30fc04e39bc8cd6961c9967685507c0aa8894799d21192",
+    "scripts/mv-harnais-coeq1.mjs": "484b8af16ca3b89f39a0e48a383a5efd735e072dcfbab40df730debb7f710ffc",
+    "scripts/mv-harnais-liste.mjs": "f757e37bb7ecc7a0acfb9c7b3c345070dca59f7dac1980b982c9aacc68b7f4f9",
+    "src/app.js": "4b84b950e5ba7070bbff4c0fb4acfec92ae3f2f33700059848e4806e440710e9",
+    "src/jalons.js": "5789ea764ed289e8727b1ff548b1344da79e50194b690be13ed075b0fb048429",
+    "src/styles.css": "e10d41d172dace634116844f6c287a2d16dc804279b5d41419078612346c11b8",
+    "src/tracteur.js": "37327b66f066224006d4a951b61911aef6f411b7ca49c0fc13ce4cefaea8fb87",
+    "src/utils.js": "050bcd49028352d63e51d57e5f7558c4f89e09fe63127f7d07085d7b8d4fab30",
+    "src/whats-new.js": "9d4e6b647753dcaf3cc7b9845096dad076a27b28f948e8263bb4df08b310676d",
+    "docs/maquettes/maquette-coequipier-journal-v1.html": "79114bfe6b9db82918d75c16dffaa00c430520344b35522054edfe02d7d015cc",
+    "scripts/mv-harnais-coeq2.mjs": "3b12c29b76589bd58e2528699c1b04811a506b07ccfce34b02f9df64bfae7432",
+    "src/coequipier.js": "4ab47b030e2d66ce6110996b06d7516f687f294ea586613b9023694560574c85"
+  }
+}

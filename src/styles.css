@@ -3261,6 +3261,45 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .sd-hist-q i{color:var(--texte-doux);font-style:normal;}
 .sd-hist-b{flex-shrink:0;font-family:inherit;border:1px solid var(--acier);background:transparent;color:var(--acier);border-radius:10px;padding:4px 12px;font-size:var(--pt-lbl,10.5px);font-weight:600;cursor:pointer;min-height:44px;}
 .sd-hist-n{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-top:8px;}
+/* ★ COEQ-2 (§523) : le coéquipier dans la feuille de session — l'encart, les jours, la feuille « Changer / Corriger » (coequipier.js) */
+.sdeq{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 8px 8px 12px;border-radius:var(--r-lg,12px);border:1.5px solid var(--gris-clair);background:var(--bg-card);}
+.sdeq[hidden],.sdeq-voile[hidden]{display:none;}
+.sdeq-txt{flex:1;min-width:0;display:flex;flex-direction:column;}
+.sdeq-t{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);}
+.sdeq-s,.sdeq-os{font-size:var(--pt-micro,12px);font-weight:500;color:var(--texte-doux);}
+.java.sdeq-vide{background:var(--bg-doux);color:var(--texte-doux);}
+.sdeq-flbl{font-size:var(--pt-micro,12px);font-weight:700;color:var(--texte-doux);margin:16px 0 8px;}
+.sdeq-jour{margin-top:8px;border:1px solid var(--gris-clair);border-radius:var(--r-lg,12px);background:var(--bg-card);overflow:hidden;}
+.sdeq-jhd{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;background:var(--bg-doux);}
+.sdeq-ln{display:flex;align-items:center;gap:8px;min-height:40px;padding:8px 12px;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,13px);}
+.sdeq-on{flex:1;min-width:0;font-weight:600;}
+.sdeq-cr{margin-left:auto;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:var(--pt-micro,12px);color:var(--texte-doux);}
+.sdeq-trace{display:block;padding:0 12px 8px;font-size:var(--pt-micro,12px);color:var(--accent-texte);}
+td .sdeq-trace{padding:2px 0 0;}
+.sdeq-voile{position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;justify-content:flex-end;border-radius:inherit;background:rgba(0,0,0,0.45);}
+.sdeq-feuille{max-height:calc(100% - 24px);overflow-y:auto;overscroll-behavior:contain;padding:8px 16px 20px;border-radius:var(--r-lg,12px) var(--r-lg,12px) 0 0;background:var(--bg-card);}
+.sdeq-poignee{width:36px;height:4px;margin:4px auto 12px;border-radius:var(--r-full,999px);background:var(--gris-clair);}
+.sdeq-ft{font-family:var(--font-titre);font-size:var(--pt-lg,20px);font-weight:600;line-height:1.15;color:var(--texte);}
+.sdeq-fs{margin-top:2px;font-size:var(--pt-micro,12px);color:var(--texte-doux);}
+.sdeq-gt{margin:16px 0 8px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);}
+.sdeq-choix{display:grid;gap:8px;}
+.mvbtn.sdeq-opt{width:100%;justify-content:flex-start;gap:8px;text-align:left;}
+.sdeq-ot{flex:1;min-width:0;display:flex;flex-direction:column;}
+.sdeq-ckj,.sdeq-ckl{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:8px 2px;border:0;border-bottom:1px solid var(--gris-clair);background:transparent;color:var(--texte);font-family:inherit;font-size:var(--pt-txt,13px);text-align:left;cursor:pointer;}
+.sdeq-ckj{border-bottom:0;font-weight:600;color:var(--texte-doux);}
+.sdeq-cb{position:relative;flex:none;width:22px;height:22px;border-radius:var(--r-sm,6px);border:1.5px solid var(--ligne-forte);}
+[aria-checked="true"] > .sdeq-cb{background:var(--accent);border-color:var(--accent);}
+[aria-checked="true"] > .sdeq-cb::after{content:'';position:absolute;left:6px;top:2px;width:6px;height:11px;border:solid var(--sur-accent);border-width:0 2px 2px 0;transform:rotate(45deg);}
+[aria-checked="mixed"] > .sdeq-cb{background:var(--accent-doux);border-color:var(--accent);}
+[aria-checked="mixed"] > .sdeq-cb::after{content:'';position:absolute;left:4px;right:4px;top:9px;height:2px;background:var(--accent);}
+.sdeq-note{margin-top:8px;font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux);}
+.sdeq-pied{display:grid;gap:8px;margin-top:16px;}
+.mvbtn.sdeq-lien{margin-top:8px;justify-content:flex-start;}
+.sdeq-tab-w{overflow-x:auto;}
+.sdeq-tab{width:100%;border-collapse:collapse;font-size:var(--pt-txt,13px);}
+.sdeq-tab th{padding:4px 8px;text-align:left;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);border-bottom:1px solid var(--gris-clair);}
+.sdeq-tab td{padding:8px;vertical-align:middle;border-bottom:1px solid var(--gris-clair);}
+.sdeq-tab .r{text-align:right;}
 @keyframes chrPulse{0%{opacity:1;}50%{opacity:.5;}100%{opacity:1;}}
 @media (prefers-reduced-motion:reduce){.chr-dot,.sdp-tag.pend{animation:none;}}
 

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.59';
+export const APP_VERSION = '10.60';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1492,7 +1492,7 @@ var QDN_CHAPITRES = [
     lead: { '*': 'Chaque session dit ses heures et son GNR, et le compteur des tracteurs avance tout seul.' },
     points: [
       ['*', 'chrono', 'La session en cours, en tête', 'Avec «\u00a0Terminer\u00a0» à portée de pouce, et un chrono qui se lit d’un coup d’œil.'],
-      ['*', 'equipe', 'Le coéquipier', 'Pour la tarière, l’ensemencement et l’engrais, il se choisit avec l’activité.'],
+      ['*', 'equipe', 'Le coéquipier', 'Pour une session à deux, il se choisit avec l’activité, se change en cours de route et se corrige après coup, jour par jour.'],
       ['*', 'engrenage', 'Le compteur et la révision', 'Le compteur avance tout seul avec les sessions, la révision se recalcule, et un tracteur peut avoir plusieurs entretiens.'],
       ['A', 'alerte', 'L’entretien le plus pressant', 'Le Pilotage le dit, en tête.'],
       ['T', 'cloche', 'La notification du matin', 'Pour vous aussi\u00a0: un tracteur qui revient du réparateur, un délai avant récolte qui se termine.']
@@ -2727,7 +2727,7 @@ var MV_AIDE = {
     ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
       ['La tarière préremplie', " : une activité qui alimente les trous de l’entreplantation propose, pour chaque parcelle cochée, le nombre de pieds marqués au repérage — confirmez, ou corrigez avant de valider."],
-      ['À deux', " : pour la tarière, l’ensemencement et l’engrais, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité ; il apparaît dans la fiche de la session. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
+      ['À deux', " : pour la tarière, l’ensemencement, le semis, l’engrais et l’amendement, la nouvelle session propose un <b>coéquipier</b>, choisi avec l’activité. Dans la feuille de la session, son cadre, sous le tracteur : « Changer » vaut pour la suite (les parcelles déjà faites gardent le leur) ; « Depuis ce matin » rattrape un oubli du jour. Les parcelles faites se rangent par jour, avec qui était là ; « Corriger » change le coéquipier d’un jour ou de parcelles choisies — le tractoriste pour aujourd’hui, l’admin pour tout, même une session terminée. Chacun compte, dans ses jalons, les trous et les hectares des parcelles où il était. L’admin règle quelles activités se font à deux (réglages du tracteur, « Se fait à deux »)."],
       ['Pourquoi ?', " : dans la fiche d’une session, la pastille <b>« Pourquoi ? »</b> sous l’activité explique pourquoi on la fait : rognage, labour, tarière, engrais, ensemencement, traitements."],
       ['Sur un ordinateur', "la session en cours, les compteurs et la liste sont à gauche ; à droite, le parc (au garage, révision dépassée ou proche d’abord) et la cuve de GNR, avec les heures de travail du mois. Toucher une session ouvre sa feuille, comme au téléphone ; toucher un tracteur ouvre son entretien. Dans l’Entretien, les machines et la cuve de GNR passent à gauche, la révision et les derniers contrôles à droite."],
       ['Le compteur d’heures', "avance tout seul entre deux relevés : le dernier relevé, plus les heures notées par les sessions (chrono, sinon barème), corrigées par l’écart appris à chaque relevé — la route et le ralenti tournent au cadran sans être notés ; « env. » dit qu’il est estimé. Une fois par jour et par tracteur, en refermant la feuille après y avoir coché, ou en terminant, Ma Vigne demande le chiffre du cadran (« Pas devant le tracteur » repose la question au geste suivant) ; au plein — le bouton « Plein » comme la fiche « Plein fait » —, il est demandé à chaque fois pour un tracteur suivi ; « Relever », dans l’Entretien, le note quand on veut. Plus bas que le dernier relevé, ou impossible dans le temps écoulé : refusé ; beaucoup plus que prévu : à confirmer. Un compteur changé se corrige au crayon de « Prochaine révision ». Une révision dépassée s’écrit « dépassée de n h »."],

@@ -5851,7 +5851,7 @@ function renderHomeTrac(){
   if(!tr&&!adm){ if(w) w.style.display='none'; c.innerHTML=''; return; }
   if(w) w.style.display='';
   var me=(currentUser&&currentUser.nom)||'', S=(typeof SESSIONS!=='undefined'&&SESSIONS)||[];
-  var mien=S.filter(function(s){ return s&&(s.conducteur===me||s.coequipier===me); }).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
+  var mien=S.filter(function(s){ return s&&(s.conducteur===me||(typeof window._trCoeqNoms==='function'?window._trCoeqNoms(s).indexOf(me)>=0:s.coequipier===me)); })   // COEQ-2 (§523).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
   var der=mien[0]||null, TL=window.TRACTEURS_LIST||[], tc=(der&&TL.find(function(t){ return t&&t.id===der.tracteurId; }))||TL[0]||null;
   var np=der?((Array.isArray(der.parcellesFaites)&&der.parcellesFaites.length)||(Array.isArray(der.parcelles)&&der.parcelles.length)||0):0;
   var fx=function(ic,l,v,s){ return '<div class="hk-fx"><span class="hk-lbl">'+_mvIcon(ic,16)+'<span>'+l+'</span></span><span class="hk-val">'+v+'</span><span class="hk-s">'+s+'</span></div>'; };

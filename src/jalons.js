@@ -8,7 +8,7 @@
 // écrit (firestore.rules, règle 6) : ni l'administrateur du domaine, ni un collègue.
 // JALONS-2 (§341) les montre : une ligne « Nouveau jalon » dans la feuille qui suit une validation, et « Mes jalons » dans « Ma trace ».
 // COEQ-1 (§343) : le coéquipier d'une session (tarière, ensemencement, engrais) compte ses trous et ses hectares ;
-//   les sessions et les kilomètres enjambés restent au conducteur.
+//   les sessions et les kilomètres enjambés restent au conducteur. COEQ-2 (§523) : seulement ceux des parcelles où il était.
 
 // ── JALONS-1 : début du bloc exécutable (lu et joué tel quel par mv-harnais-jalons) ──
 const MV_JALONS_SERIES = [
@@ -20,7 +20,7 @@ const MV_JALONS_SERIES = [
   { id: 'kmtr',  t: 'Kilomètres enjambés',    seuils: [100, 500] },
   { id: 'trous', t: 'Trous de tarière',       seuils: [1, 10, 100, 250, 500, 1000, 2000, 5000, 10000] },
   { id: 'sem',   t: 'Hectares semés',         seuils: [1, 5, 10, 25, 50, 100, 250, 500] },
-  { id: 'eng',   t: 'Hectares d’engrais',     seuils: [1, 5, 10, 25, 50, 100, 250, 500] },
+  { id: 'eng',   t: 'Hectares fertilisés',    seuils: [1, 5, 10, 25, 50, 100, 250, 500] },
   { id: 'ouil',  t: 'Ouillages',              seuils: [1, 10, 25, 50, 100, 250] },
   { id: 'sout',  t: 'Soutirages',             seuils: [1, 5, 10, 25, 50] },
   { id: 'degu',  t: 'Dégustations',           seuils: [1] },
@@ -28,6 +28,8 @@ const MV_JALONS_SERIES = [
 ];
 // ★ ACCV-4 (§419) : qui a travaillé sur une entrée — _jFaitPar (app.js) honore `quiHors` (TV-2) ; repli d'avant si elle manque.
 var _fp = function (j) { return (typeof window !== 'undefined' && typeof window._jFaitPar === 'function') ? window._jFaitPar(j) : [j.qui].concat(j.membresEquipe || []).filter(function (n, i, a) { return n && a.indexOf(n) === i; }); };
+// ★ COEQ-2 (§523) : le coéquipier d'une parcelle faite — `co`, posé à la coche ; sans lui (sessions d'avant), celui de la session.
+function _mvJalCo(s, x) { return (x && typeof x === 'object' && Object.prototype.hasOwnProperty.call(x, 'co')) ? String(x.co || '') : String((s && s.coequipier) || ''); }
 function _mvJalSlug(x) {
   return String(x == null ? '' : x).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -68,14 +70,15 @@ function _mvJalonsCompteurs(nom, D) {
   (D.activites || []).forEach(function (a) { if (a && a.nom) acts[a.nom] = a; });
   (D.sessions || []).forEach(function (s) {
     if (!s) return;
-    var cond = s.conducteur === nom, coeq = s.coequipier === nom;          // COEQ-1 (§343) : le coéquipier compte aussi
-    if (!cond && !coeq) return;
+    var cond = s.conducteur === nom, pf = Array.isArray(s.parcellesFaites) ? s.parcellesFaites : [];
+    if (!cond && !pf.some(function (x) { return _mvJalCo(s, x) === nom; })) return;   // COEQ-2 (§523) : le coéquipier, parcelle par parcelle
     if (cond && (s.statut === 'Terminé' || s.statut === 'Validé')) c.ses++;   // les sessions et les km enjambés : au conducteur
     var act = acts[s.activite] || {}, lab = (act.champCustom && act.champCustom.feedsPlantation) ? act.champCustom.label : null;
     var sl = _mvJalSlug(s.activite);
-    (s.parcellesFaites || []).forEach(function (x) {
+    pf.forEach(function (x) {
+      if (!cond && _mvJalCo(s, x) !== nom) return;                      // chaque coéquipier : les parcelles où il était
       var n = (x && typeof x === 'object') ? x.nom : x, g = geo(n);
-      if (g) { if (cond) c.kmtr += g.km; if (sl === 'ensemencement' || sl === 'semis') c.sem += g.ha; if (sl === 'engrais') c.eng += g.ha; }
+      if (g) { if (cond) c.kmtr += g.km; if (sl === 'ensemencement' || sl === 'semis') c.sem += g.ha; if (sl === 'engrais' || sl === 'amendement') c.eng += g.ha; }   // D5 : l'amendement aussi
       if (lab && x && typeof x === 'object' && x.data) { var nb = parseInt(x.data[lab], 10) || 0; if (nb > 0) c.trous += nb; }
     });
   });
@@ -142,7 +145,7 @@ function _mvJalonLibelle(id, nomTache) {
     km: n === 42.195 ? 'Le marathon des rangs' : (un ? 'Premier kilomètre de rangs' : nb + ' kilomètres de rangs'),
     pieds: nb + ' pieds', ses: un ? 'Première session de tracteur' : nb + ' sessions de tracteur', kmtr: nb + ' kilomètres enjambés',
     trous: un ? 'Premier trou de tarière' : nb + ' trous de tarière', sem: un ? 'Premier hectare semé' : nb + ' hectares semés',
-    eng: un ? 'Premier hectare d’engrais' : nb + ' hectares d’engrais', ouil: un ? 'Premier ouillage' : nb + ' ouillages',
+    eng: un ? 'Premier hectare fertilisé' : nb + ' hectares fertilisés', ouil: un ? 'Premier ouillage' : nb + ' ouillages',
     sout: un ? 'Premier soutirage' : nb + ' soutirages', degu: 'Première dégustation', an: 'Un an au domaine',
   };
   var ph = (MV_JALONS_PHRASES[serie] || {})[seuil] || (MV_JALONS_PHRASES[serie] || {})[n] || '';
@@ -220,16 +223,18 @@ function _mvPremieresFois(nom, D) {
     if (!dKm && km >= 1) dKm = iso(j.date);
   });
   ajoute('ha1', 'Premier hectare', dHa, ''); ajoute('km1', 'Premier kilomètre de rangs', dKm, '');
-  var S = (D.sessions || []).filter(function (s) { return s && iso(s.date) && (s.conducteur === nom || s.coequipier === nom); })
+  var S = (D.sessions || []).filter(function (s) { return s && iso(s.date) && (s.conducteur === nom || s.coequipier === nom || (s.parcellesFaites || []).some(function (x) { return _mvJalCo(s, x) === nom; })); })
     .sort(function (a, b) { return iso(a.date).localeCompare(iso(b.date)); });
   var s1 = S.find(function (s) { return s.conducteur === nom; });
   if (s1) ajoute('ses', 'Première session de tracteur', iso(s1.date), s1.activite || '');
   var acts = {}; (D.activites || []).forEach(function (a) { if (a && a.nom) acts[a.nom] = a; });
-  var t1 = S.find(function (s) {
+  var t1 = null, x1 = null;   // COEQ-2 (§523) : la première parcelle à trous où il était — conducteur, ou coéquipier de CETTE parcelle
+  S.some(function (s) {
     var a = acts[s.activite] || {}, lab = (a.champCustom && a.champCustom.feedsPlantation) ? a.champCustom.label : null;
-    return !!lab && (s.parcellesFaites || []).some(function (x) { return x && typeof x === 'object' && x.data && (parseInt(x.data[lab], 10) || 0) > 0; });
+    var x = lab ? (s.parcellesFaites || []).find(function (y) { return y && typeof y === 'object' && y.data && (parseInt(y.data[lab], 10) || 0) > 0 && (s.conducteur === nom || _mvJalCo(s, y) === nom); }) : null;
+    if (x) { t1 = s; x1 = x; } return !!x;
   });
-  if (t1) { var autre = t1.conducteur === nom ? t1.coequipier : t1.conducteur; ajoute('trou', 'Premier trou de tarière', iso(t1.date), autre ? 'avec ' + autre : ''); }
+  if (t1) { var autre = t1.conducteur === nom ? _mvJalCo(t1, x1) : t1.conducteur; ajoute('trou', 'Premier trou de tarière', iso(t1.date), autre ? 'avec ' + autre : ''); }
   var O = ((D.cave && D.cave.operations) || []).filter(function (o) {
     if (!o || !iso(o.date)) return false;
     var q = (o.intervenants && o.intervenants.length) ? o.intervenants : (o.operateur ? [o.operateur] : []);
@@ -367,10 +372,12 @@ function _mvSaisonImages(nom, D) {
   });
   var acts = {}; (D.activites || []).forEach(function (a) { if (a && a.nom) acts[a.nom] = a; });
   if (nom) (D.sessions || []).forEach(function (s) {
-    if (!s || !dans(s.date) || (s.conducteur !== nom && s.coequipier !== nom)) return;
-    if (s.conducteur === nom && (s.statut === 'Terminé' || s.statut === 'Validé')) out.ses++;
+    if (!s || !dans(s.date)) return;
+    var cond = s.conducteur === nom;   // COEQ-2 (§523) : le coéquipier, parcelle par parcelle
+    if (!cond && !(s.parcellesFaites || []).some(function (x) { return _mvJalCo(s, x) === nom; })) return;
+    if (cond && (s.statut === 'Terminé' || s.statut === 'Validé')) out.ses++;
     var a = acts[s.activite] || {}, lab = (a.champCustom && a.champCustom.feedsPlantation) ? a.champCustom.label : null;
-    if (lab) (s.parcellesFaites || []).forEach(function (x) { if (x && typeof x === 'object' && x.data) out.trous += parseInt(x.data[lab], 10) || 0; });
+    if (lab) (s.parcellesFaites || []).forEach(function (x) { if (x && typeof x === 'object' && x.data && (cond || _mvJalCo(s, x) === nom)) out.trous += parseInt(x.data[lab], 10) || 0; });
   });
   if (nom) ((D.cave && D.cave.operations) || []).forEach(function (o) {
     if (!o || !dans(o.date)) return;

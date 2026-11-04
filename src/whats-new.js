@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.60', d: '2026-11-03', items: [   // COEQ-2 (§523) : le coéquipier du tracteur, parcelle par parcelle
+    { niv: 1, pour: ['tractoriste', 'admin'], cible: '#sd-eq-encart', emoji: 'tracteur', titre: 'Changer de coéquipier en cours de session',
+      desc: "Une session à deux (tarière, ensemencement, semis, engrais, amendement) a son cadre «\u00a0Coéquipier\u00a0» dans sa feuille, sous le tracteur. «\u00a0Changer\u00a0» vaut pour la suite\u00a0: les parcelles déjà faites gardent le leur. «\u00a0Depuis ce matin\u00a0» rattrape un oubli du jour, et «\u00a0Annuler\u00a0» remet tout comme avant." },
+    { niv: 1, pour: ['admin'], cible: '#sd-faites', emoji: 'tracteur', titre: 'Corriger le coéquipier après coup',
+      desc: "Les parcelles faites se rangent par jour, et chaque jour dit qui était là. «\u00a0Corriger\u00a0» change le coéquipier d’un jour ou de parcelles choisies, même sur une session terminée\u00a0; la correction est signée. Sur ordinateur, la fiche de la session montre l’équipe jour par jour." },
+    { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: 'Les jalons du coéquipier, parcelle par parcelle',
+      desc: "Chaque coéquipier compte les trous de tarière et les hectares des seules parcelles où il était. L’amendement propose un coéquipier d’office, et ses hectares rejoignent l’engrais dans «\u00a0Hectares fertilisés\u00a0»." }
+  ] },
   { v: '10.59', d: '2026-11-02', items: [] },   // GT-SUIVI-1 (§515) : chaque erreur remontée porte la version de l’appli ; le suivi des incidents vit chez GUERETTECH — rien ne change pour un client
   { v: '10.58', d: '2026-11-01', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Noter le stade : la date en un appui',

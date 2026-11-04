@@ -19,7 +19,7 @@ function controles(T, H, R) {
   let coeq = null; try { coeq = new Function(fonction(T, '_mvActCoeq') + '\nreturn _mvActCoeq;')(); } catch (e) { coeq = null; }
   const q = a => { try { return coeq(a); } catch (e) { return 'erreur'; } };
   r.push(['_mvActCoeq existe et s’exécute', typeof coeq === 'function']);
-  r.push(['d’office : tarière, ensemencement, semis, engrais (accents et majuscules indifférents)', q({ nom: 'Tarière' }) === true && q({ nom: 'Ensemencement' }) === true && q({ nom: 'SEMIS' }) === true && q({ nom: 'Engrais' }) === true]);
+  r.push(['d’office : tarière, ensemencement, semis, engrais, amendement (accents et majuscules indifférents ; l’amendement : COEQ-2, D5)', q({ nom: 'Tarière' }) === true && q({ nom: 'Ensemencement' }) === true && q({ nom: 'SEMIS' }) === true && q({ nom: 'Engrais' }) === true && q({ nom: 'Amendement' }) === true]);
   r.push(['les autres activités : sans coéquipier', q({ nom: 'Rognage' }) === false && q({ nom: 'Labour' }) === false && q({ nom: 'Traitement' }) === false && q(null) === false]);
   r.push(['la décision de l’admin l’emporte, dans les deux sens', q({ nom: 'Tarière', coequipier: false }) === false && q({ nom: 'Rognage', coequipier: true }) === true]);
   r.push(['la fenêtre « Nouvelle session » a sa zone, cachée d’office', /<div id="s-coeq-wrap" style="display:none"><div class="fl"[^>]*>Coéquipier<\/div><div class="ppicker" id="s-coeq-pick"><\/div><\/div>/.test(H)]);
@@ -28,7 +28,7 @@ function controles(T, H, R) {
   r.push(['le conducteur n’est pas proposé comme coéquipier, ni un membre inactif ; « Personne » d’office', /m\.nom!==cond&&\(m\.statut\|\|'Actif'\)==='Actif'/.test(rd) && /Personne<\/div>/.test(rd) && /_escHtml\(n\)/.test(rd) && /_escAttr\(n\)/.test(rd)]);
   const sv = fonction(T, 'saveSession');
   r.push(['l’enregistrement ne pose le champ que s’il porte un nom (jamais undefined)', /if\(_coeq\) _sess\.coequipier=_coeq;/.test(sv) && /SESSIONS\.push\(_sess\);/.test(sv) && !/coequipier:/.test(sv)]);
-  r.push(['la fiche d’une session dit « … et <coéquipier> »', /\$\{s\.coequipier\?' et '\+s\.coequipier:''\}/.test(T)]);
+  r.push(['la feuille d’une session à deux donne l’équipe à son encart (COEQ-2, §523 : « … et Léo » quitte l’en-tête)', /window\.renderSDEqEncart\(\);/.test(fonction(T, 'openSessionDetail')) && /window\._trSessADeux\(s\);\n  document\.getElementById\('sd-meta'\)\.textContent=_aDeux\?_fmtDate\(s\.date\)/.test(T)]);
   r.push(['l’éditeur d’activité : la case, lue et écrite', H.includes('id="eat-coeq"') && /_coeqEl\.checked=!!\(window\._mvActCoeq&&window\._mvActCoeq\(act\)\)/.test(R) && /act\.coequipier=!!_coeqEl\.checked;/.test(R)]);
   r.push(['la liste des activités montre « À deux »', /window\._mvActCoeq\(a\)\)\?_mvBadge\('À deux','neutre'\)/.test(R)]);
   return r;

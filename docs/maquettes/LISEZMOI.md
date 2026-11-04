@@ -12,3 +12,4 @@ LA référence des écrans du plan en 22 lots (CLAUDE.md §28). **Un lot qui tou
 - `audit-ux-2026-10-25.md`, `audit-niveau-au-dessus-2026-10-25.md` — les relevés et le benchmark d’origine.
 
 ⚠️ **Corrigé depuis** : les cibles se mesurent par leur zone d’appui (UX-1, §467) — les « bulles i sous 24 px » et les « gestes de la Cave à 28 px » étaient des boîtes, pas des cibles ; les puces, les bulles « i » et la roue gardent leur taille (décision du 26/09, §176d, reconfirmée le 26/10). Le dessin des écrans reste la référence.
+- `maquette-coequipier-journal-v1.html` — le coéquipier du tracteur, parcelle par parcelle, et le journal (chantier COEQ, §523) : validée le 03/11 (« go »), décisions D1 à D6. COEQ-2 fait ; COEQ-3 (journal) et COEQ-4 (calcul) s’y comparent.
