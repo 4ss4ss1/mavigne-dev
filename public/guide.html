@@ -397,6 +397,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <symbol id="ic-reveil" viewBox="0 0 24 24" data-src="alarm-clock"><circle cx="12" cy="13" r="8" /> <path d="M12 9v4l2 2" /> <path d="M5 3 2 6" /> <path d="m22 6-3-3" /> <path d="M6.38 18.7 4 21" /> <path d="M17.64 18.67 20 21" /></symbol>
   <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
   <symbol id="ic-route" viewBox="0 0 24 24" data-src="route"><circle cx="6" cy="19" r="3" /> <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /> <circle cx="18" cy="5" r="3" /></symbol>
+<symbol id="ic-itineraire" viewBox="0 0 24 24" data-src="navigation"><polygon points="3 11 22 2 13 21 11 13 3 11" /></symbol>
   <symbol id="ic-sablier" viewBox="0 0 24 24" data-src="hourglass"><path d="M5 22h14" /> <path d="M5 2h14" /> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></symbol>
   <symbol id="ic-seau" viewBox="0 0 24 24" data-src="paint-bucket"><path d="M11 7 6 2" /> <path d="M18.992 12H2.041" /> <path d="M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595" /> <path d="m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33" /></symbol>
   <symbol id="ic-secateur" viewBox="0 0 24 24" data-src="scissors"><circle cx="6" cy="6" r="3" /> <path d="M8.12 8.12 12 12" /> <path d="M20 4 8.12 15.88" /> <circle cx="6" cy="18" r="3" /> <path d="M14.8 14.8 20 20" /></symbol>
@@ -787,7 +788,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Filtres d'état</b> : Toutes · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Finies · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-sablier"></use></svg> En cours · Arrachées.</li>
     <li><b>Au téléphone</b>, pour tout le monde : ces filtres, la tâche, la liste ou la carte et l'ordre (la proximité) se rangent dans <b>« Filtres »</b>, dans la barre du bas, à côté de la recherche ; une pastille dit combien de filtres sont actifs, et le bouton de la feuille combien de parcelles il va montrer. Sur la carte, « Liste » revient en haut.</li>
     <li><b>Filtre par tâche</b> : n'afficher que les parcelles concernées par la Taille, le Relevage…</li>
-    <li><b>Recherche</b> par nom de parcelle, avec une croix pour tout effacer.</li>
+    <li><b>Recherche</b> par nom de parcelle, dans <b>tout le domaine</b>, même sur la priorité du moment : les parcelles de la liste d’abord, avec leurs deux gestes, puis <b>« Ailleurs dans le domaine »</b>, celles qui n’y sont pas, avec la raison (faite, sans la tâche cette période, arrachée) et <b>Y aller</b>. Les accents et les majuscules ne comptent pas ; quand aucune parcelle ne porte ce nom, l’écran le dit. Une croix efface tout.</li>
     <li>Bascule <b>Liste</b> / <b>Carte</b>.</li>
     <li>Chaque carte donne la <b>surface au centiare près</b> (0,0870&nbsp;ha), le <b>pourcentage</b> et le
     <b>compte des tâches faites</b>, qui suivent la même règle : un arrachage à moitié fait compte pour une
@@ -840,7 +841,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <b>rouge</b> ou en <b>blanc</b> dans la synthèse de maturité du Cuvier.</li>
     <li><b>Commune</b> : sert d'étiquette et de repli pour la météo par secteur.</li>
     <li><b>Historique des rendements</b> par millésime, alimenté par les récoltes saisies en Cave.</li>
-    <li><b>Ouvrir dans GPS</b> pour s'y rendre, <b>Ouvrir dans carte</b> pour la situer.</li>
+    <li><b>Y aller</b>, en tête de la fiche, ouvre l’itinéraire dans le GPS du téléphone, guidage lancé. Au premier appui, vous choisissez l’appli — Google Maps, Waze, ou Plans sur iPhone ; le choix reste sur ce téléphone, et <b>Changer</b>, juste dessous, le modifie (aussi dans Réglages › Moi › Appli GPS). Le point d’arrivée est le centre du contour de la parcelle : sans contour, pas de « Y aller », la fiche dit pourquoi. <b>Sur la carte</b> la situe parmi les autres.</li>
     <li><b>Réparation ponctuelle</b> : piquet, amarre ou fil remplacé, avec quantité et date.
     Accessible à toute l'équipe — c'est du travail de terrain.</li>
   </ul>
@@ -923,7 +924,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <details><summary>J'ai validé la mauvaise parcelle</summary>
     <div class="dbody">Touchez <b>Annuler</b> dans le message qui s'affiche juste après. Passé ce délai,
-    rouvrez la parcelle et décochez la tâche : l'avancement se recalcule aussitôt.</div></details>
+    l’administrateur l’annule depuis la fiche de la parcelle (la flèche de retour) : l'avancement se recalcule aussitôt.</div></details>
   <details><summary>Une parcelle a été arrachée</summary>
     <div class="dbody">Seul un <b>administrateur</b> peut la déclarer arrachée : ouvrez sa fiche, en bas, touchez
     <b>Arracher cette parcelle</b>, puis indiquez la date et le motif. Elle sort des surfaces, de l'avancement, du planning et du
@@ -964,7 +965,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Dans la roue crantée, <b>Tâches</b>, la ligne du travail indique combien de parcelles la font ; touchez-la pour ouvrir la
     liste. Tout y est coché : décochez les parcelles qui ne la feront pas pendant la période consultée, puis <b>Enregistrer</b>.
     <b>Tout cocher</b> et <b>Tout décocher</b> vont plus vite ; la recherche les limite aux parcelles affichées. Une seule
-    parcelle se règle aussi depuis sa fiche, avec la croix de la tâche (<b>Réactiver</b> la remet). À la période suivante,
+    parcelle se règle aussi depuis sa fiche, avec la croix de la tâche — l’administrateur seul (<b>Réactiver</b> la remet). À la période suivante,
     toutes repartent concernées : l'hiver et le printemps peuvent avoir des parcelles différentes. Une parcelle où la tâche
     est commencée reste concernée. Une tâche désactivée sur une parcelle avant cette mise à jour l'est pour toutes les
     périodes, et la liste le signale : la cocher la remet pour la période consultée, sans toucher aux périodes passées.

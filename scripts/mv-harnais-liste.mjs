@@ -59,6 +59,8 @@ export const GROUPES = {
   'jalons-calcul-et-memoire': 'Jalons — le calcul, la fusion qui n’enlève rien, les ouvertures, le document de la personne',
   // COEQ-1 (§343) : le réglage « à deux » des activités et le coéquipier d'une session.
   'coequipier-tracteur': 'Coéquipier — choisi avec l’activité du tracteur (tarière, ensemencement, engrais)',
+  // YALLER-1 (§527) : la recherche des Parcelles sur tout le domaine, « Y aller » et l’appli GPS, ↩ et ✕ de la fiche à l’admin.
+  'recherche-parcelles-gps': 'Y aller — la recherche sur tout le domaine, l’itinéraire dans le GPS du téléphone, ↩ et ✕ de la fiche à l’admin',
   // PRESENCE-1 (§344) : les opérations du Chai où la personne est notée, la carte de l'Accueil.
   'presence-notee-chai': 'Présence notée — les opérations du Chai où l’admin vous a coché, avec le pourquoi du geste',
   // PREMIERES-1 (§345) : la frise du parcours au domaine, sur les vraies dates.
@@ -444,7 +446,9 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-coeq4.mjs --contre', 'coequipier-tracteur'],
   ['node scripts/mv-harnais-coeq5.mjs', 'coequipier-tracteur'],   // COEQ-5 (§526) : « En direct » du Pilotage, « Par personne »
   ['node scripts/mv-harnais-coeq5.mjs --contre', 'coequipier-tracteur'],
-  ['node scripts/harnais-cadence-escalier.mjs', 'le-temps-reel-contre-le'],   // ★ COEQ-5 (§526) : absent de la liste, il était rouge sans que personne le voie
+  ['node scripts/harnais-cadence-escalier.mjs', 'le-temps-reel-contre-le'],
+  ['node scripts/mv-harnais-yaller1.mjs', 'recherche-parcelles-gps'],   // YALLER-1 (§527) : trouver une parcelle et y aller
+  ['node scripts/mv-harnais-yaller1.mjs --contre', 'recherche-parcelles-gps'],   // ★ COEQ-5 (§526) : absent de la liste, il était rouge sans que personne le voie
   ['node scripts/mv-harnais-presence1.mjs', 'presence-notee-chai'],   // PRESENCE-1 (§344) : « Ta présence est notée »
   ['node scripts/mv-harnais-presence1.mjs --contre', 'presence-notee-chai'],
   ['node scripts/mv-harnais-premieres1.mjs', 'premieres-fois'],   // PREMIERES-1 (§345) : « Vos premières fois »

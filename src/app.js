@@ -5851,7 +5851,7 @@ function renderHomeTrac(){
   if(!tr&&!adm){ if(w) w.style.display='none'; c.innerHTML=''; return; }
   if(w) w.style.display='';
   var me=(currentUser&&currentUser.nom)||'', S=(typeof SESSIONS!=='undefined'&&SESSIONS)||[];
-  var mien=S.filter(function(s){ return s&&(s.conducteur===me||(typeof window._trCoeqNoms==='function'?window._trCoeqNoms(s).indexOf(me)>=0:s.coequipier===me)); })   // COEQ-2 (§523).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });
+  var mien=S.filter(function(s){ return s&&(s.conducteur===me||(typeof window._trCoeqNoms==='function'?window._trCoeqNoms(s).indexOf(me)>=0:s.coequipier===me)); }).sort(function(a,b){ return String(b.date||'').localeCompare(String(a.date||'')); });   // COEQ-2 (§523) ; ★ YALLER-1 (§527) : ce commentaire, collé avant .sort, avalait le tri
   var der=mien[0]||null, TL=window.TRACTEURS_LIST||[], tc=(der&&TL.find(function(t){ return t&&t.id===der.tracteurId; }))||TL[0]||null;
   var np=der?((Array.isArray(der.parcellesFaites)&&der.parcellesFaites.length)||(Array.isArray(der.parcelles)&&der.parcelles.length)||0):0;
   var fx=function(ic,l,v,s){ return '<div class="hk-fx"><span class="hk-lbl">'+_mvIcon(ic,16)+'<span>'+l+'</span></span><span class="hk-val">'+v+'</span><span class="hk-s">'+s+'</span></div>'; };
@@ -7006,6 +7006,7 @@ function _pProchaineMarque(on){
   var l=document.getElementById('pwrapliste'); if(!l) return;
   l.querySelectorAll('.pc-prochaine').forEach(function(x){ x.remove(); });
   if(!on) return;
+  if(typeof _pvQ==='function'&&_pvQ()) return;   // ★ YALLER-1 (§527) : en recherche, « Y aller » prend la place de « Prochaine »
   var v=l.querySelector('.pc-validate'); if(!v) return;
   var row=v.closest('.pc-row'), left=row&&row.querySelector('.pc-left'); if(!left) return;
   var b=document.createElement('span'); b.className='pc-prochaine'; b.textContent='Prochaine';
@@ -7328,6 +7329,7 @@ function renderParcelles(){
   var _prioLocked=_prioTaskOK&&!isAdmin()&&!_prioOverride;
   var _pgParc=document.getElementById('page-parcelles'); if(_pgParc) _pgParc.classList.toggle('p-arrivee',!!_prioLocked);
   _pFxBadge();   // ★ ARRIVEE-4 (§355) : la pastille du bouton « Filtres »   // ★ ARRIVEE-2 (§338) : l'arrivée de l'ouvrier sur sa priorité, resserrée (styles.css)
+  if(_pgParc) _pgParc.classList.toggle('p-cherche',!!_pvQ());   // ★ YALLER-1 (§527) : en recherche, l’équipe et la tournée se replient
   const pb=document.getElementById('priority-banner');
   const pe=document.getElementById('priority-empty');
   const editBtn=document.getElementById('priority-edit-btn');
@@ -7393,7 +7395,7 @@ function renderParcelles(){
     if(pFilter==='complet'&&(cl.pct!==100||p.statut==='Arrachee'))return false;
     if(pFilter==='avance'&&(cl.pct<75||cl.pct===100||p.statut==='Arrachee'))return false;
     if(pFilter==='arrachee'&&p.statut!=='Arrachee')return false;
-    if(pSearch&&!p.nom.toLowerCase().includes(pSearch.toLowerCase()))return false;
+    if(pSearch&&!_pvCherche(p.nom,pSearch))return false;   // ★ YALLER-1 (§527) : sans accents ni majuscules
     // Filtre par tâche : afficher seulement les parcelles où la tâche n'est pas encore Validé
     if(pTacheFilter!=='toutes'){
       // SEL-1 : une parcelle arrachée ne reste visible que sous « Arrachage », et seulement si elle est concernée.
@@ -7454,18 +7456,19 @@ function renderParcelles(){
     return a.nom.localeCompare(b.nom,'fr');
   });
   _pProxPos=_proxGarde;   // TRN-2 : la position revient pour la barre et le prochain rendu
+  const _pAil=_pAilleurs(data);   // ★ YALLER-1 (§527) : la recherche répond pour tout le domaine (« Ailleurs dans le domaine »)
   const cont=document.getElementById('pList');
   if(!data.length){
     const msg=pTacheFilter!=='toutes'
       ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${_pvVideTitre(pTacheFilter)}</div><div class="ed">${_pvVideTexte(pTacheFilter)}</div></div>`
       :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="6" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><line x1="14" y1="5" x2="42" y2="53" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.65"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
-    cont.innerHTML=msg;
+    cont.innerHTML=_pvQ()?(_pAil.length?_pChTete(0,_pAil)+_pChAilleurs(_pAil):_pChVide()):msg;   // ★ YALLER-1 (§527) : jamais « tâche terminée » quand c’est la recherche qui vide la liste
     // TOURNEE-1 (§324) : la tournée suit la tâche affichée, liste vide comprise. Ce retour sautait la barre, les numéros de la
     //   carte et l'anneau : passer à une tâche finie laissait la tournée de la tâche d'avant au-dessus de « … terminé ».
     _pvRenderOrdreBar(); _pOrdMapSync(); _pCibleMapSync();
     return;
   }
-  cont.innerHTML=data.map(p=>{
+  cont.innerHTML=_pChTete(data.length,_pAil)+data.map(p=>{   // ★ YALLER-1 (§527) : la tête des résultats, puis « Ailleurs »
     const cl=getPCls(p);
     const _proxD=_pProxPos?_pProxDistOf(p):null;
     const _proxHere=!!(_pProxPos&&_pProxHere&&p.nom===_pProxHere);
@@ -7503,10 +7506,11 @@ function renderParcelles(){
               : (cl.pct>=75)            ? ['Bient\u00f4t fini','ambre']
                                         : ['En cours','neutre'];
     var _cep = (p.cepages&&p.cepages.length) ? p.cepages.join(' \u00b7 ') : (p.cepage||'');
+    const _yaP=_pYaPill(p);   // ★ YALLER-1 (§527) : « Y aller » sur la carte « toutes », en recherche seulement
     const _pvInner=`
       <div class="mv-hd">
         <div style="min-width:0">
-          <div class="mv-t mv-t-ord">${_pOrdPill(p.nom)}<span class="mv-t-nom">${_escHtml(p.nom)}</span></div>
+          <div class="mv-t mv-t-ord">${_pOrdPill(p.nom)}<span class="mv-t-nom">`+_pvSurligne(p.nom)+`</span></div>
           <div class="mv-l" style="margin-top:2px">${_pvSurfFr(p.surface)} ha${_cep?' \u00b7 '+_escHtml(_cep):''}</div>
         </div>
         <div style="text-align:right;flex:none">
@@ -7516,7 +7520,7 @@ function renderParcelles(){
       </div>
       <div class="mv-track" style="margin-top:12px"><div class="mv-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
       <div class="mv-ft" style="margin-top:12px;padding-top:11px">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;min-width:0">${_mvBadge(_etat[0],_etat[1])}${draeBadge}${_proxPill}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;min-width:0">${_mvBadge(_etat[0],_etat[1])}${draeBadge}${_proxPill}</div>`+_yaP+`
       </div>`;
     // PARC-1 (§274) : sur ordinateur, une ligne de la maquette v3 (mêmes gestes : _pvActions) et la fiche à droite.
     if(_pDesk())return _pRow(p,cl,_etat,hasDrae?draeInfo:null,_proxPill,_cep);
@@ -7527,7 +7531,7 @@ function renderParcelles(){
       return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" data-tuto="parc.ligne" onclick="openDP('${_escAttr(p.nom)}')">${_pvInnerT}</div>${_pvAct}</div></div>`;
     }
     return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" data-tuto="parc.ligne" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
-  }).join('');
+  }).join('')+_pChAilleurs(_pAil);
   _pProchaineMarque(_prioLocked);   // ★ ARRIVEE-2 (§338) : « Prochaine », avant les barres — la fin de la fonction reste intacte (mv-harnais-cible)
   if(_pDesk())_pFicheSync(data);   // PARC-1 : AVANT les barres et la carte, pour laisser intacte la fin que vise mv-harnais-cible
   _pvRenderProxBar();
@@ -7578,17 +7582,18 @@ function _pRow(p,cl,etat,drae,prox,cep){
     sous='<div class="prow-s">'+_pvSurfFr(p.surface)+'\u00a0ha'+(cep?', '+_escHtml(cep):'')+'</div>';
     droite='<span class="prow-pct">'+cl.pct+'\u00a0%</span><span class="prow-bar"><i class="'+(cl.pct===100?'ok':'')+'" style="--p:'+cl.pct+'%"></i></span>';
   }
+  droite=_pYaPill(p)+droite;   // ★ YALLER-1 (§527) : « Y aller » sur la ligne, en recherche seulement
   var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(!tache&&etat[1]!=='neutre'?_mvBadge(etat[0],etat[1]):'')+(prox||'');
   return '<div class="prow'+(act?' pcard-qv':'')+'" data-tuto="parc.ligne" role="option" aria-selected="'+(p.nom===_pSelNom)+'" data-nom="'+_escAttr(p.nom)+'" onclick="_pSel(this.dataset.nom)">'
-    +'<div class="prow-g"><div class="prow-t">'+_pOrdPill(p.nom)+'<span class="prow-nom">'+_escHtml(p.nom)+'</span></div>'+sous+(b?'<div class="prow-b">'+b+'</div>':'')+'</div>'
+    +'<div class="prow-g"><div class="prow-t">'+_pOrdPill(p.nom)+'<span class="prow-nom">'+_pvSurligne(p.nom)+'</span></div>'+sous+(b?'<div class="prow-b">'+b+'</div>':'')+'</div>'
     +'<div class="prow-d" onclick="event.stopPropagation()">'+droite+'</div></div>';
 }
 // PARC-2 (§275) : le haut d'une carte de travail au téléphone (maquette v3) — rang, nom, état de la tâche choisie, badges.
 function _pCarteTache(p,drae,prox){
   var e=_pEtatTache(p), lb=_pEtatLib(e);
   var b=(drae?_mvBadge('DRAE '+drae.heures+' h','rouge'):'')+(prox||'');
-  return '<div class="mv-hd"><div style="min-width:0"><div class="mv-t mv-t-ord">'+_pOrdPill(p.nom)+'<span class="mv-t-nom">'+_escHtml(p.nom)+'</span></div>'
-    +'<div class="mv-l pcq-st pcq-'+(e==='presta'?'fait':e)+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div></div></div>'
+  return '<div class="mv-hd"><div style="min-width:0"><div class="mv-t mv-t-ord">'+_pOrdPill(p.nom)+'<span class="mv-t-nom">'+_pvSurligne(p.nom)+'</span></div>'
+    +'<div class="mv-l pcq-st pcq-'+(e==='presta'?'fait':e)+'">'+_escHtml(tNom(pTacheFilter))+(_pvType(pTacheFilter)!=='simple'?' '+_escHtml(_pvStepLabel(pTacheFilter)+pCurStep):'')+', '+lb+'</div></div>'+_pYaPill(p)+'</div>'
     +(b?'<div class="mv-ft pcq-b">'+b+'</div>':'');
 }
 function _pFicheHtml(p){
@@ -8029,8 +8034,150 @@ function _pvAuPresta(p,T){ return T==='Arrachage'&&_arrAuPrestataire(p); }
 window._mvAuPrestataire=function(p,T){ return _pvAuPresta(p,T); };
 // Au moins une parcelle attend le prestataire : la liste « À faire » vide ne dit pas « terminé sur toutes les parcelles ».
 function _arrPrestaEnAttente(){ var L=(typeof _parcConcern==='function')?_parcConcern('Arrachage'):[]; return L.some(_arrAuPrestataire); }
-function _pvVideTitre(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'Arrachage fini pour l\u2019\u00e9quipe':_escHtml(tNom(T))+' termin\u00e9'; }
+function _pvVideTitre(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'Arrachage fini pour l\u2019\u00e9quipe':_escHtml(tNom(T))+'\u00a0: tout est fait'; }   // YALLER-1 (§527) : « Taille terminé » était au masculin
 function _pvVideTexte(T){ return (T==='Arrachage'&&_arrPrestaEnAttente())?'La suite est au prestataire. \u00ab\u00a0Toutes\u00a0\u00bb montre les parcelles.':'Cette tâche est terminée sur toutes les parcelles de la saison !'; }
+// ════ ★★ YALLER-1 (§527) — TROUVER UNE PARCELLE ET « Y ALLER » ════════════════════════════════════════════════════════════
+// Nico (04/11) : les ouvriers se servent de l’appli pour retrouver les parcelles ; depuis le verrou de la priorité (ARRIVEE-1 à 4),
+// la recherche ne fouillait que la liste de la tâche, et « Ouvrir dans GPS » lisait p.lat/p.lng, que les parcelles n’ont pas
+// (modules.md §13 : la position est le centre du contour, _mvParcGeo). Maquette docs/maquettes/maquette-trouver-parcelle-v1.html.
+// La recherche : sans accents ni majuscules — la règle de la palette Ctrl K (coquille.js).
+function _pvSansAccent(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function _pvQ(){ return _pvSansAccent(pSearch).trim(); }
+function _pvCherche(nom,q){ var n=_pvSansAccent(q).trim(); return !n||_pvSansAccent(nom).indexOf(n)>=0; }
+// Le nom, la partie trouvée surlignée : calée lettre à lettre, les accents du nom restent écrits.
+function _pvSurligne(nom){
+  var s=String(nom==null?'':nom), q=_pvQ(); if(!q) return _escHtml(s);
+  var map=[], plat='';
+  for(var k=0;k<s.length;k++){ var t=_pvSansAccent(s[k]); for(var z=0;z<t.length;z++) map.push(k); plat+=t; }
+  var i=plat.indexOf(q); if(i<0) return _escHtml(s);
+  var a=map[i], b=map[i+q.length-1]+1;
+  return _escHtml(s.slice(0,a))+'<mark class="p-mk">'+_escHtml(s.slice(a,b))+'</mark>'+_escHtml(s.slice(b));
+}
+// « Ailleurs dans le domaine » : celles qui répondent à la recherche mais que les filtres sortent de la liste.
+function _pAilleurs(data){
+  var q=_pvQ(); if(!q) return [];
+  var dans={}; (data||[]).forEach(function(p){ if(p) dans[p.nom]=1; });
+  return (PARCELLES||[]).filter(function(p){ return p&&!dans[p.nom]&&_pvCherche(p.nom,q); }).sort(function(a,b){
+    var x=(a.statut==='Arrachee')?1:0, y=(b.statut==='Arrachee')?1:0; return (x-y)||String(a.nom).localeCompare(String(b.nom),'fr');
+  });
+}
+// Pourquoi elle n’est pas dans la liste — avec les mots de la fiche et de la carte de travail (« Taille, fait »).
+function _pPourquoi(p){
+  var T=pTacheFilter, tache=(T&&T!=='toutes'), com=(p.commune&&typeof p.commune==='object')?p.commune.nom:(p.commune||''), r='', c='';
+  if(p.statut==='Arrachee'||(tache&&_mvArrHors(p,T))){ r='Arrach\u00e9e'; c='arr'; }
+  else if(tache&&((typeof _mvExclu==='function')?_mvExclu(p,T):(p.tachesExclues||[]).includes(T))){
+    if((typeof window._mvTacheSel==='function')&&window._mvTacheSel(T)) r='Pas choisie pour cette campagne';
+    else r='Sans '+String(tNom(T)).toLowerCase()+((typeof window._mvHorsPer==='function'&&window._mvHorsPer(p,T))?' cette p\u00e9riode':' sur cette parcelle');
+  }
+  else if(tache&&(_pvCurDone(p,T)||(T==='Arrachage'&&_pvAuPresta(p,T)))){ var d=_pDernier(p.nom,T); r=tNom(T)+', fait'+((d&&d!=='\u2014')?' le '+d:''); c='fait'; }
+  else r='Hors des filtres choisis';
+  return '<span class="p-pq'+(c?' p-pq-'+c:'')+'"><i></i><b>'+_escHtml(r)+'</b>'+(com?'\u00a0\u00b7 '+_escHtml(com):'')+'</span>';
+}
+// La position : _mvParcGeo, la seule source (le centre du contour). null = pas de « Y aller ».
+function _mvYaPos(p){
+  var f=window._mvParcGeo, g=null; if(!p||typeof f!=='function') return null;
+  try{ g=f(p); }catch(e){ g=null; }
+  var la=g?parseFloat(g.lat):NaN, ln=g?parseFloat(g.lng!=null?g.lng:g.lon):NaN;
+  return (isFinite(la)&&isFinite(ln))?{lat:la,lng:ln}:null;
+}
+// Le bouton « Y aller » d’un résultat de recherche (à la place de « Prochaine »). Sans recherche : rien, l’écran ne bouge pas.
+function _pYaPill(p){
+  if(!p||!_pvQ()) return '';
+  if(!_mvYaPos(p)) return '<span class="p-sanspos">'+_mvIcon('info',16)+'<span>Pas de position</span></span>';
+  return '<button type="button" class="p-yaller" data-tuto="parc.yaller" data-n="'+_escAttr(p.nom)+'" onclick="event.stopPropagation();_mvYAller(this.dataset.n)">'+_mvIcon('itineraire',16)+'<span>Y aller</span></button>';
+}
+function _pChTete(n,ail){
+  if(!_pvQ()) return '';
+  var tot=n+((ail&&ail.length)||0), brut=String(pSearch||'').trim();
+  var h='<div class="p-res"><b>'+tot+' parcelle'+(tot>1?'s':'')+'</b> pour \u00ab\u00a0'+_escHtml(brut)+'\u00a0\u00bb</div>';
+  if(n&&ail&&ail.length) h+='<div class="p-sec">Dans votre liste <i>'+n+'</i></div>';
+  return h;
+}
+function _pChAilleurs(ail){
+  if(!ail||!ail.length) return '';
+  var desk=_pDesk();
+  return '<div class="p-sec">Ailleurs dans le domaine <i>'+ail.length+'</i></div>'+ail.map(function(p){
+    if(desk) return '<div class="prow p-ail-row" data-nom="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)"><div class="prow-g"><div class="prow-t"><span class="prow-nom">'+_pvSurligne(p.nom)+'</span></div><div class="prow-s">'+_pPourquoi(p)+'</div></div><div class="prow-d" onclick="event.stopPropagation()">'+_pYaPill(p)+'</div></div>';
+    return '<div class="mv-c mv-c-clic p-ail" data-nom="'+_escAttr(p.nom)+'" onclick="openDP(this.dataset.nom)"><div class="mv-hd"><div style="min-width:0"><div class="mv-t"><span class="mv-t-nom">'+_pvSurligne(p.nom)+'</span></div>'+_pPourquoi(p)+'</div>'+_pYaPill(p)+'</div></div>';
+  }).join('');
+}
+function _pChVide(){
+  var brut=String(pSearch||'').trim();
+  return '<div class="empty-state p-vide-ch"><div class="ei">'+_mvIcon('loupe',40)+'</div><div class="et">Aucune parcelle \u00ab\u00a0'+_escHtml(brut)+'\u00a0\u00bb</div>'
+    +'<div class="ed">Rien dans tout le domaine. V\u00e9rifiez l\u2019orthographe\u00a0: les accents et les majuscules ne comptent pas.</div>'
+    +'<button type="button" class="p-vide-x" onclick="clearPSearch()">'+_mvIcon('croix',16)+'<span>Effacer la recherche</span></button></div>';
+}
+// La surface de la fiche en nombre français (« 1,5 ha », jamais « 1.5 ha » sous « 1,5000 ha »).
+function _dpSurfKpi(s){ var n=parseFloat(s); return isFinite(n)?n.toLocaleString('fr-FR',{maximumFractionDigits:4}):_escHtml(String(s==null?'':s)); }
+// « Y aller » en tête de la fiche ; sans contour, la fiche dit pourquoi.
+function _dpYaPeindre(p){
+  var el=document.getElementById('dp-ya'); if(!el||!p) return;
+  if(!_mvYaPos(p)){ el.innerHTML='<div class="dp-sanspos">'+_mvIcon('info',18)+'<div><b>Position inconnue.</b> Cette parcelle n\u2019a pas encore de contour sur la carte\u00a0: le GPS ne saurait pas o\u00f9 aller.</div></div>'; return; }
+  var app=_yaLire();
+  el.innerHTML='<button type="button" class="dp-go" id="dp-ya-go" data-tuto="dp.yaller" data-n="'+_escAttr(p.nom)+'" onclick="_mvYAller(this.dataset.n)">'+_mvIcon('itineraire',20)+'<span>Y aller</span></button>'
+    +'<div class="dp-avec">'+(app?'<span>Avec '+_escHtml(_yaNom(app))+' \u00b7</span><button type="button" class="dp-lien" onclick="_yaReglage()">Changer</button>':'<span>Le GPS du t\u00e9l\u00e9phone s\u2019ouvre sur l\u2019itin\u00e9raire.</span>')+'</div>';
+}
+// L’appli GPS : une préférence du TÉLÉPHONE (comme le thème), jamais en base. mavigne_gps = gmaps | waze | plans.
+var _YA_CLE='mavigne_gps', _yaCible='';
+function _yaApple(){ var u=(typeof navigator!=='undefined'&&navigator.userAgent)||''; return /iPhone|iPad|iPod|Macintosh/.test(u); }
+function _yaApps(){
+  var a=[{id:'gmaps',nom:'Google Maps',sous:'itin\u00e9raire et guidage vocal',ic:'epingle'},{id:'waze',nom:'Waze',sous:'guidage, bouchons signal\u00e9s',ic:'route'}];
+  if(_yaApple()) a.push({id:'plans',nom:'Plans',sous:'l\u2019appli de l\u2019iPhone',ic:'boussole'});
+  return a;
+}
+function _yaLire(){ var v=''; try{ v=localStorage.getItem(_YA_CLE)||''; }catch(e){ v=''; } return _yaApps().some(function(a){ return a.id===v; })?v:''; }
+function _yaNom(id){ var a=_yaApps().find(function(x){ return x.id===id; }); return a?a.nom:''; }
+// Les trois adresses : l’itinéraire tout de suite (choix de Nico, 04/11), depuis la position du téléphone.
+function _mvYAllerUrl(app,lat,lng){
+  var c=(+lat).toFixed(6)+','+(+lng).toFixed(6);
+  if(app==='waze') return 'https://waze.com/ul?ll='+c+'&navigate=yes';
+  if(app==='plans') return 'https://maps.apple.com/?daddr='+c+'&dirflg=d';
+  return 'https://www.google.com/maps/dir/?api=1&destination='+c+'&travelmode=driving&dir_action=navigate';
+}
+function _mvYAller(nom){
+  var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }), g=_mvYaPos(p);
+  if(!g){ showToast('Position inconnue\u00a0: pas de contour pour '+nom,'#B85A1A'); return; }
+  var app=_yaLire();
+  if(!app){ _yaOuvrir(nom); return; }
+  _yaLancer(nom,app,g);
+}
+// ⚠️ window.open part DANS le geste (sinon le navigateur le bloque) ; en entraînement, rien ne part.
+function _yaLancer(nom,app,g){
+  if(window.__MV_TUTO){ showToast('Sur votre t\u00e9l\u00e9phone, '+_yaNom(app)+' s\u2019ouvrirait sur l\u2019itin\u00e9raire. Ici, c\u2019est un entra\u00eenement.'); return; }
+  try{ window.open(_mvYAllerUrl(app,g.lat,g.lng),'_blank','noopener'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_yaLancer'); }
+  showToast('Itin\u00e9raire vers '+nom+' \u00b7 '+_yaNom(app));
+}
+function _yaOuvrir(nom){
+  _yaCible=nom||'';
+  var cur=_yaLire(), sub=document.getElementById('ya-sub'), box=document.getElementById('ya-apps'); if(!box) return;
+  if(sub) sub.textContent=(nom?nom+' \u00b7 ':'')+'choisie une fois, gard\u00e9e sur ce t\u00e9l\u00e9phone.';
+  var L=_yaApps().slice();
+  if(!nom) L.push({id:'',nom:'Me redemander',sous:'au prochain \u00ab\u00a0Y aller\u00a0\u00bb',ic:'info'});
+  box.innerHTML=L.map(function(a){
+    var on=nom?false:(a.id===cur);
+    return '<button type="button" class="ya-app" data-tuto="ya.app" data-app="'+a.id+'" onclick="_yaChoisir(this.dataset.app)"><span class="ya-t">'+_mvIcon(a.ic,20)+'</span>'
+      +'<span class="ya-n"><b>'+_escHtml(a.nom)+'</b><span>'+_escHtml(a.sous)+'</span></span>'+(on?'<span class="ya-ok">'+_mvIcon('check',18)+'</span>':'')+'</button>';
+  }).join('');
+  openOv('ovYAller');
+}
+function _yaFermer(){ try{ closeOv(null,'ovYAller'); }catch(e){ var o=document.getElementById('ovYAller'); if(o) o.classList.remove('open'); } }
+// Au premier « Y aller », choisir lance l’itinéraire ; depuis « Changer » ou Réglages › Moi, choisir change seulement.
+function _yaChoisir(id){
+  try{ if(id) localStorage.setItem(_YA_CLE,id); else localStorage.removeItem(_YA_CLE); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_yaChoisir'); }
+  var nom=_yaCible; _yaCible='';
+  _yaFermer(); _yaPeindre();
+  if(_dpCurrentNom){ var pc=(PARCELLES||[]).find(function(x){ return x&&x.nom===_dpCurrentNom; }); if(pc) _dpYaPeindre(pc); }
+  var p=nom?(PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }):null, g=p?_mvYaPos(p):null;
+  if(g&&id){ _yaLancer(nom,id,g); return; }
+  showToast(id?'Appli GPS\u00a0: '+_yaNom(id):'L\u2019appli GPS sera demand\u00e9e au prochain \u00ab\u00a0Y aller\u00a0\u00bb');
+}
+function _yaReglage(){ _yaOuvrir(''); }
+function _yaPeindre(){
+  var el=document.getElementById('regl-gps-sub'); if(!el) return;
+  var a=_yaLire(); el.textContent='Pour \u00ab\u00a0Y aller\u00a0\u00bb\u00a0: '+(a?_yaNom(a):'choisie au premier appui');
+}
+window._mvYAller=_mvYAller; window._yaChoisir=_yaChoisir; window._yaReglage=_yaReglage; window._pvCherche=_pvCherche;
+try{ _yaPeindre(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_yaPeindre'); }
 // ★ ARRACH-8 (§306) : un arrachage en étapes COMMENCÉ et pas fini cette campagne. La suite reste à valider, même
 //   dans une période qui commence après la date d'arrachage (utils.js, _mvArrAvantPeriode).
 window._arrEntame = function(p){ if(!_arrActif()) return false; var n=_arrNbFaites(p); return n>0 && n<_arrCfg().etapes.length; };
@@ -8546,7 +8693,7 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
   pe.style.cssText='float:right;font-family:var(--font-titre,"Cormorant Garamond",serif);font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
   // ⚠️ innerHTML et non textContent : l'unite descend en petit, sinon « 0,42 ha »
   //   pese autant que le chiffre et la hierarchie a trois niveaux tombe a deux.
-  document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:var(--pt-txt,13px)"> ha</span>';
+  document.getElementById('dp-surf').innerHTML=_dpSurfKpi(p.surface)+'<span style="font-size:var(--pt-txt,13px)"> ha</span>';
   var _dpNbt=document.getElementById('dp-nbt');
   if(_dpNbt)_dpNbt.innerHTML=_pvNbFait(cl)+'<span style="font-size:var(--pt-txt,13px)">/'+cl.nbTotal+'</span>';
   var _dpBar=document.getElementById('dp-bar');
@@ -8605,7 +8752,7 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
     const isExclu=(typeof _mvExclu==='function')?_mvExclu(p,t.nom,exclues):exclues.includes(t.nom);   // SEL-1
     // SEL-1 : une tâche à la sélection se choisit par campagne, et seul l'administrateur la choisit.
     const _isSel=(typeof window._mvTacheSel==='function')&&window._mvTacheSel(t.nom);
-    const canExcl=canEdit&&(!_isSel||isAdmin());
+    const canExcl=canEdit&&isAdmin();   // ★ YALLER-1 (§527) : la croix et « Réactiver », à l’admin seul (demande du 15/10)
     const isOn=stat==='Validé';
     const isEnCours=stat==='En cours';
     const _plTr=((t.trous||t.nom==='Entreplantation'))?_plantParcTrous(p):0;   // COMPTE-1 (§353) : les trous prévus
@@ -8639,7 +8786,7 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openNiveauxPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.3);border-radius:8px;padding:7px 11px;font-size:var(--pt-micro,11px);font-weight:600;color:var(--acier-med);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'↑ Niveaux'}</button>`:''}
-          ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
+          ${canEdit&&isAdmin()&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:var(--pt-micro,11px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
           ${canExcl&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="${_isSel?'D\u00e9sactiver pour la campagne':'D\u00e9sactiver pour cette p\u00e9riode'}">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
@@ -8668,24 +8815,16 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
-        ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:var(--pt-txt,13px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
+        ${canEdit&&isAdmin()&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:var(--pt-txt,13px);font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
         ${canExcl&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:var(--pt-micro,12px);cursor:pointer" title="${_isSel?'D\u00e9sactiver pour la campagne':'D\u00e9sactiver pour cette p\u00e9riode'}">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
   }).join('');
   _dpRenderRendHist(p);
-  // Stocker les coordonnées GPS pour le bouton
-  const gpsBtn=document.getElementById('dp-gps-btn');
-  if(gpsBtn){
-    if(p.lat&&p.lng){
-      gpsBtn.style.display='flex';
-      gpsBtn.dataset.lat=p.lat;
-      gpsBtn.dataset.lng=p.lng;
-    } else {
-      gpsBtn.style.display='none';
-    }
-  }
-  // Stocker le nom pour le bouton Ouvrir dans carte
+  // ★ YALLER-1 (§527) : « Y aller » en tête de la fiche — la position vient du contour (_mvParcGeo), jamais de p.lat/p.lng seuls
+  //   (le bouton d’avant les lisait : les parcelles n’en ont pas, il ne s’affichait sur aucun domaine réel).
+  _dpYaPeindre(p);
+  // Stocker le nom pour le bouton « Sur la carte »
   const mapBtn=document.getElementById('dp-map-btn');
   if(mapBtn)mapBtn.dataset.nom=nom;
   // Bouton réparation ponctuelle (écriture seulement)
@@ -8735,21 +8874,8 @@ function saveRepPonct(){
   try{renderHome();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveRepPonct#2'); }
 }
 
-function openGPS(){
-  const btn=document.getElementById('dp-gps-btn');
-  const lat=btn.dataset.lat,lng=btn.dataset.lng;
-  if(!lat||!lng)return;
-  const nom=document.getElementById('dp-nom').textContent;
-  // Ouvre l'app GPS native (fonctionne iOS/Android/desktop)
-  const url=`geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(nom)})`;
-  // Fallback Apple Maps / Google Maps selon la plateforme
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  if(isIOS){
-    window.open(`maps://maps.apple.com/?q=${encodeURIComponent(nom)}&ll=${lat},${lng}`,'_blank');
-  } else {
-    window.open(`https://maps.google.com/?q=${lat},${lng}(${encodeURIComponent(nom)})`,'_blank');
-  }
-}
+// YALLER-1 (§527) : l’ancien bouton GPS de la fiche (un repère, pas un itinéraire) — gardé en alias de « Y aller ».
+function openGPS(){ if(_dpCurrentNom) _mvYAller(_dpCurrentNom); }
 
 function openInMap(){
   const btn=document.getElementById('dp-map-btn');
@@ -8773,6 +8899,7 @@ function openInMap(){
 
 function toggleExcluTache(nomParcelle,nomTache){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  if(!isAdmin()){showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A');return;}   // ★ YALLER-1 (§527) : la croix, à l’admin seul (15/10)
   if(typeof window._mvTacheSel==='function'&&window._mvTacheSel(nomTache)){
     // SEL-1 : Arrachage, Désherbage manuel, Effeuillage se choisissent pour la CAMPAGNE (utils.js),
     //   jamais par p.tachesExclues — et par l'administrateur seul, comme dans la feuille.
@@ -10407,6 +10534,7 @@ function togglePassEquipeMode(val){
 function annulerTache(nomParcelle,nomTache){
   if(_mvValidBlocked())return;
   if(!canWrite()){showToast('Droits insuffisants','#B85A1A');return;}
+  if(!isAdmin()){showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A');return;}   // ★ YALLER-1 (§527) : l’annulation à l’admin seul (15/10)
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
   const tDef=TACHES.find(t=>t.nom===nomTache);
   if(tDef&&tDef.type==='niveaux'){

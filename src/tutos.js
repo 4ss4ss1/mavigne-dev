@@ -120,6 +120,25 @@ function _zoneEquipe(chip) {
 // `fait` : l'écran a-t-il vraiment changé ? · `{T}` devient « Touchez » ou « Cliquez ».
 // `couvre` : les fonctions de l'appli que le tuto enseigne (le harnais vérifie qu'elles existent).
 var TU_TUTOS = [
+  // ★ YALLER-1 (§527) — retrouver une parcelle dans tout le domaine, et l’itinéraire dans le GPS du téléphone.
+  { id: 'yaller', titre: 'Comment faire pour aller à une parcelle\u00a0?', fin: 'aller à une parcelle',
+    module: 'Vigne', pages: ['parcelles'], pour: 'tous', duree: '1 min', depart: 'parcelles',
+    couvre: ['_mvYAller'],
+    retenir: ['Vigne › Parcelles : tapez une partie du nom dans la recherche, en bas — tout le domaine répond, les accents ne comptent pas.',
+              '« Y aller » sur la parcelle trouvée, ou en tête de sa fiche : le GPS du téléphone s’ouvre sur l’itinéraire.',
+              'L’appli GPS se choisit au premier appui ; « Changer » dans la fiche, ou Réglages › Moi, la modifie.'],
+    etapes: [
+      { type: 'taper', cible: '#pSearch', exemple: 'moulin',
+        txt: function () { return 'Tapez une partie du nom dans la recherche, par exemple «\u00a0moulin\u00a0».'; }, txtReel: 'une partie du nom de la parcelle.',
+        valide: function (x) { return String(x || '').trim().length >= 2; },
+        ok: 'Tout le domaine répond, accents et majuscules ignorés.' },
+      { type: 'toucher', cible: '[data-tuto="parc.yaller"][data-n="Clos du Moulin"]',
+        txt: function () { return 'Le Clos du Moulin est trouvé. {T} «\u00a0Y aller\u00a0».'; },
+        fait: function () { return _ouvert('ovYAller'); },
+        ok: 'La première fois, l’appli demande avec quel GPS y aller.' },
+      { type: 'regarder', cible: '#ya-apps',
+        txt: function () { return 'Choisissez l’appli : elle s’ouvre sur l’itinéraire, guidage lancé, et le choix reste sur ce téléphone. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
+    ] },
   // ★ COEQ-3 (§524) — le coéquipier du tracteur (COEQ-2, §523) : le changer en cours de session (le tractoriste), le corriger après coup (l'admin).
   { id: 'coeq-changer', titre: 'Comment faire pour changer de coéquipier\u00a0?', fin: 'changer de coéquipier',
     module: 'Tracteur', pages: ['tracteur'], pour: 'tractoriste', duree: '1 min', depart: 'home',
@@ -1245,6 +1264,8 @@ function _jeqCorrigee(memo) {
   if (!t0) return false;
   return (window.JOURNAL || []).some(function (x) { return !!(x && x.eqCorr && String(x.eqCorr.le || '') >= t0); });
 }
+// ★ YALLER-1 (§527) : un contour inventé pour le Clos du Moulin — sans contour, pas de position, donc pas de « Y aller ».
+function _tuKml() { return [{ name: 'Clos du Moulin', pts: [[47.2291, 4.9655], [47.2294, 4.9671], [47.2284, 4.9674], [47.2281, 4.9658], [47.2291, 4.9655]] }]; }
 function _charger() {
   var d = JSON.parse(JSON.stringify(TU_DONNEES));
   d.activites = (d.activites || []).concat([{ nom: 'Ensemencement' }]);   // ★ COEQ-3 (§524) : une activité à deux d'office, pour les tutos du coéquipier
@@ -1256,6 +1277,7 @@ function _charger() {
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('journal', _tuJournal()); } catch (e) { _avale(e, '_charger#journal'); } }   // TUTO-9
     if (typeof window.applyFbData === 'function') { try { window.applyFbData('intrants', _tuIntrants()); } catch (e) { _avale(e, '_charger#intrants'); } }   // FERTI-8 (§466)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('sessions', _tuSessions()); } catch (e) { _avale(e, '_charger#sessions'); } }   // COEQ-3 (§524)
+  if (typeof window.applyFbData === 'function') { try { window.applyFbData('kml_polygons', _tuKml()); } catch (e) { _avale(e, '_charger#kml'); } }   // YALLER-1 (§527)
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));

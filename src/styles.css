@@ -7921,6 +7921,49 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 }
 /* ★ FIN AUJ-TETE-1 */
 
+/* ═══ ★ YALLER-1 (§527) — TROUVER UNE PARCELLE ET « Y ALLER » ═══════════════════════════════════════════════════════════════
+   La recherche répond pour tout le domaine : « Dans votre liste », « Ailleurs dans le domaine » ; le bouton « Y aller » des
+   résultats et de la fiche ; la feuille du choix de l’appli GPS. Maquette docs/maquettes/maquette-trouver-parcelle-v1.html. */
+#page-parcelles.p-cherche #p-team-bar,#page-parcelles.p-cherche #p-ordre-bar{display:none!important}   /* la barre d’équipe porte un display en ligne */
+.p-res{padding:12px 16px 0px;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+.p-res b{color:var(--texte,#1B1A18);font-weight:600}
+.p-sec{display:flex;align-items:center;gap:8px;padding:12px 16px 8px;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-med,#55534E)}
+.p-sec i{font-style:normal;min-width:20px;height:20px;padding:0 4px;border-radius:var(--r-full,999px);background:var(--gris-clair,#E7E6E2);display:inline-grid;place-items:center}
+.p-sec::after{content:"";flex:1;height:1px;background:var(--ligne,#E7E6E2)}
+.p-ail .mv-hd{align-items:center}
+.p-pq{display:block;font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-doux,#686660);margin-top:0px}
+.p-pq i{display:inline-block;width:7px;height:7px;margin-right:4px;vertical-align:1px;border-radius:50%;background:var(--texte-doux,#686660)}
+.p-pq b{font-weight:600}
+.p-pq-fait i{background:var(--vert-med,#3D6B27)}
+.p-pq-fait b{color:var(--vert-med,#3D6B27)}
+.p-pq-arr i{background:var(--rouge,#A0291E)}
+.p-pq-arr b{color:var(--rouge,#A0291E)}
+.p-yaller{position:relative;flex:none;display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:0 12px 0 8px;margin-left:auto;border:0;border-radius:var(--r-full,999px);background:var(--accent-doux,rgba(122,40,80,.11));color:var(--accent-texte,#7A2850);font:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer;white-space:nowrap}
+.p-yaller::before{content:"";position:absolute;inset:-5px -3px}
+.p-yaller:active{filter:brightness(.94)}
+.p-sanspos{flex:none;display:inline-flex;align-items:center;gap:4px;margin-left:auto;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border-radius:3px;padding:0 0px}
+.p-ail-row .prow-s{margin-top:0px}
+.p-vide-x{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:12px;padding:0 16px;border-radius:var(--r-md,8px);border:1px solid var(--ligne-forte,#CDCAC2);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font:inherit;font-weight:600;cursor:pointer}
+.dp-ya{margin-top:12px}
+.dp-go{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:var(--r-sm,6px);background:var(--accent,#7A2850);color:var(--sur-accent,#FFFFFF);font:inherit;font-size:var(--pt-sm,16px);font-weight:600;cursor:pointer}
+.dp-go:active{filter:brightness(.92)}
+.dp-avec{display:flex;align-items:center;justify-content:center;gap:4px;min-height:32px;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+.dp-lien{border:0;background:none;padding:8px 4px;color:var(--accent-texte,#7A2850);font:inherit;font-size:var(--pt-micro,12px);font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.dp-sanspos{display:flex;align-items:flex-start;gap:8px;padding:12px;border-radius:var(--r-lg,12px);background:var(--gris-clair,#E7E6E2);font-size:var(--pt-txt,13px);color:var(--texte-med,#55534E)}
+.dp-sanspos b{color:var(--texte,#1B1A18);font-weight:600}
+.dp-btn2{display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:10px;border:1px solid var(--ligne-forte,#CDCAC2);background:var(--bg-card,#FFFFFF);color:var(--texte,#1B1A18);font:inherit;font-size:var(--pt-micro,12px);font-weight:600;cursor:pointer}
+#ovYAller .ya-app{width:100%;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 4px;border:0;border-bottom:1px solid var(--ligne,#E7E6E2);background:none;color:var(--texte,#1B1A18);font:inherit;text-align:left;cursor:pointer}
+#ovYAller .ya-app:last-child{border-bottom:0}
+#ovYAller .ya-t{flex:none;width:40px;height:40px;border-radius:10px;background:var(--gris-clair,#E7E6E2);display:grid;place-items:center;color:var(--texte-med,#55534E)}
+#ovYAller .ya-n{flex:1;min-width:0}
+#ovYAller .ya-n b{display:block;font-size:var(--pt-base,14px);font-weight:600}
+#ovYAller .ya-n span{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+#ovYAller .ya-ok{flex:none;color:var(--vert-med,#3D6B27)}
+#ovYAller .ya-pied{margin:12px 0 0;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+#ovYAller .ya-annul{display:block;margin:8px auto 0;min-height:44px;padding:0 16px;border:0;background:none;color:var(--texte-med,#55534E);font:inherit;font-weight:600;cursor:pointer}
+
+
 /* ★ CAVE-2 (§289) — LE CUVIER AU DESSIN DE LA MAQUETTE V8 (habit seulement).
    Le Cuvier dessine avec sa propre feuille (classes mvv-, injectée) ; ce bloc la recale sur les jetons par #page-cave. Cuves en
    lignes au cadre neutre (la cuve ouverte cerclée à l'accent), nom en Outfit, onglets et puces en segmenté, alerte « à mesurer »

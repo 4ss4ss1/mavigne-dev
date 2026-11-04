@@ -7,6 +7,16 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.64', d: '2026-11-04', items: [   // YALLER-1 (§527) : trouver une parcelle et y aller
+    { niv: 1, pour: ['tous'], cible: '#pSearch', emoji: 'itineraire', titre: 'Retrouver une parcelle et y aller',
+      desc: "La recherche des Parcelles cherche dans tout le domaine, même sur la priorité du moment : les parcelles de votre liste d’abord, puis «\u00a0Ailleurs dans le domaine\u00a0», avec la raison (faite, sans la tâche cette période, arrachée). «\u00a0Y aller\u00a0» ouvre l’itinéraire dans le GPS du téléphone, guidage lancé ; l’appli se choisit au premier appui (Réglages › Moi pour la changer). Les accents ne comptent plus." },
+    { niv: 0, pour: ['tous'], emoji: 'loupe', titre: 'La recherche dit vrai quand elle ne trouve rien',
+      desc: "Une recherche qui vidait la liste faisait croire la tâche «\u00a0terminée sur toutes les parcelles\u00a0». L’écran dit maintenant qu’aucune parcelle ne porte ce nom. La fiche d’une parcelle écrit aussi sa surface avec une virgule." },
+    { niv: 0, pour: ['admin'], emoji: 'cadenas', titre: 'Fiche d’une parcelle : annuler et désactiver, à l’administrateur',
+      desc: "Depuis la fiche, seul l’administrateur annule une validation (la flèche de retour) ou désactive une tâche pour la période (la croix, «\u00a0Réactiver\u00a0»). Le salarié garde Début, Valider, et «\u00a0Annuler\u00a0» juste après avoir validé." },
+    { niv: 0, pour: ['tractoriste', 'admin'], emoji: 'tracteur', titre: 'La carte Tracteur de l’Accueil montre la dernière session',
+      desc: "Depuis la mise à jour du coéquipier, elle pouvait montrer une session plus ancienne que la dernière." }
+  ] },
   { v: '10.63', d: '2026-11-04', items: [   // COEQ-5 (§526)
     { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: '« En direct » du Pilotage nomme le coéquipier',
       desc: "Le fil du cockpit dit «\u00a0Marc et Léo ont fini 3 parcelles\u00a0» et montre les deux initiales — le coéquipier des parcelles finies, ou celui du moment pour le tracteur en marche." },

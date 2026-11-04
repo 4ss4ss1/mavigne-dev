@@ -275,6 +275,9 @@ ceux qui ont déjà personnalisé leur accueil, où la règle générale l'aurai
 - ⚠️⚠️ **Les parcelles ne portent PAS de coordonnées.** Toute fonctionnalité géographique passe par
   le **centroïde du polygone homonyme** — résolveur central **`_mvParcGeo` / `_mvKmlCtrs`** dans
   `utils.js`.
+- ★ **YALLER-1 (§527) : « Y aller »** (la fiche, les résultats de recherche) lit la position par `_mvParcGeo` — jamais `p.lat`
+  seul : le bouton GPS d’avant, qui le lisait, ne s’affichait sur aucun domaine réel. La recherche de Parcelles répond pour
+  tout le domaine (« Ailleurs dans le domaine », avec la raison) ; l’appli GPS est une préférence du téléphone (`mavigne_gps`).
 - ★★★ **DEUX CHEMINS D'IMPORT KML, À NE PLUS CONFONDRE** (correction du 09/08) :
   1. **L'onglet KML du panneau GT** (`_parseKML`, `agtKmlSave`) — prévisualisation puis écriture de
      `kml_polygons` **seulement**. C'est un **REPLACE assumé**. Il ne crée aucune parcelle.

@@ -1,0 +1,42 @@
+{
+  "lot": "YALLER-1",
+  "section": "§527",
+  "base": "4d6e436e9ce44750427b7233e50050f20cbd171e",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f4245e6a551c9e251a0f30071a6ed63a41ed6bafa9e4020005ee419ab71eb64c",
+    "date": "2026-11-04T19:46:27.239Z",
+    "joues": {
+      "téléphone": 11,
+      "ordinateur": 11,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "c5430debf1dd37e6a271cbb6e6036ae675e5b4d618bc2dd585869f526556f4a1",
+    "CLAUDE.md": "840e2ceb98b0dc41a4ea53f1126f48e716f4b4c6d4885f0de54f68a4f44e6494",
+    "docs/claude/INDEX.md": "a080699d759971ecfda6a6cc3f8172afac26c15c0c4b53c09914420bf02dac9d",
+    "docs/claude/chantiers-480-529.md": "22af344b696e2b451841f9371b9829ca4583251149555115ad6c36ff11603c7f",
+    "docs/claude/journal.md": "e107b5921a077731c08f73e80ea2abf2a223054d254d3d846e105f6256b832e6",
+    "docs/claude/modules.md": "be81a7ae5e0bc3edcd9b1b86ba926c7797981f83d4499f9756bc746539d44fbd",
+    "docs/maquettes/LISEZMOI.md": "cfcd8be10e17b6e75018aec2d071f5fc605821e65b017741252505dfb3a466ca",
+    "guide/04-vigne.html": "bb9c24bff7a345537ac7ddfe22be41713989e90cfd78bddd6cef89bca89b6dad",
+    "index.html": "44494cbd61c2ea72027f59543e1d42d4aed162274883e455a6d194c4630f16ff",
+    "public/sw.js": "03d34e497e962aecba3a7faa16c473caf0bcdb7dd731b4e58dcd10d60d45f139",
+    "scripts/harnais-claude-md.mjs": "7d14c336fe3085c791346ee56443e2088ebfbb6b68314e063f200ad14ebcde01",
+    "scripts/mv-harnais-arrach9.mjs": "dd65da4940037764a905b9c357fbbafdbd2f78bce4d8e390914ba50e6ba52140",
+    "scripts/mv-harnais-liste.mjs": "d293f2293244694851a5b4f311a58ff79f107dc5b415a7130adb3a00ad368c96",
+    "scripts/tutos-couverture.json": "84575e9f41ba6449d45b924dbced446d8d14433ac216875acd436de15cb436ee",
+    "src/app.js": "8c4d241e3c567a547e7c51b909429ea1c03d03d8e34336a27aac24b1b4baedd8",
+    "src/styles.css": "b838fb93606e6ac2eb9c1a864ab456be9b855d2a3e344f5265dadc9249d03cb1",
+    "src/tutos.js": "e12186adb8b0cd8542b5d6d199035592de9cc189a287738454803225981329be",
+    "src/utils.js": "cc382f0ac4c2ee0c5fa74047ca4fe06549aa7b11b24400a69c4e68520aa419a8",
+    "src/whats-new.js": "bccd05e4041140608011a3cd6d938c88dea266c9effb4f28477be09ea5004290",
+    "docs/maquettes/maquette-trouver-parcelle-v1.html": "921678f46f0d6c9cd5e2f6f9cd887f889b858419ee061d6b30b9ae40bb59d81c",
+    "scripts/mv-harnais-yaller1.mjs": "0b7b54d78ae503daa297b62760bfea5dc079b284fbadc3851be61b22cb36670e"
+  }
+}

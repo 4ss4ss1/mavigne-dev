@@ -177,6 +177,7 @@
   <symbol id="ic-reveil" viewBox="0 0 24 24" data-src="alarm-clock"><circle cx="12" cy="13" r="8" /> <path d="M12 9v4l2 2" /> <path d="M5 3 2 6" /> <path d="m22 6-3-3" /> <path d="M6.38 18.7 4 21" /> <path d="M17.64 18.67 20 21" /></symbol>
   <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
   <symbol id="ic-route" viewBox="0 0 24 24" data-src="route"><circle cx="6" cy="19" r="3" /> <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /> <circle cx="18" cy="5" r="3" /></symbol>
+<symbol id="ic-itineraire" viewBox="0 0 24 24" data-src="navigation"><polygon points="3 11 22 2 13 21 11 13 3 11" /></symbol>
   <symbol id="ic-sablier" viewBox="0 0 24 24" data-src="hourglass"><path d="M5 22h14" /> <path d="M5 2h14" /> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></symbol>
   <symbol id="ic-seau" viewBox="0 0 24 24" data-src="paint-bucket"><path d="M11 7 6 2" /> <path d="M18.992 12H2.041" /> <path d="M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595" /> <path d="m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33" /></symbol>
   <symbol id="ic-secateur" viewBox="0 0 24 24" data-src="scissors"><circle cx="6" cy="6" r="3" /> <path d="M8.12 8.12 12 12" /> <path d="M20 4 8.12 15.88" /> <circle cx="6" cy="18" r="3" /> <path d="M14.8 14.8 20 20" /></symbol>
@@ -616,7 +617,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:var(--pt-txt,13px);margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v10.63</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v10.64</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:var(--font-ui,'Outfit',sans-serif);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -884,6 +885,21 @@
   </div>
 </div>
 
+<!-- ★ YALLER-1 (§527) : le choix de l’appli GPS — au premier « Y aller », par « Changer » dans la fiche, ou Réglages › Moi -->
+<div class="overlay" id="ovYAller" onclick="closeOv(event,'ovYAller')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Y aller avec…</div>
+      <div class="modal-sub" id="ya-sub"></div>
+    </div>
+    <div class="modal-body">
+      <div id="ya-apps" class="ya-apps"></div>
+      <p class="ya-pied">Pour changer plus tard&nbsp;: «&nbsp;Changer&nbsp;» sous «&nbsp;Y aller&nbsp;» dans la fiche d’une parcelle, ou Réglages › Moi › Appli GPS.</p>
+      <button type="button" class="ya-annul" onclick="closeOv(null,'ovYAller')">Annuler</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="ovParcelle" onclick="closeOv(event,'ovParcelle')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
@@ -892,9 +908,10 @@
       <div class="modal-title" id="dp-nom"></div>
       <div class="modal-sub" id="dp-sub"></div>
       <div id="dp-readonly-banner" style="display:none"></div>
+      <!-- ★ YALLER-1 (§527) : « Y aller », peint par openDP (_dpYaPeindre) -->
+      <div id="dp-ya" class="dp-ya"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button id="dp-gps-btn" onclick="openGPS()" style="display:none;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Ouvrir dans GPS</button>
-        <button id="dp-map-btn" onclick="openInMap()" style="background:#1B2E1A;color:#6BA34A;border:1.5px solid rgba(107,163,74,0.35);border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;display:flex;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Ouvrir dans carte</button>
+        <button id="dp-map-btn" class="dp-btn2" onclick="openInMap()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Sur la carte</button>
         <button id="dp-rep-btn" onclick="openRepPonct()" style="display:none;background:var(--orange-pale);color:var(--orange);border:1.5px solid rgba(184,90,26,0.4);border-radius:10px;padding:8px 14px;font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;align-items:center;gap:6px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Réparation ponctuelle</button>
       </div>
     </div>
@@ -1476,7 +1493,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v10.63</div>
+        <div class="mod-header-sub">Ma Vigne v10.64</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1578,6 +1595,8 @@
           </div>
         </div>
         <div class="set-row" id="regl-plein-soleil-row" onclick="toggleHiContrast()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-soleil"></use></svg></div><div><div class="sr-lbl">Plein soleil</div><div class="sr-sub">Contraste renforcé pour lire au soleil</div></div></div><div class="sr-arr" id="regl-hc-state">Activer</div></div>
+        <!-- ★ YALLER-1 (§527) : l’appli de « Y aller », gardée sur ce téléphone -->
+        <div class="set-row" id="regl-gps-row" onclick="if(window._yaReglage)window._yaReglage()"><div class="sr-l"><div class="sr-ico" style="background:var(--accent-doux)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-itineraire"></use></svg></div><div><div class="sr-lbl">Appli GPS</div><div class="sr-sub" id="regl-gps-sub">Pour «&nbsp;Y aller&nbsp;»&nbsp;: choisie au premier appui</div></div></div><div class="sr-arr">›</div></div>
         <div class="set-row" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cloche"></use></svg></div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Un message chaque jour travaillé, à la prise de poste</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
         <div class="set-row" onclick="openOv(&#39;ovHubAide&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">&#x1F4D6;</div><div><div class="sr-lbl">Aide &amp; Documentation</div><div class="sr-sub">D&eacute;marrage rapide &amp; guide complet</div></div></div><div class="sr-arr">&rsaquo;</div></div><div class="set-row" onclick="openReport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">&#x1F41B;</div><div><div class="sr-lbl">Signaler un probl&egrave;me</div><div class="sr-sub">Envoy&eacute; directement &agrave; l&#39;&eacute;quipe Ma Vigne</div></div></div><div class="sr-arr">&rsaquo;</div></div>
         <div class="set-row" id="regl-qdn-row" onclick="if(window.mvQdnOuvrir)window.mvQdnOuvrir()"><div class="sr-l"><div class="sr-ico" style="background:var(--accent-doux)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-livre"></use></svg></div><div><div class="sr-lbl">La nouvelle Ma Vigne</div><div class="sr-sub">Revoir la pr&eacute;sentation et le livret</div></div></div><div class="sr-arr">&rsaquo;</div></div>         <div class="set-row" id="regl-nouv-row" onclick="if(window.openNouvJournal)window.openNouvJournal()"><div class="sr-l"><div class="sr-ico" style="background:var(--or-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg></div><div><div class="sr-lbl">Journal des nouveautés</div><div class="sr-sub">Tout ce qui a changé, mois par mois</div></div></div><div class="sr-arr">›</div></div>
@@ -1591,7 +1610,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v10.63 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v10.64 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -3723,7 +3742,7 @@
     </div>
   </div>
 </div>
-<script src="/boot.js?v=10.63"></script>
+<script src="/boot.js?v=10.64"></script>
 <script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
@@ -3815,7 +3834,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v10.63</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:var(--pt-micro,12px);font-weight:600;">v10.64</span>
       </div>
     </div>
     <div class="modal-body">

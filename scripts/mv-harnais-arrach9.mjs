@@ -66,9 +66,9 @@ function suite(S) {
       && w.f._pEtatTache(w.P[1]) === 'afaire' && w.f._pEtatTache(w.P[2]) === 'fait' && w.f._pEtatLib('cours') === 'en cours' && w.f._pEtatBadge('fait') === 'Fait|vert'; });
   T('la liste « À faire » vide : « Arrachage fini pour l\u2019équipe », la suite au prestataire, « Toutes » montre les parcelles', () => { const w = mondeA(S);
     return w.f._arrPrestaEnAttente() === true && w.f._pvVideTitre('Arrachage') === 'Arrachage fini pour l\u2019équipe' && w.f._pvVideTexte('Arrachage') === 'La suite est au prestataire. «\u00a0Toutes\u00a0» montre les parcelles.'; });
-  T('… une autre tâche : « terminé sur toutes les parcelles », son nom en clair et échappé', () => { const w = mondeA(S);
-    return w.f._pvVideTitre('Reparation') === 'Réparation terminé' && w.f._pvVideTitre('<b>') === '&lt;b> terminé' && /^Cette tâche est terminée sur toutes les parcelles de la saison.{0,2}!$/.test(w.f._pvVideTexte('Reparation')); });
-  T('… un arrachage sans parcelle au prestataire : le texte d\u2019avant', () => { const w = mondeA(S); w.P[0].arrEtapes.f = {}; return w.f._arrPrestaEnAttente() === false && w.f._pvVideTitre('Arrachage') === 'Arrachage terminé'; });
+  T('… une autre tâche : « tout est fait » (YALLER-1 §527), son nom en clair et échappé', () => { const w = mondeA(S);
+    return w.f._pvVideTitre('Reparation') === 'Réparation\u00a0: tout est fait' && w.f._pvVideTitre('<b>') === '&lt;b>\u00a0: tout est fait' && /^Cette tâche est terminée sur toutes les parcelles de la saison.{0,2}!$/.test(w.f._pvVideTexte('Reparation')); });
+  T('… un arrachage sans parcelle au prestataire : le texte d\u2019avant', () => { const w = mondeA(S); w.P[0].arrEtapes.f = {}; return w.f._arrPrestaEnAttente() === false && w.f._pvVideTitre('Arrachage') === 'Arrachage\u00a0: tout est fait'; });
   // ── l'anneau des cartes (utils.js) ──
   T('l\u2019anneau : une parcelle au prestataire n\u2019est plus « commencée », ni la prochaine — la suivante de la tournée l\u2019est', () => { const c = mondeCible(S, true), r = c._mvCibleCarte('Arrachage');
     return r && r.etat === 'prochaine' && r.ps.length === 1 && r.ps[0].nom === 'P2'; });
