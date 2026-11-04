@@ -22,12 +22,12 @@
   "src/cockpit.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 31
+    "ko": 32
   },
   "src/coequipier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 26
+    "ko": 28
   },
   "src/comptes.js": {
     "dur": 0,
@@ -87,7 +87,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 928
+    "ko": 929
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -132,12 +132,12 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 532
+    "ko": 533
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 564
+    "ko": 567
   },
   "index.html": {
     "dur": 74,

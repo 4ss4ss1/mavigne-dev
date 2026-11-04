@@ -1,0 +1,43 @@
+{
+  "lot": "COEQ-5",
+  "section": "§526",
+  "base": "d1fb073088fe721a26bfc78bc73443d622e5c178",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "ok": true,
+    "empreinte": "758d7dd1250c2406af232654b7918666562a4e223d7e514b630a6dea632c7610",
+    "date": "2026-11-04T12:53:31.767Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "17963c60c047a3d8268bd6f70c368b6bdf5038f27139e3754481d51f58393b23",
+    "CLAUDE.md": "4a25cdbe6ecbd63d70a5dbcc8b0dea5a6d7de46e9f0bec6e25984339efd1bdfa",
+    "docs/claude/INDEX.md": "459541af37c50aadbc31969d9c1545957180f5794e1228826322c94e3a179889",
+    "docs/claude/chantiers-480-529.md": "405d15d34523ecaacc97943d7459519816c56594f6465ef126e4f8d1c16aaa1e",
+    "docs/claude/journal.md": "9f3741d0b14c4c3eb752c36c5c922c2b93ef01ea1848135755ac537af6273aac",
+    "guide/06-tracteur.html": "413fc0ee819b9c2f5ec10cb5c70a88a8da89bec745aca0435d4a0ebdb9495b7b",
+    "index.html": "ace0d5748f5b06c752bff0a6db948856bb3037b816dbe77618f614a1600e5d87",
+    "public/sw.js": "e9b2d806d83fce285b241420895701019d23c838a8456a86ebe6c92b4756d6f3",
+    "scripts/harnais-cadence-escalier.mjs": "be45736c3f088af6f24436f76d8e35dd2924d20e7584ffa96e6d4ca85d51551c",
+    "scripts/harnais-claude-md.mjs": "83ad551c3de2bee1bf1ec7d1491ee7705f2ceb96ce9d1c9cc297e8c695ca815c",
+    "scripts/mv-harnais-direct1.mjs": "441f6addbcfaeb8f2e21f773ae8d29ab5b9fb7513e391fe3a9c42ced068aabb3",
+    "scripts/mv-harnais-liste.mjs": "97d8fbe6b7970eda826581994368145481a6bb9be908cd78aaee73488bd2f9a7",
+    "scripts/typo-baseline.json": "b641b1f563f9aac03c08fa98c8b692f3202f93e3e48c9d49e6ee7651bb88be60",
+    "src/cockpit-vue.js": "59c633aefdb0b69c78e82168dffdd98c9ecb4bc8f68b364368819cfe531292d5",
+    "src/cockpit.js": "c6ae2f7b967b6bc711a5890dcf1a5158a586adfe1352e2c12a32d3ee332e4ccc",
+    "src/coequipier.js": "963dd0750b2c4099014a9ccd061490427cc7ee0f00dd2de09e1b6bfb6f14aee3",
+    "src/pilotage.js": "839ffed536cf7deb247c3465bcf30d21f6cbe2f21c0471a25cf7efbd3303f42f",
+    "src/styles.css": "4539b2b0907ce6893c68dd9753878dcf1ecb8f130c4bc0cfa76a70874b5289a2",
+    "src/tracteur.js": "b82e09a655cbad778d56a17502151c3e773f7e4803f9d17073b0ea95e9599e3b",
+    "src/utils.js": "42b37a8c5ef355858975466dc521c4590a9f5046fafdaca13130d43bfb8cdb44",
+    "src/whats-new.js": "0660807cf4043ad9b163d924b91b46de2806e04f030a1414055031c08a099912",
+    "scripts/mv-harnais-coeq5.mjs": "a1e9b0fd958bc22c575c681e7c7c3a2befad4057e8a91e6718218463ad5bae11"
+  }
+}

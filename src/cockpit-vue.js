@@ -713,9 +713,10 @@ const dureeTxt = m => { const r = Math.max(1, Math.round(m)); if (r < 60) return
 const listeTxt = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
 function texteTrac(e) {
   const qui = (e.eq && EQ[e.eq] && EQ[e.eq].noms) || 'Quelqu’un', act = e.act ? maj1(e.act) : 'Tracteur', n = e.parcs.length;
-  if (e.type === 'traite') return { titre: qui + ' a traité', sous: n > 2 ? n + '\u00a0parcelles' : (listeTxt(e.parcs) || act) };
-  if (e.type === 'trac-debut') return { titre: qui + ' a pris le tracteur', sous: act + (e.trac ? ', ' + e.trac : '') };
-  return { titre: qui + ' a fini ' + (n > 1 ? n + '\u00a0parcelles' : (e.parcs[0] || 'une parcelle')),
+  const v = (e.eq && EQ[e.eq] && EQ[e.eq].ini && EQ[e.eq].ini.length > 1) ? ' ont ' : ' a ';   // COEQ-5 (§526) : « Marc et Léo ont fini »
+  if (e.type === 'traite') return { titre: qui + v + 'traité', sous: n > 2 ? n + '\u00a0parcelles' : (listeTxt(e.parcs) || act) };
+  if (e.type === 'trac-debut') return { titre: qui + v + 'pris le tracteur', sous: act + (e.trac ? ', ' + e.trac : '') };
+  return { titre: qui + v + 'fini ' + (n > 1 ? n + '\u00a0parcelles' : (e.parcs[0] || 'une parcelle')),
     sous: act + ' au tracteur' + (n > 1 ? '\u00a0: ' + listeTxt(e.parcs) : '') + (e.m ? ', ' + dureeTxt(e.m) : '') };
 }
 // « En ce moment » : les parcelles en cours (commencée le plus récemment d'abord), puis le tracteur en marche ou en pause.

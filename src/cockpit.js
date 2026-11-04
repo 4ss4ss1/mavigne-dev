@@ -39,6 +39,14 @@ function _ckTs(e){
 //   n'y est pas déjà et s'il était dans les rangs. « Sans moi » (quiHors, TV-2) : il n'y figure pas — comme pour le temps passé
 //   (_ecoTempsVigne) et le journal des interventions. Sans équipe : l'auteur seul. Nico (12/10) : « l'équipe est bien
 //   programmée mais c'est encore moi d'indiqué dessus ».
+// ★ COEQ-5 (§526) : les coéquipiers d'un événement du tracteur — ceux des parcelles finies (`co`, COEQ-2), sinon celui du moment.
+//   `qui` (le conducteur) reste la clé ; `avec` s'ajoute, et le modèle (pilotage.js/_pilCk2Modele) en fait « Marc et Léo ».
+function _ckAvec(s, parcs){
+  var l = [], co = (typeof window !== 'undefined' && typeof window._trCoDe === 'function') ? window._trCoDe : null;
+  if(parcs && parcs.length && co){ (s.parcellesFaites || []).forEach(function(x){ var n = (x && typeof x === 'object') ? x.nom : x; if(parcs.indexOf(n) >= 0){ var c = co(s, x); if(c && l.indexOf(c) < 0) l.push(c); } }); }
+  else if(s && s.coequipier) l.push(String(s.coequipier));
+  return l;
+}
 function _ckQui(e){
   var q = String((e && e.qui) || '').trim(), r = [];
   ((e && Array.isArray(e.membresEquipe)) ? e.membresEquipe : []).forEach(function(x){ var n = String(x || '').trim(); if(n && r.indexOf(n) < 0) r.push(n); });
@@ -95,7 +103,7 @@ window._ckTracJour = function(sessions, auj, o){
     for(var i = tr.length - 1; i >= 0 && !qui; i--) qui = String(tr[i].u || '').trim();
     if(String(s.date || '').slice(0, 10) === auj){
       var tn = (tracs.filter(function(x){ return x && x.id === s.tracteurId; })[0] || {}).nom || '';
-      evts.push({ k: 'trac-debut', qui: qui, act: act, parcs: [], m: null, trac: String(tn), ts: (t0 && _ckJourDe(t0) === auj) ? t0 : (tr.length ? Number(tr[0].t) : null) });
+      evts.push({ k: 'trac-debut', qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: [], m: null, trac: String(tn), ts: (t0 && _ckJourDe(t0) === auj) ? t0 : (tr.length ? Number(tr[0].t) : null) });
     }
     var faits = [], bloc = [], tB = null, pause = false, tP = null, pBloc = [];
     tr.forEach(function(y){
@@ -118,10 +126,10 @@ window._ckTracJour = function(sessions, auj, o){
       });
       Object.keys(grp).forEach(function(k){ faits.push({ parcs: grp[k], m: null, ts: Number(k) }); });
     }
-    faits.forEach(function(f){ if(f.parcs.length) evts.push({ k: 'trac', qui: qui, act: act, parcs: f.parcs, m: f.m, ts: f.ts }); });
+    faits.forEach(function(f){ if(f.parcs.length) evts.push({ k: 'trac', qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, f.parcs) : []), act: act, parcs: f.parcs, m: f.m, ts: f.ts }); });
     if(s.statut === 'Terminé') return;
-    if(bloc.length) cours.push({ qui: qui, act: act, parcs: bloc, ts: tB, pause: false });
-    else if(pause) cours.push({ qui: qui, act: act, parcs: pBloc, ts: tP, pause: true });
+    if(bloc.length) cours.push({ qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: bloc, ts: tB, pause: false });
+    else if(pause) cours.push({ qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: pBloc, ts: tP, pause: true });
   });
   evts.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
   cours.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });

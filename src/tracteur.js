@@ -1654,7 +1654,7 @@ var _relOuvrir=function(){ return _cpt('_relOuvrir',arguments,undefined); };
 var _trRelever=function(){ return _cpt('_trRelever',arguments,undefined); };
 var _trSdOuvert=function(){ return _cpt('_trSdOuvert',arguments,undefined); };
 var _trRelevePassage=function(){ return _cpt('_trRelevePassage',arguments,undefined); };
-if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, chrSurf:_chrSurf, sdNorm:_sdNorm, chrTrace:_chrTrace, renderSDParcelles:renderSDParcelles, openSessionDetail:openSessionDetail, sessInSaison:_sessInSaison,   // COEQ-2 (§523), COEQ-3 (§524) : le filtre de saison du journal
+if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, chrSurf:_chrSurf, sdNorm:_sdNorm, chrTrace:_chrTrace, renderSDParcelles:renderSDParcelles, openSessionDetail:openSessionDetail, sessInSaison:_sessInSaison, sessBaremeMin:_sessBaremeMin,   // COEQ-2 (§523), COEQ-3 (§524) : le filtre de saison du journal
   closeOv:_closeOv, fmtDate:_fmtDate, gnrField:_gnrField, gnrNum:_gnrNum, gnrTodayISO:_gnrTodayISO,
   openOv:_openOv, saveData:_saveData, trHeuresFr:_trHeuresFr, getTracteurSel:getTracteurSel, renderEntretiens:renderEntretiens, renderTracteur:renderTracteur,
   selId:function(){ return _tracSelId; }, onglet:function(){ return _tracOnglet; } };
@@ -2494,6 +2494,7 @@ function _trFicheHtml(s){
     var _jr=window._trJoursDe(s).slice().reverse(), _ad=isAdmin();
     if(_jr.length) h+='<section class="trf-sec"><div class="trf-sec-t">L\u2019\u00e9quipe</div><div class="sdeq-tab-w"><table class="sdeq-tab"><thead><tr><th>Jour</th><th>Conducteur</th><th>Co\u00e9quipier</th><th class="r">Parcelles</th>'+(_ad?'<th></th>':'')+'</tr></thead><tbody>'
       +_jr.map(function(g){ var cc=g.parcs.filter(function(x){ return x.coCorr; })[0]; return '<tr><td>'+_escHtml(window._trJourTxt(g.jour))+'</td><td>'+_escHtml(s.conducteur||'')+'</td><td>'+_escHtml(window._trAvecTxt(window._trEqDuJour(s,g.parcs)).replace(/^avec /,''))+(cc?'<span class="sdeq-trace">corrig\u00e9 par '+_escHtml(cc.coCorr.par||'?')+'</span>':'')+'</td><td class="r">'+g.parcs.length+'</td>'+(_ad?'<td class="r"><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-sdeq="fiche-corr" data-sid="'+_escAttr(s.id)+'" data-j="'+g.jour+'">Corriger</button></td>':'')+'</tr>'; }).join('')+'</tbody></table></div></section>';
+    if(_jr.length&&typeof window._trParPersonneHtml==='function') h+=window._trParPersonneHtml(s);   // COEQ-5 (§526) : « Par personne »
   }
   h+='<section class="trf-sec"><div class="trf-sec-t">Parcelles</div><div class="trf-parcs">'+actives.map(function(p){ return '<span class="trf-p'+(done.indexOf(p.nom)>=0?' fait':'')+'">'+_escHtml(p.nom)+'</span>'; }).join('')+'</div></section>';
   h+='<section class="trf-sec"><div class="trf-sec-t">Note</div><p class="trf-note">'+(s.note?_escHtml(s.note):'<span class="trf-rien">Aucune note sur cette session.</span>')+'</p></section>';

@@ -168,7 +168,7 @@ const CONTRE = [
   ['le repli du modèle remet l’auteur devant', 'pil', 'if(q&&r.indexOf(q)<0&&!(e.quiHors&&r.length)) r.push(q);', 'if(q&&r.indexOf(q)<0&&!(e.quiHors&&r.length)) r.unshift(q);'],
   ['le modèle oublie le tracteur', 'pil', 'tracCours:tracCours, ', ''],
   ['une ligne sans heure affiche « il y a … »', 'vue', `(e.ts ? '<time data-ts="' + e.ts + '">' + ilYa(e.ts) + '</time>' : '')`, `('<time data-ts="' + e.ts + '">' + ilYa(e.ts) + '</time>')`],
-  ['un article devant l’activité', 'vue', "qui + ' a fini '", "qui + ' a fini le '"],
+  ['un article devant l’activité', 'vue', "qui + v + 'fini '", "qui + v + 'fini le '"],   // COEQ-5 (§526) : le verbe s’accorde (« ont fini »)
   ['« En ce moment » sans sa règle « hidden »', 'css', '.ck-fil-sec[hidden]{display:none}', ''],
   ['l’aide du Pilotage décrit l’ancien fil', 'uti', 'montre d’abord qui est où en ce moment', 'montre ce que l’équipe valide'],
 ];

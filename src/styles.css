@@ -3300,6 +3300,7 @@ td .sdeq-trace{padding:2px 0 0;}
 .sdeq-tab th{padding:4px 8px;text-align:left;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);border-bottom:1px solid var(--gris-clair);}
 .sdeq-tab td{padding:8px;vertical-align:middle;border-bottom:1px solid var(--gris-clair);}
 .sdeq-tab .r{text-align:right;}
+.sdeq-tot td{font-weight:600;border-top:1.5px solid var(--ligne-forte);}   /* COEQ-5 (§526) : le total de « Par personne » */
 /* ★ COEQ-3 (§524) : le tracteur au journal — une ligne par session et par jour (coequipier.js) */
 .jtr-bar{background:var(--acier);}
 .jtr-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}

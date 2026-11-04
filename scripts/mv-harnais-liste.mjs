@@ -442,6 +442,9 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-coeq3.mjs --contre', 'coequipier-tracteur'],
   ['node scripts/mv-harnais-coeq4.mjs', 'coequipier-tracteur'],   // COEQ-4 (§525) : le Pilotage compte le coéquipier
   ['node scripts/mv-harnais-coeq4.mjs --contre', 'coequipier-tracteur'],
+  ['node scripts/mv-harnais-coeq5.mjs', 'coequipier-tracteur'],   // COEQ-5 (§526) : « En direct » du Pilotage, « Par personne »
+  ['node scripts/mv-harnais-coeq5.mjs --contre', 'coequipier-tracteur'],
+  ['node scripts/harnais-cadence-escalier.mjs', 'le-temps-reel-contre-le'],   // ★ COEQ-5 (§526) : absent de la liste, il était rouge sans que personne le voie
   ['node scripts/mv-harnais-presence1.mjs', 'presence-notee-chai'],   // PRESENCE-1 (§344) : « Ta présence est notée »
   ['node scripts/mv-harnais-presence1.mjs --contre', 'presence-notee-chai'],
   ['node scripts/mv-harnais-premieres1.mjs', 'premieres-fois'],   // PREMIERES-1 (§345) : « Vos premières fois »

@@ -5043,11 +5043,11 @@ function _pilCk2Modele(d, m){
   try{ if(typeof window._ckTracJour==='function') TJ=window._ckTracJour(window.SESSIONS||[], auj, { tracs:window.TRACTEURS_LIST||[] }); }
   catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#trac'); }
   var ini2=function(l){ return l.length?l.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?']; };
-  TJ.evts.forEach(function(x){ var n=x.qui?[x.qui]:[];
-    evts.push({ type:x.k, noms:n[0]||'Quelqu\u2019un', ini:ini2(n), act:x.act||'', parcs:x.parcs||[], m:(typeof x.m==='number')?x.m:null, trac:x.trac||'', ts:(typeof x.ts==='number')?x.ts:null }); });
+  TJ.evts.forEach(function(x){ var n=x.qui?[x.qui].concat(Array.isArray(x.avec)?x.avec:[]):[];   /* COEQ-5 (§526) : et ses coéquipiers */
+    evts.push({ type:x.k, noms:(n.length>1?n.slice(0,-1).join(', ')+' et '+n[n.length-1]:(n[0]||'Quelqu\u2019un')), ini:ini2(n), act:x.act||'', parcs:x.parcs||[], m:(typeof x.m==='number')?x.m:null, trac:x.trac||'', ts:(typeof x.ts==='number')?x.ts:null }); });
   evts.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
-  var tracCours=TJ.cours.map(function(x){ var n=x.qui?[x.qui]:[];
-    return { noms:n[0]||'Quelqu\u2019un', ini:ini2(n), act:x.act||'', parcs:x.parcs||[], ts:(typeof x.ts==='number')?x.ts:null, pause:!!x.pause }; });
+  var tracCours=TJ.cours.map(function(x){ var n=x.qui?[x.qui].concat(Array.isArray(x.avec)?x.avec:[]):[];   /* COEQ-5 (§526) : et ses coéquipiers */
+    return { noms:(n.length>1?n.slice(0,-1).join(', ')+' et '+n[n.length-1]:(n[0]||'Quelqu\u2019un')), ini:ini2(n), act:x.act||'', parcs:x.parcs||[], ts:(typeof x.ts==='number')?x.ts:null, pause:!!x.pause }; });
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
   var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj, (typeof _pilSaison==='function'&&_pilSaison()&&_pilSaison().nom)||''):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;

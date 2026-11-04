@@ -255,7 +255,28 @@ function _trPassagesParc(nom){
   return out;
 }
 
-if(typeof window!=='undefined') Object.assign(window,{ _trJournalLignes:_trJournalLignes, _trJournalRow:_trJournalRow, _trJournalCarte:_trJournalCarte, _trJournalFiche:_trJournalFiche, _trPassagesParc:_trPassagesParc,
+// ★ COEQ-5 (§526) : « Par personne » (la maquette) — les heures de chacun, avec la règle de la fiche (la mesure du chrono,
+//   sinon le barème), et ses trous ; le conducteur compte toutes les parcelles, chaque coéquipier les siennes.
+function _trParPersonne(s){
+  var P=_P(), a=(window.ACTIVITES||[]).find(function(y){ return y&&y.nom===s.activite; }), lab=(a&&a.champCustom&&a.champCustom.feedsPlantation)?a.champCustom.label:null, R={}, o=[];
+  function ajoute(n,r,m,t){ if(!n) return; if(!R[n]){ R[n]={nom:n,role:r,min:0,trous:0}; o.push(n); } R[n].min+=m; R[n].trous+=t; }
+  (s.parcellesFaites||[]).forEach(function(x){
+    var e=(x&&typeof x==='object')?x:{nom:String(x)}, m=P.chrMes?(P.chrMes(x)||0):0;
+    if(!(m>0)&&P.sessBaremeMin&&P.chrSurf) m=P.sessBaremeMin(s,P.chrSurf(e.nom))||0;
+    var t=(lab&&e.data)?(parseInt(e.data[lab],10)||0):0;
+    ajoute(s.conducteur,'conducteur',m,t); ajoute(_trCoDe(s,e),'co\u00e9quipier',m,t);
+  });
+  return {lignes:o.map(function(n){ return R[n]; }),trous:!!lab};
+}
+function _trParPersonneHtml(s){
+  var r=_trParPersonne(s); if(!r.lignes.length) return '';
+  var hm=function(m){ var q=Math.round(m), h=Math.floor(q/60), x=q%60; return h+'\u00a0h\u00a0'+(x<10?'0':'')+x; }, tot=r.lignes.reduce(function(t,x){ return t+x.min; },0);
+  return '<section class="trf-sec"><div class="trf-sec-t">Par personne</div><div class="sdeq-tab-w"><table class="sdeq-tab"><thead><tr><th>Qui</th><th>R\u00f4le</th><th class="r">Heures</th>'+(r.trous?'<th class="r">Trous</th>':'')+'</tr></thead><tbody>'
+    +r.lignes.map(function(x){ return '<tr><td>'+_escHtml(x.nom)+'</td><td>'+x.role+'</td><td class="r">'+hm(x.min)+'</td>'+(r.trous?'<td class="r">'+x.trous+'</td>':'')+'</tr>'; }).join('')
+    +'<tr class="sdeq-tot"><td>Main-d\u2019\u0153uvre de la session</td><td></td><td class="r">'+hm(tot)+'</td>'+(r.trous?'<td></td>':'')+'</tr></tbody></table></div></section>';
+}
+
+if(typeof window!=='undefined') Object.assign(window,{ _trParPersonne:_trParPersonne, _trParPersonneHtml:_trParPersonneHtml, _trJournalLignes:_trJournalLignes, _trJournalRow:_trJournalRow, _trJournalCarte:_trJournalCarte, _trJournalFiche:_trJournalFiche, _trPassagesParc:_trPassagesParc,
   _trCoDe:_trCoDe, _trCoeqNoms:_trCoeqNoms, _trJourDe:_trJourDe, _trSessADeux:_trSessADeux,
   _trStampCo:_trStampCo, _trJoursDe:_trJoursDe, _trEqDuJour:_trEqDuJour, _trAvecTxt:_trAvecTxt, _trJourTxt:_trJourTxt,
   renderSDEqEncart:renderSDEqEncart, _sdRenderFaites:_sdRenderFaites, openSdEqChanger:openSdEqChanger, openSdEqCorriger:openSdEqCorriger,
