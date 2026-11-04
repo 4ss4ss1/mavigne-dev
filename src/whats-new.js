@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.62', d: '2026-11-04', items: [   // COEQ-4 (§525) : le calcul du coéquipier
+    { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Le Pilotage compte le coéquipier du tracteur',
+      desc: "Les heures d’une parcelle faite à deux vont au conducteur ET au coéquipier, le jour où elle a été faite : elles sortent de leur temps dans les rangs, et entrent dans le coût de la session, chacun à son taux. Le carburant ne double pas. Une session de plusieurs jours ne pose plus toutes ses heures sur son premier jour." },
+    { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: '« Équipe » dans les rapports, et « En direct »',
+      desc: "Le rapport du mois et le rapport de saison nomment l’équipe de chaque session (le conducteur et ses coéquipiers). «\u00a0En direct\u00a0», à l’Accueil, dit «\u00a0Marc et Léo, au tracteur\u00a0» et ne montre plus l’amendement comme une validation d’équipe." }
+  ] },
   { v: '10.61', d: '2026-11-04', items: [   // COEQ-3 (§524) : le tracteur au journal, les tutos du coéquipier
     { niv: 1, pour: ['admin'], cible: '#timeline', emoji: 'tracteur', titre: 'Le tracteur au journal',
       desc: "Chaque session du tracteur a sa ligne au journal, une par jour : le conducteur et son coéquipier, les parcelles en dépliant. Les traitements y passent aussi, en lecture (le détail légal reste au registre). L’amendement ne s’affiche plus «\u00a0— · validé par\u00a0» : il a sa ligne, avec les deux noms." },

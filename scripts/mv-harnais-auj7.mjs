@@ -117,7 +117,7 @@ if (!CONTRE) {
 const DEFAUTS = [
   ['l’arrachage reprend 0 h le jour mêlé', 'pil', 'var qH=(nH&&nB)?((S>0)?(SH/S):(nH/L.length)):(nH?1:0);', 'var qH=nB?0:1;'],
   ['le budget oublie les travaux à l’heure', 'pil', '  budget += hbE;\n', '\n'],
-  ['la cadence recompte l’arrachage', 'pil', 'Math.max(0, cadP.h - T.tracH - hbH)', 'Math.max(0, cadP.h - T.tracH)'],
+  ['la cadence recompte l’arrachage', 'pil', 'Math.max(0, cadP.h - T.tracH - (T.tracHCo||0) - hbH)', 'Math.max(0, cadP.h - T.tracH)'],
   ['l’atterrissage redevient « dépensé + reste d’argent »', 'pil', '  var att=num(E.projFin);', '  var att=dep+num(E.resteE);'],
   ['la cadence multiplie aussi le tracteur et le GNR', 'pil', '(engage + resteBar + T.moR*ecart)', '(engage + resteBar*(1+ecart))'],
   ['le cockpit reprend le barème du fait pour la main-d’œuvre', 'pil', 'var moDep=num(Pk.mo?Pk.mo.fait:T.moF)', 'var moDep=num(T.moF)'],

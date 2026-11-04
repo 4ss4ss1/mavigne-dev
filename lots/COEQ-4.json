@@ -1,0 +1,30 @@
+{
+  "lot": "COEQ-4",
+  "section": "§525",
+  "base": "aac66d6f439da95dbb5c83ce5c7f4ba96c3154c4",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "94bf8489afc8ed9a8b7a5cda0547d34bcae0fc63a9dff452b2293a36257ae1da",
+    "CLAUDE.md": "8e5b80c887032aa9c3626585e916ac6f73b64445b0e7dab1333f37895c4285ad",
+    "docs/claude/INDEX.md": "cfbd3d0949881603f41e30032672930d273b58e0351293316abe0a9cc6fe5184",
+    "docs/claude/chantiers-480-529.md": "2288e318c4f97b6761c8e93b2f09e0a73540103a90330b7b6ec78bbe8a327d7e",
+    "docs/claude/journal.md": "43ed5d57a023db4966191a61afcccb49af3b30a4027f3e9b45faf85702f49c00",
+    "index.html": "d799732ed8780292edde831a7f9f831a9ca4b322c2e9f4e7e8fce1f68f813ad7",
+    "public/sw.js": "be1d40c93c21ad3e9e5dfc7f445d1ee79ba1cb0c6c9237ebf489b147c8b88648",
+    "scripts/harnais-claude-md.mjs": "033e7ff1f7b4a691c7ce16cb7c686c3ee49ab2814e792a688f5adf456eaf858e",
+    "scripts/mv-harnais-auj7.mjs": "4ee3c731e7473a29709684971bc4e55448d893ed40619d0ef2c8ea4377ea0d7a",
+    "scripts/mv-harnais-liste.mjs": "fe8bbee02aa11aa861edd1c3940433b9fb4d9d90bf3018131b3ca29c9639e287",
+    "scripts/mv-harnais-temps-vigne.mjs": "b2b9ae75afdbe3665ba9ef52cadf24c402084abdb314e8fe2b3625a95e004657",
+    "src/app.js": "316cd3f523ba55c6352b7a2738db0c5b8ee6574d3ceb3e6d1bc78ad519446642",
+    "src/pilotage.js": "cbd925f20bacb1e1bd36d424e408bb218acdd91103898e1fe5978ed3e427509f",
+    "src/reglages.js": "e90d8ab25caeb5fb0cb7a2c276398af0da300a77555aaffb0a3862b477fae5a9",
+    "src/utils.js": "c955ac58204b35c8f9bfa2a309c87c7ff05b02ab96853551e96c79d919687eeb",
+    "src/whats-new.js": "07593257f0bb96af3c48517f6c0529593220a65bbbdd9a042d0adaa85ee9b19f",
+    "scripts/mv-harnais-coeq4.mjs": "94f38ce9369adbf66a44a5bef46faa39be56839b2ba0294ddd18c10238d88a9f"
+  }
+}

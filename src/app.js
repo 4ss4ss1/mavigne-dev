@@ -5883,8 +5883,8 @@ function renderHomeDirect(){
   var S=((typeof SESSIONS!=='undefined'&&SESSIONS)||[]).filter(function(s){ return s&&s.statut==='En cours'&&(typeof window._sessInSaison!=='function'||window._sessInSaison(s)); });   // ★ ACCV-4 (§419) : les sessions de la saison, comme le Tracteur
   var hC=cours.map(function(j){ var l=qui(j), lui=l.indexOf(me)>=0, h=_hvHeure(j);
       return '<div class="hk-ed cours"><span class="hk-ed-i"><i class="hpc-pouls" aria-hidden="true"></i></span><span class="hk-ed-t"><b>'+(lui?(l.length>1?'Votre \u00e9quipe':'Vous'):_escHtml(_accNoms(l)))+'</b><span>'+_escHtml(tNom(j.tache))+', '+_escHtml(j.parcelle)+'</span></span><span class="hk-ed-h">'+(h?'depuis '+h:'')+'</span></div>'; }).join('')
-    +S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join('');
-  var V=J.filter(function(j){ return j.statut==='Valid\u00e9'&&j.parcelle; }).slice(0,12), prec='', hF='';
+    +S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+_escHtml(s.coequipier?(s.coequipier===me?' et vous':' et '+s.coequipier):'')+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join('');
+  var V=J.filter(function(j){ return j.statut==='Valid\u00e9'&&j.parcelle&&!j.auTracteur; })   /* COEQ-4 (§525) : l'amendement fait au tracteur est montré par sa session */.slice(0,12), prec='', hF='';
   V.forEach(function(j){ var jr=_hvJour(j.date); if(jr!==prec){ hF+='<div class="hk-ed-g">'+_escHtml(jr)+'</div>'; prec=jr; }
     hF+='<div class="hk-ed"><span class="hk-ed-i">'+_mvIcon('check',16)+'</span><span class="hk-ed-t">'+sujet(qui(j))+' <b>'+_escHtml(j.parcelle)+'</b><span>'+_escHtml(tNom(j.tache))+'</span></span><span class="hk-ed-h">'+_hvHeure(j)+'</span></div>'; });
   var n=cours.length+S.length, nb=document.getElementById('home-direct-n'), vif=document.getElementById('home-direct-vif');
@@ -14213,7 +14213,7 @@ function exportRapportSaison(seasonNom){
       /* ⚠ DOCUMENT IMPRIME : il s'ouvre dans un AUTRE onglet, qui n'a pas le
          sprite. `_mvIcon` y rendrait un cadre vide, sans erreur (§45b). */
       return '<tr><td class="pnom">'+_mvIconInline(_actIcone(s.emoji),16)+' '+esc(s.activite||'')+'</td>'
-        +'<td class="muted">'+esc(tn)+'</td><td>'+esc(s.conducteur||'')+'</td>'
+        +'<td class="muted">'+esc(tn)+'</td><td>'+esc((s.conducteur||'')+((typeof window._trCoeqNoms==='function'&&window._trCoeqNoms(s).length)?' et '+window._trCoeqNoms(s).join(', '):''))+'</td>'
         +'<td class="r muted">'+((s.surface!=null)?(parseFloat(s.surface)||0).toFixed(2)+' ha':'\u2014')+'</td>'
         +'<td class="c"><span class="tag '+(done?'ok':'warn')+'">'+esc(st||((s.avancement||0)+'%'))+'</span></td>'
         +'<td class="r"><span class="pct" style="color:'+pctCol(s.avancement||0)+'">'+(s.avancement||0)+' %</span></td></tr>';
@@ -14469,7 +14469,7 @@ function exportRapportSaison(seasonNom){
       +'</tbody></table><div class="sec-note">'+(anyCu?'Colonne Cu = cuivre m\u00e9tal cumul\u00e9 sur 7 ans glissants (kg/ha) vs plafond '+_cuP7+' kg/ha \u2014 voir Conformit\u00e9 cuivre. ':'')+(parcArr.length?parcArr.length+' parcelle(s) arrach\u00e9e(s) non incluse(s). ':'')+'Dates = 1\u02b3\u1d49 et derni\u00e8re validation toutes t\u00e2ches confondues.</div></div>');
     // §4 Sessions
     H.push('<div class="section"><div class="sec-head"><div class="sec-titles"><div class="sec-eyebrow">M\u00e9canisation</div><div class="sec-title"><span class="acc">Travaux tracteur</span> \u2014 sessions</div></div><div class="sec-count">'+sess.length+' sessions</div></div>'
-      +'<table><thead><tr><th>Activit\u00e9</th><th>Tracteur</th><th>Conducteur</th><th class="r">Surface</th><th class="c">Statut</th><th class="r">Avanct.</th></tr></thead><tbody>'
+      +'<table><thead><tr><th>Activit\u00e9</th><th>Tracteur</th><th>\u00c9quipe</th><th class="r">Surface</th><th class="c">Statut</th><th class="r">Avanct.</th></tr></thead><tbody>'
       +(srows||'<tr class="emptyrow"><td colspan="6">Aucune session enregistr\u00e9e pour cette saison.</td></tr>')
       +'</tbody></table><div class="sec-note">Avancement session = surface travaill\u00e9e (ha). Sessions filtr\u00e9es par la p\u00e9riode de la saison.</div></div>');
     // §5 Parc & entretien

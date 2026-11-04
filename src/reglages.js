@@ -5176,14 +5176,14 @@ function exportPDFMois(){
       return `<tr>
         <td>${em} <strong>${s.activite}</strong></td>
         <td>${fmtD(s.date)}</td>
-        <td>${s.conducteur||'—'}</td>
+        <td>${(s.conducteur||'—')+((typeof window._trCoeqNoms==='function'&&window._trCoeqNoms(s).length)?' et '+window._trCoeqNoms(s).join(', '):'')}</td>
         <td><div class="trac-bar-wrap"><div class="trac-bar" aria-hidden="true"><div class="${fillCls}" style="width:${pct}%"></div></div><span style="font-size:10px;font-weight:700;color:${s.statut==='En cours'?'#B85A1A':'#2C3E50'}">${pct}%</span></div></td>
         <td style="font-size:10px;color:var(--texte-doux,#7A7A6A)">${faites.length}/${total} parc.</td>
         <td><span class="trac-badge ${statCls}">${s.statut}</span></td>
       </tr>`;
     }).join('');
     tracResume=`<table class="trac-table">
-      <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Avancement</th><th>Parcelles</th><th>Statut</th></tr></thead>
+      <thead><tr><th>Activité</th><th>Date</th><th>Équipe</th><th>Avancement</th><th>Parcelles</th><th>Statut</th></tr></thead>
       <tbody>${lignes}</tbody>
     </table>`;
   }
@@ -5265,7 +5265,7 @@ function exportPDFMois(){
       const skipTri=[...skip].sort((a,b)=>a.localeCompare(b,'fr'));
       const total=_isTrait?faitesTri.length:parcActives.filter(p=>!skip.includes(p.nom)).length;
       return `<div class="trac-session-block">
-        <div class="trac-session-head">${em} ${s.activite} — ${fmtD(s.date)} · ${s.conducteur||'—'} · ${pct}%</div>
+        <div class="trac-session-head">${em} ${s.activite} — ${fmtD(s.date)} · ${(s.conducteur||'—')+((typeof window._trCoeqNoms==='function'&&window._trCoeqNoms(s).length)?' et '+window._trCoeqNoms(s).join(', '):'')} · ${pct}%</div>
         <div class="trac-detail-block">
           <div class="trac-detail-col">
             <div class="trac-detail-label trac-det-ok">${_isTrait?`${_mvIconInline('eprouvette',16)} Parcelles traitées (${faitesTri.length})`:`${_mvIconInline('check',16)} Travaillées (${faitesTri.length}/${total})`}</div>

@@ -6790,7 +6790,7 @@ function _ecoGnrReel(win){
 //   entre deux bilans et non par campagne. APPELEE SANS ARGUMENT, LA FONCTION EST
 //   STRICTEMENT INCHANGEE — une seule definition de « ce que coute une session ».
 function _ecoTracHByParc(win){
-  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{},condH:{}};
+  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{},condH:{},hCo:{}};   // hCo : COEQ-4 (§525), les heures du coéquipier par parcelle
   var _rate0=_ecoRate(), _cfgT=_ecoCfg();
   var _mBy={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) _mBy[m.nom]=m; });
   // ★ TAUX A LA DATE DE LA SESSION. Une session de mars se valorise au taux de mars,
@@ -6804,7 +6804,7 @@ function _ecoTracHByParc(win){
   var seasonNom=(s&&s.nom)?s.nom:'';
   var sess=window.SESSIONS||[], acts=window.ACTIVITES||[], parcs=window.PARCELLES||[];
   function _in(se){
-    if(win&&win.d0&&win.d1){ var _d=String(se.date||'').slice(0,10); return !!_d && _d>=win.d0 && _d<=win.d1; }
+    if(win&&win.d0&&win.d1){ var _d=String(se.date||'').slice(0,10); return !!_d && _d<=win.d1; }   // COEQ-4 (§525) : la fenêtre se juge parcelle par parcelle, plus bas
     var sn=(window._saisonForDate&&se.date)?window._saisonForDate(se.date):null; sn=sn||se.saison||'';
     if(sn) return sn===seasonNom;
     return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
@@ -6817,34 +6817,35 @@ function _ecoTracHByParc(win){
     out.nSess++; if(!(_tc>0)) out.nAnon++;
     (se.parcellesFaites||[]).forEach(function(x){
       var nom=(typeof x==='string')?x:((x&&x.nom)||''); if(!nom) return;
+      // ★★ COEQ-4 (§525) : chaque parcelle porte SON jour (_trJourDe, règle de FERTI-9) et SON coéquipier (_trCoDe, COEQ-2).
+      //   Avant : toutes les heures d'une session de plusieurs jours tombaient sur son premier jour, au conducteur seul.
+      var _j=(typeof window._trJourDe==='function')?window._trJourDe(se,x):String(se.date||'').slice(0,10);
+      if(win&&win.d0&&win.d1&&(!_j||_j<win.d0||_j>win.d1)) return;
+      var _co=(typeof window._trCoDe==='function')?window._trCoDe(se,x):'';
+      var _tcP=_tauxCond(se.conducteur,_j||se.date), _tuP=(_tcP>0?_tcP:_rate0), _tcC=_co?_tauxCond(_co,_j||se.date):0, _tuC=_co?(_tcC>0?_tcC:_rate0):0;
       var d=(x&&typeof x==='object'&&typeof x.dmin==='number')?x.dmin:null, h;
       if(d!=null){ h=d/60; }
       else { if(hha<=0) return; var p=parcs.find(function(pp){return pp&&pp.nom===nom;}); h=(p?(parseFloat(p.surface)||0):0)*hha; }
-      out.h[nom]=(out.h[nom]||0)+h;
-      out.cost[nom]=(out.cost[nom]||0)+h*_tu;
-      // Source DATEE de la courbe d'engagement : conduite + carburant de CETTE session.
+      var mo=h*_tuP+(_co?h*_tuC:0);   // la main-d'œuvre : le conducteur ET le coéquipier, chacun à son taux du jour
+      out.h[nom]=(out.h[nom]||0)+h;   // les heures du TRACTEUR (GNR, compteur) : elles ne doublent pas
+      if(_co) out.hCo[nom]=(out.hCo[nom]||0)+h;
+      out.cost[nom]=(out.cost[nom]||0)+mo;
+      // Source DATEE de la courbe d'engagement : conduite + coéquipier + carburant, au jour de la parcelle.
       // Une seule definition de « ce que coute une session » — celle-ci.
-      if(se.date){
-        out.byDate[se.date]=(out.byDate[se.date]||0)+h*_tu+h*_cfgT.conso*_cfgT.gnrL;
-        // ★ AJOUT PUR : la CONDUITE seule, sans carburant. `byDate` ci-dessus melange les
-        //   deux et reste le REPLI (aucun plein releve). Des qu'on a des pleins, la courbe
-        //   d'engagement veut la conduite a la date de la SESSION et le carburant a la date
-        //   du PLEIN : deux evenements dates, et ce ne sont pas les memes dates.
-        out.condByDate[se.date]=(out.condByDate[se.date]||0)+h*_tu;
-        // ★ AJOUT PUR : la courbe d'engagement de la campagne veut le total (conduite +
-        //   carburant) ; l'exercice comptable veut le CARBURANT SEUL, parce que la conduite
-        //   est deja dans la masse salariale du planning. Deux besoins, un seul parcours.
-        out.gnrByDate[se.date]=(out.gnrByDate[se.date]||0)+h*_cfgT.conso*_cfgT.gnrL;
-        out.hByDate[se.date]=(out.hByDate[se.date]||0)+h;
+      if(_j){
+        out.byDate[_j]=(out.byDate[_j]||0)+mo+h*_cfgT.conso*_cfgT.gnrL;
+        // la main-d'œuvre seule (repli : `byDate` mêle les deux tant qu'aucun plein n'est relevé)
+        out.condByDate[_j]=(out.condByDate[_j]||0)+mo;
+        // l'exercice comptable veut le CARBURANT SEUL (la main-d'œuvre est déjà dans la masse salariale)
+        out.gnrByDate[_j]=(out.gnrByDate[_j]||0)+h*_cfgT.conso*_cfgT.gnrL;
+        out.hByDate[_j]=(out.hByDate[_j]||0)+h;
       }
       if(se.conducteur){ if(!out.qui[nom]) out.qui[nom]={}; out.qui[nom][se.conducteur]=(out.qui[nom][se.conducteur]||0)+h; }
-      // ★ AJOUT PUR (TV-1) : les heures de conduite d'UN conducteur UN jour. Le temps vigne
-      //   (_ecoTempsVigne) les retire de ses heures dans les rangs : elles sont deja mesurees.
-      if(se.conducteur && se.date){
-        var _cd=String(se.date).slice(0,10);
-        if(!out.condH[se.conducteur]) out.condH[se.conducteur]={};
-        out.condH[se.conducteur][_cd]=(out.condH[se.conducteur][_cd]||0)+h;
-      }
+      if(_co){ if(!out.qui[nom]) out.qui[nom]={}; out.qui[nom][_co]=(out.qui[nom][_co]||0)+h; }
+      // TV-1 : les heures au tracteur d'UNE personne UN jour — le temps vigne (_ecoTempsVigne) les retire de ses heures
+      //   dans les rangs. COEQ-4 : le coéquipier aussi, et au jour de la parcelle.
+      if(se.conducteur && _j){ if(!out.condH[se.conducteur]) out.condH[se.conducteur]={}; out.condH[se.conducteur][_j]=(out.condH[se.conducteur][_j]||0)+h; }
+      if(_co && _j){ if(!out.condH[_co]) out.condH[_co]={}; out.condH[_co][_j]=(out.condH[_co][_j]||0)+h; }
     });
   });
   return out;
@@ -7739,7 +7740,7 @@ function _pecData(){
       if(fait>0) pairs.push({ parc:p.nom, norm:_friseNorm(def.nom), eur:fait*tx });
       if(rst>0.01) tks.push(def.nom);
     });
-    var thH=tracH.h[p.nom]||0, tracF=tracH.cost[p.nom]||0;
+    var thH=tracH.h[p.nom]||0, tracF=tracH.cost[p.nom]||0, thCo=(tracH.hCo&&tracH.hCo[p.nom])||0;   // COEQ-4 (§525)
     var litres, gnrF;
     if(_gnrOn){ var _q=(_kBy[p.nom]||0)/_kSum; litres=gnrR.L*_q; gnrF=gnrR.eur*_q; }
     else { litres=thH*cfg.conso; gnrF=litres*cfg.gnrL; }
@@ -7761,7 +7762,7 @@ function _pecData(){
       etp:(eq?eq.etp:0), nj:(eq?eq.nj:0), noms:(eq?eq.noms:[]), reste_taches:tks });
     T.bH+=bH; T.fH+=fH; T.rH+=rH;
     T.moB+=bH*tx; T.moF+=fH*tx; T.moR+=resteE;
-    T.tracF+=tracF; T.tracH+=thH; T.gnrF+=gnrF; T.litres+=litres; T.phyF+=phyF;
+    T.tracF+=tracF; T.tracH+=thH; T.tracHCo=(T.tracHCo||0)+thCo; T.gnrF+=gnrF; T.litres+=litres; T.phyF+=phyF;
     if(!arr) T.surf+=surf; else T.nArr++;
     T.prestF+=prestF;
     T.retH+=retH; T.retE+=retE; if(retE>0) T.nRet++;
@@ -7905,7 +7906,7 @@ function _pecData(){
   var hJour=_pecHJour();
   var cadP=_pecCadPresence();
   var hBarC=T.fH;
-  var hReelC=cadP ? Math.max(0, cadP.h - T.tracH - hbH) : 0;   // AUJ-7 : ni le tracteur, ni les travaux à l'heure (sans barème en face)
+  var hReelC=cadP ? Math.max(0, cadP.h - T.tracH - (T.tracHCo||0) - hbH) : 0;   // COEQ-4 (§525) : le coéquipier n'est pas dans les rangs non plus   // AUJ-7 : ni le tracteur, ni les travaux à l'heure (sans barème en face)
   var cadOk = (hBarC>0 && hReelC>0 && avc>=_PEC_CAD_AVC);
   var ecart = cadOk ? ((hReelC-hBarC)/hBarC) : 0;
   // ★★★ ESCALIER DE SOURCES — MARCHE 2 (backlog 7, §20b).

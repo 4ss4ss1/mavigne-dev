@@ -332,7 +332,7 @@ function branchements(src) {
   R.push(['G3 · la fiche pil.eco.temps existe', /'pil\.eco\.temps':\s*\{/.test(src.utl)]);
   R.push(['G4 · … et elle est posée sur la carte', /_mvInfoBtn\('pil\.eco\.temps'\)/.test(L)]);
   R.push(['G5 · le cache est oublié à la repeinte', /_ECO_TV=null;/.test(extraire(L, '_pilExoOublier') || '')]);
-  R.push(['G6 · _ecoTracHByParc expose la conduite par conducteur et par jour', /out\.condH\[se\.conducteur\]\[_cd\]/.test(extraire(L, '_ecoTracHByParc') || '')]);
+  R.push(['G6 · _ecoTracHByParc expose la conduite par conducteur et par jour', /out\.condH\[se\.conducteur\]\[_j\]/.test(extraire(L, '_ecoTracHByParc') || '') && /out\.condH\[_co\]\[_j\]/.test(extraire(L, '_ecoTracHByParc') || '')   /* COEQ-4 (§525) : au jour de la parcelle, et le coéquipier aussi */]);
   R.push(['G7 · le moteur lit les heures DANS LES RANGS, pas le travail effectif',
     /_planChampPersRange\(m,_pexD\(d\),_pexD\(d\)\)/.test(extraire(L, '_ecoTempsVigne') || '') && !/_planWorkPersRange/.test(extraire(L, '_ecoTempsVigne') || '')]);
   // ENG-2 — _pecData, la courbe, les tableaux

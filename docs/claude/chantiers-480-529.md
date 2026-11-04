@@ -1196,3 +1196,22 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - `mv-harnais-coeq3` neuf : 14 assertions (les lignes jouées sur des sessions inventées, le câblage), 5 contre-épreuves tenues. `coeq2`, `coeq1`, globaux, preflight, échelle, jetons, boutons : verts.
 - ⚠️ **`typo-baseline.json` regravé** : tutos.js passait de 96 à 102 Ko (+6 %, au-delà des 5 % par lot). La question du découpage posée : tutos.js grandit par construction (~3 Ko par tuto) ; sortir les définitions dans un fichier à part reste à décider avec Nico. Aucun compteur de tailles en dur ne montait (la règle C était verte avant de regraver).
 - Reste COEQ-4 : le calcul du Pilotage au jour et à la personne, les rapports (« Conducteur » → « Équipe »), « En direct » — qui affiche encore « Équipe a validé » pour une ligne d’amendement (`_jFaitPar` vide).
+
+## 525. ★★★ COEQ-4 — LE PILOTAGE COMPTE LE COÉQUIPIER DU TRACTEUR, AU JOUR DE CHAQUE PARCELLE ; « ÉQUIPE » DANS LES RAPPORTS ; « EN DIRECT » (04/11 — `src/pilotage.js` · `src/app.js` · `src/reglages.js` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-coeq4.mjs` (neuf) · `scripts/mv-harnais-temps-vigne.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` — base `aac66d6` « coeq3 » — **APP 10.61 → 10.62, SW 11.49 → 11.50**)
+
+### 525a. `_ecoTracHByParc` : une seule définition, au jour et à la personne
+- **Mesuré avant (maquette, §523a)** : toutes les heures d’une session de plusieurs jours tombaient sur la date de la session, au conducteur seul. Sur la tarière de l’exemple (13 et 14 octobre), 11 h de tarière étaient comptées dans les rangs, et 2 h de conduite disparaissaient (plafonnées à la journée du premier jour).
+- Chaque parcelle porte maintenant **son jour** (`window._trJourDe`, la règle de FERTI-9) et **son coéquipier** (`window._trCoDe`, COEQ-2 ; une session d’avant lit `s.coequipier`). Les heures vont au conducteur ET au coéquipier : `condH` (le temps vigne les retire à chacun, ce jour-là), `qui`, `cost` et `condByDate` (la main-d’œuvre, chacun à son taux du jour — `_tauxCond` au jour de la parcelle). `h`, `hByDate` et `gnrByDate` restent les heures du **tracteur** : le carburant ne double pas. `hCo` (neuf) : les heures du coéquipier par parcelle.
+- La fenêtre `{d0,d1}` se juge **parcelle par parcelle** : une session commencée avant la fenêtre y compte ses parcelles faites dedans.
+- AUJ-7 : le temps réel d’Aujourd’hui (`hReelC`) retire aussi `T.tracHCo` — le coéquipier n’est pas dans les rangs non plus.
+- Hors navigateur (les harnais), sans `window._trJourDe` ni `_trCoDe`, le calcul retombe exactement sur l’ancien : les harnais d’avant restent verts sans toucher leurs données. Le harnais du temps vigne (G6) suit le nom de la variable du jour (`_cd` → `_j`) et exige la ligne du coéquipier.
+
+### 525b. Ce que l’utilisateur voit
+- MV_INFO : quatre phrases (le temps vigne, Aujourd’hui, l’engagé, le poste tracteur) disent « conducteur et coéquipier, au jour de chaque parcelle ».
+- Rapports : le rapport du mois (tableau et détail) et le rapport de saison disent « Équipe » : le conducteur et ses coéquipiers (`_trCoeqNoms`).
+- « En direct » de l’Accueil : « Marc et Léo, au tracteur » (« et vous » quand c’est moi) ; l’entrée d’amendement écrite par FERTI-3 (`auTracteur`) n’y passe plus pour « Équipe a validé ».
+
+### 525c. Mesuré, et ce qui reste
+- `mv-harnais-coeq4` neuf : 11 assertions, dont le calcul EXÉCUTÉ sur une tarière de deux jours avec trois coéquipiers ; 5 contre-épreuves tenues. temps-vigne, pil-coherence, arrach5, arrach8, jcave1, coeq1 à coeq3, globaux, typo : verts.
+- ⚠️ `harnais-cadence-escalier.mjs` est rouge **sur la base intacte** (« le KPI écart de cadence annonce la source histo ») ; il n’est pas dans la liste des contrôles. Pas touché, noté au §28.
+- Restent : « En direct » du Pilotage (`cockpit.js` : `qui` y sert aussi de clé, à reprendre avec soin) et « Par personne » dans la fiche de session.
