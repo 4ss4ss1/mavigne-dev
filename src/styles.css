@@ -3300,6 +3300,16 @@ td .sdeq-trace{padding:2px 0 0;}
 .sdeq-tab th{padding:4px 8px;text-align:left;font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);border-bottom:1px solid var(--gris-clair);}
 .sdeq-tab td{padding:8px;vertical-align:middle;border-bottom:1px solid var(--gris-clair);}
 .sdeq-tab .r{text-align:right;}
+/* ★ COEQ-3 (§524) : le tracteur au journal — une ligne par session et par jour (coequipier.js) */
+.jtr-bar{background:var(--acier);}
+.jtr-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.jtr-t{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);}
+.jtr-etq{padding:2px 8px;border-radius:var(--r-full,999px);border:1px solid var(--acier);color:var(--texte-doux);font-size:var(--pt-micro,12px);font-weight:600;}
+.jtr-qui{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jtr-det{margin-top:4px;}
+.jtr-det summary{cursor:pointer;min-height:32px;padding:4px 0;font-size:var(--pt-micro,12px);color:var(--texte-doux);}
+.jtr-pl{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,13px);}
+
 @keyframes chrPulse{0%{opacity:1;}50%{opacity:.5;}100%{opacity:1;}}
 @media (prefers-reduced-motion:reduce){.chr-dot,.sdp-tag.pend{animation:none;}}
 

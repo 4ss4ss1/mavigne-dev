@@ -1,0 +1,40 @@
+{
+  "lot": "COEQ-3",
+  "section": "§524",
+  "base": "d276073f0de1401ea1b3200ed102684c20ca9e25",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "ok": true,
+    "empreinte": "439bf4c10cce87830150a40f8e74a31d09c42cd652f1efc466d9fde102822a22",
+    "date": "2026-11-04T09:14:41.750Z",
+    "joues": {
+      "téléphone": 10,
+      "ordinateur": 10,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "e22abfd3221a509186e37e1da622eb50a836ba611156a1abad4320a2c4a6add5",
+    "CLAUDE.md": "3b134e1d461fc728801c5798c383db7109ce9d6176c50fea128b2136cfaf1c16",
+    "docs/claude/INDEX.md": "5cbbf2ff8a85d1436369fe3ef382a880b3952ec649532899f585df93390ee4c0",
+    "docs/claude/chantiers-480-529.md": "cfe3d2d403b13853377982cc96943e8287681bfd2796fda33eed8f378d42f663",
+    "docs/claude/journal.md": "907298d7ea90c598c561dd40533332a42e8c81d73580f6306ac04c3a5ab5ab87",
+    "guide/04-vigne.html": "c0f5828ce870d8a2292c8029cabc55f399683dfb4f07ab6e5c6d2ab0dc046986",
+    "index.html": "e8db35bfd52e50edc7870a55c5de6dd5cfd56bf2b59c71f38ee21e15c2b85651",
+    "public/sw.js": "d7ecf49c1be46e6a8515d6fca90bfe4914efea3a0fec2f3dee78a2eb1567025d",
+    "scripts/harnais-claude-md.mjs": "957085178e88c1f6dc178742df592a5899d471010e511efc12f8df22e62f00e4",
+    "scripts/mv-harnais-liste.mjs": "0e5ac0e4e06ce018469ab2546026c7c2edc3dee2b9b4614741a574c304381911",
+    "scripts/typo-baseline.json": "7a2697634215bdff830c1e75be2b07e05c4dec892058386988ab8e390c8c6aba",
+    "src/app.js": "a51b6ec979646cfc49d4b25991d9d18ecad728b7c40c5e61d76b9ff29ce3f584",
+    "src/coequipier.js": "aed9ae595e4063f66c00c743db4bbb01e9f63b402813a4f91aa2bb28681c66eb",
+    "src/styles.css": "9012fd63c767d1fcfb5a3528cc1c090f27d51642ed283170fc4e1b2a2eff8830",
+    "src/tracteur.js": "f76dab6ba2a098f27a5151e63f5c56ccdd3c046f6d45bdf4e5908f43fd31b5c3",
+    "src/tutos.js": "1f4c3818488bafd3edb66001036c5a8a72b98c65e8a2b6b172023236a68b81a0",
+    "src/utils.js": "6a2ce88def38e15dff5132e23a296bb9d69709c644a243c20a3bedb853760376",
+    "src/whats-new.js": "b6a9124c8af3b97e351448c2c94977e0bad94a23673eeba1ba8187368ed4d560",
+    "scripts/mv-harnais-coeq3.mjs": "8aee3a93ac042c9ea222654e562f6edf85452fc5ede105ef5d0ea4c26d068dd1"
+  }
+}

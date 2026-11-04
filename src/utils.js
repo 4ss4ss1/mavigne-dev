@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.60';
+export const APP_VERSION = '10.61';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2718,7 +2718,8 @@ var MV_AIDE = {
       ['Chaque tâche validée', "écrit une ligne ici, avec la parcelle, la personne et la durée."],
       ['Une équipe au travail', "tient en une seule entrée : tous les noms y figurent, et le travail se partage entre eux."],
       ['Corriger l’équipe', " (administrateur) : sur une validation, le bouton « Équipe » dit qui a vraiment travaillé — celui qui a validé peut rester décoché, il reste l’auteur de l’entrée. « Toute la journée » corrige d’un coup les validations de la même tâche, le même jour ; l’entrée garde la trace de la correction. La liste propose les personnes sous contrat le jour de l’entrée, plus celles déjà notées ; les cochées sont en vert."],
-      ['Les filtres', "par parcelle et par tâche se cumulent ; la pastille rappelle ce qui est actif."],
+      ['Le tracteur aussi', " : chaque session y tient une ligne par jour — le conducteur et son coéquipier, les parcelles en dépliant ; les traitements aussi, en lecture. Sur ordinateur, sa fiche renvoie à la session (« Équipe » corrige le coéquipier)."],
+      ['Les filtres', "par parcelle et par tâche se cumulent ; la pastille rappelle ce qui est actif. « Qui » retrouve chacun : celui qui a validé, les membres de son équipe, le conducteur et le coéquipier."],
       ['Une saisie faite hors réseau', "repart toute seule au retour du signal, et se fusionne avec ce que les autres ont saisi entre-temps : rien n’est écrasé."],
       ['Le journal en fichier', "se prend dans la roue crantée de la Vigne, bloc Documents."]
     ]

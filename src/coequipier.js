@@ -95,14 +95,14 @@ function _sdRenderFaites(){
 // La feuille « Changer » / « Corriger », dans la fenêtre de la session.
 var _sdEq={mode:'',sel:null,quand:'maint',coches:{},jour:''};
 function _sdEqOpt(attr,n,on,sous,badge,dis){
-  return '<button type="button" class="mvbtn mvbtn-option sdeq-opt'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" '+attr+' data-k="'+_escAttr(attr+n)+'"'+(dis?' disabled':'')+'>'
+  return '<button type="button" class="mvbtn mvbtn-option sdeq-opt'+(on?' on sel':'')+'" role="radio" aria-checked="'+on+'" '+attr+' data-k="'+_escAttr(attr+n)+'"'+(dis?' disabled':'')+'>'
     +(sous===null?_trAva(n):'')+'<span class="sdeq-ot"><span class="sdeq-on">'+_escHtml(n||'Personne')+'</span>'+(sous?'<span class="sdeq-os">'+_escHtml(sous)+'</span>':'')+'</span>'+(badge||'')+'</button>';
 }
 function _sdEqQui(s,cle){
   var h='<div class="sdeq-gt" id="sdeq-g-'+cle+'">'+(cle==='cq'?'Qui \u00e9tait l\u00e0\u00a0?':'Avec qui\u00a0?')+'</div><div class="sdeq-choix" role="radiogroup" aria-labelledby="sdeq-g-'+cle+'">';
   [''].concat(_trCoeqCandidats(s)).forEach(function(n){
     var b=n?'':(s.conducteur||'')+(cle==='cq'?' \u00e9tait seul':' continue seul');
-    h+=_sdEqOpt('data-sdeq="'+cle+'" data-n="'+_escAttr(n)+'" data-tuto="trac.eq.'+cle+'"',n,_sdEq.sel===n,n?null:b,(cle==='q'&&n===String(s.coequipier||''))?_mvBadge('en ce moment','neutre'):'');
+    h+=_sdEqOpt('data-sdeq="'+cle+'" data-n="'+_escAttr(n)+'" '+(cle==='cq'?'data-tuto="trac.eq.cq"':'data-tuto="trac.eq.q"'),n,_sdEq.sel===n,n?null:b,(cle==='q'&&n===String(s.coequipier||''))?_mvBadge('en ce moment','neutre'):'');
   });
   return h+'</div>';
 }
@@ -185,6 +185,7 @@ document.addEventListener('click',function(ev){
   if(a==='fiche-corr'){ _P().openSessionDetail(b.getAttribute('data-sid')); return openSdEqCorriger(b.getAttribute('data-j')); }
   if(a==='autres'){ _sdEq.mode='corriger'; _sdEq.sel=null; _sdEq.coches={}; _sdEq.jour=''; return _sdEqRendre(true); }
   if(a==='fermer') return closeSdEq();
+  if(a==='ouvrir') return _P().openSessionDetail(b.getAttribute('data-sid'));   // COEQ-3 (§524) : depuis la fiche du journal
   if(a==='q'||a==='cq'){ _sdEq.sel=b.getAttribute('data-n')||''; return _sdEqRendre(false); }
   if(a==='quand'){ _sdEq.quand=b.getAttribute('data-q'); return _sdEqRendre(false); }
   if(a==='cp'){ var nm=b.getAttribute('data-n'); if(_sdEq.coches[nm]) delete _sdEq.coches[nm]; else _sdEq.coches[nm]=true; return _sdEqRendre(false); }
@@ -194,7 +195,68 @@ document.addEventListener('click',function(ev){
 });
 document.addEventListener('keydown',function(ev){ var ov=document.getElementById('sd-eq-overlay'); if(ev.key==='Escape'&&ov&&!ov.hidden){ ev.stopPropagation(); ev.preventDefault(); closeSdEq(); } },true);
 
-if(typeof window!=='undefined') Object.assign(window,{ _trCoDe:_trCoDe, _trCoeqNoms:_trCoeqNoms, _trJourDe:_trJourDe, _trSessADeux:_trSessADeux,
+// ★★ COEQ-3 (§524) — LE TRACTEUR AU JOURNAL (D2, D3). Une ligne par session et par jour, LUE dans la session à l'affichage :
+//   une correction s'y voit aussitôt, rien n'est recopié. Le traitement (D3) y passe en lecture. Les lignes d'amendement écrites
+//   par FERTI-3 (`auTracteur`) restent dans la donnée (elles valident la tâche) ; le journal ne les montre plus : doublon.
+var _trJRows={};
+function _trSessDe(r){ return (window.SESSIONS||[]).find(function(s){ return s&&s.id===r.sid; })||{}; }
+function _trParcHa(n){ var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===n; }); return p?(parseFloat(p.surface)||0):0; }
+function _trJournalLignes(f){
+  f=f||{}; var P=_P(), out=[], qui=(f.qui&&f.qui!=='tous')?f.qui:'', pa=(f.parcelle&&f.parcelle!=='toutes')?f.parcelle:'', q=String(f.q||'').toLowerCase();
+  (window.SESSIONS||[]).forEach(function(s){
+    if(!s||(P.sessInSaison&&!P.sessInSaison(s))) return;
+    var tr=s.type==='traitement';
+    var G=tr?[{jour:String(s.date||'').slice(0,10),parcs:(s.parcelles||[]).map(function(n){ return {nom:String(n)}; })}]:_trJoursDe(s);
+    G.forEach(function(g){
+      var ps=g.parcs.filter(function(x){ return (!pa||x.nom===pa)&&(!qui||s.conducteur===qui||(!tr&&_trCoDe(s,x)===qui)); });
+      var r={id:'trac:'+s.id+':'+g.jour,trac:true,trait:tr,sid:s.id,date:g.jour,tache:s.activite||(tr?'Traitement':''),cond:s.conducteur||'',parcs:ps,
+             coeqs:tr?[]:_trEqDuJour(s,ps),produits:tr?(s.produits||[]):[],statut:'Valid\u00e9'};
+      if(!ps.length||(f.tache&&f.tache!=='toutes'&&r.tache!==f.tache)||(f.deb&&r.date<f.deb)||(f.fin&&r.date>f.fin)) return;
+      if(q&&[r.tache,r.cond].concat(r.coeqs,r.produits,ps.map(function(x){ return x.nom; })).join(' ').toLowerCase().indexOf(q)<0) return;
+      out.push(r);
+    });
+  });
+  _trJRows={}; out.forEach(function(r){ _trJRows[r.id]=r; });
+  return out;
+}
+function _trJournalRow(id){ return _trJRows[id]||null; }
+function _trEqTxt(r){ if(r.trait) return r.cond||'?'; var l=r.coeqs; return (r.cond||'?')+(l.length===1&&l[0]?' et '+l[0]:', '+_trAvecTxt(l)); }
+function _trHaTxt(ps){ var h=ps.reduce(function(t,x){ return t+_trParcHa(x.nom); },0); return (window._mvHaT?window._mvHaT(h):String(h))+'\u00a0ha'; }
+function _trJournalCarte(r,suite){
+  var s=_trSessDe(r), mx=r.coeqs.length>1, noms=[r.cond].concat(r.coeqs.filter(Boolean));
+  var sous=r.parcs.length+'\u00a0parcelle'+(r.parcs.length>1?'s':'')+' \u00b7 '+_trHaTxt(r.parcs)+(r.produits.length?' \u00b7 '+r.produits.join(', '):'');
+  return '<div class="jitem" data-jid="'+_escAttr(r.id)+'" onclick="_jSel(this.dataset.jid)"><div class="jdotcol"><div class="jdot jdv"></div>'+(suite?'<div class="jlinev"></div>':'')+'</div>'
+    +'<div class="jcard mv-c jtr"><div class="jcard-bar jtr-bar"></div><div class="jcard-col"><div class="jcard-inner"><div class="jtr-hd"><span class="jtr-t">'+_escHtml(r.tache)+'</span><span class="jtr-etq">'+(r.trait?'traitement':'au tracteur')+'</span></div>'
+    +'<div class="jmeta"><span class="java-grp">'+noms.slice(0,3).map(function(n){ return _trAva(n); }).join('')+'</span><span class="jtr-qui">'+_escHtml(_trEqTxt(r))+'</span></div>'
+    +'<details class="jtr-det"><summary onclick="event.stopPropagation()">'+_escHtml(sous)+'</summary>'
+    +r.parcs.map(function(x){ return '<div class="jtr-pl"><span class="sdeq-on">'+_escHtml(x.nom)+'</span><span class="sdeq-cr">'+_escHtml(r.trait?'':_trValTxt(s,x))+(mx?_trAva(_trCoDe(s,x)):'')+'</span></div>'; }).join('')
+    +'</details></div></div></div></div>';
+}
+function _trJournalFiche(r){
+  var s=_trSessDe(r), ad=(typeof isAdmin==='function'&&isAdmin()), cc=r.parcs.filter(function(x){ return x.coCorr; })[0];
+  var co=r.trait?'':_trEqDuJour(s,r.parcs).map(function(n){ var k=r.parcs.filter(function(x){ return _trCoDe(s,x)===n; }).length; return (n||'personne')+' \u2014 '+k+'\u00a0parcelle'+(k>1?'s':''); }).join(' \u00b7 ');
+  return '<div class="jfx-d">'+_escHtml(_trJourTxt(r.date))+'</div><div class="jfx-t">'+_escHtml(r.tache+(r.trait?' \u00b7 traitement':' \u00b7 au tracteur'))+'</div>'
+    +'<div class="jfx-s">'+_mvBadge(r.parcs.length+' parcelle'+(r.parcs.length>1?'s':''),'neutre')+'<span>'+_escHtml(_trHaTxt(r.parcs))+'</span></div>'
+    +'<dl class="jfx-dl"><dt>'+(r.trait?'Applicateur':'Conducteur')+'</dt><dd>'+_escHtml(r.cond||'?')+'</dd>'+(r.trait?'<dt>Produits</dt><dd>'+_escHtml(r.produits.join(', ')||'\u2014')+'</dd>':'<dt>Co\u00e9quipier</dt><dd>'+_escHtml(co||'personne')+'</dd>')+'</dl>'
+    +'<div class="sdeq-tab-w"><table class="sdeq-tab"><thead><tr><th>Parcelle</th>'+(r.trait?'':'<th>Co\u00e9quipier</th>')+'<th class="r">Surface</th></tr></thead><tbody>'
+    +r.parcs.map(function(x){ return '<tr><td>'+_escHtml(x.nom)+(r.trait?'':'<span class="sdeq-trace">'+_escHtml(_trValTxt(s,x))+'</span>')+'</td>'+(r.trait?'':'<td>'+_escHtml(_trCoDe(s,x)||'personne')+'</td>')+'<td class="r">'+_escHtml(_trHaTxt([x]))+'</td></tr>'; }).join('')+'</tbody></table></div>'
+    +(cc?'<div class="sdeq-trace">Co\u00e9quipier corrig\u00e9 par '+_escHtml(cc.coCorr.par||'?')+' \u2014 '+_escHtml(_trJourTxt(cc.coCorr.le||'').toLowerCase())+'</div>':'')
+    +(r.trait?'<div class="jfx-act"><span class="sdeq-note">Le d\u00e9tail l\u00e9gal est au registre, dans Phyto.</span></div>'
+      :'<div class="jfx-act">'+(ad?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau" data-sdeq="fiche-corr" data-sid="'+_escAttr(r.sid)+'" data-j="'+r.date+'">\u00c9quipe</button>':'')+'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau" data-sdeq="ouvrir" data-sid="'+_escAttr(r.sid)+'">Ouvrir la session</button></div>');
+}
+// Les passages du tracteur sur UNE parcelle (fiche de la parcelle, « Derniers passages »).
+function _trPassagesParc(nom){
+  var out=[];
+  (window.SESSIONS||[]).forEach(function(s){
+    if(!s) return;
+    if(s.type==='traitement'){ if((s.parcelles||[]).indexOf(nom)>=0) out.push({date:String(s.date||'').slice(0,10),tache:'Traitement',qui:s.conducteur||'',statut:'traitement',trac:true}); return; }
+    (s.parcellesFaites||[]).forEach(function(x){ if(x&&typeof x==='object'&&x.nom===nom){ var c=_trCoDe(s,x); out.push({date:_trJourDe(s,x),tache:s.activite||'',qui:(s.conducteur||'')+(c?' et '+c:''),statut:'au tracteur',trac:true}); } });
+  });
+  return out;
+}
+
+if(typeof window!=='undefined') Object.assign(window,{ _trJournalLignes:_trJournalLignes, _trJournalRow:_trJournalRow, _trJournalCarte:_trJournalCarte, _trJournalFiche:_trJournalFiche, _trPassagesParc:_trPassagesParc,
+  _trCoDe:_trCoDe, _trCoeqNoms:_trCoeqNoms, _trJourDe:_trJourDe, _trSessADeux:_trSessADeux,
   _trStampCo:_trStampCo, _trJoursDe:_trJoursDe, _trEqDuJour:_trEqDuJour, _trAvecTxt:_trAvecTxt, _trJourTxt:_trJourTxt,
   renderSDEqEncart:renderSDEqEncart, _sdRenderFaites:_sdRenderFaites, openSdEqChanger:openSdEqChanger, openSdEqCorriger:openSdEqCorriger,
   closeSdEq:closeSdEq, saveSdEqChanger:saveSdEqChanger, saveSdEqCorriger:saveSdEqCorriger });

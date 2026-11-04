@@ -1507,7 +1507,7 @@ function _trEncoursHtml(s){
     +'<div class="trx-hd"><div><div class="trx-k">En cours</div><div class="trx-t">'+_escHtml(s.activite||'Session')+'</div><div class="trx-m">'+_escHtml(meta)+'</div></div><div class="trx-pct">'+pct+'\u00a0%</div></div>'
     +'<div class="trx-barre" aria-hidden="true"><span style="width:'+Math.max(0,Math.min(100,pct))+'%"></span></div>'
     +'<div class="trx-ha">'+_escHtml(window._mvHaT?window._mvHaT(fait):String(fait))+' ha sur '+_escHtml(window._mvHaT?window._mvHaT(tot):String(tot))+'</div>'
-    +(peut?'<div class="trx-act"><button type="button" class="trx-av" onclick="openSessionDetail(this.closest(\'.trx\').dataset.sid)">Enregistrer l\u2019avancement</button><button type="button" class="trx-fin" onclick="_trTerminer(this.closest(\'.trx\').dataset.sid)">Terminer</button></div>':'')
+    +(peut?'<div class="trx-act"><button type="button" class="trx-av" onclick="openSessionDetail(this.closest(\'.trx\').dataset.sid)" data-tuto="trac.encours.av">Enregistrer l\u2019avancement</button><button type="button" class="trx-fin" onclick="_trTerminer(this.closest(\'.trx\').dataset.sid)">Terminer</button></div>':'')
     +'</div>';
 }
 function _trTerminer(id){
@@ -1654,7 +1654,7 @@ var _relOuvrir=function(){ return _cpt('_relOuvrir',arguments,undefined); };
 var _trRelever=function(){ return _cpt('_trRelever',arguments,undefined); };
 var _trSdOuvert=function(){ return _cpt('_trSdOuvert',arguments,undefined); };
 var _trRelevePassage=function(){ return _cpt('_trRelevePassage',arguments,undefined); };
-if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, chrSurf:_chrSurf, sdNorm:_sdNorm, chrTrace:_chrTrace, renderSDParcelles:renderSDParcelles, openSessionDetail:openSessionDetail,   // COEQ-2 (§523)
+if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom, chrSurf:_chrSurf, sdNorm:_sdNorm, chrTrace:_chrTrace, renderSDParcelles:renderSDParcelles, openSessionDetail:openSessionDetail, sessInSaison:_sessInSaison,   // COEQ-2 (§523), COEQ-3 (§524) : le filtre de saison du journal
   closeOv:_closeOv, fmtDate:_fmtDate, gnrField:_gnrField, gnrNum:_gnrNum, gnrTodayISO:_gnrTodayISO,
   openOv:_openOv, saveData:_saveData, trHeuresFr:_trHeuresFr, getTracteurSel:getTracteurSel, renderEntretiens:renderEntretiens, renderTracteur:renderTracteur,
   selId:function(){ return _tracSelId; }, onglet:function(){ return _tracOnglet; } };

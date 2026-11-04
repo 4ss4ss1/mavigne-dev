@@ -1173,3 +1173,26 @@ La partie 1 de `maquette-niveau-au-dessus-v1` : « une carte résumée dans Pilo
 - `mv-harnais-coeq2` neuf : 22 assertions (les fonctions jouées sur des sessions inventées, le bloc des jalons, le câblage), 6 contre-épreuves tenues. COEQ-1 (11), FERTI-9 (60, 15 contre-épreuves), sessions, tap, jalons, premieres1, presence2, saisonimg1, trac1, traux1a, traux1b, robustesse-tracteur : verts. Preflight, globaux, typo, jetons, boutons, charte, police, icônes, What’s New, confidentialité, tutos, cliquets : verts.
 - **Tutos concernés** : aucun (`mv-tutos-concernes`) ; le côte à côte rejoué sur la construction : vert. ⚠️ **Les deux tutos promis par la maquette ne sont pas dans ce lot** : le domaine d’entraînement n’a aucune session à deux, il faut l’y ajouter ; ils partent avec COEQ-3. Les gestes neufs passent par un écouteur unique (`data-sdeq`), pas par `onclick` : le compte des gestes sans tuto ne bouge pas — ce n’est pas une dispense.
 - Restent : COEQ-3 et COEQ-4 (§28).
+
+## 524. ★★★ COEQ-3 — LE TRACTEUR AU JOURNAL ; LE FILTRE « QUI » SUR TOUTE L’ÉQUIPE ; LES DEUX TUTOS DU COÉQUIPIER (04/11 — `src/coequipier.js` · `src/app.js` · `src/tutos.js` · `src/tracteur.js` · `src/styles.css` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/04-vigne.html` · `scripts/mv-harnais-coeq3.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` — base `d276073` « coeq2 » — **APP 10.60 → 10.61, SW 11.48 → 11.49**)
+
+### 524a. Le journal lit la session (D2, D3)
+- **Une ligne par session et par jour**, construite à l’affichage par `_trJournalLignes` (coequipier.js) depuis `SESSIONS` — rien n’est écrit dans `JOURNAL`. Une correction du coéquipier s’y voit donc aussitôt, et les deux ne peuvent pas se contredire. Mêmes filtres que le journal (Qui, tâche, parcelle, dates, recherche) ; la saison, celle du Tracteur (`_sessInSaison`, prêté par `window._trPont`). Elle se déplie (`<details>`) sur ses parcelles, avec l’initiale du coéquipier quand le jour est mêlé.
+- ★ **Filtrée sur un coéquipier, elle ne garde que SES parcelles** (la maquette) ; sur le conducteur, toutes.
+- **D3** : un traitement (`type:'traitement'`) passe en ligne de lecture — l’applicateur, les produits, les parcelles ; la fiche renvoie au registre, qui reste le document légal.
+- ★★ **La ligne d’amendement écrite par FERTI-3 (`auTracteur:true`) n’est plus montrée** : elle s’affichait « — · validé par Marc » (`quiHors` + `membresEquipe:[]`, voulu pour qu’aucun lecteur ne la compte deux fois). Elle reste dans la donnée — elle valide la tâche « Amendement » — ; la ligne de la session la remplace à l’écran, avec les deux noms. La fiche parcelle l’écarte aussi.
+- Sur ordinateur, la fiche d’une ligne du tracteur (`_trJournalFiche`) : conducteur, coéquipier(s) avec leurs parcelles, le tableau, la trace d’une correction, « Équipe » (admin : ouvre la session et « Corriger » sur ce jour) et « Ouvrir la session ». `_jMontre` trouve la ligne par `_trJournalRow`.
+
+### 524b. « Qui » et la fiche parcelle
+- Le filtre « Qui » lisait `r.qui` seul : un membre d’une équipe ne retrouvait pas son travail. Il lit maintenant `_jFaitPar(r)` (ACCV-4) en plus de l’auteur ; la recherche aussi.
+- « Derniers passages » (fiche parcelle) ajoute les passages du tracteur (`_trPassagesParc` : l’activité, le jour de la parcelle, « conducteur et coéquipier », « au tracteur » ; les traitements).
+
+### 524c. Les deux tutos (la dette de COEQ-2)
+- `coeq-changer` (tractoriste) et `coeq-corriger` (admin), au Tracteur : la session en cours → « Changer » → Sophie → la feuille dit « Paul, avec Sophie » ; « Corriger » sur hier → Sophie → la journée d’hier corrigée. Le domaine d’entraînement reçoit une activité « Ensemencement » (à deux d’office) et une session en cours depuis hier (`_tuSessions`, chargée par `_charger`) ; la carte « En cours » porte `data-tuto="trac.encours.av"`.
+- ⚠️ Le moteur reconnaît une option choisie à la classe `sel` (`_optCourante`) : les options des feuilles la portent avec `on`. ⚠️ Une étiquette `data-tuto` s’écrit EN CLAIR : `'trac.eq.'+cle` était invisible à `mv-harnais-tutos` (règle E).
+- `_tuJour` existait déjà dans tutos.js (même sens) : le doublon a été retiré avant livraison.
+
+### 524d. Mesuré, et ce qui reste
+- `mv-harnais-coeq3` neuf : 14 assertions (les lignes jouées sur des sessions inventées, le câblage), 5 contre-épreuves tenues. `coeq2`, `coeq1`, globaux, preflight, échelle, jetons, boutons : verts.
+- ⚠️ **`typo-baseline.json` regravé** : tutos.js passait de 96 à 102 Ko (+6 %, au-delà des 5 % par lot). La question du découpage posée : tutos.js grandit par construction (~3 Ko par tuto) ; sortir les définitions dans un fichier à part reste à décider avec Nico. Aucun compteur de tailles en dur ne montait (la règle C était verte avant de regraver).
+- Reste COEQ-4 : le calcul du Pilotage au jour et à la personne, les rapports (« Conducteur » → « Équipe »), « En direct » — qui affiche encore « Équipe a validé » pour une ligne d’amendement (`_jFaitPar` vide).

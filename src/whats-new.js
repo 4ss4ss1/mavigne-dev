@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.61', d: '2026-11-04', items: [   // COEQ-3 (§524) : le tracteur au journal, les tutos du coéquipier
+    { niv: 1, pour: ['admin'], cible: '#timeline', emoji: 'tracteur', titre: 'Le tracteur au journal',
+      desc: "Chaque session du tracteur a sa ligne au journal, une par jour : le conducteur et son coéquipier, les parcelles en dépliant. Les traitements y passent aussi, en lecture (le détail légal reste au registre). L’amendement ne s’affiche plus «\u00a0— · validé par\u00a0» : il a sa ligne, avec les deux noms." },
+    { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Le filtre « Qui » retrouve toute l’équipe',
+      desc: "Filtré sur une personne, le journal montre aussi les validations où elle était dans l’équipe sans les avoir validées, et les parcelles du tracteur où elle était. La fiche d’une parcelle compte aussi les passages du tracteur dans « Derniers passages »." },
+    { niv: 0, pour: ['tractoriste', 'admin'], emoji: 'tracteur', titre: 'Deux tutos pour le coéquipier',
+      desc: "«\u00a0Comment faire pour changer de coéquipier\u00a0?\u00a0» et «\u00a0Comment faire pour corriger le coéquipier d’une session\u00a0?\u00a0», joués sur un domaine d’entraînement : rien ne bouge sur le vôtre." }
+  ] },
   { v: '10.60', d: '2026-11-03', items: [   // COEQ-2 (§523) : le coéquipier du tracteur, parcelle par parcelle
     { niv: 1, pour: ['tractoriste', 'admin'], cible: '#sd-eq-encart', emoji: 'tracteur', titre: 'Changer de coéquipier en cours de session',
       desc: "Une session à deux (tarière, ensemencement, semis, engrais, amendement) a son cadre «\u00a0Coéquipier\u00a0» dans sa feuille, sous le tracteur. «\u00a0Changer\u00a0» vaut pour la suite\u00a0: les parcelles déjà faites gardent le leur. «\u00a0Depuis ce matin\u00a0» rattrape un oubli du jour, et «\u00a0Annuler\u00a0» remet tout comme avant." },

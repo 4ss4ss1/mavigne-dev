@@ -7622,7 +7622,8 @@ function _pFicheHtml(p){
       var st=getTacheStatut(p,t.nom)||'Non d\u00e9marr\u00e9', e=_pvAuPresta(p,t.nom)?'presta':(st==='Valid\u00e9'?'fait':(st==='En cours'?'cours':'afaire'));   // ARRACH-9
       return '<tr'+(t.nom===pTacheFilter?' class="pfx-cur"':'')+'><td>'+_escHtml(tNom(t.nom))+'</td><td>'+_pEtatBadge(e)+'</td><td class="r">'+_escHtml(_pDernier(p.nom,t.nom))+'</td></tr>'; }).join('')
     +'</tbody></table>':'<div class="pfx-rien">'+(p.statut==='Arrachee'?'Plus aucun travail sur cette parcelle.':'Aucun travail pr\u00e9vu pour cette p\u00e9riode.')+'</div>')+'</section>';
-  var j=(JOURNAL||[]).filter(function(e){return e&&e.parcelle===p.nom;}).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,4);
+  // ★ COEQ-3 (§524) : les passages du tracteur aussi (lus dans les sessions) ; l'entrée d'amendement écrite par FERTI-3 n'y fait plus doublon.
+  var j=(JOURNAL||[]).filter(function(e){return e&&e.parcelle===p.nom&&!e.auTracteur;}).concat((typeof window._trPassagesParc==='function')?window._trPassagesParc(p.nom):[]).sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''));}).slice(0,4);
   // ★ ARRACH-8 : l'état EFFECTIF de chaque ligne — une validation annulée ensuite, ou un passage saisi après l'arrachage, le dit.
   var _ann=(typeof window._mvAnnulee==='function')?window._mvAnnulee:null, _apr=(typeof window._mvApresArrachage==='function')?window._mvApresArrachage:null;
   h+='<section class="pfx-sec"><div class="pfx-sec-t">Derniers passages</div>'+(j.length?j.map(function(e){
@@ -11367,15 +11368,17 @@ function renderJournalList(){
   // Rafraîchir les chips de parcelle à chaque rendu
   renderParcelleFilterChips();
   let data=JOURNAL.filter(r=>{
-    if(jQui!=='tous'&&r.qui!==jQui)return false;
+    if(r.auTracteur)return false;   // ★ COEQ-3 (§524) : la ligne du tracteur la montre, lue dans la session
+    if(jQui!=='tous'&&r.qui!==jQui&&(_jFaitPar(r)||[]).indexOf(jQui)<0)return false;   // COEQ-3 : toute l'équipe, pas seulement celui qui a validé
     if(jTache!=='toutes'&&r.tache!==jTache)return false;
     if(jParcelle!=='toutes'&&r.parcelle!==jParcelle&&!r.meteo)return false;
     if(r.meteo&&jParcelle!=='toutes')return false;
     if(jDateDeb&&r.date<jDateDeb)return false;
     if(jDateFin&&r.date>jDateFin)return false;
-    if(jSearch){if(r.meteo)return false;const q=jSearch.toLowerCase();if(!((r.parcelle||'').toLowerCase().includes(q)||(r.tache||'').toLowerCase().includes(q)||(r.qui||'').toLowerCase().includes(q)))return false;}
+    if(jSearch){if(r.meteo)return false;const q=jSearch.toLowerCase();if(!((r.parcelle||'').toLowerCase().includes(q)||(r.tache||'').toLowerCase().includes(q)||(r.qui||'').toLowerCase().includes(q)||(_jFaitPar(r)||[]).join(' ').toLowerCase().includes(q)))return false;}
     return true;
   });
+  if(typeof window._trJournalLignes==='function') data=data.concat(window._trJournalLignes({qui:jQui,tache:jTache,parcelle:jParcelle,deb:jDateDeb,fin:jDateFin,q:jSearch})).sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });   // ★ COEQ-3 (§524) : une ligne par session et par jour
   // Stats sur données COMPLÈTES (avant pagination)
   const tot=data.filter(j=>!j.meteo).length;
   const val=data.filter(j=>j.statut==='Validé'&&!j.meteo).length;
@@ -11427,6 +11430,7 @@ function renderJournalList(){
       <div class="dhead"><div class="dline"></div><div class="dlabel">${fmtDate(date)}</div><div class="dcnt">${items.filter(r=>!r.meteo).length}</div><div class="dline"></div></div>
       ${items.map((r,i)=>{
         const hasNext=i<items.length-1;
+        if(r.trac&&typeof window._trJournalCarte==='function')return window._trJournalCarte(r,hasNext);   // COEQ-3 (§524)
         if(r.meteo)return `<div class="jitem"><div class="jdotcol"><div class="jdot jdm"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="meteo-card" style="flex:1"><div class="mc-left"><div class="mc-title">Météo enregistrée</div><div class="mc-val">${r.emoji} ${r.temp}°C</div><div class="mc-detail">${r.desc} · Vent ${r.wind} km/h</div></div><div class="mc-icon">${r.emoji}</div></div></div>`;
         const isValide=r.statut==='Validé';
         const isInfo=r.statut==='Info';
@@ -11866,6 +11870,7 @@ var _jSelId='';
 function _jDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
 function _jFicheHtml(r){
   if(!r) return '<div class="jfx-rien">Choisissez une entr\u00e9e dans la liste.</div>';
+  if(r.trac&&typeof window._trJournalFiche==='function') return window._trJournalFiche(r);   // ★ COEQ-3 (§524) : une ligne du tracteur
   var p=(PARCELLES||[]).find(function(x){return x&&x.nom===r.parcelle;}), su=p?(p.surface||p.surf||''):'';
   var eq=r.equipe||r.qui==='Equipe';
   var qui=r.quiHors?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(eq?('\u00c9quipe '+[r.qui&&r.qui!=='Equipe'?r.qui:''].concat(r.membresEquipe||[]).filter(Boolean).join(', ')):(r.qui||'Non assign\u00e9'));
@@ -11882,7 +11887,7 @@ function _jMontre(id){
   _jSelId=id||'';
   _jRows().forEach(function(x){ x.setAttribute('aria-selected',String(x.dataset.jid===_jSelId)); });
   var el=document.getElementById('j-fiche'); if(!el) return;
-  el.innerHTML=_jFicheHtml((JOURNAL||[]).find(function(e){ return e&&String(e.id==null?'':e.id)===_jSelId; }));
+  el.innerHTML=_jFicheHtml((JOURNAL||[]).find(function(e){ return e&&String(e.id==null?'':e.id)===_jSelId; })||((typeof window._trJournalRow==='function')?window._trJournalRow(_jSelId):null));   // COEQ-3 (§524)
 }
 function _jSel(id){ if(!_jDesk()) return; _jMontre(id); }
 function _jFicheSync(){

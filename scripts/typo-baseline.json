@@ -1,13 +1,13 @@
 {
   "src/admin-gt.js": {
-    "dur": 71,
-    "petit": 38,
-    "ko": 382
+    "dur": 68,
+    "petit": 36,
+    "ko": 387
   },
   "src/app.js": {
     "dur": 85,
     "petit": 53,
-    "ko": 960
+    "ko": 962
   },
   "src/cave.js": {
     "dur": 28,
@@ -23,6 +23,11 @@
     "dur": 0,
     "petit": 0,
     "ko": 31
+  },
+  "src/coequipier.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 26
   },
   "src/comptes.js": {
     "dur": 0,
@@ -67,7 +72,7 @@
   "src/jalons.js": {
     "dur": 2,
     "petit": 1,
-    "ko": 53
+    "ko": 54
   },
   "src/onboarding.js": {
     "dur": 3,
@@ -117,12 +122,12 @@
   "src/tracteur.js": {
     "dur": 10,
     "petit": 10,
-    "ko": 226
+    "ko": 230
   },
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 96
+    "ko": 102
   },
   "src/utils.js": {
     "dur": 5,
@@ -132,16 +137,16 @@
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 562
+    "ko": 564
   },
   "index.html": {
     "dur": 74,
     "petit": 27,
-    "ko": 371
+    "ko": 372
   },
   "src/styles.css": {
     "dur": 237,
     "petit": 69,
-    "ko": 1009
+    "ko": 1018
   }
 }

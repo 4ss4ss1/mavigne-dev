@@ -78,6 +78,11 @@ function _tuIntrants() {
            fertil: [op('tu-f1', '2024-11-14', 2, 1.7, 3.5, 30), op('tu-f2', '2025-11-20', 2.2, 1.6, 3.8, 32)] };
 }
 function _tuFerNouveau() { return _vis(_q('[data-tuto="phy.nouveau.pc"]')) ? '[data-tuto="phy.nouveau.pc"]' : '[data-tuto="phy.nouveau"]'; }
+// ★ COEQ-3 (§524) : une session d'ensemencement à deux, en cours depuis hier (Paul conduit, Jean coéquipier), pour les tutos du coéquipier.
+function _tuSessions() { return [{ id: 'tu-coeq', activite: 'Ensemencement', conducteur: 'Paul', coequipier: 'Jean', statut: 'En cours', date: _tuJour(-1), avancement: 30, parcellesSkip: [],
+  parcellesFaites: [{ nom: 'Clos du Moulin', co: 'Jean' }, { nom: 'Les Charmes', co: 'Jean' }, { nom: 'Vieilles Vignes', co: 'Jean', d: _tuJour(0) }] }]; }
+function _tuSess() { return (window.SESSIONS || []).find(function (s) { return s && s.id === 'tu-coeq'; }) || null; }
+function _tuEqOuverte(sel) { var o = document.getElementById('sd-eq-overlay'); return !!(o && !o.hidden && _q(sel)); }
 function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.classList.contains('open')); }
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
 // ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
@@ -115,6 +120,59 @@ function _zoneEquipe(chip) {
 // `fait` : l'écran a-t-il vraiment changé ? · `{T}` devient « Touchez » ou « Cliquez ».
 // `couvre` : les fonctions de l'appli que le tuto enseigne (le harnais vérifie qu'elles existent).
 var TU_TUTOS = [
+  // ★ COEQ-3 (§524) — le coéquipier du tracteur (COEQ-2, §523) : le changer en cours de session (le tractoriste), le corriger après coup (l'admin).
+  { id: 'coeq-changer', titre: 'Comment faire pour changer de coéquipier\u00a0?', fin: 'changer de coéquipier',
+    module: 'Tracteur', pages: ['tracteur'], pour: 'tractoriste', duree: '1 min', depart: 'home',
+    couvre: ['openSdEqChanger', 'saveSdEqChanger'],
+    retenir: ['Tracteur › la session en cours › « Enregistrer l’avancement ».',
+              'Sous le tracteur, le cadre du coéquipier : « Changer », puis qui, puis « Maintenant » ou « Depuis ce matin ».',
+              'Les parcelles déjà faites gardent leur coéquipier ; « Annuler » remet tout comme avant.'],
+    etapes: [
+      { type: 'aller', page: 'tracteur', pourquoi: 'Le coéquipier se change dans la session, au Tracteur.' },
+      { type: 'toucher', cible: '[data-tuto="trac.encours.av"]',
+        txt: function () { return 'L’ensemencement est en cours : Paul conduit, Jean l’accompagne. {T} « ' + (L('[data-tuto="trac.encours.av"]') || 'Enregistrer l’avancement') + ' ».'; },
+        fait: function () { return _ouvert('ovSessionDetail'); },
+        ok: 'La feuille de la session est ouverte.' },
+      { type: 'toucher', cible: '[data-tuto="trac.eq.changer"]',
+        txt: function () { return 'Sous le tracteur, le cadre du coéquipier dit « ' + L('#sd-eq-encart .sdeq-t') + ' ». {T} « Changer ».'; },
+        fait: function () { return _tuEqOuverte('[data-tuto="trac.eq.q"]'); },
+        ok: 'La feuille « Changer de coéquipier » s’ouvre.' },
+      { type: 'choisir', options: ['[data-tuto="trac.eq.q"][data-n="Sophie"]'],
+        txt: function () { return 'Jean part à la vigne, Sophie prend sa place : touchez Sophie. « Maintenant » est déjà choisi.'; },
+        txtReel: 'touchez la personne qui prend la place.' },
+      { type: 'toucher', cible: '[data-tuto="trac.eq.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="trac.eq.ok"]') + ' ».'; },
+        fait: function () { var s = _tuSess(); return !!(s && s.coequipier === 'Sophie'); },
+        ok: 'C’est fait : la prochaine parcelle prendra Sophie.' },
+      { type: 'regarder', cible: '#sd-eq-encart',
+        txt: function () { return 'Le cadre dit maintenant « ' + L('#sd-eq-encart .sdeq-t') + ' ». Plus bas, les parcelles déjà faites gardent Jean. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
+    ] },
+  { id: 'coeq-corriger', titre: 'Comment faire pour corriger le coéquipier d’une session\u00a0?', fin: 'corriger le coéquipier d’une session',
+    module: 'Tracteur', pages: ['tracteur'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['openSdEqCorriger', 'saveSdEqCorriger'],
+    retenir: ['Tracteur › la session › « Faites, jour par jour » : chaque jour dit qui était là.',
+              '« Corriger » sur un jour : qui était là, puis les parcelles — celles du jour sont cochées d’office.',
+              'La correction est signée. L’administrateur corrige tout, même une session terminée (sur ordinateur : la fiche de la session, « Corriger »).'],
+    etapes: [
+      { type: 'aller', page: 'tracteur', pourquoi: 'Le coéquipier se corrige dans la session, au Tracteur.' },
+      { type: 'toucher', cible: '[data-tuto="trac.encours.av"]',
+        txt: function () { return 'L’ensemencement a commencé hier. {T} « ' + (L('[data-tuto="trac.encours.av"]') || 'Enregistrer l’avancement') + ' ».'; },
+        fait: function () { return _ouvert('ovSessionDetail'); },
+        ok: 'La feuille de la session est ouverte.' },
+      { type: 'toucher', get cible() { return '[data-tuto="trac.eq.corriger"][data-j="' + _tuJour(-1) + '"]'; },
+        txt: function () { return 'Plus bas, « Faites, jour par jour ». Hier, c’est Sophie qui accompagnait Paul, pas Jean. {T} « Corriger » sur la journée d’hier.'; },
+        fait: function () { return _tuEqOuverte('[data-tuto="trac.eq.cq"]'); },
+        ok: 'La feuille « Corriger le coéquipier » s’ouvre, les parcelles d’hier déjà cochées.' },
+      { type: 'choisir', options: ['[data-tuto="trac.eq.cq"][data-n="Sophie"]'],
+        txt: function () { return 'Qui était là\u00a0? Touchez Sophie.'; },
+        txtReel: 'touchez la personne qui était vraiment là.' },
+      { type: 'toucher', cible: '[data-tuto="trac.eq.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="trac.eq.ok"]') + ' ».'; },
+        fait: function () { var s = _tuSess(), h = _tuJour(-1); return !!s && typeof window._trJourDe === 'function' && (s.parcellesFaites || []).filter(function (x) { return window._trJourDe(s, x) === h; }).every(function (x) { return x.co === 'Sophie'; }); },
+        ok: 'La journée d’hier est corrigée, et la correction signée.' },
+      { type: 'regarder', cible: '#sd-faites',
+        txt: function () { return 'Hier dit maintenant « avec Sophie », et ses jalons suivent. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
+    ] },
   // ★ ACCV-4 (§419) : corriger l'équipe d'une validation, au Journal (administrateur).
   { id: 'jequipe', titre: 'Comment faire pour corriger l’équipe d’une validation\u00a0?', fin: 'corriger l’équipe d’une validation',
     module: 'Vigne', pages: ['journal'], pour: 'admin', duree: '1 min', depart: 'journal',
@@ -1189,6 +1247,7 @@ function _jeqCorrigee(memo) {
 }
 function _charger() {
   var d = JSON.parse(JSON.stringify(TU_DONNEES));
+  d.activites = (d.activites || []).concat([{ nom: 'Ensemencement' }]);   // ★ COEQ-3 (§524) : une activité à deux d'office, pour les tutos du coéquipier
   ['config', 'membres', 'saisons', 'taches', 'activites', 'conducteurs', 'parcelles'].forEach(function (k) {
     if (d[k] === undefined || typeof window.applyFbData !== 'function') return;
     try { window.applyFbData(k, d[k]); } catch (e) { _avale(e, '_charger#' + k); }
@@ -1196,6 +1255,7 @@ function _charger() {
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCave()); } catch (e) { _avale(e, '_charger#cave_vendange'); } }
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('journal', _tuJournal()); } catch (e) { _avale(e, '_charger#journal'); } }   // TUTO-9
     if (typeof window.applyFbData === 'function') { try { window.applyFbData('intrants', _tuIntrants()); } catch (e) { _avale(e, '_charger#intrants'); } }   // FERTI-8 (§466)
+  if (typeof window.applyFbData === 'function') { try { window.applyFbData('sessions', _tuSessions()); } catch (e) { _avale(e, '_charger#sessions'); } }   // COEQ-3 (§524)
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));
