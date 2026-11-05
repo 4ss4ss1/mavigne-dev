@@ -109,11 +109,11 @@ function fiche(c, d) {
       return '<li class="' + esc(x.type) + '"><span><b>' + esc(x.titre) + '</b><time>' + esc(d.dateFr ? d.dateFr(x.quand) : x.quand) + '</time></span></li>';
     }).join('') + '</ul></div>';
     h += '<div class="agt-inc-actions"><button class="agt-btn fill agt-inc-court" onclick="agtPrepOuvrir(\'' + _escAttr(c.slug) + '\')">Pr\u00e9parer ce domaine</button>'
-      + '<button class="agt-btn agt-inc-court" onclick="agtShowFiche(\'' + _escAttr(c.slug) + '\')">Fiche compl\u00e8te</button>'
+      + '<button class="agt-btn agt-inc-court" onclick="agtFicheOuvrir(\'' + _escAttr(c.slug) + '\')">Fiche compl\u00e8te</button>'   /* ★ FICHE-1 : la fiche complète en pleine page */
       + '<button class="agt-btn agt-inc-court" onclick="copyTenantLink(\'' + _escAttr(c.slug) + '\',this)">Copier le lien d\u2019invitation</button></div>';
   } else if (E.onglet === 'reglages') {
     h += '<div class="agt-inc-bloc"><p class="agt-cli-note">Les donn\u00e9es du domaine se lisent ici et se modifient dans la pr\u00e9paration (D1).</p><div class="agt-inc-actions">'
-      + [['agtShowMembres', 'Membres'], ['agtShowParcelles', 'Parcelles'], ['agtShowJournal', 'Journal'], ['agtShowErreurs', 'Erreurs'], ['agtShowFiche', 'Fiche compl\u00e8te']].map(function (a) {
+      + [['agtShowMembres', 'Membres'], ['agtShowParcelles', 'Parcelles'], ['agtShowJournal', 'Journal'], ['agtShowErreurs', 'Erreurs'], ['agtFicheOuvrir', 'Fiche compl\u00e8te'], ['agtShowFiche', 'Formule, essai et statut']].map(function (a) {
         return '<button class="agt-btn agt-inc-court" onclick="' + a[0] + '(\'' + _escAttr(c.slug) + '\')">' + a[1] + '</button>';
       }).join('') + '</div></div>'
       + '<div class="agt-inc-bloc"><button class="agt-btn agt-inc-court agt-cli-danger" onclick="agtDeleteTenant(\'' + _escAttr(c.slug) + '\')">Supprimer le domaine</button></div>';

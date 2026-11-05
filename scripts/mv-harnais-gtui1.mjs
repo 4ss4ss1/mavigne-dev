@@ -140,7 +140,7 @@ function mord(titre, fichier, ancre, remplace, essai) {
 mord('★★ un slug quelconque passe', 'co', "return /^[a-z0-9][a-z0-9-]{0,59}$/.test(String(s || ''));", "return String(s || '').length > 0;", 'slugs');
 mord('★★ « toString » devient une route', 'co', "return Object.prototype.hasOwnProperty.call(ROUTES, vue) ? ROUTES[vue] : '';", "return ROUTES[vue] || '';", 'routes');
 mord('★★ la route d’arrivée passe sous le verrou', 'co', "  if (window._agtEstVerrouille && window._agtEstVerrouille()) return;\n  var r = lireRoute", "  var r = lireRoute", 'arrivee');
-mord('★ un lien empile l’historique ou garde un slug douteux', 'co', "(arg && slugValide(arg) ? '/' + arg : '')", "(arg ? '/' + arg : '')", 'noter');
+mord('★ un lien empile l’historique ou garde un slug douteux', 'co', "(arg && (slugValide(arg) || argFiche(arg)) ? '/' + arg : '')", "(arg ? '/' + arg : '')", 'noter');   // FICHE-1 : <slug>/fiche aussi
 mord('★★ la recherche redevient sensible aux accents', 'co', "toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')", "toLowerCase()", 'recherche');
 mord('★ le début d’un mot ne passe plus devant', 'co', "vues.sort(function (a, b) { return (b.r - a.r) || (a.i - b.i); });", "vues.sort(function (a, b) { return a.i - b.i; });", 'recherche');
 mord('★★ changer d’onglet oublie le lien direct', 'gt', "  if(window._agtRouteNoter) window._agtRouteNoter(tab);\n", '', 'statiques');

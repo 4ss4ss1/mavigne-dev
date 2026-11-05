@@ -966,6 +966,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-gtrestes1.mjs --contre'],
   ['node scripts/harnais-bandeau-essai.mjs'],       // GT-RESTES-1 : réparé (window bouché) et désormais dans la chaîne — il pourrissait dehors
   ['node scripts/harnais-sec7-contre.mjs'],         // GT-RESTES-1 : recalé sur un gabarit vivant d’app.js, et désormais dans la chaîne
+  ['node scripts/mv-harnais-fiche1.mjs'],          // FICHE-1 (§530) : la fiche complète, les pièces signées, le dépôt (versions alignées, règles, brouillons)
+  ['node scripts/mv-harnais-fiche1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

@@ -48,6 +48,18 @@ service firebase.storage {
              && request.auth.token.ro != true;
     }
 
+    // ★ FICHE-1 (§530) — les pièces signées hors de l'appli (devis, contrats papier), déposées par GUERETTECH :
+    //   _guerettech/pieces/{slug}/{fichier}. GUERETTECH seul les lit et les dépose ; PDF ou image, 10 Mo au plus ;
+    //   ni réécriture ni effacement (une pièce signée se garde).
+    match /_guerettech/pieces/{slug}/{filename} {
+      allow read:   if isGtAdmin();
+      allow create: if isGtAdmin()
+                    && request.resource.size <= 10 * 1024 * 1024
+                    && (request.resource.contentType == 'application/pdf'
+                        || request.resource.contentType.matches('image/.*'));
+      allow update, delete: if false;
+    }
+
     // Analyses labo — par tenant : tenants/{slug}/analyses/{fichier}
     match /tenants/{tenant}/analyses/{filename} {
       // Lecture : membre du tenant (ou GT admin), jamais le compte démo.

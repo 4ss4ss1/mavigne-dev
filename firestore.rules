@@ -371,6 +371,13 @@ service cloud.firestore {
                        && request.auth.token.get('tenant', '') == slug);
       allow write: if false;
     }
+    // ★ FICHE-1 (§530) — l'HISTORIQUE des acceptations d'un domaine (hist/{ref}-{ts}), écrit par acceptTerms
+    //   (Admin SDK). Lu par GUERETTECH seul, pour la fiche complète d'un client et le registre des pièces signées.
+    //   Personne n'écrit : rien ne s'efface (SIGN-1).
+    match /_mv_signatures/{slug}/hist/{h} {
+      allow read:  if isGtAdmin();
+      allow write: if false;
+    }
 
 
     // ════ v2.2 — Catalogue phyto E-Phy (données nationales partagées) ════

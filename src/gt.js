@@ -12,4 +12,6 @@ import './gt/incidents.js';  // GT-UI-2 (§517) : l'écran Incidents en tableau,
 import './gt/clients.js';    // GT-UI-3 (§518) : l'écran Clients en tableau par santé, sa fiche à onglets, le contact
 import './gt/facturation.js'; // GT-UI-5 (§520) : l'écran Facturation de la maquette (chiffres, barres, tableau, fiche)
 import './gt/leads.js';      // GT-UI-5 (§520) : l'écran Leads de la maquette (colonnes, tableau, fiche)
+import './gt/fiche.js';      // FICHE-1 (§530) : la fiche complète d'un client (la maquette fiche-client-v1, écran 1)
+import './gt/pieces.js';     // FICHE-1 (§530) : les pièces signées (écran 2)
 import './gt/sante.js';      // GT-UI-6 (§521) : l'écran Santé du système (l'état des tâches planifiées, le parc)

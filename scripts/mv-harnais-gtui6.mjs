@@ -75,7 +75,7 @@ function statiques(S) {
   const tw = S.fcl.slice(S.fcl.indexOf('LA RELANCE D\'UN LEAD À SA DATE'), S.fcl.indexOf("logger.info('[trialWatch] ' + Object.keys(clients).length"));
   r.push([tw.length > 0 && /to: \[GT_EMAIL\]/.test(tw) && !/to: \[(?!GT_EMAIL)/.test(tw) && /e2\.relanceVue !== e2\.relance/.test(tw) && /relanceVue: val\[id\]\.relance/.test(tw) && /e2\.st !== 'installe' && e2\.st !== 'perdu'/.test(tw),
     '★★★ la relance d’un lead : un mail à NICOLAS seulement, une fois par date, jamais pour une demande close']);
-  r.push([/var _AUTRES=\[[^\]]*'sante'\]/.test(S.gt) && /_agtSante = \(GT\.sante && typeof GT\.sante==='object'\) \? GT\.sante : \{\};/.test(S.gt) && fonction(S.gt, '_agtRadarSante').indexOf("_agtSante[cle]") !== -1,
+  r.push([/var _AUTRES=\[[^\]]*'sante'[^\]]*\]/.test(S.gt) && /_agtSante = \(GT\.sante && typeof GT\.sante==='object'\) \? GT\.sante : \{\};/.test(S.gt) && fonction(S.gt, '_agtRadarSante').indexOf("_agtSante[cle]") !== -1,
     'la console lit l’état des tâches ; la carte du Radar le montre (fini « leur état arrive avec GT-UI-6 »)']);
   r.push([/data-tab="sante" onclick="agtSwitchTab\('sante'\)"/.test(S.html) && /sante: 'sante'/.test(S.co) && /if\(tb==='sante'\)\s+body\.innerHTML=ban\+\(window\._agtSanteVue/.test(fonction(S.gt, 'agtRenderBody')) && /import '\.\/gt\/sante\.js';/.test(S.entree),
     'l’écran « Santé du système » : la barre latérale, l’onglet du téléphone, #sante, le rendu']);

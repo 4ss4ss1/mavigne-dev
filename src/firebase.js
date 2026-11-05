@@ -3066,6 +3066,32 @@ window.fbAdminLire = async function (tenantSlug, key) {
 };
 // ★ GTFIX-4 (§513) — la même, pour un document de `_guerettech` : la console dit une lecture ratée au lieu
 //   d'afficher un registre réduit, une facturation vide, un journal vide.
+// ★★ FICHE-1 (§530) — LES PREUVES D'ACCEPTATION DES DOMAINES, pour la console (GUERETTECH seul : la règle de
+//   _mv_signatures autorise isGtAdmin()). La preuve est écrite par le serveur (acceptTerms) hors du domaine ; ici,
+//   on la LIT — elle et son historique (hist/, règle de lecture ajoutée par FICHE-1).
+window.fbGtSignatures = async function () {
+  var snap = await getDocs(collection(db, '_mv_signatures'));
+  var o = {}; snap.forEach(function (d) { o[d.id] = d.data(); });
+  return o;
+};
+window.fbGtSignatureHist = async function (slug) {
+  var snap = await getDocs(collection(db, '_mv_signatures', String(slug), 'hist'));
+  var L = []; snap.forEach(function (d) { L.push(Object.assign({ _id: d.id }, d.data())); });
+  return L;
+};
+// ★★ FICHE-1 — LES PIÈCES SIGNÉES HORS DE L'APPLI (devis, contrats papier) : déposées dans le stockage, sous
+//   _guerettech/pieces/<slug>/ (règle : GUERETTECH seul ; PDF ou image ; 10 Mo ; ni réécriture ni effacement).
+window.fbGtPieceDeposer = async function (slug, fichier) {
+  var nom = String((fichier && fichier.name) || 'piece').replace(/[^A-Za-z0-9._-]+/g, '-').slice(-80);
+  var chemin = '_guerettech/pieces/' + String(slug) + '/' + Date.now() + '-' + nom;
+  var r = _storageRef(_storage, chemin);
+  await new Promise(function (ok, ko) {
+    var t = uploadBytesResumable(r, fichier, { contentType: fichier.type || 'application/octet-stream' });   // la porte des tutos (jamais l'appel brut : mv-harnais-tutos)
+    t.on('state_changed', null, ko, ok);
+  });
+  return { chemin: chemin, nom: String((fichier && fichier.name) || nom), taille: Number(fichier && fichier.size) || 0, type: String((fichier && fichier.type) || '') };
+};
+window.fbGtPieceUrl = async function (chemin) { return getDownloadURL(_storageRef(_storage, String(chemin))); };
 window.fbGtLire = async function (key) {
   var snap = await getDocFromServer(doc(db, '_guerettech', key));
   return { existe: snap.exists(), valeur: snap.exists() ? snap.data() : null };

@@ -453,7 +453,7 @@ async function renderAdminGT(){
   // écriture ne part d'ici (ce doc est lisible PUBLIQUEMENT par la règle d'unicité des slugs).
   _agtSlugs   = slugs.slice();
   _agtClients = _agtRegClients(gtData, _reg[1].v);
-  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi','sante'];   // ★ GT-UI-6 : sante
+  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi','sante','pieces'];   // ★ GT-UI-6 : sante · ★ FICHE-1 : pieces
   var _tout=await Promise.all([
     Promise.all(slugs.map(function(slug){ return Promise.all(_AGT_CLES_DOM.map(function(k){ return _dom(slug, k); })); })),
     Promise.all(_AUTRES.map(_gt)),
@@ -481,6 +481,8 @@ async function renderAdminGT(){
   _agtLeadStNoter(_agtLeadSt);   // ★ GTFIX-1 : la base de comparaison de chaque fiche
   _agtReportsGT = (GT.support_reports&&Array.isArray(GT.support_reports.value))?GT.support_reports.value:[];
   _agtSante = (GT.sante && typeof GT.sante==='object') ? GT.sante : {};   // ★ GT-UI-6
+  _agtPieces = (GT.pieces && GT.pieces.value && typeof GT.pieces.value==='object') ? GT.pieces.value : {};   // ★ FICHE-1 : la liste des pièces déposées
+  _agtSignaturesCharger();   // ★ FICHE-1 : les preuves d'acceptation, à part (une lecture ratée ne bloque pas la console)
   _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
   _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
   _agtMajCompteurs();
@@ -758,6 +760,7 @@ function _agtCompteursBarre(){
   var retard=0;
   if(typeof _agtBizSlugs==='function') _agtBizSlugs().forEach(function(x){ var vus={}; _agtFacts(x.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retard++; } }); });
   pose('agt-side-n-business', retard);
+  pose('agt-side-n-pieces', (_agtTenants||[]).filter(function(t){ return !_agtInterne(t.slug) && _agtSigEtat(_agtSignatures[t.slug]||null)==='depassee'; }).length);   // ★ FICHE-1 : à refaire signer
   pose('agt-bas-n-radar', lire('agt-radar-badge')); pose('agt-bas-n-incidents', lire('agt-inc-badge'));   // ★ GT-RESTES-1 : la barre du bas
   var malS=0; [['sauvegarde',26],['export',26],['ephy',194],['mails',2]].forEach(function(x){ var e=_agtSante[x[0]]; if(e && e.quand && (e.ok===false || (Date.now()-Date.parse(e.quand))/3600000>x[1])) malS++; });
   pose('agt-side-n-sante', malS);   // ★ GT-UI-6 : une tâche en échec ou en retard
@@ -785,7 +788,9 @@ function agtRenderBody(){
   // survivre dans une session ouverte pendant le deploiement.
   var tb=_AGT_TAB_MIGR[_agtTab]||_agtTab, ban=_agtBandeauLectures();
   if(tb==='radar')     body.innerHTML=ban+_agtBuildRadar();
-  if(tb==='clients')   body.innerHTML=ban+_agtBuildClients();
+  var _fc=(tb==='clients' && window._agtFicheCourante) ? window._agtFicheCourante() : '';   // ★ FICHE-1
+  if(tb==='clients')   body.innerHTML=ban+((_fc && window._agtFicheVue) ? window._agtFicheVue(window._agtFicheDonnees(_fc)) : _agtBuildClients());
+  if(tb==='pieces')    body.innerHTML=ban+(window._agtPiecesVue ? window._agtPiecesVue(window._agtPiecesDonnees()) : '');   // ★ FICHE-1
   if(tb==='business'){ body.innerHTML=ban+(window._agtFacturationVue ? window._agtFacturationVue(window._agtFacDonnees()) : ''); _agtBizFill(); }   // ★ GT-UI-5 : src/gt/facturation.js
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
   if(tb==='leads')     body.innerHTML=ban+(window._agtLeadsVue ? window._agtLeadsVue(window._agtLeadsDonnees()) : '');   // ★ GT-UI-5 : src/gt/leads.js
@@ -795,7 +800,184 @@ function agtRenderBody(){
   _agtEntete(tb);   // ★ GT-UI-4 : les résumés suivent les gestes
 }
 
-var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', sante:'Sant\u00e9 du syst\u00e8me', outils:'Outils' };
+// ════ FICHE-1 (§530) — LA FICHE COMPLÈTE D'UN CLIENT, LES PIÈCES SIGNÉES, LE DÉPÔT DE PIÈCES ════
+// La maquette docs/maquettes/maquette-fiche-client-v1.html (écrans 1 et 2). Les preuves d'acceptation sont LUES
+// (_mv_signatures, écrites par le serveur) ; les pièces déposées vivent dans le stockage (_guerettech/pieces/<slug>/)
+// et leur liste dans _guerettech/pieces (transaction). Rien ne part seul : relance, demande de signature et reçu
+// sont des BROUILLONS (D5).
+var _AGT_TEXTES = { cgv:'1.1', dpa:'1.0' };   // ⚠ les versions de functions/claims.js (TERMS_*_CUR) et d'app.js (_MVT_*) : le harnais fiche1 compare
+var _agtSignatures = {}, _agtSignaturesLu = false, _agtSignaturesKo = false, _agtSigHist = {}, _agtPieces = {};
+function _agtSignaturesCharger(){
+  if(!window.fbGtSignatures) return;
+  window.fbGtSignatures().then(function(o){ _agtSignatures=o||{}; _agtSignaturesLu=true; _agtSignaturesKo=false; agtRenderBody(); },
+    function(e){ _agtSignaturesKo=true; if(window.logError) window.logError({level:'error',cat:'gt-signatures',msg:'preuves illisibles',detail:(e&&e.message)||String(e)}); agtRenderBody(); });
+}
+function _agtFicheCharger(slug){
+  if(!slug || _agtSigHist[slug] || !window.fbGtSignatureHist) return;
+  _agtSigHist[slug]='lecture';
+  window.fbGtSignatureHist(slug).then(function(L){ _agtSigHist[slug]=L||[]; agtRenderBody(); },
+    function(e){ _agtSigHist[slug]='ko'; if(window.logError) window.logError({level:'info',cat:'gt-signatures',msg:'historique illisible',detail:(e&&e.message)||String(e)}); agtRenderBody(); });
+}
+function _agtSigEtat(p){
+  if(!p || !p.docs) return 'jamais';
+  return ((p.docs.cgv||{}).version===_AGT_TEXTES.cgv && (p.docs.dpa||{}).version===_AGT_TEXTES.dpa) ? 'ajour' : 'depassee';
+}
+function _agtHeure(ms){ var d=new Date(ms); return _agtDateFr(d.toISOString())+' \u00e0 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function _agtCourt(h){ h=String(h||''); return h.length>12 ? (h.slice(0,4)+'\u2026'+h.slice(-4)) : (h||'\u2014'); }
+function _agtNavigateur(ua){
+  ua=String(ua||''); if(!ua) return '';
+  var a=function(x){ return ua.indexOf(x)>=0; };   // indexOf plutôt que des regex à barre échappée (le preflight lit mal « \/ »)
+  var vi=ua.match(/OS (\d+)_/), va=ua.match(/Android (\d+)/);
+  var os=(a('iPhone')||a('iPad'))?('iOS'+(vi?' '+vi[1]:'')):(a('Android')?('Android'+(va?' '+va[1]:'')):(a('Windows')?'Windows':(a('Mac OS X')?'macOS':'')));
+  var nav=a('Edg/')?'Edge':(a('Firefox/')?'Firefox':(a('Chrome/')?'Chrome':(a('Safari/')?'Safari':'')));
+  return [nav, os].filter(Boolean).join(' ');
+}
+// Le détail lisible d'une preuve (et de son historique, s'il est lu).
+function _agtSigDetail(p, hist){
+  if(!p) return null;
+  var sg=p.signataire||{}, cl=p.client||{}, ts=Number(p.ts_ms)||0, mail=String(p.email_at_signing||'');
+  var d={ quand: ts?_agtHeure(ts):'\u2014', signataire:[sg.nom, sg.fonction].filter(Boolean).join(', '),
+    client:[cl.raison_sociale, cl.siret?('SIRET '+cl.siret):''].filter(Boolean).join(' \u00b7 '),
+    cgv:String((p.docs&&p.docs.cgv&&p.docs.cgv.version)||'?'), dpa:String((p.docs&&p.docs.dpa&&p.docs.dpa.version)||'?'),
+    hcgv:_agtCourt(p.docs&&p.docs.cgv&&p.docs.cgv.hash), hdpa:_agtCourt(p.docs&&p.docs.dpa&&p.docs.dpa.hash),
+    trace:[mail?('compte '+mail.split('@')[0]):'', p.ip_hash?('adresse IP en empreinte '+String(p.ip_hash).slice(0,4)+'\u2026'):'', _agtNavigateur(p.user_agent)].filter(Boolean).join(' \u00b7 '),
+    recu: mail?('envoy\u00e9 \u00e0 '+mail+(ts?(' le '+_agtDateFr(new Date(ts).toISOString())):'')):'\u2014', hist:null, histKo:false };
+  d.parCompte=d.signataire+(mail?(' \u00b7 compte '+mail.split('@')[0]):'');   // la fiche d'une preuve (maquette, écran 2)
+  d.traceCourte=[p.ip_hash?('IP en empreinte '+String(p.ip_hash).slice(0,4)+'\u2026'):'', _agtNavigateur(p.user_agent)].filter(Boolean).join(' \u00b7 ');
+  if(Array.isArray(hist)){
+    d.hist=hist.slice().sort(function(a,b){ return (Number(a.ts_ms)||0)-(Number(b.ts_ms)||0); }).map(function(x){
+      var s2=x.signataire||{}, nom=[s2.nom, s2.fonction].filter(Boolean).join(', '), t2=Number(x.ts_ms)||0;
+      var c=(x.docs&&x.docs.cgv&&x.docs.cgv.version)||'?', dp=(x.docs&&x.docs.dpa&&x.docs.dpa.version)||'?';
+      var jour=t2?_agtDateFr(new Date(t2).toISOString()):'';
+      return { type:(x.type==='preuve'?'preuve':'supplementaire'), titre:(x.type==='preuve'?'Preuve du domaine \u2014 ':'Acceptation suppl\u00e9mentaire \u2014 ')+nom,
+        sous:jour+(x.type==='preuve'?(' \u00b7 CG '+c+' \u00b7 accord '+dp):' \u00b7 ne remplace pas la preuve'), quand:t2?new Date(t2).toISOString().slice(0,10):'',
+        titreCourt:(x.type==='preuve'?'Preuve du domaine':'Acceptation suppl\u00e9mentaire'), sousCourt:jour+(s2.nom?(' \u00b7 '+s2.nom):'') };
+    });
+  } else if(hist==='ko') d.histKo=true;
+  return d;
+}
+// « , du 05/09 au 20/09/2026 » : le début se déduit de la fin et de la durée (la maquette).
+function _agtEssaiPeriode(c){
+  var fin=c.trialExp?(typeof c.trialExp==='number'?c.trialExp:Date.parse(c.trialExp)):NaN; if(!isFinite(fin)) return '';
+  var deb=new Date(fin-Number(c.trialDays||0)*86400000), f=new Date(fin);
+  return ', du '+String(deb.getDate()).padStart(2,'0')+'/'+String(deb.getMonth()+1).padStart(2,'0')+' au '+_agtDateFr(f.toISOString().slice(0,10));
+}
+var _AGT_ST_PASTILLE={ actif:'mvpas-type mvpas-vert', essai:'mvpas-type mvpas-orange', echu:'mvpas-type mvpas-rouge', pending:'mvpas-type mvpas-violet', aqualifier:'mvpas-type mvpas-gris' };
+function _agtPiecesDe(slug){
+  return Object.keys(_agtPieces||{}).map(function(id){ return Object.assign({ id:id }, _agtPieces[id]); }).filter(function(x){ return x && x.slug===slug; })
+    .sort(function(a,b){ return String(b.deposeLe||'')<String(a.deposeLe||'')?-1:1; });
+}
+// ★ Ce que la fiche complète d'un client LIT (src/gt/fiche.js).
+window._agtFicheDonnees = function(slug){
+  var i=(_agtTenants||[]).findIndex(function(t){ return t.slug===slug; }); if(i<0) return null;
+  var t=_agtTenants[i], c=_agtCli(slug), st=_agtStatutOf(slug), p=_agtSignatures[slug]||null, cl=(p&&p.client)||{};
+  var abo=_agtFacts(slug).filter(function(f){ return _agtFType(f)==='abo'; }).sort(function(a,b){ return String(b.date||'')<String(a.date||'')?-1:1; })[0];
+  var per=(abo&&abo.per==='annuel')?'annuel':'mensuel', prix=_agtAboPrix(slug), prochain=abo?_agtAboProchain(abo):null;
+  var an=new Date().getFullYear(), encAn=0, nRet=0, mRet=0, jRet=0, vus={};
+  _agtFacts(slug).forEach(function(f){ var e=_agtFEncInfo(slug,f), d0=_agtD(e.le||f.date); if(e.enc && d0 && d0.getFullYear()===an) encAn+=e.enc;
+    if(_agtFType(f)!=='geste' && _agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; nRet++; mRet+=_agtRefReste(slug,f.ref); jRet=Math.max(jRet,_agtFRetard(f)); } });
+  var der=_agtFacts(slug).filter(function(f){ return _agtFType(f)!=='geste'; }).sort(function(a,b){ return String(b.date||'')<String(a.date||'')?-1:1; })[0];
+  var du=_agtBizDu(slug), hist=_agtSigHist[slug], det=_agtSigDetail(p, hist);
+  var pieces=[];
+  if(p){
+    pieces.push({ icone:'document', titre:'Conditions g\u00e9n\u00e9rales v'+det.cgv, sous:'\u2014 le texte sign\u00e9, empreinte v\u00e9rifi\u00e9e', geste:"window.open('/cgu.html','_blank','noopener')" });
+    pieces.push({ icone:'document', titre:'Accord de traitement v'+det.dpa, sous:'(art. 28 RGPD)', geste:"window.open('/dpa.html','_blank','noopener')" });
+    pieces.push({ icone:'recu', titre:'Re\u00e7u d\u2019acceptation', sous:'du '+_agtDateFr(new Date(Number(p.ts_ms)||Date.now()).toISOString()), geste:"agtPiecesOuvrir('"+_escAttr(slug)+"')" });
+  }
+  _agtPiecesDe(slug).forEach(function(x){ pieces.push({ icone:'document', titre:String(x.titre||x.nom||'Pi\u00e8ce'), sous:'\u2014 d\u00e9pos\u00e9 le '+_agtDateFr(String(x.deposeLe||'').slice(0,10)), geste:"agtPieceOuvrir('"+_escAttr(x.id)+"')" }); });
+  var chr=(window._agtCliDonnees ? window._agtCliDonnees().chronologie(slug) : []) || [];
+  if(det && det.hist) det.hist.forEach(function(x){ if(x.quand) chr.push({ quand:x.quand, type:'', titre:x.titre }); });
+  chr.sort(function(a,b){ return a.quand<b.quand?1:(a.quand>b.quand?-1:0); });
+  return { slug:slug, i:i, nom:t.nom, debut:String(c.created_at||'').slice(0,10),
+    statut:{ label:(_agtInterne(slug)?'Interne':st.label), classe:(_agtInterne(slug)?'mvpas-etiquette':(_AGT_ST_PASTILLE[st.cle]||'mvpas-etiquette')) },
+    identite:{ raison_sociale:cl.raison_sociale||'', siret:cl.siret||'', adresse:[cl.adresse, cl.cp_ville].filter(Boolean).join(', '),
+      vignoble:[(t.parcelles!=null?t.parcelles+' parcelles':''), (t.membres!=null?t.membres+' membres':'')].filter(Boolean).join(' \u00b7 ') },
+    contact:(c.contact&&typeof c.contact==='object')?c.contact:{},
+    contrat:{ formule:(_AGT_PLANL[_agtPlan(slug)]||_agtPlan(slug)), tarif:(prix?(_agtEur(prix)+' HT par mois \u00b7 '+per):'\u2014'),
+      debut:c.created_at?(_agtDateFr(String(c.created_at).slice(0,10))+(st.cle==='pending'?' (pr\u00e9paration)':' (installation)')):'',
+      essai:c.trialDays?(c.trialDays+' jours'+_agtEssaiPeriode(c)+' \u00b7 '+((c.trialRenewals>0)?('reconduit '+c.trialRenewals+' fois'):'non reconduit')):'',
+      prochain:prochain?_agtDateFr(prochain.toISOString().slice(0,10)):'', prochainMontant:(prix?(_agtEur(per==='annuel'?prix*12:prix)+' HT'):''),
+      resiliation:'\u2014 \u00b7 conservation des donn\u00e9es 90 jours apr\u00e8s (CGU 4.5)' },
+    facturation:{ du:(du?(_agtEur(du)+(mRet?(' \u00b7 dont '+_agtEur(mRet)+' en retard de '+jRet+' jour'+(jRet>1?'s':'')):'')):'rien'), nRetard:nRet, an:an, encAn:_agtEur(encAn),
+      derniere:der?((der.ref||'')+' \u00b7 '+_agtDateFr(der.date)+' \u00b7 '+_agtEur(der.montant)):'' },
+    signature:Object.assign({ etat:_agtSigEtat(p), preuve:p }, det||{}), versions:_AGT_TEXTES, pieces:pieces, chronologie:chr.slice(0,8),
+    esc:_escHtml, eur:_agtEur, dateFr:function(x){ return x?_agtDateFr(x):'\u2014'; } };
+};
+// ★ Ce que le registre des pièces signées LIT (src/gt/pieces.js).
+window._agtPiecesDonnees = function(){
+  var lignes=(_agtTenants||[]).map(function(t){
+    var p=_agtSignatures[t.slug]||null, et=_agtSigEtat(p), st=_agtStatutOf(t.slug), det=_agtSigDetail(p, _agtSigHist[t.slug]);
+    var lib = _agtInterne(t.slug) ? 'Interne \u00b7 sans objet' : (et==='ajour' ? ('\u00c0 jour'+(st.cle==='essai'?' \u00b7 essai':'')) : (et==='depassee'
+      ? [((p.docs.cgv||{}).version!==_AGT_TEXTES.cgv?('CG d\u00e9pass\u00e9es : '+((p.docs.cgv||{}).version||'?')+' \u2192 '+_AGT_TEXTES.cgv):''), ((p.docs.dpa||{}).version!==_AGT_TEXTES.dpa?('accord d\u00e9pass\u00e9 : '+((p.docs.dpa||{}).version||'?')+' \u2192 '+_AGT_TEXTES.dpa):'')].filter(Boolean).join(' \u00b7 ')
+      : ('Jamais sign\u00e9'+(st.cle==='pending'?' \u00b7 \u00e0 installer':''))));
+    return { slug:t.slug, nom:t.nom, preuve:p, etat:et, etatLib:lib, hors:_agtInterne(t.slug), docs:p?('CG '+det.cgv+' \u00b7 accord '+det.dpa):'',
+      signeLe:p&&p.ts_ms?_agtDateFr(new Date(Number(p.ts_ms)).toISOString().slice(0,10)):'', signataire:det?det.signataire:'', ref:p?String(p.ref||''):'',
+      deposees:_agtPiecesDe(t.slug).length, detail:det };
+  });
+  var comptes=lignes.filter(function(l){ return !l.hors; }), aref=comptes.filter(function(l){ return l.etat==='depassee'; });
+  var dep=[]; Object.keys(_agtPieces||{}).forEach(function(id){ var x=_agtPieces[id]||{}; var t=(_agtTenants||[]).filter(function(y){ return y.slug===x.slug; })[0];
+    dep.push({ id:id, client:(t?t.nom:x.slug), titre:String(x.titre||x.nom||'Pi\u00e8ce'), le:_agtDateFr(String(x.deposeLe||'').slice(0,10)), fichier:String(x.nom||'') }); });
+  return { lignes:lignes, versions:_AGT_TEXTES, deposees:dep,
+    kpis:{ signes:comptes.filter(function(l){ return l.etat!=='jamais'; }).length, total:comptes.length, arefaire:aref.length,
+      arefaireLib:(aref.length?aref.map(function(l){ return l.etatLib; })[0]:''), deposees:dep.length }, esc:_escHtml };
+};
+// ★ Les gestes — des brouillons, jamais un envoi.
+function agtFicheRelancer(slug){
+  var i=(_agtTenants||[]).findIndex(function(t){ return t.slug===slug; }); if(i<0) return;
+  var F=_agtFacts(slug), k=F.findIndex(function(f){ return _agtFType(f)!=='geste' && _agtFRetard(f)>0; });
+  if(k>=0) agtBizRelance(i,k);
+}
+function agtPiecesDemander(){
+  var L=(window._agtPiecesDonnees().lignes||[]).filter(function(l){ return !l.hors && l.etat==='depassee'; });
+  var bcc=L.map(function(l){ return _agtContactEmail(l.slug); }).filter(Boolean);
+  var suj='Ma Vigne \u2014 nouvelle version des conditions g\u00e9n\u00e9rales';
+  var txt='Bonjour,\n\nLes conditions g\u00e9n\u00e9rales de Ma Vigne passent en version '+_AGT_TEXTES.cgv+' (accord de traitement des donn\u00e9es : version '+_AGT_TEXTES.dpa+').\n'
+    +'\u00c0 votre prochaine connexion d\u2019administrateur, l\u2019application vous proposera de les lire et de les accepter : rien d\u2019autre \u00e0 faire.\n\nBien cordialement,\nNicolas Gu\u00e9ret \u2014 GUERETTECH\n';
+  try{ window.location.href='mailto:?bcc='+bcc.join(',')+'&subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto demande de signature',detail:(e&&e.message)||String(e)}); }
+}
+function agtPreuveTelecharger(slug){
+  var p=_agtSignatures[slug]; if(!p) return;
+  var blob=new Blob([JSON.stringify({ preuve:p, historique:Array.isArray(_agtSigHist[slug])?_agtSigHist[slug]:null }, null, 2)], { type:'application/json' });
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='preuve-'+slug+'-'+String(p.ref||'')+'.json';
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function agtPreuveRecu(slug){
+  var p=_agtSignatures[slug]; if(!p) return;
+  var d=_agtSigDetail(p, null), mail=String(p.email_at_signing||'');
+  if(!_agtEmailValide(mail)) mail='';
+  var suj='Ma Vigne \u2014 re\u00e7u d\u2019acceptation (CGU + accord de traitement) \u00b7 '+String((p.client&&p.client.raison_sociale)||slug);
+  var txt='Bonjour,\n\nVoici le rappel de votre acceptation :\n- r\u00e9f\u00e9rence '+String(p.ref||'')+'\n- le '+d.quand+' (heure du serveur), par '+d.signataire+'\n- conditions g\u00e9n\u00e9rales v'+d.cgv+', accord de traitement v'+d.dpa+'\n\nBien cordialement,\nNicolas Gu\u00e9ret \u2014 GUERETTECH\n';
+  try{ window.location.href='mailto:'+mail+'?subject='+encodeURIComponent(suj)+'&body='+encodeURIComponent(txt); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto reçu',detail:(e&&e.message)||String(e)}); }
+}
+function agtPieceChoisir(slug){
+  var inp=document.createElement('input'); inp.type='file'; inp.accept='application/pdf,image/png,image/jpeg,image/webp';   // types explicites (« image/ » suivi d'une étoile ouvre un commentaire pour le preflight)
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0]; if(!f) return;
+    if(f.size>10*1024*1024){ showToast('10 Mo au plus','#B85A1A'); return; }
+    window.openPrompt({ titre:'Nom de la pi\u00e8ce sign\u00e9e', sub:'Par exemple : devis d\u2019installation accept\u00e9, contrat papier.', valeur:String(f.name||'').replace(/\.[a-z0-9]+$/i,''), btnLabel:'D\u00e9poser',
+      cb:function(v){ _agtPieceDeposer(slug, f, String(v||'').trim().slice(0,120) || f.name); } });
+  };
+  inp.click();
+}
+async function _agtPieceDeposer(slug, fichier, titre){
+  try{
+    if(!window.fbGtPieceDeposer || !window.fbGtMaj) throw new Error('d\u00e9p\u00f4t indisponible');
+    var m=await window.fbGtPieceDeposer(slug, fichier), id='pc'+Date.now().toString(36), now=new Date().toISOString();
+    var r=await window.fbGtMaj('pieces', function(d){ var v=Object.assign({}, (d&&d.value)||{}); v[id]={ slug:slug, titre:titre, nom:m.nom, chemin:m.chemin, taille:m.taille, type:m.type, deposeLe:now }; return { value:v, maj:now }; });
+    _agtPieces=(r&&r.valeur&&r.valeur.value)||_agtPieces;
+    agtLogAccess(slug, 'Pi\u00e8ce sign\u00e9e d\u00e9pos\u00e9e : '+titre, '', 'commercial');
+    showToast('Pi\u00e8ce d\u00e9pos\u00e9e','#3D6B27'); agtRenderBody();
+  }catch(e){ _agtEchecEcriture(e, 'D\u00e9p\u00f4t de pi\u00e8ce'); }
+}
+async function agtPieceOuvrir(id){
+  var x=(_agtPieces||{})[id]; if(!x || !window.fbGtPieceUrl) return;
+  try{ var u=await window.fbGtPieceUrl(x.chemin); window.open(u, '_blank', 'noopener'); }
+  catch(e){ _agtEchecEcriture(e, 'Ouverture de la pi\u00e8ce'); }
+}
+
+var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', pieces:'Pi\u00e8ces sign\u00e9es', sante:'Sant\u00e9 du syst\u00e8me', outils:'Outils' };   // ★ FICHE-1 : pieces
 // ★★ GT-UI-4 (§519) — L'EN-TÊTE DE LA MAQUETTE : le titre de l'écran, son résumé, la fraîcheur du chargement, l'action
 //   principale. Recalculé à chaque onglet et à chaque rendu (les résumés suivent les gestes).
 var _agtCharge=0;
@@ -807,6 +989,7 @@ function _agtResume(tab){
   if(tab==='business'){ var nf=0; Object.keys(_agtBilling||{}).forEach(function(sl){ nf+=_agtFacts(sl).length; }); return nf+' facture'+(nf>1?'s':'')+' \u00b7 num\u00e9rotation continue sur toutes les factures'; }
   if(tab==='leads'){ var nl=(_agtLeads||[]).length, nn=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length; return nl+' demande'+(nl>1?'s':'')+(nn?' \u00b7 '+nn+' sans r\u00e9ponse':''); }
   if(tab==='sante') return 'sauvegardes, synchronisations, e-mails, versions';
+  if(tab==='pieces') return 'conditions g\u00e9n\u00e9rales, accords de traitement, pi\u00e8ces d\u00e9pos\u00e9es';   // ★ FICHE-1
   if(tab==='outils') return 'journal d\u2019acc\u00e8s, codes d\u2019essai, contours';
   return '';
 }
@@ -824,12 +1007,20 @@ function _agtMajFraicheur(){
 }
 function _agtEntete(tab){
   var t=document.getElementById('agt-titre'), so=document.getElementById('agt-sous'), ac=document.getElementById('agt-tete-actions');
+  // ★ FICHE-1 : la fiche complète d'un client prend l'en-tête (son nom, « fiche complète du client », « Retour aux clients »).
+  var fc=(tab==='clients' && window._agtFicheCourante) ? window._agtFicheCourante() : '', tf=fc ? (_agtTenants||[]).filter(function(x){ return x.slug===fc; })[0] : null;
+  if(tf){
+    if(t) t.textContent=tf.nom; if(so) so.textContent='fiche compl\u00e8te du client';
+    if(ac) ac.innerHTML='<button class="agt-tete-second" onclick="agtFicheFermer()">Retour aux clients</button>';
+    _agtMajFraicheur(); return;
+  }
   if(t && _AGT_NOMS_ONGLETS[tab]) t.textContent=_AGT_NOMS_ONGLETS[tab];
   if(so) so.textContent=_agtResume(tab);
   if(ac) ac.innerHTML=_agtActions(tab);
   _agtMajFraicheur();
 }
 function agtSwitchTab(tab){
+  if(tab==='clients' && window._agtFicheReset) window._agtFicheReset();   // ★ FICHE-1 : « Clients » revient à la liste
   _agtTab=tab;
   document.querySelectorAll('.agt-tab').forEach(function(b){
     var isActive=b.dataset.tab===tab;
@@ -6050,6 +6241,13 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+window.agtFicheRelancer  = agtFicheRelancer;   // FICHE-1
+window.agtPiecesDemander = agtPiecesDemander;
+window.agtPreuveTelecharger = agtPreuveTelecharger;
+window.agtPreuveRecu     = agtPreuveRecu;
+window.agtPieceChoisir   = agtPieceChoisir;
+window.agtPieceOuvrir    = agtPieceOuvrir;
+window._agtFicheCharger  = _agtFicheCharger;
 window.agtTicketCreerGT  = agtTicketCreerGT;   // GT-RESTES-1
 window.agtIncLier        = agtIncLier;
 window.agtLogFiltre      = agtLogFiltre;   // GT-UI-7

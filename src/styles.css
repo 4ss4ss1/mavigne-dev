@@ -1434,12 +1434,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-infobox{background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);line-height:1.6;}
 .agt-chip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 11px;color:rgba(255,255,255,0.3);font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;font-family:var(--font-ui);}
 .agt-chip.on{background:rgba(139,92,246,0.18);border-color:rgba(139,92,246,0.5);color:#C4B5FD;}
-/* ★★★ GT-UI-4 (§519) — LA CONSOLE SUR LA MAQUETTE (docs/maquettes/maquette-console-gt-v1.html, MAQ-1). La charte de
-   l'appli — claire par défaut, sombre avec elle : les jetons --bg-app, --bg-card, --texte, --accent… basculent seuls —,
-   la barre latérale, l'en-tête (titre, résumé, fraîcheur, Actualiser, action principale), les tableaux, les fiches, les
-   pastilles communes (.mvpas). Remplace les styles sombres de GT-UI-1 à 3 (le violet et l'or de l'ancienne console).
-   Les écrans pas encore refaits (Facturation, Leads, Outils, Signalements) gardent leur ancien rendu, ENCADRÉ
-   (.agt-ancien), jusqu'à GT-UI-5 et GT-UI-6. Échelle d'espacement, rayons et crans de la charte. */
+/* ★★★ GT-UI-4 (§519) — la console sur la maquette ; le détail : docs/claude, la section du lot. */
 #page-admin-gt{background:var(--bg-app);color:var(--texte);}
 #page-admin-gt .agt-body{background:var(--bg-app);}
 #page-admin-gt .agt-hdr{background:var(--bg-card);border-bottom:1px solid var(--ligne,#E7E6E2);}
@@ -1595,8 +1590,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-trace-t{flex:1;min-width:0;color:var(--texte);}
 .agt-trace-s{display:block;color:var(--texte-doux);font-size:var(--pt-micro,12px);}
 .agt-trace-q{flex-shrink:0;color:var(--texte-doux);font-size:var(--pt-micro,12px);}
-/* ★ GT-UI-5 (§520) — FACTURATION ET LEADS DE LA MAQUETTE : les barres des encaissements, le paiement saisi dans la fiche,
-   l'aperçu de la relance, le formulaire d'une facture ; les colonnes des demandes. */
+/* ★ GT-UI-5 (§520) — Facturation et Leads de la maquette ; le détail : docs/claude. */
 .agt-fac-barres{display:flex;align-items:flex-end;gap:8px;height:160px;}
 .agt-fac-mois{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0;}
 .agt-fac-val{font-family:var(--font-ui);font-size:var(--pt-micro,12px);color:var(--texte-med);font-variant-numeric:tabular-nums;}
@@ -1614,9 +1608,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .agt-leads-fiche{display:flex;flex-direction:column;gap:4px;padding:12px;cursor:pointer;font-family:var(--font-ui);font-size:var(--pt-txt,13px);color:var(--texte);}
 .agt-leads-fiche.on{outline:2px solid var(--accent);outline-offset:-1px;}
 .agt-leads-note{color:var(--texte-med);font-size:var(--pt-micro,12px);}
-/* ★★ GT-UI-7 (§522) — LES ÉCRANS TÉLÉPHONE DE LA MAQUETTE (≤ 700 px) : chaque tableau devient une pile de cartes (une
-   ligne = une carte, l'en-tête s'efface), les filtres défilent sur une ligne, la fiche ouverte prend tout l'écran (sa
-   croix la referme), les chiffres passent sur deux colonnes. */
+/* GT-UI-7 (§522) : les écrans téléphone de la maquette — tableaux en cartes, filtres sur une ligne, fiche plein écran. */
 @media (max-width:700px){
   #page-admin-gt .agt-body{padding:12px;}
   .agt-tete{padding:8px 12px;}
@@ -1641,8 +1633,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   #page-admin-gt .agt-body{padding-bottom:calc(40px + 32px);}   /* la place de la barre du bas */
   .agt-radar .agt-tbl td:nth-child(1),.agt-radar .agt-tbl td:nth-child(2){display:inline-block;margin:0 8px 4px 0;}
 }
-/* ★ GT-RESTES-1 (§529) — LA BARRE D'ONGLETS DU BAS AU TÉLÉPHONE (la maquette) : Radar, Incidents, Clients, Plus ; la
-   feuille de « Plus ». Elle remplace, au téléphone, les onglets du haut et la barre de session du bas. */
+/* GT-RESTES-1 (§529) : la barre d'onglets du bas au téléphone et la feuille « Plus » (la maquette). */
 .agt-bas,.agt-bas-plus{display:none;}
 @media (max-width:700px){
   #page-admin-gt .agt-bottom-bar,#page-admin-gt .agt-tabs{display:none;}   /* la barre du bas les remplace */
@@ -1655,6 +1646,16 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   .agt-bas-plus button{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 12px;background:none;border:none;border-radius:var(--r-md,8px);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt,13px);text-align:left;cursor:pointer;}
   .agt-bas-plus button:hover{background:var(--survol);}
 }
+/* FICHE-1 (§530) : la fiche complète d'un client, reprise de la maquette fiche-client-v1 (écran 1). */
+.agt-fc-bandeau{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:0 0 16px;}
+.agt-fc-nom{margin:4px 0;font-family:var(--font-titre);font-size:var(--pt-xl,28px);color:var(--texte);}
+.agt-fc-grille{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.agt-fc-col{display:flex;flex-direction:column;gap:16px;}
+.agt-fc-pieces{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.agt-fc-pieces li{display:flex;align-items:center;gap:12px;font-size:var(--pt-txt,13px);color:var(--texte);}
+.agt-fc-pieces li span{flex:1;}
+.agt-fc{max-width:1180px;}
+@media (max-width:900px){ .agt-fc-grille{grid-template-columns:1fr;} }
 /* ★ GT-UI-6 (§521) — « SANTÉ DU SYSTÈME » DE LA MAQUETTE : cinq états (le point dit bon, en retard, en échec, en
    attente), les versions du parc en barres (en ligne, ancienne, bloquée), « Avant le déploiement général ». */
 .agt-sante-rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px;margin:0 0 16px;}

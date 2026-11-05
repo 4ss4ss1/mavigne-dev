@@ -12,7 +12,7 @@
 // ── Les routes (GT-B31 : « pas de lien direct ») ──────────────────────────────
 //   #radar · #incidents · #clients · #clients/<slug> (la fiche) · #facturation · #leads · #outils
 //   L'onglet interne de la facturation s'appelle encore `business` (D7 : le libellé seul change).
-var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', sante: 'sante', outils: 'outils' };   // GT-UI-6 : #sante
+var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', pieces: 'pieces', sante: 'sante', outils: 'outils' };   // GT-UI-6 : #sante · FICHE-1 : #pieces
 export function lireRoute(hash) {
   var h = String(hash || '').replace(/^#/, '');
   try { h = decodeURIComponent(h); } catch (e) { h = ''; }
@@ -23,6 +23,8 @@ export function routeVersOnglet(vue) { return Object.prototype.hasOwnProperty.ca
 export function ongletVersRoute(onglet) { return onglet === 'business' ? 'facturation' : (routeVersOnglet(onglet) ? onglet : ''); }
 // Un slug lu dans l'adresse ne part vers la console que s'il a la forme d'un slug (le lien vient d'ailleurs).
 export function slugValide(s) { return /^[a-z0-9][a-z0-9-]{0,59}$/.test(String(s || '')); }
+// ★ FICHE-1 (§530) — #clients/<slug>/fiche : la fiche complète. Le slug est vérifié de même ; rien d'autre ne passe.
+export function argFiche(arg) { var m = /^([a-z0-9][a-z0-9-]{0,59})\/fiche$/.exec(String(arg || '')); return m ? m[1] : ''; }
 
 var _routeAppliquee = false;
 function appliquerRoute() {
@@ -31,13 +33,14 @@ function appliquerRoute() {
   var r = lireRoute(location.hash), onglet = routeVersOnglet(r.vue);
   if (!onglet) return;
   if (!window._agtOngletCourant || window._agtOngletCourant() !== onglet) window.agtSwitchTab(onglet);
-  if (onglet === 'clients' && r.arg && slugValide(r.arg) && window.agtShowFiche) window.agtShowFiche(r.arg);
+  if (onglet === 'clients' && argFiche(r.arg) && window.agtFicheOuvrir) window.agtFicheOuvrir(argFiche(r.arg));   // ★ FICHE-1
+  else if (onglet === 'clients' && r.arg && slugValide(r.arg) && window.agtShowFiche) window.agtShowFiche(r.arg);
 }
 // Appelée par la console : à son premier chargement complet (la route d'arrivée), puis à chaque onglet.
 window._agtRouteAppliquer = function () { if (_routeAppliquee) return; _routeAppliquee = true; appliquerRoute(); };
 window._agtRouteNoter = function (onglet, arg) {
   var v = ongletVersRoute(onglet); if (!v) return;
-  var h = '#' + v + (arg && slugValide(arg) ? '/' + arg : '');
+  var h = '#' + v + (arg && (slugValide(arg) || argFiche(arg)) ? '/' + arg : '');   // ★ FICHE-1 : <slug>/fiche aussi
   if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) { location.hash = h; } }
 };
 window.addEventListener('hashchange', appliquerRoute);

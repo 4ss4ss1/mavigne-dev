@@ -1,0 +1,47 @@
+{
+  "lot": "FICHE-1",
+  "section": "§530",
+  "base": "85b89dce0a39238a894474fad69ea9e1d2efc5f9",
+  "inclut": [],
+  "date": "2026-11-05",
+  "tutos": {
+    "ok": true,
+    "empreinte": "12bbe8ef44fdaae7024de7264d86b540ad4315ba46b39de91286c2fdda6402bd",
+    "date": "2026-11-05T18:41:05.059Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "11f21784f8947166ab42a281424512d19bee02a8d09400e4965325a4d8e6a769",
+    "CLAUDE.md": "8d686241d265a5993774f6e749e3ca1bbaaf5c45e4ce1995013639577b2456e8",
+    "docs/claude/INDEX.md": "85e854a72a6782d2222ade8b4bcf7b3118bdfd94481fadaf3455a355b518d688",
+    "docs/claude/journal.md": "937ce2d64af5527aa3852f50a93a057d5fdff3e9e37f71dc7850a9853bf6e88b",
+    "firestore.rules": "346a42af1439da56fb4d91c74af6298df42736f244636ef2704aba2405c358a8",
+    "public/sw.js": "62935e8044add87fe928e28a19ffa67787be65c8eb8e7c27a6911a8fe3c4fdff",
+    "scripts/harnais-claude-md.mjs": "cc87004d17b8c16db45247af090907ad994c7b3c210755c15f2a21bea6e2a5ad",
+    "scripts/mv-harnais-gtfix4.mjs": "e7dbf7bac39db6b51d6821cab6c1ae07f074ede0fc76da8e4a452f9c7388be37",
+    "scripts/mv-harnais-gtsuivi1.mjs": "575510e4f4f611a882774f40df884efd8085310c332ce888db1d79245ae75aec",
+    "scripts/mv-harnais-gtui1.mjs": "7dba87937c5d23483dda2364750b4dce5098b480afec1742ba72fbb390084779",
+    "scripts/mv-harnais-gtui6.mjs": "1f8dbafe4fdd485cd721cd55dda987ca415874c2a99f43e87d9d996c72032fa1",
+    "scripts/mv-harnais-liste.mjs": "66effd19ec8023a266591dae99069310dcfddecfb7e4dcffed8aa686c877c4de",
+    "scripts/typo-baseline.json": "6197cef9ce5a7c7bf9d1c23a0ba302e661ae0d5321e1e4070b93e55fdac74b69",
+    "src/admin-gt.js": "ec751fc7cc3d3463e98b192b6378df7eec5ae7d80e7b84135d5ac05c42024386",
+    "src/firebase.js": "78e83a8c25379ff27db7ecfea8b70cc9d9ab074395152268f8353377d3eced9f",
+    "src/gt.js": "d197408307b35f1d3aa3de9df6c45b27ebb70a95845b462520a905237975a996",
+    "src/gt/clients.js": "f7ae014500a0aabde840bff64e4e73649a2c6603303028ee907ab2fd17a36710",
+    "src/gt/console.html": "6ee904c7431d816445dda5e3bd13b6049a13b4fb0dc78c9fe4aa2b04a0ef1e81",
+    "src/gt/coquille.js": "478a92bccc410b0dac2fdd01b0bbb9c46829ba6bdae599e22ea7ec9348c9391a",
+    "src/styles.css": "467053b90ff47946e91c257c36fae376f55d04efa6cd53c6c9d32e2c9ac4d6d4",
+    "storage.rules": "6ec144448335236cbedfb55d98b5a01a0237ce12e2cfd06183ff4cff1b654b8b",
+    "docs/claude/chantiers-530-579.md": "32dd18d2d2e282331beac8ef5d60060ec05292521f3b9a0632bffc32a2eeaae2",
+    "docs/maquettes/maquette-fiche-client-v1.html": "1297dab33d0cea47abf3687748a97d79e9efa5d4237929bc2c1d08dae240de0b",
+    "scripts/mv-harnais-fiche1.mjs": "0d7a8c0921b95eb972ca05aba2c881ae5e7092c7cfd99e29cd71bea08f01d591",
+    "src/gt/fiche.js": "dcd39af889cbc992fdbc886f54e8afcfd86fa97a9b4887aa284f5861881871d5",
+    "src/gt/pieces.js": "3e92c2537d27d8c546dd7f126f3d3acff331ead5fe43f892f1f719dbc76a5a42"
+  }
+}

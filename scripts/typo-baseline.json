@@ -2,7 +2,7 @@
   "src/admin-gt.js": {
     "dur": 68,
     "petit": 36,
-    "ko": 387
+    "ko": 409
   },
   "src/app.js": {
     "dur": 85,
@@ -57,7 +57,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 212
+    "ko": 214
   },
   "src/gt.js": {
     "dur": 0,
@@ -147,6 +147,6 @@
   "src/styles.css": {
     "dur": 237,
     "petit": 69,
-    "ko": 1023
+    "ko": 1025
   }
 }

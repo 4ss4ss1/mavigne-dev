@@ -107,12 +107,12 @@ function statiques(S) {
   r.push([/_agtMajCompteurs\(\);   \/\/ ★ GTFIX-4 \(GT-B21\)/.test(fonction(S.gt, 'agtRenderBody')) && ra.indexOf('_agtMajCompteurs();') !== -1, '★★ les compteurs se recalculent après chaque rendu (GT-B21)']);
   const mc = fonction(S.gt, '_agtMajCompteurs');
   r.push([/background:(?:#22C55E|var\(--ok\))/.test(mc) && mc.indexOf("critique'+(totalErrCrit>1?'s':'')") !== -1, 'le voyant du bas repasse au vert quand plus rien n’est critique (le vert de la charte depuis GT-UI-7)']);
-  r.push([/var tb=_AGT_TAB_MIGR\[_agtTab\]\|\|_agtTab, ban=_agtBandeauLectures\(\);/.test(S.gt) && (fonction(S.gt, 'agtRenderBody').match(/innerHTML=ban\+/g) || []).length === 7, 'le bandeau des lectures ratées en tête de chaque onglet (sept, avec la Santé du système — GT-UI-6)']);
+  r.push([/var tb=_AGT_TAB_MIGR\[_agtTab\]\|\|_agtTab, ban=_agtBandeauLectures\(\);/.test(S.gt) && (fonction(S.gt, 'agtRenderBody').match(/innerHTML=ban\+/g) || []).length === 8, 'le bandeau des lectures ratées en tête de chaque onglet (huit, avec les Pièces signées — FICHE-1)']);
   r.push([fonction(S.gt, 'agtLeadSet').indexOf('renderAdminGT()') === -1 && fonction(S.gt, 'agtLeadNote').indexOf('renderAdminGT()') === -1, '★ un geste de lead ne recharge plus toute la console']);
   r.push([S.gt.indexOf('agtAccedeTenant') === -1, '★★ « Accéder » est parti : plus de faux accès au journal (GT-B16)']);
   r.push([S.gt.indexOf("width:0%;background:linear-gradient(90deg,'+_AGT_SAISON") === -1, 'plus de barre de saison vide (GT-B22)']);
   // ★ GT-UI-3 (§518) : la carte du domaine est partie ; la fiche du client (src/gt/clients.js) mène à la fiche complète.
-  r.push([S.cli.indexOf("onclick=\"agtShowFiche(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl") !== -1 && !/agtShowConfig|agtSaveConfig/.test(S.gt + S.cli), '★★ un seul écran de config : la fiche complète (Domaine), plus de fenêtre Config (GT-B17)']);
+  r.push([S.cli.indexOf("['agtShowFiche', 'Formule, essai et statut']") !== -1 && !/agtShowConfig|agtSaveConfig/.test(S.gt + S.cli), '★★ un seul écran de config : l’ancienne fiche (formule, essai, statut), plus de fenêtre Config (GT-B17) — la fiche complète est en pleine page depuis FICHE-1']);
   r.push([fonction(S.gt, '_fcSecDom').indexOf('_agtCguHtml(c, _FC_SLUG)') !== -1 && /_agtMutConfigDomaine\(cfg,existe,nom,lat,lon\)/.test(S.gt), 'la fiche › Domaine garde la règle de config et l’acceptation CGU + DPA']);
   r.push([S.cli.indexOf("(c.parcelles == null ? '\\u2014' : c.parcelles)") !== -1 && S.cli.indexOf("if (c.echecs && c.echecs.length) r.push('lecture impossible');") !== -1, 'la fiche d’un domaine dit « — » et sa santé nomme une lecture impossible (GT-UI-3 ; avant, la carte)']);
   r.push([fonction(S.gt, '_agtBuildLog').indexOf('e.icon') === -1 && fonction(S.gt, '_agtRadarTraces').indexOf("_agtIco(e.icon||'')") !== -1, 'le nom d’une icône ne s’écrit jamais en toutes lettres (GT-B23) : le journal en tableau n’en montre plus, les traces du Radar la dessinent']);
@@ -155,6 +155,6 @@ mord('★ le voyant ne repasse plus au vert', 'gt', ": '<div id=\"agt-bottom-sta
 mord('★ une note de lead recharge tout', 'gt', "      if(await _agtSaveLeadSt(id)) agtRenderBody();   // ★ GTFIX-4 (GT-B11)", "      if(await _agtSaveLeadSt(id)) renderAdminGT();", 'statiques');
 mord('★ les traces écrivent le nom de l’icône en toutes lettres', 'gt', "'<div class=\"agt-trace\"><span class=\"agt-trace-ic\" aria-hidden=\"true\">'+_agtIco(e.icon||'')+'</span>", "'<div class=\"agt-trace\"><span class=\"agt-trace-ic\" aria-hidden=\"true\">'+(e.icon||'')+'</span>", 'statiques');   // GT-UI-7 : le journal en tableau n’a plus d’icône ; les traces du Radar, si
 mord('★ « il y a 312 h » revient', 'gt', "    var when = e.ts ? _agtRelTime(e.ts) : '';", "    var diff = e.ts ? Math.floor((Date.now()-new Date(e.ts))/60000) : null; var when = diff===null ? '' : 'il y a '+Math.floor(diff/60)+'h';", 'statiques');
-mord('★ « Config » rouvre une seconde fenêtre', 'cli', "onclick=\"agtShowFiche(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl", "onclick=\"agtShowConfig(\\'' + _escAttr(c.slug) + '\\')\">Fiche compl", 'statiques');
+mord('★ « Config » rouvre une seconde fenêtre', 'cli', "['agtShowFiche', 'Formule, essai et statut']", "['agtShowConfig', 'Formule, essai et statut']", 'statiques');   // FICHE-1 : l’ancre suit
 console.log('\n' + '─'.repeat(30) + '\n  ' + okC.length + ' vert · ' + koC.length + ' ROUGE\n' + '─'.repeat(30));
 process.exit(koC.length ? 1 : 0);
