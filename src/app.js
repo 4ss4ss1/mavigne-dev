@@ -5881,13 +5881,21 @@ function renderHomeDirect(){
   J.forEach(function(j){ if(j.statut!=='En cours'||j.date!==auj||!j.parcelle) return; var k=j.parcelle+'|'+j.tache; if(vus[k]) return; vus[k]=1;
     var p=(PARCELLES||[]).find(function(x){ return x&&x.nom===j.parcelle; }); if(p&&getTacheStatut(p,j.tache)!=='En cours') return; cours.push(j); });
   var S=((typeof SESSIONS!=='undefined'&&SESSIONS)||[]).filter(function(s){ return s&&s.statut==='En cours'&&(typeof window._sessInSaison!=='function'||window._sessInSaison(s)); });   // ★ ACCV-4 (§419) : les sessions de la saison, comme le Tracteur
-  var hC=cours.map(function(j){ var l=qui(j), lui=l.indexOf(me)>=0, h=_hvHeure(j);
-      return '<div class="hk-ed cours"><span class="hk-ed-i"><i class="hpc-pouls" aria-hidden="true"></i></span><span class="hk-ed-t"><b>'+(lui?(l.length>1?'Votre \u00e9quipe':'Vous'):_escHtml(_accNoms(l)))+'</b><span>'+_escHtml(tNom(j.tache))+', '+_escHtml(j.parcelle)+'</span></span><span class="hk-ed-h">'+(h?'depuis '+h:'')+'</span></div>'; }).join('')
-    +S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+_escHtml(s.coequipier?(s.coequipier===me?' et vous':' et '+s.coequipier):'')+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join('');
+  // ★★ RANGS-1 (§528) : au tracteur EN CE MOMENT seulement — une parcelle en mesure, une pause, ou entre deux parcelles (cockpit.js,
+  //   _ckTracJour, la ligne « au tracteur » du Pilotage), parmi les sessions de la saison. Avant : toute session restée ouverte, même
+  //   sans un geste du jour — l'amendement de la veille annonçait « au tracteur » un jour de repos. Les parcelles commencées : ceux
+  //   qui y sont maintenant (utils.js, _mvJRangs) ; « Personne en ce moment » quand l'équipe est ailleurs.
+  var maint=Date.now(), vuNow={ iso:auj, ts:maint };
+  var TC=(typeof window._ckTracJour==='function')?((window._ckTracJour(S, auj, { tracs:[], maint:maint })||{}).cours||[]):null;
+  var hh=function(t){ var d=new Date(t); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+  var hC=cours.map(function(j){ var l=(typeof _jFaitPar==='function')?_jFaitPar(j, vuNow):qui(j), lui=l.indexOf(me)>=0, h=_hvHeure(j);
+      return '<div class="hk-ed cours"><span class="hk-ed-i"><i class="hpc-pouls" aria-hidden="true"></i></span><span class="hk-ed-t"><b>'+(l.length?(lui?(l.length>1?'Votre \u00e9quipe':'Vous'):_escHtml(_accNoms(l))):'Personne en ce moment')+'</b><span>'+_escHtml(tNom(j.tache))+', '+_escHtml(j.parcelle)+'</span></span><span class="hk-ed-h">'+(h?'depuis '+h:'')+'</span></div>'; }).join('')
+    +(TC?TC.map(function(x){ var av=Array.isArray(x.avec)?x.avec:[], lui=x.qui===me, avm=av.indexOf(me)>=0, autres=av.filter(function(n){ return n!==me; });
+        return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(x.qui||'Un tractoriste'))+_escHtml((avm?' et vous':'')+(autres.length?' et '+_accNoms(autres):''))+', au tracteur</b><span>'+_escHtml((x.act||'Session')+(x.entre?', entre deux parcelles':((x.parcs&&x.parcs.length)?', '+x.parcs.join(', '):'')))+'</span></span><span class="hk-ed-h">'+(x.pause?'en pause':(x.ts?'depuis '+hh(x.ts):''))+'</span></div>'; }).join(''):S.map(function(s){ var lui=s.conducteur===me; return '<div class="hk-ed cours"><span class="hk-ed-i">'+_mvIcon('tracteur',16)+'</span><span class="hk-ed-t"><b>'+(lui?'Vous':_escHtml(s.conducteur||'Un tractoriste'))+_escHtml(s.coequipier?(s.coequipier===me?' et vous':' et '+s.coequipier):'')+', au tracteur</b><span>'+_escHtml(s.activite||'Session')+'</span></span><span class="hk-ed-h"></span></div>'; }).join(''));
   var V=J.filter(function(j){ return j.statut==='Valid\u00e9'&&j.parcelle&&!j.auTracteur; })   /* COEQ-4 (§525) : l'amendement fait au tracteur est montré par sa session */.slice(0,12), prec='', hF='';
   V.forEach(function(j){ var jr=_hvJour(j.date); if(jr!==prec){ hF+='<div class="hk-ed-g">'+_escHtml(jr)+'</div>'; prec=jr; }
     hF+='<div class="hk-ed"><span class="hk-ed-i">'+_mvIcon('check',16)+'</span><span class="hk-ed-t">'+sujet(qui(j))+' <b>'+_escHtml(j.parcelle)+'</b><span>'+_escHtml(tNom(j.tache))+'</span></span><span class="hk-ed-h">'+_hvHeure(j)+'</span></div>'; });
-  var n=cours.length+S.length, nb=document.getElementById('home-direct-n'), vif=document.getElementById('home-direct-vif');
+  var n=cours.length+(TC?TC.length:S.length), nb=document.getElementById('home-direct-n'), vif=document.getElementById('home-direct-vif');
   if(nb){ nb.textContent=n?n+' en cours':''; nb.style.display=n?'':'none'; }
   if(vif) vif.classList.toggle('off',!n);
   if(!hC&&!hF){ c.innerHTML='<div class="hk-calme"><span class="hk-as-i">'+_mvIcon('sablier',16)+'</span><span>Rien encore aujourd\u2019hui. Les d\u00e9buts et les validations de l\u2019\u00e9quipe s\u2019afficheront ici, au fil de la journ\u00e9e.</span></div>'; return; }
@@ -6137,7 +6145,8 @@ function _mvPartTache(out){
   JOURNAL.forEach(function(j){
     if(!me||!j||j.meteo||!j.tache||!j.date||j.date<d15||M.taches.indexOf(j.tache)<0)return;
     if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(j.date)!==vn)return;
-    if(j.qui!==me&&(j.membresEquipe||[]).indexOf(me)<0)return;
+    if(typeof _jFaitPar==='function'){ if(_jFaitPar(j).indexOf(me)<0)return; }   // ★ RANGS-1 (§528) : qui a vraiment travaillé (ni « sans moi », ni hors des rangs)
+    else if(j.qui!==me&&(j.membresEquipe||[]).indexOf(me)<0)return;
     cnt[j.tache]=(cnt[j.tache]||0)+1;
   });
   var best=M.taches[0],bestN=0;
@@ -6540,9 +6549,8 @@ function _mvMurData(){
     var key=j.parcelle+'|'+(j.tache||'');
     if(seen[key])return;
     seen[key]=1;
-    var eq=[];
-    if(j.qui)eq.push(j.qui);
-    (j.membresEquipe||[]).forEach(function(n){ if(n&&eq.indexOf(n)<0)eq.push(n); });
+    var eq=(typeof _jFaitPar==='function')?_jFaitPar(j).slice():[];   // ★ RANGS-1 (§528) : qui a vraiment travaillé (ni « sans moi », ni hors des rangs)
+    if(typeof _jFaitPar!=='function'){ if(j.qui)eq.push(j.qui); (j.membresEquipe||[]).forEach(function(n){ if(n&&eq.indexOf(n)<0)eq.push(n); }); }
     if(!eq.length)return;
     var s=pS[j.parcelle],part=s/eq.length;
     tot+=s; nTr++;
@@ -9883,8 +9891,7 @@ function _mvdsBilan(tache){
   JOURNAL.forEach(function(j){
     if(!j||j.meteo||j.tache!==tache||!j.date)return;
     if(vn&&typeof window._saisonForDate==='function'&&window._saisonForDate(j.date)!==vn)return;
-    if(j.qui)qui[j.qui]=1;
-    (j.membresEquipe||[]).forEach(function(n){ if(n)qui[n]=1; });
+    ((typeof _jFaitPar==='function')?_jFaitPar(j):[j.qui].concat(j.membresEquipe||[])).forEach(function(n){ if(n)qui[n]=1; });   // ★ RANGS-1 (§528) : qui a vraiment travaillé
     if(!dmin||j.date<dmin)dmin=j.date;
     if(!dmax||j.date>dmax)dmax=j.date;
   });
@@ -11409,10 +11416,22 @@ function _renderMeteoSnapshot(s){
 //   · La correction ne touche que le groupe : l'auteur reste (traçabilité), la date, la parcelle, la tâche et l'état ne bougent pas
 //     (les changer changerait l'avancement des parcelles). Elle s'écrit sur l'entrée (`eqCorr` : par qui, quand).
 //   · « Toute la journée » : les validations de la même tâche, le même jour, par le même auteur, dans le même état.
-function _jFaitPar(j){
+function _jFaitPar(j, vu){
   if(!j) return [];
   var l=(j.quiHors?[]:[j.qui]).concat(j.membresEquipe||[]);
-  return l.filter(function(n,i){ return n&&n!=='Equipe'&&l.indexOf(n)===i; });
+  var r=l.filter(function(n,i){ return n&&n!=='Equipe'&&l.indexOf(n)===i; });
+  // ★★ RANGS-1 (§528) : seulement ceux qui étaient dans les rangs — ni absents ni au repos au planning, ni en cave, ni au tracteur
+  //   à l'heure de la ligne (utils.js, _mvJRangs). Nico (04/11) : « il y a le même problème dans le journal ». `vu` ({iso, ts}) : jugé
+  //   à un autre instant (« En ce moment »). Une équipe corrigée au Journal (eqCorr) fait foi telle quelle.
+  if(typeof window!=='undefined'&&typeof window._mvJRangs==='function'){ try{ r=window._mvJRangs(j, r, vu).dans; }catch(x){ if(window._mvAvale) window._mvAvale(x,'app.js/_jFaitPar'); } }
+  return r;
+}
+// ★ RANGS-1 (§528) : ceux qui figurent sur la ligne sans avoir été dans les rangs, et pourquoi — la ligne et la fiche du Journal.
+function _jHorsRangs(j){
+  if(!j||typeof window==='undefined'||typeof window._mvJRangs!=='function') return [];
+  var b=[j.quiHors?'':j.qui].concat(j.membresEquipe||[]);
+  b=b.filter(function(n,i){ return n&&n!=='Equipe'&&b.indexOf(n)===i; });
+  try{ return window._mvJRangs(j, b).hors; }catch(x){ if(window._mvAvale) window._mvAvale(x,'app.js/_jHorsRangs'); return []; }
 }
 window._jFaitPar=_jFaitPar;
 function _jEqCibles(id,tout){
@@ -11484,6 +11503,8 @@ function _jAvas(r, col){
   if(r.quiHors) noms=(_jFaitPar(r)||[]).slice();
   else if(isEq){ if(r.qui&&r.qui!=='Equipe') noms.push(r.qui); (r.membresEquipe||[]).forEach(function(n){ noms.push(n); }); }
   else noms=[r.qui||'?'];
+  var _jhr=(typeof _jHorsRangs==='function')?_jHorsRangs(r):[];   // ★ RANGS-1 (§528) : pas ceux qui n'étaient pas dans les rangs
+  if(_jhr.length) noms=noms.filter(function(n){ return !_jhr.some(function(h){ return h.nom===n; }); });
   noms=noms.filter(function(n,i,a){ return n && a.indexOf(n)===i; });
   if(!noms.length) noms=['?'];
   var coul=function(n){ if(n===r.qui&&!r.quiHors) return col; var m=MEMBRES.find(function(x){ return x.nom===n; }); return (m&&m.couleur)||COULEURS_MBR[n]||'#888'; };
@@ -11567,8 +11588,9 @@ function renderJournalList(){
         const m=MEMBRES.find(x=>x.nom===r.qui);
         const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
-        const membresStr=isEq&&r.membresEquipe&&r.membresEquipe.length>0?` + ${r.membresEquipe.join(', ')}`:isEq?' + équipe':'';
-        const quiAff=r.quiHors?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné');   // ★ ACCV-4 (§419) : l'auteur hors du groupe ne passe plus pour un travailleur
+        const _jhr=(typeof _jHorsRangs==='function')?_jHorsRangs(r):[], _jhn=_jhr.map(function(h){ return h.nom; }), _jaut=!r.quiHors&&!!r.qui&&_jhn.indexOf(r.qui)>=0, _jmb=(r.membresEquipe||[]).filter(function(n){ return _jhn.indexOf(n)<0; }), _jtous=isEq&&(r.membresEquipe||[]).length>0&&!_jmb.length;   // ★ RANGS-1 (§528) : ni ceux qui n'étaient pas dans les rangs ; l'auteur au tracteur à cette heure-là, comme « sans moi »
+        const membresStr=isEq&&_jmb.length>0?` + ${_jmb.join(', ')}`:(isEq&&!_jtous)?' + équipe':'';
+        const quiAff=(r.quiHors||_jaut)?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(_jtous?((r.qui&&r.qui!=='Equipe')?r.qui:'\u2014'):(isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné'));   // ★ ACCV-4 (§419) : l'auteur hors du groupe ne passe plus pour un travailleur
         // ARRACH-3 : l'étape d'arrachage, et le prestataire quand c'en est un, à côté de la tâche.
         const tacheAff=_escHtml(tNom(r.tache)+(r.etapeLbl?(' \u00b7 '+r.etapeLbl+(r.presta?(' (prestataire'+(r.prestaNom?' '+r.prestaNom:'')+')'):'')):''));
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
@@ -12001,11 +12023,12 @@ function _jFicheHtml(r){
   if(r.trac&&typeof window._trJournalFiche==='function') return window._trJournalFiche(r);   // ★ COEQ-3 (§524) : une ligne du tracteur
   var p=(PARCELLES||[]).find(function(x){return x&&x.nom===r.parcelle;}), su=p?(p.surface||p.surf||''):'';
   var eq=r.equipe||r.qui==='Equipe';
-  var qui=r.quiHors?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(eq?('\u00c9quipe '+[r.qui&&r.qui!=='Equipe'?r.qui:''].concat(r.membresEquipe||[]).filter(Boolean).join(', ')):(r.qui||'Non assign\u00e9'));
+  var _jhr=(typeof _jHorsRangs==='function')?_jHorsRangs(r):[], _jhn=_jhr.map(function(h){ return h.nom; }), _jaut=!r.quiHors&&!!r.qui&&_jhn.indexOf(r.qui)>=0, _jmb=(r.membresEquipe||[]).filter(function(n){ return _jhn.indexOf(n)<0; }), _jtous=eq&&(r.membresEquipe||[]).length>0&&!_jmb.length;   // ★ RANGS-1 (§528)
+  var qui=(r.quiHors||_jaut)?((_jFaitPar(r).join(', ')||'\u2014')+' \u00b7 valid\u00e9 par '+(r.qui||'?')):(_jtous?((r.qui&&r.qui!=='Equipe')?r.qui:'\u2014'):(eq?('\u00c9quipe '+[r.qui&&r.qui!=='Equipe'?r.qui:''].concat(r.membresEquipe||[]).filter(function(n){ return n&&_jhn.indexOf(n)<0; }).join(', ')):(r.qui||'Non assign\u00e9')));
   return '<div class="jfx-d">'+_escHtml(fmtDate(r.date)+(r.time?' \u00b7 '+r.time:''))+'</div>'
     +'<div class="jfx-t">'+_escHtml(tNom(r.tache)+(r.etapeLbl?' \u00b7 '+r.etapeLbl:'')+(r.parcelle?' \u00b7 '+r.parcelle:''))+'</div>'
     +'<div class="jfx-s">'+_mvBadge(r.statut, r.statut==='Valid\u00e9'?'vert':(r.statut==='Info'?'neutre':'ambre'))+(su?'<span>'+_escHtml(String(su).replace('.',','))+' ha</span>':'')+'</div>'
-    +'<dl class="jfx-dl"><dt>Qui</dt><dd>'+_escHtml(qui)+'</dd></dl>'
+    +'<dl class="jfx-dl"><dt>Qui</dt><dd>'+_escHtml(qui)+'</dd>'+((_jhr.length&&typeof window._mvRangsTexte==='function')?'<dt>Pas dans les rangs</dt><dd>'+_escHtml(window._mvRangsTexte(_jhr))+'</dd>':'')+'</dl>'
     +_jEqTrace(r)
     +(r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):'')
     +'<div class="jfx-act">'+_jEqBtn(r)+'</div>';

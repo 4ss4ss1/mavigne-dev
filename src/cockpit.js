@@ -47,10 +47,15 @@ function _ckAvec(s, parcs){
   else if(s && s.coequipier) l.push(String(s.coequipier));
   return l;
 }
-function _ckQui(e){
+// ★ RANGS-1 (§528) : seulement ceux qui étaient dans les rangs — ni absents ni au repos au planning, ni en cave, ni au tracteur
+//   (utils.js, _mvJRangs) ; `vu` ({iso, ts}) juge à l'instant présent, pour « En ce moment ». Hors navigateur, la liste reste entière.
+function _ckQui(e, vu){
   var q = String((e && e.qui) || '').trim(), r = [];
   ((e && Array.isArray(e.membresEquipe)) ? e.membresEquipe : []).forEach(function(x){ var n = String(x || '').trim(); if(n && r.indexOf(n) < 0) r.push(n); });
   if(q && r.indexOf(q) < 0 && !(e.quiHors && r.length)) r.push(q);
+  if(typeof window !== 'undefined' && typeof window._mvJRangs === 'function'){
+    try{ r = window._mvJRangs(e, r, vu).dans; }catch(x){ if(window._mvAvale) window._mvAvale(x, 'cockpit.js/_ckQui'); }
+  }
   return r;
 }
 window._ckQui = _ckQui;
@@ -105,9 +110,12 @@ window._ckTracJour = function(sessions, auj, o){
       var tn = (tracs.filter(function(x){ return x && x.id === s.tracteurId; })[0] || {}).nom || '';
       evts.push({ k: 'trac-debut', qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: [], m: null, trac: String(tn), ts: (t0 && _ckJourDe(t0) === auj) ? t0 : (tr.length ? Number(tr[0].t) : null) });
     }
-    var faits = [], bloc = [], tB = null, pause = false, tP = null, pBloc = [];
+    var faits = [], bloc = [], tB = null, pause = false, tP = null, pBloc = [], tE = null, pE = [];
     tr.forEach(function(y){
       var e = String(y.e || ''), ps = _ckParcs(y.p), t = Number(y.t);
+      // ★ RANGS-1 (§528) : la dernière parcelle finie (ou cochée) par le conducteur ou son coéquipier — « entre deux parcelles ».
+      if((e === 'fin' || e === 'coche' || e === 'retabli' || e === 'valeur') && (!y.u || y.u === qui || (s.coequipier && y.u === String(s.coequipier)))){ tE = t; pE = ps; }
+      else if(e === 'debut' || e === 'reprise' || e === 'reprend' || e === 'interrompt' || e === 'dejeuner' || e === 'finjour' || e === 'ferme') tE = null;
       if(e === 'fin'){ if(ps.length) faits.push({ parcs: ps, m: (typeof y.m === 'number' && y.m > 0) ? y.m : null, ts: t }); bloc = []; tB = null; }
       else if(e === 'coche' || e === 'retabli'){ if(ps.length) faits.push({ parcs: ps, m: null, ts: t }); }
       else if(e === 'decoche'){ ps.forEach(function(n){ for(var j = faits.length - 1; j >= 0; j--){ var k = faits[j].parcs.indexOf(n); if(k >= 0){ faits[j].parcs.splice(k, 1); return; } } }); }
@@ -130,6 +138,9 @@ window._ckTracJour = function(sessions, auj, o){
     if(s.statut === 'Terminé') return;
     if(bloc.length) cours.push({ qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: bloc, ts: tB, pause: false });
     else if(pause) cours.push({ qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: pBloc, ts: tP, pause: true });
+    // ★★ RANGS-1 (§528) : ENTRE DEUX PARCELLES — une parcelle finie il y a moins de 45 min, sans « Fin de journée » : le trajet, le
+    //   plein de l'épandeur ; on est toujours au tracteur. Seulement quand l'appelant donne l'heure (`o.maint`) : en direct.
+    else if(tE != null && o && typeof o.maint === 'number' && _ckJourDe(o.maint) === auj && o.maint >= tE && o.maint - tE <= 45 * 60000) cours.push({ qui: qui, avec: (typeof _ckAvec === 'function' ? _ckAvec(s, null) : []), act: act, parcs: pE, ts: tE, pause: false, entre: true });
   });
   evts.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
   cours.sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });

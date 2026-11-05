@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.65', d: '2026-11-04', items: [   // RANGS-1 (§528) : qui est dans les rangs — « En direct » et le Journal
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: '« En direct » ne nomme que ceux qui sont dans les rangs',
+      desc: "Une parcelle en cours nommait toute l’équipe qui l’avait commencée, même un autre jour : une absente au planning, un salarié au repos, ceux partis au tracteur. «\u00a0En ce moment\u00a0» ne garde plus que ceux qui y sont maintenant — «\u00a0personne en ce moment\u00a0» quand toute l’équipe est ailleurs — et le tracteur garde sa ligne, avec le conducteur et son coéquipier, y compris entre deux parcelles (le trajet, le plein)." },
+    { niv: 0, pour: ['tous'], emoji: 'tracteur', titre: '« En direct » de l’Accueil : le tracteur en ce moment seulement',
+      desc: "Une session restée ouverte s’affichait «\u00a0au tracteur\u00a0» même un jour où personne n’y touchait. L’Accueil ne montre plus que le tracteur en marche, en pause ou entre deux parcelles, avec son équipe et l’heure du début." },
+    { niv: 0, pour: ['tous'], emoji: 'journal', titre: 'Le Journal dit qui a vraiment travaillé',
+      desc: "Une validation ne nomme plus ceux qui n’étaient pas dans les rangs à cette heure-là : absents ou au repos au planning, en cave, au tracteur (conducteur ou coéquipier). Les lignes déjà écrites se corrigent aussi ; sur ordinateur, la fiche dit qui a été écarté et pourquoi («\u00a0Pas dans les rangs\u00a0»). Une équipe corrigée avec «\u00a0Équipe\u00a0» reste telle quelle. Les jalons, «\u00a0Ma part\u00a0» et le bilan de campagne comptent de la même façon." }
+  ] },
   { v: '10.64', d: '2026-11-04', items: [   // YALLER-1 (§527) : trouver une parcelle et y aller
     { niv: 1, pour: ['tous'], cible: '#pSearch', emoji: 'itineraire', titre: 'Retrouver une parcelle et y aller',
       desc: "La recherche des Parcelles cherche dans tout le domaine, même sur la priorité du moment : les parcelles de votre liste d’abord, puis «\u00a0Ailleurs dans le domaine\u00a0», avec la raison (faite, sans la tâche cette période, arrachée). «\u00a0Y aller\u00a0» ouvre l’itinéraire dans le GPS du téléphone, guidage lancé ; l’appli se choisit au premier appui (Réglages › Moi pour la changer). Les accents ne comptent plus." },

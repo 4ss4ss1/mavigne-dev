@@ -276,6 +276,98 @@ function _trParPersonneHtml(s){
     +'<tr class="sdeq-tot"><td>Main-d\u2019\u0153uvre de la session</td><td></td><td class="r">'+hm(tot)+'</td>'+(r.trous?'<td></td>':'')+'</tr></tbody></table></div></section>';
 }
 
+// ── ★★ RANGS-1 (§528) — QUAND UNE PERSONNE EST AU TRACTEUR, CONDUCTEUR OU COÉQUIPIER ─────────────────────────────────────────
+//   Nico (04/11, dicté) : « à partir du moment où on clique sur le début d'une parcelle [au tracteur], il faut que ça retire ces
+//   personnes du en direct des vignes, parce qu'ils ne sont pas en direct des vignes, ils sont en direct du tracteur ».
+//   · À l'instant présent (`direct`) : la lecture même de la ligne « au tracteur » d'« En direct » (cockpit.js, _ckTracJour avec
+//     `maint` : une parcelle en mesure, une pause, ou entre deux parcelles depuis moins de 45 min) — la ligne de la vigne et celle
+//     du tracteur ne peuvent pas se contredire.
+//   · À une heure passée : les plages du jour, lues dans les mesures du chrono (t0 → t1, avec le coéquipier de la parcelle, `co`,
+//     COEQ-2) et dans la boîte noire du jour (SESS-1, trois jours gardés) : une mesure, une pause, puis jusqu'au geste suivant s'il
+//     arrive dans les 45 min (le trajet, le plein de l'épandeur) ; « Fin de journée » ferme. Deux plages à moins de 45 min se
+//     rejoignent. Un geste fait par un autre (l'administrateur qui corrige depuis le bureau) ne dit rien de qui était au tracteur.
+//   · Une parcelle cochée sans aucune heure (une vieille coche, sans mesure ni boîte noire) ne dit pas quand : elle n'écarte personne.
+var _TR_ENTRE_MS=45*60000, _TR_RG={t:0,m:{}};
+var _TR_PRESENT={debut:1,reprise:1,reprend:1,ajout:1,fin:1,coche:1,valeur:1,retabli:1,decoche:1,interrompt:1,dejeuner:1,finjour:1,ferme:1};
+function _trRgMemo(){ var n=Date.now(); if(n-_TR_RG.t>5000) _TR_RG={t:n,m:{}}; return _TR_RG.m; }
+function _trHeureLe(iso,hhmm){ var m=/^(\d{1,2})[:h](\d{2})/.exec(String(hhmm||'').trim()), p=String(iso||'').split('-'); if(!m||p.length!==3) return null; var d=new Date(+p[0],+p[1]-1,+p[2],+m[1],+m[2]); return isNaN(d.getTime())?null:d.getTime(); }
+function _trCoDepuisTs(s){ var d=s&&s.coeqDepuis; if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(String(d.j||''))) return null; return _trHeureLe(d.j,d.h||'00:00'); }
+function _trParcsTr(p){ return String(p||'').split(' + ').map(function(x){ return x.trim(); }).filter(Boolean); }
+function _trDuo(a,b){ return [a,b].filter(function(n,i,l){ return n&&l.indexOf(n)===i; }); }
+// Les morceaux de temps au tracteur d'une session, un jour : [{a, b, qui:[conducteur, coéquipier]}], ajoutés à `out`.
+function _trSegsSession(s,iso,maint,out){
+  if(!s||typeof s!=='object') return;
+  var cond=String(s.conducteur||'').trim();
+  if(s.type==='traitement'){
+    if(!cond||String(s.date||'').slice(0,10)!==iso) return;
+    var ta=_trHeureLe(iso,s.heureDebut), tb=_trHeureLe(iso,s.heureFin);
+    if(ta!=null&&tb!=null&&tb>=ta) out.push({a:ta,b:tb,qui:[cond]});
+    else if(ta!=null||tb!=null){ var tx=(ta!=null)?ta:tb; out.push({a:tx,b:tx,qui:[cond]}); }
+    return;
+  }
+  var coM=String(s.coequipier||'').trim(), coD=_trCoDepuisTs(s), coP={};
+  (s.parcellesFaites||[]).forEach(function(x){ if(x&&typeof x==='object'&&x.nom) coP[x.nom]=_trCoDe(s,x); });
+  // le coéquipier d'un morceau : celui de ses parcelles déjà faites, sinon celui du moment (depuis coeqDepuis, COEQ-2)
+  var qui=function(ps,t){ var c=null; for(var i=0;i<(ps||[]).length;i++){ if(coP[ps[i]]!=null){ c=coP[ps[i]]; break; } } if(c==null) c=(coD==null||t>=coD)?coM:''; return _trDuo(cond,c); };
+  (s.parcellesFaites||[]).forEach(function(x){
+    if(!x||typeof x!=='object'||!(typeof x.t0==='number'&&x.t0>0&&typeof x.t1==='number'&&x.t1>=x.t0)) return;
+    if(_trIso(x.t0)!==iso&&_trIso(x.t1)!==iso) return;
+    out.push({a:x.t0,b:x.t1,qui:_trDuo(cond,_trCoDe(s,x))});
+  });
+  var tr=(Array.isArray(s.trace)?s.trace:[]).filter(function(y){ return y&&typeof y.t==='number'&&_TR_PRESENT[y.e]&&_trIso(y.t)===iso&&(!y.u||y.u===cond||(coM&&y.u===coM)); })
+    .slice().sort(function(a,b){ return a.t-b.t; });
+  var bloc=null, blocP=[], pause=null, fin=null, finP=[], ferme=false;
+  tr.forEach(function(y){
+    var e=String(y.e), t=y.t, ps=_trParcsTr(y.p);
+    if(fin!=null){ if(t-fin<=_TR_ENTRE_MS) out.push({a:fin,b:t,qui:qui(finP,fin)}); fin=null; }
+    ferme=false;
+    if(e==='debut'||e==='reprise'){ if(bloc!=null) out.push({a:bloc,b:t,qui:qui(blocP,bloc)}); if(pause!=null){ out.push({a:pause,b:t,qui:qui(blocP,pause)}); pause=null; } bloc=t; blocP=ps.slice(); }
+    else if(e==='reprend'){ if(pause!=null){ out.push({a:pause,b:t,qui:qui(blocP,pause)}); pause=null; } if(ps.length){ bloc=t; blocP=ps.slice(); } else out.push({a:t,b:t,qui:qui(blocP,t)}); }
+    else if(e==='ajout'){ ps.forEach(function(n){ if(blocP.indexOf(n)<0) blocP.push(n); }); out.push({a:t,b:t,qui:qui(blocP,t)}); }
+    else if(e==='fin'){ var pf=ps.length?ps:blocP; if(bloc!=null){ out.push({a:bloc,b:t,qui:qui(pf,bloc)}); bloc=null; } else out.push({a:t,b:t,qui:qui(pf,t)}); fin=t; finP=pf; }
+    else if(e==='coche'||e==='valeur'||e==='retabli'){ out.push({a:t,b:t,qui:qui(ps,t)}); fin=t; finP=ps; }
+    else if(e==='interrompt'||e==='dejeuner'){ if(bloc!=null){ out.push({a:bloc,b:t,qui:qui(blocP,bloc)}); bloc=null; } pause=t; }
+    else if(e==='finjour'||e==='ferme'){ if(bloc!=null){ out.push({a:bloc,b:t,qui:qui(blocP,bloc)}); bloc=null; } if(pause!=null){ out.push({a:pause,b:t,qui:qui(blocP,pause)}); pause=null; } out.push({a:t,b:t,qui:qui(blocP,t)}); ferme=true; }
+    else out.push({a:t,b:t,qui:qui(ps,t)});
+  });
+  // Ce qui reste ouvert : aujourd'hui, jusqu'à maintenant (après la fin d'une parcelle : 45 min au plus) ; un autre jour, jusqu'au
+  //   dernier geste de la journée — on ne sait pas mieux.
+  var ouvert=(typeof maint==='number'&&_trIso(maint)===iso&&s.statut!=='Termin\u00e9'&&!ferme), tl=tr.length?tr[tr.length-1].t:null;
+  if(bloc!=null) out.push({a:bloc,b:ouvert?Math.max(bloc,maint):Math.max(bloc,tl||bloc),qui:qui(blocP,bloc)});
+  if(pause!=null) out.push({a:pause,b:ouvert?Math.max(pause,maint):Math.max(pause,tl||pause),qui:qui(blocP,pause)});
+  if(fin!=null&&ouvert&&maint>fin) out.push({a:fin,b:Math.min(maint,fin+_TR_ENTRE_MS),qui:qui(finP,fin)});
+}
+function _trSegsJour(iso,maint){
+  var memo=_trRgMemo(), k='s|'+iso+'|'+(typeof maint==='number'?Math.floor(maint/60000):''), out=memo[k];
+  if(out) return out;
+  out=[];
+  (window.SESSIONS||[]).forEach(function(s){ try{ _trSegsSession(s,iso,maint,out); }catch(e){ if(window._mvAvale) window._mvAvale(e,'coequipier.js/_trSegsJour'); } });
+  memo[k]=out; return out;
+}
+// Les plages au tracteur d'une personne, un jour : [{a, b}] triées, rejointes à moins de 45 min.
+function _trPlagesDe(nom,iso,maint){
+  nom=String(nom==null?'':nom).trim(); iso=String(iso||'').slice(0,10);
+  if(!nom||!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return [];
+  var L=_trSegsJour(iso,(typeof maint==='number')?maint:Date.now()).filter(function(g){ return g.qui.indexOf(nom)>=0; })
+    .map(function(g){ return {a:g.a,b:g.b}; }).sort(function(x,y){ return x.a-y.a; }), r=[];
+  L.forEach(function(g){ var d=r[r.length-1]; if(d&&g.a-d.b<=_TR_ENTRE_MS){ if(g.b>d.b) d.b=g.b; } else r.push({a:g.a,b:g.b}); });
+  return r;
+}
+// Au tracteur à l'heure `ts` du jour `iso` ? `direct` : l'instant présent, lu comme la ligne « au tracteur » d'« En direct ».
+function _trAuTracteur(nom,iso,ts,direct){
+  nom=String(nom==null?'':nom).trim(); iso=String(iso||'').slice(0,10);
+  if(!nom||typeof ts!=='number'||!isFinite(ts)||!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+  if(direct&&typeof window._ckTracJour==='function'){
+    var memo=_trRgMemo(), k='c|'+iso+'|'+Math.floor(ts/60000), C=memo[k];
+    if(!C){ C=(window._ckTracJour(window.SESSIONS||[],iso,{tracs:[],maint:ts})||{}).cours||[]; memo[k]=C; }
+    return C.some(function(c){ return c&&(String(c.qui||'').trim()===nom||(Array.isArray(c.avec)&&c.avec.indexOf(nom)>=0)); });
+  }
+  var P=_trPlagesDe(nom,iso,Date.now());
+  for(var i=0;i<P.length;i++){ if(ts>=P[i].a&&ts<=P[i].b) return true; }
+  return false;
+}
+if(typeof window!=='undefined') Object.assign(window,{ _trAuTracteur:_trAuTracteur, _trPlagesDe:_trPlagesDe });
+
 if(typeof window!=='undefined') Object.assign(window,{ _trParPersonne:_trParPersonne, _trParPersonneHtml:_trParPersonneHtml, _trJournalLignes:_trJournalLignes, _trJournalRow:_trJournalRow, _trJournalCarte:_trJournalCarte, _trJournalFiche:_trJournalFiche, _trPassagesParc:_trPassagesParc,
   _trCoDe:_trCoDe, _trCoeqNoms:_trCoeqNoms, _trJourDe:_trJourDe, _trSessADeux:_trSessADeux,
   _trStampCo:_trStampCo, _trJoursDe:_trJoursDe, _trEqDuJour:_trEqDuJour, _trAvecTxt:_trAvecTxt, _trJourTxt:_trJourTxt,

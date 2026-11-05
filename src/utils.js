@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.64';
+export const APP_VERSION = '10.65';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2677,7 +2677,7 @@ var MV_AIDE = {
       ['La roue crantée', "en haut à droite ouvre ce qui se règle une fois l’an pour la vigne — tâches et barème, écartements de plantation, secteurs météo — et les documents de la vigne. Administrateur seulement ; l’en-tête dit « Vigne » sur les trois onglets."],
       ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
       ['La météo 5 jours', "le jour en tête, puis cinq colonnes. La barre et le chiffre sous chaque jour disent le <b>risque</b> de pluie — une probabilité, pas des millimètres ; la note signale le premier jour où il dépasse 50\u00a0%. Quand le domaine a plusieurs communes, le bouton « Secteurs » montre dans la même carte la météo de chaque commune."],
-      ['En direct', " : ce qui est commencé aujourd’hui et pas encore validé, avec l’heure du début, et les sessions du tracteur ouvertes ; puis le fil des validations, rangé par jour — « Vous et Jean avez validé » quand vous en êtes. La carte garde la hauteur d’une journée calme ; « Tout voir » la déplie."],
+      ['En direct', " : ce qui est commencé aujourd’hui et pas encore validé, avec l’heure du début et ceux qui y sont en ce moment, puis le tracteur en marche, en pause ou entre deux parcelles, avec son équipe ; puis le fil des validations, rangé par jour — « Vous et Jean avez validé » quand vous en êtes. Personne n’y figure s’il était absent ou au repos au planning, en cave ou au tracteur. La carte garde la hauteur d’une journée calme ; « Tout voir » la déplie."],
       ['À savoir', " : en tête de la colonne de droite (dessous la carte du jour au téléphone) — un délai de rentrée en cours, la pluie probable, le gel et le vent des prochains jours travaillés. Des faits, jamais une décision : c’est vous qui jugez. Elle reste toujours affichée."],
       ['Au tracteur', " : chez le tractoriste et l’administrateur — votre dernière session, le compteur du tracteur et sa révision quand elle approche, la cuve de GNR (administrateur) ou vos sessions de la saison ; « Démarrer une session » ouvre la feuille du Tracteur."],
       ['Deux colonnes sur ordinateur', " : la journée à gauche (la carte du jour, « La saison », « Ma saison », « Au tracteur ») ; « À savoir », la météo et « En direct » à droite. Cette colonne reste visible en descendant quand elle tient dans l’écran. Au téléphone, une seule colonne, dans l’ordre des questions du matin."],
@@ -2720,6 +2720,7 @@ var MV_AIDE = {
       ['Chaque tâche validée', "écrit une ligne ici, avec la parcelle, la personne et la durée."],
       ['Une équipe au travail', "tient en une seule entrée : tous les noms y figurent, et le travail se partage entre eux."],
       ['Corriger l’équipe', " (administrateur) : sur une validation, le bouton « Équipe » dit qui a vraiment travaillé — celui qui a validé peut rester décoché, il reste l’auteur de l’entrée. « Toute la journée » corrige d’un coup les validations de la même tâche, le même jour ; l’entrée garde la trace de la correction. La liste propose les personnes sous contrat le jour de l’entrée, plus celles déjà notées ; les cochées sont en vert."],
+      ['Qui a travaillé', " : une validation ne nomme que ceux qui étaient dans les rangs à cette heure-là — ni absents ou au repos au planning, ni en cave, ni au tracteur (conducteur ou coéquipier). Les lignes déjà écrites suivent aussi, et une correction du planning ou du coéquipier se voit aussitôt. Sur ordinateur, la fiche dit qui a été écarté et pourquoi (« Pas dans les rangs »). Une équipe corrigée avec « Équipe » reste telle quelle."],
       ['Le tracteur aussi', " : chaque session y tient une ligne par jour — le conducteur et son coéquipier, les parcelles en dépliant ; les traitements aussi, en lecture. Sur ordinateur, sa fiche renvoie à la session (« Équipe » corrige le coéquipier)."],
       ['Les filtres', "par parcelle et par tâche se cumulent ; la pastille rappelle ce qui est actif. « Qui » retrouve chacun : celui qui a validé, les membres de son équipe, le conducteur et le coéquipier."],
       ['Une saisie faite hors réseau', "repart toute seule au retour du signal, et se fusionne avec ce que les autres ont saisi entre-temps : rien n’est écrasé."],
@@ -2921,7 +2922,7 @@ var MV_AIDE = {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
       ['Choisir ce que vous regardez', " : la barre <b>« Vous regardez »</b>, en haut du Pilotage. <b>La campagne</b> : touchez son nom pour en choisir une sur la frise de l’année. <b>L’année vigne</b> ou <b>l’exercice</b> : les flèches remontent aux années passées. Les chiffres du haut et chaque onglet suivent ce choix ; au téléphone, l’étiquette et les dates s’effacent pour tenir dans la barre. <b>Aujourd’hui</b> fait exception : il lit toujours la campagne en cours, et la nomme sous sa date."],
-      ['Aujourd’hui se lit d’un coup d’œil', ": en haut à droite du cadre, la bascule <b>Terrain · Cave · Économie</b> et la roue « Choisir les indicateurs ». Sous la date, la campagne que lisent les chiffres de la page, ses dates et le jour où vous en êtes (quand la barre « Vous regardez » montre déjà cette campagne, son nom seul). Puis une phrase, sur toute la ligne, résume la journée ; sous chaque chiffre, sa référence : la <b>fin prévue</b> et l’<b>objectif</b> sous l’avance ou le retard (en jours travaillés au planning), le <b>coût à la fin</b> et le <b>budget</b> sous l’écart au budget — le « i » dit comment c’est compté. Chaque morceau se touche : le retard mène à la fin prévue, le budget à la vue Économie, les points à anticiper à « À savoir », la cave à la vue Cave. Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon son état sur sa fiche pour la tâche choisie, en contour pâle quand cette tâche y est désactivée, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas) et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, le fil <b>En direct</b> puis <b>À savoir</b> restent visibles quand vous descendez dans la page, sous le bandeau et les onglets, qui restent en haut. Le fil <b>En direct</b> montre d’abord qui est où en ce moment — chaque parcelle en cours avec son équipe et depuis quand, le tracteur en marche ou en pause —, puis la journée : validations, débuts, parcelles finies au tracteur avec le temps mesuré, traitements ; l’équipe passe d’abord, et celui qui a saisi n’y figure que s’il était dans les rangs. Sur ordinateur, il garde la hauteur d’une journée calme : quand il y a plus, la fin s’efface et « Tout voir » le déplie ; « Replier » le remet à sa taille. <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; les <b>points à anticiper</b> y viennent en tête, surlignés et marqués « À anticiper » : une tâche dont les dates sont passées, un contrat qui finit dans les 30 jours, la pluie ou le vent sur une commune où une tâche est en cours. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème (le total des tâches de la carte « par tâche », en heures réelles face au barème des parcelles validées ; un tiret tant que rien n’est à comparer), le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
+      ['Aujourd’hui se lit d’un coup d’œil', ": en haut à droite du cadre, la bascule <b>Terrain · Cave · Économie</b> et la roue « Choisir les indicateurs ». Sous la date, la campagne que lisent les chiffres de la page, ses dates et le jour où vous en êtes (quand la barre « Vous regardez » montre déjà cette campagne, son nom seul). Puis une phrase, sur toute la ligne, résume la journée ; sous chaque chiffre, sa référence : la <b>fin prévue</b> et l’<b>objectif</b> sous l’avance ou le retard (en jours travaillés au planning), le <b>coût à la fin</b> et le <b>budget</b> sous l’écart au budget — le « i » dit comment c’est compté. Chaque morceau se touche : le retard mène à la fin prévue, le budget à la vue Économie, les points à anticiper à « À savoir », la cave à la vue Cave. Viennent les photos du domaine, la <b>fin prévue</b> avec sa frise et votre objectif, la <b>décision du jour</b> en quatre tuiles, le <b>domaine en direct</b> (chaque parcelle à sa forme et à l’échelle, colorée selon son état sur sa fiche pour la tâche choisie, en contour pâle quand cette tâche y est désactivée, rangée par appellation, l’équipe posée sur chaque parcelle en cours, sa pastille qui clignote les jours travaillés ; au survol, une loupe la montre en grand ; la toucher ouvre sa fiche), les chantiers (à faire ou en cours en haut, par date de début ; les terminés en bas) et la charge restante (une ligne relie la photo de chaque jour au point d’aujourd’hui). À droite sur ordinateur, le fil <b>En direct</b> puis <b>À savoir</b> restent visibles quand vous descendez dans la page, sous le bandeau et les onglets, qui restent en haut. Le fil <b>En direct</b> montre d’abord qui est où en ce moment — chaque parcelle en cours et depuis quand, avec ceux de son équipe qui y sont maintenant : ni absents ou au repos au planning, ni en cave ou au tracteur (« personne en ce moment » quand toute l’équipe est ailleurs) ; puis le tracteur en marche, en pause ou entre deux parcelles, avec son équipe —, puis la journée : validations, débuts, parcelles finies au tracteur avec le temps mesuré, traitements ; l’équipe passe d’abord, celui qui a saisi n’y figure que s’il était dans les rangs, et personne n’y figure s’il était absent, au repos, en cave ou au tracteur à cette heure-là. Sur ordinateur, il garde la hauteur d’une journée calme : quand il y a plus, la fin s’efface et « Tout voir » le déplie ; « Replier » le remet à sa taille. <b>À savoir</b> réunit la météo des cinq jours, la pluie ou le vent par secteur, les absences, les fins de contrat, les retards et le matériel ; les <b>points à anticiper</b> y viennent en tête, surlignés et marqués « À anticiper » : une tâche dont les dates sont passées, un contrat qui finit dans les 30 jours, la pluie ou le vent sur une commune où une tâche est en cours. Tout ce qui parle des gens suit le <b>planning</b> : un jour sans travail, l’effectif et les présences montrent le prochain jour travaillé ; un absent revient le premier jour où le planning le prévoit, un arrêt maladie dit sa date de fin. La bascule <b>Terrain / Économie</b>, en haut, donne la photo économique du jour : l’atterrissage de la campagne, le coût à l’hectare, l’écart au barème (le total des tâches de la carte « par tâche », en heures réelles face au barème des parcelles validées ; un tiret tant que rien n’est à comparer), le dépensé face au fait, la cadence de l’équipe, le coût de l’inaction, les postes, les appellations et les tâches — les chiffres de l’onglet Économie ; l’atterrissage y est la fin projetée, et l’arrachage (comme les autres travaux sans barème) a sa ligne « Travaux à l’heure ». « Agrandir » ouvre la courbe en grand ; « Changer la priorité » ouvre le choix de la tâche prioritaire ; la date de l’objectif se règle en touchant son bouton. La tension par personne se détaille dans L’équipe & le matériel, la protection restante dans Conformité."],
       ['La vue Cave', ": la bascule, en haut à droite du cadre, passe à trois vues — <b>Terrain</b>, <b>Cave</b>, <b>Économie</b>. La vue Cave reprend le verdict de la Cave, mot pour mot, et dessine chaque cuve suivie (inox ou bois, son niveau d’après les caisses, des bulles quand elle fermente, un flocon en macération à froid) et, au Chai, un rond par fût là où les fûts demandent un geste : rouge une alerte, orange un geste attendu. Les cuvées qui suivent leur cours (fermentation, malo), puis celles qui sont à jour, tiennent chacune sur une ligne : leur nombre, leurs fûts et, pour les cuvées à jour, le prochain ouillage. « Tout voir », ou leur état dans la légende (gris en cours, vert à jour), les déplie avec tous leurs fûts. La légende filtre ; au survol, une bulle détaille. Dessous : la semaine de l’équipe en cave d’après le Planning (la journée, le matin ou l’après-midi) face aux gestes prévus, le millésime de la vigne à la bouteille, les derniers gestes et ce qu’il faut savoir en cave. Rien ne s’y fait : chaque ligne ouvre l’écran de la Cave. Quand la cave presse, un point s’allume sur « Cave », la phrase du haut le dit, et une ligne Cave s’ajoute dans « À savoir » de Terrain. Dans le coin d’un fût, le signe de sa dernière dégustation — fleur, piqué ou oxydé — : le fût est repéré par son tonnelier, son année et sa référence saisis à l’entonnage ; le signe part quand une dégustation plus récente du même fût ne le note plus. Un fût marqué garde son rond même quand sa cuvée est rangée sur une ligne, juste dessous, avec sa référence. « Choisir les indicateurs » peut masquer la vue ou ses points."],
       ['Presque tout se lit, quatre choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
       ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
@@ -6596,6 +6597,128 @@ window._mvCaveEcrire = function(liste, part){
   if(typeof window.saveData==='function') window.saveData('config');
   return n;
 };
+// ★★★ RANGS-1 (§528, 04/11/2026) — QUI EST DANS LES RANGS. Nico (04/11, dicté) : « le en direct, il est faux… Pauline, elle
+//   n'est pas inscrite sur le planning, elle est en formation… aujourd'hui je suis en repos, donc je ne peux pas être dans les
+//   vignes… à partir du moment où on clique sur le début d'une parcelle [au tracteur], il faut que ça retire ces personnes du en
+//   direct des vignes, parce qu'ils sont en direct du tracteur », puis « il y a le même problème dans le journal ».
+//   Une personne notée dans l'équipe d'une ligne de vigne n'y était pas si, ce jour-là (à cette heure-là quand on la connaît) :
+//   · le planning ne la fait pas travailler : absente, en congé, en récup, en arrêt (la journée), ou pas prévue (au repos) un jour
+//     où le domaine travaille ; une absence d'une partie de la journée ne l'écarte qu'à ses heures d'absence, un retard jamais ;
+//   · elle est en cave (JCAVE-1) : la journée, ou la demi-journée qui couvre l'heure (le matin avant 12 h 30, l'après-midi après) ;
+//   · elle est au tracteur, conducteur ou coéquipier (coequipier.js, _trAuTracteur).
+//   La règle se joue À LA LECTURE (_mvJRangs, lue par app.js/_jFaitPar et cockpit.js/_ckQui) : les lignes déjà écrites se corrigent
+//   aussi, et une correction du planning ou du coéquipier se voit partout aussitôt. L'équipe NOTÉE ne change pas ; une équipe
+//   corrigée par l'administrateur au Journal (`eqCorr`, ACCV-4) fait foi telle quelle. Celui qui a saisi, jugé à l'instant de sa
+//   saisie, n'est écarté que par le tracteur : s'il valide, c'est qu'il était là (« sans moi », quiHors, le dit autrement).
+//   `vu` ({iso, ts}) juge à un autre instant — « En ce moment » : maintenant, pour tout le monde, celui qui a saisi compris.
+//   Hors navigateur ou sans données (ni fiche, ni planning, ni session), personne n'est écarté : la liste revient entière.
+var _MV_RG = { t: 0, m: {} };
+function _mvRgMemo(){ var n = Date.now(); if(n - _MV_RG.t > 5000) _MV_RG = { t: n, m: {} }; return _MV_RG.m; }
+function _mvRgIso(t){ var d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _mvRgDate(iso){ var p = String(iso).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function _mvRgMin(hhmm){ var m = /^(\d{1,2})[:h](\d{2})/.exec(String(hhmm || '').trim()); return m ? (+m[1]) * 60 + (+m[2]) : null; }
+function _mvRgMinDe(ts){ var d = new Date(ts); return d.getHours() * 60 + d.getMinutes(); }
+// Le domaine travaille-t-il ce jour-là (une personne hors bureau, sous contrat, prévue au planning) ? Sinon « au repos » ne dit rien :
+//   un samedi travaillé sans saisie au planning n'écarte pas toute l'équipe.
+function _mvRgDomaine(iso){
+  var memo = _mvRgMemo(), k = 'd|' + iso;
+  if(k in memo) return memo[k];
+  var dt = _mvRgDate(iso), v = false;
+  try{
+    v = (window.MEMBRES || []).some(function(m){
+      return m && m.nom && !m.bureau && (typeof window._mvEnContratLe !== 'function' || window._mvEnContratLe(m, iso)) && window._pilPrevuLe(m, dt);
+    });
+  }catch(x){ if(window._mvAvale) window._mvAvale(x, 'utils.js/_mvRgDomaine'); v = false; }
+  memo[k] = v; return v;
+}
+// Le planning d'une personne un jour : 'present' | 'absent' | 'repos' | { de, a } (absente de telle à telle minute).
+//   Lu comme les présences du Pilotage (_pilEtatEntree, _pilPrevuLe) ; sur un téléphone de salarié, le planning de l'équipe
+//   (MOTIFS-1) porte les absences d'une journée entière, sans motif — c'est assez.
+function _mvRgPlanning(m, iso){
+  var memo = _mvRgMemo(), k = 'p|' + m.nom + '|' + iso;
+  if(k in memo) return memo[k];
+  var v = 'present';
+  try{
+    var dt = _mvRgDate(iso);
+    if(typeof window._pilPrevuLe === 'function' && _mvRgDomaine(iso) && !window._pilPrevuLe(m, dt)) v = 'repos';
+    else {
+      var PE = window.PLANNING_ENTRIES || {}, by = PE[m.nom] && PE[m.nom][dt.getFullYear()];
+      var e = (by && by[dt.getMonth()] && by[dt.getMonth()][dt.getDate()]) || null;
+      if(e && typeof e === 'object'){
+        if(e.type === 'cp' || e.type === 'recup') v = 'absent';
+        else if(e.absent === true){
+          var retard = e.motif === 'retard' || (typeof e.motif_h === 'number' && e.motif_h > 0) || (typeof e.motif_t === 'string' && e.motif_t !== '');
+          var de = _mvRgMin(e.abs_de), a = _mvRgMin(e.abs_a);
+          if(retard) v = 'present';
+          else if(de != null && a != null && a > de) v = { de: de, a: a };
+          else v = 'absent';
+        }
+      }
+    }
+  }catch(x){ if(window._mvAvale) window._mvAvale(x, 'utils.js/_mvRgPlanning'); v = 'present'; }
+  memo[k] = v; return v;
+}
+// Pourquoi `nom` n'était pas dans les rangs le jour `iso` à l'heure `ts` (null : heure inconnue) : 'absent' | 'repos' | 'cave' |
+//   'tracteur', ou '' s'il y était. o.tracteurSeul : seul le tracteur compte (celui qui a saisi) ; o.direct : l'instant présent.
+export function _mvHorsRangs(nom, iso, ts, o){
+  nom = String(nom == null ? '' : nom).trim(); iso = String(iso || '').slice(0, 10);
+  if(!nom || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+  var t = (typeof ts === 'number' && isFinite(ts)) ? ts : null;
+  if(!(o && o.tracteurSeul)){
+    var m = (window.MEMBRES || []).find(function(x){ return x && String(x.nom || '').trim() === nom; });
+    if(m){
+      var p = _mvRgPlanning(m, iso);
+      if(p === 'absent' || p === 'repos') return p;
+      if(p && typeof p === 'object' && t != null){ var mn = _mvRgMinDe(t); if(mn >= p.de && mn < p.a) return 'absent'; }
+    }
+    var c = (typeof window._mvCaveJour === 'function') ? window._mvCaveJour(nom, iso) : '';
+    if(c === 'j') return 'cave';
+    if(t != null && (c === 'm' || c === 'a')){ var mm = _mvRgMinDe(t); if((c === 'm' && mm < 750) || (c === 'a' && mm >= 750)) return 'cave'; }
+  }
+  if(t != null && typeof window._trAuTracteur === 'function'){
+    try{ if(window._trAuTracteur(nom, iso, t, !!(o && o.direct))) return 'tracteur'; }
+    catch(x){ if(window._mvAvale) window._mvAvale(x, 'utils.js/_mvHorsRangs#tracteur'); }
+  }
+  return '';
+}
+// L'heure d'une ligne du journal : son identifiant est Date.now() en base 16 (seul, ou suivi d'un tiret) ; sinon inconnue.
+function _mvJTs(j){
+  var m = /^([0-9a-f]{10,12})(?:-|$)/.exec(String((j && j.id) || ''));
+  if(!m) return null;
+  var t = parseInt(m[1], 16);
+  return (t > 1500000000000 && t < Date.now() + 86400000) ? t : null;
+}
+// Une ligne du journal et la liste de ceux qui y figurent → { dans, hors:[{nom, pourquoi}] }. Jugée à l'heure de sa saisie (une
+//   ligne saisie un autre jour que le sien : heure inconnue, seules les règles de la journée jouent), ou à l'instant `vu`.
+export function _mvJRangs(j, liste, vu){
+  var L = Array.isArray(liste) ? liste.filter(function(n){ return n != null && n !== ''; }).map(String) : [], out = { dans: L, hors: [] };
+  if(!j || typeof j !== 'object' || !L.length || j.meteo || j.eqCorr || j.auTracteur || j.trac) return out;
+  var direct = !!(vu && typeof vu === 'object' && vu.iso), iso, ts;
+  if(direct){ iso = String(vu.iso).slice(0, 10); ts = (typeof vu.ts === 'number') ? vu.ts : null; }
+  else { iso = String(j.date || '').slice(0, 10); ts = _mvJTs(j); if(ts != null && _mvRgIso(ts) !== iso) ts = null; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return out;
+  var aut = String(j.qui || '').trim(), dans = [], hors = [];
+  L.forEach(function(n){
+    var p = _mvHorsRangs(n, iso, ts, direct ? { direct: true } : (n === aut ? { tracteurSeul: true } : null));
+    if(p) hors.push({ nom: n, pourquoi: p }); else dans.push(n);
+  });
+  return { dans: dans, hors: hors };
+}
+// « Alicia et Nico au tracteur · absence : Pauline » — sans accord (la fiche ne porte pas le genre, VIF-1) ni motif (MOTIFS-1).
+export function _mvRangsTexte(hors){
+  var G = { tracteur: [], cave: [], repos: [], absent: [] }, r = [];
+  (hors || []).forEach(function(h){ if(h && G[h.pourquoi] && G[h.pourquoi].indexOf(h.nom) < 0) G[h.pourquoi].push(h.nom); });
+  var et = function(l){ return l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1]; };
+  if(G.tracteur.length) r.push(et(G.tracteur) + ' au tracteur');
+  if(G.cave.length) r.push(et(G.cave) + ' en cave');
+  if(G.repos.length) r.push('repos\u00a0: ' + et(G.repos));
+  if(G.absent.length) r.push('absence\u00a0: ' + et(G.absent));
+  return r.join(' \u00b7 ');
+}
+window._mvHorsRangs = _mvHorsRangs;
+window._mvJRangs = _mvJRangs;
+window._mvRangsTexte = _mvRangsTexte;
+
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1
 window.checkWhatsNew      = checkWhatsNew;

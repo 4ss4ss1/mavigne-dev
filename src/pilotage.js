@@ -4995,11 +4995,12 @@ function _pilCk2Modele(d, m){
   var fil=(typeof window._ckFilDonnees==='function')?window._ckFilDonnees(J, auj):[];
   // ★ DIRECT-1 (§318) : qui travaille = cockpit.js/_ckQui (l'équipe d'abord, l'auteur s'il était dans les rangs — « sans moi »
   //   le retire). Le repli applique la même règle (mv-harnais-direct1) ; les noms s'écrivent « A, B et C ».
-  var qui=function(e){
-    if(typeof window._ckQui==='function') return window._ckQui(e);
+  var qui=function(e, vu){
+    if(typeof window._ckQui==='function') return vu?window._ckQui(e, vu):window._ckQui(e);
     var q=String((e&&e.qui)||'').trim(), r=[];
     ((e&&Array.isArray(e.membresEquipe))?e.membresEquipe:[]).forEach(function(x){ var n=String(x||'').trim(); if(n&&r.indexOf(n)<0) r.push(n); });
     if(q&&r.indexOf(q)<0&&!(e.quiHors&&r.length)) r.push(q);
+    if(typeof window._mvJRangs==='function'){ try{ r=window._mvJRangs(e, r, vu).dans; }catch(x){ if(window._mvAvale) window._mvAvale(x,'pilotage.js/_pilCk2Modele#qui'); } }   // RANGS-1 (§528) : la règle de _ckQui
     return r;
   };
   var etN=function(l){ return (typeof window._ckEt==='function')?window._ckEt(l):l.join(' et '); };
@@ -5015,11 +5016,17 @@ function _pilCk2Modele(d, m){
   // ★ FORME-1 (§301) : l'équipe d'une parcelle en cours = ceux du « Début » qui la met en cours (le même journal, la même
   //   période que l'état « en cours » — ETAT-1, §320 : cockpit.js/_ckPlanDebuts), QUEL QUE SOIT LE JOUR. Avant : le journal du jour seul
   //   — une parcelle commencée la veille restait « en cours » sans personne dessus, et le plan écrivait « aucune équipe ».
+  // ★★ RANGS-1 (§528) : « En ce moment » dit qui est sur la parcelle MAINTENANT — l'équipe du « Début », moins ceux que le planning
+  //   ne fait pas travailler aujourd'hui, ceux en cave et ceux au tracteur (utils.js, _mvJRangs, jugé à l'instant). Nico (04/11) :
+  //   « Pauline… est en formation… aujourd'hui je suis en repos… il ne faut pas qu'elles soient considérées dans une tâche de vigne
+  //   alors qu'elles sont sur le tracteur ». Plus personne de l'équipe dans les rangs : la parcelle reste en cours, « personne en ce
+  //   moment » (`vide`), pastille « – ». Le plan lit la même équipe.
+  var maintenant=t0.getTime(), vuNow={ iso:auj, ts:maintenant };
   var equipes=[];
   taches.forEach(function(t){
     var deb=(typeof window._ckPlanDebuts==='function')?window._ckPlanDebuts(PARC, J, t.cle, perD, perO):{};
-    Object.keys(deb).forEach(function(n){ var e=deb[n], q=qui(e);
-      equipes.push({ noms:etN(q)||'Personne d\u2019indiqu\u00e9', ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?'], tache:t.id, parcelle:n, depuis:String(e.date||auj) }); });
+    Object.keys(deb).forEach(function(n){ var e=deb[n], q0=qui(e), q=qui(e, vuNow), vide=!!(q0.length&&!q.length);
+      equipes.push({ noms:etN(q)||(vide?'personne en ce moment':'Personne d\u2019indiqu\u00e9'), ini:q.length?q.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):[vide?'\u2013':'?'], tache:t.id, parcelle:n, depuis:String(e.date||auj), vide:vide }); });
   });
   // ★ DIRECT-2 (§328) : le jour du début d'une parcelle EN COURS SANS ligne « Début » dans la période. C'est l'arrachage en étapes :
   //   une étape validée met la parcelle en cours (app.js/_arrSyncTache) sans écrire de « Début » ; son jour est celui de la première
@@ -5040,14 +5047,14 @@ function _pilCk2Modele(d, m){
   //   fil, à leur heure ; le conducteur en marche ou en pause va dans « En ce moment », au-dessus. Nico (12/10) : « aujourd'hui
   //   j'étais sur le tracteur, j'aimerais bien que ça apparaisse ».
   var TJ={ evts:[], cours:[] };
-  try{ if(typeof window._ckTracJour==='function') TJ=window._ckTracJour(window.SESSIONS||[], auj, { tracs:window.TRACTEURS_LIST||[] }); }
+  try{ if(typeof window._ckTracJour==='function') TJ=window._ckTracJour(window.SESSIONS||[], auj, { tracs:window.TRACTEURS_LIST||[], maint:maintenant }); }   // RANGS-1 (§528) : maint — entre deux parcelles
   catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#trac'); }
   var ini2=function(l){ return l.length?l.slice(0,2).map(function(c){ return c.charAt(0).toUpperCase(); }):['?']; };
   TJ.evts.forEach(function(x){ var n=x.qui?[x.qui].concat(Array.isArray(x.avec)?x.avec:[]):[];   /* COEQ-5 (§526) : et ses coéquipiers */
     evts.push({ type:x.k, noms:(n.length>1?n.slice(0,-1).join(', ')+' et '+n[n.length-1]:(n[0]||'Quelqu\u2019un')), ini:ini2(n), act:x.act||'', parcs:x.parcs||[], m:(typeof x.m==='number')?x.m:null, trac:x.trac||'', ts:(typeof x.ts==='number')?x.ts:null }); });
   evts.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
   var tracCours=TJ.cours.map(function(x){ var n=x.qui?[x.qui].concat(Array.isArray(x.avec)?x.avec:[]):[];   /* COEQ-5 (§526) : et ses coéquipiers */
-    return { noms:(n.length>1?n.slice(0,-1).join(', ')+' et '+n[n.length-1]:(n[0]||'Quelqu\u2019un')), ini:ini2(n), act:x.act||'', parcs:x.parcs||[], ts:(typeof x.ts==='number')?x.ts:null, pause:!!x.pause }; });
+    return { noms:(n.length>1?n.slice(0,-1).join(', ')+' et '+n[n.length-1]:(n[0]||'Quelqu\u2019un')), ini:ini2(n), act:x.act||'', parcs:x.parcs||[], ts:(typeof x.ts==='number')?x.ts:null, pause:!!x.pause, entre:!!x.entre }; });   // RANGS-1 (§528) : entre deux parcelles
   // La courbe : les photos du jour (PHOTO-1) et aujourd'hui en direct.
   var ph=((typeof window._ckChargeSerie==='function')?window._ckChargeSerie(_pilPhotoListe(), d, auj, (typeof _pilSaison==='function'&&_pilSaison()&&_pilSaison().nom)||''):[]).map(function(x){ return { d:x.iso, reste:x.v }; });
   var hT=d.totalTotal||0;

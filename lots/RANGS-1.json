@@ -1,0 +1,35 @@
+{
+  "lot": "RANGS-1",
+  "section": "§528",
+  "base": "75afdcdc79f602bbfc5c6f75048b131044e7ec86",
+  "inclut": [],
+  "date": "2026-11-04",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "ee7cfbdba08257ee47f2cc0e61ee6fcbc7dddf486f140aea79e10d2e5de56477",
+    "CLAUDE.md": "179d65325808d9a2fd80924b36054763e900b0c337885805c487e56af37e423f",
+    "docs/claude/INDEX.md": "223f8f528a2cdf6cb890a1c94b326c83601f6ce129c3034d605339ea04e36343",
+    "docs/claude/chantiers-480-529.md": "f728a1ffcd88b55fe13855de6e5a1e69bbc70d764f061d95f0fb28f92ef9f1ee",
+    "docs/claude/journal.md": "10567ebb4e030cc94919db914894008e64c38757d8a5a05c4dec21061c028648",
+    "guide/04-vigne.html": "c5234e3e65b1a8f36db22c344a35bc7ce57cc3bb454aca59ba9f35fcc67e2dd6",
+    "guide/11-pilotage.html": "c584d1c04114a67a7200efc0b776f0c12bded2959cb711ca2b6cb818d9afc719",
+    "index.html": "9790ce50e65e4e90a17b33ba5d37b62ee2184a67240157db7e06ba7e48ea2fe5",
+    "public/sw.js": "d65fb13aac1b2cb8214eae2e3f6fa3b775151d0d3fa359f515c5c59a4ddce7a6",
+    "scripts/harnais-claude-md.mjs": "3ddc7aa692be5e17322519ab57d9a2a9e3808574cdf1305ab617a4deca9d60fa",
+    "scripts/mv-harnais-coeq5.mjs": "185d811dcc4412b8fb9487b756b8b8815658b9dd46faf7d4bdba07d0d3b55545",
+    "scripts/mv-harnais-liste.mjs": "00746360e0686f781e91401457fad239d211b408ebe548cca9edb3bfb5bd1dfe",
+    "scripts/typo-baseline.json": "559d2aa446f470e0ce4ab95dbcb1511658d61b97810d81c2e96c43c77a6d8b36",
+    "src/app.js": "4b5bd025983e7c759fa5e68e836ae8d8dec2ffbeafe870c39735f15877962612",
+    "src/cave.js": "92c11fda6b33d2780e8980d0fba1e1f81469fc2233388a8c576933d470102105",
+    "src/cockpit-vue.js": "859d68e442499e421079f05e0e7a99a6bfc0cdf166e9a5a13a89a4e6552502ec",
+    "src/cockpit.js": "9b7d62ea41e256332295f20184de15eac194c29b48af36b53868123b6902527a",
+    "src/coequipier.js": "ecc22012ef6ba7b0a0961da5f4daad652e8772ce73a1cda96bf14a9b321392f2",
+    "src/pilotage.js": "fc85e43a12fa18e71361c841a37bccd1ee97a0af84a53607048ca412bec6d11d",
+    "src/utils.js": "7ef8fd74b30968e5596137eaf268688723f0fb0fed08dfeedb76d3df1df20e2f",
+    "src/whats-new.js": "a30239a768c0b4bcb929744da9f1edba777577342339c669bab9bc1cb8470a6a",
+    "scripts/mv-harnais-rangs1.mjs": "946e564553fbe72e7a5b642ade3d5baac88b8d061894248d777e8065935b6a9d"
+  }
+}

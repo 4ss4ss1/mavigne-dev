@@ -9039,8 +9039,8 @@ function _bcVigne(JOURNAL, PARCELLES, c){
     if(j.parcelle && j.parcelle !== 'Domaine') t.parcelles[j.parcelle] = 1;
     if(j.date < t.d0) t.d0 = j.date;
     if(j.date > t.d1) t.d1 = j.date;
-    if(j.qui){ t.gens[j.qui] = 1; gens[j.qui] = 1; }
-    (j.membresEquipe||[]).forEach(function(n){ if(n){ t.gens[n] = 1; gens[n] = 1; } });
+    // ★ RANGS-1 (§528) : qui a vraiment travaillé — app.js/_jFaitPar (ni « sans moi », ni absent, au repos, en cave ou au tracteur).
+    ((typeof window._jFaitPar === 'function') ? window._jFaitPar(j) : [j.qui].concat(j.membresEquipe || [])).forEach(function(n){ if(n){ t.gens[n] = 1; gens[n] = 1; } });
     jours[j.date] = 1;
   });
   var lignes = Object.keys(parT).map(function(k){

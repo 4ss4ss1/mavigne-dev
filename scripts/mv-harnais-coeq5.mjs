@@ -31,7 +31,7 @@ function controles(S) {
     r.push(['par personne : le conducteur toutes les parcelles (150 min, 60 trous), chaque coéquipier les siennes (Léo 90 min et 40 trous, Hugo 60 min et 20 trous)', g('Marc').min === 150 && g('Marc').trous === 60 && g('Léo').min === 90 && g('Léo').trous === 40 && g('Hugo').min === 60 && g('Hugo').trous === 20 && pp.trous === true]);
     r.push(['le fil : les coéquipiers des parcelles finies, sinon celui du moment', av(SESS, ['A', 'C']).join() === 'Léo' && av(SESS, ['A', 'B']).join() === 'Léo,Hugo' && av(SESS, null).join() === 'Hugo']);
   }
-  r.push(['le fil du tracteur porte ses coéquipiers (début, parcelles finies, en cours, en pause)', (S.K.match(/avec: \(typeof _ckAvec === 'function' \? _ckAvec\(s, (null|f\.parcs)\) : \[\]\)/g) || []).length === 4]);
+  r.push(['le fil du tracteur porte ses coéquipiers (début, parcelles finies, en cours, en pause, entre deux parcelles — RANGS-1, §528)', (S.K.match(/avec: \(typeof _ckAvec === 'function' \? _ckAvec\(s, (null|f\.parcs)\) : \[\]\)/g) || []).length === 5]);
   r.push(['le modèle en fait « Marc et Léo », deux initiales', (S.P.match(/var n=x\.qui\?\[x\.qui\]\.concat\(Array\.isArray\(x\.avec\)\?x\.avec:\[\]\):\[\];/g) || []).length === 2 && (S.P.match(/noms:\(n\.length>1\?n\.slice\(0,-1\)\.join\(', '\)\+' et '\+n\[n\.length-1\]/g) || []).length === 2]);
   r.push(['le verbe s’accorde : « ont fini »', /EQ\[e\.eq\]\.ini\.length > 1\) \? ' ont ' : ' a '/.test(S.V) && /qui \+ v \+ 'fini '/.test(S.V)]);
   r.push(['la fiche de session montre « Par personne », le pont prête le barème', /window\._trParPersonneHtml\(s\)/.test(S.T) && /sessBaremeMin:_sessBaremeMin/.test(S.T)]);

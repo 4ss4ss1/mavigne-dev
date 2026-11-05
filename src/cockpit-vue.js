@@ -288,6 +288,7 @@ function charger(v) {
   if (!S.vue || !T[S.vue]) S.vue = (v.prio && T[v.prio]) ? v.prio : ((TACHES.find(t => t.pct < 100 && !t.eqFini) || TACHES[0] || {}).id || null);
   EQ = {}; S.equipes = []; S.evts = [];
   (v.equipes || []).forEach((e, i) => { const id = 'e' + i; EQ[id] = { noms: e.noms, ini: e.ini }; if (parNom[e.parcelle] && T[e.tache]) S.equipes.push({ id, tache: e.tache, parc: parNom[e.parcelle], depuis: typeof e.depuis === 'string' ? e.depuis : '' }); });   // DIRECT-2 (§328) : jamais « aujourd'hui » par défaut
+  (v.equipes || []).forEach((e, i) => { if (e.vide) { const q = S.equipes.find(x => x.id === 'e' + i); if (q) q.vide = true; } });   // ★ RANGS-1 (§528) : l’équipe n’est plus dans les rangs
   // ★ FORME-1 (§301) : une parcelle en cours porte TOUJOURS une pastille (« en cours » et « une équipe dessus » sont une
   //   seule lecture du journal, cockpit.js/_ckPlanDebuts) ; un début sans nom au journal le dit au lieu de disparaître.
   TACHES.forEach(t => Object.keys(S.etats[t.id]).forEach(pid => {
@@ -307,7 +308,7 @@ function charger(v) {
   });
   NEXT_ID = S.evts.length + 1;
   // ★ DIRECT-1 : le tracteur en marche (ou en pause) — « En ce moment », au-dessus du fil, avec les parcelles en cours (S.equipes).
-  S.trac = (v.tracCours || []).map((x, i) => { const id = 't' + i; EQ[id] = { noms: String(x.noms || ''), ini: Array.isArray(x.ini) && x.ini.length ? x.ini : ['?'] }; return { id, act: String(x.act || ''), parcs: Array.isArray(x.parcs) ? x.parcs.map(String) : [], ts: typeof x.ts === 'number' ? x.ts : null, pause: !!x.pause }; });
+  S.trac = (v.tracCours || []).map((x, i) => { const id = 't' + i; EQ[id] = { noms: String(x.noms || ''), ini: Array.isArray(x.ini) && x.ini.length ? x.ini : ['?'] }; return { id, act: String(x.act || ''), parcs: Array.isArray(x.parcs) ? x.parcs.map(String) : [], ts: typeof x.ts === 'number' ? x.ts : null, pause: !!x.pause, entre: !!x.entre }; });   // RANGS-1 (§528) : entre deux parcelles
   HIST = (v.photos || []).map(x => ({ d: deIso(x.d), r: x.reste, c: x.cout || 0 }));
   TOTAL = Math.max(v.total || 0, ...HIST.map(h => h.r), v.reste || 0, 1);
   YMAX = Math.ceil(TOTAL / 500) * 500;
@@ -399,7 +400,7 @@ const INFO = {
   savoir: 'Ce qui peut changer la journée ou la semaine. En tête, surlignés et marqués « À anticiper », les points que compte la phrase du haut de la page : une tâche dont les dates sont passées sans être finie, un contrat qui se termine dans les 30 jours, la pluie (2 mm et plus) ou le vent (40 km/h et plus) des deux jours qui viennent sur une commune où une tâche est en cours ; toucher la phrase mène ici. Sous chaque jour de la bande : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis le reste : la pluie ou le vent sans tâche en cours dans les communes touchées, les absences et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
   decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
   plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
-  fil: 'En ce moment : chaque parcelle en cours, avec l’équipe qui l’a commencée et depuis quand — même un autre jour —, puis le tracteur en marche ou en pause. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs.',
+  fil: 'En ce moment : chaque parcelle en cours et depuis quand — même un autre jour —, avec ceux de son équipe qui y sont maintenant : ni ceux que le planning ne fait pas travailler aujourd’hui (absence, repos), ni ceux en cave ou au tracteur (« personne en ce moment » quand toute l’équipe est ailleurs) ; puis le tracteur en marche, en pause ou entre deux parcelles (moins de 45 min après la dernière finie), avec son équipe. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs, et personne n’y figure s’il était absent, au repos, en cave ou au tracteur à cette heure-là.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
   coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
@@ -733,10 +734,14 @@ function htmlCoursLi(c) {
     const p = PIDX[c.e.parc], tt = T[c.e.tache];
     t = anonyme ? maj1(tt.art) + ' en cours' : eq.noms + ' sur ' + tt.art;
     s = [p.nom, quand(c.e.depuis), anonyme ? 'personne d’indiqué' : ''].filter(Boolean).join(', ');   // DIRECT-2 : sans jour connu, pas de date
+    // ★ RANGS-1 (§528) : l’équipe du « Début » n’est plus dans les rangs (absente, au repos, en cave, au tracteur) — la parcelle reste en cours.
+    if (c.e.vide) { t = maj1(tt.art) + ' en cours'; s = [p.nom, quand(c.e.depuis), 'personne en ce moment'].filter(Boolean).join(', '); }
   } else {
     t = (anonyme ? 'Quelqu’un' : eq.noms) + ' au tracteur';
     s = [c.e.act ? maj1(c.e.act) : 'Tracteur', listeTxt(c.e.parcs), c.e.ts ? (c.e.pause ? 'en pause depuis ' : 'depuis ') + heureTxt(c.e.ts) : (c.e.pause ? 'en pause' : '')].filter(Boolean).join(', ');
     if (c.e.pause) tag = 'En pause';
+    // ★ RANGS-1 (§528) : une parcelle finie il y a moins de 45 min — le trajet, le plein : toujours au tracteur.
+    if (c.e.entre) s = [c.e.act ? maj1(c.e.act) : 'Tracteur', 'entre deux parcelles', c.e.ts ? 'depuis ' + heureTxt(c.e.ts) : ''].filter(Boolean).join(', ');
   }
   return '<li class="ck-ev ck-ev-cours"><span class="ck-ev-ic">' + ic + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(t) + '</span>'
     + '<span class="ck-ev-s">' + esc(s) + '</span></span><span class="ck-ev-d"><span class="ck-ev-tag">' + tag + '</span></span></li>';

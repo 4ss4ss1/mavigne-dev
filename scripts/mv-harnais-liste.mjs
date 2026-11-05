@@ -449,6 +449,8 @@ export const HARNAIS = [
   ['node scripts/harnais-cadence-escalier.mjs', 'le-temps-reel-contre-le'],
   ['node scripts/mv-harnais-yaller1.mjs', 'recherche-parcelles-gps'],   // YALLER-1 (§527) : trouver une parcelle et y aller
   ['node scripts/mv-harnais-yaller1.mjs --contre', 'recherche-parcelles-gps'],   // ★ COEQ-5 (§526) : absent de la liste, il était rouge sans que personne le voie
+  ['node scripts/mv-harnais-rangs1.mjs'],   // RANGS-1 (§528) : qui est dans les rangs — « En direct » et le Journal
+  ['node scripts/mv-harnais-rangs1.mjs --contre'],
   ['node scripts/mv-harnais-presence1.mjs', 'presence-notee-chai'],   // PRESENCE-1 (§344) : « Ta présence est notée »
   ['node scripts/mv-harnais-presence1.mjs --contre', 'presence-notee-chai'],
   ['node scripts/mv-harnais-premieres1.mjs', 'premieres-fois'],   // PREMIERES-1 (§345) : « Vos premières fois »
