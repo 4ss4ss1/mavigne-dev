@@ -12,7 +12,7 @@
 
 export var ONGLETS = [['ouverts', 'Ouverts'], ['alivrer', '\u00c0 livrer'], ['averifier', '\u00c0 v\u00e9rifier'], ['clos', 'Clos'], ['tous', 'Tous']];
 var ORDRE_ST = ['nouveau', 'qualifie', 'en_cours', 'corrige', 'livre', 'clos', 'sans_suite'];
-var E = { onglet: 'ouverts', q: '', prios: {}, client: '', source: '', periode: 0, tri: 'prio', sens: 1, sel: {}, ouvert: '' };
+var E = { onglet: 'ouverts', q: '', prios: {}, client: '', source: '', periode: 0, tri: 'prio', sens: 1, sel: {}, ouvert: '', nouveau: false };
 
 // ── Les fonctions pures (le harnais gtui2 les joue) ──────────────────────────
 // Une valeur posée dans un gestionnaire inline passe par _escAttr (C24b) — celle de l'appli quand elle est chargée.
@@ -95,19 +95,30 @@ function fiche(g, d) {
   var esc = d.esc, s = (d.suivi || {})[g.key] || {};
   var noms = Object.keys(g.tenants || {}), pages = Object.keys(g.pages || {}), gens = Object.keys(g.users || {}), vers = Object.keys(g.versions || {}).sort();
   var h = '<aside class="agt-inc-fiche" aria-label="Fiche de l\u2019incident">';
-  h += '<div class="agt-inc-fiche-tete"><div class="agt-inc-fiche-sur">' + esc((d.cat || {})[g.cat] || g.cat || 'Erreur') + ' \u00b7 ' + esc(g.level || 'error') + '</div>'
+  h += '<div class="agt-inc-fiche-tete"><div class="agt-inc-fiche-sur">' + (g.ticket ? 'Ticket saisi \u00e0 la main' : esc((d.cat || {})[g.cat] || g.cat || 'Erreur') + ' \u00b7 ' + esc(g.level || 'error')) + '</div>'
     + '<button class="agt-inc-x" onclick="agtIncOuvrir(\'\')" aria-label="Fermer la fiche">\u00d7</button></div>';
   h += '<h3 class="agt-inc-fiche-titre">' + esc(g.msg || '(sans message)') + '</h3>';
   h += '<div class="agt-inc-bloc">' + d.ligneSuivi(g) + '</div>';
+  if (!g.ticket) {
   var hs = histo14(g), max = Math.max.apply(null, hs.concat([1]));
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Les 14 derniers jours</div><div class="agt-histo" aria-label="Occurrences des quatorze derniers jours">'
     + hs.map(function (v) { return '<span' + (v ? '' : ' class="zero"') + ' style="height:' + (v ? Math.max(8, Math.round(v / max * 100)) : 4) + '%" title="' + v + '"></span>'; }).join('')
     + '</div><div class="agt-histo-pied"><span>il y a 13 jours</span><span>aujourd\u2019hui</span></div></div>';
-  var li = lies(g, d.groupes, d);
-  if (li.length) h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Li\u00e9 \u00e0</div><ul class="agt-lies">' + li.map(function (x) {
+  }
+  // ★ GT-RESTES-1 (§529) — « Lié à » : les liens posés à la main d'abord (retirables), puis ceux d'un même domaine ; « Lier à… ».
+  var manu = ((s.liens) || []).map(function (k) { return (d.groupes || []).filter(function (x) { return x.key === k; })[0]; }).filter(Boolean);
+  var auto = lies(g, d.groupes, d).filter(function (x) { return manu.indexOf(x) < 0; });
+  var ligneLie = function (x, retirable) {
     var px = prioDe(x, d);
-    return '<li tabindex="0" onclick="agtIncOuvrir(\'' + _escAttr(x.id) + '\')"><span class="mvpas mvpas-type ' + PRIO_COUL[px.p] + (px.confirmee ? '' : ' agt-sugg') + '">' + px.p + '</span><span>' + esc(x.msg || '') + '</span><span class="mvpas mvpas-statut ' + ST_COUL[statutDe(x, d)] + '">' + esc(d.st[statutDe(x, d)] || '') + '</span></li>';
-  }).join('') + '</ul></div>';
+    return '<li tabindex="0" onclick="agtIncOuvrir(\'' + _escAttr(x.id) + '\')"><span class="mvpas mvpas-type ' + PRIO_COUL[px.p] + (px.confirmee ? '' : ' agt-sugg') + '">' + px.p + '</span><span>' + esc(x.msg || '') + '</span><span class="mvpas mvpas-statut ' + ST_COUL[statutDe(x, d)] + '">' + esc(d.st[statutDe(x, d)] || '') + '</span>'
+      + (retirable ? '<button class="agt-inc-x" style="width:24px;height:24px" aria-label="Retirer ce lien" onclick="event.stopPropagation();agtIncLier(\'' + _escAttr(g.id) + '\',\'' + _escAttr(x.id) + '\',false)">\u00d7</button>' : '') + '</li>';
+  };
+  var autres = trier((d.groupes || []).filter(function (x) { return x.key !== g.key && manu.indexOf(x) < 0; }), d, { tri: 'prio', sens: 1 }).slice(0, 60);
+  h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Li\u00e9 \u00e0</div>'
+    + ((manu.length || auto.length) ? '<ul class="agt-lies">' + manu.map(function (x) { return ligneLie(x, true); }).join('') + auto.map(function (x) { return ligneLie(x, false); }).join('') + '</ul>' : '<p class="agt-cli-note">Rien de li\u00e9 pour l\u2019instant.</p>')
+    + (autres.length ? '<select class="agt-inc-sel" style="margin-top:8px" aria-label="Lier \u00e0 un autre incident" onchange="if(this.value)agtIncLier(\'' + _escAttr(g.id) + '\',this.value,true)"><option value="">Lier \u00e0\u2026</option>'
+      + autres.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(prioDe(x, d).p + ' \u00b7 ' + String(x.msg || '').slice(0, 70)) + '</option>'; }).join('') + '</select>' : '') + '</div>';
+  if (!g.ticket) {
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Rep\u00e8res</div><dl class="agt-inc-dl">'
     + '<dt>Domaines</dt><dd>' + (noms.length ? noms.map(function (n) { return esc(n) + (g.tenants[n] > 1 ? ' \u00d7' + g.tenants[n] : ''); }).join(', ') : '\u2014') + '</dd>'
     + '<dt>Fois</dt><dd>' + g.n + (gens.length ? ' \u00b7 ' + gens.length + ' personne' + (gens.length > 1 ? 's' : '') : '') + (g.nOpen < g.n ? ' \u00b7 ' + g.nOpen + ' non trait\u00e9e' + (g.nOpen > 1 ? 's' : '') : '') + '</dd>'
@@ -120,9 +131,27 @@ function fiche(g, d) {
     return '<li><span>' + esc(e.ts ? 'il y a ' + d.relTime(e.ts) : '\u2014') + ' \u00b7 ' + esc(e._tenantNom || e.tenant || '?') + (e.page ? ' \u00b7 ' + esc(e.page) : '') + (e.v ? ' \u00b7 ' + esc(e.v) : '') + (e.resolved ? ' \u00b7 trait\u00e9e' : '') + '</span>'
       + (e.detail ? '<code>' + esc(String(e.detail).slice(0, 280)) + '</code>' : '') + '</li>';
   }).join('') + '</ul></div>';
-  h += '<div class="agt-inc-actions">' + (g.nOpen > 0 ? '<button class="agt-btn fill agt-inc-court" onclick="agtResolveGroup(\'' + _escAttr(g.id) + '\')">Clore l\u2019incident</button>' : '')
+  } else {
+  h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Rep\u00e8res</div><dl class="agt-inc-dl">'
+    + '<dt>Client</dt><dd>' + (noms.length ? esc(noms.join(', ')) : 'aucun') + '</dd>'
+    + '<dt>Cr\u00e9\u00e9 le</dt><dd>' + (g.first ? esc(d.dateFr(g.first)) : '\u2014') + '</dd>'
+    + '<dt>Mis \u00e0 jour</dt><dd>' + (g.last ? 'il y a ' + esc(d.relTime(g.last.toISOString())) : '\u2014') + '</dd></dl></div>';
+  }
+  h += '<div class="agt-inc-actions">' + (g.nOpen > 0 ? '<button class="agt-btn fill agt-inc-court" onclick="agtResolveGroup(\'' + _escAttr(g.id) + '\')">' + (g.ticket ? 'Clore le ticket' : 'Clore l\u2019incident') + '</button>' : '')
     + '<button class="agt-btn agt-inc-court" onclick="agtErrCopy(\'' + _escAttr(g.id) + '\')">Copier pour le d\u00e9veloppeur</button></div>';
   return h + '</aside>';
+}
+// ★ GT-RESTES-1 (§529) — « Nouveau ticket » (la maquette) : un titre, un client, une priorité, une note.
+function ficheNouveau(d) {
+  var esc = d.esc, noms = d.noms || {};
+  return '<aside class="agt-inc-fiche" aria-label="Nouveau ticket"><div class="agt-inc-fiche-tete"><div class="agt-inc-fiche-sur">Ticket saisi \u00e0 la main</div>'
+    + '<button class="agt-inc-x" onclick="agtIncTicketFermer()" aria-label="Fermer">\u00d7</button></div><h3 class="agt-inc-fiche-titre">Nouveau ticket</h3>'
+    + '<div class="agt-inc-bloc agt-fac-form">'
+    + '<label class="agt-fac-large">Titre <input id="agt-tk-titre" class="agt-inc-q" maxlength="160" placeholder="Ce qu’il faut faire ou corriger"></label>'
+    + '<label>Client <select id="agt-tk-client" class="agt-inc-sel"><option value="">Aucun</option>' + Object.keys(noms).sort(function (a, b) { return String(noms[a]).localeCompare(String(noms[b])); }).map(function (k) { return '<option value="' + esc(k) + '">' + esc(noms[k]) + '</option>'; }).join('') + '</select></label>'
+    + '<label>Priorit\u00e9 <select id="agt-tk-prio" class="agt-inc-sel">' + ['P1', 'P2', 'P3', 'P4'].map(function (p) { return '<option' + (p === 'P3' ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '</select></label>'
+    + '<label class="agt-fac-large">Note <textarea id="agt-tk-note" class="agt-inc-q" rows="4" maxlength="2000"></textarea></label></div>'
+    + '<div class="agt-inc-actions"><button class="agt-btn fill agt-inc-court" onclick="agtIncTicketCreer()">Cr\u00e9er le ticket</button></div></aside>';
 }
 export function vue(d) {
   var esc = d.esc, tout = d.groupes || [];
@@ -146,8 +175,8 @@ export function vue(d) {
     + '<button class="agt-btn fill agt-inc-court" onclick="agtIncLot(\'clos\')">Clore</button>'
     + ['P1', 'P2', 'P3', 'P4'].map(function (p) { return '<button class="agt-btn agt-inc-court" onclick="agtIncLot(\'' + _escAttr(p) + '\')">' + p + '</button>'; }).join('')
     + '<button class="agt-btn agt-inc-court" onclick="agtIncSelTout(false)">D\u00e9s\u00e9lectionner</button></div>';
-  h += '<div class="agt-inc-corps' + (ouvert ? ' avec-fiche' : '') + '">';
-  if (ouvert) h += fiche(ouvert, d);
+  h += '<div class="agt-inc-corps' + ((ouvert || E.nouveau) ? ' avec-fiche' : '') + '">';
+  if (E.nouveau) h += ficheNouveau(d); else if (ouvert) h += fiche(ouvert, d);   // ★ GT-RESTES-1 : le nouveau ticket
   h += '<div class="agt-tbl-cadre">';
   if (!liste.length) h += '<div class="agt-inc-vide">Rien pour ces filtres.</div>';
   else {
@@ -158,7 +187,7 @@ export function vue(d) {
       h += '<tr class="' + (g.id === E.ouvert ? 'on' : '') + (g.nOpen === 0 ? ' traite' : '') + '" tabindex="0" onclick="agtIncOuvrir(\'' + _escAttr(g.id) + '\')" onkeydown="if(event.key===\'Enter\')agtIncOuvrir(\'' + _escAttr(g.id) + '\')">'
         + '<td class="agt-tbl-case" onclick="event.stopPropagation()"><input type="checkbox" aria-label="S\u00e9lectionner" onchange="agtIncSel(\'' + _escAttr(g.id) + '\',this.checked)"' + (E.sel[g.id] ? ' checked' : '') + '></td>'
         + '<td><span class="mvpas mvpas-type ' + PRIO_COUL[p.p] + (p.confirmee ? '' : ' agt-sugg') + ' agt-prio ' + p.p.toLowerCase() + (p.confirmee ? '' : ' sugg') + '" title="' + (p.confirmee ? 'Priorit\u00e9 confirm\u00e9e' : 'Sugg\u00e9r\u00e9e : ' + esc(d.prio(g).pourquoi)) + '">' + p.p + '</span></td>'
-        + '<td class="agt-tbl-titre"><span class="agt-tbl-msg">' + esc(g.msg || '(sans message)') + '</span><span class="agt-tbl-sous">' + esc((d.cat || {})[g.cat] || g.cat || '') + (noms.length ? ' \u00b7 ' + esc(noms.slice(0, 3).join(', ')) + (noms.length > 3 ? ' +' + (noms.length - 3) : '') : '') + '</span></td>'
+        + '<td class="agt-tbl-titre"><span class="agt-tbl-msg">' + esc(g.msg || '(sans message)') + '</span><span class="agt-tbl-sous">' + esc(g.ticket ? 'Ticket' : ((d.cat || {})[g.cat] || g.cat || '')) + (noms.length ? ' \u00b7 ' + esc(noms.slice(0, 3).join(', ')) + (noms.length > 3 ? ' +' + (noms.length - 3) : '') : '') + '</span></td>'
         + '<td class="agt-tbl-n">' + g.n + '</td>'
         + '<td>' + (g.last ? esc(d.relTime(g.last.toISOString())) : '\u2014') + '</td>'
         + '<td><span class="mvpas mvpas-statut ' + ST_COUL[st] + '">' + esc(d.st[st] || st) + '</span>' + (revenu(g, d) ? ' <span class="agt-revenu">revenu</span>' : '') + '</td></tr>';
@@ -174,7 +203,19 @@ function rendre() { if (window.agtRenderBody) window.agtRenderBody(); }
 window._agtIncidentsVue = vue;
 window.agtIncOnglet = function (o) { E.onglet = o; E.sel = {}; rendre(); };
 window.agtIncTri = function (col) { if (E.tri === col) E.sens = -E.sens; else { E.tri = col; E.sens = 1; } rendre(); };
-window.agtIncOuvrir = function (gid) { E.ouvert = (gid && E.ouvert !== gid) ? String(gid) : ''; rendre(); };
+window.agtIncOuvrir = function (gid) { E.nouveau = false; E.ouvert = (gid && E.ouvert !== gid) ? String(gid) : ''; rendre(); };
+window.agtIncNouveauTicket = function () {
+  E.nouveau = true; E.ouvert = '';
+  if (window._agtOngletCourant && window._agtOngletCourant() !== 'incidents' && window.agtSwitchTab) window.agtSwitchTab('incidents'); else rendre();
+  var t = document.getElementById('agt-tk-titre'); if (t) t.focus();
+};
+window.agtIncTicketFermer = function () { E.nouveau = false; rendre(); };
+window.agtIncTicketCreer = async function () {
+  var v = function (id) { var x = document.getElementById(id); return x ? x.value : ''; };
+  if (!window.agtTicketCreerGT) return;
+  var gid = await window.agtTicketCreerGT({ titre: v('agt-tk-titre'), client: v('agt-tk-client'), prio: v('agt-tk-prio'), note: v('agt-tk-note') });
+  if (gid) { E.nouveau = false; E.onglet = 'ouverts'; E.ouvert = gid; rendre(); }
+};
 window.agtIncSel = function (gid, on) { if (on) E.sel[gid] = true; else delete E.sel[gid]; rendre(); };
 window.agtIncSelTout = function (on) {
   E.sel = {};

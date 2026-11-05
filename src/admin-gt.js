@@ -758,6 +758,7 @@ function _agtCompteursBarre(){
   var retard=0;
   if(typeof _agtBizSlugs==='function') _agtBizSlugs().forEach(function(x){ var vus={}; _agtFacts(x.slug).forEach(function(f){ if(_agtFRetard(f)>0 && !vus[f.ref||'']){ vus[f.ref||'']=1; retard++; } }); });
   pose('agt-side-n-business', retard);
+  pose('agt-bas-n-radar', lire('agt-radar-badge')); pose('agt-bas-n-incidents', lire('agt-inc-badge'));   // ★ GT-RESTES-1 : la barre du bas
   var malS=0; [['sauvegarde',26],['export',26],['ephy',194],['mails',2]].forEach(function(x){ var e=_agtSante[x[0]]; if(e && e.quand && (e.ok===false || (Date.now()-Date.parse(e.quand))/3600000>x[1])) malS++; });
   pose('agt-side-n-sante', malS);   // ★ GT-UI-6 : une tâche en échec ou en retard
 }
@@ -812,6 +813,7 @@ function _agtResume(tab){
 function _agtActions(tab){
   if(tab==='clients') return '<button class="agt-tete-second" onclick="openOv(\'ovAddTenant\')">Nouveau client</button><button class="agt-tete-principal" onclick="agtOpenInstall()">Installer un domaine</button>';
   if(tab==='business') return '<button class="agt-tete-principal" onclick="agtFacNouvelle(-1)">+ Nouvelle facture</button>';   // GT-UI-5
+  if(tab==='incidents') return '<button class="agt-tete-principal" onclick="agtIncNouveauTicket()">+ Nouveau ticket</button>';   // ★ GT-RESTES-1
   return '';
 }
 function _agtMajFraicheur(){
@@ -836,6 +838,9 @@ function agtSwitchTab(tab){
     b.classList.toggle('crit',isActive&&isCrit);
   });
   // ★ GT-UI-1 (§516) : la barre latérale, le titre de l'écran et le lien direct suivent l'onglet.
+  // ★ GT-RESTES-1 : la barre du bas du téléphone — « Plus » s'allume pour les écrans qu'il range.
+  document.querySelectorAll('.agt-bas-it').forEach(function(b){ var t2=b.dataset.tab; b.classList.toggle('active', t2===tab || (t2==='plus' && ['business','leads','sante','outils'].indexOf(tab)>=0)); });
+  var _pl=document.getElementById('agt-bas-plus'); if(_pl) _pl.hidden=true;
   document.querySelectorAll('.agt-side-it').forEach(function(b){
     var on=b.dataset.tab===tab; b.classList.toggle('active',on);
     if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
@@ -1487,8 +1492,58 @@ function _agtErrSante(){
 // ── Actions de groupe ───────────────────────────────────────────────────────
 // Retrouve un groupe depuis son empreinte, sans dependre de l'ordre d'affichage
 // (les filtres peuvent avoir change entre le rendu et le clic).
+// ★★ GT-RESTES-1 (§529) — LES TICKETS SAISIS À LA MAIN (la maquette : « Nouveau ticket »). Un ticket vit dans le suivi
+//   (`_guerettech/suivi`, clé `ticket|<id>` : titre, client, priorité, statut, note, liens) et se range dans le tableau
+//   des incidents comme un incident sans occurrence. Les gestes du suivi (priorité, statut, note, Annuler) le servent.
+function _agtTicketsGroupes(suivi, noms){
+  var L=[];
+  Object.keys(suivi||{}).forEach(function(cle){
+    var e=suivi[cle]||{};
+    if(cle.indexOf('ticket|')!==0 || e.ticket!==true) return;
+    var id=cle.slice(7), cree=Date.parse(e.creeLe||'')||0, maj=Date.parse(e.maj||'')||cree, tn={};
+    if(e.client) tn[(noms&&noms[e.client])||e.clientNom||e.client]=1;
+    L.push({ id:'tk-'+id, key:cle, ticket:true, level:'error', cat:'ticket', msg:String(e.titre||'Ticket'), n:1,
+      nOpen:_AGT_SUIVI_FIN[e.statut]?0:1, nCrit:0, first:cree?new Date(cree):null, last:maj?new Date(maj):null,
+      tenants:tn, pages:{}, users:{}, versions:{}, loc:0, fb:0, items:[] });
+  });
+  return L;
+}
+function _agtNomsClients(){ var o={}; (_agtTenants||[]).forEach(function(t){ o[t.slug]=t.nom; }); return o; }
+async function agtTicketCreerGT(t){
+  t=t||{};
+  var titre=String(t.titre||'').trim().slice(0,160), prio=String(t.prio||'P3'), client=String(t.client||'');
+  if(!titre){ showToast('Un ticket a besoin d\u2019un titre','#B85A1A'); return ''; }
+  if(['P1','P2','P3','P4'].indexOf(prio)<0) prio='P3';
+  if(client && !(_agtTenants||[]).some(function(x){ return x.slug===client; })) client='';
+  var id=Date.now().toString(36)+Math.random().toString(36).slice(2,6), now=new Date().toISOString();
+  var ok=await _agtSuiviMaj('ticket|'+id, { ticket:true, titre:titre, client:client, clientNom:(_agtNomsClients()[client]||''), prio:prio,
+    statut:'nouveau', note:String(t.note||'').trim().slice(0,2000), creeLe:now, liens:[] });
+  if(!ok) return '';
+  showToast('Ticket cr\u00e9\u00e9','#3D6B27'); agtRenderBody();
+  return 'tk-'+id;
+}
+// ★ GT-RESTES-1 — les liens entre incidents (et tickets) : posés des DEUX côtés, en une transaction.
+function _agtLiensMaj(liste, cle, oui){
+  var L=(Array.isArray(liste)?liste:[]).filter(function(x){ return x!==cle; });
+  if(oui) L.push(cle);
+  return L;
+}
+async function agtIncLier(gidA, gidB, oui){
+  var a=_agtErrGroupById(gidA), b=_agtErrGroupById(gidB);
+  if(!a || !b || a.key===b.key) return false;
+  try{
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var now=new Date().toISOString();
+    var r=await window.fbGtMaj('suivi', function(d, existe){
+      var v1=_agtMutSuivi(d, existe, a.key, { liens:_agtLiensMaj(((d&&d.value&&d.value[a.key])||{}).liens, b.key, !!oui) }, now);
+      return _agtMutSuivi(v1, true, b.key, { liens:_agtLiensMaj((v1.value[b.key]||{}).liens, a.key, !!oui) }, now);
+    });
+    _agtSuivi=r.valeur.value; _agtAppliquerSuivi(); agtRenderBody();
+    return true;
+  }catch(e){ _agtEchecEcriture(e, 'Lien entre incidents'); return false; }
+}
 function _agtErrGroupById(gid){
-  var all=_agtErrGroupes(_agtErrMerged());
+  var all=_agtErrGroupes(_agtErrMerged()).concat(_agtTicketsGroupes(_agtSuivi, _agtNomsClients()));
   for(var i=0;i<all.length;i++) if(all[i].id===gid) return all[i];
   return null;
 }
@@ -5868,6 +5923,12 @@ async function agtLeadRelance(id, date){
   date=String(date||'');
   if(date && !/^\d{4}-\d{2}-\d{2}$/.test(date)){ showToast('Date invalide','#B85A1A'); return; }
   var e=Object.assign({}, _agtLeadSt[id]||{});
+  // ★ GT-RESTES-1 : la relance remplacée ou retirée part dans l'historique (avec, si le mail est parti, sa date signalée).
+  if(e.relance && e.relance!==date){
+    var h0=Array.isArray(e.relances)?e.relances.slice(-19):[];
+    h0.push({ date:e.relance, fin:(date?'remplac\u00e9e':'retir\u00e9e'), le:new Date().toISOString(), signalee:(e.relanceVue===e.relance) });
+    e.relances=h0;
+  }
   if(date) e.relance=date; else delete e.relance;
   _agtLeadSt[id]=e;
   if(await _agtSaveLeadSt(id)){ showToast(date?('Relance pr\u00e9vue le '+_agtDateFr(date)):'Relance retir\u00e9e','#3D6B27'); agtRenderBody(); }
@@ -5989,6 +6050,8 @@ window.agtLotCopy        = agtLotCopy;
 window.agtLotPrint       = agtLotPrint;
 window.renderAdminGT     = renderAdminGT;
 window.agtSwitchTab      = agtSwitchTab;
+window.agtTicketCreerGT  = agtTicketCreerGT;   // GT-RESTES-1
+window.agtIncLier        = agtIncLier;
 window.agtLogFiltre      = agtLogFiltre;   // GT-UI-7
 window.agtLeadRelance    = agtLeadRelance;   // GT-UI-6
 // ★ GT-UI-6 (§521) — ce que l'écran « Santé du système » (src/gt/sante.js) LIT.
@@ -6031,7 +6094,7 @@ window._agtFacDonnees = function(){
 };
 // ★ GT-UI-5 (§520) — ce que l'écran Leads (src/gt/leads.js) LIT.
 window._agtLeadsDonnees = function(){
-  return { leads:_agtLeadsSorted().map(function(l){ var e=_agtLeadSt[l._id]||{}, st=_agtLeadStOf(l._id); return Object.assign({}, l, { st:st, note:String(e.note||''), relance:String(e.relance||''), retard:_agtLeadRelanceRetard(Object.assign({}, e, { st:st })) }); }),
+  return { leads:_agtLeadsSorted().map(function(l){ var e=_agtLeadSt[l._id]||{}, st=_agtLeadStOf(l._id); return Object.assign({}, l, { st:st, note:String(e.note||''), relance:String(e.relance||''), relanceVue:String(e.relanceVue||''), relances:Array.isArray(e.relances)?e.relances:[], retard:_agtLeadRelanceRetard(Object.assign({}, e, { st:st })) }); }),
     st:Object.keys(_AGT_LEADST).reduce(function(o,k){ o[k]=_AGT_LEADST[k].l; return o; },{}), esc:_escHtml, dateFr:function(x){ return x ? _agtDateFr(x) : '\u2014'; } };
 };
 window._agtBizFill       = _agtBizFill;   // la nouvelle fiche pré-remplit son formulaire
@@ -6077,7 +6140,7 @@ window.agtRadarTri       = agtRadarTri;   // GT-UI-2
 window.agtRenderBody     = agtRenderBody;   // ★ GT-UI-2 : les écrans de src/gt/ redessinent par elle
 // ★ GT-UI-2 (§517) — ce que l'écran Incidents (src/gt/incidents.js) LIT de la console, et rien d'autre.
 window._agtIncDonnees = function(){
-  return { groupes:_agtErrGroupes(_agtErrMerged()), suivi:_agtSuivi, st:_AGT_SUIVI_ST, fin:_AGT_SUIVI_FIN,
+  return { groupes:_agtErrGroupes(_agtErrMerged()).concat(_agtTicketsGroupes(_agtSuivi, _agtNomsClients())), suivi:_agtSuivi, st:_AGT_SUIVI_ST, fin:_AGT_SUIVI_FIN,   // ★ GT-RESTES-1 : les tickets avec
     prio:function(g){ return _agtPrioSuggeree(g); }, cat:_AGT_CAT, ligneSuivi:function(g){ return _agtSuiviLigne(g); },
     sante:_agtErrSante(), esc:_escHtml, relTime:_agtRelTime, dateFr:_agtDateFr,
     noms:(_agtTenants||[]).reduce(function(o,t){ o[t.slug]=t.nom; return o; },{}) };

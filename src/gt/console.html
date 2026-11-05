@@ -62,7 +62,23 @@
     </div>
   </div>
   <div class="agt-body" id="agt-body">
-    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">Chargement&hellip;</div>
+    <div style="text-align:center;padding:40px 20px;color:var(--texte-doux);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-txt,13px)">Chargement&hellip;</div>
+  </div>
+  <!-- ★ GT-RESTES-1 (§529) — LA BARRE D'ONGLETS DU BAS, au téléphone seulement (la maquette) : Radar, Incidents,
+       Clients, Plus — « Plus » ouvre une feuille avec le reste. Elle remplace au téléphone les onglets du haut et la
+       barre de session (styles.css). -->
+  <nav class="agt-bas" aria-label="Écrans">
+    <button class="agt-bas-it active" data-tab="radar" onclick="agtSwitchTab('radar')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cible"></use></svg><span>Radar</span><span class="agt-bas-n mvpas mvpas-compteur mvpas-alerte" id="agt-bas-n-radar"></span></button>
+    <button class="agt-bas-it" data-tab="incidents" onclick="agtSwitchTab('incidents')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg><span>Incidents</span><span class="agt-bas-n mvpas mvpas-compteur mvpas-alerte" id="agt-bas-n-incidents"></span></button>
+    <button class="agt-bas-it" data-tab="clients" onclick="agtSwitchTab('clients')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg><span>Clients</span></button>
+    <button class="agt-bas-it" data-tab="plus" onclick="agtBasPlus()" aria-haspopup="menu" aria-controls="agt-bas-plus"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-points"></use></svg><span>Plus</span></button>
+  </nav>
+  <div class="agt-bas-plus" id="agt-bas-plus" role="menu" hidden>
+    <button role="menuitem" onclick="agtSwitchTab('business')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg><span>Facturation</span></button>
+    <button role="menuitem" onclick="agtSwitchTab('leads')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-enveloppe"></use></svg><span>Leads</span></button>
+    <button role="menuitem" onclick="agtSwitchTab('sante')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg><span>Santé du système</span></button>
+    <button role="menuitem" onclick="agtSwitchTab('outils')"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg><span>Outils</span></button>
+    <button role="menuitem" onclick="agtLockNow()"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg><span>Verrouiller</span></button>
   </div>
   <div class="agt-bottom-bar" id="agt-bottom-bar">
     <div class="agt-bottom-inner">

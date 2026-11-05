@@ -38,6 +38,17 @@ export function relancePastille(l, d) {
   if (l.retard > 0) return '<span class="mvpas mvpas-statut mvpas-retard">Relance en retard de ' + l.retard + ' jour' + (l.retard > 1 ? 's' : '') + '</span>';
   return '<span class="mvpas mvpas-statut mvpas-afaire">Relancer le ' + String(l.relance).slice(8, 10) + '/' + String(l.relance).slice(5, 7) + '</span>';
 }
+// ★ GT-RESTES-1 (§529) — l'historique des relances d'une demande : les dates remplacées ou retirées, et si le mail
+//   « Relance à faire » était parti ; la date en cours, signalée ou non.
+export function historiqueRelances(l, d) {
+  var esc = (d && d.esc) || function (x) { return String(x); }, fr = (d && d.dateFr) || function (x) { return x; };
+  var L = (Array.isArray(l.relances) ? l.relances : []).slice().reverse();
+  var enCours = l.relance ? ('<li><span><b>' + esc(fr(l.relance)) + '</b> \u2014 en cours' + (l.relanceVue === l.relance ? ', mail parti' : '') + '</span></li>') : '';
+  if (!L.length && !enCours) return '';
+  return '<div class="agt-inc-h4" style="margin-top:12px">Historique des relances</div><ul class="agt-chrono">' + enCours + L.map(function (r) {
+    return '<li><span><b>' + esc(fr(r.date)) + '</b> \u2014 ' + esc(r.fin || '') + (r.signalee ? ' (mail parti)' : '') + '<time>' + esc(r.le ? fr(String(r.le).slice(0, 10)) : '') + '</time></span></li>';
+  }).join('') + '</ul>';
+}
 export function chercher(leads, q) {
   q = plier(q).trim();
   if (!q) return leads || [];
@@ -65,7 +76,7 @@ function fiche(l, d) {
     + '<input id="agt-lead-rel" class="agt-inc-sel" type="date" aria-label="Date de relance" value="' + esc(l.relance || '') + '">'
     + '<button class="agt-btn agt-inc-court" onclick="agtLeadRelance(\'' + _escAttr(l._id) + '\',(document.getElementById(\'agt-lead-rel\')||{}).value||\'\')">Enregistrer</button>'
     + (l.relance ? '<button class="agt-btn agt-inc-court" onclick="agtLeadRelance(\'' + _escAttr(l._id) + '\',\'\')">Retirer</button>' : '') + '</div>'
-    + '<p class="agt-cli-note">Le jour venu, un mail \u00ab Relance \u00e0 faire \u00bb vous arrive et le Radar la remonte ; rien ne part chez le prospect.</p></div>';
+    + '<p class="agt-cli-note">Le jour venu, un mail \u00ab Relance \u00e0 faire \u00bb vous arrive et le Radar la remonte ; rien ne part chez le prospect.</p>' + historiqueRelances(l, d) + '</div>';   // ★ GT-RESTES-1 : l'historique
   h += '<div class="agt-inc-bloc"><div class="agt-inc-h4">Note</div>' + (l.note ? '<p class="agt-cli-note" style="white-space:pre-wrap">' + esc(l.note) + '</p>' : '<p class="agt-cli-note">Aucune note.</p>')
     + '<button class="agt-btn agt-inc-court" onclick="agtLeadNote(\'' + _escAttr(l._id) + '\')">' + (l.note ? 'Modifier la note' : '+ Note') + '</button></div>';
   h += '<div class="agt-inc-actions"><button class="agt-btn fill agt-inc-court" onclick="agtLeadMail(\'' + _escAttr(l._id) + '\')">R\u00e9pondre</button>'

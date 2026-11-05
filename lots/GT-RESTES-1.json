@@ -1,0 +1,40 @@
+{
+  "lot": "GT-RESTES-1",
+  "section": "§529",
+  "base": "6080c449627965d2125e85e00e76d4458a1a51da",
+  "inclut": [],
+  "date": "2026-11-05",
+  "tutos": {
+    "ok": true,
+    "empreinte": "a1d18fe0cfbda828100b622f1d19f830072fcdcd5f4b6fc0034903edfc848b12",
+    "date": "2026-11-05T08:17:37.232Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "fc6bdf3b38491ebb7d6491f682ae5919d0ced50a0919cd5bf1a7aa7543e6929f",
+    "CLAUDE.md": "b70e5fd0e40283b83d52ca4e11bdfd1ea17fba376663bd573ad38273249688bd",
+    "docs/claude/INDEX.md": "dd7a14c870aa078f92e7d98876c27403cb6b9e6cd6dc655e175173fecb678e12",
+    "docs/claude/chantiers-480-529.md": "fd383ab73439e2d921c9dd3894c7546f7ea452c324073ad5919964667e9c5aa5",
+    "docs/claude/journal.md": "12c152193cfbf9b6ad643bc69efc55296ad9605102e4b533e6555df88245d01d",
+    "public/sw.js": "30e34b0680d0fef9cf41274c6d40d969b51799748d32b77636fb930c9b2233fb",
+    "scripts/harnais-bandeau-essai.mjs": "30776dc702632c368b7ceef338a3dda8d6d4b58551061af5345777fd0098ef81",
+    "scripts/harnais-claude-md.mjs": "fc08c43cdcb86eb9642cfbf4efd12d1ec59c2f34ab63f3a000b54b4b7f68c9ce",
+    "scripts/harnais-sec7-contre.mjs": "703022217593539a1c2d6c798ad7e259de5041d6c4af3a4b8f99fb6024d206fb",
+    "scripts/mv-harnais-cote1.mjs": "80aaae5e1eca55f7dc117723727f3c5f0ba2a4ac29195065fbb296dea52e6470",
+    "scripts/mv-harnais-liste.mjs": "8673496677fcd84845bb30f0063b5d03476da41ebf2f9d2b1d1b95e40fcbe4a7",
+    "scripts/preflight-baseline.json": "43c7628777fa46cb564d98bc945b0ddd4f307e1dda1074175fa8cc74f2833129",
+    "src/admin-gt.js": "95943fa0409eeb2339e2bcd182ef34372b1c471cdac674b06811d7a6e1f3686f",
+    "src/gt/console.html": "dd1434c75f1dbf8ec1c0f8f7ab64c88b406b93e9c30c6229aeeb6cfa5e33d2ec",
+    "src/gt/coquille.js": "9f1ebd8218e39ed1bc1749f1f81d0d4d322fda99f1dc66de6fe4fb0c8597c39a",
+    "src/gt/incidents.js": "da68debed64b250d8fed5593e35fd573c15ad92034f3f4792cefc13c67ccf64f",
+    "src/gt/leads.js": "6e725a0bee05e9b6151f07164492976337b54b673cb327e2f0f138efb40d2753",
+    "src/styles.css": "e6792474191d6276a85da321413bf881b829b460a42dc4e161f57db6bb66327d",
+    "scripts/mv-harnais-gtrestes1.mjs": "770db0ccdbeb07de58e518c8ef7b1450aa5f1f84bd53ad85908c1b2f1e8b61fb"
+  }
+}

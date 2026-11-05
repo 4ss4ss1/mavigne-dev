@@ -49,8 +49,8 @@ const EPREUVES = [
   {
     nom: 'C24c · une interpolation nue de plus dans un gabarit de app.js',
     volet: 'C24c', fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}" title="${p.nom}"',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" title="${p.nom}" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
   },
   {
     nom: 'C24c · un gabarit HTML NEUF dans cave.js (fichier sans aucun gabarit aujourd\'hui)',
@@ -67,8 +67,8 @@ const EPREUVES = [
   {
     nom: 'C24c · PIEGE n°2 — un ternaire dont UNE SEULE branche est echappee',
     volet: 'C24c', fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}" data-t="${pct>0?_escHtml(String(pct)):col}"',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" data-x="${pTacheFilter?_escHtml(String(pTacheFilter)):pTacheFilter}" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
   },
 
   // ── C24a : le mauvais echappeur dans un slot JS ──────────────────────────
@@ -106,16 +106,16 @@ const EPREUVES = [
   {
     nom: '★ INVERSE · POINT FIXE 1/2 — appeler une aide PROUVEE sûre (utils.js) depuis un gabarit de app.js',
     volet: null, fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}">${_mvInfoBtn(\'x\')}<i',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">${_mvInfoBtn(\'x\')}Toutes tâches</div>',
   },
   {
     nom: 'POINT FIXE 2/2 — la MEME aide cesse d\'echapper (utils.js) → l\'appel rougit dans app.js',
     volet: 'C24c', fichier: 'src/utils.js', voletFichier: 'src/app.js',
     prealable: {
       fichier: 'src/app.js',
-      de: 'style="width:${pct}%;background:${col}"',
-      a: 'style="width:${pct}%;background:${col}">${_mvInfoBtn(\'x\')}<i',
+      de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+      a: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">${_mvInfoBtn(\'x\')}Toutes tâches</div>',
     },
     de: "return '<button type=\"button\" class=\"mv-i\" data-mvi=\"' + _escAttr(cle)",
     a: "return '<button type=\"button\" class=\"mv-i\" data-mvi=\"' + (cle)",
@@ -125,26 +125,26 @@ const EPREUVES = [
   {
     nom: '★ INVERSE · PIEGE n°4 — une fausse interpolation DANS UN COMMENTAIRE',
     volet: null, fichier: 'src/app.js',
-    de: '  function _bar(pct,col){',
-    a: '  // exemple pour la doc : <div title="${p.nom}">${x.libelle}</div>\n  function _bar(pct,col){',
+    de: '    var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?',
+    a: '    // exemple pour la doc : <div title="${p.nom}">${x.libelle}</div>\n    var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?',
   },
   {
     nom: '★ INVERSE · PIEGE n°3 — parentheses imbriquees _escHtml(String(x||\'\'))',
     volet: null, fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}" data-n="${_escHtml(String((col===\'x\'?pct:col)||\'\'))}"',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" data-n="${_escHtml(String((pTacheFilter===\'x\'?1:pTacheFilter)||\'\'))}" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
   },
   {
     nom: '★ INVERSE · un ternaire dont LES DEUX branches sont echappees',
     volet: null, fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}" data-t="${pct>0?_escHtml(String(pct)):_escHtml(col)}"',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" data-x="${pTacheFilter?_escHtml(String(pTacheFilter)):_escHtml(\'toutes\')}" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
   },
   {
     nom: '★ INVERSE · Number() autour de l\'interpolation',
     volet: null, fichier: 'src/app.js',
-    de: 'style="width:${pct}%;background:${col}"',
-    a: 'style="width:${pct}%;background:${col}" data-w="${Number(pct)}"',
+    de: 'data-t="toutes" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
+    a: 'data-t="toutes" data-w="${Number(pTacheFilter)}" onclick="setPTacheFilter(\'toutes\',this)">Toutes tâches</div>',
   },
 
   // ══ C25 — LE JETON APP CHECK ═════════════════════════════════════════════

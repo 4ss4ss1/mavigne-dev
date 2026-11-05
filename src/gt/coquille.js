@@ -41,6 +41,8 @@ window._agtRouteNoter = function (onglet, arg) {
   if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) { location.hash = h; } }
 };
 window.addEventListener('hashchange', appliquerRoute);
+// ★ GT-RESTES-1 (§529) — « Plus » de la barre du bas (téléphone) : ouvre ou referme la feuille des autres écrans.
+window.agtBasPlus = function () { var p = document.getElementById('agt-bas-plus'); if (p) p.hidden = !p.hidden; };
 
 // ── La palette (Ctrl K) ───────────────────────────────────────────────────────
 // Sans accents, sans casse ; un mot qui COMMENCE par la recherche passe devant un mot qui la contient.

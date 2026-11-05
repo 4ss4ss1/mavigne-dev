@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.53
+// MA VIGNE — Service Worker v11.54
+// v11.54 (05/11/2026) — GT-RESTES-1 (§529) : console GUERETTECH — la barre d’onglets du bas au téléphone, les tickets et les liens entre incidents (styles.css, console.html).
 // v11.53 (04/11/2026) — RANGS-1 (§528) : qui est dans les rangs — « En direct » (Pilotage, Accueil) et le Journal ne nomment plus ceux que le planning ne fait pas travailler, ni ceux en cave ou au tracteur ; le tracteur entre deux parcelles (utils.js, coequipier.js, cockpit.js, cockpit-vue.js, pilotage.js, app.js, cave.js, index.html).
 // v11.52 (04/11/2026) — YALLER-1 (§527) : retrouver une parcelle dans tout le domaine et « Y aller » (l’itinéraire dans le GPS du téléphone, l’appli choisie une fois), l’annulation et la croix de la fiche à l’admin, le tri de la carte Tracteur rétabli (app.js, tutos.js, styles.css, utils.js, whats-new.js, index.html).
 // v11.51 (04/11/2026) — COEQ-5 (§526) : « En direct » du Pilotage nomme le coéquipier, « Par personne » dans la fiche de session, le contrôle de cadence recalé et mis dans la chaîne (cockpit.js, cockpit-vue.js, pilotage.js, coequipier.js, tracteur.js, styles.css, utils.js, index.html).
@@ -4685,7 +4686,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.53';
+const CACHE_NAME   = 'mavigne-v11.54';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4702,7 +4703,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.53 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.54 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4722,7 +4723,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.53 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.54 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

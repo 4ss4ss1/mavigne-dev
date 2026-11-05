@@ -1,9 +1,10 @@
 import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 // ★ RACINE DEDUITE DU FICHIER, JAMAIS DU REPERTOIRE COURANT NI D'UN CHEMIN ABSOLU.
 //   Regle posee en §44c : six harnais portaient « /home/claude/mavigne-dev/ » en dur —
 //   un chemin de bac a sable. Chez Nico et en CI ils sortaient en ENOENT, et deux
 //   d'entre eux etaient VERTS ici : un filet qui ne demarre pas se lit comme un succes.
-const R = new URL('../', import.meta.url).pathname;
+const R = fileURLToPath(new URL('../', import.meta.url));   // GT-RESTES-1 : pas de .pathname (mv-harnais-chemins)
 const A=readFileSync(R+'src/app.js','utf8');
 const H=readFileSync(R+'index.html','utf8');
 const S=readFileSync(R+'public/sw.js','utf8');
@@ -19,11 +20,13 @@ function rend(d,lvl){
   //    assertion : sept verifications du bandeau ne protegeaient plus rien, et
   //    la sortie ressemblait a un simple rouge. Le stub rend un marqueur inerte,
   //    pas une chaine vide : on veut voir si l'icone est bien posee.
-  new Function('document','_mvTrial','currentUser','_mvIcon',`${fn}\n_mvTrialBanner();`)(
+  // ★ GT-RESTES-1 (§529) : le bandeau lit maintenant `window` (sa garde) — sans ce bouchon, le harnais sortait en exit 1
+  //   avant sa première assertion (« window is not defined »), hors de la chaîne : personne ne le voyait.
+  new Function('document','_mvTrial','currentUser','_mvIcon','window',`${fn}\n_mvTrialBanner();`)(
     {getElementById:(i)=>i==='mv-trial-bar'?bar:{classList:{add:()=>{},remove:()=>{}}},
      body:{classList:{add:()=>{},remove:()=>{}}}},
     ()=>({active:true,expired:false,daysLeft:d,level:lvl}), {},
-    (nom,taille)=>'<svg data-ic="'+nom+'" data-px="'+taille+'"></svg>');
+    (nom,taille)=>'<svg data-ic="'+nom+'" data-px="'+taille+'"></svg>', { _mvPrepOn: () => false });   // hors préparation : le bandeau se montre
   return html||'';
 }
 console.log('\n── le bandeau ──');
