@@ -1,0 +1,43 @@
+{
+  "lot": "BASEAN-1",
+  "section": "§538",
+  "base": "f5eae4f2b06c9b7fd9eaae8d5868ae1b3ef2fbb8",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "ok": true,
+    "empreinte": "d61a2537804605753def3ee31d3047a89e854794fda96042f8cae70731945b3c",
+    "date": "2026-11-06T22:46:58.016Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "solidarite"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "03ebbb14ed9a6ed28e80bc819fd1919c32cc3205d21607762fef058c827f431c",
+    "CLAUDE.md": "cfb6b53b7ba4c0d4cbadbc79f8d67829ebc1b370bad9da84ec4240161c50f9a8",
+    "docs/claude/INDEX.md": "742cd6d6561a495c9ff1ccad25764b020ed0de81551cc4f037b33c5762b44caf",
+    "docs/claude/chantiers-530-579.md": "3219849fe15081d732a9e614548f4d13ba1278790a60842303a917935d65c9d7",
+    "docs/claude/journal.md": "b7f6c32fe23a345eac3412c54dc0d3d4d8faeb11c51389e75d8a466f59997afe",
+    "docs/claude/modules.md": "b043c653f4313e0748c290c3d75922a2d775b0cb48d26710ce6dd81b00b2e66c",
+    "guide/10-planning.html": "d04b62b325bc8e320dd5de945fe200f366a20709974934ab0496e04e2a6f3e4c",
+    "index.html": "4c6a73cb6d5ef62ee6cd69278675eea358415742ef9b74bae318d775b939fd21",
+    "public/sw.js": "855087730eec28f9a7212860487a12d1ea95437ea36c0f465119d6818469ab97",
+    "scripts/harnais-claude-md.mjs": "7a992b05034d43c431e06915cd59f1826997ce96089587304b61289610e5498a",
+    "scripts/mv-harnais-effectif-periode.mjs": "19ceff3c1b34bc73ae1c080e8f28f842f9165138165be0ef5b96535a2bd32dde",
+    "scripts/mv-harnais-liste.mjs": "2d1cf2e26d6d7cfad72aa9db0efcac45701be09de61f41a35a96fe4eca7819f0",
+    "scripts/mv-harnais-majoration.mjs": "5bf1658448a7fe42f6e79377c7de6463f2b317dec6094b9611c5255da17921a1",
+    "scripts/mv-harnais-recup.mjs": "7d2e4a4b4d92f4dac0e7cacc407381d8875211365a398737dd67365f092dd100",
+    "scripts/mv-harnais-retard.mjs": "c0f03ead845276295ab3a19b616994410a9c232d120fd33ba7308693623be517",
+    "src/planning.js": "f8f27724054993c7d1e931b60c399bdaab5e12c3b9bd152837b7d7155560a16f",
+    "src/tutos.js": "4ad230a1efb42c8b897d90308338bc7a2419907ca240139865fde384db24b6d3",
+    "src/utils.js": "82ad80e5881c28ddd30144092d9eae86ee5d8ba58bd7a9784924d9940b594b33",
+    "src/whats-new.js": "698039e1d590aacc5f80d7d388e836e908aa9e3cb67983657af361a466d4acab",
+    "scripts/mv-harnais-basean1.mjs": "6597a040a3c718fdac77492377a50cdb604e83c8178aa6d180118eb081e23948"
+  }
+}

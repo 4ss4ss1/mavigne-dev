@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.70', d: '2026-11-06', items: [   // BASEAN-1 (§538) : la base de l'année et la journée de solidarité
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'La base de l’année remplace les 1 607 h',
+      desc: "À partir de 2027, le compteur de chacun suit la base de l’année : 7 h par jour du lundi au vendredi, soit 35 h par semaine en moyenne (1 827 h en 2027). Les congés et les fériés chômés y comptent pour leurs heures prévues : un congé pris en août ou en octobre ne retire plus rien. 2026 garde ses 1 607 h." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'La journée de solidarité se règle dans la roue crantée',
+      desc: "Dans la roue crantée du Planning : étalée sur l’année, un jour férié travaillé (sans majoration, jamais le 1er mai), un autre jour, ou offerte — et qui en est dispensé. 7 h pour un temps plein, au prorata d’un temps partiel." },
+  ] },
   { v: '10.69', d: '2026-11-06', items: [   // CPJOURS-1 (§537) : les congés se décomptent par période, jours de repos compris
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une semaine de congé compte ses jours de repos',
       desc: "Un congé se décompte du premier jour où la personne aurait travaillé jusqu’à la veille de sa reprise : une semaine vaut 6 jours ouvrables, ou 5 ouvrés selon le réglage du domaine, jours de repos compris. Cochés un par un dans la grille, les seuls jours travaillés laissaient de côté un mercredi de repos : il compte maintenant. Les fériés ne se décomptent toujours pas." },

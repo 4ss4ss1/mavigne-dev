@@ -1128,6 +1128,12 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ La base de l’année et la journée de solidarité (BASEAN-1, §538)
+
+À partir de 2027 (`_planBaseActive`) : base = 7 h × les jours du lundi au vendredi (`_planBaseAn`), proratisée au contrat, + la journée
+de solidarité (`CONFIG.solidarite[année]` : étalée, férié travaillé non majoré, autre jour, offerte ; dispenses par salarié). Le compteur
+(`_planCompteH`) : travail + congés et fériés chômés à leurs heures prévues (`_planCreditFerie`). 2026 et avant : `plafAnnuel` en travail effectif.
+
 ### ★ Le décompte des congés : par période (CPJOURS-1, §537)
 
 `_planCpPris` → `_planCpJours` : du premier jour où la personne aurait travaillé à la veille de sa reprise, tous les jours

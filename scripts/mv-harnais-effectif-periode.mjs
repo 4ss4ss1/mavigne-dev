@@ -74,7 +74,8 @@ const NOMS = [
   '_planMbrsPer', '_planMbrsMois', '_planMbrsAn',
   // SEM-1 (17/09/2026) : _planDayH rend les heures du MODELE un jour sans saisie, a partir de la regle de septembre 2026
   '_planRecupActiveAt',
-  '_planPlId', '_planPlanned', '_planTimingH', '_planDefTiming', '_planDayH', '_planEffective',
+  '_planPlId', '_planSolid', '_planSolidJour', '_planEstSolid', '_planPlanned', '_planTimingH',   // ★ BASEAN-1 : _planPlanned lit le jour de solidarité
+  '_planDefTiming', '_planDayH', '_planEffective',
   '_planCalcMonth', '_planAbsLostH', '_planAbsNeutH', '_planRempH', '_planSummary',
   '_pl2Actifs', '_pl2HorsContrat', '_pl2Annual', '_pl2Annual_', '_planGensArchives', '_paAuj', '_paEnCours', '_paGroupes'
 ];

@@ -322,6 +322,85 @@ function _planLegal(){
   };
 }
 
+// ★★ BASEAN-1 (§538) — LA BASE DE L'ANNÉE : 35 H PAR SEMAINE EN MOYENNE, FÉRIÉS ET CONGÉS COMPTÉS AUX HEURES PRÉVUES.
+//   Avant : un plafond fixe de 1 607 h de TRAVAIL EFFECTIF (congés et fériés à 0). Les modèles portaient les congés en
+//   fermetures à 0 h ; dès qu'un congé se prenait ailleurs, ou qu'on travaillait pendant une « fermeture », tout se faussait.
+//   La règle (maquette v2 validée par Nico le 06/11) : le planning ne porte plus de congés ; un jour de congé et un férié chômé
+//   comptent les heures prévues ce jour-là — ni retirées, ni à rattraper (accord national, art. 4.3 et 10.4 § 4.2) ; la base de
+//   l'année = 7 h × les jours du lundi au vendredi, soit 35 h par semaine en moyenne, + la journée de solidarité.
+//   ⚠️ À PARTIR DE 2027 (CONFIG.base_annee_depuis) : une année commencée ne change pas de règle — 2026 et avant gardent le
+//   plafond de Le cadre en travail effectif, leurs modèles portant encore les congés en fermetures.
+function _planBaseActive(yr){var c=window.CONFIG&&window.CONFIG.base_annee_depuis;return yr>=((c!=null&&!isNaN(+c))?+c:2027);}
+function _planJoursSem(yr){var n=0;for(var d=new Date(yr,0,1);d.getFullYear()===yr;d.setDate(d.getDate()+1)){var g=d.getDay();if(g>=1&&g<=5)n++;}return n;}
+function _planBaseAn(yr){return 7*_planJoursSem(yr);}
+// ── LA JOURNÉE DE SOLIDARITÉ (Code du travail ; chronique juridique FRSEA, 2025) : 7 h de travail en plus dans l'année, non
+//   payées, au prorata d'un temps partiel. Le domaine choisit chaque année, la même façon pour tous : étalée sur l'année, un
+//   férié travaillé (jamais le 1er mai), un autre jour (jamais un dimanche), ou non travaillée (offerte). Dispensés : déjà faite
+//   chez un autre employeur cette année (quel que soit le choix) ; moins de 18 ans quand c'est un férié. Embauché en cours
+//   d'année : les 7 h entières, sans prorata de présence. Travaillée un férié, elle n'est PAS majorée (_planFerieMbr).
+//   CONFIG.solidarite[année] = {mode:'etalee'|'ferie'|'jour'|'offerte', jour:'MM-JJ', dispenses:{<id ou nom>:'ailleurs'|'mineur'}}
+var PLAN_SOLID_MODES={etalee:'\u00c9tal\u00e9e sur l\u2019ann\u00e9e',ferie:'Un jour f\u00e9ri\u00e9 travaill\u00e9',jour:'Un autre jour',offerte:'Non travaill\u00e9e'};
+function _planSolid(yr){var s=window.CONFIG&&window.CONFIG.solidarite&&window.CONFIG.solidarite[yr];return (s&&PLAN_SOLID_MODES[s.mode])?s:null;}
+function _planSolidCle(mbr){return String((mbr&&(mbr.id||mbr.nom))||'');}
+function _planSolidFait(mbr,yr){
+  var s=_planSolid(yr); if(!s||s.mode==='offerte'||!mbr)return false;
+  if(typeof window._mvAnnualise==='function'&&!window._mvAnnualise(mbr))return false;   // payé à l'heure : ce jour-là se paie normalement
+  var d=s.dispenses&&s.dispenses[_planSolidCle(mbr)];
+  if(d==='ailleurs')return false;
+  if(d==='mineur'&&s.mode==='ferie')return false;
+  return true;
+}
+function _planSolidJour(yr){var s=_planSolid(yr);if(!s||(s.mode!=='ferie'&&s.mode!=='jour')||!/^\d\d-\d\d$/.test(s.jour||''))return null;
+  return {m:parseInt(s.jour.slice(0,2),10)-1,d:parseInt(s.jour.slice(3),10)};}
+function _planEstSolid(yr,m,d){var j=_planSolidJour(yr);return !!(j&&j.m===m&&j.d===d);}
+// Temps partiel : la part du temps plein, lue sur le modèle (au-dessus de 90 % de la base, c'est un temps plein).
+function _planSolidRatio(plId,yr){var t=_planGetTpl(plId,yr)||{},F=_feriesY(yr),tot=0;
+  for(var m=0;m<12;m++){var M=t[m];if(M&&typeof M==='object')for(var k in M){var v=parseFloat(M[k]);if(v>0&&!isNaN(parseInt(k,10)))tot+=v;}
+    for(var dk in (F[m]||{}))tot+=_planCreditFerie(plId,yr,m,parseInt(dk,10));}   // ses fériés chômés comptent, comme dans la base
+  var r=Math.round(tot/_planBaseAn(yr)*100)/100;return r>=0.9?1:Math.max(0,r);}
+// Un férié, sauf pour qui y fait sa journée de solidarité : pour lui, c'est un jour de travail ordinaire, sans majoration.
+function _planFerieMbr(mbr,m,d){var f=_planFerie(m,d),y=_pY();if(f&&mbr&&_planEstSolid(y,m,d)&&_planSolidFait(mbr,y))return null;return f;}
+// Les heures qu'un férié chômé aurait portées. Le modèle met 0 un férié : on prend le même jour de la semaine, la semaine
+//   d'avant ou d'après (puis à deux semaines). Un férié que le modèle prévoit travaillé n'est pas chômé : rien à créditer —
+//   sauf le jour de solidarité, qui garde son crédit : ses 7 h de travail sont EN PLUS, comme les 7 h de sa base.
+function _planCreditFerie(plId,yr,m,d){
+  var t=_planGetTpl(plId,yr)||{},F=_feriesY(yr),raw=function(mm,dd){return parseFloat(t[mm]&&t[mm][dd])||0;};
+  if(raw(m,d)>0&&!_planEstSolid(yr,m,d))return 0;
+  var ks=[-7,7,-14,14];                                       // le même mois d'abord : les modèles changent de rythme au 1er
+  for(var pass=0;pass<2;pass++)for(var i=0;i<ks.length;i++){var x=new Date(yr,m,d+ks[i]);if(x.getFullYear()!==yr)continue;
+    var xm=x.getMonth(),xd=x.getDate();if((pass===0)!==(xm===m))continue;
+    if(F[xm]&&F[xm][xd])continue;var w=raw(xm,xd);if(w>0)return w;}
+  return 0;
+}
+// Une semaine entièrement à 0 h au modèle : une fermeture (même lecture que CPJOURS-1, §537).
+function _planSemFermee(plId,yr,m,d){var t=_planGetTpl(plId,yr)||{},dow=new Date(yr,m,d).getDay();if(dow<1||dow>5)return false;
+  for(var j=1;j<=5;j++){var x=new Date(yr,m,d-dow+j);if(x.getFullYear()!==yr)continue;if((parseFloat(t[x.getMonth()]&&t[x.getMonth()][x.getDate()])||0)>0)return false;}
+  return true;}
+// ★ Ce qu'une journée apporte au compteur de l'année : le travail, plus le congé et le férié chômé à leurs heures prévues.
+function _planCompteH(mbr,plId,m,d,e,yr){
+  var w=_planWorkH(plId,m,d,e,yr);
+  if(e&&e.type==='cp'){
+    var h=parseFloat(e.heures)||_planPlanned(plId,m,d,yr);
+    if(h<=0&&_planSemFermee(plId,yr,m,d))h=7*_planSolidRatio(plId,yr);   // un congé posé sur une fermeture : 7 h
+    return w+h;
+  }
+  var F=_feriesY(yr);
+  if(F[m]&&F[m][d]){
+    if(_planEstSolid(yr,m,d)){if(!e&&!_planSolidFait(mbr,yr))w=0;return w+_planCreditFerie(plId,yr,m,d);}
+    var t=_planGetTpl(plId,yr)||{},raw=parseFloat(t[m]&&t[m][d])||0;
+    if(!e&&raw<=0)return _planCreditFerie(plId,yr,m,d);                     // chômé : ses heures prévues
+    return w;                                                                 // travaillé : le travail seul
+  }
+  return w;
+}
+// Le modèle sur l'année, tel que la base le lit : ses heures, ses fériés chômés, le jour de solidarité.
+function _planModelBrut(plId,yr){var t=_planGetTpl(plId,yr)||{},F=_feriesY(yr),tot=0;
+  for(var m=0;m<12;m++){var M=t[m];if(M&&typeof M==='object')for(var k in M){var v=parseFloat(M[k]);if(v>0&&!isNaN(parseInt(k,10)))tot+=v;}
+    for(var dk in (F[m]||{}))tot+=_planCreditFerie(plId,yr,m,parseInt(dk,10));}
+  var j=_planSolidJour(yr);if(j&&!(parseFloat(t[j.m]&&t[j.m][j.d])>0))tot+=7*_planSolidRatio(plId,yr);
+  return tot;}
+function _planBaseAttendue(plId,yr){var s=_planSolid(yr);return _planBaseAn(yr)+((s&&s.mode!=='offerte')?7*_planSolidRatio(plId,yr):0);}
+
 // ── Politique du domaine pour les heures au-dela du planning du mois ──
 // 'paye'    : payees le mois meme
 // 'recup'   : recuperees en repos, aucun paiement mensuel
@@ -738,8 +817,10 @@ function _planGetRefH(plId,m){
   },0);
 }
 function _planPlanned(plId,m,d,yr){
-  var tpl=_planGetTpl(plId,yr);
-  return (tpl[m]&&tpl[m][d])||0;
+  var tpl=_planGetTpl(plId,yr),v=(tpl[m]&&tpl[m][d])||0;
+  // ★ BASEAN-1 (§538) : le jour de solidarité (férié travaillé ou autre jour) est un jour de travail de 7 h, au prorata
+  if(!v){var y=(yr!=null?yr:_pY());if(_planEstSolid(y,m,d))v=7*_planSolidRatio(plId,y);}
+  return v;
 }
 function _planTimingH(debut,fin,continu){
   if(!debut||!fin)return 0;
@@ -1477,7 +1558,7 @@ function _planMajMonth(mbr,m){
   var T=_planMajTaux(),plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m);
   for(var d=1;d<=_planDays(m);d++){
     if(!_planInContractCtr(mbr,m,d))continue;
-    var f=_planFerie(m,d),dow=_planDow(m,d);
+    var f=_planFerieMbr(mbr,m,d),dow=_planDow(m,d);   // ★ BASEAN-1 : la journée de solidarité n'est pas majorée
     if(!f&&dow!==0)continue;                        // ni ferie ni dimanche : rien a dire
     var e=ent[d],st=_planDayStatus(plId,m,d,e);
     if(_PLAN_ST_OFFDAY[st.t]&&!st.retard)continue;  // CP, recup, absence, formation
@@ -2305,7 +2386,7 @@ function _planHsupMois(mbr,m){
     // ★ DIM-3 — « toujours » : un dimanche ou un férié PRÉVU au modèle n'est pas une journée normale — toutes ses heures sont en
     //   plus, et un dimanche prévu non travaillé ne manque pas.
     if(_planDimFerToujours())js.forEach(function(y){if(y.avant||!y.ec)return;var dow=new Date(y.y,y.m,y.d).getDay(),sv2=_planCtxYear;_planCtxYear=y.y;
-      try{var fer=_planFerie(y.m,y.d);if(dow!==0&&!fer)return;y.bp=y.jm?y.jm.h:0;y.bm=0;}finally{_planCtxYear=sv2;}});
+      try{var fer=_planFerieMbr(mbr,y.m,y.d);if(dow!==0&&!fer)return;y.bp=y.jm?y.jm.h:0;y.bm=0;}finally{_planCtxYear=sv2;}});
     var totP=0,totM=0;js.forEach(function(y){if(!y.avant&&!y.jm)totP+=y.bp;totM+=y.bm;});
     var off=Math.min(totP,totM),r=off;
     js.forEach(function(y){var c=(y.avant||y.jm)?0:Math.min(y.bp,r);y.conso=c;y.hs=y.bp-c;r-=c;});
@@ -2382,7 +2463,7 @@ function _planDfMois(mbr,m){
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),o={prevu:0,fait:0};
   for(var d=1;d<=_planDays(m);d++){
     if(!_planInContractRead(mbr,m,d))continue;
-    if(!_planFerie(m,d)&&_planDow(m,d)!==0)continue;
+    if(!_planFerieMbr(mbr,m,d)&&_planDow(m,d)!==0)continue;
     var e=ent[d];if(e&&e.type==='recup')continue;
     o.prevu+=parseFloat(_planPlanned(plId,m,d))||0;
     o.fait+=_planWorkH(plId,m,d,e)||0;
@@ -2763,9 +2844,18 @@ function _planAnnuPlafond(mbr){
       if(_planInContractCtr(mbr,m,d))ctr+=pl;
     }
   }
+  var yr=_pY();
+  if(_planBaseActive(yr)){                       // ★ BASEAN-1 : la base de l'année, + la journée de solidarité (sans prorata de présence)
+    var base=_planBaseAn(yr),b=(all>0)?(base*ctr/all):base;
+    return Math.max(0,b-_planSuspH(mbr))+(_planSolidFait(mbr,yr)?7*_planSolidRatio(plId,yr):0);
+  }
   var plaf=(all>0)?(L.plafAnnuel*ctr/all):L.plafAnnuel;
   return Math.max(0,plaf-_planSuspH(mbr));
 }
+// ★ BASEAN-1 — ce que compte le mois, pour la base : le travail, plus congés et fériés chômés à leurs heures prévues.
+function _planCompteMonth(mbr,m){var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),yr=_pY(),c=0;
+  for(var d=1;d<=_planDays(m);d++){if(!_planInContractCtr(mbr,m,d))continue;c+=_planCompteH(mbr,plId,m,d,ent[d],yr);}
+  return c;}
 // Heures de MODULATION : cumul des depassements de 35 h, semaine par semaine.
 // Une semaine creuse ne rattrape pas une semaine chargee -> jamais un simple
 // total annuel moins 1607. Les semaines a cheval sur l'annee sont tronquees
@@ -2799,14 +2889,14 @@ function _planModulH(mbr,uptoMonth){
 function _planAnnu(mbr,uptoMonth){
   var L=_planLegal(),um=(uptoMonth==null?11:uptoMonth);
   var annu=(typeof window._mvAnnualise==='function')?window._mvAnnualise(mbr):true;
-  var plaf=annu?_planAnnuPlafond(mbr):0,cum=0,proj=0;
+  var plaf=annu?_planAnnuPlafond(mbr):0,cum=0,proj=0,nv=_planBaseActive(_pY());
   for(var m=0;m<12;m++){
-    if(m<=um){var w=_planWorkMonth(mbr,m);cum+=w;proj+=w;}
-    else proj+=_planSummary(mbr,m).ref;
+    if(m<=um){var w=nv?_planCompteMonth(mbr,m):_planWorkMonth(mbr,m);cum+=w;proj+=w;}
+    else proj+=nv?_planCompteMonth(mbr,m):_planSummary(mbr,m).ref;
   }
   var moisRest=Math.max(0,11-um);
   return {
-    annualise:annu,
+    annualise:annu, base:nv, baseAn:nv?_planBaseAn(_pY()):0, baseAtt:nv?_planBaseAttendue(_planPlId(mbr),_pY()):0,
     plafond:plaf, cumul:cum, reste:plaf-cum,
     projection:proj, ecartProj:proj-plaf,
     modul:annu?_planModulH(mbr,um):0, modulMax:L.modulMax,
@@ -4483,7 +4573,7 @@ function _planAnnuCard(mbr,uptoMonth){
   +'</div>';
   h+='<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">'
     +'<div><span style="font-size:var(--pt-xxl,32px);font-weight:800;line-height:1;font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.cumul)+'</span><span style="font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux);margin-left:4px"> faites</span></div>'
-    +'<div style="text-align:right;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35">plafond<b style="display:block;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.plafond)+'</b></div>'
+    +'<div style="text-align:right;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35">'+(a.base?'base':'plafond')+'<b style="display:block;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:lining-nums tabular-nums">'+_planFmt(a.plafond)+'</b></div>'
   +'</div>';
   h+='<div style="position:relative;height:13px;background:var(--gris-clair);border-radius:7px;margin:13px 0 6px">'
     +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:7px;width:'+Math.min(100,a.cumul/ech*100)+'%;background:'+(over?'var(--orange)':'var(--vert-med)')+'"></div>'
@@ -4495,17 +4585,20 @@ function _planAnnuCard(mbr,uptoMonth){
     +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:9px 4px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
     +'<div class="mvencadre" style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
   +'</div>';
-  var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
+  var _ref=a.base?a.baseAn:L.plafAnnuel;
+  var nt=a.base
+    ?'Compt\u00e9\u00a0: le <b>travail</b>, plus les cong\u00e9s et les f\u00e9ri\u00e9s ch\u00f4m\u00e9s \u00e0 leurs heures pr\u00e9vues \u2014 ils ne retirent rien et ne se rattrapent pas. Base '+_pY()+'\u00a0: '+_planJoursSem(_pY())+' jours du lundi au vendredi \u00d7 7 h = '+_planFmt(a.baseAn)+(_planSolidFait(mbr,_pY())?', + '+_planFmt(7*_planSolidRatio(_planPlId(mbr),_pY()))+' de journ\u00e9e de solidarit\u00e9':'')+'.'
+    :'Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
   if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
-  else if(a.plafond<L.plafAnnuel-1)nt='<b>Plafond proratis\u00e9</b> \u00e0 la dur\u00e9e du contrat. '+nt;
+  else if(a.plafond<_ref-1)nt='<b>'+(a.base?'Base proratis\u00e9e':'Plafond proratis\u00e9')+'</b> \u00e0 la dur\u00e9e du contrat. '+nt;
   h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.4">'+nt+'</div>';
-  var _mdl=_planModelTotal(_planPlId(mbr)),_dev=_mdl-L.plafAnnuel,_devAb=Math.abs(_dev);
+  var _mdl=a.base?_planModelBrut(_planPlId(mbr),_pY()):_planModelTotal(_planPlId(mbr)),_att=a.base?a.baseAtt:L.plafAnnuel,_dev=_mdl-_att,_devAb=Math.abs(_dev);
   h+='<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
   h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:lining-nums tabular-nums">'+_planFmt(_mdl)+'</span></div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:'+(_devAb>10?'var(--orange)':'var(--texte-doux)')+';margin-top:5px;line-height:1.4">'
     +(_devAb>10
-      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(L.plafAnnuel)+' attendues.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
-      :'Conforme aux '+_planFmt(L.plafAnnuel)+' attendues ('+(_dev>=0?'+':'\u2212')+_planFmt(_devAb)+').')
+      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(_att)+(a.base?' de la base':' attendues')+'.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
+      :'Conforme aux '+_planFmt(_att)+(a.base?' de la base':' attendues')+' ('+(_dev>=0?'+':'\u2212')+_planFmt(_devAb)+').')
   +'</div>';
   h+='</div><div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
   var mOver=(a.modul>a.modulMax+0.0001),mWarn=(a.modul>a.modulMax*0.8);
@@ -6769,12 +6862,12 @@ function _planRenderCadre(){
         +_planLegInput('plan-leg-maxh','Max. hebdo. (absolu)',_L.maxHebdo,'1')
         +_planLegInput('plan-leg-maxm','Max. hebdo. (moy. 12 sem.)',_L.maxMoy,'1')
         +_planLegInput('plan-leg-maxj','Max. quotidien',_L.maxJour,'0.5')
-        +_planLegInput('plan-leg-annu','Dur\u00e9e annuelle (annualisation)',_L.plafAnnuel,'1')
+        +(_planBaseActive(_pY())?'':_planLegInput('plan-leg-annu','Dur\u00e9e annuelle (annualisation)',_L.plafAnnuel,'1'))
         +_planLegInput('plan-leg-modul','Max. heures de modulation / an',_L.modulMax,'10')
       +'</div>'
       +'<button class="plan-btn-saisir" style="width:100%" onclick="planSaveLegal()">Enregistrer le cadre l\u00e9gal</button>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">D\u00e9fauts = convention nationale Production Agricole et CUMA. Modifiez les valeurs pour la convention collective d\'un autre domaine.</div>'
-    +'</div>';
+    +'</div>'+_planBaseCarte();
   // ── Congés du domaine : règle de décompte et période de référence ──
   // ⚠️ Ces deux réglages vivaient dans la fiche d'UN salarié (onglet Congés), où les
   //    changer touchait TOUT LE MONDE sans que rien ne le dise. Ce sont des réglages
@@ -7026,10 +7119,67 @@ function planSetDuesDebut(v){
   else window.fbSaveToast({config:window.CONFIG},_m,'#3D6B27');
   _planRenderCadre();
 }
+// ★ BASEAN-1 — la carte de Le cadre : la base de l'année, et la journée de solidarité de l'année.
+function _planBaseCarte(){
+  var yr=_pY(); if(!_planBaseActive(yr))return '';
+  var J=_planJoursSem(yr),base=_planBaseAn(yr),s=_planSolid(yr)||{},mode=s.mode||'',adm=(typeof isAdmin==='function')&&isAdmin();
+  var F=_feriesY(yr),fer=[];
+  for(var m=0;m<12;m++)for(var dk in (F[m]||{})){var dd=parseInt(dk,10),cl=(m<9?'0':'')+(m+1)+'-'+(dd<10?'0':'')+dd;if(cl==='05-01')continue;
+    fer.push({cl:cl,t:F[m][dk]+' \u00b7 '+['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'][new Date(yr,m,dd).getDay()]+' '+dd+' '+PLAN_MOIS[m].toLowerCase()});}
+  fer.sort(function(x,y){return x.cl<y.cl?-1:1;});
+  var lab='font-size:var(--pt-txt,13px);color:var(--texte);display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1.5px solid var(--gris-clair,#e5e7eb);border-radius:10px;cursor:pointer';
+  function opt(v,t,sub){return '<label style="'+lab+'"'+(v==='etalee'?' data-tuto="plan.solid.etalee"':'')+'><input type="radio" name="plan-solid-mode" value="'+v+'"'+(mode===v?' checked':'')+(adm?'':' disabled')+' onchange="planSolidMode(this.value)" style="margin-top:2px"><span><b>'+t+'</b><span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.4">'+sub+'</span></span></label>';}
+  var h='<div class="mvcarte" style="padding:14px;display:grid;gap:10px">'
+    +'<div style="font-size:var(--pt-base,14px);font-weight:700">La base de l\u2019ann\u00e9e '+yr+'</div>'
+    +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);line-height:1.5">'+J+' jours du lundi au vendredi \u00d7 7 h = <b style="color:var(--texte)">'+_planFmt(base)+'</b>, soit 35 h par semaine en moyenne. Les cong\u00e9s et les f\u00e9ri\u00e9s ch\u00f4m\u00e9s y comptent pour leurs heures pr\u00e9vues\u00a0: ils ne retirent rien et ne se rattrapent pas.</div>'
+    +'<div style="font-size:var(--pt-base,14px);font-weight:700;margin-top:4px">Journ\u00e9e de solidarit\u00e9 '+yr+(mode?'':' <span class="mvpas mvpas-statut mvpas-surveiller">\u00e0 r\u00e9gler</span>')+'</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">Obligatoire\u00a0: 7 h de travail en plus dans l\u2019ann\u00e9e, non pay\u00e9es, au prorata d\u2019un temps partiel. Le domaine choisit comment, la m\u00eame fa\u00e7on pour tous.</div>'
+    +opt('etalee','\u00c9tal\u00e9e sur l\u2019ann\u00e9e','7 h de plus dans le planning, plac\u00e9es o\u00f9 tu veux. La base passe \u00e0 '+_planFmt(base+7)+'.')
+    +opt('ferie','Un jour f\u00e9ri\u00e9 travaill\u00e9','Ce jour devient un jour de travail de 7 h, sans majoration. Jamais le 1er mai.')
+    +'<div id="plan-solid-ferie-w" style="display:'+(mode==='ferie'?'block':'none')+';margin:-4px 0 0 30px"><select id="plan-solid-ferie" class="fsel"'+(adm?'':' disabled')+'>'
+      +fer.map(function(f){var sel=(s.jour?s.jour===f.cl:/Pentec/.test(f.t));return '<option value="'+f.cl+'"'+(sel?' selected':'')+'>'+_escHtml(f.t)+'</option>';}).join('')+'</select></div>'
+    +opt('jour','Un autre jour','Un samedi, un jour de repos du planning\u00a0: 7 h ce jour-l\u00e0. Jamais un dimanche.')
+    +'<div id="plan-solid-date-w" style="display:'+(mode==='jour'?'block':'none')+';margin:-4px 0 0 30px"><input type="date" id="plan-solid-date" class="fi" min="'+yr+'-01-01" max="'+yr+'-12-31" value="'+(mode==='jour'&&s.jour?yr+'-'+s.jour:'')+'"'+(adm?'':' disabled')+'></div>'
+    +opt('offerte','Non travaill\u00e9e','Le domaine l\u2019offre\u00a0: la base ne bouge pas.');
+  var gens=(window.MEMBRES||[]).filter(function(x){return x&&x.nom&&!(window._mvEstCollectif&&window._mvEstCollectif(x))&&(typeof window._mvAnnualise!=='function'||window._mvAnnualise(x));});
+  if(gens.length){
+    h+='<div style="font-size:var(--pt-txt,13px);font-weight:700;margin-top:4px">Dispens\u00e9s cette ann\u00e9e</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">D\u00e9j\u00e0 faite chez un autre employeur cette ann\u00e9e\u00a0: dispens\u00e9, quel que soit le choix. Moins de 18 ans\u00a0: dispens\u00e9 si c\u2019est un f\u00e9ri\u00e9. Embauch\u00e9 en cours d\u2019ann\u00e9e\u00a0: les 7 h enti\u00e8res.</div>';
+    gens.forEach(function(x){var k=_planSolidCle(x),v=(s.dispenses&&s.dispenses[k])||'';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:var(--pt-txt,13px)"><span>'+_escHtml(x.nom)+'</span><select data-solid-disp="'+_escAttr(k)+'" class="fsel" style="width:auto"'+(adm?'':' disabled')+'>'
+        +'<option value=""'+(v?'':' selected')+'>la fait</option><option value="ailleurs"'+(v==='ailleurs'?' selected':'')+'>d\u00e9j\u00e0 faite ailleurs</option><option value="mineur"'+(v==='mineur'?' selected':'')+'>moins de 18 ans</option></select></div>';});
+  }
+  if(adm)h+='<button class="plan-btn-saisir" style="width:100%" data-tuto="plan.solid.ok" onclick="planSaveSolid()">Enregistrer la journ\u00e9e de solidarit\u00e9</button>';
+  return h+'</div>';
+}
+function planSolidMode(v){var a=document.getElementById('plan-solid-ferie-w'),b=document.getElementById('plan-solid-date-w');if(a)a.style.display=(v==='ferie'?'block':'none');if(b)b.style.display=(v==='jour'?'block':'none');}
+function planSaveSolid(){
+  if(typeof isAdmin==='function'&&!isAdmin())return;
+  var yr=_pY(),dire=function(t){if(window.showToast)showToast(t);};
+  var c=document.querySelector('input[name="plan-solid-mode"]:checked'),mode=c?c.value:'';
+  if(!PLAN_SOLID_MODES[mode]){dire('Choisis comment se fait la journ\u00e9e de solidarit\u00e9');return;}
+  var o={mode:mode};
+  if(mode==='ferie'){var v=(document.getElementById('plan-solid-ferie')||{}).value||'';
+    if(!/^\d\d-\d\d$/.test(v)||v==='05-01'){dire('Choisis le f\u00e9ri\u00e9 \u2014 jamais le 1er mai');return;}o.jour=v;}
+  if(mode==='jour'){var dv=(document.getElementById('plan-solid-date')||{}).value||'';
+    if(!/^\d{4}-\d\d-\d\d$/.test(dv)||dv.slice(0,4)!==String(yr)){dire('Choisis une date en '+yr);return;}
+    var dt=new Date(dv+'T12:00:00'),F=_feriesY(yr);
+    if(dt.getDay()===0){dire('Jamais un dimanche');return;}
+    if(F[dt.getMonth()]&&F[dt.getMonth()][dt.getDate()]){dire('C\u2019est un f\u00e9ri\u00e9\u00a0: choisis \u00ab\u00a0un jour f\u00e9ri\u00e9 travaill\u00e9\u00a0\u00bb');return;}
+    o.jour=dv.slice(5);}
+  var disp={};document.querySelectorAll('select[data-solid-disp]').forEach(function(el){if(el.value)disp[el.getAttribute('data-solid-disp')]=el.value;});
+  if(Object.keys(disp).length)o.dispenses=disp;
+  if(!window.CONFIG)window.CONFIG={};
+  if(!window.CONFIG.solidarite||typeof window.CONFIG.solidarite!=='object')window.CONFIG.solidarite={};
+  window.CONFIG.solidarite[yr]=o;
+  window.fbSaveToast({config:window.CONFIG},'Journ\u00e9e de solidarit\u00e9 '+yr+' enregistr\u00e9e','#3D6B27');
+  _planRenderCadre();
+}
 function planSaveLegal(){
   var gv=function(id,def){var v=parseFloat((document.getElementById(id)||{}).value);return isNaN(v)?def:v;};
   var L={hebdoLeg:gv('plan-leg-hebdo',PLAN_LEGAL_DEF.hebdoLeg),mensLeg:gv('plan-leg-mens',PLAN_LEGAL_DEF.mensLeg),maxHebdo:gv('plan-leg-maxh',PLAN_LEGAL_DEF.maxHebdo),maxMoy:gv('plan-leg-maxm',PLAN_LEGAL_DEF.maxMoy),maxJour:gv('plan-leg-maxj',PLAN_LEGAL_DEF.maxJour),plafAnnuel:gv('plan-leg-annu',PLAN_LEGAL_DEF.plafAnnuel),modulMax:gv('plan-leg-modul',PLAN_LEGAL_DEF.modulMax)};
   if(!window.CONFIG)window.CONFIG={};
+  if(!document.getElementById('plan-leg-annu'))L.plafAnnuel=_planLegal().plafAnnuel;   // ★ BASEAN-1 : champ masqué depuis la base
   window.CONFIG.cadre_legal=L;
   window.CONFIG=window.CONFIG;
   window.fbSaveToast({config:window.CONFIG},'\u2705 Cadre l\u00e9gal enregistr\u00e9','#3D6B27');
@@ -8046,7 +8196,7 @@ function _plRvAnnuHtml(mbr,tc,_moisLbl){
   var _anMod=(_an.modul>_an.modulMax+0.0001);
   return _an.annualise
   ? ('<div class="soldean"><div class="t">Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
-    +'<span class="it">Plafond annuel <b>'+_planFmt(Math.round(_an.plafond))+'</b>'+(Math.abs(_an.plafond-Math.round(_an.plafond))>0.01||_an.plafond<_planLegal().plafAnnuel-0.5?' <i>au prorata du contrat</i>':'')+'</span>'
+    +'<span class="it">'+(_planBaseActive(_pY())?'Base de l\u2019ann\u00e9e':'Plafond annuel')+' <b>'+_planFmt(Math.round(_an.plafond))+'</b>'+(Math.abs(_an.plafond-Math.round(_an.plafond))>0.01||_an.plafond<_planLegal().plafAnnuel-0.5?' <i>au prorata du contrat</i>':'')+'</span>'
     +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
     +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#b45309':'#15803d')+'">'+_planFmt(Math.round(Math.abs(_an.reste)*2)/2)+'</b></span>'
     +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#6a5ba8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
@@ -9265,7 +9415,7 @@ function _paDoc(yr,nom){
     var tot=0, nj=0;
     for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0){ tot+=g[mm][dd]; nj++; }
     tot=Math.round(tot*10)/10;
-    var ec=Math.round((tot-1607)*10)/10;
+    var ec=_planBaseActive(yr)?Math.round((_planModelBrut(gr.id,yr)-_planBaseAttendue(gr.id,yr))*10)/10:Math.round((tot-1607)*10)/10;   // ★ BASEAN-1
     var exc=_paExceptions(g,yr);
     var lg='<span><i style="background:#fff"></i>Journ\u00e9e compl\u00e8te</span>'
          + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
@@ -9280,7 +9430,7 @@ function _paDoc(yr,nom){
       + '<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
       + '<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
       + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec===0?'':(ec>0?'+':'\u2212'))+(ec===0?'0':_paFmt(Math.abs(ec)))
-      + ' h par rapport aux 1 607 h</div></div></div>'
+      + ' h par rapport '+(_planBaseActive(yr)?'\u00e0 la base de l\u2019ann\u00e9e':'aux 1 607 h')+'</div></div></div>'
       + (exc ? ('<div class="pa-exc">'+exc+(exc>1?' journ\u00e9es sortent':' journ\u00e9e sort')
               +' du rythme annonc\u00e9 ci-dessus \u2014 elles figurent dans la grille, '
               +'rep\u00e9r\u00e9es par un lis\u00e9r\u00e9 rouge quand elles tombent un jour f\u00e9ri\u00e9 '
@@ -9689,6 +9839,8 @@ window.planSaveCoupureH     = planSaveCoupureH;
 window._planCoupureH        = _planCoupureH;
 window._planCoupureTxt      = _planCoupureTxt;
 window.planSaveLegal        = planSaveLegal;
+window.planSaveSolid        = planSaveSolid;   // ★ BASEAN-1
+window.planSolidMode        = planSolidMode;
 window.planSaveMaj          = planSaveMaj;
 window.planSetHsupMode      = planSetHsupMode;
 window.planLegalPreset      = planLegalPreset;

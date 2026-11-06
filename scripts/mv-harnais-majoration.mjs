@@ -59,7 +59,7 @@ const REEL = [
   pickVar('PLAN_ABS_MOTIFS'), pickVar('_MV_FERIES_CACHE'),
   pickVar('PLAN_MAJ_DEF'),    pickVar('PLAN_MAJ_DEBUT'),  pickVar('PLAN_RECUP_DEBUT'),
   pickVar('_PLAN_ST_OFFDAY'),
-  pickFn('_mvEasterMD'), pickFn('_feriesY'),  pickFn('_planFerie'),
+  pickFn('_mvEasterMD'), pickFn('_feriesY'),  pickFn('_planFerie'), pickFn('_planSolid'), pickFn('_planSolidJour'), pickFn('_planEstSolid'), pickFn('_planFerieMbr'),   // ★ BASEAN-1
   pickFn('_planAbsDef'), pickFn('_planAbsMotif'), pickFn('_planAbsT'),
   pickFn('_planMinOf'),  pickFn('_planTimingH'),
   pickFn('_planHsupMode'), pickFn('_planHsupPayable'),
