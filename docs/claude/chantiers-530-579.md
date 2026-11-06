@@ -185,3 +185,22 @@ Le défaut symétrique, trouvé en route : sur la forme par année, cinq modèle
 
 ### 536d. Ce qui reste ouvert
 - §28, bloc MODELES-1.
+
+## 537. ★★ CPJOURS-1 — LES CONGÉS SE DÉCOMPTENT PAR PÉRIODE : UNE SEMAINE DE CONGÉ COMPTE SES JOURS DE REPOS (06/11 — `src/planning.js` (`_planCpJours`, `_planCpAjout`, `_planCpCle` neufs ; `_planCpPris` ; `_planCpPlan` ; `_planCpSelBuild` ; la note de la fenêtre de pose) · `src/whats-new.js` · `src/utils.js` (APP) · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-cpjours1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `docs/maquettes/maquette-planning-annee-v2.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `.mv-base` · `lots/CPJOURS-1.json` — base `677ef67` « modeles1 » — **APP 10.68 → 10.69, SW 11.59 → 11.60**)
+
+### 537a. D’où ça vient
+Nico (06/11), en pleine maquette du planning de l’année : « quand je prends une semaine de congé du lundi au vendredi, notre convention c’est 6 jours ; si c’était un jour où je ne travaillais pas le mercredi, ça compte que 4 jours ». Mesuré : `_planCpPris` comptait les jours portant une saisie `cp` (lundi→samedi en ouvrables, lundi→vendredi en ouvrés), plus le samedi qui suit un vendredi posé. La pose depuis la grille ne prend que les cases cochées : le mercredi de repos (0 h) n’est pas coché, il manque. L’outil « Poser des congés » du … au … le posait (saisie à 0 h) et tombait juste sur ce cas — mais faux sur deux autres : lundi-mardi avant un mercredi de repos (2 au lieu de 3), une période qui commence un jour de repos (un jour de trop).
+La règle, vérifiée : fiche service-public (« le lundi, le mardi et le mercredi même si le salarié ne travaille pas ce jour »), Cass. soc. 23/02/2000 (le premier jour où il aurait dû travailler, puis tous les jours ouvrables jusqu’à la reprise), jours ouvrés admis s’ils ne sont pas moins favorables — ceux de l’entreprise, pas ceux du salarié —, fériés chômés exclus ; accord national du 23/12/1981, art. 3. Le réglage 5 ou 6 jours reste celui du domaine (Nico : « chaque domaine est différent, il ne faut pas que ça bloque »).
+
+### 537b. Le modèle, et ce qui a été écarté
+- **Une période** = des jours posés reliés par des jours de repos (6 au plus d’affilée), prolongée par ses jours de repos jusqu’à la veille de la reprise (6 au plus ; au-delà, le seul samedi qui suit — la règle d’avant). **Départ** : le premier jour où il aurait travaillé (travail prévu, ou fermeture). **Compte** : lundi→samedi (ouvrables) ou lundi→vendredi (ouvrés), hors fériés, dimanches, hors contrat, dans la période de référence. Jour de repos = sans travail prévu, sans autre saisie, dans le contrat.
+- ★ **Le piège évité : les fermetures à 0 h des modèles 2026** (trois semaines d’août). Prises pour des jours de repos, un congé posé la veille aurait avalé toute la fermeture, et une fermeture posée en congé (saisies à 0 h) n’aurait plus rien compté — aucun jour « travaillé » pour partir. Règle : un jour ouvré à 0 h dans une semaine entièrement à 0 h est une fermeture, une borne et un départ valable (cas H et I du harnais).
+- **L’aperçu n’a plus sa propre règle** : `_planCpAjout` = le solde après moins le solde avant, par `_planCpJours`, sur les deux chemins de pose (période, sélection). `_planCpCount` reste écrite — ancre de `mv-harnais-ctx-planning` — mais n’est plus appelée.
+- Écarté : poser des saisies `cp` sur les jours de repos au moment de la pose (le compte doit tenir pour les poses déjà faites, et une saisie à 0 h n’apporte rien) ; toucher au réglage 5/6.
+
+### 537c. Ce qui a été vérifié
+- `scripts/mv-harnais-cpjours1.mjs` (neuf) : les vraies fonctions extraites de `planning.js`, 2027 et ses fériés réels, quatre modèles fictifs — 23 cas (A à N, et le câblage des deux chemins de pose), 6 contre-épreuves tenues ; « les jours de repos ne comptent plus » rend 4 au cas A, le chiffre que voyait Nico.
+- Ce qui n’a pas pu être vu : les soldes réels des domaines (un décompte peut monter d’un ou deux jours, voir §28) ; la fenêtre de pose sur un vrai téléphone.
+
+### 537d. Ce qui reste ouvert
+- §28, bloc CPJOURS-1.

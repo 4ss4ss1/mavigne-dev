@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.59
+// MA VIGNE — Service Worker v11.60
+// v11.60 (06/11/2026) — CPJOURS-1 (§537) : les congés se décomptent par période — une semaine de congé compte ses jours de repos (6 jours ouvrables ou 5 ouvrés selon le réglage), du premier jour travaillé à la veille de la reprise
 // v11.59 (06/11/2026) — RESTE-1 (§535) : l’entreplantation garde ce qui reste à planter — les trous moins les plantés, d’une campagne à l’autre, clôture ou pas ; la plantation en plusieurs fois reste « En cours » (comptes.js, app.js, pilotage.js, reglages.js, tracteur.js ; APP 10.67 → 10.68).
 // v11.58 (06/11/2026) — FENETRES-1 (§533) : les fenêtres .mat-modal du Cuvier et du Chai défilent — une règle commune (styles.css) ; la saisie en série, les couleurs et les réglages en colonne, leur liste défile et Enregistrer reste visible (APP 10.66 → 10.67).
 // v11.57 (06/11/2026) — CUVFICHE-1 (§532) : la fiche d’une cuve au téléphone — elle défile jusqu’à ses gestes (Décuver), ce qu’elle ouvre passe devant elle (relevé, cuve, réception par openOv ; Décuver, étape, opération, fin de FA l’écartent puis la rappellent), elle se repeint après un geste, et se rouvre au premier toucher (cuvier.js ; APP 10.65 → 10.66).
@@ -4691,7 +4692,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.59';
+const CACHE_NAME   = 'mavigne-v11.60';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4708,7 +4709,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.59 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.60 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4728,7 +4729,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.59 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.60 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

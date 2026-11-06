@@ -2083,70 +2083,97 @@ function _planCpPeriodeLbl(){
 }
 window._planCpPeriode=_planCpPeriode;
 
-function _planCpPris(nom){
-  // Décompte des congés selon le mode du domaine (window.CONFIG.cp_mode) :
-  //  - 'ouvrables' (défaut) : lun→sam CP hors dimanches + fériés chômés, + samedi auto. Réf. 30 j/an.
-  //  - 'ouvres' : lun→ven uniquement, hors samedis + dimanches + fériés. Réf. 25 j/an.
-  // MULTI-ANNÉES : PLANNING_ENTRIES[nom] = {année:{mois:{jour:e}}} → boucle année→mois→jour,
-  // le jour de semaine ET les fériés étant ceux de l'ANNÉE RÉELLE de chaque entrée.
-  var mode=((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'ouvres':'ouvrables';
+// ★ CPJOURS-1 (§537) — LE DÉCOMPTE DES CONGÉS SE FAIT PAR PÉRIODE, PLUS PAR CASE.
+//   La règle (Code du travail, art. L3141-3 ; Cass. soc. 23/02/2000 ; fiche service-public ; accord national
+//   agricole, art. 3) : le congé part du PREMIER JOUR où le salarié aurait dû travailler, puis on compte TOUS
+//   les jours ouvrables (lun→sam) — ou ouvrés (lun→ven), selon le réglage du domaine — jusqu'à la VEILLE DE SA
+//   REPRISE : ses jours de repos compris, les fériés jamais, le dimanche jamais.
+//   AVANT : on comptait les CASES posées, plus le samedi qui suit un vendredi posé. Cochés un par un dans la
+//   grille, les jours de travail d'une semaine laissaient de côté le mercredi de repos d'un rythme sur deux
+//   semaines (4 jours au lieu de 6) ; lundi-mardi avec reprise le jeudi oubliait le mercredi ; une période
+//   posée À PARTIR d'un jour de repos le comptait en trop.
+//   UNE PÉRIODE = des jours posés en congé, reliés par des jours de repos (6 au plus d'affilée), prolongée par
+//   ses jours de repos jusqu'à la veille de la reprise (6 au plus ; au-delà, le seul samedi qui suit, comme
+//   avant). JOUR DE REPOS = sans travail prévu (0 h, samedi ou dimanche libres, férié), sans autre saisie,
+//   dans le contrat. ⚠️ Un jour ouvré à 0 h dans une SEMAINE ENTIÈREMENT à 0 h n'est PAS un jour de repos :
+//   c'est une fermeture (les modèles 2026 en portent). Il borne la période comme un jour de travail, et un
+//   congé posé dessus compte comme avant — sinon un congé posé la veille d'une fermeture l'aurait avalée.
+//   `plus` : des jours [{yr,mi,d}] comptés comme posés, pour l'aperçu des deux chemins de pose (_planCpAjout) :
+//   l'aperçu affiche exactement ce que le solde affichera après la pose.
+function _planCpCle(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;}
+function _planCpJours(nom,plus){
+  var mode=_planCpMode();
   _planMigrateYears();
-  var _cpP=_planCpPeriode();
-  var mbrEnt=PLANNING_ENTRIES[nom];
-  if(!mbrEnt)return 0;
+  var per=_planCpPeriode(), ent=PLANNING_ENTRIES[nom]||{};
   var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===nom;});
-  var plId=mbr?_planPlId(mbr):'standard';
-  function _plannedY(yr,m,d){ var t=_planGetTpl(plId,yr); return (t[m]&&t[m][d])||0; }
-  var n=0;
-  // Décompte principal
-  Object.keys(mbrEnt).forEach(function(yk){
-    var yearEnt=mbrEnt[yk]; if(!yearEnt||typeof yearEnt!=='object')return;
-    var yr=parseInt(yk,10); if(isNaN(yr)||yr<2000)return;
-    var F=_feriesY(yr);
-    Object.keys(yearEnt).forEach(function(mk){
-      var monthEnt=yearEnt[mk]; if(!monthEnt||typeof monthEnt!=='object')return;
-      var m=parseInt(mk,10); if(isNaN(m))return;
-      Object.keys(monthEnt).forEach(function(dk){
-        var e=monthEnt[dk]; if(!e||e.type!=='cp')return;
-        var d=parseInt(dk,10); if(isNaN(d))return;
-        var _dt=new Date(yr,m,d);
-        if(_dt<_cpP.debut||_dt>_cpP.fin)return;  // hors periode de reference
-        var dow=_dt.getDay();
-        if(dow===0)return;                       // dimanche : jamais décompté
-        if(F[m]&&F[m][d])return;                 // férié chômé : jamais décompté
-        if(mode==='ouvres'&&dow===6)return;      // ouvrés : samedi ne compte pas
-        n++;
-      });
+  var plId=mbr?_planPlId(mbr):'standard', tpl={}, cp={}, memo={};
+  function prevu(y,m,d){var t=tpl[y]||(tpl[y]=_planGetTpl(plId,y)||{});return (t[m]&&t[m][d])||0;}
+  function saisie(y,m,d){var Y=ent[y],M=Y&&Y[m];return (M&&M[d])||null;}
+  Object.keys(ent).forEach(function(yk){
+    var yr=parseInt(yk,10),Y=ent[yk]; if(isNaN(yr)||yr<2000||!Y||typeof Y!=='object')return;
+    Object.keys(Y).forEach(function(mk){
+      var m=parseInt(mk,10),M=Y[mk]; if(isNaN(m)||!M||typeof M!=='object')return;
+      Object.keys(M).forEach(function(dk){var d=parseInt(dk,10),e=M[dk]; if(!isNaN(d)&&e&&e.type==='cp')cp[_planCpCle(yr,m,d)]=1;});
     });
   });
-  // Samedi automatique (mode ouvrables) : un vendredi CP entraîne le samedi de repos suivant
-  if(mode!=='ouvres'){
-    Object.keys(mbrEnt).forEach(function(yk){
-      var yearEnt=mbrEnt[yk]; if(!yearEnt||typeof yearEnt!=='object')return;
-      var yr=parseInt(yk,10); if(isNaN(yr)||yr<2000)return;
-      Object.keys(yearEnt).forEach(function(mk){
-        var monthEnt=yearEnt[mk]; if(!monthEnt||typeof monthEnt!=='object')return;
-        var m=parseInt(mk,10); if(isNaN(m))return;
-        Object.keys(monthEnt).forEach(function(dk){
-          var e=monthEnt[dk]; if(!e||e.type!=='cp')return;
-          var d=parseInt(dk,10); if(isNaN(d))return;
-          var _dv=new Date(yr,m,d);
-          if(_dv<_cpP.debut||_dv>_cpP.fin)return;            // hors periode de reference
-          if(_dv.getDay()!==5)return;                        // vendredis CP uniquement
-          var sat=new Date(yr,m,d+1); if(sat.getDay()!==6)return;
-          var sy=sat.getFullYear(), sm=sat.getMonth(), sd=sat.getDate();
-          var Fs=_feriesY(sy); if(Fs[sm]&&Fs[sm][sd])return;  // samedi férié : pas décompté
-          var satY=mbrEnt[sy]||null;                          // bucket année du samedi (peut différer)
-          var satMo=(satY&&satY[sm])||null;
-          var se=(satMo&&satMo[sd])||null;
-          if(se&&se.type==='cp')return;                       // déjà compté au décompte principal
-          if(_plannedY(sy,sm,sd)>0)return;                    // samedi travaillé : pas décompté
-          n++;                                                 // samedi de repos encadré
-        });
-      });
-    });
+  (plus||[]).forEach(function(c){if(c&&c.yr)cp[_planCpCle(c.yr,c.mi,c.d)]=1;});
+  var cles=Object.keys(cp).sort(); if(!cles.length)return 0;
+  function info(dt){
+    var y=dt.getFullYear(),m=dt.getMonth(),d=dt.getDate(),k=_planCpCle(y,m,d); if(memo[k])return memo[k];
+    var dow=dt.getDay(),F=_feriesY(y),fer=!!(F[m]&&F[m][d]),p=prevu(y,m,d),estCp=!!cp[k];
+    var inC=mbr?window._planSurAnnee(y,function(){return _planInContract(mbr,m,d);}):true;
+    var travail=inC&&!fer&&p>0, ferme=false;
+    if(inC&&!fer&&p<=0&&dow>=1&&dow<=5){       // une semaine entièrement à 0 h : une fermeture, pas un repos
+      ferme=true;
+      for(var j=1;j<=5;j++){var x=new Date(y,m,d-dow+j);if(prevu(x.getFullYear(),x.getMonth(),x.getDate())>0){ferme=false;break;}}
+    }
+    return (memo[k]={dow:dow,fer:fer,inC:inC,depart:inC&&(travail||ferme),
+      repos:inC&&!estCp&&!travail&&!ferme&&!saisie(y,m,d)});
   }
+  function lendemain(dt){return new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+1);}
+  function jourDe(k){var q=k.split('-');return new Date(+q[0],+q[1]-1,+q[2]);}
+  var periodes=[], cur=null;
+  cles.forEach(function(k){
+    var dt=jourDe(k);
+    if(cur){
+      var x=lendemain(cur.fin),n=0,relie=true;
+      while(x<dt){n++;if(n>6||!info(x).repos){relie=false;break;}x=lendemain(x);}
+      if(relie){cur.fin=dt;return;}
+      periodes.push(cur);
+    }
+    cur={deb:dt,fin:dt};
+  });
+  if(cur)periodes.push(cur);
+  var n=0;
+  periodes.forEach(function(pr){
+    // la reprise : ses jours de repos qui suivent comptent jusqu'à la veille (6 au plus ; sinon, le seul samedi)
+    var fin=pr.fin,x=lendemain(pr.fin),suite=[];
+    while(info(x).repos){suite.push(x);if(suite.length>6)break;x=lendemain(x);}
+    if(suite.length>6){suite=[];var s=lendemain(pr.fin);if(s.getDay()===6&&info(s).repos)suite=[s];}
+    if(suite.length)fin=suite[suite.length-1];
+    // le départ : le premier jour où il aurait travaillé
+    var a=pr.deb; while(a<=pr.fin&&!info(a).depart)a=lendemain(a);
+    if(a>pr.fin)return;                                    // posé sur ses seuls jours de repos : rien à décompter
+    for(var t=a;t<=fin;t=lendemain(t)){
+      var I=info(t);
+      if(!I.inC||I.fer||I.dow===0)continue;                // dimanche, férié, hors contrat : jamais
+      if(mode==='ouvres'&&I.dow===6)continue;              // ouvrés : le samedi ne compte pas
+      if(t<per.debut||t>per.fin)continue;                  // hors période de référence
+      n++;
+    }
+  });
   return n;
+}
+// Ce qu'une pose AJOUTE au décompte : le solde après, moins le solde avant — la même fonction des deux côtés.
+function _planCpAjout(mbr,marked){
+  if(!mbr||!marked||!marked.length)return 0;
+  return Math.max(0,_planCpJours(mbr.nom,marked)-_planCpJours(mbr.nom));
+}
+function _planCpPris(nom){
+  // Décompte des congés selon le mode du domaine (window.CONFIG.cp_mode) : 'ouvrables' (défaut, 6 par semaine,
+  // réf. 30 j/an) ou 'ouvres' (5 par semaine, réf. 25 j/an). PAR PÉRIODE depuis CPJOURS-1 (§537) : _planCpJours.
+  // MULTI-ANNÉES : PLANNING_ENTRIES[nom] = {année:{mois:{jour:e}}}, jour de semaine ET fériés de l'ANNÉE RÉELLE.
+  return _planCpJours(nom);
 }
 function _planCpSolde(mbr){return(mbr.cp_initial_j||0)-_planCpPris(mbr.nom);}
 // Periode de reference des conges payes (mois de debut, 0-11).
@@ -6411,7 +6438,7 @@ function _planCpSelBuild(){
       cells.push(c);
       if(c.type==='cp')marked.push(c);
     });
-    out.push({mbr:mbr,plId:plId,cells:cells,marked:marked,count:_planCpCount(plId,marked,mode)});
+    out.push({mbr:mbr,plId:plId,cells:cells,marked:marked,count:_planCpAjout(mbr,marked)});
   });
   return out;
 }
@@ -6451,7 +6478,7 @@ function _planCPRenderSel(){
   } else {
     h+='<div class="mvencadre">'+head+rows+'</div>';
     if(ign>0)h+='<div class="pl2-note" style="margin-top:8px">'+_mvIcon('info',16)+' '+ign+' case'+(ign>1?'s':'')+' de la s\u00e9lection ne '+(ign>1?'seront':'sera')+' pas pos\u00e9e'+(ign>1?'s':'')+' (dimanche, f\u00e9ri\u00e9, samedi de repos ou hors contrat). Survolez une case grise pour la raison.</div>';
-    if(mode!=='ouvres')h+='<div class="pl2-note" style="margin-top:8px">Un vendredi pos\u00e9 entra\u00eene automatiquement le samedi de repos suivant dans le d\u00e9compte, sans occuper la case.</div>';
+    h+='<div class="pl2-note" style="margin-top:8px">Le d\u00e9compte part du premier jour o\u00f9 la personne aurait travaill\u00e9 et va jusqu\u2019\u00e0 la veille de sa reprise\u00a0: ses jours de repos comptent'+(mode!=='ouvres'?', samedi compris':'')+', les f\u00e9ri\u00e9s jamais.</div>';
     h+='<div class="pl2-note" style="margin-top:8px">Les jours d\u00e9j\u00e0 en r\u00e9cup\u00e9ration ou en absence sont pr\u00e9serv\u00e9s.</div>';
   }
   body.innerHTML=h;
@@ -6539,6 +6566,8 @@ function _planCpDayType(mbr,plId,yr,mi,d){
   else type='cp';
   return {dow:dow,mi:mi,d:d,yr:yr,type:type,pl:pl};
 }
+// ⚠️ CPJOURS-1 (§537) : plus appelée par les chemins de pose (ils passent par _planCpAjout, le décompte par
+//    période). Gardée pour l'ancre du harnais CTX-1 ; c'est l'ANCIENNE règle des cases + samedi auto.
 // Décompte d'un ensemble de jours marqués — même règle que _planCpPris, appliquée en amont
 // pour que l'aperçu affiche EXACTEMENT ce que le compteur affichera après la pose.
 function _planCpCount(plId,marked,mode){
@@ -6573,7 +6602,7 @@ function _planCpPlan(mbr,du,au){
     if(c.type==='cp')marked.push(c);
     cur.setDate(cur.getDate()+1);
   }
-  return {cells:cells, marked:marked, count:_planCpCount(plId,marked,mode)};
+  return {cells:cells, marked:marked, count:_planCpAjout(mbr,marked)};
 }
 function _planCPRender(){
   var body=document.getElementById('plancp-body');

@@ -1,0 +1,30 @@
+{
+  "lot": "CPJOURS-1",
+  "section": "§537",
+  "base": "677ef679c58b080ff7ba830dbf39668cc6afbc4d",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "f5601aaaf9dea86db20dd4ac69af6e1af88f9c14eb4356bccbbf45fee4ae6d99",
+    "CLAUDE.md": "4b8c4c550fa90fcdbc2aab3266b4c9b2d781177763607e1b71300e94c1a4d61f",
+    "docs/claude/INDEX.md": "170837514ae00bbe2edf47dc915312e6fe7bdd4c157a4bfac2343072097e6ecf",
+    "docs/claude/chantiers-530-579.md": "4182696aa036fd9ce2952d5ea6f902801fd261b7e6176eeffaa7478079bc6fff",
+    "docs/claude/journal.md": "e441077a9e86b41febad415f6d6fb4e33951525a0096eb8c6026762eee85a357",
+    "docs/claude/modules.md": "edf397344fd5358d4f554021054183667bed2af4191126d5b73b7a9ba2ba2006",
+    "docs/maquettes/LISEZMOI.md": "e3a52c9cca149b61ab61c0377ebb58c12688138abb8cbf2e0c4793e00cdd9cdb",
+    "guide/10-planning.html": "9b5700d5dfbe05a22e7eeaa22b2776c696f6ae84ca8100d654bc4182a5ede62b",
+    "index.html": "a71e9d6ba74d3eec768d92078e83e694d37be6725cf2a2530b82ebb0aea235c7",
+    "public/sw.js": "c21204137b05073c721ad448f325c58de21ac3d5b5ff25b1ff21653851c6b848",
+    "scripts/harnais-claude-md.mjs": "2dd6d9cb85ac0c1eea1e067c0b3b6673d7e39536245dc1fe3877e6250b3fb571",
+    "scripts/mv-harnais-liste.mjs": "11e4ace661b743e9d16b2b574fc71bdcc4b3f20ac539a6e11fba92f406329ba1",
+    "src/planning.js": "f42a2cdf8b8d0863f28f42a8bf6a92c8e756c4db61b5dd55415d736acdac1c9f",
+    "src/utils.js": "bd5c9c8d4c27f7408bdc0c48839b6603d19a09b832027c92ddf3dbdcbf9443df",
+    "src/whats-new.js": "42a4f692b4167fa2ed7840d88a479a44cc388237b8438ac92aed8cde29dc31da",
+    "docs/maquettes/maquette-planning-annee-v2.html": "e75ef99b73f7804a6f95406d7ab3987da71669ef5ac73beb0540f46ce2611940",
+    "scripts/mv-harnais-cpjours1.mjs": "01cfbc4e69ab5683e02b8196a55050399e6785ed7fde44221c3f08fd0b7fdfe2"
+  }
+}

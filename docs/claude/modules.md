@@ -1128,6 +1128,12 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Le décompte des congés : par période (CPJOURS-1, §537)
+
+`_planCpPris` → `_planCpJours` : du premier jour où la personne aurait travaillé à la veille de sa reprise, tous les jours
+ouvrables (ou ouvrés, selon `CONFIG.cp_mode`), ses jours de repos compris, fériés et dimanches jamais. Une semaine
+entièrement à 0 h est une fermeture (borne), pas un repos. L’aperçu des poses = `_planCpAjout` (après − avant).
+
 ### ⚠️⚠️⚠️ Le défaut de modèle : un réglage du domaine logé dans une fiche individuelle
 
 **Le mode de décompte des congés** (6 jours ouvrables / 5 jours ouvrés) **et la période de

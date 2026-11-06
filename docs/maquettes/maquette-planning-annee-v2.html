@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — le planning de l’année, maquette v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--texte-pale:#A3A19B;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);--presse:rgba(28,26,22,.095);
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--sur-accent:#FFFFFF;--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.13);--ok-texte:#217343;
+  --attention:#A15C00;--attention-doux:rgba(161,92,0,.13);--attention-texte:#975600;
+  --danger:#C2381B;--danger-doux:rgba(194,56,27,.12);--danger-texte:#BA361A;
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+  /* ── l'intensité de la semaine : du repos de la vigne aux vendanges ── */
+  --i1:#DCE7D3;--i1t:#26341E;   /* 29 h et moins  */
+  --i2:#C2D6B4;--i2t:#20301A;   /* 30 à 33 h 30   */
+  --i3:#E9DDAF;--i3t:#3A3115;   /* 34 à 35 h 30   */
+  --i4:#D9B067;--i4t:#36260A;   /* 36 à 38 h 30   */
+  --i5:#A0563A;--i5t:#FFFFFF;   /* 39 à 41 h 30   */
+  --i6:#7A2850;--i6t:#FFFFFF;   /* 42 h et plus   */
+  --ferme-a:#E7E6E2;--ferme-b:#F6F5F2;--ferme-t:#55534E;
+  --repere:#1B1A18;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+  --i1:#2C3A26;--i1t:#DDE8D4;--i2:#3B4F31;--i2t:#E6F0DE;--i3:#55492A;--i3t:#F2E8C6;--i4:#7A5A22;--i4t:#F8E9C8;--i5:#A0563A;--i5t:#FFFFFF;--i6:#9A3E6B;--i6t:#FFFFFF;
+  --ferme-a:#272624;--ferme-b:#1D1C1B;--ferme-t:#B4B2AC;--repere:#EDECE9;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+  --i1:#2C3A26;--i1t:#DDE8D4;--i2:#3B4F31;--i2t:#E6F0DE;--i3:#55492A;--i3t:#F2E8C6;--i4:#7A5A22;--i4t:#F8E9C8;--i5:#A0563A;--i5t:#FFFFFF;--i6:#9A3E6B;--i6t:#FFFFFF;
+  --ferme-a:#272624;--ferme-b:#1D1C1B;--ferme-t:#B4B2AC;--repere:#EDECE9;
+}}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.01em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── page ── */
+.entete{position:sticky;top:0;z-index:30;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete nav a:hover{background:var(--survol)}
+.entete button{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+@media (max-width:700px){.entete{position:static}}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:76ch;margin-bottom:22px;color:var(--texte-med);font-size:var(--pt-base)}
+.intro b{color:var(--texte)}
+.intro p+p{margin-top:8px}
+.mesures{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+.mesure{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px}
+.mesure .k{font-size:var(--pt-xxl);font-weight:600;line-height:1.05}
+.mesure .k small{font-size:var(--pt-base);font-weight:400;color:var(--texte-med);margin-left:4px}
+.mesure .l{color:var(--texte);font-size:var(--pt-micro);margin-top:6px}
+.mesure .b{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:6px}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.92em;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:4px;padding:0 4px}
+section.ecart{margin:0 0 56px;padding-top:14px;border-top:1px solid var(--ligne-forte)}
+.ecart-tete{display:grid;gap:6px;margin-bottom:18px}
+.ecart-tete h2{font-size:var(--pt-xl)}
+.ecart-tete .ou{color:var(--texte-med);max-width:80ch}
+.ecart-tete .pourquoi{max-width:80ch;font-size:var(--pt-base)}
+.reco{display:inline-flex;align-items:center;gap:6px;font-size:var(--pt-nano);font-weight:600;padding:3px 10px;border-radius:var(--r-full);background:var(--accent-doux);color:var(--accent-texte);width:max-content}
+.legende-ecran{color:var(--texte-med);font-size:var(--pt-micro);margin:0 0 6px}
+.legende-ecran b{color:var(--texte);font-weight:600}
+.demo{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.demo button{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:6px 11px;min-height:34px;cursor:pointer}
+.demo button[aria-pressed="true"]{background:var(--inverse);color:var(--sur-inverse);border-color:var(--inverse)}
+.demo button:hover{background:var(--survol)}
+.demo button[aria-pressed="true"]:hover{background:var(--inverse)}
+.ecrans{display:grid;grid-template-columns:minmax(0,1fr);gap:28px 22px;align-items:start}
+@media (min-width:1000px){ .ecrans.deux-tel{grid-template-columns:410px 410px;justify-content:start} }
+
+/* ── cadres ── */
+.pc{background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.pc-corps{overflow-x:auto}
+.pc-int{min-width:1120px;display:grid;grid-template-columns:200px minmax(0,1fr)}
+.rail{background:var(--bg-card);border-right:1px solid var(--ligne);padding:14px 10px;display:flex;flex-direction:column;gap:2px;font-size:var(--pt-txt);color:var(--texte-med)}
+.rail .marque{font-family:var(--font-titre);font-size:var(--pt-md);color:var(--texte);font-weight:600;padding:2px 8px 12px}
+.rail span{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:var(--r-md)}
+.rail span i{width:18px;height:18px;border-radius:5px;background:var(--bg-doux);border:1px solid var(--ligne);flex:none}
+.rail span.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.rail span.on i{background:var(--accent);border-color:var(--accent)}
+.zone{padding:0 0 18px}
+.zone-tete{display:flex;align-items:center;gap:14px;padding:14px 22px 0;flex-wrap:wrap}
+.zone-tete h3{font-size:var(--pt-lg)}
+.zone-tete .s{color:var(--texte-med);font-size:var(--pt-micro)}
+.onglets{display:flex;gap:4px;padding:10px 22px 0;border-bottom:1px solid var(--ligne)}
+.onglets span{padding:8px 12px;font-size:var(--pt-txt);color:var(--texte-med);border-bottom:2px solid transparent;margin-bottom:-1px}
+.onglets span.on{color:var(--texte);font-weight:600;border-bottom-color:var(--accent)}
+.zone-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;padding:16px 22px 0;align-items:start}
+.an-sel{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:2px;margin-left:auto;background:var(--bg-card)}
+.an-sel b{padding:2px 10px;font-size:var(--pt-base)}
+.an-sel span{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;color:var(--texte-med);border-radius:50%}
+.tel{width:390px;max-width:100%;min-width:0;margin:0;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;height:812px;display:flex;flex-direction:column}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 6px;font-size:var(--pt-micro);color:var(--texte-med);flex:none}
+.tel-corps{padding:0 12px 90px;overflow-y:auto;flex:1;scrollbar-width:none}
+.tel-corps::-webkit-scrollbar{display:none}
+.tel-dock{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ligne);background:var(--bg-card);padding:8px 6px 12px;font-size:10px;color:var(--texte-doux);text-align:center;z-index:3}
+.tel-dock span.on{color:var(--accent-texte);font-weight:600}
+.tel-dock span i{display:block;width:40px;height:28px;margin:0 auto 3px;border-radius:10px;background:var(--bg-doux);border:1px solid var(--ligne)}
+.tel-dock span.on i{background:var(--accent);border-color:var(--accent)}
+.bande{background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:8px 12px;display:flex;align-items:center;gap:10px;flex:none}
+.bande .t{font-weight:600;font-size:var(--pt-sm)}
+.bande .s{color:var(--texte-med);font-size:var(--pt-nano);display:block;line-height:1.2}
+.ico{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);display:inline-flex;align-items:center;justify-content:center;background:var(--bg-doux);flex:none;color:var(--texte-med)}
+.voile{position:absolute;inset:0;background:rgba(0,0,0,.32);z-index:4;transition:opacity .25s cubic-bezier(.22,1,.36,1)}
+.feuille{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--bg-card);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:8px 16px 18px;z-index:5;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s;scrollbar-width:none}
+.feuille::-webkit-scrollbar{display:none}
+.feuille .poignee{width:40px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.cache{opacity:0;pointer-events:none}
+.feuille.cache{transform:translateY(24px)}
+
+/* ── pièces communes ── */
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte + .carte{margin-top:12px}
+.carte h4{font-family:var(--font-ui);font-size:var(--pt-base);font-weight:600;margin:0 0 2px}
+.cadre-ligne{color:var(--texte-doux);font-size:var(--pt-micro)}
+.etiq{display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-nano);font-weight:600;letter-spacing:.01em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne);white-space:nowrap}
+.etiq.ok{background:var(--ok-doux);color:var(--ok-texte);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention-texte);border-color:transparent}
+.etiq.danger{background:var(--danger-doux);color:var(--danger-texte);border-color:transparent}
+.note{color:var(--texte-doux);font-size:var(--pt-micro)}
+.bouton{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--pt-base);font-weight:600;border-radius:var(--r-md);padding:10px 15px;border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);min-height:42px;cursor:pointer;text-align:center;line-height:1.2;transition:background .2s,transform .2s cubic-bezier(.22,1,.36,1)}
+.bouton:hover{background:var(--survol)}
+.bouton:active{transform:translateY(1px)}
+.bouton.plein{background:var(--accent);color:var(--sur-accent);border-color:var(--accent)}
+.bouton.plein:hover{filter:brightness(1.07)}
+.bouton.petit{min-height:34px;padding:6px 11px;font-size:var(--pt-txt)}
+.bouton.large{width:100%}
+.lien{background:none;border:0;color:var(--texte-med);font-size:var(--pt-micro);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 0}
+.toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--inverse);color:var(--sur-inverse);border-radius:12px;padding:10px 12px 10px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md);font-size:var(--pt-txt);transition:opacity .25s,transform .3s cubic-bezier(.22,1,.36,1);z-index:8;max-width:calc(100% - 24px);width:max-content}
+.toast.cache{transform:translate(-50%,10px)}
+.toast button{color:#F1C2D6;font-weight:600;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.1);border:0;cursor:pointer;white-space:nowrap}
+:root[data-theme="dark"] .toast button{color:var(--accent)}
+.tel .toast{bottom:92px}
+
+/* ── le compteur de l'année ── */
+.cpt .lbl{font-size:var(--pt-micro);color:var(--texte-med)}
+.cpt .gros{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:2px}
+.cpt .gros b{font-size:34px;font-weight:600;line-height:1.05;letter-spacing:-0.01em}
+.cpt .gros span{color:var(--texte-med);font-size:var(--pt-base)}
+.cpt .jauge{height:8px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);overflow:hidden;margin:10px 0 8px;position:relative}
+.cpt .jauge i{display:block;height:100%;background:var(--attention);border-radius:var(--r-full);transition:width .5s cubic-bezier(.22,1,.36,1)}
+.cpt .jauge.juste i{background:var(--ok)}
+.cpt .verdict{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cpt .sous{color:var(--texte-doux);font-size:var(--pt-micro);margin-top:8px}
+.cpt .act{display:grid;gap:6px;margin-top:12px}
+.calcul{margin-top:12px;padding-top:10px;border-top:1px solid var(--ligne);display:grid;gap:8px}
+.calcul .choix{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:3px}
+.calcul .choix button{flex:1;border:0;background:transparent;border-radius:6px;padding:7px 6px;font-size:var(--pt-micro);color:var(--texte-med);cursor:pointer;line-height:1.25}
+.calcul .choix button b{display:block;font-size:var(--pt-txt);color:var(--texte)}
+.calcul .choix button[aria-pressed="true"]{background:var(--bg-card);box-shadow:var(--shadow-sm);color:var(--texte)}
+.calcul ol{margin:0;padding-left:18px;color:var(--texte-med);font-size:var(--pt-micro);display:grid;gap:3px}
+.calcul label{display:flex;align-items:center;gap:8px;font-size:var(--pt-micro);color:var(--texte-med);cursor:pointer}
+
+/* ── la frise ── */
+.frise-boite{position:relative;padding:22px 0 18px}
+.frise-mois{position:absolute;top:0;left:0;right:0;height:18px}
+.frise-mois span{position:absolute;top:0;font-size:var(--pt-nano);color:var(--texte-med);padding-left:4px;border-left:1px solid var(--ligne-forte);height:calc(100% + 64px)}
+.frise{position:relative;height:46px;border-radius:var(--r-md);overflow:hidden;background:var(--bg-doux);border:1px solid var(--ligne)}
+.seg{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro);font-weight:600;cursor:pointer;border-right:1px solid rgba(255,255,255,.55);transition:filter .2s,opacity .2s;overflow:hidden;white-space:nowrap;padding:0 2px}
+:root[data-theme="dark"] .seg{border-right-color:rgba(0,0,0,.45)}
+.seg:hover{filter:brightness(.96)}
+.seg.ferme{background:repeating-linear-gradient(135deg,var(--ferme-a) 0 5px,var(--ferme-b) 5px 10px);color:var(--ferme-t);font-weight:500}
+.frise.choix .seg{opacity:.45}
+.frise.choix .seg.sel{opacity:1;box-shadow:inset 0 0 0 2px var(--repere)}
+.fer-pts{position:relative;height:14px;margin-top:3px}
+.fer-pts i{position:absolute;top:2px;width:7px;height:7px;border-radius:50%;background:var(--texte-med);transform:translateX(-50%);cursor:help}
+.barres{position:relative;height:96px;margin-top:6px;border-bottom:1px solid var(--ligne-forte)}
+.barres .b{position:absolute;bottom:0;border-radius:3px 3px 0 0;cursor:help;transition:height .45s cubic-bezier(.22,1,.36,1)}
+.barres .b.vide{background:repeating-linear-gradient(135deg,var(--ferme-a) 0 3px,transparent 3px 6px);height:6px!important;border-radius:2px}
+.barres .ref{position:absolute;left:0;right:0;border-top:1.5px dashed var(--texte-med);opacity:.75;pointer-events:none}
+.barres .ref.max{border-top-color:var(--danger);opacity:.9}
+.barres .ref em{position:absolute;right:0;top:-17px;font-style:normal;font-size:var(--pt-nano);color:var(--texte-med);background:var(--bg-card);padding:0 4px;border-radius:4px}
+.barres .ref.max em{color:var(--danger-texte)}
+.legende{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:var(--pt-micro);color:var(--texte-med)}
+.legende span{display:inline-flex;align-items:center;gap:6px}
+.legende i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.06)}
+.tip{position:fixed;z-index:60;pointer-events:none;background:var(--inverse);color:var(--sur-inverse);font-size:var(--pt-micro);padding:7px 10px;border-radius:8px;max-width:260px;box-shadow:var(--shadow-md);opacity:0;transition:opacity .15s}
+.tip.on{opacity:1}
+
+/* ── les semaines types ── */
+.rythmes{display:grid;gap:10px;margin-top:16px}
+.ry{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+.ry-tete{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;cursor:pointer;border-radius:var(--r-lg);width:100%;text-align:left;border:0;background:none}
+.ry-tete:hover{background:var(--survol)}
+.pastille{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro);font-weight:700;flex:none}
+.ry-nom{font-weight:600;font-size:var(--pt-base)}
+.ry-ou{color:var(--texte-med);font-size:var(--pt-micro)}
+.ry-sem{display:grid;grid-template-columns:repeat(7,36px);gap:3px}
+.ry-sem span{height:30px;border-radius:6px;background:var(--bg-doux);border:1px solid var(--ligne);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:var(--pt-nano);line-height:1.05;color:var(--texte-pale)}
+.ry-sem span b{font-size:var(--pt-micro);color:var(--texte);font-weight:600}
+.ry-sem span.on{background:var(--bg-card);border-color:var(--ligne-forte)}
+.ry.ouvert{box-shadow:0 0 0 2px var(--anneau),var(--shadow-sm)}
+.ry-ed{border-top:1px solid var(--ligne);padding:12px 14px 14px;display:grid;gap:12px}
+.ed-jours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.ed-j{border:1px solid var(--ligne);border-radius:10px;padding:6px 4px;text-align:center;background:var(--bg-doux)}
+.ed-j .n{font-size:var(--pt-nano);color:var(--texte-med)}
+.ed-j .v{font-size:var(--pt-base);font-weight:600;margin:2px 0}
+.ed-j .h{font-size:10px;color:var(--texte-doux);min-height:13px}
+.ed-j .pm{display:flex;justify-content:center;gap:4px;margin-top:4px}
+.ed-j .pm button{width:30px;height:30px;border-radius:8px;border:1px solid var(--ligne-forte);background:var(--bg-card);cursor:pointer;font-size:15px;line-height:1;padding:0}
+.ed-j .pm button:hover{background:var(--survol)}
+.ed-j.off{opacity:.65}
+.ed-l{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:var(--pt-micro);color:var(--texte-med)}
+.ed-l select{border:1px solid var(--ligne-forte);border-radius:8px;padding:6px 8px;background:var(--bg-card);font-size:var(--pt-txt)}
+.ed-l .grp{display:inline-flex;align-items:center;gap:6px}
+.ed-l .grp button{border:1px solid var(--ligne-forte);background:var(--bg-card);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:var(--pt-micro)}
+.ed-l .grp button:hover{background:var(--survol)}
+.ed-res{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--pt-micro);color:var(--texte-med)}
+.ed-res b{color:var(--texte);font-weight:600}
+
+/* ── le cadre, les gens ── */
+.verif{display:grid;gap:8px}
+.verif div{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px;font-size:var(--pt-micro);color:var(--texte-med);align-items:start}
+.verif div b{color:var(--texte);font-weight:600}
+.verif svg{margin-top:1px}
+.gens div.g{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--ligne);font-size:var(--pt-micro)}
+.gens div.g:first-of-type{border-top:0}
+.ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--pt-micro);background:var(--accent-doux);color:var(--accent-texte)}
+.gens .nm{font-weight:600;color:var(--texte);font-size:var(--pt-txt)}
+.gens .ct{color:var(--texte-med)}
+.gens .hh{text-align:right;color:var(--texte-med)}
+.gens .hh b{display:block;color:var(--texte);font-size:var(--pt-txt)}
+
+/* ── suggestions ── */
+.sugg{display:grid;gap:8px}
+.sg{border:1px solid var(--ligne);border-radius:10px;padding:10px 12px;background:var(--bg-card);display:grid;gap:8px}
+.sg ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:var(--pt-txt)}
+.sg li{display:flex;justify-content:space-between;gap:10px}
+.sg li em{font-style:normal;color:var(--ok-texte);font-weight:600;white-space:nowrap}
+.sg li em.moins{color:var(--attention-texte)}
+.sg .pied{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:var(--pt-micro);color:var(--texte-med)}
+
+/* ── téléphone : les mois ── */
+.cpt-tel{margin-top:10px}
+.mois-l{display:grid;gap:6px;margin-top:12px}
+.mois-l button{display:grid;grid-template-columns:62px minmax(0,1fr) 54px;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--ligne);border-radius:10px;background:var(--bg-card);cursor:pointer;text-align:left;min-height:48px}
+.mois-l button:hover{background:var(--survol)}
+.mois-l .mn{font-weight:600;font-size:var(--pt-txt)}
+.mois-l .mb{position:relative;height:16px;border-radius:5px;overflow:hidden;background:var(--bg-doux)}
+.mois-l .mb i{position:absolute;top:0;bottom:0}
+.mois-l .mh{text-align:right;font-size:var(--pt-micro);color:var(--texte-med)}
+.mois-l .mh b{display:block;color:var(--texte);font-size:var(--pt-txt)}
+.mois-l .mr{grid-column:2/4;font-size:var(--pt-nano);color:var(--texte-med);margin-top:-4px}
+
+/* ── B : semaines à peindre ── */
+.palette{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.palette button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:5px 12px 5px 5px;background:var(--bg-card);cursor:pointer;font-size:var(--pt-txt)}
+.palette button i{width:22px;height:22px;border-radius:50%;display:inline-block}
+.palette button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--repere);border-color:transparent}
+.semgrille{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;user-select:none}
+.semgrille button{border:0;border-radius:8px;padding:6px 2px 5px;cursor:crosshair;text-align:center;font-size:10px;line-height:1.2;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.semgrille button b{font-size:var(--pt-micro)}
+.semgrille .q{grid-column:1/-1;font-size:var(--pt-nano);color:var(--texte-med);padding-top:6px}
+.lw{display:grid;gap:4px;margin-top:10px}
+.lw button{display:grid;grid-template-columns:22px 44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--ligne);border-radius:10px;background:var(--bg-card);text-align:left;cursor:pointer;font-size:var(--pt-micro);min-height:44px}
+.lw button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.lw .ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--ligne-forte)}
+.lw button.on .ck{background:var(--accent);border-color:var(--accent)}
+.lw .tg{padding:2px 8px;border-radius:var(--r-full);font-weight:600;font-size:var(--pt-nano)}
+.barre-app{position:absolute;left:0;right:0;bottom:62px;background:var(--bg-card);border-top:1px solid var(--ligne);padding:8px 10px;display:flex;gap:6px;overflow-x:auto;z-index:4;scrollbar-width:none}
+.barre-app button{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:6px 10px;background:var(--bg-card);font-size:var(--pt-micro);cursor:pointer}
+.barre-app button i{width:14px;height:14px;border-radius:50%}
+
+/* ── Nico : le cycle sur deux semaines ── */
+.cycle{display:grid;grid-template-columns:96px repeat(7,minmax(0,1fr)) 86px;gap:6px;align-items:stretch}
+.cycle .hd{font-size:var(--pt-nano);color:var(--texte-med);text-align:center;align-self:end}
+.cycle .lb{font-size:var(--pt-micro);font-weight:600;display:flex;flex-direction:column;justify-content:center}
+.cycle .lb small{font-weight:400;color:var(--texte-med)}
+.cycle .c{border:1px solid var(--ligne);border-radius:10px;background:var(--bg-doux);padding:6px 2px;text-align:center;cursor:pointer;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.cycle .c:hover{background:var(--survol)}
+.cycle .c b{font-size:var(--pt-base)}
+.cycle .c span{font-size:10px;color:var(--texte-doux)}
+.cycle .c.off b{color:var(--texte-pale);font-weight:500}
+.cycle .c.we{background:var(--accent-doux)}
+.cycle .tot{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;font-size:var(--pt-micro);color:var(--texte-med)}
+.cycle .tot b{font-size:var(--pt-md);color:var(--texte)}
+.cycle .tot.trop b{color:var(--danger-texte)}
+.alerte{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--danger-doux);color:var(--texte);font-size:var(--pt-txt)}
+.alerte.ok{background:var(--ok-doux)}
+.alerte small{display:block;color:var(--texte-med);font-size:var(--pt-micro)}
+
+/* ── le salarié ── */
+.mon-tot{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.mon-tot b{font-size:40px;line-height:1;font-weight:600;letter-spacing:-0.01em}
+.prochain{margin-top:10px;border-left:4px solid var(--accent);background:var(--bg-card);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow-sm)}
+.prochain .k{font-size:var(--pt-nano);color:var(--accent-texte);font-weight:600}
+.prochain .t{font-weight:600;font-size:var(--pt-base);margin-top:2px}
+.periodes{display:grid;gap:6px;margin-top:12px}
+.per{display:grid;grid-template-columns:6px minmax(0,1fr);gap:10px;background:var(--bg-card);border:1px solid var(--ligne);border-radius:10px;padding:9px 10px 9px 0;overflow:hidden}
+.per i{border-radius:0 4px 4px 0}
+.per .d{font-weight:600;font-size:var(--pt-txt)}
+.per .x{font-size:var(--pt-micro);color:var(--texte-med)}
+.per .f{font-size:var(--pt-nano);color:var(--texte-doux);margin-top:2px}
+.per.passe{opacity:.55}
+.per.cours{box-shadow:0 0 0 2px var(--anneau)}
+/* le document */
+.feuille-a4{background:#FFFFFF;color:#1B1A18;width:100%;max-width:820px;aspect-ratio:297/210;border-radius:4px;box-shadow:var(--shadow-md);padding:26px 30px 20px;font-size:10.5px;line-height:1.38;overflow:hidden;display:flex;flex-direction:column;gap:9px;border:1px solid #E7E6E2}
+.feuille-a4 .t1{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:1.5px solid #1B1A18;padding-bottom:8px}
+.feuille-a4 .t1 h3{font-family:var(--font-titre);font-size:22px;line-height:1.05}
+.feuille-a4 .t1 .dom{font-size:10px;color:#55534E}
+.feuille-a4 .t1 .qui{text-align:right;font-size:10.5px}
+.feuille-a4 .t1 .qui b{font-size:13px}
+.feuille-a4 .cadre{display:flex;flex-wrap:wrap;gap:4px 18px;color:#55534E;font-size:9.5px}
+.feuille-a4 .cadre b{color:#1B1A18}
+.feuille-a4 table{width:100%;border-collapse:collapse;font-size:9.6px}
+.feuille-a4 th{text-align:left;font-weight:600;color:#55534E;border-bottom:1px solid #CDCAC2;padding:3px 6px 3px 0;font-size:9px}
+.feuille-a4 td{border-bottom:1px solid #EFEDE8;padding:3px 6px 3px 0;vertical-align:top}
+.feuille-a4 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.feuille-a4 .pt{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.feuille-a4 .bas{margin-top:auto;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end;border-top:1px solid #CDCAC2;padding-top:8px}
+.feuille-a4 .tt b{font-size:24px;line-height:1;font-weight:600}
+.feuille-a4 .tt span{display:block;font-size:9.5px;color:#55534E}
+.feuille-a4 .ml{font-size:8.8px;color:#55534E}
+/* publier */
+.pub{position:absolute;inset:0;background:rgba(0,0,0,.34);display:flex;align-items:flex-start;justify-content:center;padding-top:96px;z-index:9;transition:opacity .25s}
+.pub .boite{background:var(--bg-card);border-radius:16px;box-shadow:var(--shadow-md);width:min(520px,92%);padding:18px 20px;display:grid;gap:12px;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.pub.cache .boite{transform:translateY(12px)}
+.pub h4{font-family:var(--font-titre);font-size:var(--pt-lg);margin:0}
+.etapes{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.etapes li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;font-size:var(--pt-txt)}
+.etapes li i{width:24px;height:24px;border-radius:50%;background:var(--accent-doux);color:var(--accent-texte);font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro)}
+.etapes li small{display:block;color:var(--texte-med);font-size:var(--pt-micro)}
+.versions{border-top:1px solid var(--ligne);padding-top:10px;display:grid;gap:4px;font-size:var(--pt-micro);color:var(--texte-med)}
+.versions b{color:var(--texte)}
+
+/* ── les grands ── */
+.grands{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.gd{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;display:grid;gap:6px;align-content:start}
+.gd h4{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:600;margin:0}
+.gd .qui{font-size:var(--pt-micro);color:var(--texte-med)}
+.gd .nous{font-size:var(--pt-micro);color:var(--texte);border-top:1px solid var(--ligne);padding-top:6px;margin-top:2px}
+.gd .nous b{color:var(--accent-texte)}
+.texte-loi{margin-top:12px;background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:16px 18px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+.texte-loi h4{font-family:var(--font-titre);font-size:var(--pt-md);margin:0 0 6px}
+.texte-loi ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:var(--pt-txt);color:var(--texte-med)}
+.texte-loi ul b{color:var(--texte);font-weight:600}
+@media (max-width:820px){.texte-loi{grid-template-columns:1fr}}
+/* ── dans l'appli ── */
+.integ{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.integ .carte p+p{margin-top:6px}
+.integ .carte p{font-size:var(--pt-txt);color:var(--texte-med)}
+.integ .carte p b{color:var(--texte)}
+.tab{width:100%;border-collapse:collapse;font-size:var(--pt-txt);margin-top:4px}
+.tab td,.tab th{padding:7px 8px 7px 0;border-top:1px solid var(--ligne);vertical-align:top;text-align:left}
+.tab th{color:var(--texte-med);font-weight:500;font-size:var(--pt-micro);border-top:0}
+
+/* ── v2 : la règle, les congés ── */
+.regle-g{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px}
+@media (max-width:860px){.regle-g{grid-template-columns:1fr}}
+.regles{margin:0;padding-left:20px;display:grid;gap:8px;font-size:var(--pt-base);color:var(--texte-med)}
+.regles b{color:var(--texte)}
+.tab tr.ici td{background:var(--accent-doux)}
+.tab tr.ici td:first-child{border-radius:6px 0 0 6px}
+.tab tr.ici td:last-child{border-radius:0 6px 6px 0}
+.absents{position:relative;height:10px;margin-top:2px}
+.absents i{position:absolute;top:0;height:8px;border-radius:3px;background:var(--accent);cursor:help}
+.reglages{display:flex;flex-wrap:wrap;gap:12px 24px;margin-bottom:12px}
+.reglages>div{display:grid;gap:4px}
+.choix2{display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:3px}
+.choix2 button{border:0;background:transparent;border-radius:6px;padding:7px 12px;font-size:var(--pt-txt);color:var(--texte-med);cursor:pointer;line-height:1.2;text-align:left}
+.choix2 button small{display:block;font-size:var(--pt-nano);color:var(--texte-doux)}
+.choix2 button[aria-pressed="true"]{background:var(--bg-card);box-shadow:var(--shadow-sm);color:var(--texte);font-weight:600}
+#conges-corps>.tab{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);border-collapse:separate;border-spacing:0;overflow:hidden}
+.gens-t td,.gens-t th{padding:10px 12px}
+.puce-cp{display:inline-block;font-size:var(--pt-nano);font-weight:600;padding:2px 8px;border-radius:var(--r-full);background:var(--accent-doux);color:var(--accent-texte);margin:0 4px 4px 0;white-space:nowrap}
+.sem-cp{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.jcp{border:1px solid var(--ligne);border-radius:10px;padding:8px 4px;text-align:center;background:var(--bg-doux);display:grid;gap:2px}
+.jcp .n{font-size:var(--pt-nano);color:var(--texte-med)}
+.jcp b{font-size:var(--pt-base)}
+.jcp .m{font-size:var(--pt-nano);color:var(--texte-doux)}
+.jcp.repos b{color:var(--texte-pale);font-weight:500}
+.jcp.compte{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.jcp.compte .m{color:var(--accent-texte);font-weight:600}
+.cp-verdict{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (max-width:760px){.cp-verdict{grid-template-columns:1fr}}
+.cp-verdict>div{border:1px solid var(--ligne);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.cp-verdict>div.ok{background:var(--ok-doux);border-color:transparent}
+.cp-verdict b{font-size:var(--pt-md)}
+.mars-t td,.mars-t th{text-align:center}
+.mars-t td:first-child,.mars-t th:first-child{text-align:left}
+</style>
+</head>
+<body>
+<header class="entete">
+  <div>
+    <h1>Le planning de l’année</h1>
+    <div class="base">Maquette v2 · les congés sortent du planning · base <code>1bed91f</code> · APP 10.58 · SW 11.39 · 1er novembre 2026</div>
+  </div>
+  <nav aria-label="Sections">
+    <a href="#grands">Les grands</a><a href="#textes">Les congés : les textes</a><a href="#regle">La règle</a><a href="#a">A · Mois par mois</a><a href="#conges">Les congés de chacun</a><a href="#b">B · Semaines</a><a href="#nico">Nico</a><a href="#salarie">Le salarié</a><a href="#appli">Dans l’appli</a>
+    <button type="button" id="theme" aria-pressed="false">Sombre</button>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="intro">
+    <p><b>Ce que change la v2.</b> Le domaine n’est jamais vraiment fermé : la semaine de mars se prend à tour de rôle, et l’été peut faire deux semaines puis une en octobre. Les congés sortent donc du planning. Le planning dit ce qu’on travaille quand on est là, toute l’année ; chacun pose ses congés, et ils ne retirent rien.</p>
+    <p>Pour que ça tombe juste chaque année, la base devient <b>35 h par semaine en moyenne</b>, calculée sur le calendrier, et un jour de congé ou un férié compte les heures prévues ce jour-là. Le décompte des jours suit ton réglage, 5 ou 6 par semaine, jours de repos compris. Tout est calculé pour de vrai sur 2027 : touche les boutons, les chiffres suivent.</p>
+  </div>
+  <div class="mesures">
+    <div class="mesure"><div class="k num">365<small>cases</small></div><div class="l">L’éditeur actuel : un champ par jour, mois par mois.</div><div class="b">Ou un CSV fabriqué ailleurs, importé modèle par modèle.</div></div>
+    <div class="mesure"><div class="k num">51<small>jours à reposer</small></div><div class="l">Le report actuel de 2026 sur 2027 (même jour, même rang).</div><div class="b">44 jours de travail restent vides, 7 n’ont pas de place, et 6 jours reçoivent des heures alors qu’ils sont fériés en 2027.</div></div>
+    <div class="mesure"><div class="k num">1 589<small>h</small></div><div class="l">Le modèle intégré « standard » de 2026.</div><div class="b">Exactement 227 jours × 7 h : les jours ouvrés réels de 2026. L’appli le compare pourtant à 1 607 h.</div></div>
+    <div class="mesure"><div class="k num">4<small>jours</small></div><div class="l">Une semaine de congé de Nico, mercredi de repos.</div><div class="b">L’appli compte les jours cochés. La loi compte 6 jours ouvrables, ou 5 ouvrés selon le réglage : le mercredi de repos compris.</div></div>
+    <div class="mesure"><div class="k num">50 h 30</div><div class="l">La semaine la plus chargée du modèle « nico » de 2026.</div><div class="b">Cinq semaines de mai et juin passent les 48 h réglées dans Le cadre. Rien ne l’a signalé.</div></div>
+  </div>
+
+  <!-- ═══ LES GRANDS ═══ -->
+  <section class="ecart" id="grands">
+    <div class="ecart-tete">
+      <h2>Ce que font les grands logiciels de planning annualisé</h2>
+      <p class="ou">Regardés : Skello, Combo, Horoquartz (eTemptation), les plannings par cycles des hôpitaux et des collectivités, un exploitant d’autoroutes. Et le texte qui s’applique au domaine : l’accord national du 23 décembre 1981 sur la durée du travail en agriculture, article 10.4.</p>
+      <p class="pourquoi">Aucun ne fait remplir 365 cases. Tous font la même chose en trois temps : décrire le rythme, laisser le logiciel compter, publier un planning que chacun sait lire.</p>
+    </div>
+    <div class="grands">
+      <div class="gd"><h4>Un compteur annuel toujours visible</h4><p class="qui">Skello : la base annuelle, les heures planifiées, ce qui reste à planifier, et un écart cumulé semaine après semaine.</p><p class="nous"><b>Pour Ma Vigne :</b> le compteur en haut de l’écran, qui dit « juste » ou « il manque 9 h 30 » avant de publier.</p></div>
+      <div class="gd"><h4>Une période, un volume, une équipe</h4><p class="qui">Combo : une période de référence, le volume d’heures (1 607 h par défaut, au prorata si besoin), un plancher et un plafond par semaine, les équipes concernées ; chacun peut être ajusté à part.</p><p class="nous"><b>Pour Ma Vigne :</b> l’année, la cible, l’équipe vigne ; un contrat de quelques mois reçoit sa part tout seul.</p></div>
+      <div class="gd"><h4>Des semaines types, pas des jours</h4><p class="qui">Les plannings par cycles des hôpitaux : un cycle d’une à douze semaines, répété sur l’année, devient le planning de référence. Combo duplique une semaine type sur d’autres semaines.</p><p class="nous"><b>Pour Ma Vigne :</b> une semaine type par saison, et un rythme sur deux semaines pour les cas à part.</p></div>
+      <div class="gd"><h4>Simuler l’année avant de la figer</h4><p class="qui">Horoquartz (HQ Anticipation) : planifier à l’année les heures à réaliser, ajuster les heures par semaine, voir où l’on arrive en fin de période.</p><p class="nous"><b>Pour Ma Vigne :</b> « Tomber juste » — l’appli propose deux ou trois retouches, tu choisis.</p></div>
+      <div class="gd"><h4>Le cadre vérifié pendant la saisie</h4><p class="qui">Combo signale en direct, dans le planning, les dépassements de durée maximale, de pause et de contrat.</p><p class="nous"><b>Pour Ma Vigne :</b> 10 h par jour, 48 h par semaine, la moyenne sur 12 semaines, les heures de modulation — vérifiés à chaque retouche, avec les réglages de Le cadre.</p></div>
+      <div class="gd"><h4>Publier, et que chacun lise son année</h4><p class="qui">Combo publie les plannings (application, SMS). Chez un exploitant d’autoroutes, un planning théorique sur 12 mois est affiché, puis chacun reçoit sa version avec ses horaires.</p><p class="nous"><b>Pour Ma Vigne :</b> le programme affiché au domaine, et « Mon année » pour chacun, avec les heures de prise et de fin.</p></div>
+    </div>
+    <div class="texte-loi">
+      <div>
+        <h4>Ce que demande l’accord agricole (article 10.4)</h4>
+        <ul>
+          <li><b>Avant le début de la période</b>, un programme pour l’équipe concernée : la formule choisie, l’équipe, la période (12 mois au plus), les périodes de forte activité (plus de 35 h), d’activité réduite ou nulle, à 35 h, et l’horaire indicatif de chacune.</li>
+          <li><b>Affiché au moins une semaine avant</b>, avec une copie à l’inspection du travail.</li>
+          <li><b>Une modification</b> s’affiche aussi une semaine avant, sauf force majeure (imprévus de production, intempéries).</li>
+          <li><b>250 h de modulation</b> au plus dans l’année. Jusqu’à 200 h programmées : formule 1, 150 h hors modulation possibles. Au-delà : formule 2, 100 h.</li>
+          <li><b>Un jour réduit</b> ne descend pas sous la demi-journée.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ce que ça donne à l’écran</h4>
+        <ul>
+          <li>Le programme se déduit de la frise : chaque saison est classée forte, réduite ou fermée, la formule se calcule toute seule.</li>
+          <li>Le document a deux versions : l’affichage pour l’équipe, et celle de chacun.</li>
+          <li>Chaque modification crée une version datée, avec le délai d’une semaine rappelé.</li>
+          <li>Le compte de chacun (heures programmées, faites, absences) existe déjà : c’est le relevé mensuel.</li>
+        </ul>
+        <p class="note" style="margin-top:10px">Pour mémoire : le 2 octobre 2024, la Cour de cassation a écarté l’ancienne rédaction de cet article (avenant de 2000), faute de programme indicatif. La rédaction en vigueur (avenant 19 de 2019) en détaille le contenu.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LES CONGÉS : LES TEXTES ═══ -->
+  <section class="ecart" id="textes">
+    <div class="ecart-tete">
+      <h2>Les congés : ce que disent les textes</h2>
+      <p class="ou">Vérifié : le Code du travail et la fiche service-public, l’accord national agricole du 23 décembre 1981 (articles 3, 4 et 10.4, version de 2019), et deux arrêts de la Cour de cassation.</p>
+    </div>
+    <div class="texte-loi">
+      <div>
+        <h4>Ce qui est écrit</h4>
+        <ul>
+          <li><b>2,5 jours ouvrables par mois</b>, 30 au plus dans l’année, soit 5 semaines (Code du travail, art. L3141-3 ; accord national, art. 3.1).</li>
+          <li><b>Le décompte</b> part du premier jour où le salarié aurait dû travailler, puis compte tous les jours ouvrables jusqu’à la reprise, même ceux qu’il ne travaille pas : une semaine de congé vaut 6 jours ouvrables (Cass. soc., 23 février 2000 ; service-public).</li>
+          <li><b>Les jours ouvrés</b> (5 par semaine, 25 par an) sont admis s’ils ne sont pas moins favorables. Ce sont les jours où l’entreprise travaille, pas ceux de chaque salarié.</li>
+          <li><b>Les fériés chômés</b> pendant les congés ne se décomptent pas.</li>
+          <li><b>La période de prise</b> comprend au moins le 1er mai au 31 octobre, connue des salariés deux mois avant (accord national, art. 3.3).</li>
+          <li><b>Un férié chômé</b> : ses heures ne se récupèrent pas (art. 4.3).</li>
+          <li><b>Une absence payée</b>, et les congés en sont : elle ne se récupère pas, et pour la payer on la compte sur le temps que la personne aurait travaillé (art. 10.4, § 4.2 ; annexe II).</li>
+          <li><b>Le compte de chacun</b> note chaque semaine l’horaire programmé, les heures faites et les heures d’absence (art. 10.4, § 4.4).</li>
+          <li><b>Sans texte ni usage contraire</b>, un jour de congé n’est pas du travail effectif (Cass. soc., 13 juillet 2010).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ce que le domaine décide</h4>
+        <ul>
+          <li><b>5 ou 6 jours par semaine</b> : un réglage par domaine, déjà dans Ma Vigne. La maquette suit les deux.</li>
+          <li><b>Ce que vaut un jour de congé dans le compteur d’heures</b> : les textes ne le disent pas pour l’annualisation. Au planning, il compte les heures prévues ce jour-là et rien ne bouge, quelle que soit la saison. Au réel, il ne compte rien : un congé pris en semaine courte donne des heures en plus, en semaine longue des heures en moins.</li>
+          <li><b>La journée de solidarité</b> : travaillée (+ 7 h) ou non.</li>
+        </ul>
+        <p class="note" style="margin-top:10px">« Au planning » répond à ta demande : un congé n’ampute rien. C’est un choix du domaine, pas une règle de l’accord : à écrire dans le programme affiché, et à faire valider par ton comptable ou le service juridique de la FDSEA.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LA RÈGLE ═══ -->
+  <section class="ecart" id="regle">
+    <div class="ecart-tete">
+      <h2>La règle de calcul — juste chaque année</h2>
+      <p class="pourquoi">Cinq règles. Les quatre premières font le planning, la cinquième le compte des jours. Rien ne dépend d’une année en particulier : la base se calcule sur le calendrier.</p>
+    </div>
+    <div class="carte" id="regle-corps"></div>
+  </section>
+
+  <!-- ═══ A ═══ -->
+  <section class="ecart" id="a">
+    <div class="ecart-tete">
+      <span class="reco">Recommandée</span>
+      <h2>A · Mois par mois — la frise de l’année</h2>
+      <p class="ou">C’est ta façon de dire les choses : « on ne travaille pas le même nombre d’heures selon le mois ». Ta grille 2026 change d’ailleurs de rythme au 1er de chaque mois. Elle tient en 7 semaines types, vendanges comprises. En v2, plus aucune fermeture : le domaine est ouvert toute l’année.</p>
+      <p class="pourquoi">On décrit l’année par saisons, chacune avec sa semaine type : les heures de chaque jour et l’heure de prise. L’appli pose les fériés, compte, vérifie le cadre et propose les retouches pour tomber juste. Sous la frise, une bande montre qui est en congé : elle ne change rien au planning.</p>
+    </div>
+    <div class="demo" role="group" aria-label="Démonstration sur ordinateur">
+      <button type="button" data-a="reset">Partir de 2026</button>
+      <button type="button" data-a="sugg">Tomber juste</button>
+      <button type="button" data-a="mars">Modifier « Fin d’hiver »</button>
+      <button type="button" data-a="pub">Publier</button>
+    </div>
+    <p class="legende-ecran"><b>Ordinateur</b> — Planning › L’année. Survole la frise et les barres ; touche une saison ou une semaine type pour la modifier.</p>
+    <div class="pc" id="a-pc">
+      <div class="pc-corps"><div class="pc-int">
+        <div class="rail" aria-hidden="true"><div class="marque">Ma Vigne</div><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Cave</span><span><i></i>La Réserve</span><span class="on"><i></i>Planning</span><span><i></i>Réglages</span></div>
+        <div class="zone">
+          <div class="zone-tete"><h3>Planning</h3><span class="s">Équipe vigne · 4 personnes</span><span class="an-sel" aria-label="Année"><span>‹</span><b class="num">2027</b><span>›</span></span><button type="button" class="bouton plein petit" data-a="pub">Publier le programme</button></div>
+          <div class="onglets" aria-hidden="true"><span>Le mois</span><span>Les gens</span><span class="on">L’année</span><span>Le cadre</span></div>
+          <div class="zone-grille">
+            <div>
+              <div class="carte" id="a-repris" style="border-left:4px solid var(--accent);padding:10px 14px"></div>
+              <div class="carte" style="margin-top:12px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h4>2027, l’équipe vigne</h4><span class="note">une barre = une semaine · la ligne pointillée = 35 h</span></div>
+                <div id="a-frise"></div>
+                <div class="legende" id="a-leg"></div>
+              </div>
+              <div class="rythmes" id="a-rythmes"></div>
+            </div>
+            <div>
+              <div class="carte cpt" id="a-cpt"></div>
+              <div id="a-sugg"></div>
+              <div class="carte" id="a-cadre"></div>
+              <div class="carte gens" id="a-gens"></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="pub cache" id="a-pub" aria-hidden="true"></div>
+      <div class="toast cache" id="a-toast" role="status"></div>
+    </div>
+
+    <div style="height:28px"></div>
+    <div class="demo" role="group" aria-label="Démonstration au téléphone">
+      <button type="button" data-t="annee" aria-pressed="true">L’année</button>
+      <button type="button" data-t="mois">Modifier un mois</button>
+      <button type="button" data-t="sugg">Tomber juste</button>
+      <button type="button" data-t="pub">Publier</button>
+    </div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran"><b>Téléphone</b> — L’année : le compteur, puis les douze mois.</p>
+        <div class="tel" id="t-annee">
+          <div class="tel-barre"><span class="num">08:12</span><span>mardi 1er décembre</span></div>
+          <div class="bande"><span class="ico" aria-hidden="true">‹</span><div style="flex:1"><div class="t">L’année 2027</div><span class="s">Planning · équipe vigne</span></div><span class="ico" aria-hidden="true">…</span></div>
+          <div class="tel-corps" id="t-annee-corps"></div>
+          <div class="tel-dock" aria-hidden="true"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="legende-ecran" id="t2-leg"><b>Téléphone</b> — la feuille qui s’ouvre.</p>
+        <div class="tel" id="t-feuille">
+          <div class="tel-barre"><span class="num">08:12</span><span>mardi 1er décembre</span></div>
+          <div class="bande"><span class="ico" aria-hidden="true">‹</span><div style="flex:1"><div class="t">L’année 2027</div><span class="s">Planning · équipe vigne</span></div><span class="ico" aria-hidden="true">…</span></div>
+          <div class="tel-corps" id="t2-fond" aria-hidden="true"></div>
+          <div class="voile" id="t2-voile"></div>
+          <div class="feuille" id="t2-feuille"></div>
+          <div class="toast cache" id="t2-toast" role="status"></div>
+          <div class="tel-dock" aria-hidden="true"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LES CONGÉS DE CHACUN ═══ -->
+  <section class="ecart" id="conges">
+    <div class="ecart-tete">
+      <h2>Les congés de chacun</h2>
+      <p class="ou">Trois façons de prendre ses congés en 2027. Jean les prend comme toi cette année : deux semaines l’été, une en octobre.</p>
+      <p class="pourquoi">Avant, la troisième semaine d’août de Jean, travaillée pendant la « fermeture », ressortait en heures au-delà du planning, et sa semaine d’octobre retirait ses heures de l’année. En v2, le planning ne bouge pas : change le réglage ou la valeur d’un jour de congé, et regarde qui reste juste.</p>
+    </div>
+    <div id="conges-corps"></div>
+  </section>
+
+  <!-- ═══ B ═══ -->
+  <section class="ecart" id="b">
+    <div class="ecart-tete">
+      <h2>B · Semaines à peindre</h2>
+      <p class="ou">Le modèle des grands logiciels : on choisit une semaine type, puis on la peint sur les semaines de l’année, une à une ou en glissant.</p>
+      <p class="pourquoi">Très souple, mais une semaine ne porte qu’un seul rythme : ta grille 2026, qui change au 1er du mois, y perd ses semaines à cheval (fin mars, fin septembre). Et 53 semaines restent 53 gestes. Dans A, cette souplesse existe déjà, réservée aux semaines à part comme les vendanges.</p>
+    </div>
+    <p class="legende-ecran"><b>Ordinateur</b> — choisis une semaine type, puis clique ou glisse sur les semaines.</p>
+    <div class="pc" id="b-pc">
+      <div class="pc-corps"><div class="pc-int">
+        <div class="rail" aria-hidden="true"><div class="marque">Ma Vigne</div><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Cave</span><span><i></i>La Réserve</span><span class="on"><i></i>Planning</span><span><i></i>Réglages</span></div>
+        <div class="zone">
+          <div class="zone-tete"><h3>Planning</h3><span class="s">Équipe vigne · 4 personnes</span><span class="an-sel" aria-label="Année"><span>‹</span><b class="num">2027</b><span>›</span></span></div>
+          <div class="onglets" aria-hidden="true"><span>Le mois</span><span>Les gens</span><span class="on">L’année</span><span>Le cadre</span></div>
+          <div class="zone-grille">
+            <div class="carte">
+              <div class="palette" id="b-pal" role="group" aria-label="Semaine type à peindre"></div>
+              <div class="semgrille" id="b-grille"></div>
+              <p class="note" style="margin-top:10px">Une case = une semaine, du lundi au dimanche. Les fériés retirent leurs heures tout seuls.</p>
+            </div>
+            <div>
+              <div class="carte cpt" id="b-cpt"></div>
+              <div class="carte" id="b-cadre"></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="toast cache" id="b-toast" role="status"></div>
+    </div>
+    <div style="height:24px"></div>
+    <div class="ecrans deux-tel">
+      <div>
+        <p class="legende-ecran"><b>Téléphone</b> — coche des semaines, puis choisis leur semaine type en bas.</p>
+        <div class="tel" id="tb">
+          <div class="tel-barre"><span class="num">08:12</span><span>mardi 1er décembre</span></div>
+          <div class="bande"><span class="ico" aria-hidden="true">‹</span><div style="flex:1"><div class="t">Les semaines 2027</div><span class="s" id="tb-s">Planning · équipe vigne</span></div></div>
+          <div class="tel-corps" id="tb-corps"></div>
+          <div class="barre-app" id="tb-app"></div>
+          <div class="tel-dock" aria-hidden="true"><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+        </div>
+      </div>
+      <div class="carte" style="align-self:start">
+        <h4>A ou B : ce qui les sépare</h4>
+        <table class="tab">
+          <tr><th></th><th>A · mois par mois</th><th>B · semaines</th></tr>
+          <tr><td>Gestes pour 2027</td><td>« Partir de 2026 », puis 1 ou 2 retouches</td><td>Une couleur par semaine, 53 semaines</td></tr>
+          <tr><td>Fin de mois en milieu de semaine</td><td>Suivie au jour près</td><td>La semaine prend un seul rythme</td></tr>
+          <tr><td>Semaine à part (vendanges)</td><td>Oui, posée par-dessus</td><td>Oui, c’est le principe</td></tr>
+          <tr><td>Ce que lit le salarié</td><td>Des saisons : « du 3 mai au 30 juillet »</td><td>Pareil, regroupé après coup</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NICO ═══ -->
+  <section class="ecart" id="nico">
+    <div class="ecart-tete">
+      <h2>Nico, à part — un rythme sur deux semaines</h2>
+      <p class="ou">Le modèle « nico » de 2026 alterne deux semaines : une longue avec le week-end, une courte. Le CSV sait aussi décaler la prise de certains jours, avec les codes D/M/A.</p>
+      <p class="pourquoi">La même frise, avec une semaine A et une semaine B. Chaque jour a son heure de prise, écrite en clair : plus de codes. Le cadre est vérifié de la même façon, et il voit ce que la grille ne montrait pas.</p>
+    </div>
+    <div class="demo" role="group" aria-label="Saisons du rythme">
+      <span class="note" style="align-self:center;margin-right:4px">Saison :</span>
+      <div id="n-saisons" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="pc" id="n-pc">
+      <div class="pc-corps"><div class="pc-int" style="grid-template-columns:200px minmax(0,1fr)">
+        <div class="rail" aria-hidden="true"><div class="marque">Ma Vigne</div><span><i></i>Pilotage</span><span><i></i>Vigne</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span><i></i>Cave</span><span><i></i>La Réserve</span><span class="on"><i></i>Planning</span><span><i></i>Réglages</span></div>
+        <div class="zone">
+          <div class="zone-tete"><h3>Planning</h3><span class="s">Nico · son propre rythme</span><span class="an-sel" aria-label="Année"><span>‹</span><b class="num">2027</b><span>›</span></span></div>
+          <div class="onglets" aria-hidden="true"><span>Le mois</span><span>Les gens</span><span class="on">L’année</span><span>Le cadre</span></div>
+          <div class="zone-grille">
+            <div>
+              <div class="carte"><div id="n-cycle"></div></div>
+              <div id="n-alerte" style="margin-top:12px"></div>
+              <div class="carte" style="margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><h4>Son année, semaine par semaine</h4><span class="note">ligne rouge = 48 h · pointillés = 35 h</span></div><div id="n-frise"></div></div>
+            </div>
+            <div>
+              <div class="carte cpt" id="n-cpt"></div>
+              <div id="n-sugg"></div>
+              <div class="carte" id="n-cadre"></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="toast cache" id="n-toast" role="status"></div>
+    </div>
+  </section>
+
+  <!-- ═══ LE SALARIÉ ═══ -->
+  <section class="ecart" id="salarie">
+    <div class="ecart-tete">
+      <h2>Ce que reçoit le salarié — en janvier, et toute l’année</h2>
+      <p class="ou">Marie demande son planning 2027 le 11 janvier. Elle l’a déjà : dans l’appli, « Mon année » à côté de « Mon mois », avec ses congés posés, et en PDF.</p>
+      <p class="pourquoi">Des dates, des heures de prise et de fin, le total. Le PDF est le programme indicatif de l’accord : le même document sert à l’affichage au domaine et à chacun. Il suit ce que tu as réglé plus haut : retouche A, il se met à jour.</p>
+    </div>
+    <div class="ecrans" style="grid-template-columns:minmax(0,1fr)">
+      <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start">
+        <div>
+          <p class="legende-ecran"><b>Téléphone de Marie</b> — Planning › Mon année.</p>
+          <div class="tel" id="s-tel">
+            <div class="tel-barre"><span class="num">07:41</span><span>lundi 11 janvier</span></div>
+            <div class="bande"><div style="flex:1"><div class="t">Mon planning</div><span class="s">Domaine des Grandes Vignes</span></div></div>
+            <div style="display:flex;gap:4px;background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-full);padding:3px;margin:8px 12px 0;flex:none" aria-hidden="true"><span style="flex:1;text-align:center;padding:7px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med)">Mon mois</span><span style="flex:1;text-align:center;padding:7px;border-radius:var(--r-full);font-size:var(--pt-txt);background:var(--bg-card);font-weight:600;box-shadow:var(--shadow-sm)">Mon année</span><span style="flex:1;text-align:center;padding:7px;border-radius:var(--r-full);font-size:var(--pt-txt);color:var(--texte-med)">L’équipe</span></div>
+            <div class="tel-corps" id="s-corps"></div>
+            <div class="toast cache" id="s-toast" role="status"></div>
+            <div class="tel-dock" aria-hidden="true"><span><i></i>Accueil</span><span><i></i>Parcelles</span><span><i></i>Tracteur</span><span><i></i>Phyto</span><span class="on"><i></i>Plus</span></div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:300px">
+          <p class="legende-ecran"><b>Le PDF</b> — programme indicatif 2027, version de Marie (A4 à l’italienne).</p>
+          <div class="feuille-a4" id="s-pdf"></div>
+          <p class="note" style="margin-top:8px">La version d’affichage est la même sans le nom, avec la liste de l’équipe. Elle se télécharge aussi pour l’inspection du travail.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ DANS L'APPLI ═══ -->
+  <section class="ecart" id="appli">
+    <div class="ecart-tete">
+      <h2>Dans l’appli — ce qui change, ce qui ne change pas</h2>
+    </div>
+    <div class="integ">
+      <div class="carte"><h4>Le planning sans congés</h4><p>Planning › <b>« L’année »</b>, entre « Les gens » et « Le cadre ». Plus de fermeture dans le planning : chaque semaine porte sa semaine type. Les grilles 2026 gardent les leurs, c’est leur histoire.</p><p>Chez le salarié : <b>« Mon année »</b> à côté de « Mon mois », avec ses congés.</p></div>
+      <div class="carte"><h4>Les congés se posent par période</h4><p>Du … au …, et le compte suit la loi : du premier jour où la personne aurait travaillé à la veille de sa reprise, <b>5 ou 6 jours par semaine selon le réglage</b> du domaine, ses jours de repos compris, fériés exclus. Fini les jours cochés un par un.</p></div>
+      <div class="carte"><h4>Le compteur annuel</h4><p>Il compare le travail, plus les fériés et les congés comptés à leurs heures prévues, à <b>la base de l’année</b> : 7 h × les jours du lundi au vendredi (+ 7 h de solidarité si cochée). Le réglage « 1 607 h » de Le cadre devient « 35 h par semaine en moyenne ».</p><p>Le relevé paie déjà un jour de congé aux heures prévues : rien ne change là.</p></div>
+      <div class="carte"><h4>Ce qui reste un choix du domaine</h4><p>La valeur d’un jour de congé dans le compteur : <b>les heures prévues</b> (proposé) ou rien. Un réglage, à côté du « 5 ou 6 jours ».</p><p>La frise écrit toujours la même grille jour par jour (<code>planning_templates</code>) : paie, relevé, Pilotage et capacité la lisent comme avant. Le CSV devient facultatif.</p></div>
+      <div class="carte" style="grid-column:1/-1"><h4>Découpage proposé</h4>
+        <table class="tab">
+          <tr><th style="width:70px">Lot</th><th>Ce qu’il livre</th></tr>
+          <tr><td>1</td><td>Le décompte des congés par période, 5 ou 6 jours, jours de repos compris. L’outil « Poser des congés » du … au … compte déjà le mercredi de repos ; la sélection dans la grille et l’éditeur du jour, non. Tous passent sur la même règle. C’est un défaut d’aujourd’hui : il passe en premier, seul.</td></tr>
+          <tr><td>2</td><td>La règle : la base de l’année, les fériés et les congés comptés au planning, le compteur annuel qui la suit.</td></tr>
+          <tr><td>3</td><td>La frise en lecture, puis en édition : semaines types, saisons, jours à part, « Tomber juste », la bande des congés.</td></tr>
+          <tr><td>4</td><td>Le programme indicatif (affichage et version de chacun), « Mon année », les versions datées.</td></tr>
+          <tr><td>5</td><td>Le rythme sur deux semaines et les heures de prise par jour, à la place des codes D/M/A.</td></tr>
+        </table>
+        <p class="note" style="margin-top:8px">Chaque lot met à jour l’aide, le guide et les tutos dans le même lot.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+<script>
+/* ═══ MOTEUR — calendrier, programmes, statistiques, suggestions ═══ */
+var AN=2027;
+var JC=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+var JL=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+var ML=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+var MC=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+function paques(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da,12);}
+function cle(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function feries(y){var F={};function add(m,d,n){F[cle(new Date(y,m,d,12))]=n;}
+  add(0,1,'Jour de l’An');add(4,1,'Fête du Travail');add(4,8,'Victoire 1945');add(6,14,'Fête nationale');add(7,15,'Assomption');add(10,1,'Toussaint');add(10,11,'Armistice');add(11,25,'Noël');
+  var e=paques(y);function sh(n){var x=new Date(e);x.setDate(x.getDate()+n);return x;}
+  F[cle(sh(1))]='Lundi de Pâques';F[cle(sh(39))]='Ascension';F[cle(sh(50))]='Lundi de Pentecôte';return F;}
+var FER=feries(AN);
+var LUN0=new Date(AN-1,11,28,12); // lundi de la semaine qui contient le 1er janvier
+var JOURS=[];(function(){for(var d=new Date(AN,0,1,12),i=0;d.getFullYear()===AN;d.setDate(d.getDate()+1),i++){var k=cle(d);JOURS.push({i:i,k:k,md:k.slice(5),m:d.getMonth(),dm:d.getDate(),g:(d.getDay()+6)%7,fer:FER[k]||null,w:Math.floor(Math.round((d-LUN0)/864e5)/7)});}})();
+var NSEM=JOURS[JOURS.length-1].w+1;
+var OUVRES=JOURS.filter(function(D){return D.g<5&&!D.fer;}).length;
+var FER_SEMAINE=JOURS.filter(function(D){return D.g<5&&D.fer;}).length;
+var JSEM=JOURS.filter(function(D){return D.g<5;}).length; // jours du lundi au vendredi de l'année
+function joursSemaineAn(y){var n=0;for(var d=new Date(y,0,1,12);d.getFullYear()===y;d.setDate(d.getDate()+1)){var g=d.getDay();if(g>=1&&g<=5)n++;}return n;}
+function debutSemaine(w){var d=new Date(LUN0);d.setDate(d.getDate()+w*7);return d;}
+function cyc(w){return ((w-1)%2+2)%2;} // semaine A = celle du 4 janvier
+/* un programme : {type:'periodes'|'semaines', R:{id:{nom,sem:[[7 heures]...],prise,priseJ?:[[...]],continu}}, base:[{du,r}], over:[{du,au,r,nom}], W:[r...], exc:{md:h}} */
+function rythmeLe(P,D){
+  if(P.type==='semaines')return P.W[D.w];
+  for(var i=0;i<P.over.length;i++){var o=P.over[i];if(D.md>=o.du&&D.md<=o.au)return o.r;}
+  var r=null;for(var j=0;j<P.base.length;j++){if(D.md>=P.base[j].du)r=P.base[j].r;}return r;}
+function semDe(R,w){return R.sem.length>1?R.sem[cyc(w)]:R.sem[0];}
+function heuresLe(P,D){
+  if(D.fer)return 0;
+  if(P.exc&&P.exc[D.md]!=null)return P.exc[D.md];
+  var r=rythmeLe(P,D);if(!r||r==='ferme')return 0;
+  return semDe(P.R[r],D.w)[D.g]||0;}
+function prevuLe(P,D){
+  if(P.exc&&P.exc[D.md]!=null)return P.exc[D.md];
+  var r=rythmeLe(P,D);if(!r||r==='ferme')return 0;
+  return semDe(P.R[r],D.w)[D.g]||0;}
+function totalSem(R,v){return R.sem[v||0].reduce(function(s,x){return s+x;},0);}
+function stats(P){
+  var t=0,j=0,maxJ=0,minJ=99,dim=0,wk=[],wkB=[],parR={},fermes=0,brut=0,ferV=0,nFer=0;
+  for(var w=0;w<NSEM;w++){wk.push(0);wkB.push(0);}
+  JOURS.forEach(function(D){var h=heuresLe(P,D),r=rythmeLe(P,D),pv=prevuLe(P,D);
+    if(h>0){t+=h;j++;if(h>maxJ)maxJ=h;if(h<minJ)minJ=h;if(D.g===6)dim++;}
+    if(D.fer&&pv>0){ferV+=pv;nFer++;}
+    brut+=pv;wkB[D.w]+=pv;
+    if(r==='ferme'&&D.g<5&&!D.fer)fermes++;
+    wk[D.w]+=h;parR[r]=(parR[r]||0)+h;});
+  var mod=0,maxW=0,wMax=0,nb48=0;
+  wk.forEach(function(x,w){if(x>maxW){maxW=x;wMax=w;}if(x>48.0001)nb48++;});
+  wkB.forEach(function(x){if(x>35)mod+=x-35;});
+  var max12=0;for(var i=0;i+12<=NSEM;i++){var s=0;for(var k=i;k<i+12;k++)s+=wk[k];if(s/12>max12)max12=s/12;}
+  return {tot:t,brut:brut,ferV:ferV,nFer:nFer,jours:j,maxJ:maxJ,minJ:minJ===99?0:minJ,dim:dim,wk:wk,wkB:wkB,mod:mod,maxW:maxW,wMax:wMax,nb48:nb48,max12:max12,parR:parR,fermes:fermes};}
+/* la cible */
+var CIBLE={solid:false,cp:'planning',mode5:6};
+function baseAn(y){return 7*(y===AN?JSEM:joursSemaineAn(y))+(CIBLE.solid?7:0);}
+function cible(){return baseAn(AN);}
+/* les plages : jours consécutifs d'un même morceau (période, fermeture, semaine) */
+function plages(P){
+  var out=[],cur=null;
+  JOURS.forEach(function(D){
+    var r=rythmeLe(P,D),key;
+    if(P.type==='semaines')key='w'+D.w+':'+r;else{key='b:'+r;for(var i=0;i<P.over.length;i++){var o=P.over[i];if(D.md>=o.du&&D.md<=o.au){key='o'+i;break;}}if(key.charAt(0)==='b'){var bi=-1;for(var j=0;j<P.base.length;j++)if(D.md>=P.base[j].du)bi=j;key='b'+bi;}}
+    if(P.type==='semaines'&&cur&&cur.r===r){key=cur.key;}
+    if(!cur||cur.key!==key){cur={key:key,r:r,i0:D.i,i1:D.i,fer:[],h:0,premier:null,dernier:null,nom:null};out.push(cur);
+      if(P.type!=='semaines'&&key.charAt(0)==='o')cur.nom=P.over[+key.slice(1)].nom;}
+    cur.i1=D.i;var h=heuresLe(P,D);cur.h+=h;
+    if(D.fer&&r&&r!=='ferme'&&P.R[r]&&semDe(P.R[r],D.w)[D.g]>0)cur.fer.push(D);
+    if(r==='ferme'){if(D.g<5&&!D.fer){if(cur.premier==null)cur.premier=D.i;cur.dernier=D.i;}}
+    else if(h>0){if(cur.premier==null)cur.premier=D.i;cur.dernier=D.i;}
+  });
+  return out;}
+/* ═══ suggestions : une ou deux retouches qui tombent juste ═══ */
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function decale(md,n){var d=new Date(AN+'-'+md+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()!==AN?null:cle(d).slice(5);}
+function retouches(P,opts){
+  var M=[],used={};
+  JOURS.forEach(function(D){used[rythmeLe(P,D)]=1;});
+  Object.keys(P.R).forEach(function(r){if(!used[r])return;var R=P.R[r];
+    R.sem.forEach(function(sem,v){
+      var pos=sem.filter(function(x){return x>0;});if(!pos.length)return;
+      var mx=Math.max.apply(null,pos),mn=Math.min.apply(null,pos);
+      var longs=[],courts=[];sem.forEach(function(x,g){if(x===mx)longs.push(g);else if(x>0&&x===mn)courts.push(g);});
+      if(courts.length)[0.5,1,-0.5,-1].forEach(function(dd){var nv=mn+dd;if(nv<3.5||nv>=mx)return;var Q=clone(P);courts.forEach(function(g){Q.R[r].sem[v][g]=nv;});
+        M.push({Q:Q,cout:Math.abs(dd)>0.5?2:1,lib:[r,v,'court',courts,mn,nv],cle:r+v+'c'});});
+      [0.5,-0.5].forEach(function(dd){var nv=mx+dd;if(nv>(opts.maxJ||10)||nv<4)return;var Q=clone(P);longs.forEach(function(g){Q.R[r].sem[v][g]=nv;});
+        M.push({Q:Q,cout:3,lib:[r,v,'long',longs,mx,nv],cle:r+v+'l'});});
+    });});
+  // un jour à part : la veille de Noël et du jour de l'An (le dernier jour travaillé avant)
+  [['12-25','Noël'],['12-31','la Saint-Sylvestre']].forEach(function(v){var i0=JOURS.findIndex(function(D){return D.md===v[0];});
+    for(var i=i0-1;i>=0;i--){var D=JOURS[i];if(D.fer)continue;var pv=prevuLe(P,D);if(pv>0){[-0.5,-1,0.5].forEach(function(dd){var nv=pv+dd;if(nv<3.5||nv>(opts.maxJ||10))return;var Q=clone(P);if(!Q.exc)Q.exc={};Q.exc[D.md]=nv;
+        M.push({Q:Q,cout:Math.abs(dd)>0.5?2:1,lib:['jour',D.md,pv,nv,v[1]],cle:'j'+D.md});});break;}}});
+  if(P.type==='periodes')for(var i=1;i<P.base.length;i++){[7,-7,14,-14].forEach(function(n){var nm=decale(P.base[i].du,n);if(!nm)return;
+    if(nm<=P.base[i-1].du)return;if(i<P.base.length-1&&nm>=P.base[i+1].du)return;var Q=clone(P);Q.base[i].du=nm;
+    M.push({Q:Q,cout:Math.abs(n)>7?2:1,lib:['debut',i,P.base[i].du,nm,P.base[i].r],cle:'b'+i});});}
+  return M;}
+function respecte(Q,opts){var s=stats(Q);return s.maxJ<=(opts.maxJ||10)+1e-9&&s.maxW<=(opts.maxH||48)+1e-9;}
+function suggestions(P,cib,opts){
+  opts=opts||{};var base=stats(P).brut,ecart=cib-base;if(Math.abs(ecart)<0.01)return [];
+  var M=retouches(P,opts);M.forEach(function(m){m.t=stats(m.Q).brut;m.d=m.t-base;});
+  // une retouche va dans le sens de l'écart : on ne retire pas d'un côté pour remettre de l'autre
+  M=M.filter(function(m){return ecart>0?m.d>0.001:m.d<-0.001;});
+  var cands=[];
+  M.forEach(function(m){if(Math.abs(m.d)<=Math.abs(ecart)+0.26&&respecte(m.Q,opts))cands.push({moves:[m],t:m.t,cout:m.cout});});
+  for(var a=0;a<M.length;a++)for(var b=a+1;b<M.length;b++){
+    if(M[a].cle===M[b].cle||M[a].lib[0]===M[b].lib[0]&&M[a].lib[1]===M[b].lib[1]&&M[a].lib[2]===M[b].lib[2]&&M[a].lib[0]!=='jour')continue;
+    if(Math.abs(M[a].d+M[b].d-ecart)>0.26)continue; // seulement les paires qui tombent (presque) juste
+    var Q=clone(M[a].Q);applique(Q,M[b]);var t=stats(Q).brut;
+    if(!respecte(Q,opts))continue;cands.push({moves:[M[a],M[b]],t:t,cout:M[a].cout+M[b].cout+1});}
+  cands.forEach(function(c){c.reste=cib-c.t;c.score=Math.abs(c.reste)*20+c.cout;});
+  cands.sort(function(x,y){return x.score-y.score;});
+  var out=[],vus={};
+  for(var k=0;k<cands.length&&out.length<3;k++){var c=cands[k];var sig=c.moves.map(function(m){return m.cle;}).sort().join('+');if(vus[sig])continue;
+    var unique=c.moves.map(function(m){return m.cle;});if(out.some(function(o){return o.moves.some(function(m){return unique.indexOf(m.cle)>=0;});})&&out.length<2&&cands.length>6)continue;
+    vus[sig]=1;out.push(c);}
+  return out;}
+function applique(P,m){var L=m.lib;
+  if(L[0]==='debut'){P.base[L[1]].du=L[3];return;}
+  if(L[0]==='jour'){if(!P.exc)P.exc={};P.exc[L[1]]=L[3];return;}
+  var r=L[0],v=L[1];L[3].forEach(function(g){P.R[r].sem[v][g]=L[5];});}
+/* ═══ les congés ═══
+   Décompte : du premier jour où la personne aurait travaillé jusqu'à la veille de sa reprise,
+   tous les jours ouvrables (lun→sam) ou ouvrés (lun→ven) selon le réglage du domaine,
+   fériés exclus, ses jours de repos compris (Cass. soc. 23/02/2000). */
+function idxCle(md){for(var i=0;i<JOURS.length;i++)if(JOURS[i].md===md)return i;return -1;}
+function travaille(P,i){var D=JOURS[i];return !D.fer&&heuresLe(P,D)>0;}
+function cpPlage(P,du,au,mode){var a=idxCle(du),b=idxCle(au),n=0,h=0,jours=[];
+  var s=a;while(s<=b&&!travaille(P,s))s++;
+  var r=b+1;while(r<JOURS.length&&!travaille(P,r))r++;var fin=Math.min(JOURS.length-1,r-1);
+  for(var i=s;i<=fin;i++){var D=JOURS[i];if(D.fer||D.g===6)continue;if(mode===5&&D.g===5)continue;n++;jours.push(i);}
+  for(var k=a;k<=b;k++){var E=JOURS[k];if(!E.fer)h+=heuresLe(P,E);}
+  return {n:n,h:h,de:s,a:fin,jours:jours};}
+function cpPersonne(P,per,mode){var n=0,h=0;per.forEach(function(x){var c=cpPlage(P,x[0],x[1],mode);n+=c.n;h+=c.h;});return {n:n,h:h};}
+if(typeof module!=='undefined')module.exports={cpPlage:cpPlage,cpPersonne:cpPersonne,JSEM:JSEM,baseAn:baseAn,joursSemaineAn:joursSemaineAn,JOURS:JOURS,NSEM:NSEM,OUVRES:OUVRES,FER_SEMAINE:FER_SEMAINE,stats:stats,plages:plages,suggestions:suggestions,applique:applique,cible:cible,CIBLE:CIBLE,heuresLe:heuresLe,rythmeLe:rythmeLe,FER:FER,debutSemaine:debutSemaine};
+
+/* ═══ RENDU — la frise, le compteur, le cadre, les écrans ═══ */
+var NB=' ', NBF=' ';
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function milliers(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,NBF);}
+function fmtH(h){var neg=h<-1e-9;h=Math.abs(h);var H=Math.floor(h+1e-9),M=Math.round((h-H)*60);if(M===60){H++;M=0;}if(H===0&&M)return (neg?'−':'')+M+NB+'min';return (neg?'−':'')+milliers(H)+NB+'h'+(M?NB+String(M).padStart(2,'0'):'');}
+function fmtD(h){return (h>0.001?'+':'')+fmtH(h);}
+function court(h){if(!h)return '–';var H=Math.floor(h),M=Math.round((h-H)*60);return H+'h'+(M?String(M).padStart(2,'0'):'');}
+function mn(t){var p=t.split(':');return (+p[0])*60+(+p[1]);}
+function hm(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function finDe(prise,h,continu){return hm(mn(prise)+Math.round(h*60)+((!continu&&h>=6)?60:0));}
+function jourTxt(i){var D=JOURS[i];return (D.dm===1?'1er':D.dm)+NB+ML[D.m];}
+function jourCourt(i){var D=JOURS[i];return (D.dm===1?'1er':D.dm)+NB+MC[D.m];}
+function jourLong(i){var D=JOURS[i];return JL[D.g]+' '+jourTxt(i);}
+function idxMd(md){for(var i=0;i<JOURS.length;i++)if(JOURS[i].md===md)return i;return -1;}
+function plageTxt(a,b,long){var A=JOURS[a],B=JOURS[b];if(a===b)return long?jourTxt(a):jourCourt(a);
+  if(A.m===B.m)return (A.dm===1?'1er':A.dm)+' → '+(long?jourTxt(b):jourCourt(b));
+  return (long?jourTxt(a):jourCourt(a))+' → '+(long?jourTxt(b):jourCourt(b));}
+function joursListe(gs){if(!gs.length)return '';var run=true;for(var k=1;k<gs.length;k++)if(gs[k]!==gs[k-1]+1)run=false;
+  if(run&&gs.length>2)return JL[gs[0]]+' au '+JL[gs[gs.length-1]];
+  if(gs.length===1)return JL[gs[0]];var l=gs.map(function(g){return JL[g];});return l.slice(0,-1).join(', ')+' et '+l[l.length-1];}
+function intens(t){return t<30?1:t<34?2:t<36?3:t<39?4:t<42?5:6;}
+function moyR(R){var s=0;R.sem.forEach(function(x){s+=x.reduce(function(a,b){return a+b;},0);});return s/R.sem.length;}
+function couleur(P,r){if(!r||r==='ferme')return null;var n=intens(moyR(P.R[r]));return {bg:'var(--i'+n+')',fg:'var(--i'+n+'t)',n:n};}
+function horaires(R,v,sep){var sem=R.sem[v||0],g={},ord=[];sem.forEach(function(h,j){if(h>0){var p=(R.priseJ&&R.priseJ[v||0]&&R.priseJ[v||0][j])||R.prise;var k=h+'|'+p;if(!g[k]){g[k]=[];ord.push(k);}g[k].push(j);}});
+  return ord.map(function(k){var p=k.split('|'),h=+p[0];return joursListe(g[k])+' '+p[1]+' → '+finDe(p[1],h,R.continu)+' ('+fmtH(h)+')';}).join(sep||' · ');}
+function activite(t){return t>35.001?'forte':t<34.999?'réduite':'35 h';}
+var ICO={ok:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.2" fill="var(--ok-doux)" stroke="var(--ok)" stroke-width="1.2"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="var(--ok)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  att:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l6.6 12H1.4z" fill="var(--attention-doux)" stroke="var(--attention)" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 6v3.6" stroke="var(--attention)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--attention)"/></svg>',
+  dg:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.2" fill="var(--danger-doux)" stroke="var(--danger)" stroke-width="1.2"/><path d="M8 4.4v4.4" stroke="var(--danger)" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="11.4" r="1" fill="var(--danger)"/></svg>',
+  info:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.2" fill="var(--bg-doux)" stroke="var(--texte-doux)" stroke-width="1.2"/><path d="M8 7.2v4" stroke="var(--texte-med)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="var(--texte-med)"/></svg>'};
+
+/* ── les programmes ── */
+var R_EQUIPE={
+  hiver:{nom:'Hiver',sem:[[7,7,7,7,4,0,0]],prise:'08:00'},
+  mars:{nom:'Fin d’hiver',sem:[[7.5,7.5,7.5,7.5,4,0,0]],prise:'07:30'},
+  avril:{nom:'Printemps',sem:[[8,8,8,8,5,0,0]],prise:'07:30'},
+  ete:{nom:'Été',sem:[[8.5,8.5,8.5,8.5,5,0,0]],prise:'07:00'},
+  vend:{nom:'Vendanges',sem:[[7,7,7,7,7,7,0]],prise:'07:30'},
+  automne:{nom:'Automne',sem:[[7,7,7,7,4,0,0]],prise:'08:00'},
+  decembre:{nom:'Fin d’année',sem:[[7,7,7,7,0,0,0]],prise:'08:00'}};
+var FERMETURES=[{du:'09-06',au:'09-11',r:'vend',nom:'Vendanges'}]; // v2 : plus de fermeture, seulement la semaine à part
+/* les congés de chacun (v2) : posés par personne, le planning ne bouge pas */
+var GENS=[{n:'Marie',ini:'M',per:[['03-08','03-12'],['08-02','08-20'],['12-27','12-31']],quoi:'une semaine en mars, trois en août, Noël'},
+  {n:'Jean',ini:'J',per:[['03-15','03-19'],['08-02','08-13'],['10-18','10-22'],['12-27','12-31']],quoi:'deux semaines l’été, une en octobre'},
+  {n:'Sophie',ini:'S',per:[['03-22','03-26'],['08-16','09-03'],['12-20','12-24']],quoi:'fin mars, fin août, avant Noël'}];
+var TEAM0={type:'periodes',R:R_EQUIPE,base:[{du:'01-01',r:'hiver'},{du:'03-01',r:'mars'},{du:'04-01',r:'avril'},{du:'05-01',r:'ete'},{du:'10-01',r:'automne'},{du:'11-15',r:'decembre'}],over:FERMETURES,exc:{}};
+var NICO0={type:'periodes',R:{
+  hiver:{nom:'Hiver',sem:[[7.5,6.5,6,7,4,0,0],[6.5,7,0,6.5,4,0,0]],prise:'07:30',priseJ:[[null,null,null,null,null,null,null],[null,'09:00',null,null,null,null,null]]},
+  mars:{nom:'Mars',sem:[[8,6.5,6,7.5,8,0,0],[6,7.5,0,6.5,4,0,0]],prise:'07:00',priseJ:[[null,null,null,null,null,null,null],[null,'09:00',null,null,null,null,null]]},
+  ete:{nom:'Printemps – été',sem:[[6.5,8.5,0,6.5,8,10,10],[8.5,6.5,6.5,8,8,0,0]],prise:'07:00',priseJ:[[null,null,null,null,null,'06:30','06:30'],[null,'09:00','09:00',null,null,null,null]]},
+  finete:{nom:'Fin d’été',sem:[[6.5,8.5,0,6.5,7,0,0],[8.5,6.5,6.5,8.5,8,0,0]],prise:'07:00',priseJ:[[null,null,null,null,null,null,null],[null,'09:00',null,null,null,null,null]]},
+  vend:{nom:'Vendanges',sem:[[7,7,7,7,7,7,0]],prise:'07:30'},
+  automne:{nom:'Automne',sem:[[7.5,6.5,6,7,7.5,0,0],[6,7,0,6.5,4,0,0]],prise:'07:30',priseJ:[[null,null,null,null,null,null,null],[null,'09:00',null,null,null,null,null]]}},
+  base:[{du:'01-01',r:'hiver'},{du:'03-01',r:'mars'},{du:'04-01',r:'ete'},{du:'08-21',r:'finete'},{du:'10-01',r:'automne'}],over:FERMETURES,exc:{}};
+var TEAM=clone(TEAM0),NICO=clone(NICO0);
+var CADRE={maxJ:10,maxH:48,maxMoy:44,modul:250};
+var UI={selA:null,suggA:false,calcA:false,tel:'mois',telMois:2,pub:false,calcT:false};
+var UIN={sel:'ete',sugg:false,calc:false};
+var UIB={pinceau:'ete',sel:{},glisse:false,calc:false};
+var PILE=[];
+/* B : la même équipe, posée semaine par semaine (rythme dominant de chaque semaine de A) */
+var BPROG=(function(){var W=[],acc=[];for(var w=0;w<NSEM;w++)acc.push({});
+  JOURS.forEach(function(D){var r=rythmeLe(TEAM0,D),h=heuresLe(TEAM0,D);if(r==='ferme'){acc[D.w].ferme=(acc[D.w].ferme||0)+(D.g<5?1:0);return;}acc[D.w][r]=(acc[D.w][r]||0)+h+0.001;});
+  acc.forEach(function(a,w){var best='hiver',bv=-1;Object.keys(a).forEach(function(k){var v=k==='ferme'?a[k]*3:a[k];if(v>bv){bv=v;best=k;}});W.push(best);});
+  return {type:'semaines',R:clone(R_EQUIPE),W:W};})();
+
+/* ═══ la frise + les barres ═══ */
+var DEC0=JOURS[0].g; // le 1er janvier dans sa semaine
+function renderFrise(P,el,o){
+  o=o||{};var N=JOURS.length,s=stats(P),pl=plages(P),h='';
+  h+='<div class="frise-boite"><div class="frise-mois">';
+  for(var m=0;m<12;m++){var i0=idxMd(String(m+1).padStart(2,'0')+'-01');h+='<span style="left:'+(i0/N*100)+'%">'+MC[m]+'</span>';}
+  h+='</div><div class="frise'+(o.sel?' choix':'')+'">';
+  pl.forEach(function(p){var l=p.i0/N*100,w=(p.i1-p.i0+1)/N*100,lab='',tip;
+    if(p.r==='ferme'){tip=(p.nom||'Fermeture')+' — '+plageTxt(p.premier!=null?p.premier:p.i0,p.dernier!=null?p.dernier:p.i1,true)+' · congés payés';lab=w>6?'congés':'';
+      h+='<div class="seg ferme" style="left:'+l+'%;width:'+w+'%" data-tip="'+esc(tip)+'">'+lab+'</div>';return;}
+    var R=P.R[p.r],c=couleur(P,p.r),t1=totalSem(R,0),t2=R.sem.length>1?totalSem(R,1):null;
+    lab=t2!=null?(w>5.5?court(t1)+' / '+court(t2):''):(w>2.8?court(t1):'');
+    tip=R.nom+(p.nom&&p.nom!==R.nom?' ('+p.nom+')':'')+' — '+plageTxt(p.premier!=null?p.premier:p.i0,p.dernier!=null?p.dernier:p.i1,true)+' · '+(t2!=null?'semaines de '+fmtH(t1)+' et '+fmtH(t2):fmtH(t1)+' par semaine')+' · '+fmtH(p.h)+' en tout';
+    h+='<div class="seg'+(o.sel===p.r?' sel':'')+'" role="button" tabindex="0" data-r="'+p.r+'" style="left:'+l+'%;width:'+w+'%;background:'+c.bg+';color:'+c.fg+'" data-tip="'+esc(tip)+'">'+lab+'</div>';});
+  h+='</div><div class="fer-pts">';
+  JOURS.forEach(function(D){if(!D.fer)return;var r=rythmeLe(P,D),chome=r&&r!=='ferme'&&semDe(P.R[r],D.w)[D.g]>0;
+    h+='<i style="left:'+((D.i+0.5)/N*100)+'%;opacity:'+(chome?1:.35)+'" data-tip="'+esc(D.fer+' — '+jourLong(D.i)+(chome?' · chômé, ses heures sont retirées':(D.g>=5?' · tombe un '+JL[D.g]+', rien à retirer':' · pendant une fermeture')))+'"></i>';});
+  h+='</div>';
+  if(o.conges){h+='<div class="absents" aria-label="Personnes en congé, semaine par semaine">';
+    for(var w2=0;w2<NSEM;w2++){var a2=w2*7-DEC0,ia2=Math.max(0,a2),ib2=Math.min(N,a2+7);if(ib2<=ia2)continue;var qui=[];
+      o.conges.forEach(function(p){if(p.per.some(function(x){var u=idxMd(x[0]),v=idxMd(x[1]);return u<ib2&&v>=ia2;}))qui.push(p.n);});
+      if(!qui.length)continue;h+='<i style="left:calc('+(ia2/N*100)+'% + 1px);width:calc('+((ib2-ia2)/N*100)+'% - 2px);opacity:'+(0.35+0.22*qui.length)+'" data-tip="'+esc('Semaine du '+plageTxt(ia2,ib2-1,true)+' — en congé : '+qui.join(', ')+'. Le planning ne bouge pas.')+'"></i>';}
+    h+='</div>';}
+  h+='<div class="barres">';
+  var MAXH=o.maxLine?54:46;
+  for(var w=0;w<NSEM;w++){var a=w*7-DEC0,b=a+7,ia=Math.max(0,a),ib=Math.min(N,b);if(ib<=ia)continue;
+    var dom=null,dv=-1,acc={},ferme=0;for(var i=ia;i<ib;i++){var D=JOURS[i],r=rythmeLe(P,D),hh=heuresLe(P,D);if(r==='ferme'&&D.g<5)ferme++;if(hh>0){acc[r]=(acc[r]||0)+hh;if(acc[r]>dv){dv=acc[r];dom=r;}}}
+    var left=ia/N*100,wd=(ib-ia)/N*100,tot=s.wk[w],ferL=[];for(var j=ia;j<ib;j++)if(JOURS[j].fer&&JOURS[j].g<5)ferL.push(JL[JOURS[j].g]+' '+JOURS[j].dm+' ('+JOURS[j].fer+')');
+    var tip='Semaine du '+plageTxt(ia,ib-1,true)+' — '+(tot?fmtH(tot):'rien')+(ferL.length?' · férié : '+ferL.join(', '):'')+(ferme>=3?' · fermeture':'');
+    if(!tot){if(ferme>=3)h+='<div class="b vide" style="left:calc('+left+'% + 1px);width:calc('+wd+'% - 2px)" data-tip="'+esc(tip)+'"></div>';continue;}
+    var c=couleur(P,dom),trop=o.maxLine&&tot>CADRE.maxH+1e-9;
+    h+='<div class="b" data-r="'+dom+'" style="left:calc('+left+'% + 1px);width:calc('+wd+'% - 2px);height:'+(Math.min(tot,MAXH)/MAXH*100)+'%;background:'+(trop?'var(--danger)':c.bg)+'" data-tip="'+esc(tip)+'"></div>';}
+  h+='<div class="ref" style="bottom:'+(35/MAXH*100)+'%"><em>35 h</em></div>'+(o.maxLine?'<div class="ref max" style="bottom:'+(CADRE.maxH/MAXH*100)+'%"><em>48 h</em></div>':'')+'</div></div>';
+  el.innerHTML=h;}
+function renderLegende(P,el){var vus={},h='';plages(P).forEach(function(p){if(vus[p.r])return;vus[p.r]=1;
+    if(p.r==='ferme')return;var c=couleur(P,p.r),R=P.R[p.r];h+='<span><i style="background:'+c.bg+'"></i>'+esc(R.nom)+' · '+court(totalSem(R,0))+'</span>';});
+  h+='<span><i style="background:var(--texte-med);border-radius:50%;width:8px;height:8px"></i>Férié (compté pour ses heures prévues)</span><span><i style="background:var(--accent);opacity:.6"></i>Congés posés (plus foncé = plus de monde)</span>';
+  el.innerHTML=h;}
+
+/* ═══ le compteur ═══ */
+function renderCompteur(P,el,ctx){
+  var s=stats(P),cib=cible(),ec=s.brut-cib,juste=Math.abs(ec)<0.01,h='';
+  h+='<div class="lbl">'+esc(ctx.qui)+'</div><div class="gros"><b class="num">'+fmtH(s.brut)+'</b><span>sur '+fmtH(cib)+'</span></div>';
+  h+='<div class="jauge'+(juste?' juste':'')+'"><i style="width:'+Math.min(100,s.brut/cib*100)+'%"></i></div><div class="verdict">';
+  h+=juste?'<span class="etiq ok">Juste : le planning tombe sur la base</span>':(ec<0?'<span class="etiq att">Il manque '+fmtH(-ec)+'</span>':'<span class="etiq att">'+fmtH(ec)+' de trop</span>');
+  h+='</div><div class="sous">'+fmtH(s.tot)+' de travail + '+fmtH(s.ferV)+' de fériés ('+s.nFer+' jours), comptés pour leurs heures prévues · domaine ouvert toute l’année</div><div class="act">';
+  if(!juste&&!ctx.sansSugg)h+='<button type="button" class="bouton plein large" data-act="sugg">'+(ctx.suggOuvert?'Masquer les retouches':'Tomber juste')+'</button>';
+  if(!ctx.sansCalc)h+='<button type="button" class="lien" data-act="calcul" aria-expanded="'+(!!ctx.calc)+'">'+(ctx.calc?'Masquer le calcul':'Comment ce chiffre est calculé')+'</button>';h+='</div>';
+  if(ctx.calc){h+='<div class="calcul"><ol><li>Base '+AN+' : '+JSEM+' jours du lundi au vendredi × 7 h = '+fmtH(7*JSEM)+', soit 35 h par semaine en moyenne.</li>'+(CIBLE.solid?'<li>Journée de solidarité travaillée : + 7 h = '+fmtH(cib)+'.</li>':'')+'<li>Les fériés chômés et les congés comptent les heures prévues ce jour-là : la saison ne change rien.</li><li>Une autre année se calcule pareil : 2028 compte 260 jours, soit '+fmtH(1820+(CIBLE.solid?7:0))+'.</li></ol>'+
+      '<label><input type="checkbox" data-act="solid"'+(CIBLE.solid?' checked':'')+'> Journée de solidarité travaillée (+ 7 h)</label><p class="note">Ton modèle 2026 tombait déjà sur 1 827 h : 1 589 h de travail + 9 fériés et 25 jours de congés comptés à 7 h.</p></div>';}
+  el.innerHTML=h;}
+
+/* ═══ les retouches proposées ═══ */
+function libRetouche(P,m){var L=m.lib;
+  if(L[0]==='jour'){var ij=idxMd(L[1]);return jourLong(ij).charAt(0).toUpperCase()+jourLong(ij).slice(1)+', veille de '+L[4]+' : '+fmtH(L[3])+' au lieu de '+fmtH(L[2]);}
+  if(L[0]==='debut'){var i=L[1],r=P.base[i].r,prev=P.base[i-1].r,ia=idxMd(L[2]),ib=idxMd(L[3]),n=Math.round((ib-ia)/7),sem=Math.abs(n)===1?'une semaine':'deux semaines';
+    return n>0?P.R[prev].nom+' '+sem+' de plus, jusqu’au '+jourTxt(ib-1):P.R[r].nom+' dès le '+jourTxt(ib)+', '+sem+' plus tôt';}
+  var R=P.R[L[0]],cy=R.sem.length>1?', semaine '+(L[1]===0?'A':'B'):'';
+  return R.nom+cy+' : '+joursListe(L[3])+' '+fmtH(L[5])+' au lieu de '+fmtH(L[4]);}
+function renderSugg(P,el,ctx){
+  var s=stats(P),cib=cible(),ec=cib-s.brut;
+  if(Math.abs(ec)<0.01){el.innerHTML='<div class="carte"><p class="note">Le planning tombe juste. Rien à retoucher.</p></div>';return;}
+  var L=suggestions(P,cib,{maxJ:CADRE.maxJ,maxH:CADRE.maxH});ctx.sg=L;
+  var NOMBRE=['Aucune façon','Une façon','Deux façons','Trois façons'];var h='<div class="carte"><h4>'+NOMBRE[Math.min(3,L.length)]+' de tomber juste</h4><p class="note" style="margin-bottom:10px">'+(ec>0?'Il manque '+fmtH(ec):'Il y a '+fmtH(-ec)+' de trop')+'. Chaque proposition garde la forme de tes semaines et respecte le cadre.</p><div class="sugg">';
+  if(!L.length)h+='<p class="note">Aucune retouche simple ne tombe juste : modifie une semaine type à la main.</p>';
+  L.forEach(function(c,k){h+='<div class="sg"><ul>'+c.moves.map(function(m){return '<li><span>'+esc(libRetouche(P,m))+'</span><em class="'+(m.d<0?'moins':'')+'">'+fmtD(m.d)+'</em></li>';}).join('')+'</ul><div class="pied"><span>= <b class="num">'+fmtH(c.t)+'</b>'+(Math.abs(c.reste)<0.01?' · juste':(c.reste>0?' · il manque '+fmtH(c.reste):' · '+fmtH(-c.reste)+' de trop'))+'</span><button type="button" class="bouton petit" data-act="appl" data-k="'+k+'">Appliquer</button></div></div>';});
+  el.innerHTML=h+'</div></div>';}
+function appliqueSugg(P,c){c.moves.forEach(function(m){applique(P,m);});}
+
+/* ═══ le cadre ═══ */
+function renderCadre(P,el,titre){
+  var s=stats(P),l=[],modF=s.mod<=200?'formule 1 (200 h programmées au plus)':s.mod<=CADRE.modul?'formule 2 (plus de 200 h)':'au-delà des 250 h permises';
+  function ln(ok,t){l.push('<div>'+(ok===true?ICO.ok:ok===false?ICO.dg:ok==='att'?ICO.att:ICO.info)+'<span>'+t+'</span></div>');}
+  ln(s.maxJ<=CADRE.maxJ,'<b>10 h par jour au plus</b> — la plus longue : '+fmtH(s.maxJ));
+  var wa=s.wMax*7-DEC0;ln(s.maxW<=CADRE.maxH,'<b>48 h par semaine au plus</b> — '+(s.nb48?s.nb48+' semaine'+(s.nb48>1?'s':'')+' au-delà, jusqu’à '+fmtH(s.maxW):'la plus chargée : '+fmtH(s.maxW)+' ('+plageTxt(Math.max(0,wa),Math.min(JOURS.length-1,wa+6))+')'));
+  ln(s.max12<=CADRE.maxMoy,'<b>44 h en moyenne sur 12 semaines</b> — au plus '+fmtH(Math.round(s.max12*2)/2));
+  ln(s.mod<=CADRE.modul,'<b>Heures de modulation programmées : '+fmtH(s.mod)+'</b> sur 250 — '+modF);
+  ln(s.minJ>=3.5?true:'att','<b>Jour réduit</b> — le plus court : '+fmtH(s.minJ)+(s.minJ>=3.5?'':' ; l’accord demande au moins une demi-journée'));
+  ln(null,'<b>Dimanches travaillés</b> : '+(s.dim?s.dim:'aucun'));
+  el.innerHTML='<h4>'+(titre||'Le cadre')+'</h4><p class="cadre-ligne" style="margin-bottom:10px">Réglages de Planning › Le cadre.</p><div class="verif">'+l.join('')+'</div>';}
+
+/* ═══ qui suit ce planning ═══ */
+function ecartPers(P,g){var s=stats(P),c=cpPersonne(P,g.per,CIBLE.mode5);
+  if(CIBLE.cp==='planning')return {c:c,total:s.brut,cible:cible(),ec:s.brut-cible()};
+  var t=s.brut-c.h,ci=cible()-175;return {c:c,total:t,cible:ci,ec:t-ci};}
+function renderGens(P,el){
+  var s=stats(P),cib=cible();
+  function part(a,b){var t=0;for(var i=idxMd(a);i<=idxMd(b);i++)t+=prevuLe(P,JOURS[i]);return t;}
+  var pP=part('03-01','10-30'),cP=cib*pP/s.brut;
+  function ligne(ini,nm,ct,prevu,ci){var ok=Math.abs(prevu-ci)<0.01;return '<div class="g"><span class="ava">'+ini+'</span><div><div class="nm">'+nm+'</div><div class="ct">'+ct+'</div></div><div class="hh"><b class="num">'+fmtH(prevu)+'</b>'+(ok?'<span class="etiq ok">juste</span>':'sur '+fmtH(Math.round(ci*2)/2))+'</div></div>';}
+  var h='<h4>Qui suit ce planning</h4><p class="cadre-ligne" style="margin-bottom:4px">Chacun avec ses congés : le planning ne bouge pas.</p>';
+  GENS.forEach(function(g){var e=ecartPers(P,g);h+=ligne(g.ini,g.n,'CDI · '+g.quoi,e.total,e.cible);});
+  h+=ligne('P','Paul','CDD du 1er mars au 30 octobre',pP,cP);
+  h+='<div class="g"><span class="ava" style="background:var(--bg-doux);color:var(--texte-med)">+</span><div><div class="nm">Saisonniers TESA</div><div class="ct">suivent l’horaire de l’équipe, payés au réel</div></div><div class="hh">—</div></div>';
+  h+='<div class="g"><span class="ava">N</span><div><div class="nm">Nico</div><div class="ct">son propre rythme, sur deux semaines</div></div><div class="hh"><a href="#nico" class="lien" style="font-size:var(--pt-micro)">Ouvrir</a></div></div>';
+  el.innerHTML=h;}
+
+/* ═══ les semaines types (A, ordinateur) ═══ */
+function ouTxt(P,r){var bits=[];
+  P.base.forEach(function(b,i){if(b.r!==r)return;var a=idxMd(b.du),z=i<P.base.length-1?idxMd(P.base[i+1].du)-1:JOURS.length-1;bits.push(plageTxt(a,z));});
+  P.over.forEach(function(o){if(o.r===r)bits.push(plageTxt(idxMd(o.du),idxMd(o.au))+' (semaine à part)');});
+  var cut=P.over.filter(function(o){return P.base.some(function(b,i){if(b.r!==r)return false;var z=i<P.base.length-1?P.base[i+1].du:'12-31';return o.du>=b.du&&o.du<z&&o.r!==r;});}).map(function(o){return o.nom.toLowerCase();});
+  return bits.join(', ')+(cut.length?' — sans les '+cut.join(' ni les '):'');}
+function semaineMini(R,v){return '<div class="ry-sem">'+R.sem[v||0].map(function(x,j){return '<span class="'+(x>0?'on':'')+'">'+JC[j]+'<b>'+court(x)+'</b></span>';}).join('')+'</div>';}
+function editeur(P,r,cible_){var R=P.R[r],s=stats(P),ec=s.tot-cible(),h='<div class="ry-ed">',v=0;
+  h+='<div class="ed-jours">'+R.sem[0].map(function(x,j){var p=R.prise;return '<div class="ed-j'+(x?'':' off')+'"><div class="n">'+JL[j]+'</div><div class="v num">'+(x?fmtH(x):'repos')+'</div><div class="h">'+(x?p+'–'+finDe(p,x,R.continu):'')+'</div><div class="pm"><button type="button" data-act="pm" data-r="'+r+'" data-g="'+j+'" data-d="-0.5" aria-label="'+JL[j]+' moins 30 min">−</button><button type="button" data-act="pm" data-r="'+r+'" data-g="'+j+'" data-d="0.5" aria-label="'+JL[j]+' plus 30 min">+</button></div></div>';}).join('')+'</div>';
+  var opts='';for(var t=6*60;t<=9*60+30;t+=30){var x=hm(t);opts+='<option'+(x===R.prise?' selected':'')+'>'+x+'</option>';}
+  h+='<div class="ed-l"><label class="grp">Prise de service <select data-act="prise" data-r="'+r+'">'+opts+'</select></label><span>Coupure du midi : 1 h dès 6 h de travail (Le cadre)</span>';
+  var bi=-1;P.base.forEach(function(b,i){if(b.r===r&&i>0)bi=i;});
+  if(bi>0)h+='<span class="grp">Débute le <b>'+jourTxt(idxMd(P.base[bi].du))+'</b><button type="button" data-act="deb" data-i="'+bi+'" data-n="-7">1 sem. plus tôt</button><button type="button" data-act="deb" data-i="'+bi+'" data-n="7">1 sem. plus tard</button></span>';
+  h+='</div><div class="ed-res"><span><b>'+fmtH(totalSem(R,0))+'</b> par semaine · activité '+activite(totalSem(R,0))+'</span><span><b>'+fmtH(s.parR[r]||0)+'</b> dans l’année</span><span>L’année : <b>'+fmtH(s.tot)+'</b> ('+(Math.abs(ec)<0.01?'juste':fmtD(ec))+')</span></div>';
+  return h+'</div>';}
+function ordreRythmes(P){var o=[],vus={};JOURS.forEach(function(D){var r=rythmeLe(P,D);if(r&&r!=='ferme'&&!vus[r]){vus[r]=1;o.push(r);}});return o;}
+function renderRythmes(P,el){var s=stats(P),h='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><h4 style="font-family:var(--font-titre);font-size:var(--pt-md)">Les semaines types</h4><span class="note">touche une semaine type pour la régler</span></div>';
+  ordreRythmes(P).forEach(function(r){var R=P.R[r],c=couleur(P,r),ouv=UI.selA===r;
+    h+='<div class="ry'+(ouv?' ouvert':'')+'"><button type="button" class="ry-tete" data-act="sel" data-r="'+r+'" aria-expanded="'+ouv+'"><span class="pastille num" style="background:'+c.bg+';color:'+c.fg+'">'+court(totalSem(R,0))+'</span><span><span class="ry-nom">'+esc(R.nom)+'</span><br><span class="ry-ou">'+esc(ouTxt(P,r))+'</span><br><span class="ry-ou">'+esc(horaires(R,0))+'</span></span>'+semaineMini(R,0)+'</button>'+(ouv?editeur(P,r):'')+'</div>';});
+  el.innerHTML=h;}
+function renderRepris(el){
+  el.innerHTML='<div style="display:flex;gap:10px;align-items:flex-start">'+ICO.info+'<div><b>Repris de 2026</b> : 7 semaines types, vendanges comprises. <b>Le domaine reste ouvert toute l’année</b> : les congés sortent du planning, chacun pose les siens.<div class="note" style="margin-top:4px">Ce qui bouge tout seul : le lundi de Pâques passe du 6 avril au 29 mars ; le 1er mai, le 8 mai et Noël tombent un samedi. Les fériés gardent leurs heures prévues : ils ne retirent rien.</div></div></div>';}
+
+/* ═══ publier ═══ */
+function pubHTML(P,qui){var s=stats(P),ec=s.tot-cible();
+  return '<h4>Publier le programme 2027</h4><p class="note">'+qui+' · version 1</p>'+(Math.abs(ec)>=0.01?'<div class="alerte" style="background:var(--attention-doux)">'+ICO.att+'<div>Le total ne tombe pas juste ('+(ec<0?'il manque '+fmtH(-ec):fmtH(ec)+' de trop')+').<small>Tu peux publier quand même : le compteur de chacun le montrera.</small></div><span></span></div>':'')+
+  '<ol class="etapes"><li><i>1</i><div><b>Affichage au domaine</b><small>Au plus tard le jeudi 24 décembre 2026 : une semaine avant le 1er janvier.</small></div></li><li><i>2</i><div><b>Copie à l’inspection du travail</b><small>Le PDF d’affichage, prêt à envoyer.</small></div></li><li><i>3</i><div><b>Chacun reçoit son année</b><small>Dans « Mon année », avec son PDF. Ses congés ne changent rien au programme.</small></div></li></ol>'+
+  '<div class="versions"><div><b>Version 1</b> — publiée le mardi 1er décembre 2026.</div><div>Une modification en cours d’année crée la version 2. Elle s’affiche au moins une semaine avant, sauf force majeure.</div></div>'+
+  '<div style="display:flex;gap:8px"><button type="button" class="bouton" style="flex:1" data-act="pubnon">Plus tard</button><button type="button" class="bouton plein" style="flex:1" data-act="pubok">Publier</button></div>';}
+
+/* ═══ toasts et annulation ═══ */
+var TT={};
+function toast(id,txt,annul){var el=$(id);if(!el)return;el.innerHTML='<span>'+esc(txt)+'</span>'+(annul?'<button type="button" data-act="annul">Annuler</button>':'');el.classList.remove('cache');
+  clearTimeout(TT[id]);TT[id]=setTimeout(function(){el.classList.add('cache');},5200);}
+function memo(prog){PILE.push({prog:prog,etat:clone(prog==='team'?TEAM:prog==='nico'?NICO:BPROG)});if(PILE.length>30)PILE.shift();}
+function annule(){var x=PILE.pop();if(!x)return;if(x.prog==='team')TEAM=x.etat;else if(x.prog==='nico')NICO=x.etat;else BPROG=x.etat;tout();}
+
+/* ═══ A : ordinateur ═══ */
+function renderA(){
+  renderRepris($('a-repris'));renderFrise(TEAM,$('a-frise'),{sel:UI.selA,conges:GENS});renderLegende(TEAM,$('a-leg'));renderRythmes(TEAM,$('a-rythmes'));
+  renderCompteur(TEAM,$('a-cpt'),{qui:'Le planning 2027 · équipe vigne',calc:UI.calcA,suggOuvert:UI.suggA});
+  var sg=$('a-sugg');if(UI.suggA){sg.style.marginTop='12px';renderSugg(TEAM,sg,UI);}else sg.innerHTML='';
+  renderCadre(TEAM,$('a-cadre'));$('a-cadre').style.marginTop='12px';renderGens(TEAM,$('a-gens'));$('a-gens').style.marginTop='12px';
+  var pub=$('a-pub');pub.innerHTML='<div class="boite" role="dialog" aria-label="Publier le programme">'+pubHTML(TEAM,'Équipe vigne · 4 personnes')+'</div>';pub.classList.toggle('cache',!UI.pub);pub.setAttribute('aria-hidden',UI.pub?'false':'true');}
+
+/* ═══ A : téléphone ═══ */
+function moisLigne(P,m){var a=idxMd(String(m+1).padStart(2,'0')+'-01'),z=m<11?idxMd(String(m+2).padStart(2,'0')+'-01')-1:JOURS.length-1,n=z-a+1,bar='',tot=0,run=null,dom={},notes=[];
+  for(var i=a;i<=z;i++){var D=JOURS[i],r=rythmeLe(P,D),h=heuresLe(P,D);tot+=h;if(h>0)dom[r]=(dom[r]||0)+h;
+    if(!run||run.r!==r){run={r:r,i:i,n:0};bar+='';run.list=true;}run.n++;
+    if(i===z||rythmeLe(P,JOURS[i+1])!==r){var c=couleur(P,r);bar+='<i style="left:'+((run.i-a)/n*100)+'%;width:'+(run.n/n*100)+'%;background:'+(r==='ferme'?'repeating-linear-gradient(135deg,var(--ferme-a) 0 3px,var(--ferme-b) 3px 6px)':c.bg)+'"></i>';run=null;}
+    if(D.fer&&D.g<5)notes.push(D.fer.toLowerCase()+' le '+D.dm);}
+  var best=null,bv=0;Object.keys(dom).forEach(function(k){if(dom[k]>bv){bv=dom[k];best=k;}});
+  P.over.forEach(function(o){var ia=idxMd(o.du),ib=idxMd(o.au);if(ia>=a&&ia<=z)notes.unshift((o.r==='ferme'?'congés':'vendanges')+' '+plageTxt(ia,ib));});
+  P.base.forEach(function(b,i){var ib=idxMd(b.du);if(i>0&&ib>a&&ib<=z)notes.unshift(P.R[b.r].nom.toLowerCase()+' dès le '+JOURS[ib].dm);});
+  return {bar:bar,tot:tot,best:best,notes:notes};}
+function renderTelAnnee(el,fond){var P=TEAM,h='<div class="carte cpt cpt-tel t-cpt"></div><div class="mois-l">';
+  for(var m=0;m<12;m++){var L=moisLigne(P,m),R=L.best?P.R[L.best]:null;
+    h+='<button type="button" data-act="mois" data-m="'+m+'"'+(fond?' tabindex="-1"':'')+'><span class="mn">'+ML[m].charAt(0).toUpperCase()+ML[m].slice(1)+'</span><span class="mb">'+L.bar+'</span><span class="mh"><b class="num">'+fmtH(L.tot)+'</b>'+(R?court(totalSem(R,0))+'/sem.':'')+'</span>'+(L.notes.length?'<span class="mr">'+esc(L.notes.join(' · '))+'</span>':'')+'</button>';}
+  h+='</div><button type="button" class="bouton plein large" style="margin-top:12px" data-act="tpub"'+(fond?' tabindex="-1"':'')+'>Publier le programme</button>';
+  el.innerHTML=h;renderCompteur(P,el.querySelector('.t-cpt'),{qui:'Le planning 2027',calc:fond?false:UI.calcT,suggOuvert:false,sansSugg:!!fond,sansCalc:!!fond});
+  if(!fond){var b=el.querySelector('.t-cpt [data-act="sugg"]');if(b)b.setAttribute('data-act','tsugg');var c=el.querySelector('.t-cpt [data-act="calcul"]');if(c)c.setAttribute('data-act','tcalcul');}}
+function feuilleMois(P,m){var L=moisLigne(P,m),r=L.best||'hiver',R=P.R[r],s=stats(P),ec=s.tot-cible();
+  var h='<div class="poignee"></div><h3 style="font-size:var(--pt-lg)">'+ML[m].charAt(0).toUpperCase()+ML[m].slice(1)+' — '+esc(R.nom)+'</h3><p class="note" style="margin:2px 0 10px">'+esc(ouTxt(P,r))+'</p>';
+  h+='<div style="display:grid;gap:6px">'+R.sem[0].map(function(x,j){return '<div style="display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--ligne)"><span style="font-weight:600">'+JL[j]+'</span><span class="note">'+(x?R.prise+' → '+finDe(R.prise,x,R.continu):'repos')+'</span><span style="display:inline-flex;align-items:center;gap:6px"><button type="button" class="bouton petit" style="width:40px;padding:0" data-act="pm" data-r="'+r+'" data-g="'+j+'" data-d="-0.5" aria-label="moins 30 min">−</button><b class="num" style="min-width:52px;text-align:center">'+(x?fmtH(x):'–')+'</b><button type="button" class="bouton petit" style="width:40px;padding:0" data-act="pm" data-r="'+r+'" data-g="'+j+'" data-d="0.5" aria-label="plus 30 min">+</button></span></div>';}).join('')+'</div>';
+  var opts='';for(var t=6*60;t<=9*60+30;t+=30){var x=hm(t);opts+='<option'+(x===R.prise?' selected':'')+'>'+x+'</option>';}
+  h+='<div class="ed-l" style="margin-top:10px"><label class="grp">Prise de service <select data-act="prise" data-r="'+r+'">'+opts+'</select></label></div>';
+  h+='<div class="ed-res" style="margin-top:10px;padding:10px;border-radius:10px;background:var(--bg-doux)"><span><b>'+fmtH(totalSem(R,0))+'</b> par semaine</span><span>L’année : <b>'+fmtH(s.tot)+'</b> ('+(Math.abs(ec)<0.01?'juste':fmtD(ec))+')</span></div>';
+  h+='<p class="note" style="margin-top:8px">La semaine type « '+esc(R.nom)+' » sert partout où elle est posée : changer ici change toute la saison.</p><button type="button" class="bouton large" style="margin-top:10px" data-act="tfermer">Fermer</button>';
+  return h;}
+function renderTel(){
+  renderTelAnnee($('t-annee-corps'),false);
+  var fond=$('t2-fond');renderTelAnnee(fond,true);
+  var f=$('t2-feuille'),v=$('t2-voile'),leg=$('t2-leg'),st=UI.tel;
+  var ouvert=st!=='annee';f.classList.toggle('cache',!ouvert);v.classList.toggle('cache',!ouvert);
+  if(st==='mois'){f.innerHTML=feuilleMois(TEAM,UI.telMois);leg.innerHTML='<b>Téléphone</b> — un mois touché : sa semaine type s’ouvre en feuille.';}
+  else if(st==='sugg'){f.innerHTML='<div class="poignee"></div><div id="t2-sugg"></div><button type="button" class="bouton large" style="margin-top:10px" data-act="tfermer">Fermer</button>';renderSugg(TEAM,f.querySelector('#t2-sugg'),UI);var cc=f.querySelector('.carte');if(cc){cc.style.border='0';cc.style.boxShadow='none';cc.style.padding='0';}leg.innerHTML='<b>Téléphone</b> — « Tomber juste » : les retouches proposées.';}
+  else if(st==='pub'){f.innerHTML='<div class="poignee"></div><div style="display:grid;gap:12px">'+pubHTML(TEAM,'Équipe vigne · 4 personnes')+'</div>';leg.innerHTML='<b>Téléphone</b> — publier le programme.';}
+  else{f.innerHTML='';leg.innerHTML='<b>Téléphone</b> — feuille fermée : touche un mois à gauche, ou un bouton au-dessus.';}
+  document.querySelectorAll('[data-t]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-t')===st?'true':'false');});}
+
+/* ═══ B ═══ */
+function isoSem(w){return w===0?53:w;}
+function renderB(){var P=BPROG,pal='',ids=Object.keys(P.R);
+  ids.forEach(function(r){var c=couleur(P,r),R=P.R[r];pal+='<button type="button" data-act="pin" data-r="'+r+'" aria-pressed="'+(UIB.pinceau===r)+'"><i style="background:'+c.bg+'"></i>'+esc(R.nom)+' · '+court(totalSem(R,0))+'</button>';});
+  $('b-pal').innerHTML=pal;
+  var s=stats(P),g='',Q=[[0,12,'Janvier → mars'],[13,25,'Avril → juin'],[26,38,'Juillet → septembre'],[39,52,'Octobre → décembre']];
+  Q.forEach(function(q){g+='<div class="q">'+q[2]+'</div>';for(var w=q[0];w<=q[1];w++)g+=celluleB(P,s,w);});
+  $('b-grille').innerHTML=g;
+  renderCompteur(P,$('b-cpt'),{qui:'Le planning 2027 · équipe vigne',calc:UIB.calc,sansSugg:true});
+  renderCadre(P,$('b-cadre'));$('b-cadre').style.marginTop='12px';renderBTel();}
+function celluleB(P,s,w){var r=P.W[w],a=Math.max(0,w*7-DEC0),z=Math.min(JOURS.length-1,w*7-DEC0+6),c=r==='ferme'?null:couleur(P,r);
+  var st=r==='ferme'?'background:repeating-linear-gradient(135deg,var(--ferme-a) 0 4px,var(--ferme-b) 4px 8px);color:var(--ferme-t)':'background:'+c.bg+';color:'+c.fg;
+  return '<button type="button" data-act="peint" data-w="'+w+'" style="'+st+'" data-tip="'+esc('S'+isoSem(w)+' · '+plageTxt(a,z,true)+' — '+(r==='ferme'?'fermé':P.R[r].nom+', '+fmtH(s.wk[w])))+'"><span>S'+isoSem(w)+'</span><b class="num">'+(r==='ferme'?'fermé':court(s.wk[w]))+'</b></button>';}
+function peindre(w){if(BPROG.W[w]===UIB.pinceau)return;BPROG.W[w]=UIB.pinceau;var s=stats(BPROG);var b=document.querySelector('#b-grille [data-w="'+w+'"]');if(b)b.outerHTML=celluleB(BPROG,s,w);renderCompteur(BPROG,$('b-cpt'),{qui:'Le planning 2027 · équipe vigne',calc:UIB.calc,sansSugg:true});}
+function renderBTel(){var P=BPROG,s=stats(P),h='',mPrec=-1,n=Object.keys(UIB.sel).length;
+  for(var w=0;w<NSEM;w++){var a=Math.max(0,w*7-DEC0),z=Math.min(JOURS.length-1,w*7-DEC0+6),m=JOURS[a].m;
+    if(m!==mPrec){mPrec=m;h+='<div class="note" style="margin:8px 2px 2px;font-weight:600;color:var(--texte-med)">'+ML[m].charAt(0).toUpperCase()+ML[m].slice(1)+'</div>';}
+    var r=P.W[w],c=r==='ferme'?null:couleur(P,r);
+    h+='<button type="button" class="'+(UIB.sel[w]?'on':'')+'" data-act="bsel" data-w="'+w+'"><span class="ck"></span><b>S'+isoSem(w)+'</b><span>'+plageTxt(a,z)+'</span><span class="tg" style="'+(r==='ferme'?'background:var(--bg-doux);color:var(--texte-med)':'background:'+c.bg+';color:'+c.fg)+'">'+(r==='ferme'?'fermé':esc(P.R[r].nom)+' · '+court(s.wk[w]))+'</span></button>';}
+  $('tb-corps').innerHTML='<div class="carte cpt cpt-tel" id="tb-cpt"></div><div class="lw">'+h+'</div>';
+  renderCompteur(P,$('tb-cpt'),{qui:'Le planning 2027',calc:false,sansSugg:true,sansCalc:true});
+  $('tb-s').textContent=n?n+' semaine'+(n>1?'s':'')+' cochée'+(n>1?'s':''):'Planning · équipe vigne';
+  var app='<span class="note" style="align-self:center;white-space:nowrap">Appliquer :</span>';Object.keys(P.R).forEach(function(r){var c=couleur(P,r);app+='<button type="button" data-act="bapp" data-r="'+r+'"'+(n?'':' disabled')+'><i style="background:'+c.bg+'"></i>'+esc(P.R[r].nom)+'</button>';});
+  $('tb-app').innerHTML=app;}
+
+/* ═══ Nico ═══ */
+function renderN(){var P=NICO,s=stats(P);
+  var sb='';ordreRythmes(P).forEach(function(r){if(P.R[r].sem.length<2)return;sb+='<button type="button" data-act="nsel" data-r="'+r+'" aria-pressed="'+(UIN.sel===r)+'">'+esc(P.R[r].nom)+'</button>';});$('n-saisons').innerHTML=sb;
+  var r=UIN.sel,R=P.R[r],h='<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h4 style="font-family:var(--font-titre);font-size:var(--pt-md)">'+esc(R.nom)+'</h4><span class="note">'+esc(ouTxt(P,r))+'</span></div><p class="note" style="margin:2px 0 10px">La semaine A commence le lundi 4 janvier, puis une semaine sur deux. Touche un horaire pour changer l’heure de prise de ce jour-là.</p><div class="cycle"><span></span>'+JC.map(function(j,k){return '<span class="hd">'+JL[k]+'</span>';}).join('')+'<span class="hd">Semaine</span>';
+  [0,1].forEach(function(v){var tot=totalSem(R,v),trop=tot>CADRE.maxH+1e-9;
+    h+='<div class="lb">Semaine '+(v?'B':'A')+'<small>'+(v?'11 janv., 25 janv.…':'4 janv., 18 janv.…')+'</small></div>';
+    R.sem[v].forEach(function(x,j){var p=(R.priseJ&&R.priseJ[v]&&R.priseJ[v][j])||R.prise,dec=R.priseJ&&R.priseJ[v]&&R.priseJ[v][j];
+      h+='<div class="c'+(x?'':' off')+(j>=5&&x?' we':'')+'"><b class="num">'+(x?court(x):'–')+'</b>'+(x?'<span data-act="nprise" data-v="'+v+'" data-g="'+j+'" style="cursor:pointer;'+(dec?'color:var(--accent-texte);font-weight:600':'')+'" data-tip="Toucher pour changer l’heure de prise">'+p+'–'+finDe(p,x,R.continu)+'</span>':'<span>repos</span>')+'<span style="display:flex;gap:3px;margin-top:3px"><button type="button" class="bouton petit" style="min-height:26px;width:28px;padding:0" data-act="npm" data-v="'+v+'" data-g="'+j+'" data-d="-0.5" aria-label="moins 30 min">−</button><button type="button" class="bouton petit" style="min-height:26px;width:28px;padding:0" data-act="npm" data-v="'+v+'" data-g="'+j+'" data-d="0.5" aria-label="plus 30 min">+</button></span></div>';});
+    h+='<div class="tot'+(trop?' trop':'')+'"><b class="num">'+court(tot)+'</b>'+(trop?'au-delà de 48 h':activite(tot))+'</div>';});
+  h+='</div>';$('n-cycle').innerHTML=h;
+  var fix=correctif(P,r),al=$('n-alerte');
+  if(s.nb48){al.innerHTML='<div class="alerte">'+ICO.dg+'<div><b>'+s.nb48+' semaine'+(s.nb48>1?'s':'')+' au-delà de 48 h</b> (jusqu’à '+fmtH(s.maxW)+')<small>Le cadre : 48 h par semaine au plus. En 2026, la grille ne le montrait pas.</small></div>'+(fix?'<button type="button" class="bouton petit" data-act="nfix">Corriger : '+esc(fix.lib)+'</button>':'')+'</div>';}
+  else al.innerHTML='<div class="alerte ok">'+ICO.ok+'<div><b>Aucune semaine au-delà de 48 h</b><small>La plus chargée : '+fmtH(s.maxW)+'.</small></div><span></span></div>';
+  renderFrise(P,$('n-frise'),{sel:UIN.sel,maxLine:true});
+  renderCompteur(P,$('n-cpt'),{qui:'Le planning 2027 · Nico',calc:UIN.calc,suggOuvert:UIN.sugg});
+  var sg=$('n-sugg');if(UIN.sugg){sg.style.marginTop='12px';renderSugg(P,sg,UIN);}else sg.innerHTML='';
+  renderCadre(P,$('n-cadre'));$('n-cadre').style.marginTop='12px';}
+function correctif(P,r0){var best=null;Object.keys(P.R).forEach(function(r){var R=P.R[r];R.sem.forEach(function(sem,v){var t=sem.reduce(function(a,b){return a+b;},0),ex=t-CADRE.maxH;if(ex<=1e-9||best)return;
+  var ord=[4,0,1,2,3];for(var k=0;k<ord.length;k++){var g=ord[k];if(sem[g]-ex>=3.5){var nv=Math.floor((sem[g]-ex)*2)/2;best={r:r,v:v,g:g,nv:nv,lib:(R.sem.length>1?(v?'semaine B, ':'semaine A, '):'')+JL[g]+' à '+fmtH(nv)+(r!==r0?' ('+R.nom+')':'')};break;}}});});return best;}
+
+/* ═══ la règle de calcul ═══ */
+function renderRegle(){var s0=stats(TEAM0),h='<ol class="regles">';
+  h+='<li><b>Le planning ne porte plus de congés.</b> Chaque semaine a sa semaine type : le domaine est ouvert toute l’année.</li>';
+  h+='<li><b>Un férié chômé et un jour de congé comptent les heures prévues ce jour-là.</b> Rien n’est retiré, rien n’est à rattraper, quelle que soit la saison.</li>';
+  h+='<li><b>La base de l’année : 35 h par semaine en moyenne</b>, soit 7 h × les jours du lundi au vendredi de l’année, + 7 h si la journée de solidarité est travaillée.</li>';
+  h+='<li><b>Le planning est juste quand ses heures, fériés compris, égalent la base.</b> Alors chacun est juste, quels que soient ses congés et ses jours de repos.</li>';
+  h+='<li><b>Les jours de congé se décomptent</b> du premier jour où la personne aurait travaillé jusqu’à la veille de sa reprise, en 5 ou 6 jours par semaine selon le réglage du domaine, ses jours de repos compris.</li></ol>';
+  var t='<table class="tab"><tr><th>Année</th><th>Jours du lundi au vendredi</th><th>Base'+(CIBLE.solid?' (solidarité comprise)':'')+'</th></tr>';
+  [2026,2027,2028,2029,2030,2031,2032].forEach(function(y){var n=joursSemaineAn(y);t+='<tr'+(y===AN?' class="ici"':'')+'><td>'+y+(y===AN?' · celle de la maquette':'')+'</td><td class="num">'+n+'</td><td class="num"><b>'+fmtH(7*n+(CIBLE.solid?7:0))+'</b></td></tr>';});
+  t+='</table>';
+  $('regle-corps').innerHTML='<div class="regle-g"><div>'+h+'</div><div>'+t+'<p class="note" style="margin-top:10px">Vérifié sur ton modèle 2026 : 1 589 h de travail + 9 fériés × 7 h + 25 jours de congés × 7 h = 1 827 h, soit 261 × 7. Il était déjà construit sur cette base ; il comptait seulement fériés et congés à 7 h.</p><p class="note" style="margin-top:6px">En 2027, tes rythmes 2026 avec le domaine ouvert font '+fmtH(s0.brut)+' : une demi-heure de trop. La veille de Noël à 6 h 30, comme le 24 décembre 2026, et c’est juste.</p></div></div>';}
+
+/* ═══ les congés de chacun ═══ */
+function renderConges(){var P=TEAM,s=stats(P),m=CIBLE.mode5,droit=m===6?30:25,h='';
+  h+='<div class="reglages"><div><span class="note">Le domaine compte</span><div class="choix2" role="group" aria-label="Décompte des congés"><button type="button" data-act="mode5" data-v="5" aria-pressed="'+(m===5)+'">5 jours par semaine<small>jours ouvrés</small></button><button type="button" data-act="mode5" data-v="6" aria-pressed="'+(m===6)+'">6 jours par semaine<small>jours ouvrables</small></button></div></div>';
+  h+='<div><span class="note">Un jour de congé compte</span><div class="choix2" role="group" aria-label="Valeur d’un jour de congé"><button type="button" data-act="cpval" data-v="planning" aria-pressed="'+(CIBLE.cp==='planning')+'">Les heures prévues<small>au planning, proposé</small></button><button type="button" data-act="cpval" data-v="reel" aria-pressed="'+(CIBLE.cp==='reel')+'">Rien<small>au réel</small></button></div></div></div>';
+  h+='<table class="tab gens-t"><tr><th>Personne</th><th>Ses congés 2027</th><th>Jours décomptés</th><th>Heures de congé</th><th>Travail</th><th>Son année</th></tr>';
+  var ecs=[];
+  GENS.forEach(function(g){var e=ecartPers(P,g),c=e.c,chips=g.per.map(function(x){var q=cpPlage(P,x[0],x[1],m);return '<span class="puce-cp">'+plageTxt(idxMd(x[0]),idxMd(x[1]))+' · '+q.n+' j</span>';}).join('');
+    var juste=Math.abs(e.ec)<0.01;ecs.push([g.n,e.ec]);
+    h+='<tr><td><b>'+g.n+'</b><br><span class="note">'+esc(g.quoi)+'</span></td><td>'+chips+'</td><td class="num"><b>'+c.n+'</b> sur '+droit+'</td><td class="num">'+(CIBLE.cp==='planning'?fmtH(c.h):'<s>'+fmtH(c.h)+'</s> 0 h')+'</td><td class="num">'+fmtH(s.tot-c.h)+'</td><td class="num"><b>'+fmtH(e.total)+'</b> sur '+fmtH(e.cible)+'<br>'+(juste?'<span class="etiq ok">juste</span>':'<span class="etiq att">'+(e.ec<0?'il manque '+fmtH(-e.ec):fmtH(e.ec)+' de trop')+'</span>')+'</td></tr>';});
+  h+='</table>';
+  var plan=CIBLE.cp==='planning';
+  h+='<p class="note" style="margin-top:8px">'+(plan?'Les trois tombent juste. Jean travaille '+fmtH(Math.abs((s.tot-cpPersonne(P,GENS[1].per,m).h)-(s.tot-cpPersonne(P,GENS[0].per,m).h)))+' de plus que Marie : sa semaine d’octobre est plus courte qu’une semaine d’août. C’est normal, chaque jour de congé vaut les heures qu’il aurait faites.':'Au réel, la saison des congés crée les écarts : '+ecs.map(function(x){return x[0]+' '+fmtD(x[1]);}).join(', ')+'. La base retire 5 semaines à 35 h (175 h), mais une semaine d’août en vaut 39 et une semaine d’octobre 32 : c’est ce qui faussait tout.')+'</p>';
+  if(m===6)h+='<p class="note">'+'29 et non 30 : la semaine de Noël finit sur un samedi férié (25 décembre ou 1er janvier), qui ne se décompte pas. Il reste un jour à poser.</p>';
+  /* la semaine de Nico */
+  var a=idxMd('01-11'),q=cpPlage(NICO,'01-11','01-15',m),q2=cpPlage(NICO,'01-13','01-15',m),coche=0,jj='';
+  for(var i=a;i<a+7;i++){var D=JOURS[i],hh=heuresLe(NICO,D),cpt=q.jours.indexOf(i)>=0;if(hh>0)coche++;
+    jj+='<div class="jcp'+(cpt?' compte':'')+(hh>0?'':' repos')+'"><span class="n">'+JL[D.g]+' '+D.dm+'</span><b>'+(hh>0?court(hh):'repos')+'</b><span class="m">'+(cpt?'compté':'—')+'</span></div>';}
+  h+='<div class="carte" style="margin-top:14px"><h4>Une semaine de congé de Nico : du lundi 11 au vendredi 15 janvier</h4><p class="note" style="margin-bottom:10px">Semaine B de son rythme : le mercredi est son jour de repos. Il reprend le lundi 18.</p><div class="sem-cp">'+jj+'</div>';
+  h+='<div class="cp-verdict"><div><span class="note">Aujourd’hui, cochés un par un dans la grille</span><b class="num">'+coche+' jours</b><span class="note">'+(m===6?coche+1+' avec le samedi qui suit un vendredi coché. ':'')+'Le mercredi de repos manque.</span></div><div class="ok"><span class="note">La règle, réglage du domaine</span><b class="num">'+q.n+' jours '+(m===6?'ouvrables':'ouvrés')+'</b><span class="note">'+(m===6?'du lundi au samedi':'du lundi au vendredi')+', mercredi de repos compris</span></div><div><span class="note">S’il pose du mercredi au vendredi</span><b class="num">'+q2.n+' jours</b><span class="note">le compte part du jeudi, son premier jour de travail</span></div></div></div>';
+  /* mars étalé */
+  var sem=[['03-01','03-05'],['03-08','03-12'],['03-15','03-19'],['03-22','03-26'],['03-29','04-02']],pers=GENS.concat([{n:'Paul',per:[]}]),g='<table class="tab mars-t"><tr><th></th>'+sem.map(function(x){return '<th>'+plageTxt(idxMd(x[0]),idxMd(x[1]))+'</th>';}).join('')+'</tr>';
+  pers.forEach(function(p){g+='<tr><td><b>'+p.n+'</b></td>'+sem.map(function(x){var u=idxMd(x[0]),v=idxMd(x[1]),on=p.per.some(function(y){return idxMd(y[0])<=v&&idxMd(y[1])>=u;});return '<td>'+(on?'<span class="puce-cp">congé</span>':'<span class="note">présent</span>')+'</td>';}).join('')+'</tr>';});
+  g+='<tr><td class="note">Présents</td>'+sem.map(function(x){var u=idxMd(x[0]),v=idxMd(x[1]),n=pers.filter(function(p){return !p.per.some(function(y){return idxMd(y[0])<=v&&idxMd(y[1])>=u;});}).length;return '<td><b class="num">'+n+' / '+pers.length+'</b></td>';}).join('')+'</tr></table>';
+  h+='<div class="carte" style="margin-top:12px"><h4>Mars : une semaine chacun, étalée sur le mois</h4><p class="note" style="margin-bottom:6px">Le planning de mars ne change pas. On voit seulement qui est là chaque semaine.</p>'+g+'</div>';
+  $('conges-corps').innerHTML=h;}
+
+/* ═══ le salarié ═══ */
+function renderS(){var P=TEAM,s=stats(P),pl=plages(P),aujourd=idxMd('01-11'),h='',pdf='',g=GENS[0],e=ecartPers(P,g),m=CIBLE.mode5,droit=m===6?30:25;
+  var cours=null,suiv=null;pl.forEach(function(p,k){if(aujourd>=p.i0&&aujourd<=p.i1)cours=k;});
+  for(var k=cours+1;k<pl.length;k++){if(pl[k].r!==pl[cours].r){suiv=k;break;}}
+  h+='<div style="margin-top:12px"><div class="lbl note">Mon année 2027 · Marie</div><div class="mon-tot"><b class="num">'+fmtH(e.total)+'</b>'+(Math.abs(e.ec)<0.01?'<span class="etiq ok">juste</span>':'<span class="etiq att">'+fmtD(e.ec)+'</span>')+'</div><div class="note" style="margin-top:4px">'+fmtH(s.tot-e.c.h)+' de travail + '+(CIBLE.cp==='planning'?fmtH(e.c.h)+' de congés + ':'')+fmtH(s.ferV)+' de fériés</div></div>';
+  if(suiv!=null){var q=pl[suiv],Rq=P.R[q.r],Rc=P.R[pl[cours].r],d0=q.premier!=null?q.premier:q.i0;
+    h+='<div class="prochain"><div class="k">Prochain changement · '+jourLong(d0)+'</div><div class="t">'+esc(Rq.nom)+' : '+horaires(Rq,0,', ')+'</div><div class="note">Jusque-là : '+esc(horaires(Rc,0,', '))+'.</div></div>';}
+  h+='<div class="carte" style="margin-top:10px;padding:10px 12px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>Mes congés</b><span class="note num">'+e.c.n+' jours posés sur '+droit+'</span></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+g.per.map(function(x){return '<span class="puce-cp">'+plageTxt(idxMd(x[0]),idxMd(x[1]))+' · '+cpPlage(P,x[0],x[1],m).n+' j</span>';}).join('')+'</div><p class="note" style="margin-top:6px">Un jour de congé compte les heures prévues ce jour-là : rien à rattraper.</p></div>';
+  h+='<div class="periodes">';
+  pl.forEach(function(p,k){var a=p.premier!=null?p.premier:p.i0,z=p.dernier!=null?p.dernier:p.i1,cl=k<cours?' passe':k===cours?' cours':'';
+    var R=P.R[p.r],c=couleur(P,p.r);
+    h+='<div class="per'+cl+'"><i style="background:'+c.bg+'"></i><div><div class="d">'+plageTxt(a,z)+' · '+court(totalSem(R,0))+' par semaine</div><div class="x">'+esc(horaires(R,0,' · '))+'</div>'+(p.fer.length?'<div class="f">Férié : '+p.fer.map(function(D){return JL[D.g]+' '+jourTxt(D.i);}).join(', ')+'</div>':'')+'</div></div>';});
+  h+='</div><button type="button" class="bouton plein large" style="margin-top:12px" data-act="spdf">Télécharger le PDF</button><p class="note" style="margin-top:8px">Ce programme est indicatif : un changement t’est annoncé au moins une semaine avant, sauf force majeure.</p>';
+  $('s-corps').innerHTML=h;
+  var form=s.mod<=200?'Formule 1':'Formule 2',cont=s.mod<=200?'150 h':'100 h';
+  pdf+='<div class="t1"><div><div class="dom">Domaine des Grandes Vignes · 21 Côte-d’Or</div><h3>Programme indicatif 2027</h3><div class="dom">Annualisation du temps de travail — accord national du 23 décembre 1981, article 10.4</div></div><div class="qui"><b>Marie</b><br>ouvrière viticole · CDI<br>équipe vigne (4 salariés)</div></div>';
+  pdf+='<div class="cadre"><span>Période : <b>du 1er janvier au 31 décembre 2027</b>, domaine ouvert toute l’année</span><span>Base : <b>'+JSEM+' jours × 7 h = '+fmtH(cible())+'</b>, 35 h par semaine en moyenne</span><span>'+form+' : <b>'+fmtH(s.mod)+' de modulation programmées</b> · contingent hors modulation '+cont+'</span></div>';
+  pdf+='<table><thead><tr><th style="width:22%">Période</th><th>Jours et horaires</th><th style="width:10%;text-align:right">Par semaine</th><th style="width:12%">Activité</th></tr></thead><tbody>';
+  pl.forEach(function(p){var a=p.premier!=null?p.premier:p.i0,z=p.dernier!=null?p.dernier:p.i1;
+    var R=P.R[p.r],n=intens(totalSem(R,0)),COL=['','#DCE7D3','#C2D6B4','#E9DDAF','#D9B067','#A0563A','#7A2850'];
+    pdf+='<tr><td><span class="pt" style="background:'+COL[n]+'"></span>'+plageTxt(a,z,true)+'</td><td>'+esc(horaires(R,0,' · '))+(p.fer.length?' <span style="color:#686660">— férié : '+p.fer.map(function(D){return JL[D.g]+' '+D.dm;}).join(', ')+'</span>':'')+'</td><td class="n">'+fmtH(totalSem(R,0))+'</td><td>'+activite(totalSem(R,0))+'</td></tr>';});
+  pdf+='</tbody></table><div class="bas"><div class="tt"><b class="num">'+fmtH(s.brut)+'</b><span>dont '+fmtH(s.ferV)+' de fériés · '+s.jours+' jours de travail prévus</span></div><div class="ml">Congés payés : '+droit+' jours '+(m===6?'ouvrables':'ouvrés')+' par an, posés par chacun ; posés à ce jour : '+g.per.map(function(x){return plageTxt(idxMd(x[0]),idxMd(x[1]),true);}).join(', ')+'. Un jour de congé ou un férié chômé compte les heures prévues ce jour-là : rien n’est retiré ni à rattraper (accord national, art. 4.3 et 10.4). Programme indicatif : une modification est affichée au moins une semaine à l’avance, sauf force majeure. Rémunération lissée sur 151,67 h par mois. Affiché le 1er décembre 2026 · copie à l’inspection du travail · version 1.</div></div>';
+  $('s-pdf').innerHTML=pdf;}
+
+/* ═══ tout ═══ */
+function tout(){renderRegle();renderA();renderConges();renderTel();renderB();renderN();renderS();}
+
+/* ═══ les gestes ═══ */
+function pas(P,r,v,g,d){var R=P.R[r],x=R.sem[v][g]+d;if(x<0)x=0;if(x>CADRE.maxJ)return false;if(x>0&&x<3.5)x=d>0?3.5:0;R.sem[v][g]=x;return true;}
+document.addEventListener('click',function(e){var t=e.target.closest('[data-act],[data-a],[data-t],[data-mode]');if(!t)return;
+  var act=t.getAttribute('data-act'),zone=t.closest('#a-pc,#t-annee,#t-feuille,#b-pc,#tb,#n-pc,#nico,#s-tel');var zid=zone?zone.id:'';
+  if(t.hasAttribute('data-mode')){CIBLE.mode=t.getAttribute('data-mode');tout();return;}
+  if(t.hasAttribute('data-a')){var a=t.getAttribute('data-a');
+    if(a==='reset'){memo('team');TEAM=clone(TEAM0);UI.selA=null;UI.suggA=false;UI.pub=false;tout();toast('a-toast','Repris de 2026 : 7 semaines types et 3 fermetures.',true);}
+    if(a==='sugg'){UI.suggA=true;UI.pub=false;renderA();}
+    if(a==='mars'){UI.selA='mars';UI.pub=false;renderA();var c=document.querySelector('#a-rythmes .ry.ouvert');if(c)c.scrollIntoView({block:'nearest',behavior:'smooth'});}
+    if(a==='pub'){UI.pub=true;renderA();}
+    return;}
+  if(t.hasAttribute('data-t')){UI.tel=t.getAttribute('data-t');renderTel();return;}
+  switch(act){
+    case 'sugg': if(zid==='n-pc'){UIN.sugg=!UIN.sugg;renderN();}else{UI.suggA=!UI.suggA;renderA();}break;
+    case 'calcul': if(zid==='n-pc')UIN.calc=!UIN.calc;else if(zid==='b-pc')UIB.calc=!UIB.calc;else UI.calcA=!UI.calcA;tout();break;
+    case 'tcalcul': UI.calcT=!UI.calcT;renderTel();break;
+    case 'solid': CIBLE.solid=t.checked;tout();break;
+    case 'appl':{var k=+t.getAttribute('data-k');
+      if(zid==='n-pc'){var c1=UIN.sg[k];if(!c1)break;memo('nico');appliqueSugg(NICO,c1);UIN.sugg=false;tout();toast('n-toast','Appliqué : '+c1.moves.map(function(m){return libRetouche(NICO,m);}).join(' · '),true);}
+      else{var c2=UI.sg[k];if(!c2)break;var lib=c2.moves.map(function(m){return libRetouche(TEAM,m);}).join(' · ');memo('team');appliqueSugg(TEAM,c2);UI.suggA=false;if(zid==='t-feuille')UI.tel='annee';tout();toast(zid==='t-feuille'?'t2-toast':'a-toast','Appliqué : '+lib,true);}
+      break;}
+    case 'annul': annule();break;
+    case 'sel':{var r=t.getAttribute('data-r');UI.selA=UI.selA===r?null:r;renderA();break;}
+    case 'pm':{memo('team');pas(TEAM,t.getAttribute('data-r'),0,+t.getAttribute('data-g'),+t.getAttribute('data-d'));tout();break;}
+    case 'deb':{var i=+t.getAttribute('data-i'),n=+t.getAttribute('data-n'),nm=decale(TEAM.base[i].du,n);
+      if(!nm||nm<=TEAM.base[i-1].du||(i<TEAM.base.length-1&&nm>=TEAM.base[i+1].du)){toast('a-toast','Impossible : la saison voisine serait vide.');break;}
+      memo('team');TEAM.base[i].du=nm;tout();break;}
+    case 'pubnon': UI.pub=false;if(zid==='t-feuille')UI.tel='annee';tout();break;
+    case 'pubok': UI.pub=false;if(zid==='t-feuille'){UI.tel='annee';renderTel();toast('t2-toast','Programme 2027 publié : 4 personnes prévenues.');}else{renderA();toast('a-toast','Programme 2027 publié : 4 personnes prévenues. À afficher avant le 24 décembre.');}break;
+    case 'mois': if(zid==='t-annee'||zid==='t-feuille'){UI.tel='mois';UI.telMois=+t.getAttribute('data-m');renderTel();}break;
+    case 'tsugg': UI.tel='sugg';renderTel();break;
+    case 'tpub': UI.tel='pub';renderTel();break;
+    case 'tfermer': UI.tel='annee';renderTel();break;
+    case 'pin': UIB.pinceau=t.getAttribute('data-r');renderB();break;
+    case 'bsel':{var w=+t.getAttribute('data-w');if(UIB.sel[w])delete UIB.sel[w];else UIB.sel[w]=1;renderBTel();break;}
+    case 'bapp':{var rr=t.getAttribute('data-r'),ws=Object.keys(UIB.sel);if(!ws.length)break;memo('b');ws.forEach(function(w){BPROG.W[+w]=rr;});UIB.sel={};renderB();toast('b-toast',ws.length+' semaine'+(ws.length>1?'s':'')+' : '+(rr==='ferme'?'fermé':BPROG.R[rr].nom),true);break;}
+    case 'nsel': UIN.sel=t.getAttribute('data-r');renderN();break;
+    case 'npm':{memo('nico');pas(NICO,UIN.sel,+t.getAttribute('data-v'),+t.getAttribute('data-g'),+t.getAttribute('data-d'));tout();break;}
+    case 'nprise':{var R=NICO.R[UIN.sel],v=+t.getAttribute('data-v'),g=+t.getAttribute('data-g');if(!R.priseJ)R.priseJ=[[null,null,null,null,null,null,null],[null,null,null,null,null,null,null]];
+      var cur=R.priseJ[v][g]||R.prise,seq=['06:30','07:00','07:30','08:00','08:30','09:00'],nx=seq[(seq.indexOf(cur)+1)%seq.length];memo('nico');R.priseJ[v][g]=nx===R.prise?null:nx;renderN();break;}
+    case 'nfix':{var f=correctif(NICO,UIN.sel);if(!f)break;memo('nico');NICO.R[f.r].sem[f.v][f.g]=f.nv;tout();toast('n-toast','Corrigé : '+f.lib,true);break;}
+    case 'spdf': toast('s-toast','PDF prêt : programme indicatif 2027, Marie.');break;
+    case 'mode5': CIBLE.mode5=+t.getAttribute('data-v');tout();break;
+    case 'cpval': CIBLE.cp=t.getAttribute('data-v');tout();break;
+  }
+});
+document.addEventListener('change',function(e){var t=e.target;if(t.getAttribute('data-act')==='prise'){memo('team');TEAM.R[t.getAttribute('data-r')].prise=t.value;tout();}
+  if(t.getAttribute('data-act')==='solid'){CIBLE.solid=t.checked;tout();}});
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('seg')){e.preventDefault();e.target.click();}});
+/* la frise : toucher une saison la sélectionne */
+document.addEventListener('click',function(e){var s=e.target.closest('.seg[data-r],.barres .b[data-r]');if(!s)return;var r=s.getAttribute('data-r');
+  if(s.closest('#a-frise')){UI.selA=UI.selA===r?null:r;renderA();var c=document.querySelector('#a-rythmes .ry.ouvert');if(c)c.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  else if(s.closest('#n-frise')&&NICO.R[r]&&NICO.R[r].sem.length>1){UIN.sel=r;renderN();}});
+/* B : peindre en glissant */
+document.addEventListener('mousedown',function(e){var c=e.target.closest('#b-grille [data-w]');if(!c)return;e.preventDefault();memo('b');UIB.glisse=true;peindre(+c.getAttribute('data-w'));});
+document.addEventListener('mouseover',function(e){if(!UIB.glisse)return;var c=e.target.closest('#b-grille [data-w]');if(c)peindre(+c.getAttribute('data-w'));});
+document.addEventListener('mouseup',function(){if(UIB.glisse){UIB.glisse=false;renderB();}});
+document.addEventListener('click',function(e){var c=e.target.closest('#b-grille [data-w]');if(!c||e.detail!==0)return;memo('b');peindre(+c.getAttribute('data-w'));renderB();});
+/* les infobulles */
+(function(){var tip=$('tip'),cur=null;
+  function place(e){var x=e.clientX+14,y=e.clientY+16,w=tip.offsetWidth,h=tip.offsetHeight;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-12;tip.style.left=x+'px';tip.style.top=y+'px';}
+  document.addEventListener('mousemove',function(e){var t=e.target.closest('[data-tip]');if(t!==cur){cur=t;if(t){tip.textContent=t.getAttribute('data-tip');tip.classList.add('on');}else tip.classList.remove('on');}if(cur)place(e);});
+  document.addEventListener('focusin',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');if(!t)return;var r=t.getBoundingClientRect();tip.textContent=t.getAttribute('data-tip');tip.classList.add('on');tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,r.left)+'px';tip.style.top=(r.bottom+8)+'px';});
+  document.addEventListener('focusout',function(){tip.classList.remove('on');});})();
+/* thème */
+(function(){var b=$('theme');if(matchMedia('(prefers-color-scheme: dark)').matches){b.textContent='Clair';b.setAttribute('aria-pressed','true');}b.addEventListener('click',function(){var d=document.documentElement,sombre=d.getAttribute('data-theme')!=='dark'&&!(d.getAttribute('data-theme')!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);d.setAttribute('data-theme',sombre?'dark':'light');b.textContent=sombre?'Clair':'Sombre';b.setAttribute('aria-pressed',sombre?'true':'false');});})();
+tout();
+
+</script>
+</body>
+</html>

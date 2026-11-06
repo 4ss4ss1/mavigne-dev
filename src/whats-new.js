@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.69', d: '2026-11-06', items: [   // CPJOURS-1 (§537) : les congés se décomptent par période, jours de repos compris
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une semaine de congé compte ses jours de repos',
+      desc: "Un congé se décompte du premier jour où la personne aurait travaillé jusqu’à la veille de sa reprise : une semaine vaut 6 jours ouvrables, ou 5 ouvrés selon le réglage du domaine, jours de repos compris. Cochés un par un dans la grille, les seuls jours travaillés laissaient de côté un mercredi de repos : il compte maintenant. Les fériés ne se décomptent toujours pas." },
+  ] },
   { v: '10.68', d: '2026-11-06', items: [   // RESTE-1 (§535) : l'entreplantation garde ce qui reste à planter
     { niv: 0, pour: ['tous'], emoji: 'pousse', titre: 'L’entreplantation garde ce qui reste à planter',
       desc: "Trois trous percés, deux pieds plantés : il en reste un. Avant, valider la parcelle voulait dire « tout est planté », et le trou restant disparaissait. Dans la fiche de la parcelle, tapez le nombre de pieds plantés : la parcelle reste « En cours » avec ce qui reste. « Valider » d’un appui plante toujours tout ce qui reste." },
