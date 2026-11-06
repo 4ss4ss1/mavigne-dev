@@ -2,12 +2,12 @@
   "src/admin-gt.js": {
     "dur": 68,
     "petit": 36,
-    "ko": 409
+    "ko": 415
   },
   "src/app.js": {
     "dur": 85,
     "petit": 53,
-    "ko": 978
+    "ko": 980
   },
   "src/cave.js": {
     "dur": 28,
@@ -32,7 +32,7 @@
   "src/comptes.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 23
+    "ko": 36
   },
   "src/compteur.js": {
     "dur": 0,
@@ -47,7 +47,7 @@
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 587
+    "ko": 594
   },
   "src/diagnostic.js": {
     "dur": 0,
@@ -87,7 +87,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 930
+    "ko": 931
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -102,7 +102,7 @@
   "src/reglages.js": {
     "dur": 108,
     "petit": 82,
-    "ko": 492
+    "ko": 493
   },
   "src/reserve.js": {
     "dur": 14,
@@ -132,12 +132,12 @@
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 543
+    "ko": 544
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 570
+    "ko": 573
   },
   "index.html": {
     "dur": 74,
@@ -147,6 +147,11 @@
   "src/styles.css": {
     "dur": 237,
     "petit": 69,
-    "ko": 1025
+    "ko": 1024
+  },
+  "src/gt/console.css": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 4
   }
 }

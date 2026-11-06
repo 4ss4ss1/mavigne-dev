@@ -3504,6 +3504,7 @@ function _clotOverlayHTML(ctx){
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+esc+'</b> archivée — snapshot complet (parcelles, journal, sessions, phyto).</div></div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b id="clot-cf-new2">'+_clotEsc(ctx.sug.nom)+'</b> devient la campagne active de <b>toute l\'équipe</b>.</div></div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Les <b>travaux tracteur</b> de la campagne finie restent rangés dans leur saison — l\'accueil de la nouvelle démarre vierge.</div></div>'
+          + (ctx.reste > 0 ? '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+ctx.reste+' pied'+(ctx.reste>1?'s':'')+' encore \u00e0 planter</b> (entreplantation) passe'+(ctx.reste>1?'nt':'')+' \u00e0 la suivante \u2014 rien ne repart de z\u00e9ro.</div></div>' : '')   // ★ RESTE-1 (§535)
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:var(--pt-txt,13px);line-height:1.4"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div>Chaque membre bascule ensemble au prochain chargement de l\'app.</div></div>'
         + '</div>'
       + '</div>'
@@ -3533,7 +3534,8 @@ function openClotureFlow(){
   var dd = _clotDatesFor(sug.type, sug.year);
   _CLOT = { step:1, mode:'create', type:sug.type, endNom:actNom, endPct:pct, _sugYear:sug.year };
   var prepared = (window.SAISONS||[]).filter(function(s){ return s && !s.active; });
-  var html = _clotOverlayHTML({ pct:pct, endNom:actNom, surfTot:surfTot, nSess:nSess, nTrait:nTrait, nTaches:nTaches, sug:dd, prepared:prepared, warn:(pct<_CLOT_WARN_PCT) });
+  var nReste = (typeof window._cptReste === 'function') ? parcActives.reduce(function(s,p){ return s + (window._cptReste(p) || 0); }, 0) : 0;   // ★ RESTE-1 (§535)
+  var html = _clotOverlayHTML({ pct:pct, endNom:actNom, surfTot:surfTot, nSess:nSess, nTrait:nTrait, nTaches:nTaches, sug:dd, prepared:prepared, warn:(pct<_CLOT_WARN_PCT), reste:nReste });
   var old = document.getElementById('ovCloture'); if(old && old.parentNode) old.parentNode.removeChild(old);
   var wrap = document.createElement('div'); wrap.innerHTML = html;
   if(wrap.firstElementChild) document.body.appendChild(wrap.firstElementChild);
@@ -7321,7 +7323,7 @@ function _vgnLignes(){
         : (p.tachesExclues || []).filter(function(t){
             return taches.some(function(x){ return x.nom === t; });
           }),
-      trous: parseInt(p.plantation_trous, 10) || 0,
+      trous: (typeof window._cptReste === 'function') ? window._cptReste(p) : (parseInt(p.plantation_trous, 10) || 0),   // ★ RESTE-1 (§535) : ce qui reste à planter
       dernier: j ? { date:j.date, tache:String(j.tache || j.activite || '') } : null,
       rend: rh.length ? rh[0] : null,
       geo: !!geo,
@@ -7466,7 +7468,7 @@ function _vgnDoc(c){
         var cep = l.cepages.length
           ? _vgnEsc(l.cepages.join(' \u00b7 ')) + (l.complantee ? ' <i style="color:#8A8272">complant\u00e9e</i>' : '')
           : '<span style="color:#A89E8C">\u2014</span>';
-        return '<tr><td>' + _vgnEsc(l.nom) + (l.trous > 0 ? ' <i style="color:#8A8272">' + l.trous + ' trous</i>' : '') + '</td>'
+        return '<tr><td>' + _vgnEsc(l.nom) + (l.trous > 0 ? ' <i style="color:#8A8272">' + l.trous + ' \u00e0 planter</i>' : '') + '</td>'
           + '<td>' + (l.commune ? _vgnEsc(l.commune) : '<span style="color:#A89E8C">\u2014</span>') + '</td>'
           + '<td class="n">' + _vgnNum(l.ha) + '</td>'
           + '<td>' + cep + '</td>'

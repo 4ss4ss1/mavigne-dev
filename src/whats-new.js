@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.68', d: '2026-11-06', items: [   // RESTE-1 (§535) : l'entreplantation garde ce qui reste à planter
+    { niv: 0, pour: ['tous'], emoji: 'pousse', titre: 'L’entreplantation garde ce qui reste à planter',
+      desc: "Trois trous percés, deux pieds plantés : il en reste un. Avant, valider la parcelle voulait dire « tout est planté », et le trou restant disparaissait. Dans la fiche de la parcelle, tapez le nombre de pieds plantés : la parcelle reste « En cours » avec ce qui reste. « Valider » d’un appui plante toujours tout ce qui reste." },
+    { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'Ce qui reste passe à la campagne suivante',
+      desc: "Les trous pas encore plantés et les pieds marqués pas encore percés passent à la campagne suivante, clôture ou pas : les nouveaux trous s’ajoutent dessus. Les trous de tarière des années passées ne s’additionnent plus à ceux de l’année. Le compte des pieds marqués repart de zéro à chaque campagne, et l’écran de clôture dit combien de pieds restent à planter." },
+  ] },
   { v: '10.67', d: '2026-11-06', items: [   // FENETRES-1 (§533) : les fenêtres du Cuvier et du Chai défilent
     { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'Les fenêtres du Cuvier défilent jusqu’en bas',
       desc: "Noter des mesures, la couleur des parcelles, la fiche d’une récolte ou d’une parcelle, les réglages du Cuvier et du Chai : une fenêtre plus longue que l’écran était coupée. Avec beaucoup de parcelles, le bouton Enregistrer de la saisie en série sortait même de l’écran. La liste défile maintenant, et Enregistrer reste visible en bas." },

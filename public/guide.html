@@ -831,7 +831,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
   <h4>La fiche d'une parcelle</h4>
   <ul class="dot">
-    <li><b>L'entreplantation</b> montre ses chiffres : pieds marqués, trous percés, pieds plantés, et le temps qu'il reste.
+    <li><b>L'entreplantation</b> montre ses chiffres : pieds reportés d'une campagne d'avant, pieds marqués, trous percés, pieds plantés, et ce qui reste à planter avec son temps.
+    Plantée en partie, une parcelle se valide en tapant le nombre de pieds plantés : elle reste « en cours » avec ce qui reste.
     L'administrateur y corrige le compte d'une parcelle (« Corriger le compte »).</li>
     <li><b>Sa forme</b>, en haut, tirée de son contour : nord en haut, avec une échelle en mètres. Une parcelle sans contour n'en affiche pas.</li>
     <li>Avancement tâche par tâche, surface, heures estimées et heures restantes.</li>
@@ -1104,6 +1105,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     (<b>3&nbsp;minutes</b> par défaut, réglable dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Tâches</span>).</li>
     <li>Tant qu'aucun trou n'est saisi, le calcul revient au forfait à la surface.</li>
     <li>La mise à jour est <b>immédiate</b> : cocher, décocher ou supprimer une session recalcule tout.</li>
+    <li><b>Il reste à planter les trous moins les pieds plantés.</b> Une parcelle plantée en partie reste « en cours », et ce qui
+    reste passe à la campagne suivante, clôture ou pas : les nouveaux trous s'ajoutent dessus. Les pieds marqués au repérage
+    comptent comme des trous à venir ; leur compte repart de zéro à chaque campagne.</li>
   </ul>
   <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Ne confondez pas <b>Entreplantation</b> (remplacer
   les pieds manquants, tâche du cycle) et <b>Complantation</b> (une parcelle plantée en plusieurs
@@ -1113,7 +1117,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-drapeau"></use></svg> Clôturer la campagne</h3>
   <p><span class="path">Réglages › Domaine › Saisons › Clôturer la campagne</span> — l'opération solde
   la campagne en cours et prépare la suivante. L'historique reste intégralement consultable, et les
-  comparaisons d'une année sur l'autre s'appuient dessus dans le Pilotage.</p>
+  comparaisons d'une année sur l'autre s'appuient dessus dans le Pilotage. Les pieds pas encore plantés de
+  l'entreplantation passent à la suivante : l'écran de clôture dit combien.</p>
 </section>
 
 
@@ -1267,7 +1272,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <details><summary>Je me suis trompé sur le nombre de trous d'une parcelle</summary>
     <div class="dbody">Dans la session, touchez <b>« Voir toutes »</b>, <b>décochez</b> la parcelle —
     l'application demande confirmation — puis <b>recochez-la</b> : elle redemande la valeur. Le total et la tâche Entreplantation se recalculent immédiatement. Quand la parcelle a été comptée au repérage, la valeur arrive
-    préremplie avec les pieds marqués : il suffit de confirmer, ou de corriger.</div></details>
+    préremplie avec les pieds marqués qui restent à percer : il suffit de confirmer, ou de corriger.</div></details>
   <details><summary>Qui peut créer une session&nbsp;?</summary>
     <div class="dbody">Les <b>tractoristes</b> et les <b>administrateurs</b>. La suppression d'un
     tracteur et les exports sont réservés à l'administrateur.</div></details>

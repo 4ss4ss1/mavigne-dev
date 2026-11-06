@@ -1,0 +1,46 @@
+{
+  "lot": "RESTE-1",
+  "section": "§535",
+  "base": "f16f710ca2041fd3335d8e1057d7cf02ba75c3b1",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "ok": true,
+    "empreinte": "3614b9b24f1677280981bc70e807659bfeda49fe291a96f819cffc329025a372",
+    "date": "2026-11-06T14:42:11.251Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "stade"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "924d60d98699c56e07d97d507d5a8995f9e2edd572df488a8f67545780872d19",
+    "CLAUDE.md": "a549bb7febd25f7598ccb8e7d585f8e53691a7703b1cbdf7eb670633b15a7109",
+    "docs/claude/INDEX.md": "42cebc1b1c5eedb813a2add4c48d68686105e177f6ff5ac46589d6057da8f8c0",
+    "docs/claude/chantiers-530-579.md": "97c85bd7c345cc791a07fbcdbb6b287fecfd8351f9651ab4f82bdc24666964b6",
+    "docs/claude/journal.md": "2d2c60f450a8566dd99b84310857811cd241ea121f242493b912183f3ea74333",
+    "guide/04-vigne.html": "880959e3e16a9228e74c2155392565f9868ee5d3646aa05c3556846812cdac00",
+    "guide/05-saisons.html": "1c8237b9e538f1c35ad2996a18700cf16f736c3afb6688432640d8c38c670084",
+    "guide/06-tracteur.html": "e2dd992a43c80476ae4191e4999cc501fcc91d2c85df53ba26d2b7e60a075067",
+    "index.html": "427541a589878540bda30a9f1dbb9bf317341cee92f1d5490ad36f02223a03b7",
+    "public/sw.js": "f2695fabd04fddec14e9bc6244e79ed840f710a253e9089cb00eb63cddfee870",
+    "scripts/harnais-claude-md.mjs": "671f7ebcea7a4a6c0aee6e87407f486d280f6870d31d4dfae795e498eac7fd9e",
+    "scripts/mv-harnais-compte1.mjs": "b4810c8107c9ea5c34bd711e7ae023bbbb83b1c7800f40d3a099a8b165eb0a78",
+    "scripts/mv-harnais-liste.mjs": "c7a2816feb56aaae13ea64e0ea9c6e0d8573fbf691a195c9e924a63efc8c54b7",
+    "scripts/mv-harnais-robustesse-accueil.mjs": "e38ef0eee7228343790cc0e398a6bf5874bb67c9bcfb2166b2af92bb1748685e",
+    "scripts/typo-baseline.json": "18b3a07a0a38f248cea72f7c4a67b8930e5c0f75073c99934491bcdc6b2a5bc4",
+    "src/app.js": "a9e845dd584645267cffa662d10f255adac682d0cf1fd556ff7e798971605e08",
+    "src/comptes.js": "0b2e2eb9217c004282ad513fc5305b912724c8df6a889fa8f3052d13d3b6c5ab",
+    "src/pilotage.js": "0a29c96bd4bc093dcc300c749c091b60e22af593e406039c8c827153e3cd3667",
+    "src/reglages.js": "0ea511457ae727d22655a46aea697962285205ccc058c46d428a6be0b458c8b9",
+    "src/tracteur.js": "57cb4666367a65ed6218c424cb2d5ac2ba7bb0014a8f3c63b40e496abe2f6a09",
+    "src/utils.js": "d1c7efb258043ade601232ed91c51a5d9ccf16a872b94ef7dadde7c2d4b664fc",
+    "src/whats-new.js": "4627a88c1f1f1f7fda251ed24f42f7f67bec38cb862ef1db921731fd11e88457",
+    "scripts/mv-harnais-reste1.mjs": "9fd32c0a7ea387b4ddebe15875569dd025ed15c2f3d30158c4711a0a8dcae834"
+  }
+}

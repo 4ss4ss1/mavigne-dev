@@ -46,7 +46,7 @@ if (CONTRE) {
     ['app.js', 'la fiche d\u2019une parcelle lit une entrée du journal qui n\u2019existe pas',
       'function openDP(nom){\n', 'function openDP(nom){\n  var __j=JOURNAL[JOURNAL.length].date.length;\n'],
     ['app.js', 'le correctif « NaN h » de la fiche parcelle retiré (Entreplantation sans trous)',
-      "?(_plantParcTrous(p)*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));", "?(_plantParcTrous(p)*_plantMinTrou()/60):(t.hha*p.surface)):(t.hha*p.surface);"   /* COMPTE-1 (§353) : les trous prévus */],
+      "if(_dpTrous){ var _dpR=_plantParcReste(p); if(_dpR>0) hReste+=_dpR*_plantMinTrou()/60; }", "if(_dpTrous){ hReste+=(t.hha*p.surface); }"   /* RESTE-1 (§535) : ce qui reste à planter */],
     ['app.js', 'le garde-fou d\u2019une tâche sans surface retiré dans calcHeures (« NaN % » dans « La saison ») — ACCV-4 : « La saison » prend ses pourcentages dans calcHeures',
       "const pct=surfT>0?Math.round(surfDone/surfT*100):0;\n    TRAVAUX[t.nom]={h_ha:_hha", "const pct=Math.round(surfDone/surfT*100);\n    TRAVAUX[t.nom]={h_ha:_hha"],
     ['app.js', 'une erreur journalisée à chaque rendu de l\u2019Accueil',

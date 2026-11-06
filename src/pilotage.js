@@ -2182,7 +2182,7 @@ function _opComPt(c){
 }
 
 // ── Reste / plein par tâche (mono) — aligné recalcTravaux (Validé/Auto=fait) ──
-// ★ COMPTE-1 (§353) : les trous PRÉVUS — pieds marqués ou trous de la parcelle, le plus grand (app.js, _plantParcTrous).
+// ★ COMPTE-1 (§353), RESTE-1 (§535) : les trous PRÉVUS de la période — plantés pendant, plus ce qui reste à planter (app.js, _plantParcTrous).
 function _opTrousPrevus(p){ return (typeof window._plantParcTrous==='function')?window._plantParcTrous(p):(parseInt(p&&p.plantation_trous)||0); }
 function _opParcFull(p,def){
   var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
@@ -2197,7 +2197,7 @@ function _opParcFull(p,def){
 }
 function _opParcReste(p,def){
   var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
-  if(def.trous){ if(typeof s==='string' && s==='Validé') return 0; var tr=_opTrousPrevus(p); return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.trous){ var tr=(typeof window._plantParcReste==='function')?window._plantParcReste(p):((typeof s==='string' && s==='Validé')?0:_opTrousPrevus(p)); return tr>0 ? tr*_opMinTrou(def)/60 : 0; }   // ★ RESTE-1 (§535) : ce qui reste à planter, parcelle validée ou en cours
   if(def.type==='niveaux'){ var rg=SP[nom]||((def.niveaux&&def.niveaux.length)||3); var allN=def.niveaux||[{num:1,hha:50},{num:2,hha:20},{num:3,hha:20}]; var pOv=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,rg):rg; var nivsP=allN.filter(function(n){return n.num<=pOv;}), totP=nivsP.reduce(function(a,n){return a+n.hha;},0); if(typeof s==='string') return (s==='Validé')?0:surf*totP; var _rN=window._mvNivH(nivsP,s); return surf*Math.max(0,_rN.total-_rN.done); }
   if(def.type==='passages'){ var pg=SP[nom]||((def.passagesHha&&def.passagesHha.length)||2); var planNb=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,pg):pg; var htot=0; for(var i=1;i<=planNb;i++) htot+=_opPassHha(def,i); if(typeof s==='string') return (s==='Validé')?0:surf*htot; var doneH=0; for(var j=1;j<=planNb;j++){ if(s&&s['p'+j]==='Validé') doneH+=_opPassHha(def,j); } return surf*(htot-doneH); }
   return (typeof s==='string' && s==='Validé') ? 0 : surf*((def.hha)||0);
@@ -6388,7 +6388,7 @@ function _ecoTvAvecBareme(def){
 function _ecoTvBar(p, def, ev){
   var surf=parseFloat(p.surface)||0;
   if(!def) return 0;
-  if(def.trous){ var tr=parseInt(ev.trous||p.plantation_trous,10)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.trous){ var tr=parseInt(ev.trous,10)||((ev.jid&&typeof window._cptPlantesEntree==='function')?window._cptPlantesEntree(p,ev.jid):0); return tr>0 ? tr*_opMinTrou(def)/60 : 0; }   // ★ RESTE-1 (§535) : les pieds de CETTE validation
   if(ev.niv && ev.niv.length){
     var N=def.niveaux||[], h=0;
     ev.niv.forEach(function(k){ N.forEach(function(n){ if(n && n.num===k) h+=Number(n.hha)||0; }); });
@@ -6444,7 +6444,7 @@ function _ecoTvEvents(d0, d1){
     //   +14 %. Borné à la période (dt>=d0) : la même tâche revient chaque campagne.
     var dup=false;
     if(clot && dt>=d0 && st==='Valid\u00e9' && !niv.length && !pass.length){
-      dup=!!P.val; prev[k]={ niv:(prev[k]||P).niv, pass:(prev[k]||P).pass, val:true };
+      dup=!!P.val&&!(window.TACHES||[]).some(function(t){ return t&&t.nom===j.tache&&t.trous; }); prev[k]={ niv:(prev[k]||P).niv, pass:(prev[k]||P).pass, val:true };   // ★ RESTE-1 (§535) : une entreplantation se plante en plusieurs fois — chaque fois ses pieds
     }
     if(!clot || dt<d0) return;
     var noms=[]; if(j.qui && !j.quiHors) noms.push(j.qui);   // TV-2 : le validateur hors des rangs ne compte pas
@@ -6458,7 +6458,7 @@ function _ecoTvEvents(d0, d1){
         t.forEach(function(n){ if(n && n!==j.qui && noms.indexOf(n)<0) noms.push(n); }); });
     }
     var e={ date:dt, parc:nom, tache:j.tache, surf:parseFloat(p.surface)||0, noms:noms, eqj:!!EQd,
-            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, p:p, dup:dup,
+            niv:nNiv, pass:nPass, trous:j.plantation_trous||null, jid:j.id||'', p:p, dup:dup,
             etape:j.etape?String(j.etape):'', etapeLbl:j.etapeLbl?String(j.etapeLbl):'',
             hors:(j.qui && j.quiHors) ? String(j.qui) : '' };   // PAR-1 : décoché ce jour-là, il ne rejoint pas la journée du domaine
     // ★ ARRACH-8 (§306) : un passage d'une AUTRE tâche saisi après l'arrachage de la parcelle est une erreur de saisie

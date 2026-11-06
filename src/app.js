@@ -4184,6 +4184,7 @@ function _mvReconPlan(){
       if(g.type==='simple'){
         if(g.last!=='Validé') return;
         if(cur[tache]==='Validé') return;
+        if(typeof window._cptResteA==='function'&&typeof window._cptPiloteTrous==='function'&&window._cptPiloteTrous(_vp_tDef(tache)||{nom:tache})&&window._cptResteA(p)>0) return;   // ★ RESTE-1 (§535) : plantée en partie, elle reste « En cours »
         plan.push({nom:nom,tache:tache,type:'simple'});
       } else {
         var pref=(g.type==='passages')?'p':'n';
@@ -4346,7 +4347,7 @@ function calcHeures(){
       const _pv=parcT.filter(p=>getTacheStatut(p,t.nom)==='Validé');
       const _ptt=_plantTrousTot(parcT);
       if(_ptt>0){
-        const _ptd=_plantTrousTot(_pv);
+        const _ptd=_plantFaitsTot(parcT);   // ★ RESTE-1 (§535) : les pieds plantés pendant la période, parcelle finie ou en cours
         const _ht=Math.round(_ptt*_mt/60*10)/10;
         const _hd=Math.round(_ptd*_mt/60*10)/10;
         const _hr=Math.round((_ht-_hd)*10)/10;
@@ -8717,7 +8718,8 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
     //   la fiche affichait « NaN h » restantes dès que la période portait l'Entreplantation (liste par
     //   défaut). Même règle que calcHeures : sans trous, 0 h ; sinon le barème `t.hha || 0`.
     var _dpTrous=(t.trous||t.nom==='Entreplantation');
-    if(getTacheStatut(p,t.nom)!=='Validé')hReste+=_dpTrous?((_plantParcTrous(p)>0)?(_plantParcTrous(p)*_plantMinTrou()/60):0):((t.hha||0)*(parseFloat(p.surface)||0));   // COMPTE-1 (§353) : les trous prévus
+    if(_dpTrous){ var _dpR=_plantParcReste(p); if(_dpR>0) hReste+=_dpR*_plantMinTrou()/60; }   // ★ RESTE-1 (§535) : ce qui reste à planter, parcelle validée ou en cours
+    else if(getTacheStatut(p,t.nom)!=='Validé')hReste+=(t.hha||0)*(parseFloat(p.surface)||0);
   });
   document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:var(--pt-txt,13px)"> h</span>';
   var _dpVS=(typeof _visuSaison==='function'?_visuSaison():((getSaisonActive()||{}).nom||''));
@@ -8763,7 +8765,7 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
     const canExcl=canEdit&&isAdmin();   // ★ YALLER-1 (§527) : la croix et « Réactiver », à l’admin seul (demande du 15/10)
     const isOn=stat==='Validé';
     const isEnCours=stat==='En cours';
-    const _plTr=((t.trous||t.nom==='Entreplantation'))?_plantParcTrous(p):0;   // COMPTE-1 (§353) : les trous prévus
+    const _plTr=((t.trous||t.nom==='Entreplantation'))?_plantParcReste(p):0;   // ★ RESTE-1 (§535) : les heures de ce qui reste à planter
     const hEstim=(_plTr>0)?Math.round(_plTr*_plantMinTrou()/60*10)/10:(t.hha?Math.round(t.hha*p.surface*10)/10:0);
     const statusColor=isExclu?'var(--texte-doux)':isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)';
     const statusLabel=isExclu?'Non applicable':isOn?'Validé':isEnCours?'En cours':'À faire';
@@ -9138,7 +9140,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   if(vpPlant)vpPlant.style.display=(_vpTr||_vpDem)?'block':'none';
   var _vpLbl=document.getElementById('vp-trous-lbl'); if(_vpLbl)_vpLbl.textContent=_vpDem?'Pieds marqués (0 si aucun)':'Pieds plantés';
   if(vpTrous){var _pvObj=PARCELLES.find(function(x){return x.nom===nomParcelle;});
-    var _pvV=_vpDem?((typeof window._cptMarques==='function')?window._cptMarques(_pvObj):null):(_pvObj?_plantParcTrous(_pvObj):0);
+    var _pvV=_vpDem?((typeof window._cptMarques==='function')?window._cptMarques(_pvObj):null):(_pvObj?((typeof window._cptReste==='function')?window._cptReste(_pvObj):_plantParcTrous(_pvObj)):0);
     vpTrous.value=(_pvV!=null&&(_vpDem||_pvV>0))?_pvV:'';}
   _mvEqUi('vp');   // ÉQUIPES-1
   openOv('ovValidation');
@@ -9534,27 +9536,25 @@ async function confirmValidation(){
     _cptVal=parseInt(_cRaw,10);
   }
   p.taches[_validTache]='Validé';
-  // Entreplantation : stocker le nombre de trous tarrière (saisie manuelle)
+  // ★ RESTE-1 (§535) : les pieds plantés tapés vont au journal, et seulement là — ils n'écrasent plus les trous de la
+  //   parcelle (au rechargement, la somme de toutes les tarières revenait). Champ vide : tout ce qui restait à planter.
   var trous=null;
-  if(((_vp_tDef(_validTache)&&_vp_tDef(_validTache).trous)||_validTache==='Entreplantation')){
+  if(_vpTrX){
     var trousEl=document.getElementById('vp-trous');
     var trousVal=trousEl?parseInt(trousEl.value)||0:0;
-    if(trousVal>0){
-      p.plantation_trous=trousVal;
-      delete p.plantation_trous_src;
-      trous=trousVal;
-    }
+    if(trousVal>0) trous=trousVal;
   }
   if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='';_validBtn.title='Validé — cliquer pour annuler';}
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
   if(quiHors)jEntry.quiHors=true;
   if(trous)jEntry.plantation_trous=trous;
-  else if(_vpTrX&&_plantParcTrous(p)>0) jEntry.plantation_trous=_plantParcTrous(p);   // COMPTE-1 (§353) : le temps réalisé se lit au journal
+  else if(_vpTrX&&typeof window._cptReste==='function'&&window._cptReste(p)>0) jEntry.plantation_trous=window._cptReste(p);   // ★ RESTE-1 (§535) : tout ce qui restait (le temps réalisé se lit au journal)
   if(_cptDem&&typeof window._cptAuValider==='function') window._cptAuValider(p,_validTache,jEntry,_cptVal);   // COMPTE-1 (§353)
   // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui) — VALID-1 (§242) : elle n'est
   // plus ATTENDUE. L'entrée s'écrit et la feuille se ferme d'abord ; _mvMeteoApres complète l'entrée ensuite.
   var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
   JOURNAL.unshift(_mvEqApplique(jEntry));
+  var _cptStA=(_vpTrX&&typeof window._cptStatutApres==='function')?window._cptStatutApres(p,_validTache):'';   // ★ RESTE-1 (§535) : il en reste → « En cours »
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles'); saveData('journal'); saveData('travaux');
@@ -9567,9 +9567,11 @@ async function confirmValidation(){
   if(window._mvJalonsSync) window._mvJalonsSync().then(function(r){ if(r&&r.nouveaux&&r.nouveaux.length&&window._mvJalonsAnnonce) window._mvJalonsAnnonce(r.nouveaux); });
   // ARRACH-6 : l'arrachage d'une vigne en place est fini → proposer de la déclarer arrachée.
   if(_validTache==='Arrachage'&&p.statut!=='Arrachee'&&isAdmin()&&_arrProposer(p.nom,date)) return;
+  // ★ RESTE-1 (§535) : plantée en partie, la parcelle n'est pas « faite » — pas de feuille d'après validation, le reste dit.
+  if(_cptStA==='En cours'){ showToast(tNom(_validTache)+' \u00b7 '+_validParcelle+' : '+trous+' plant\u00e9'+(trous>1?'s':'')+', reste '+window._cptReste(p)+' \u00e0 planter','#3D6B27'); return; }
   _mvdsOpen({tache:_validTache,parcelle:_validParcelle,surf:p.surface,
              membres:equipe?(quiHors?[]:[currentUser.nom]).concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
-             detail:trous?(trous+' trous'):''});
+             detail:trous?(trous+' plant\u00e9'+(trous>1?'s':'')):''});
 }
 function _jePrefillTeam(){
   var ts=document.getElementById('je-tache');if(!ts)return;
@@ -10030,15 +10032,23 @@ window._mvdsSnap=_mvdsSnap;
 // ── Plantation pilotée par le nombre de trous (tarière) ──────────────────────
 function _vp_tDef(nm){ return (window.TACHES||TACHES||[]).find(function(t){return t&&t.nom===nm;}); }
 function _plantMinTrou(){ var v=window.CONFIG&&parseFloat(CONFIG.plantation_min_trou); return (v&&v>0)?v:3; }
-// ★ COMPTE-1 (§353) : les trous PRÉVUS d'une parcelle — le plus grand des deux : pieds marqués au repérage, trous de la
-//   parcelle (tarière, validation). Toute lecture des trous prévus passe par ici (fiche, rapport, Pilotage), jamais par le champ brut.
+// ★ COMPTE-1 (§353), RESTE-1 (§535) : les trous PRÉVUS d'une parcelle pour la période regardée — les pieds plantés pendant la
+//   période, plus ce qui reste à planter à sa fin (comptes.js, _cptPrevus). Toute lecture des trous prévus passe par ici (fiche, rapport, Pilotage), jamais par le champ brut.
 function _plantParcTrous(p){ return (typeof window._cptPrevus==='function')?window._cptPrevus(p):(parseInt(p&&p.plantation_trous)||0); }
 window._plantParcTrous=_plantParcTrous;
 function _plantTrousTot(parcs){ return (parcs||[]).reduce(function(s,p){return s+_plantParcTrous(p);},0); }
 function _plantPlanTrous(nomTache){ return _plantTrousTot(_parcConcern(nomTache||'Entreplantation')); }
+// ★ RESTE-1 (§535) : ce qui RESTE à planter à la fin de la période regardée, et ce qui y a été PLANTÉ (comptes.js).
+//   Les trous prévus (_plantParcTrous) = plantés pendant la période + ce qui reste à sa fin.
+function _plantParcReste(p){ return (typeof window._cptResteA==='function')?window._cptResteA(p):_plantParcTrous(p); }
+function _plantParcFaits(p){ return (typeof window._cptPlantesPer==='function')?window._cptPlantesPer(p):0; }
+function _plantFaitsTot(parcs){ return (parcs||[]).reduce(function(s,p){return s+_plantParcFaits(p);},0); }
+window._plantParcReste=_plantParcReste;
 // Recalcule p.plantation_trous depuis les sessions Tarière (champCustom.feedsPlantation).
 // Parcelles 'session' (src=tariere) suivent les sessions ; valeurs manuelles préservées.
+// ★ RESTE-1 (§535) : ce total de toutes les tarières reste écrit pour mémoire ; plus aucune règle ne le lit (comptes.js relit les sessions).
 function _recalcPlantationTrous(){
+  if(typeof window._cptInvalider==='function') window._cptInvalider();   // une session a changé : les comptes se relisent
   var fromSess={};
   (window.SESSIONS||[]).forEach(function(s){
     if(!s)return;
@@ -10169,7 +10179,7 @@ function recalcTravaux(nomTache){
     var _rmt=_plantMinTrou();
     var _rtt=_plantTrousTot(parcActives);
     var _rpv=parcActives.filter(function(p){return getTacheStatut(p,nomTache)==='Validé';});
-    var _rtd=_plantTrousTot(_rpv);
+    var _rtd=_plantFaitsTot(parcActives);   // ★ RESTE-1 (§535) : les pieds plantés pendant la période
     tw.surf_total=surfTot;
     tw.surf_done=Math.round(_rpv.reduce(function(s,p){return s+(p.surface||0);},0)*100)/100;
     tw.h_total=Math.round(_rtt*_rmt/60*10)/10;
@@ -13623,6 +13633,7 @@ function pQuickValidate(nom,evt){
   if(quiHors) jEntry.quiHors=true;   // TV-2
   if(type==='simple'&&typeof window._cptAuValider==='function') window._cptAuValider(p,task,jEntry,_cpt);   // COMPTE-1 (§353)
   JOURNAL.unshift(_mvEqApplique(jEntry));
+  if(type==='simple'&&typeof window._cptStatutApres==='function') window._cptStatutApres(p,task);   // ★ RESTE-1 (§535) : il en reste → « En cours »
   recalcTravaux(task);
   injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');

@@ -471,6 +471,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tacheper1.mjs --contre', 'periodes-taches-du-domaine'],
   ['node scripts/mv-harnais-compte1.mjs', 'entreplantation-pieds-marques'],   // COMPTE-1 (§353) : les pieds marqués chiffrent l'entreplantation
   ['node scripts/mv-harnais-compte1.mjs --contre', 'entreplantation-pieds-marques'],
+  ['node scripts/mv-harnais-reste1.mjs', 'entreplantation-pieds-marques'],   // RESTE-1 (§535) : le reste à planter, d'une campagne à l'autre — l'appli entière
+  ['node scripts/mv-harnais-reste1.mjs --contre', 'entreplantation-pieds-marques'],
   ['node scripts/mv-harnais-fml1.mjs', 'fin-vinification-malo'],   // FML-1 (§356) : pas de « Fini » avant la malo
   ['node scripts/mv-harnais-fml1.mjs --contre', 'fin-vinification-malo'],
   ['node scripts/mv-harnais-manque1.mjs', 'pilotage-ce-qui-manque'],   // MANQUE-1 (§357) : « Ce qu'il manque » lisible et vrai

@@ -2773,8 +2773,8 @@ function toggleSessionParcelle(nom,row){
     // ★ COMPTE-1 (§353) : une activité qui alimente les trous arrive préremplie avec les pieds marqués au repérage.
     var _ocvH=document.getElementById('ocv-hint'); if(_ocvH){ _ocvH.hidden=true; _ocvH.textContent=''; }
     if(act.champCustom.feedsPlantation&&typeof window._cptMarques==='function'){
-      var _pM=(window.PARCELLES||[]).find(function(x){return x&&x.nom===nom;}), _nM=_pM?window._cptMarques(_pM):null;
-      if(_nM){ ocvVal.value=String(_nM); if(_ocvH){ _ocvH.textContent='Prérempli avec les '+_nM+' pieds marqués au repérage. Corrige si besoin.'; _ocvH.hidden=false; } }
+      var _pM=(window.PARCELLES||[]).find(function(x){return x&&x.nom===nom;}), _nM=_pM?((typeof window._cptAPercer==='function')?window._cptAPercer(_pM):window._cptMarques(_pM)):null;   // ★ RESTE-1 (§535) : les marqués qui restent à percer
+      if(_nM){ ocvVal.value=String(_nM); if(_ocvH){ _ocvH.textContent='Prérempli avec les '+_nM+' pieds marqués qui restent à percer. Corrige si besoin.'; _ocvH.hidden=false; } }
     }
     _openOv('ovChampValidation');
     setTimeout(function(){ocvVal.focus();try{ if(ocvVal.value) ocvVal.select(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/ovChampValidation#select'); }},200);
