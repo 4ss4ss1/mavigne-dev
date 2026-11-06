@@ -33,12 +33,15 @@ function bornes(src, nom) {
   throw new Error('accolade non fermée : ' + nom);
 }
 const fn = (src, nom) => { const [a, b] = bornes(src, nom); return src.slice(a, b); };
-const FONCTIONS = ['renderVendCuves', '_vendTeteHtml', '_vendChiffresHtml', '_vendRempHtml', '_vendFicheHtml', '_vendBascOuv', '_vendDateLongue', '_matPlur', '_matVin'];
+// ★ CUVFICHE-1 (§532) : _vendBascOuv peint la fiche par _vendFicheTel, et renderVendCuves la repeint (_vendFicheRafraichir) —
+//   leur comportement propre est joué par mv-harnais-cuvfiche1 ; ici, elles viennent seulement avec ceux qui les appellent.
+const FONCTIONS = ['renderVendCuves', '_vendTeteHtml', '_vendChiffresHtml', '_vendRempHtml', '_vendFicheHtml', '_vendBascOuv', '_vendDateLongue', '_matPlur', '_matVin',
+  '_vendFicheTel', '_vendFicheHaut', '_vendFicheOuverte', '_vendFicheRafraichir', '_vendFicheEtat', '_vendFicheRendre'];
 
 function jouer(S) {
   const L = [];
   const t = (nom, ok, detail) => L.push({ nom, ok: !!ok, detail: ok ? '' : (detail || '') });
-  let code = 'var _vendOuvert = null;\n';
+  let code = 'var _vendOuvert = null, _vendFicheAttente = null;\n';
   try { for (const f of FONCTIONS) code += fn(S.cuv, f) + '\n'; } catch (e) { t('les fonctions de l’onglet existent', false, e.message); return L; }
   const cuve = (id, nom, statut, vol, cap, o) => Object.assign({ id, nom, statut, volume_hl: cap, _vol: vol, parcelles: ['Les Charmes'], cuve_ref: 'p' + id }, o || {});
   const CUVES = [cuve('c1', 'Cuve 1', 'fa', 40, 50, { _due: true, _stale: 2 }), cuve('c2', 'Cuve 2', 'fa', 30, 40),

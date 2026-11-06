@@ -39,6 +39,8 @@ function _vendInjectCss(){
   if(document.getElementById('mvv-vend-css')) return;
   var s=document.createElement('style'); s.id='mvv-vend-css';
   s.textContent=`
+/* ★ CUVFICHE-1 : la fiche d'une cuve au téléphone défile (.mat-modal est en overflow:hidden, rien ne défilait) */
+#cuv-fiche-corps{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .mvv-wrap{background:var(--bg-app,#F2EFE7);min-height:60vh;color:var(--texte,#1A1A14);
   padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .mvv-wrap *{box-sizing:border-box}
@@ -579,16 +581,96 @@ function _vendSetVue(v){ _vendVue=(v==='plan'?'plan':'liste'); renderVendCuves()
 function _vendSetFiltre(k){ _vendFiltre=k; _vendOuvert=null; renderVendCuves(); }
 function _vendSetTri(k){ _vendTri=k; renderVendCuves(); }
 function _vendBascOuv(id){
-  _vendOuvert=(_vendOuvert===id?null:id);
+  /* ★ CUVFICHE-1 : au téléphone, une fiche refermée par le fond ou par le retour Android gardait _vendOuvert —
+     le toucher suivant sur la même cuve la « refermait », et rien ne s'ouvrait. Fenêtre fermée = on ouvre. */
+  var fo=document.getElementById('ovCuveFiche');
+  if(id && !_matLarge() && fo && fo.classList && !fo.classList.contains('open')) _vendOuvert=id;
+  else _vendOuvert=(_vendOuvert===id?null:id);
+  _vendFicheAttente=null;
   /* ★ CUVES-1 (§383) : à droite sur ordinateur (le rendu la pose), dans sa fenêtre au téléphone. */
   var corps=document.getElementById('cuv-fiche-corps');
   renderVendCuves();
   if(_matLarge()||!corps) return;
   if(!_vendOuvert){ if(typeof window.closeOv==='function') window.closeOv(null,'ovCuveFiche'); return; }
   var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x&&x.id===_vendOuvert; })[0]; if(!c) return;
+  _vendFicheTel(c, null);
+}
+/* ══ ★ CUVFICHE-1 — LA FICHE D'UNE CUVE AU TÉLÉPHONE (fenêtre ovCuveFiche) ══════════════════════════════════
+   Signalé par Nico le 06/11 (une cuve en Pressurage, impossible de la décuver) ; les points 2 à 4 trouvés en
+   relisant le code, pas encore vus sur un téléphone :
+   1. elle ne défilait pas : .mat-modal est en overflow:hidden et rien dedans ne défilait — la rangée des gestes,
+      Décuver compris, était hors d'atteinte. Le style vit dans _vendInjectCss (styles.css est au plafond de 1 Mo) ;
+   2. ce qu'elle ouvre passait DERRIÈRE elle. La fiche est un dialogue (openOv, plancher 9200), au-dessus de
+      .mvv-ov (9000) où vivent Décuver, l'étape, l'opération et la fin de FA. ⚠️ Baisser son z-index ne suffit pas :
+      _mvOvSync rend inerte tout ce qui est hors du dialogue du dessus — la feuille aurait été visible mais
+      intouchable. Donc : relevé, cuve et réception (famille .overlay) s'ouvrent par openOv, au-dessus d'elle ;
+      les feuilles .mvv-ov l'ÉCARTENT le temps de se jouer, et elle revient à leur fermeture ;
+   3. elle ne se repeignait pas après un geste : un relevé enregistré n'y apparaissait qu'en la rouvrant.
+      renderVendCuves la repeint désormais, au même endroit du défilement, listes dépliées comprises (data-vf) ;
+   4. refermée par le fond ou le retour, elle demandait deux touchers pour se rouvrir (voir _vendBascOuv). */
+var _vendFicheAttente=null;   // { id, etat } : la fiche écartée par une feuille .mvv-ov, à faire revenir
+function _vendFicheTel(c, etat){
+  var corps=document.getElementById('cuv-fiche-corps'); if(!corps||!c) return;
   corps.innerHTML='<div class="cuv-fiche">'+_vendFicheHtml(c,canWrite())+'</div>';
-  if(typeof window.openOv==='function') window.openOv('ovCuveFiche');
+  var fo=document.getElementById('ovCuveFiche');
+  if(!(fo && fo.classList && fo.classList.contains('open')) && typeof window.openOv==='function') window.openOv('ovCuveFiche');
+  _vendFicheRendre(corps, etat);
   _vendPeindreGraphes();
+}
+/* L'état d'une fiche qu'on repeint : son défilement, et ses listes dépliées (Parcours, relevés, opérations — data-vf).
+   Sans lui, corriger un relevé depuis la liste la repliait, et le défilement retombait à côté. */
+function _vendFicheEtat(corps){
+  var e={ haut:corps?corps.scrollTop:0, ouverts:[] };
+  if(corps && corps.querySelectorAll){
+    var l=corps.querySelectorAll('details[data-vf][open]');
+    for(var i=0;i<l.length;i++) e.ouverts.push(l[i].getAttribute('data-vf'));
+  }
+  return e;
+}
+function _vendFicheRendre(corps, e){
+  if(!e) return;
+  if(e.ouverts && e.ouverts.length && corps.querySelectorAll){
+    var l=corps.querySelectorAll('details[data-vf]');
+    for(var i=0;i<l.length;i++) if(e.ouverts.indexOf(l[i].getAttribute('data-vf'))>=0) l[i].open=true;
+  }
+  _vendFicheHaut(corps, e.haut);   // après les listes : la hauteur les compte
+}
+function _vendFicheHaut(corps, haut){
+  if(!haut) return;
+  corps.scrollTop=haut;
+  // les courbes se peignent après : on revient au même endroit une fois la page posée
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(function(){ corps.scrollTop=haut; });
+}
+function _vendFicheOuverte(){
+  if(_matLarge()) return false;
+  var fo=document.getElementById('ovCuveFiche');
+  return !!(fo && fo.classList && fo.classList.contains('open'));
+}
+function _vendFicheRafraichir(){
+  if(!_vendFicheOuverte()) return;
+  var corps=document.getElementById('cuv-fiche-corps'); if(!corps) return;
+  var c=_vendOuvert?(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x&&x.id===_vendOuvert; })[0]:null;
+  if(!c){ if(typeof window.closeOv==='function') window.closeOv(null,'ovCuveFiche'); return; }   // cuve supprimée : la fiche se ferme
+  var etat=_vendFicheEtat(corps);
+  corps.innerHTML='<div class="cuv-fiche">'+_vendFicheHtml(c,canWrite())+'</div>';
+  _vendFicheRendre(corps, etat);
+}
+function _vendFicheEcarter(){
+  if(!_vendFicheOuverte() || !_vendOuvert) return;
+  var corps=document.getElementById('cuv-fiche-corps');
+  _vendFicheAttente={ id:_vendOuvert, etat:_vendFicheEtat(corps) };
+  if(typeof window.closeOv==='function') window.closeOv(null,'ovCuveFiche');
+}
+function _vendFicheRevenir(){
+  var a=_vendFicheAttente; if(!a) return;
+  var ov=document.getElementById('mvv-ov');
+  if(ov && ov.classList.contains('open')) return;          // une feuille suivante a pris le relais : la fiche attend
+  _vendFicheAttente=null;
+  if(_matLarge() || _vendOuvert!==a.id) return;             // écran élargi, ou une autre cuve choisie entre-temps
+  if(document.querySelector('.overlay.open')) return;        // un autre dialogue est ouvert : ne pas passer devant lui
+  var vb=document.getElementById('mvv-body'); if(!vb || !vb.offsetParent) return;   // on a quitté les Cuves
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x&&x.id===a.id; })[0]; if(!c) return;
+  _vendFicheTel(c, a.etat);
 }
 /* ⚠️ On ne repeint PAS a chaque frappe : le champ perdrait le focus, meme
    piege que _vendDecCuveVol. On repeint la liste seule, et on remet le
@@ -832,7 +914,7 @@ function _vendParcHist(c,canEdit){
       +(canEdit?'<button class="mv-gh mvv-icbtn" onclick="openVendStat(\''+_escAttr(c.id)+'\',\''+_escAttr(e.id)+'\')" title="Corriger cette \u00e9tape" aria-label="Corriger cette \u00e9tape">'+_mvIcon('crayon',16)+'</button>':'')
       +'</div>';
   }).join('');
-  return '<details class="mvv-histwrap"><summary>Parcours \u2014 '+h.length+' \u00e9tape'+(h.length>1?'s':'')
+  return '<details class="mvv-histwrap" data-vf="parc"><summary>Parcours \u2014 '+h.length+' \u00e9tape'+(h.length>1?'s':'')
     +' <span class="u">\u00b7 depuis le '+_vendFrDate(h[0].date)+'</span></summary>'+rows+'</details>';
 }
 function _vendErLbl(r){ return r.erasflage==='total'?'Éraflage total':r.erasflage==='partiel'?('Partiel '+(r.er_pct||30)+'%'):'Vendange entière'; }
@@ -1798,6 +1880,7 @@ function renderVendCuves() {
       :(large&&cuves.length?_vendRempHtml(cuves):''))+'</div>'
     +'</div>';
   el.innerHTML=h;
+  _vendFicheRafraichir();   // ★ CUVFICHE-1 : la fiche du téléphone suit le geste qu'on vient d'enregistrer
   _vendPeindreGraphes();
   _vendRefreshCockpit();
 }
@@ -2119,7 +2202,7 @@ function openOvVendRec(id, presetParc) {
   el=document.getElementById('vrec-del-btn'); if(el) el.style.display=r?'block':'none';
   _vendRepInject(r);
   _vndUpdateCalc();
-  var ov=document.getElementById('ovVendRec'); if(ov) ov.classList.add('open');
+  var ov=document.getElementById('ovVendRec'); if(typeof window.openOv==='function') window.openOv('ovVendRec'); else if(ov) ov.classList.add('open');   /* ★ CUVFICHE-1 : openOv place la feuille AU-DESSUS de la fiche (z-index), classList.add la laissait dessous */
 }
 // ════════════════════════════════════════════════════════════════════════════
 // VD-GARDE / VD-SAVE — deux mensonges du Cuvier, corriges ensemble (01/09)
@@ -2351,7 +2434,7 @@ function openOvVendCuve(id) {
   _vcuvInjectStatDate(c);
   el=document.getElementById('vcuv-del-btn'); if(el) el.style.display=c?'block':'none';
   _vendInjectCuveFrom(!c);
-  var ov=document.getElementById('ovVendCuve'); if(ov) ov.classList.add('open');
+  var ov=document.getElementById('ovVendCuve'); if(typeof window.openOv==='function') window.openOv('ovVendCuve'); else if(ov) ov.classList.add('open');   /* ★ CUVFICHE-1 : openOv place la feuille AU-DESSUS de la fiche (z-index), classList.add la laissait dessous */
 }
 /* ═════ LE CHAMP « DEPUIS LE » DE LA FICHE — PARC-1 ═════
    Pose sous le select de statut, et VISIBLE SEULEMENT si le statut change :
@@ -2486,7 +2569,7 @@ function _vendMesHist(c,canEdit){
       +(canEdit?'<button class="mv-gh mvv-icbtn" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\',\''+_escAttr(x.id)+'\')" title="Corriger ce relevé" aria-label="Corriger ce relevé">'+_mvIcon('crayon',16)+'</button>':'')
       +'</div>';
   }).join('');
-  return '<details class="mvv-histwrap"><summary>'+m.length+' relevé'+(m.length>1?'s':'')
+  return '<details class="mvv-histwrap" data-vf="mes"><summary>'+m.length+' relevé'+(m.length>1?'s':'')
     +' <span class="u">· depuis le '+_vendFrDate(m[0].date)+'</span></summary>'+rows+'</details>';
 }
 function _vmAdjRem(d){_vmRem=Math.max(0,_vmRem+d);var el=document.getElementById('vm-rem-val');if(el)el.textContent=_vmRem;}
@@ -2542,7 +2625,7 @@ function openOvVendMesure(cuveId, mesureId) {
   el=document.getElementById('vm-chap'); if(el) el.style.display=_chap?'':'none';
   _vmInjectActions(_vmesureEditId);
   _vmIntRender(m&&((m.qui&&m.qui.length)?m.qui:m.intervenants));   // ★★ PRESENCE-2 (§346), `qui` depuis PRESENCE-2B
-  var ov=document.getElementById('ovVendMesure'); if(ov) ov.classList.add('open');
+  var ov=document.getElementById('ovVendMesure'); if(typeof window.openOv==='function') window.openOv('ovVendMesure'); else if(ov) ov.classList.add('open');   /* ★ CUVFICHE-1 : openOv place la feuille AU-DESSUS de la fiche (z-index), classList.add la laissait dessous */
 }
 function _vendMesDel(){
   if(!_vendGarde()) return;
@@ -4110,19 +4193,28 @@ function _vendParcSurf(nom){
 }
 
 // —— Hôte bottom-sheet (cave.js seul, indépendant d'index.html) ——
+var _vendSheetSeq=0;   // ★ CUVFICHE-1 : chaque ouverture de feuille compte — une fermeture suivie d'une réouverture ne rappelle pas la fiche
 function _vendSheet(html){
+  _vendSheetSeq++;
   _vendEnsureSheetCss();
   var ov=document.getElementById('mvv-ov');
   if(!ov){ ov=document.createElement('div'); ov.id='mvv-ov'; ov.className='mvv-ov';
     ov.addEventListener('click',function(e){ if(e.target===ov) _vendSheetClose(); });
     document.body.appendChild(ov); }
   var _dejaOuverte=ov.classList.contains('open');
+  _vendFicheEcarter();   // ★ CUVFICHE-1 : au téléphone, la fiche de la cuve s'écarte (elle masquait la feuille et la rendait inerte)
   ov.innerHTML='<div class="mvv-sheet" onclick="event.stopPropagation()">'+html+'</div>';
   requestAnimationFrame(function(){ ov.classList.add('open'); });
   // Une feuille qui en REMPLACE une autre (etape suivante) ne pose pas une 2e entree.
   if(!_dejaOuverte){ if(window._mvHistPush) window._mvHistPush();  /* TOUR-2 : le retour Android ferme cette surface (app.js, _MV_SURFACES) */ }
 }
-function _vendSheetClose(){ var ov=document.getElementById('mvv-ov'); if(ov) ov.classList.remove('open'); }
+function _vendSheetClose(){
+  var ov=document.getElementById('mvv-ov'); if(ov) ov.classList.remove('open');
+  /* ★ CUVFICHE-1 : la fiche écartée revient — après la fin du geste (l'enregistrement repeint d'abord la liste). */
+  /* ⚠️ Une feuille qui en enchaîne une autre se ferme puis se rouvre aussitôt, et son « open » ne se pose qu'à
+     l'image suivante (requestAnimationFrame) : le minuteur verrait la place libre. Le numéro d'ouverture tranche. */
+  if(_vendFicheAttente){ var seq=_vendSheetSeq; setTimeout(function(){ if(seq===_vendSheetSeq) _vendFicheRevenir(); }, 0); }
+}
 
 // —— Injection du champ « client » dans l'overlay récolte (cave.js seul) ——
 function _vendInjectClientField(sel){
@@ -5276,7 +5368,7 @@ function _vendOpsSummary(c,canEdit){
       +(canEdit?'<button class="mv-gh mvv-icbtn" onclick="openVendOp(\''+_escAttr(c.id)+'\',\''+_escAttr(o.id)+'\')" title="Corriger cette opération" aria-label="Corriger cette opération">'+_mvIcon('crayon',16)+'</button>':'')
       +'</div>';
   }).join('');
-  return '<details class="mvv-histwrap"><summary>'+_escHtml(_vendOpLbl(last.type))
+  return '<details class="mvv-histwrap" data-vf="ops"><summary>'+_escHtml(_vendOpLbl(last.type))
     +' <span class="u">'+_vendFrDate(last.date)+(det?' · '+_escHtml(det):'')+'</span>'
     +(ops.length>1?' <span class="u">· '+ops.length+' au total</span>':'')
     +'</summary>'+rows+'</details>';

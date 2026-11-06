@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 novembre 2026 (INCIDENT-1)** — **L'INCIDENT DE DONNÉES ; LA FEUILLE DE LA CONSOLE** (§531). Base `5b84788` (« fiche1 »). APP 10.65 inchangé, **SW 11.55 → 11.56**. La maquette `maquette-fiche-client-v1.html`, écran 3, reprise à l'identique : **l'horloge des 72 h** (depuis la prise de connaissance), **la procédure en 7 étapes** (cocher, noter ce qu'on sait), **le message aux clients** (un brouillon, contacts en copie cachée — D5), **le registre des violations** (`_guerettech/violations`, transaction, tenu même sans notification), contacts, textes signés ; `#incident`. **`src/gt/console.css`** : la feuille de la console (importée par `gt.js`), sortie de `styles.css` au plafond de 1 Mo — les harnais des jetons, de l'échelle, du contraste et des tailles la lisent. `mv-harnais-incident1` neuf (9 + 7 mutants). Déploiement : `npm run build && firebase deploy --only hosting`.
+> Dernière consolidation : **6 novembre 2026 (CUVFICHE-1)** — **LA FICHE D'UNE CUVE AU TÉLÉPHONE : ELLE DÉFILE, CE QU'ELLE OUVRE PASSE DEVANT ELLE, ELLE SE REPEINT** (§532). Base `d5fa1e5` (« incident1 »). **APP 10.65 → 10.66, SW 11.56 → 11.57**. Signalé par Nico (une cuve en Pressurage, impossible de la décuver au téléphone) : la fenêtre `ovCuveFiche` (`.mat-modal`, `overflow:hidden`) ne défilait pas — `#cuv-fiche-corps` devient la zone qui défile (style dans `_vendInjectCss`, `styles.css` au plafond) ; relevé, cuve et réception s'ouvrent par `openOv` (ils passaient dessous) ; ★ les feuilles `.mvv-ov` (Décuver, étape, opération, fin de FA) **écartent la fiche puis la rappellent** — la laisser ouverte, même plus bas, l'aurait laissée inerte (`_mvOvSync`) ; `renderVendCuves` repeint la fiche (défilement et listes dépliées gardés, `data-vf`) ; un seul toucher la rouvre. ⚠️ Une première passe (Sonnet) ne couvrait que trois fenêtres et livrait un zip incomplet : relue et complétée avant intégration (§532a). `mv-harnais-cuvfiche1` neuf (23 + 15 mutants), `cuves1` suit ; la chaîne (676 commandes, 0 rouge) a trouvé `boot.js?v=10.65` oublié par la première passe — le preflight ne lit pas `?v=`. Déploiement : `npm run build && firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1688,7 +1688,7 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    `for(var i…)` dupliqué d'`app.js` a été corrigé. Le point « passer le plafond à 0 » est clos.
 3. **Syntaxe** — `node --check` (CJS) / `--input-type=module --check` (ESM) · accolades CSS
    équilibrées · balance des balises HTML · scan demi-surrogates.
-4. **Versions** — bump APP (`APP_VERSION` + **les 5 affichages réels** d'`index.html`) **ET** SW
+4. **Versions** — bump APP (`APP_VERSION` + **les 5 affichages réels** d'`index.html` — les quatre `v…` et `boot.js?v=` ; le preflight ne lit que les quatre premiers, `mv-harnais-tutos` rougit sur le cinquième, CUVFICHE-1 §532) **ET** SW
    (en-tête + `CACHE_NAME` + les 2 `console.log` + une ligne de changelog **prépendée**) dès qu'on
    touche `index.html` / `app.js` / `utils.js` / `styles.css`. Un module JS seul = **aucun bump**.
 5. **`WHATS_NEW`** — prépendé, jamais remplacé, rédigé **du point de vue de l'utilisateur** (le
@@ -2060,6 +2060,11 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ RANGS-1 (04/11, §528) — qui est dans les rangs : ce qui reste
 - **À vérifier chez Nico** : « En direct » du Pilotage ce matin (Victor, Shana et Alicia sur la réparation ; ni Pauline ni lui) et demain matin (lui et Alicia sur la ligne du tracteur, absents de la réparation ; « entre deux parcelles » pendant un plein) ; l'Accueil (plus de « au tracteur » sur une session ouverte sans personne) ; au Journal sur ordinateur, une validation de mardi et sa fiche (« Pas dans les rangs »).
 - **Ouvert** : une session sans chrono (coches seules) — au-delà de 45 min entre deux coches, l'appli ne sait plus qu'on est au tracteur ; les équipes proposées (du jour, priorité, Équipe 1) ne lisent ni le planning ni le tracteur — la lecture trie, l'afficher dans la barre d'équipe des Parcelles serait un lot d'écran.
+
+### ★ CUVFICHE-1 (06/11, §532) — la fiche d'une cuve au téléphone : ce qui reste
+- **À vérifier chez Nico, CUVFICHE-1 déployé** — sur son téléphone, Cave › Le Cuvier › une cuve : la fiche défile jusqu'à la rangée des gestes ; « Noter un relevé » et « Modifier » s'ouvrent devant elle ; « Décuver », « Changer l'étape », « Opération » : la fiche s'écarte, puis revient à jour au même endroit, la liste des relevés toujours dépliée ; le retour Android sur une feuille ouverte (la feuille se ferme, la fiche revient) ; refermer la fiche en touchant à côté, puis la rouvrir d'un seul toucher. Et confirmer que le premier zip de la conversation (`mavigne-CUVFICHE-1-v10.66.zip`, incomplet) n'a pas été collé.
+- **Vu en route, hors lot** — les cinq autres fenêtres `.mat-modal` (fiche récolte, fiche et saisie des maturités, couleurs, réglage du Cuvier) n'ont pas de zone qui défile non plus : seule `.mat-f-liste` défile, et son parent n'est pas une colonne flex. Courtes sur la démo ; à regarder sur un vrai domaine avant de poser une règle commune (`.mat-modal > [id$="-corps"]`).
+- **Vu en route, hors lot** — `mv-harnais-cuvier-correction` (hors chaîne, du 06/09) cherche `_vendTriDate` dans `cave.js` ; elle vit dans `cuvier.js` depuis CUV-DEC (§164). Rouge sur la base, laissé tel quel.
 
 ## 29. Synchronisation de la mémoire
 

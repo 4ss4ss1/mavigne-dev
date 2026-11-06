@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.66', d: '2026-11-06', items: [   // CUVFICHE-1 (§532) : la fiche d'une cuve au téléphone
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'La fiche d’une cuve défile enfin jusqu’en bas',
+      desc: "Au téléphone, la fiche d’une cuve s’arrêtait sous la courbe : Décuver, Changer l’étape, Opération et Modifier étaient hors d’atteinte. Elle défile maintenant jusqu’au dernier bouton." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'Ce que la fiche ouvre passe devant elle',
+      desc: "Noter un relevé, Décuver, Changer l’étape, Opération, Modifier : tout ce que la fiche d’une cuve ouvre s’affiche maintenant au premier plan. Certaines de ces fenêtres s’ouvraient derrière elle, donc invisibles. Le geste fini, la fiche revient à jour, là où vous l’aviez laissée." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'Une fiche refermée se rouvre au premier toucher',
+      desc: "Refermée en touchant à côté ou avec le retour du téléphone, la fiche d’une cuve demandait deux touchers pour se rouvrir. Un seul suffit." },
+  ] },
   { v: '10.65', d: '2026-11-04', items: [   // RANGS-1 (§528) : qui est dans les rangs — « En direct » et le Journal
     { niv: 0, pour: ['admin'], emoji: 'equipe', titre: '« En direct » ne nomme que ceux qui sont dans les rangs',
       desc: "Une parcelle en cours nommait toute l’équipe qui l’avait commencée, même un autre jour : une absente au planning, un salarié au repos, ceux partis au tracteur. «\u00a0En ce moment\u00a0» ne garde plus que ceux qui y sont maintenant — «\u00a0personne en ce moment\u00a0» quand toute l’équipe est ailleurs — et le tracteur garde sa ligne, avec le conducteur et son coéquipier, y compris entre deux parcelles (le trajet, le plein)." },

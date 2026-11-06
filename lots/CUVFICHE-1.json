@@ -1,0 +1,26 @@
+{
+  "lot": "CUVFICHE-1",
+  "section": "§532",
+  "base": "d5fa1e56eda6b911b18492cf26872985c5774e77",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "1367a6a8278c2be54e49b46e6cd72b3667bfcc4b185c6fa4032792f74d0ec749",
+    "CLAUDE.md": "049e51421aff09970c4a864857388e08c383f01cacdd4f65102f4bb1733a3469",
+    "docs/claude/INDEX.md": "0e09d33e872f24760dfd8c00ec4cef8b0bee1b8c8ac0631f810f29f0a67af9d6",
+    "docs/claude/chantiers-530-579.md": "40ce53749955be3c2da04e47290bfd69a113d3f8a00e841eec4fda2bdbff399f",
+    "docs/claude/journal.md": "86dd9f47a03f4b20e3283391de7ded462494f0f89e5ae02fcad0211678e67a0c",
+    "index.html": "06b412348ec99b58a01ac33512ec00cfdad1f6b3ce0bfa481ef9a6c92a84414f",
+    "public/sw.js": "efea901aca2e8efb8bbad94b1aa9616d207556aab6a8274b89672be1e1401cda",
+    "scripts/mv-harnais-cuves1.mjs": "e8cf4e1e9fdee5f400f11eb46fafbaf6830e4154535d33ba62c25d3383d2307e",
+    "scripts/mv-harnais-liste.mjs": "eda12721d93db4388d410b0c25c65a6d91041bbcd33b004e00a8e0f66d49a78e",
+    "src/cuvier.js": "a4ae6a1168cae5569bc75da68fe10a0a3fff513983585a06a7eaddfabdc4b853",
+    "src/utils.js": "52e84c9b5fb5473666a3cb97c93a84c1be02652bb2a1bde194b2d7483b62c270",
+    "src/whats-new.js": "36954affddde84be9395a04defc6d7ae4699c0a2d12d9c2ec2a3e5fdb7891dea",
+    "scripts/mv-harnais-cuvfiche1.mjs": "60aa88c6ecf46da6dd7bad9f60937a33ed202e64ee40841adb2829e79ddc22eb"
+  }
+}

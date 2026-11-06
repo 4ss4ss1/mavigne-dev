@@ -52,3 +52,31 @@
 
 ### 531d. Ce qui reste ouvert
 - **La demande du 04/11 est couverte** (FICHE-1 et INCIDENT-1). Rien d'autre d'ouvert sur la console à ce jour ; à vérifier chez Nico après déploiement (liste « À vérifier » de CLAUDE.md).
+
+## 532. ★★ CUVFICHE-1 — LA FICHE D'UNE CUVE AU TÉLÉPHONE : ELLE DÉFILE, CE QU'ELLE OUVRE PASSE DEVANT ELLE, ELLE SE REPEINT (06/11 — `src/cuvier.js` · `src/whats-new.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-cuvfiche1.mjs` (neuf) · `scripts/mv-harnais-cuves1.mjs` · `scripts/mv-harnais-liste.mjs` — base `d5fa1e5` « incident1 » — **APP 10.65 → 10.66, SW 11.56 → 11.57**)
+
+### 532a. D'où ça vient
+- **Nico, 06/11, au téléphone** : « comment je fais pour entonner une cuvée du cuvier ? ». La réponse — « Décuver », en bas de la fiche de la cuve — était juste dans le code et fausse à l'écran : la fiche d'une cuve en Pressurage ne descendait pas sous sa courbe. Puis : « Noter un relevé » s'affiche derrière la fiche.
+- **Une première passe, sous Sonnet, dans la même conversation** : le défilement, et `openOv` pour le relevé, la cuve et la réception. Livrée en fichiers à plat, puis en zip **incomplet** (ni doc, ni marque, ni harnais neuf). **Relue sous Opus avant intégration, elle ne réglait pas la demande** (532b). Nico prévenu de ne pas coller ce zip (à confirmer, §28).
+
+### 532b. Ce qu'on a trouvé en relisant, et ce qui a été retenu
+- **La fiche est un dialogue** : `_vendBascOuv` l'ouvre par `openOv`, donc au plancher des modales (9200, UI-Z §85). Les quatre gestes du bas — Décuver, Changer l'étape, Opération, Déclarer la FA finie — ouvrent une feuille `.mvv-ov` (9000) : **dessous**. La première passe rendait Décuver atteignable… pour ouvrir sa feuille derrière la fiche.
+- ⚠️ **Baisser la fiche sous 9000 ne suffit pas** : `_mvOvSync` pose `inert` sur tout ce qui est hors du dialogue `.overlay` du dessus — la feuille aurait été visible, et intouchable. Écartés aussi : glisser `#mvv-ov` DANS la fiche (le retour Android départage les surfaces par z-index puis ordre DOM, `_mvTopSurface` : égalités fragiles) ; faire entrer `.mvv-ov` dans la famille `.overlay` (toutes les feuilles du Cuvier et du Chai touchées, pour un seul écran).
+- **Retenu : la fiche s'écarte.** `_vendSheet` appelle `_vendFicheEcarter` (au téléphone, fiche ouverte : son état noté, `closeOv`) ; `_vendSheetClose` rappelle `_vendFicheRevenir` au minuteur — après l'enregistrement, qui repeint la liste d'abord. ⚠️ Une feuille qui en enchaîne une autre se ferme puis se rouvre, et son `open` n'arrive qu'à l'image suivante (`requestAnimationFrame`) : le minuteur la croirait partie. `_vendSheetSeq` (un numéro par ouverture) tranche. La fiche ne revient pas si un autre dialogue est ouvert, si l'écran s'est élargi, si l'on a quitté les Cuves ou choisi une autre cuve.
+- **La fiche ne se repeignait jamais au téléphone** : `renderVendCuves` ne touchait pas sa fenêtre. Un relevé enregistré depuis la fiche n'y apparaissait qu'en la rouvrant. `_vendFicheRafraichir`, en fin de `renderVendCuves` et avant les courbes, la repeint ; une cuve supprimée la ferme.
+- **Un repeint replie les listes** : Parcours, relevés et opérations sont des `<details>`, état tenu par le DOM seul — corriger un relevé depuis la liste l'aurait repliée, et le défilement serait retombé à côté. Elles portent une clé (`data-vf`) ; `_vendFicheEtat` / `_vendFicheRendre` gardent les ouvertes et le défilement (rétabli après les listes, puis à l'image suivante, une fois les courbes peintes).
+- **Deux touchers pour rouvrir** : refermée par le fond ou le retour, la fiche gardait `_vendOuvert`, et le toucher suivant la « refermait ». Désormais : fenêtre fermée = on ouvre.
+- **Vérifié, déjà juste** : « Corriger le volume » (`openPrompt`) et « Agrandir » (`openOv('ovGraph')`) passent devant la fiche ; le bloc « Au labo » n'a aucun bouton.
+- Le style du défilement vit dans `_vendInjectCss` : `styles.css` est à 768 octets du plafond de 1 Mo (§531).
+
+### 532c. Mesuré
+- `mv-harnais-cuvfiche1` (neuf) : **23 assertions, 15/15 mutants** — les vraies fonctions dans un faux DOM qui tient les classes, le défilement (remis à zéro par un contenu réécrit, comme un navigateur), les `<details>`, les minuteurs et les images.
+- `mv-harnais-cuves1` : ses fonctions extraites appellent les nouvelles, ajoutées à sa liste — 24 verts, 8/8.
+- Preflight : 0 erreur. Harnais du Cuvier (13), version, annonces, typographie, couches, cliquets : verts. `WHATS_NEW` 10.66 exécuté en Node : trois items, niveau 0, admin et cave.
+- **La chaîne complète, sur le code final : 676 commandes, 0 rouge.** Jouée par tranches — le bac à sable coupe un appel à 300 s et tue ce qui tourne en fond : 1 à 215 ; `icones-contre` seule (71 s) ; 217 à 307 ; 273 à 669 ; 670 à 676. Construction (`vite build`) verte.
+- ★ **Le premier passage a trouvé un rouge de ce lot** : `mv-harnais-tutos` — `index.html` chargeait encore `boot.js?v=10.65`. La montée de version de la première passe n'avait changé que les quatre affichages `v…` ; le preflight, qui ne lit pas `?v=`, était vert. Corrigé, puis tout rejoué.
+- **Tutos concernés** : aucun (11 tutos, aucun ne touche ce changement) ; le côte à côte : rien qui le touche.
+- **Pas vu** : un vrai téléphone — le défilement, l'écart et le retour de la fiche, le retour Android sur une feuille ouverte (§28).
+
+### 532d. Ce qui reste ouvert
+- **À vérifier chez Nico** et **vu en route** (les autres fenêtres `.mat-modal` sans zone qui défile ; `mv-harnais-cuvier-correction` périmé) : §28, bloc CUVFICHE-1.
