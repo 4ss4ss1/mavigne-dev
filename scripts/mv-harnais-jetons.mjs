@@ -19,7 +19,7 @@
       écran (§42). L'accueil, Pilotage › Décider et Planning › Équipe restent à
       regarder à l'œil.
    ─────────────────────────────────────────────────────────────────────────── */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 /* Les DRAPEAUX sont écartés des chemins : `--baseline` lu comme un nom de
    fichier tuait mv-harnais-echelle sur un ENOENT (§47c). */
@@ -27,7 +27,7 @@ const _args = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const CHEMIN_CSS = _args[0] || 'src/styles.css';
 const REF        = 'scripts/mv-jetons-baseline.json';
 
-const CSS_BRUT = (CHEMIN_CSS === 'src/styles.css' ? readFileSync('src/charte.css', 'utf8') + '\n' : '') + readFileSync(CHEMIN_CSS, 'utf8'); /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
+const CSS_BRUT = (CHEMIN_CSS === 'src/styles.css' ? readFileSync('src/charte.css', 'utf8') + '\n' : '') + readFileSync(CHEMIN_CSS, 'utf8') + (CHEMIN_CSS === 'src/styles.css' && existsSync('src/gt/console.css') ? '\n' + readFileSync('src/gt/console.css', 'utf8') : '');   /* ★ INCIDENT-1 (§531) : la feuille de la console, lue avec */ /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
 /* Les fichiers où un jeton pourrait être re-déclaré en douce. */
 const AUTRES = ['index.html', 'src/app.js', 'src/utils.js', 'src/pilotage.js',
                 'src/planning.js', 'src/cave.js', 'src/cuvier.js', 'src/reglages.js', 'src/tracteur.js',   // ★ CUV-DEC

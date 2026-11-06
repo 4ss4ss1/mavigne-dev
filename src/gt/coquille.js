@@ -12,7 +12,7 @@
 // ── Les routes (GT-B31 : « pas de lien direct ») ──────────────────────────────
 //   #radar · #incidents · #clients · #clients/<slug> (la fiche) · #facturation · #leads · #outils
 //   L'onglet interne de la facturation s'appelle encore `business` (D7 : le libellé seul change).
-var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', pieces: 'pieces', sante: 'sante', outils: 'outils' };   // GT-UI-6 : #sante · FICHE-1 : #pieces
+var ROUTES = { radar: 'radar', incidents: 'incidents', clients: 'clients', facturation: 'business', leads: 'leads', pieces: 'pieces', sante: 'sante', incident: 'incident', outils: 'outils' };   // GT-UI-6 : #sante · FICHE-1 : #pieces · INCIDENT-1 : #incident
 export function lireRoute(hash) {
   var h = String(hash || '').replace(/^#/, '');
   try { h = decodeURIComponent(h); } catch (e) { h = ''; }

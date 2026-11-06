@@ -453,7 +453,7 @@ async function renderAdminGT(){
   // écriture ne part d'ici (ce doc est lisible PUBLIQUEMENT par la règle d'unicité des slugs).
   _agtSlugs   = slugs.slice();
   _agtClients = _agtRegClients(gtData, _reg[1].v);
-  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi','sante','pieces'];   // ★ GT-UI-6 : sante · ★ FICHE-1 : pieces
+  var _AUTRES=['access_log','demo_tokens','demo_stats','billing','leads_status','support_reports','suivi','sante','pieces','violations'];   // ★ GT-UI-6 : sante · ★ FICHE-1 : pieces · ★ INCIDENT-1 : violations
   var _tout=await Promise.all([
     Promise.all(slugs.map(function(slug){ return Promise.all(_AGT_CLES_DOM.map(function(k){ return _dom(slug, k); })); })),
     Promise.all(_AUTRES.map(_gt)),
@@ -482,6 +482,7 @@ async function renderAdminGT(){
   _agtReportsGT = (GT.support_reports&&Array.isArray(GT.support_reports.value))?GT.support_reports.value:[];
   _agtSante = (GT.sante && typeof GT.sante==='object') ? GT.sante : {};   // ★ GT-UI-6
   _agtPieces = (GT.pieces && GT.pieces.value && typeof GT.pieces.value==='object') ? GT.pieces.value : {};   // ★ FICHE-1 : la liste des pièces déposées
+  _agtViolations = (GT.violations && GT.violations.value && typeof GT.violations.value==='object') ? GT.violations.value : {};   // ★ INCIDENT-1 : le registre des violations
   _agtSignaturesCharger();   // ★ FICHE-1 : les preuves d'acceptation, à part (une lecture ratée ne bloque pas la console)
   _agtSuivi = (GT.suivi && GT.suivi.value && typeof GT.suivi.value==='object') ? GT.suivi.value : {};
   _agtAppliquerSuivi();   // ★ GT-SUIVI-1 : le « traité » de chaque occurrence, avant les compteurs
@@ -791,6 +792,7 @@ function agtRenderBody(){
   var _fc=(tb==='clients' && window._agtFicheCourante) ? window._agtFicheCourante() : '';   // ★ FICHE-1
   if(tb==='clients')   body.innerHTML=ban+((_fc && window._agtFicheVue) ? window._agtFicheVue(window._agtFicheDonnees(_fc)) : _agtBuildClients());
   if(tb==='pieces')    body.innerHTML=ban+(window._agtPiecesVue ? window._agtPiecesVue(window._agtPiecesDonnees()) : '');   // ★ FICHE-1
+  if(tb==='incident')  body.innerHTML=ban+(window._agtIncidentVue ? window._agtIncidentVue(window._agtIncidentDonnees()) : '');   // ★ INCIDENT-1
   if(tb==='business'){ body.innerHTML=ban+(window._agtFacturationVue ? window._agtFacturationVue(window._agtFacDonnees()) : ''); _agtBizFill(); }   // ★ GT-UI-5 : src/gt/facturation.js
   if(tb==='incidents') body.innerHTML=ban+_agtBuildIncidents();
   if(tb==='leads')     body.innerHTML=ban+(window._agtLeadsVue ? window._agtLeadsVue(window._agtLeadsDonnees()) : '');   // ★ GT-UI-5 : src/gt/leads.js
@@ -977,7 +979,64 @@ async function agtPieceOuvrir(id){
   catch(e){ _agtEchecEcriture(e, 'Ouverture de la pi\u00e8ce'); }
 }
 
-var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', pieces:'Pi\u00e8ces sign\u00e9es', sante:'Sant\u00e9 du syst\u00e8me', outils:'Outils' };   // ★ FICHE-1 : pieces
+// ════ INCIDENT-1 (§531) — L'INCIDENT DE DONNÉES (la maquette fiche-client-v1, écran 3) ════
+// Le registre des violations vit dans _guerettech/violations (GUERETTECH seul), écrit par transaction ; un incident
+// est « en cours » tant qu'il n'est pas clos. Le message aux clients touchés est un BROUILLON (D5).
+var _agtViolations = {};
+var _AGT_CONTACT_GT = 'Nicolas Gu\u00e9ret \u2014 ngdevpro@gmail.com \u2014 06 99 42 48 59';   // ⚠ celui des mentions légales et de la politique de confidentialité
+window._agtIncidentDonnees = function(){
+  var L=Object.keys(_agtViolations||{}).map(function(id){ return Object.assign({ id:id }, _agtViolations[id]); })
+    .sort(function(a,b){ return String(b.ouvertLe||'')<String(a.ouvertLe||'')?-1:1; });
+  return { entrees:L, encours:L.filter(function(x){ return !x.closLe; })[0]||null, maintenant:Date.now(), contact:_AGT_CONTACT_GT,
+    domaines:(_agtTenants||[]).filter(function(t){ return !_agtInterne(t.slug); }).map(function(t){ return { slug:t.slug, nom:t.nom }; }), esc:_escHtml };
+};
+async function _agtViolMaj(fn, quoi){
+  try{
+    if(!window.fbGtMaj) throw new Error('fbGtMaj indisponible');
+    var now=new Date().toISOString();
+    var r=await window.fbGtMaj('violations', function(d){ var v=JSON.parse(JSON.stringify((d&&d.value)||{})); fn(v, now); return { value:v, maj:now }; });
+    _agtViolations=(r&&r.valeur&&r.valeur.value)||_agtViolations; agtRenderBody();
+    return true;
+  }catch(e){ _agtEchecEcriture(e, quoi); return false; }
+}
+function agtIncidentOuvrir(){
+  window.openPrompt({ titre:'Ouvrir un incident de donn\u00e9es', sub:'Ce qui s\u2019est pass\u00e9, en une phrase. L\u2019horloge des 72 heures part de maintenant : l\u2019heure o\u00f9 vous l\u2019avez su.', valeur:'', btnLabel:'Ouvrir',
+    cb:function(v){ var id='vi'+Date.now().toString(36);
+      _agtViolMaj(function(V, now){ V[id]={ ouvertLe:now, nature:String(v||'').trim().slice(0,200), etapes:{1:true}, domaines:[], role:'sous-traitant' }; }, 'Ouverture de l\u2019incident')
+        .then(function(ok){ if(ok){ agtLogAccess('', 'Incident de donn\u00e9es ouvert', '', 'systeme'); if(window.agtIncidentVoir) window.agtIncidentVoir(''); } }); } });
+}
+function agtIncidentEtape(id, n){
+  _agtViolMaj(function(V, now){ var x=V[id]; if(!x || x.closLe) return; x.etapes=x.etapes||{}; x.etapes[n]=!x.etapes[n];
+    if(n===4){ if(x.etapes[n]) x.clientsPrevenusLe=now; else delete x.clientsPrevenusLe; } }, '\u00c9tape de la proc\u00e9dure');
+}
+function agtIncidentChamp(id, k, v){
+  if(['nature','categories','volume','personnes','mesures','cnil','role'].indexOf(k)<0) return;
+  _agtViolMaj(function(V){ if(V[id] && !V[id].closLe) V[id][k]=String(v||'').trim().slice(0,300); }, 'Incident de donn\u00e9es');
+}
+function agtIncidentDomaine(id, slug, oui){
+  _agtViolMaj(function(V){ var x=V[id]; if(!x || x.closLe) return; var L=(x.domaines||[]).filter(function(s){ return s!==slug; }); if(oui) L.push(slug); x.domaines=L; }, 'Domaines touch\u00e9s');
+}
+function agtIncidentClore(id){
+  var clore=function(){ _agtViolMaj(function(V, now){ if(V[id]){ V[id].closLe=now; V[id].etapes=V[id].etapes||{}; V[id].etapes[7]=true; } }, 'Cl\u00f4ture de l\u2019incident')
+    .then(function(ok){ if(ok) agtLogAccess('', 'Incident de donn\u00e9es clos', '', 'systeme'); }); };
+  if(window.openConfirmDel) window.openConfirmDel('Clore l\u2019incident ?', 'Il reste au registre des violations, avec tout ce qui a \u00e9t\u00e9 not\u00e9.', clore, 'bouclier', 'Clore', '#3D6B27');
+  else clore();
+}
+function agtIncidentInscrire(){
+  window.openPrompt({ titre:'Inscrire une violation au registre', sub:'Ce qui s\u2019est pass\u00e9, en une phrase (une violation pass\u00e9e, d\u00e9j\u00e0 trait\u00e9e).', valeur:'', btnLabel:'Inscrire',
+    cb:function(v){ var id='vi'+Date.now().toString(36);
+      _agtViolMaj(function(V, now){ V[id]={ ouvertLe:now, nature:String(v||'').trim().slice(0,200), etapes:{1:true,7:true}, domaines:[], role:'sous-traitant', closLe:now }; }, 'Registre des violations')
+        .then(function(ok){ if(ok && window.agtIncidentVoir) window.agtIncidentVoir(id); }); } });
+}
+function agtIncidentMessages(id){
+  var x=(_agtViolations||{})[id]; if(!x || !window._agtIncidentMessage) return;
+  var bcc=(x.domaines||[]).map(function(s){ return _agtContactEmail(s); }).filter(Boolean);
+  var txt=window._agtIncidentMessage(x, _AGT_CONTACT_GT), i=txt.indexOf('\n\n');
+  try{ window.location.href='mailto:?bcc='+bcc.join(',')+'&subject='+encodeURIComponent(txt.slice(0,i).replace(/^Objet : /,''))+'&body='+encodeURIComponent(txt.slice(i+2)); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto incident',detail:(e&&e.message)||String(e)}); }
+}
+
+var _AGT_NOMS_ONGLETS={ radar:'Radar', incidents:'Incidents', clients:'Clients', business:'Facturation', leads:'Leads', pieces:'Pi\u00e8ces sign\u00e9es', sante:'Sant\u00e9 du syst\u00e8me', incident:'Incident de donn\u00e9es', outils:'Outils' };   // ★ FICHE-1 : pieces · ★ INCIDENT-1 : incident
 // ★★ GT-UI-4 (§519) — L'EN-TÊTE DE LA MAQUETTE : le titre de l'écran, son résumé, la fraîcheur du chargement, l'action
 //   principale. Recalculé à chaque onglet et à chaque rendu (les résumés suivent les gestes).
 var _agtCharge=0;
@@ -990,6 +1049,7 @@ function _agtResume(tab){
   if(tab==='leads'){ var nl=(_agtLeads||[]).length, nn=(_agtLeads||[]).filter(function(l){ return _agtLeadStOf(l._id)==='nouveau'; }).length; return nl+' demande'+(nl>1?'s':'')+(nn?' \u00b7 '+nn+' sans r\u00e9ponse':''); }
   if(tab==='sante') return 'sauvegardes, synchronisations, e-mails, versions';
   if(tab==='pieces') return 'conditions g\u00e9n\u00e9rales, accords de traitement, pi\u00e8ces d\u00e9pos\u00e9es';   // ★ FICHE-1
+  if(tab==='incident') return 'la proc\u00e9dure, le message aux clients, le registre';   // ★ INCIDENT-1
   if(tab==='outils') return 'journal d\u2019acc\u00e8s, codes d\u2019essai, contours';
   return '';
 }
@@ -6248,6 +6308,13 @@ window.agtPreuveRecu     = agtPreuveRecu;
 window.agtPieceChoisir   = agtPieceChoisir;
 window.agtPieceOuvrir    = agtPieceOuvrir;
 window._agtFicheCharger  = _agtFicheCharger;
+window.agtIncidentOuvrir = agtIncidentOuvrir;   // INCIDENT-1
+window.agtIncidentEtape  = agtIncidentEtape;
+window.agtIncidentChamp  = agtIncidentChamp;
+window.agtIncidentDomaine = agtIncidentDomaine;
+window.agtIncidentClore  = agtIncidentClore;
+window.agtIncidentInscrire = agtIncidentInscrire;
+window.agtIncidentMessages = agtIncidentMessages;
 window.agtTicketCreerGT  = agtTicketCreerGT;   // GT-RESTES-1
 window.agtIncLier        = agtIncLier;
 window.agtLogFiltre      = agtLogFiltre;   // GT-UI-7

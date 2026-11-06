@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SRC = { gt: lire('src/admin-gt.js'), fi: lire('src/gt/fiche.js'), pc: lire('src/gt/pieces.js'), fb: lire('src/firebase.js'), ru: lire('firestore.rules'), st: lire('storage.rules'),
-  html: lire('src/gt/console.html'), co: lire('src/gt/coquille.js'), cli: lire('src/gt/clients.js'), css: lire('src/styles.css'), app: lire('src/app.js'), fcl: lire('functions/claims.js'), entree: lire('src/gt.js') };
+  html: lire('src/gt/console.html'), co: lire('src/gt/coquille.js'), cli: lire('src/gt/clients.js'), css: lire('src/gt/console.css'),   /* INCIDENT-1 : le bloc FICHE-1 vit dans la feuille de la console */ app: lire('src/app.js'), fcl: lire('functions/claims.js'), entree: lire('src/gt.js') };
 function fonction(src, nom) {
   const m = new RegExp('^(?:export\\s+)?(?:async\\s+)?function ' + nom + '\\s*\\(', 'm').exec(src);
   if (!m) throw new Error('ABSENTE : ' + nom);
@@ -99,7 +99,7 @@ mord('★★★ la console annonce une version que le serveur ne sert pas', 'gt'
 mord('★★ une preuve dépassée passe pour à jour', 'pc', "  if (c === versions.cgv && d === versions.dpa) return", "  if (c === versions.cgv) return", 'etat');
 mord('★★★ l’historique s’ouvre en écriture', 'ru', "    match /_mv_signatures/{slug}/hist/{h} {\n      allow read:  if isGtAdmin();\n      allow write: if false;", "    match /_mv_signatures/{slug}/hist/{h} {\n      allow read:  if isGtAdmin();\n      allow write: if isGtAdmin();", 'statiques');
 mord('★★★ une pièce déposée s’efface', 'st', "      allow update, delete: if false;", "      allow update, delete: if isGtAdmin();", 'statiques');
-mord('★★★ la demande de signature part toute seule', 'gt', "  try{ window.location.href='mailto:?bcc='", "  try{ window.fbGtMail && window.fbGtMail(bcc); window.location.href='mailto:?bcc='", 'statiques');
+mord('★★★ la demande de signature part toute seule', 'gt', "  try{ window.location.href='mailto:?bcc='+bcc.join(',')+'&subject='+encodeURIComponent(suj)", "  try{ window.fbGtMail && window.fbGtMail(bcc); window.location.href='mailto:?bcc='+bcc.join(',')+'&subject='+encodeURIComponent(suj)", 'statiques');   // INCIDENT-1 : l'ancre se précise (deux brouillons en copie cachée désormais)
 mord('★★ un nom piégé s’affiche tel quel', 'fi', "<h2 class=\"agt-fc-nom\">' + esc(f.nom) + '</h2>'", "<h2 class=\"agt-fc-nom\">' + f.nom + '</h2>'", 'fiche');
 mord('★ une case vide reste blanche', 'fi', "esc(p[1] == null || p[1] === '' ? '\\u2014' : p[1])", "esc(p[1] == null ? '' : p[1])", 'fiche');
 mord('★ l’onglet des pièces compte les domaines', 'pc', "  if (deposees) n.deposees = deposees.length;", "", 'registre');

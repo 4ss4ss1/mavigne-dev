@@ -107,7 +107,7 @@ function statiques(S) {
   r.push([/_agtMajCompteurs\(\);   \/\/ ★ GTFIX-4 \(GT-B21\)/.test(fonction(S.gt, 'agtRenderBody')) && ra.indexOf('_agtMajCompteurs();') !== -1, '★★ les compteurs se recalculent après chaque rendu (GT-B21)']);
   const mc = fonction(S.gt, '_agtMajCompteurs');
   r.push([/background:(?:#22C55E|var\(--ok\))/.test(mc) && mc.indexOf("critique'+(totalErrCrit>1?'s':'')") !== -1, 'le voyant du bas repasse au vert quand plus rien n’est critique (le vert de la charte depuis GT-UI-7)']);
-  r.push([/var tb=_AGT_TAB_MIGR\[_agtTab\]\|\|_agtTab, ban=_agtBandeauLectures\(\);/.test(S.gt) && (fonction(S.gt, 'agtRenderBody').match(/innerHTML=ban\+/g) || []).length === 8, 'le bandeau des lectures ratées en tête de chaque onglet (huit, avec les Pièces signées — FICHE-1)']);
+  r.push([/var tb=_AGT_TAB_MIGR\[_agtTab\]\|\|_agtTab, ban=_agtBandeauLectures\(\);/.test(S.gt) && (fonction(S.gt, 'agtRenderBody').match(/innerHTML=ban\+/g) || []).length === 9, 'le bandeau des lectures ratées en tête de chaque onglet (neuf, avec l’Incident de données — INCIDENT-1)']);
   r.push([fonction(S.gt, 'agtLeadSet').indexOf('renderAdminGT()') === -1 && fonction(S.gt, 'agtLeadNote').indexOf('renderAdminGT()') === -1, '★ un geste de lead ne recharge plus toute la console']);
   r.push([S.gt.indexOf('agtAccedeTenant') === -1, '★★ « Accéder » est parti : plus de faux accès au journal (GT-B16)']);
   r.push([S.gt.indexOf("width:0%;background:linear-gradient(90deg,'+_AGT_SAISON") === -1, 'plus de barre de saison vide (GT-B22)']);

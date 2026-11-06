@@ -1,0 +1,35 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   MA VIGNE — src/gt/console.css — LES STYLES DE LA CONSOLE GUERETTECH (gt.html seulement)
+   ════════════════════════════════════════════════════════════════════════════
+   ★ INCIDENT-1 (§531) : styles.css avait atteint le plafond de 1 Mo du harnais des tailles (FICHE-1, §530c). Les
+   styles des écrans neufs de la console vivent ici, importés par src/gt.js — l'appli des domaines ne les charge
+   plus. Mêmes règles que styles.css : les jetons de la charte (aucune couleur en dur), l'échelle d'espacement ;
+   les harnais des jetons, de l'échelle, du contraste et des tailles lisent ce fichier avec styles.css.
+   Les blocs plus anciens de la console (GT-UI-1 à GT-RESTES-1) restent dans styles.css : leurs harnais les y lisent.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* FICHE-1 (§530) : la fiche complète d'un client, reprise de la maquette fiche-client-v1 (écran 1). */
+.agt-fc-bandeau{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:0 0 16px;}
+.agt-fc-nom{margin:4px 0;font-family:var(--font-titre);font-size:var(--pt-xl,28px);color:var(--texte);}
+.agt-fc-grille{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.agt-fc-col{display:flex;flex-direction:column;gap:16px;}
+.agt-fc-pieces{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.agt-fc-pieces li{display:flex;align-items:center;gap:12px;font-size:var(--pt-txt,13px);color:var(--texte);}
+.agt-fc-pieces li span{flex:1;}
+.agt-fc{max-width:1180px;}
+@media (max-width:900px){ .agt-fc-grille{grid-template-columns:1fr;} }
+
+/* INCIDENT-1 (§531) : l'incident de données, reprise de la maquette fiche-client-v1 (écran 3) — l'horloge, les étapes. */
+.agt-ih-horloge{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--attention-doux);border:1px solid var(--attention);border-radius:var(--r-lg,12px);padding:12px 16px;margin:0 0 16px;color:var(--attention-texte);font-size:var(--pt-txt,13px);}
+.agt-ih-horloge > div:nth-child(2){flex:1;}
+.agt-ih-calme{background:var(--bg-doux);border-color:var(--ligne,#E7E6E2);color:var(--texte-med);}
+.agt-ih-etapes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+.agt-ih-etape{display:grid;grid-template-columns:28px 1fr;gap:12px;font-size:var(--pt-txt,13px);color:var(--texte);line-height:1.5;}
+.agt-ih-etape p{margin:4px 0 0;color:var(--texte-med);}
+.agt-ih-n{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--ligne-forte);background:none;font-weight:700;color:var(--texte-doux);font-family:var(--font-ui);cursor:pointer;padding:0;}
+.agt-ih-n:disabled{cursor:default;}
+.agt-ih-etape.fait .agt-ih-n{background:var(--ok-doux);border-color:var(--ok);color:var(--ok-texte);}
+.agt-ih-titre{cursor:pointer;}
+.agt-ih-su{color:var(--texte);font-weight:600;}
+.agt-ih-edit{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding:12px;background:var(--bg-doux);border-radius:var(--r-md,8px);}
+.agt-ih-champ{display:flex;flex-direction:column;gap:4px;font-size:var(--pt-micro,12px);color:var(--texte-med);}

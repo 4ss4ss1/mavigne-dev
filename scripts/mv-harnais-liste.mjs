@@ -968,6 +968,8 @@ export const HARNAIS = [
   ['node scripts/harnais-sec7-contre.mjs'],         // GT-RESTES-1 : recalé sur un gabarit vivant d’app.js, et désormais dans la chaîne
   ['node scripts/mv-harnais-fiche1.mjs'],          // FICHE-1 (§530) : la fiche complète, les pièces signées, le dépôt (versions alignées, règles, brouillons)
   ['node scripts/mv-harnais-fiche1.mjs --contre'],
+  ['node scripts/mv-harnais-incident1.mjs'],        // INCIDENT-1 (§531) : l'horloge des 72 h, le message (brouillon), le registre par transaction, la feuille de la console
+  ['node scripts/mv-harnais-incident1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

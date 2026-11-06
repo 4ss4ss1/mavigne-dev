@@ -29,3 +29,26 @@
 ### 530d. Ce qui reste ouvert
 - **INCIDENT-1** : l'écran 3 de la maquette — la procédure, le message aux clients, le registre des violations, l'horloge des 72 h ; **avec la sortie des styles de la console hors de `styles.css`** (plafond de 1 Mo).
 - **Déploiement** : `npm run build && firebase deploy --only hosting,firestore:rules,storage`.
+
+## 531. ★★★ INCIDENT-1 — L'INCIDENT DE DONNÉES ; LA FEUILLE DE LA CONSOLE (06/11 — `src/gt/incident.js` (neuf) · `src/gt/console.css` (neuve) · `src/admin-gt.js` · `src/gt/console.html` · `src/gt/coquille.js` · `src/gt.js` · `src/styles.css` · `public/sw.js` · `scripts/mv-harnais-incident1.mjs` (neuf) · `scripts/mv-harnais-jetons.mjs` · `scripts/mv-harnais-echelle.mjs` · `scripts/mv-harnais-contraste.mjs` · `scripts/mv-harnais-typo.mjs` · `scripts/mv-harnais-fiche1.mjs` · `scripts/mv-harnais-gtsuivi1.mjs` · `scripts/mv-harnais-gtfix4.mjs` · `scripts/contraste-baseline.json` · `scripts/mv-harnais-liste.mjs` — base `5b84788` « fiche1 » — APP 10.65 inchangé, **SW 11.55 → 11.56**)
+
+### 531a. D'où ça vient
+- **Nico, 04/11** : « une fiche de procédure en cas d'incident de données » ; la maquette `maquette-fiche-client-v1.html`, écran 3, D4 (le registre dans la console, tenu même sans notification) et D5 (rien ne part seul) validées le 05/11 ; « que ça corresponde parfaitement à la maquette ».
+- **`styles.css` au plafond de 1 Mo** (§530c) : ce lot commence par la feuille de la console.
+- **Les engagements, relus dans les textes signés** : CG 4.8 et accord de traitement — en sous-traitant, GUERETTECH notifie le client « dans les meilleurs délais » (nature, catégories, volume approximatif, mesures) ; le client apprécie la CNIL (72 h, art. 33) ; pour ses propres données (comptes, facturation, demandes du site), GUERETTECH notifie la CNIL. Le contact du message est celui des mentions légales et de la politique de confidentialité (adresse, téléphone) : rien d'inventé.
+
+### 531b. Ce qui change
+- **La feuille de la console** `src/gt/console.css`, importée par `src/gt.js` : la console seule la charge (la construction produit une feuille `gt-*.css` à côté de celle de l'appli). Les styles des écrans neufs y vivent (FICHE-1 y déménage, INCIDENT-1 s'y ajoute) ; les blocs plus anciens restent dans `styles.css`, où leurs harnais les lisent. **Les harnais des jetons, de l'échelle, du contraste et des tailles lisent la nouvelle feuille** avec `styles.css` — rien n'échappe aux contrôles.
+- **L'écran « Incident de données »** (`src/gt/incident.js`, `#incident`, dans la barre sous Système et dans la feuille « Plus ») : **l'horloge** (`horloge` : écoulé depuis la prise de connaissance, échéance des 72 h, heures restantes, dépassement ; sans incident : « Ouvrir un incident ») ; **la procédure en 7 étapes**, le texte de la maquette — au repos, chaque étape se lit comme la maquette ; un clic sur le numéro la coche (l'étape 4 cochée date la prévenance des clients), un clic sur le titre l'ouvre pour noter ce qu'on sait (nature, catégories, volume, personnes, rôle de GUERETTECH, domaines touchés, mesures, CNIL) ; **le message aux clients** (`message`) rempli de ce qui est noté, ce qu'on ignore entre crochets — « Préparer les brouillons » ouvre UN brouillon, contacts des domaines touchés en copie cachée (D5) ; **le registre des violations** (en cours, clos ; « + Inscrire » une violation passée ; une ligne ouvre son incident) ; les contacts utiles ; ce que disent les textes signés.
+- **Les données** : `_guerettech/violations` (règle existante `_guerettech/{document=**}` : GUERETTECH seul), écrit par transaction (`_agtViolMaj`, `fbGtMaj`) ; un incident clos ne bouge plus ; l'ouverture et la clôture vont au journal d'accès.
+
+### 531c. Mesuré
+- **La comparaison contre la maquette** (livrée) : au premier rendu, deux écarts — ce qu'on sait s'affichait sous les étapes au repos (déplacé dans l'étape ouverte) ; le contact écrit avec des tirets (les points de la maquette). Au second : identique.
+- `mv-harnais-incident1` (neuf) : **9 assertions, 7/7 mutants**.
+- Le preflight a relevé 6 valeurs posées dans des gestes sans `_escAttr` à l'interpolation (C24b) — échappées.
+- `gtsuivi1` (la liste lue se termine par `'violations'`), `gtfix4` (neuf onglets avec bandeau), `fiche1` (sa feuille) suivent ; la référence du contraste regravée (un écart de moins en sombre).
+- **La chaîne**, premier passage complet (674 commandes) : deux rouges, tous deux de ce lot — la contre-épreuve de `mv-harnais-fiche1` (son ancre du brouillon de demande de signature n'était plus unique : le message d'incident commence pareil — l'ancre se précise) ; `mv-harnais-icones-contre` (son épreuve de l'échelle travaille dans une copie sans `src/gt/console.css` : les harnais de l'échelle et des jetons ne lisent la feuille de la console **que si elle existe**). **Second passage, sur le code final : 674 commandes, 0 rouge.**
+- **Tutos concernés** : aucun ; **le côte à côte rejoué** sur la construction finale, aux trois tailles : vert.
+
+### 531d. Ce qui reste ouvert
+- **La demande du 04/11 est couverte** (FICHE-1 et INCIDENT-1). Rien d'autre d'ouvert sur la console à ce jour ; à vérifier chez Nico après déploiement (liste « À vérifier » de CLAUDE.md).

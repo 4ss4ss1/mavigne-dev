@@ -54,7 +54,7 @@ const AA_GRAND  = 3.0;   /* WCAG AA, texte large : >= 24 px, ou >= 18.5 px gras 
 
 const FICHIERS = fs.readdirSync(path.join(RACINE, 'src'))
   .filter(f => f.endsWith('.js')).sort().map(f => 'src/' + f)
-  .concat(['index.html', 'src/styles.css']);
+  .concat(['index.html', 'src/styles.css', 'src/gt/console.css']);   // ★ INCIDENT-1 (§531)
 
 let SRC = {};
 for (const f of FICHIERS) SRC[f] = fs.readFileSync(path.join(RACINE, f), 'utf8');

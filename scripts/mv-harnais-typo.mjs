@@ -58,7 +58,7 @@ const TOLERANCE = 1.05;       /* +5 % par lot sans regraver : au-dela, on se pos
 
 const FICHIERS = fs.readdirSync(path.join(RACINE, 'src'))
   .filter(f => f.endsWith('.js')).sort().map(f => 'src/' + f)
-  .concat(['index.html', 'src/styles.css']);
+  .concat(['index.html', 'src/styles.css', 'src/gt/console.css']);   // ★ INCIDENT-1 (§531)
 
 const lire = f => fs.readFileSync(path.join(RACINE, f), 'utf8');
 

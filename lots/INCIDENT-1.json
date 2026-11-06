@@ -1,0 +1,45 @@
+{
+  "lot": "INCIDENT-1",
+  "section": "§531",
+  "base": "5b8478860da5c215959f00f5e249ceab2d8e6fba",
+  "inclut": [],
+  "date": "2026-11-05",
+  "tutos": {
+    "ok": true,
+    "empreinte": "1b69a5885171be11c44a95aee8cc7679c7458bf6f7a81b91db79838e833403fb",
+    "date": "2026-11-05T19:50:48.621Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "59e63834d050d2223a2378234eb24e8c6d693593aeab92a49caf135df0d9263a",
+    "CLAUDE.md": "72635255708f1214b22a3738c09f9a7e6cb2e89f2f7582f2aad9bcc70bf883af",
+    "docs/claude/INDEX.md": "a98337d326486f4ff0bf2792060d063d793cc323b6b352e9fbac94ae38b19b78",
+    "docs/claude/chantiers-530-579.md": "5c819fe8e9459baefbbda4b625e54f69839f52b85eaabac11a8c10d19ff29781",
+    "docs/claude/journal.md": "3824b0d3ab731f538ee9d0ddf75f69e2f94c0b9f53889e0883d2d2df70a7d81f",
+    "public/sw.js": "2b30be0a817b4cd5aa84d089232a829ef831f3edb12c691abfde50d1bad6b61e",
+    "scripts/contraste-baseline.json": "6b8537ca530cb6464fb8e87337dd54482449f14fd4c1d61f2103945b5fbc3db0",
+    "scripts/harnais-claude-md.mjs": "57f3aada6b7c23d846c06f9441c111e5e67165aad3c9fb7d7c942f8ec64c975b",
+    "scripts/mv-harnais-contraste.mjs": "a2cadc613bf68a36d690592bfee8c61d0ea0941e1eb6475dcd6a141bc834a171",
+    "scripts/mv-harnais-echelle.mjs": "37f5ab74eda7e8085624ed11fbf594d28174b7f8e01c9a7836f273ed632655e7",
+    "scripts/mv-harnais-fiche1.mjs": "51c03637ed2fefb8024215d2d7b90342276b00b1da7da87263becb24c700c6db",
+    "scripts/mv-harnais-gtfix4.mjs": "11121538aec873099955938aa489ffc0f4195c5807dc63d52467c191b34bff63",
+    "scripts/mv-harnais-gtsuivi1.mjs": "c276c96f7961f46605b2cb9b2e893dbfbd7157eb060a336ae5f10c99c1251f6e",
+    "scripts/mv-harnais-jetons.mjs": "087afdf75627580542c26466e9b02df8d39b3f26c5b247db70548fd309eb1c54",
+    "scripts/mv-harnais-liste.mjs": "e61c7b22af88c1fae7f8a3f52fc772930ee06d3e4e6bf2b23d6780dd2a4131bb",
+    "scripts/mv-harnais-typo.mjs": "dc65a7586cb7f4946890fce5236d3582a66ceb01f953a0f7e932ab595e2ead02",
+    "src/admin-gt.js": "4f4fec69e57d52e9388166f1077c614129efba29d574f3893572390a4383460a",
+    "src/gt.js": "d0781b2c8a38374c926750680fcc35a8be37112e7cce42348868e794c3004cec",
+    "src/gt/console.html": "ebec5ff3de8f83304c8e3107f761c4dc28a5d5d1beb28ad183167dca330692ae",
+    "src/gt/coquille.js": "c35860fd72249b506aa0b0509ddd8062db63432c269978d01311218da238f01c",
+    "src/styles.css": "8a2bd2739c9c40a6722555a5639d32ea1a504c8ed463830db2e4cea3c1ab274f",
+    "scripts/mv-harnais-incident1.mjs": "8ff5a600b1ff991d2fd72a7a2d1a0d50109bcf52aa40c557a3252d6b3ec0b8cc",
+    "src/gt/console.css": "d3fa81cad1eb3b90a197131232973335eadc0196a41ddf18c27929e3e9668bb6",
+    "src/gt/incident.js": "7e0b7b4b9523793548257963ac7f28840c70cc82bca1dbe96ac70c953231767e"
+  }
+}

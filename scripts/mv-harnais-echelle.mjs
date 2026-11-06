@@ -8,7 +8,7 @@
       plus dans _pilCssV2(). Le harnais suit — il avait 13 rouges le jour du
       demenagement, ce qui est exactement son travail.
    ─────────────────────────────────────────────────────────────────────────── */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 // ⚠️ Les DRAPEAUX sont ecartes des chemins : `--baseline` etait lu comme un
 //   nom de fichier et le harnais mourait sur un ENOENT. Un argument
@@ -17,7 +17,7 @@ const _args = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const JS  = _args[0] || 'src/pilotage.js';
 const CSS = _args[1] || 'src/styles.css';
 const BRUT = readFileSync(JS, 'utf8');
-const FEUILLE = (CSS === 'src/styles.css' ? readFileSync('src/charte.css', 'utf8') + '\n' : '') + readFileSync(CSS, 'utf8'); /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
+const FEUILLE = (CSS === 'src/styles.css' ? readFileSync('src/charte.css', 'utf8') + '\n' : '') + readFileSync(CSS, 'utf8') + (CSS === 'src/styles.css' && existsSync('src/gt/console.css') ? '\n' + readFileSync('src/gt/console.css', 'utf8') : '');   /* ★ INCIDENT-1 (§531) : la feuille de la console, lue avec */ /* ★ CHARTE-2 (§368) : les réglages vivent dans charte.css, lue AVANT la feuille */
 
 /* §34g — LES COMMENTAIRES NE SONT PAS UNE PREUVE. Une assertion satisfaite par
    la phrase qui documente la correction ne teste rien. On lit le code seul. */

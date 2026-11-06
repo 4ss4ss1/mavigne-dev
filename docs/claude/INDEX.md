@@ -584,3 +584,4 @@
 | 528 | 528. ★★★ RANGS-1 — QUI EST DANS LES RANGS : « EN DIRECT » (PILOTAGE, ACCUEIL) ET LE JOURNAL NE NOMMENT PLUS… | `docs/claude/chantiers-480-529.md` |
 | 529 | 529. ★★★ GT-RESTES-1 — LES RESTES DE LA CONSOLE GT : TICKETS ET LIENS, BARRE D’ONGLETS DU BAS AU TÉLÉPHONE,… | `docs/claude/chantiers-480-529.md` |
 | 530 | 530. ★★★ FICHE-1 — LA FICHE COMPLÈTE D'UN CLIENT, LES PIÈCES SIGNÉES, LE DÉPÔT DE PIÈCES (05/11 — `src/gt/f… | `docs/claude/chantiers-530-579.md` |
+| 531 | 531. ★★★ INCIDENT-1 — L'INCIDENT DE DONNÉES ; LA FEUILLE DE LA CONSOLE (06/11 — `src/gt/incident.js` (neuf)… | `docs/claude/chantiers-530-579.md` |

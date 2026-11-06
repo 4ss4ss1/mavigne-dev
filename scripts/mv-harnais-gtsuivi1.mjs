@@ -110,7 +110,7 @@ function statiques(S) {
   const sm = fonction(S.gt, '_agtSuiviMaj');
   r.push([/window\.fbGtMaj\('suivi', function\(d, existe\)\{ return _agtMutSuivi\(/.test(sm), 'le suivi s’écrit en transaction (la porte de GTFIX-1)']);
   const ra = fonction(S.gt, 'renderAdminGT');
-  r.push([/'support_reports','suivi'(,'sante')?(,'pieces')?\]/.test(ra)   /* GT-UI-6 : la santé lue avec */ && ra.indexOf('_agtAppliquerSuivi();') !== -1 && ra.indexOf('_agtAppliquerSuivi();') < ra.lastIndexOf('_agtMajCompteurs();'),
+  r.push([/'support_reports','suivi'(,'sante')?(,'pieces')?(,'violations')?\]/.test(ra)   /* GT-UI-6 : la santé lue avec */ && ra.indexOf('_agtAppliquerSuivi();') !== -1 && ra.indexOf('_agtAppliquerSuivi();') < ra.lastIndexOf('_agtMajCompteurs();'),
     '★ le chargement lit le suivi et l’applique AVANT les compteurs']);
   const rr = fonction(S.gt, 'agtResolveReport');
   const iA = rr.indexOf('await window.fbResolveReport('), iF = rr.search(/flip\((t\.reports|_agtReportsGT)\)/);

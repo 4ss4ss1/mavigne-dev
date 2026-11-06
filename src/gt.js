@@ -14,4 +14,6 @@ import './gt/facturation.js'; // GT-UI-5 (§520) : l'écran Facturation de la ma
 import './gt/leads.js';      // GT-UI-5 (§520) : l'écran Leads de la maquette (colonnes, tableau, fiche)
 import './gt/fiche.js';      // FICHE-1 (§530) : la fiche complète d'un client (la maquette fiche-client-v1, écran 1)
 import './gt/pieces.js';     // FICHE-1 (§530) : les pièces signées (écran 2)
-import './gt/sante.js';      // GT-UI-6 (§521) : l'écran Santé du système (l'état des tâches planifiées, le parc)
+import './gt/incident.js';   // INCIDENT-1 (§531) : l'incident de données (la maquette fiche-client-v1, écran 3)
+import './gt/sante.js';
+import './gt/console.css';   // INCIDENT-1 (§531) : les styles des écrans neufs de la console (styles.css a atteint 1 Mo)      // GT-UI-6 (§521) : l'écran Santé du système (l'état des tâches planifiées, le parc)
