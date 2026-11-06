@@ -866,6 +866,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair
   ['node scripts/mv-harnais-cfg1.mjs --contre'],
+  ['node scripts/mv-harnais-modeles1.mjs'],            // MODELES-1 (§536) : les modèles de semaine se comptent en modèles — le rangement par année passe, une vraie perte se voit
+  ['node scripts/mv-harnais-modeles1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

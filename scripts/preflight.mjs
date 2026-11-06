@@ -762,7 +762,7 @@ function checkGuardBehaviour() {
   let FLOORS, docSize;
   try {
     FLOORS = new Function(floorsSrc + '\nreturn _MV_GUARD_FLOORS;')();
-    const helpers = ['_mvIntrantsCount', '_mvPaieCount'].map(grab).filter(Boolean).join('\n');
+    const helpers = ['_mvIntrantsCount', '_mvPaieCount', '_mvModelesCount'].map(grab).filter(Boolean).join('\n');   // MODELES-1 (§536)
     docSize = new Function(
       helpers + '\nfunction _mvParcProgCount(v){ return Array.isArray(v) ? v.length : 0; }\n' +
       sizeSrc + '\nreturn _mvDocSize;')();
@@ -801,6 +801,15 @@ function checkGuardBehaviour() {
     ['un taux horaire retiré (4 → 3) : passe', () => !bloque('paie', 4, 3)],
     ['une tâche supprimée (11 → 10) : passe', () => !bloque('taches', 11, 10)],
     ['un domaine qui démarre (2 → 1) : passe, sous le plancher', () => !bloque('intrants', 2, 1)],
+
+    // — MODELES-1 (§536) : planning_templates se compte en MODÈLES, ancienne forme (sans année) comprise —
+    ['modèles à l\'ancienne forme (5 à plat) : 5', () => docSize('planning_templates', { a: {}, b: {}, c: {}, d: {}, e: {} }) === 5],
+    ['modèles rangés par année (3 + 2) : 5', () => docSize('planning_templates', { 2026: { a: {}, b: {}, c: {} }, 2027: { a: {}, b: {} } }) === 5],
+    ['le rangement par année (5 à plat → 5 sous 2026) : passe',
+      () => !bloque('planning_templates', docSize('planning_templates', { a: {}, b: {}, c: {}, d: {}, e: {} }),
+                    docSize('planning_templates', { 2026: { a: {}, b: {}, c: {}, d: {}, e: {} } }))],
+    ['modèles écrasés dans la même année (5 → 1) : bloqué', () => bloque('planning_templates', 5, docSize('planning_templates', { 2026: { a: {} } }))],
+    ['le dernier modèle supprimé (1 → 0) : passe, sous le plancher', () => !bloque('planning_templates', 1, 0)],
 
     // — les collections volontairement non gardées le restent-elles ? —
     ['travaux reste non gardé (dérivé, régénérable)', () => !Object.prototype.hasOwnProperty.call(FLOORS, 'travaux')],

@@ -1831,10 +1831,36 @@ function _mvPaieCount(v) {
   if (Array.isArray(v.gnr_appoints)) n += v.gnr_appoints.length;
   return n;
 }
+// ★★ MODELES-1 (§536) — `planning_templates` SE COMPTE EN MODÈLES, PAS EN CLÉS.
+//   Le document est rangé par année ({ 2026: { standard:{…}, tractoriste:{…} } }) : Object.keys() y compte des
+//   ANNÉES, un tiroir pour tous les modèles de l'année. Deux défauts, mesurés le 06/11 :
+//   · un domaine resté à l'ANCIENNE forme ({ standard, tractoriste, … } sans année), que _planMigrateYears
+//     (planning.js) range en mémoire sous 2026 à l'ouverture du Planning, passait de 5 clés à 1 : la garde
+//     lisait « quatre modèles effacés » et refusait TOUT enregistrement de modèle, à chaque essai
+//     (« fbSave planning_templates BLOQUE (anti-ecrasement) · cur=5 new=1 », un client, rien de perdu) ;
+//   · à l'inverse, sur la forme par année, cinq modèles ramenés à un dans la même année laissaient une clé :
+//     la garde ne voyait rien.
+//   On compte donc les modèles de chaque année, plus ceux de l'ancienne forme qu'aucune année ne porte déjà :
+//   la migration écarte un modèle déjà rangé sous 2026, il ne compte pas deux fois. Ainsi le rangement par
+//   année ne fait jamais baisser le compte, et une vraie perte se voit. « Quatre chiffres = une année » :
+//   la règle de _planMigrateYears, la même ici (mv-harnais-modeles1 vérifie qu'elles ne divergent pas).
+function _mvModelesCount(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return 0;
+  var n = 0, ranges = {}, anciens = [];
+  Object.keys(v).forEach(function (k) {
+    if (/^\d{4}$/.test(k)) {
+      var an = v[k];
+      if (an && typeof an === 'object' && !Array.isArray(an)) Object.keys(an).forEach(function (id) { n++; ranges[id] = 1; });
+    } else anciens.push(k);
+  });
+  anciens.forEach(function (id) { if (!ranges[id]) n++; });
+  return n;
+}
 function _mvDocSize(key, val) {
   if (key === 'parcelles') return _mvParcProgCount(val);
   if (key === 'intrants')  return _mvIntrantsCount(val);
   if (key === 'paie')      return _mvPaieCount(val);
+  if (key === 'planning_templates') return _mvModelesCount(val);   // ★★ MODELES-1 (§536)
   if (Array.isArray(val)) return val.length;
   if (val && typeof val === 'object') return Object.keys(val).length;
   return (val == null) ? 0 : 1;
@@ -1858,11 +1884,14 @@ function _mvDocSize(key, val) {
 // NON gardees, volontairement : `travaux` (derive, regenerable par recalcTravaux) et
 // `kml_polygons` (l'import KML est un REPLACE assume -- un garde y produirait un faux
 // positif des qu'un domaine reimporte un parcellaire plus petit).
+// ★★ MODELES-1 (§536) — planning_templates : plancher 2, plus 1. Comptée en MODÈLES (_mvModelesCount), la
+//   collection d'un seul modèle tomberait à 0 en le supprimant (0 < 1 × 0,5) : refusé, alors que c'est un geste à
+//   la main. À 1 modèle la garde ne s'arme pas ; de 2 à 1, 1 n'est pas « moins de la moitié » : rien ne bloque.
 var _MV_GUARD_FLOORS = {
   parcelles: 5, membres: 2, saisons: 1, config: 3,
   journal: 5, sessions: 5, cave_elevage: 1, cave_vendange: 1,
   tracteurs_list: 2, conducteurs: 2, activites: 2,
-  planning_entries: 2, planning_templates: 1, planning_acomptes: 1, planning_hsup: 1,
+  planning_entries: 2, planning_templates: 2, planning_acomptes: 1, planning_hsup: 1,
   traitements: 5, intrants: 3, paie: 2, pheno: 2, taches: 5,
   entretiens: 5, historique: 5, reparateur_hist: 2
 };

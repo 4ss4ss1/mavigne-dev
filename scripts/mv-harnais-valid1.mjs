@@ -200,8 +200,9 @@ console.log(`\nVALID-1 + LOGIN-1 : ${ok} vertes, ${ko} rouges`);
 if (!CONTRE) process.exit(ko ? 1 : 0);
 if (ko) process.exit(1);
 const DEF = [
-  ['la feuille attend de nouveau la météo avant d’écrire', B => ({ ...B, valid: B.valid.replace('  JOURNAL.unshift(_mvEqApplique(jEntry));\n  recalcTravaux(_validTache);',
-    '  var _mSnap=await fetchMeteoMoyenne(_mDeb,date); if(_mSnap)jEntry.meteo_snapshot=_mSnap;\n  JOURNAL.unshift(_mvEqApplique(jEntry));\n  recalcTravaux(_validTache);') })],
+  // ★ MODELES-1 (§536) : RESTE-1 (§535) a inséré « var _cptStA=… » entre l’écriture et recalcTravaux — le repère suit le code (il ne s’injectait plus).
+  ['la feuille attend de nouveau la météo avant d’écrire', B => ({ ...B, valid: B.valid.replace('  JOURNAL.unshift(_mvEqApplique(jEntry));\n  var _cptStA=',
+    '  var _mSnap=await fetchMeteoMoyenne(_mDeb,date); if(_mSnap)jEntry.meteo_snapshot=_mSnap;\n  JOURNAL.unshift(_mvEqApplique(jEntry));\n  var _cptStA=') })],
   ['le formulaire du journal attend de nouveau la météo', B => ({ ...B, jour: B.jour.replace('  JOURNAL.unshift(_mvEqApplique(jEntry));\n',
     '  if(_mDeb){ var _mSnap=await fetchMeteoMoyenne(_mDeb,date); if(_mSnap)jEntry.meteo_snapshot=_mSnap; }\n  JOURNAL.unshift(_mvEqApplique(jEntry));\n') })],
   ['l’appel météo n’est plus borné', B => ({ ...B, meteo: B.meteo.replace('fetch(url, _ctl ? { signal: _ctl.signal } : undefined)', 'fetch(url)') })],

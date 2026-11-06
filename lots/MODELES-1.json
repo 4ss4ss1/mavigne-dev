@@ -1,0 +1,33 @@
+{
+  "lot": "MODELES-1",
+  "section": "§536",
+  "base": "27a204828d502d8e73b800d691eaf277370df535",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "ok": true,
+    "empreinte": "c2f29caac3692ffd68df7c41aecbe9d40e641e9821e3212822de03f4a2e0029b",
+    "date": "2026-11-06T17:33:41.196Z",
+    "joues": {
+      "téléphone": 11,
+      "ordinateur": 11,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "3b33b1bd0e5449ad98f28a593ca1b41d46b8e7bd46d37ad4aed12cfc9037534d",
+    "CLAUDE.md": "c6b8fad7946e5a14d709d18686fca66c5e4c4cc9cd588085550ff43bf802e7f5",
+    "docs/claude/INDEX.md": "2c09c5ac6f2393f0b3d2b3cab324aa1f60adbd4a62fcc0ae9fb975897394d5b3",
+    "docs/claude/chantiers-530-579.md": "d28ac04b2823e8ebe90188691d3583538766079d23e5b0a3d5017cddb2fdbabc",
+    "docs/claude/journal.md": "fbbdc56a5645f32621cea4d4b9dc9cbecc0a6cc34393a76e7ea10ecd938697ba",
+    "docs/claude/modules.md": "abb03233e829a3e9d1739fc20b72144daeece0d5177fbc94af66909b383e03a6",
+    "scripts/harnais-claude-md.mjs": "9fb4818dfbb8d210f424d26f50a936af977beba987f2f5f35bfb7f063862f2a7",
+    "scripts/mv-harnais-liste.mjs": "d59219ffce11dc95bcc6c9449e88223a8ea58efbe08d45ecfdb5d7e6da72515a",
+    "scripts/mv-harnais-valid1.mjs": "9a06b4b2ba16daa78c9b1ee1d9b1da93ea46ea25e45e5283015ab69ef1372226",
+    "scripts/preflight.mjs": "a956574ad2d5806422641e2227abda407d0f43f1e470c8537e7355fab7dad172",
+    "src/firebase.js": "e24c6f9fc507845d013336cdb32e2c1ad003b7eac783e46c59d26087a5a4ea5b",
+    "scripts/mv-harnais-modeles1.mjs": "600326dfa5a5295379e852cd205835d4959e13f8fb2b3d141370d5f519796e9a"
+  }
+}

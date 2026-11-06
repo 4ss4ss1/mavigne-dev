@@ -139,7 +139,7 @@ divergent en silence et le dernier `fbSave` écrase l'autre, **sans toast et san
 ```
 parcelles 5 · membres 2 · saisons 1 · config 3 · journal 5 · sessions 5
 cave_elevage 1 · cave_vendange 1 · tracteurs_list 2 · conducteurs 2 · activites 2
-planning_entries 2 · planning_templates 1 · planning_acomptes 1 · planning_hsup 1
+planning_entries 2 · planning_templates 2 · planning_acomptes 1 · planning_hsup 1
 traitements 5 · intrants 3 · paie 2 · taches 5 · entretiens 5 · historique 5 · reparateur_hist 2
 ```
 Le garde ne se déclenche que sur une **chute de plus de moitié en une seule écriture**.
@@ -152,6 +152,8 @@ propres gardes avant d'écrire (§18b).
 **constante** → deux compteurs de **contenu** : **`_mvIntrantsCount`** et **`_mvPaieCount`**.
 ★★★ **`_mvPaieCount` compte désormais `taux_serie`** (12/08, §36) : ce n'est plus un dérivé, c'est
 **la source de tout coût de main-d'œuvre daté**. `taux_hist`, lui, reste un dérivé et ne compte pas.
+
+★★ **`planning_templates` se compte en MODÈLES** (`_mvModelesCount`, MODELES-1, §536) : les modèles de chaque année (clé de quatre chiffres, la règle de `_planMigrateYears`) + ceux de l’ancienne forme (sans année) qu’aucune année ne porte déjà. `Object.keys()` y comptait des ANNÉES : l’ancienne forme rangée en mémoire sous 2026 passait de 5 clés à 1 → tout enregistrement de modèle refusé (« cur=5 new=1 ») ; une perte dans une même année passait sans un mot. Plancher **2** : le dernier modèle reste supprimable.
 
 ★★★ **Le document `paie` — modèle à jour (§36)** :
 ```
@@ -888,7 +890,7 @@ salarié ne les lit ni ne les écoute ; il compose `planning_equipe` + SA `plann
 qu'il appelle). Un téléphone en vue salarié n'enregistre jamais ces trois documents (garde de `fbSave`).
 
 ⚠️ **Ancienne forme** sans année (`[nom][mois][jour]`, `[plId]`) : relue au chargement par `_planMigrateYears`, rangée
-sous `_MV_PLAN_BASE_YEAR` (2026). Ne jamais écrire dans cette forme.
+sous `_MV_PLAN_BASE_YEAR` (2026). Ne jamais écrire dans cette forme. ★ Le premier enregistrement de modèles l’écrit rangée : la garde compte les modèles, plus les clés (MODELES-1, §536 — avant, ce premier enregistrement était refusé dès 3 modèles).
 ⚠️ **Tout le monde est clé par NOM** (`MEMBRES`, entrées, hsup, acomptes) : renommer un salarié sans migrer ses clés
 le coupe de son historique.
 
