@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 novembre 2026 (FENETRES-1)** — **LES FENÊTRES DU CUVIER ET DU CHAI DÉFILENT ; « NOTER DES MESURES » NE PERD PLUS SON BOUTON ENREGISTRER** (§533). Base `8f3713a` (« cuvfiche1 »). **APP 10.66 → 10.67, SW 11.57 → 11.58**. La coque `.mat-modal` (six fenêtres : saisie en série, couleurs, réglage du Cuvier et du Chai, fiches récolte, maturité, cuve) coupe à 92vh et aucun corps ne défilait. ★ Les fenêtres à pied étaient **écrites** pour une colonne flex (`.mat-f-liste` flex 1 et `min-height:0`, `.mat-f-pied` fixe) dont le parent n'était pas une colonne : les règles n'agissaient pas. **Mesuré dans Chromium à 390 × 844** (avant/après, animations coupées) : avec 40 parcelles, Enregistrer et la dernière parcelle étaient inatteignables ; après, Enregistrer visible d'emblée, la liste défile. Une règle commune dans `styles.css` (`.mat-modal>[id$="-corps"]`, et une colonne pour les trois fenêtres à pied) ; celle de la fiche cuve (CUVFICHE-1) y rejoint les autres. `mv-harnais-fenetres1` neuf (9 + 7 mutants) : toute fenêtre à venir est couverte ; chaîne 678 commandes, 0 rouge ; côte à côte rejoué, vert. Déploiement : `npm run build && firebase deploy --only hosting`.
+> Dernière consolidation : **6 novembre 2026 (PACK-1)** — **PROTÉGER LE CODE : UN ZIP REMPLACE LE CLONE QUAND LE DÉPÔT EST PRIVÉ ; LA LICENCE** (§534). Base `6dc415d` (« fenetres1 »). APP 10.67 inchangé, SW 11.58 inchangé : rien de ce qui est servi ne change. Le dépôt était public **par nécessité** (le clone anonyme de Claude) ; Nico veut le fermer sans ralentir. `npm run pack-claude` (`scripts/mv-pack-claude.mjs`, pur Node, sans git) fabrique `..\mavigne-dev-claude.zip` hors dépôt, sans `.git` / `node_modules` / `dist` / `.env` / clés, avec `PACK-INFO.txt` (commit) ; l'ouverture de ce fichier fixe l'ordre **zip → clone → le dire à Nico**. `LICENSE` « tous droits réservés ». `public/cgu.html` non touché exprès (empreinte signée : CGU 1.2 = lot dédié). ★ Un constat de ce lot était faux et a été corrigé avant livraison (§534c) ; vrai en revanche : un contour client réel dans `mv-harnais-kml-fusion.mjs` (§28, bloc PACK-1). Testé sous Linux (zip : 13,1 Mo) ; la branche Windows se prouve au premier lancement chez Nico. Déploiement : aucun.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -50,11 +50,19 @@ un écran de remise d'abonnement inconnu du dossier).
 d'absence a une durée de vie de quelques minutes.**
 
 ★★★ **DEPUIS LE 10 AOÛT (SOIR) — LE DÉPÔT GITHUB REMPLACE L'UPLOAD POUR LA LECTURE DU CODE.**
-Le code vit dans `github.com/4ss4ss1/mavigne-dev` (**public**, cloné en HTTPS anonyme — c'est la
-condition qui rend le clone possible sans identifiants). En tête de toute session de travail sur le
-code : `git clone https://github.com/4ss4ss1/mavigne-dev.git` (ou `git pull` si déjà cloné dans la
-session en cours) dans `/home/claude/mavigne-dev/`, puis lire les fichiers réels de là — jamais
-depuis une mémoire de la structure d'une session précédente.
+Le code vit dans `github.com/4ss4ss1/mavigne-dev`. ★★★ **PACK-1 (06/11) — DEUX MODES D'ACCÈS, DANS CET ORDRE.**
+**(A) Dépôt PRIVÉ (cible, protection du code) → le ZIP.** Nico lance `npm run pack-claude` (`scripts/mv-pack-claude.mjs`, pur Node, sans git ; fabrique
+`..\mavigne-dev-claude.zip`, ~13 Mo, hors dépôt, sans `.git` / `node_modules` / `dist` / `.env`) et le glisse
+dans la conversation. Claude le cherche d'abord dans `/mnt/user-data/uploads/`, le dézippe dans
+`/home/claude/` (le dossier `mavigne-dev/` en sort), lit `PACK-INFO.txt` (date + commit local) puis CLAUDE.md.
+**(B) Dépôt PUBLIC (ancien mode) → clone anonyme** : `git clone https://github.com/4ss4ss1/mavigne-dev.git`
+dans `/home/claude/`. **Ordre de recherche en tête de session : zip dans uploads → sinon clone → sinon LE
+DIRE À NICO** (ne jamais improviser un contexte). Jamais de token (règle inchangée).
+⚠️ Mode A : **pas d'historique Git** dans la session (`git log`, `git pull` n'existent pas). La fraîcheur se
+mesure au commit de `PACK-INFO.txt` : si Nico dit avoir poussé / modifié après son zip, **lui demander un
+nouveau zip** (10 s) avant de patcher. Un zip trop vieux est le même piège que le clone du matin (13/08).
+Dans les deux modes, lire les fichiers réels — jamais depuis une mémoire de la structure d'une session
+précédente.
 ⚠️⚠️ **Le clone NE PERSISTE PAS d'une conversation à l'autre.** Le bac à sable Claude repart à
 zéro à chaque nouvelle conversation — seuls `/mnt/user-data/outputs` et les uploads accumulés
 survivent DANS une même conversation, jamais entre deux. **Réflexe : si `/home/claude/mavigne-dev`
@@ -89,9 +97,10 @@ patchs s'appliquaient sans erreur, tous les contrôles passaient — **sur une b
   tous deux déployés. Un client passé sur l'un ne prendra **jamais** l'autre. Sauter un numéro ne
   coûte rien ; en réutiliser un fige un client pour toujours.
 
-⚠️ **Le dépôt est PUBLIC** — condition nécessaire au clone anonyme. S'il redevient privé, le clone
-échoue avec `fatal: could not read Username for 'https://github.com'` : le dire à Nico plutôt que
-de deviner une autre cause. Après un clone/pull, `git log -1` pour dater ce qu'on lit et le
+⚠️ **Mode B seulement : le dépôt est PUBLIC** — condition nécessaire au clone anonyme. S'il est privé, le clone
+échoue avec `fatal: could not read Username for 'https://github.com'` : **chercher alors le zip PACK-1 dans
+`/mnt/user-data/uploads/`** ; s'il n'y est pas non plus, le dire à Nico (« dépôt privé, glisse le zip :
+`npm run pack-claude` ») plutôt que de deviner une autre cause. Après un clone/pull, `git log -1` pour dater ce qu'on lit et le
 comparer à ce que Nico vient de décrire avoir poussé.
 
 ⚠️⚠️⚠️ **CE QUI NE CHANGE PAS : LA LIVRAISON.** Claude n'a **aucun accès en écriture** au dépôt
@@ -430,8 +439,8 @@ sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
 
 ## 🖥️ Environnement de Nico
 
-- ★★★ **Git, depuis le 10 août — via GitHub Desktop.** Dépôt `4ss4ss1/mavigne-dev` (**public** —
-  nécessaire au clone anonyme de Claude), cloné dans
+- ★★★ **Git, depuis le 10 août — via GitHub Desktop.** Dépôt `4ss4ss1/mavigne-dev` (**public** tant que
+  Claude clone anonymement ; **privé** + zip PACK-1 dès la protection du code), cloné dans
   **`C:\Users\p4n0m\Desktop\Dev\mavigne-dev\`** (tranché le 02/10 : les deux chemins notés jusque-là
   étaient faux). (dossier **distinct** de l'ancien `mavigne\`,
   qui peut être supprimé une fois vérifié que tout a bien été copié dedans). Nico édite dans
@@ -446,8 +455,9 @@ sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
   dans `/home/claude/` (le clone dans `/mnt/user-data/uploads` échoue : système en lecture seule).
   **Le clone ne survit pas d'une conversation à l'autre** — le refaire à chaque nouvelle session.
   **Dans une même session**, si Nico dit avoir poussé un changement, `git pull` avant de relire.
-  Le dépôt étant public, aucune authentification n'est nécessaire — si le clone échoue avec
-  `fatal: could not read Username`, c'est que le dépôt est repassé en privé : le dire à Nico.
+  Dépôt public : aucune authentification. S'il est privé (PACK-1), le clone échoue avec
+  `fatal: could not read Username` → le zip de `npm run pack-claude` dans `/mnt/user-data/uploads/`
+  (voir l'ouverture de ce fichier) ; sans zip non plus, le dire à Nico.
 - **Filet avant chaque lot, complémentaire à Git désormais** : `xcopy src
   ..\mavigne-sauvegardes\avant-XX\src\ /E /I /Y` (**hors** du dossier projet). Filets
   complémentaires : les fichiers uploadés dans la conversation, et surtout l'**historique Firebase
@@ -2069,6 +2079,12 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ FENETRES-1 (06/11, §533) — les fenêtres du Cuvier et du Chai : ce qui reste
 - **À vérifier chez Nico, FENETRES-1 déployé** — au téléphone, Cave › Le Cuvier › Maturités › « Noter des mesures » : la liste des parcelles défile, Enregistrer reste en bas ; « Classer » (couleur des parcelles) ; une fiche de parcelle et une fiche récolte longues défilent jusqu'en bas ; un réglage de la roue crantée (Cuvier, Chai) — inchangé. Sur PC aussi, avec toutes ses parcelles.
 - **Vu en route, hors lot** — la fiche récolte au téléphone ne se repeint pas après « Modifier » (seul `_recSel` écrit `rec-fiche-corps`) : la récolte corrigée n'y apparaît qu'en rouvrant la fiche. Même défaut que la fiche cuve avant CUVFICHE-1 (§532b) ; la fiche maturité, elle, se repeint après une suppression (`_vendAnaDel`).
+
+### ★ PACK-1 (06/11, §534) — protéger le code : ce qui reste
+- **Chez Nico, dans cet ordre** : intégrer et pousser ; `npm run pack-claude` (premier lancement Windows = la preuve de `Compress-Archive`) ; tester le zip dans une conversation neuve ; **seulement alors** passer le dépôt en privé ; remplacer le bloc de démarrage des instructions du projet Claude (le zip d'abord).
+- **Hors dépôt** : adresse des commits en noreply ; clé web Firebase restreinte (référents HTTP + API) ; marque « Ma Vigne » à l'INPI ; e-Soleau.
+- **CGU 1.2** (article 7 bis, restrictions d'usage) : lot dédié — l'empreinte signée change, ré-acceptation à prévoir.
+- **Vu en route, hors lot** : `scripts/mv-harnais-kml-fusion.mjs` porte un contour réel d'un fichier client (Vris Bas) → le remplacer par un contour fictif de même forme, harnais vert ; `DEV_EMAILS` met l'adresse personnelle de Nico dans le bundle servi ; ⚠️ un module caché par `DEV_EMAILS` part quand même dans le bundle de tous — une idée en cours ne s'y cache pas.
 
 ## 29. Synchronisation de la mémoire
 

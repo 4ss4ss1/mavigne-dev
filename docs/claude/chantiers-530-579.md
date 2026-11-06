@@ -112,3 +112,23 @@
 
 ### 533d. Ce qui reste ouvert
 - **À vérifier chez Nico** et **vu en route** (la fiche récolte ne se repeint pas après « Modifier ») : §28, bloc FENETRES-1.
+
+## 534. ★★ PACK-1 — PROTÉGER LE CODE : UN ZIP REMPLACE LE CLONE QUAND LE DÉPÔT EST PRIVÉ ; LA LICENCE (06/11 — `scripts/mv-pack-claude.mjs` (neuf) · `package.json` · `LICENSE` (neuf) · `CLAUDE.md` · `.mv-base` — base `6dc415d` « fenetres1 » — APP 10.67 inchangé, SW 11.58 inchangé)
+
+### 534a. D'où ça vient
+Nico est suivi sur les réseaux par des éditeurs de logiciels viticoles et veut protéger son code, ses données et sa méthode. Constat du 06/11 : le dépôt est **public** — `functions/` (le serveur, invisible autrement), `firestore.rules`, `storage.rules`, CLAUDE.md et tout `docs/claude/` (la méthode, le backlog), les lots. Il l'était **par nécessité** : le clone anonyme de Claude. Contrainte posée par Nico : passer en privé **sans ralentir** le travail.
+
+### 534b. Ce qui est livré
+- **`npm run pack-claude`** → `scripts/mv-pack-claude.mjs`, pur Node (aucun git requis, le poste de Nico n'a que GitHub Desktop) : copie le dossier sans `.git`, `node_modules`, `dist`, `.firebase`, `gt.html`, `.env*`, ni fichier de clé (`*.pem`, `*.key`, `*.p12`, `service-account*.json`) ; écrit `PACK-INFO.txt` (date, commit lu dans `.git` sans git) ; zippe par `Compress-Archive` sous Windows, `zip` ailleurs. Sortie : `..\mavigne-dev-claude.zip`, **hors du dépôt** (jamais commité).
+- **`CLAUDE.md`** (ouverture et Environnement de Nico) : deux modes d'accès ; ordre de recherche en tête de session **zip → clone → le dire à Nico** ; fraîcheur du mode zip = le commit de `PACK-INFO.txt`.
+- **`LICENSE`** : tous droits réservés, aucune licence accordée.
+- ⚠️ **Non livré exprès : `public/cgu.html`.** Les clients signent la version avec son empreinte SHA-256 : toute modification est une v1.2 + ré-acceptation, donc un lot à part. La clause « article 7 bis — restrictions d'usage » est proposée hors dépôt.
+
+### 534c. Vérifié
+- **Le zip** : 13,1 Mo, 986 entrées, aucune sous `node_modules`, `.git/`, `dist/`, ni `.env` ; `PACK-INFO.txt` porte le commit. ⚠️ **Testé sous Linux seulement** : la branche Windows (`Compress-Archive`) n'a jamais tourné ici — le premier lancement chez Nico en est la preuve.
+- **Audit du dépôt** : aucune clé privée ni jeton dans HEAD ni dans l'historique. La clé `AIza…` de `src/firebase.js` est la clé web Firebase, publique par nature : elle se restreint par référents HTTP dans Google Cloud. Les commits portent l'adresse personnelle de Nico.
+- ★ **Une erreur de ce lot, corrigée avant livraison** : un premier passage a lu dans le premier commit (`6756111`, « socle propre ») « l'adresse d'un tiers et des coordonnées de parcelles ». Relu : l'adresse est **celle de Nico** (`DEV_EMAILS`, encore dans `src/app.js`, donc dans le bundle servi), les coordonnées sont les **centres de Gevrey, Brochon et Fixin**. `DEV_MODULES` est vide : aucun module en développement ne part caché dans le bundle aujourd'hui. ⚠️ **Vrai, en revanche** : `scripts/mv-harnais-kml-fusion.mjs` porte un contour réel (« le vrai contour du fichier d'Alexandre », Vris Bas), dans HEAD et dans l'historique.
+- `harnais-claude-md` : 63 vertes.
+
+### 534d. Ce qui reste ouvert
+- §28, bloc PACK-1.

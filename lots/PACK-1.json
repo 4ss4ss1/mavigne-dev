@@ -1,0 +1,18 @@
+{
+  "lot": "PACK-1",
+  "section": "§534",
+  "base": "6dc415d3341ff5fc2af3461e106e24ce019793a2",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "1eb50e885da0b2aa8614ed04dce38c3996a05708db6c0157e6bf681439d39558",
+    "CLAUDE.md": "3bfaf17e4ef1dfee6eb39289c531b1ae9c081d51a0030d79994baa4e4febd25f",
+    "docs/claude/INDEX.md": "d1bae59d889927a11423ee14f3420f2712de821899027fa2ea9c310299026d6a",
+    "docs/claude/chantiers-530-579.md": "1e0047c40e7eda89bb0c1c1d32b105ea1f44b7446bd60b002ecc318cc0ef3942",
+    "docs/claude/journal.md": "cec2feb9224c7b2c6db5560cab25cbeea76ea106ff88d0c3e61eb29efa89a210",
+    "package.json": "643822bdbe13538574591135d5003ed2262c2e312f8671fd4acdc389a6147a5b",
+    "LICENSE": "495f13c220ddf66672848e02a6c91d353e19b5e2f540e930f7613412fb875ec3",
+    "scripts/mv-pack-claude.mjs": "7836261a50571366de626ef53e8e8f9887331b87b80a6b6992a84b58bcf44179"
+  }
+}

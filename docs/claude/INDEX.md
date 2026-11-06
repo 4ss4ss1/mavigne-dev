@@ -587,3 +587,4 @@
 | 531 | 531. ★★★ INCIDENT-1 — L'INCIDENT DE DONNÉES ; LA FEUILLE DE LA CONSOLE (06/11 — `src/gt/incident.js` (neuf)… | `docs/claude/chantiers-530-579.md` |
 | 532 | 532. ★★ CUVFICHE-1 — LA FICHE D'UNE CUVE AU TÉLÉPHONE : ELLE DÉFILE, CE QU'ELLE OUVRE PASSE DEVANT ELLE, EL… | `docs/claude/chantiers-530-579.md` |
 | 533 | 533. ★★ FENETRES-1 — LES FENÊTRES DU CUVIER ET DU CHAI DÉFILENT ; « NOTER DES MESURES » NE PERD PLUS SON BO… | `docs/claude/chantiers-530-579.md` |
+| 534 | 534. ★★ PACK-1 — PROTÉGER LE CODE : UN ZIP REMPLACE LE CLONE QUAND LE DÉPÔT EST PRIVÉ ; LA LICENCE (06/11 —… | `docs/claude/chantiers-530-579.md` |

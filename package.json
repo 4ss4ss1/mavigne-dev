@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node scripts/mv-gt-page.mjs && vite",
     "check": "node scripts/mv-lanceur.mjs",
+    "pack-claude": "node scripts/mv-pack-claude.mjs",
     "lint": "node scripts/lint-cliquet.mjs",
     "lint:vocabulaire": "node scripts/lint-vocabulaire.mjs",
     "prebuild": "npm run check",
