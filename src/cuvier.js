@@ -39,8 +39,6 @@ function _vendInjectCss(){
   if(document.getElementById('mvv-vend-css')) return;
   var s=document.createElement('style'); s.id='mvv-vend-css';
   s.textContent=`
-/* ★ CUVFICHE-1 : la fiche d'une cuve au téléphone défile (.mat-modal est en overflow:hidden, rien ne défilait) */
-#cuv-fiche-corps{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .mvv-wrap{background:var(--bg-app,#F2EFE7);min-height:60vh;color:var(--texte,#1A1A14);
   padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .mvv-wrap *{box-sizing:border-box}
@@ -599,7 +597,8 @@ function _vendBascOuv(id){
    Signalé par Nico le 06/11 (une cuve en Pressurage, impossible de la décuver) ; les points 2 à 4 trouvés en
    relisant le code, pas encore vus sur un téléphone :
    1. elle ne défilait pas : .mat-modal est en overflow:hidden et rien dedans ne défilait — la rangée des gestes,
-      Décuver compris, était hors d'atteinte. Le style vit dans _vendInjectCss (styles.css est au plafond de 1 Mo) ;
+      Décuver compris, était hors d'atteinte. Le style est désormais commun aux six fenêtres .mat-modal (styles.css,
+      FENETRES-1 §533) ;
    2. ce qu'elle ouvre passait DERRIÈRE elle. La fiche est un dialogue (openOv, plancher 9200), au-dessus de
       .mvv-ov (9000) où vivent Décuver, l'étape, l'opération et la fin de FA. ⚠️ Baisser son z-index ne suffit pas :
       _mvOvSync rend inerte tout ce qui est hors du dialogue du dessus — la feuille aurait été visible mais

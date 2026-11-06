@@ -8138,6 +8138,9 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 .mat-fi-act{padding:var(--e-2,8px) var(--e-5,20px) var(--e-5,20px)}
 .mat-lien{padding:0;border:0;background:transparent;color:var(--accent-texte);font-family:var(--font-ui);font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);cursor:pointer}
 .mat-modal{display:flex;flex-direction:column;max-height:92vh;padding:0;overflow:hidden}
+/* ★ FENETRES-1 (§533) : la coque coupe à 92vh, son corps défile ; avec un pied, colonne : la liste défile, le pied reste */
+.mat-modal>[id$="-corps"]{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#mat-saisie-corps,#mat-coul-corps,#creg-ed-corps{display:flex;flex-direction:column}
 .mat-f-hd{flex:none;display:flex;align-items:center;gap:var(--e-3,12px);padding:var(--e-4,16px) var(--e-4,16px) var(--e-3,12px)}
 .mat-f-t{flex:1;margin:0;font-size:var(--pt-sm,16px);font-weight:var(--fw-semi,600);color:var(--texte)}
 .mat-f-ctl{flex:none;display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--e-3,12px);padding:0 var(--e-4,16px) var(--e-3,12px);border-bottom:var(--bw) solid var(--ligne,#E7E6E2)}

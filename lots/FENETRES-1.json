@@ -1,0 +1,35 @@
+{
+  "lot": "FENETRES-1",
+  "section": "§533",
+  "base": "8f3713a101685876453a42f05b1869ba934565e4",
+  "inclut": [],
+  "date": "2026-11-06",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f87eb7dc6469abfb37899a2b3ef73c9d97f676cedc12cf47f362d1085d1d3505",
+    "date": "2026-11-06T10:28:53.067Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "4906d00564092f08b2f8a9075a6e4913b4810961ac4cb9a37de020e4ff5df95e",
+    "CLAUDE.md": "f91dd5ecde630b84f4b5bddb7be923eefef5cb2e3210270821c8f8f673d5444d",
+    "docs/claude/INDEX.md": "921d6cc83a8829ab3e6d10ef835743881a2e99f80c1e89a581940e3db7bcc757",
+    "docs/claude/chantiers-530-579.md": "ee2283e7996b1357cf52da4449cbc4f3e49da5106b9ac6a6155d1a9d79452c69",
+    "docs/claude/journal.md": "88f77faf831afe614e8a973f50939b87f5d1eceb2544c2c18d72b659d04bc634",
+    "index.html": "341c218721869481e6905a86db5571af58c39eec0d40a01adf3d594a7b80aeee",
+    "public/sw.js": "62c53688dffa98a937d25b4b28e1a3ee309d47b54155910dcce788fec895de4e",
+    "scripts/mv-harnais-cuvfiche1.mjs": "7bf0b3c79943410738c0a1c278cd8f47688f5087d0bebae85eab3f0e470791cd",
+    "scripts/mv-harnais-liste.mjs": "88693393f69be09dd874792f9984a377df98343abb4da9bbe10f9fb90d2c151c",
+    "src/cuvier.js": "e36f43ddf22435a2cbae3ed0210e3fd8a61f61a7cf370b5405db4db190b58514",
+    "src/styles.css": "ee1a07deaced8600727a2d8b6aeb7b49084847767fedd0ee34fd2d7701353e4a",
+    "src/utils.js": "c975353a703492c207646f12ee6e1333ce1b76c03754f3483fc724a33bb4231a",
+    "src/whats-new.js": "377167787a2acdc55ecdb1989ff1e8ec270e8ba04fe81605d9867e2930f99bae",
+    "scripts/mv-harnais-fenetres1.mjs": "1daef6006e847fed20089b0aea4346070b33f23ece44dcac5a2d45ad06ed34a2"
+  }
+}

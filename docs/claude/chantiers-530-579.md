@@ -79,4 +79,36 @@
 - **Pas vu** : un vrai téléphone — le défilement, l'écart et le retour de la fiche, le retour Android sur une feuille ouverte (§28).
 
 ### 532d. Ce qui reste ouvert
-- **À vérifier chez Nico** et **vu en route** (les autres fenêtres `.mat-modal` sans zone qui défile ; `mv-harnais-cuvier-correction` périmé) : §28, bloc CUVFICHE-1.
+- **À vérifier chez Nico** et **vu en route** (les autres fenêtres `.mat-modal` sans zone qui défile — traité au §533 ; `mv-harnais-cuvier-correction` périmé) : §28, bloc CUVFICHE-1.
+
+## 533. ★★ FENETRES-1 — LES FENÊTRES DU CUVIER ET DU CHAI DÉFILENT ; « NOTER DES MESURES » NE PERD PLUS SON BOUTON ENREGISTRER (06/11 — `src/styles.css` · `src/cuvier.js` · `src/whats-new.js` · `src/utils.js` · `index.html` · `public/sw.js` · `scripts/mv-harnais-fenetres1.mjs` (neuf) · `scripts/mv-harnais-cuvfiche1.mjs` · `scripts/mv-harnais-liste.mjs` — base `8f3713a` « cuvfiche1 » — **APP 10.66 → 10.67, SW 11.57 → 11.58**)
+
+### 533a. D'où ça vient
+- **Vu en route au §532** (la fiche cuve), puis **Nico, 06/11** : « occupe-toi des autres fenêtres alors ». Plan reformulé et validé (« oui ») : une règle commune, vérifier ce que chaque fenêtre ouvre, une preuve au navigateur, le rituel.
+
+### 533b. Ce qu'on a trouvé
+- **Six fenêtres partagent la coque `.mat-modal`** (`index.html`, `styles.css` : colonne flex, `max-height:92vh`, `overflow:hidden`) : la saisie en série des maturités, la couleur des parcelles, le réglage de la roue crantée (Cuvier et Chai), les fiches récolte, maturité et cuve — toutes ouvertes par `openOv`. **Aucun corps ne défilait.**
+- ★ **Trois d'entre elles étaient écrites pour défiler** : `.mat-f-hd` et `.mat-f-pied` en `flex:none`, `.mat-f-liste` en `flex:1 1 auto; min-height:0; overflow-y:auto` — le schéma juste d'une feuille à liste. Mais leur parent (`#mat-saisie-corps`, `#mat-coul-corps`, `#creg-ed-corps`) était un bloc ordinaire : **des règles flex sur des éléments qui ne sont pas des éléments flex ne font rien**, sans un mot d'erreur. La liste prenait toute sa hauteur et poussait le pied — Enregistrer — sous la coupe.
+- **Ce que chaque fenêtre ouvre passe devant elle** (vérifié) : la fiche maturité ouvre la saisie par `openOv`, la fiche récolte « Modifier » par `openOv` (CUVFICHE-1) ; les autres boutons restent dans la fenêtre. Rien à corriger de ce côté.
+- **Retenu** : une règle commune `.mat-modal>[id$="-corps"]` (le corps remplit la fenêtre, peut rétrécir, défile), et une colonne `display:flex; flex-direction:column` pour les trois fenêtres à pied — leur liste défile entre l'en-tête et le pied, qui reste visible. Les fiches sans pied restent des blocs : en colonne, leurs marges verticales auraient cessé de fusionner, et leur mise en page aurait bougé. La règle de la fiche cuve (CUVFICHE-1, dans `_vendInjectCss`) rejoint la règle commune.
+- ⚠️ **`styles.css` passe à 1 048 122 octets** — 454 sous le plafond de 1 024 ko que tient `mv-harnais-typo`. Le prochain style d'écran ira dans une feuille à part (comme `src/gt/console.css`, §531) ; `charte.css` ne reçoit que des réglages (couleurs, tailles), pas des mises en page.
+
+### 533c. Mesuré
+- **Dans Chromium, à 390 × 844**, avec les vraies `charte.css` et `styles.css`, avant (`8f3713a`) puis après, et la structure réelle de chaque fenêtre :
+
+  | Fenêtre | Avant | Après |
+  |---|---|---|
+  | Saisie en série, 40 parcelles | Enregistrer et la dernière parcelle inatteignables | Enregistrer visible d'emblée ; la liste défile jusqu'à la dernière |
+  | Couleur des parcelles, 30 | idem | idem, corrigé |
+  | Réglage du Cuvier (court) | bouton visible | inchangé |
+  | Fiches récolte, maturité, cuve (longues) | bouton du bas inatteignable | le corps défile jusqu'à lui |
+
+  ⚠️ **Le premier passage disait tout invisible, même le réglage de 177 px** : la coque monte par une animation (`slideUp`), et on mesurait pendant la montée. Animations coupées, les chiffres sont ceux ci-dessus. Le script de cette preuve est resté hors du dépôt (un `--navigateur` dans le harnais demanderait Chromium dans la CI).
+- `mv-harnais-fenetres1` (neuf) : **9 assertions, 7/7 mutants**. Il lit le texte et garde l'invariant pour les fenêtres à venir : un corps en « -corps » pour chaque coque ; tout corps rempli par une fonction qui écrit `.mat-f-pied` est en colonne. ⚠️ Un mutant (« une fiche gagne un pied ») est d'abord passé : le harnais cherchait la fonction autour de `m.index + 1`, donc avant le mot `function` entier, et lisait la précédente.
+- `mv-harnais-cuvfiche1` lit la règle commune dans `styles.css` (son mutant « la fiche ne défile plus » suit) — 23 verts, 15/15.
+- Preflight 0 erreur ; `matu1`, `rec1`, `cuves1` (et leurs contre-épreuves), version, annonces, typographie, couches, cliquets : verts. Aide et guide 08 relus : rien à changer.
+- **La chaîne complète, sur le code final : 678 commandes, 0 rouge.** Jouée par tranches (le bac à sable coupe un appel à 300 s) : 1 à 215 ; `icones-contre` seule ; 217 à 229 ; 230 à 589 ; 590 à 678. Construction (`vite build`) verte.
+- **Tutos concernés** : aucun (11 tutos) ; **le panneau côte à côte était à rejouer** (`styles.css` touché) : rejoué sur la construction finale, vert aux trois tailles (1280, 1536, 1920).
+
+### 533d. Ce qui reste ouvert
+- **À vérifier chez Nico** et **vu en route** (la fiche récolte ne se repeint pas après « Modifier ») : §28, bloc FENETRES-1.

@@ -19,6 +19,7 @@ const CONTRE = process.argv.includes('--contre');
 const SAIN = {
   cuv: fs.readFileSync('src/cuvier.js', 'utf8'),
   wn: fs.readFileSync('src/whats-new.js', 'utf8'),
+  css: fs.readFileSync('src/styles.css', 'utf8'),   // ★ FENETRES-1 (§533) : la règle du défilement y est commune aux six fenêtres
 };
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^function ' + nom + '\\s*\\(', 'gm'))];
@@ -186,7 +187,7 @@ function jouer(S) {
       t(ov + ' s’ouvre par openOv, au-dessus de la fiche', fn(S.cuv, f).includes("window.openOv('" + ov + "')"));
     t('les trois listes de la fiche portent leur clé (Parcours, relevés, opérations)',
       fn(S.cuv, '_vendParcHist').includes('data-vf="parc"') && fn(S.cuv, '_vendMesHist').includes('data-vf="mes"') && fn(S.cuv, '_vendOpsSummary').includes('data-vf="ops"'));
-    t('la fiche défile : #cuv-fiche-corps est la zone qui défile', /#cuv-fiche-corps\{flex:1 1 auto;min-height:0;overflow-y:auto/.test(fn(S.cuv, '_vendInjectCss')));
+    t('la fiche défile : le corps de la fenêtre est la zone qui défile (règle commune, FENETRES-1)', S.css.includes('.mat-modal>[id$="-corps"]{flex:1 1 auto;min-height:0;overflow-y:auto'));
     const bloc = S.wn.slice(S.wn.indexOf("{ v: '10.66'"), S.wn.indexOf("{ v: '10.65'"));
     t('la nouveauté le dit, au Journal', /La fiche d’une cuve défile enfin jusqu’en bas/.test(bloc) && /Ce que la fiche ouvre passe devant elle/.test(bloc) && /niv: 0/.test(bloc));
   });
@@ -207,7 +208,7 @@ const DEFAUTS = [
   ['une cuve supprimée garde sa fiche ouverte', (S) => ({ ...S, cuv: S.cuv.replace("if(!c){ if(typeof window.closeOv==='function') window.closeOv(null,'ovCuveFiche'); return; }   // cuve supprimée", 'if(!c){ return; }   // cuve supprimée') })],
   ['sur ordinateur, la feuille ferme la fiche', (S) => ({ ...S, cuv: S.cuv.replace("function _vendFicheOuverte(){\n  if(_matLarge()) return false;\n", 'function _vendFicheOuverte(){\n') })],
   ['le relevé repasse derrière la fiche', (S) => ({ ...S, cuv: S.cuv.replace("if(typeof window.openOv==='function') window.openOv('ovVendMesure'); else if(ov) ov.classList.add('open');", "if(ov) ov.classList.add('open');") })],
-  ['la fiche ne défile plus', (S) => ({ ...S, cuv: S.cuv.replace('#cuv-fiche-corps{flex:1 1 auto;min-height:0;overflow-y:auto;', '#cuv-fiche-corps{flex:1 1 auto;') })],
+  ['la fiche ne défile plus', (S) => ({ ...S, css: S.css.replace('.mat-modal>[id$="-corps"]{flex:1 1 auto;min-height:0;overflow-y:auto;', '.mat-modal>[id$="-corps"]{flex:1 1 auto;') })],
   ['la nouveauté manque', (S) => ({ ...S, wn: S.wn.replace('La fiche d’une cuve défile enfin jusqu’en bas', 'X') })],
 ];
 
@@ -226,7 +227,7 @@ if (!CONTRE) {
   console.log('\nCUVFICHE-1 — contre-épreuve');
   for (const [nom, casse] of DEFAUTS) {
     const S = casse(SAIN);
-    const inchange = S.cuv === SAIN.cuv && S.wn === SAIN.wn;
+    const inchange = S.cuv === SAIN.cuv && S.wn === SAIN.wn && S.css === SAIN.css;
     const rouges = inchange ? 0 : jouer(S).filter((x) => !x.ok).length;
     if (inchange) { rate++; console.log('    ' + c.r('INJECTION RATÉE') + '  ' + nom + c.d('  (le texte visé a changé : mettre la contre-épreuve à jour)')); }
     else if (!rouges) { rate++; console.log('    ' + c.r('NON DÉTECTÉ') + '  ' + nom); }

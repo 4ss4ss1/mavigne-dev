@@ -972,6 +972,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-incident1.mjs --contre'],
   ['node scripts/mv-harnais-cuvfiche1.mjs'],        // CUVFICHE-1 (§532) : la fiche d'une cuve au téléphone — elle défile, ce qu'elle ouvre passe devant, elle se repeint, un toucher la rouvre
   ['node scripts/mv-harnais-cuvfiche1.mjs --contre'],
+  ['node scripts/mv-harnais-fenetres1.mjs'],        // FENETRES-1 (§533) : les fenêtres .mat-modal défilent — corps couverts, fenêtres à pied en colonne, une seule règle
+  ['node scripts/mv-harnais-fenetres1.mjs --contre'],
 ];
 
 /* ── BUILD-1 (§305) — COMMENT LE LANCEUR JOUE LA LISTE ─────────────────────────

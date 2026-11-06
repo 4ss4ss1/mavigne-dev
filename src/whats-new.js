@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.67', d: '2026-11-06', items: [   // FENETRES-1 (§533) : les fenêtres du Cuvier et du Chai défilent
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'Les fenêtres du Cuvier défilent jusqu’en bas',
+      desc: "Noter des mesures, la couleur des parcelles, la fiche d’une récolte ou d’une parcelle, les réglages du Cuvier et du Chai : une fenêtre plus longue que l’écran était coupée. Avec beaucoup de parcelles, le bouton Enregistrer de la saisie en série sortait même de l’écran. La liste défile maintenant, et Enregistrer reste visible en bas." },
+  ] },
   { v: '10.66', d: '2026-11-06', items: [   // CUVFICHE-1 (§532) : la fiche d'une cuve au téléphone
     { niv: 0, pour: ['admin', 'cave'], emoji: 'graphique', titre: 'La fiche d’une cuve défile enfin jusqu’en bas',
       desc: "Au téléphone, la fiche d’une cuve s’arrêtait sous la courbe : Décuver, Changer l’étape, Opération et Modifier étaient hors d’atteinte. Elle défile maintenant jusqu’au dernier bouton." },
