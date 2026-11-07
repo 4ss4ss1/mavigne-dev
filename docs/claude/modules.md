@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ La grille de 365 cases est partie (FRISE-5, §544)
+
+Un modèle se règle dans « L’année » (`src/planning-annee.js`) ; `planCreateTemplate` l’y ouvre. La garde du recalage vit dans la frise
+(`_planAnneeBrouillon` part de `_planGetTpl`, `planAnneeEnregistrer` écrit les douze mois).
+
 ### ★ Une semaine sur la frise (FRISE-4, §543)
 
 Sous la frise : `planAnneeSemaine` (précédente / suivante), ses jours (`planAnneeJour`), `planAnneeFermeSem`, « Rouvrir comme la saison »

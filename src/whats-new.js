@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.76', d: '2026-11-07', items: [   // FRISE-5 (§544) : la grille de 365 cases laisse la place à la frise
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Un modèle se règle sur son année',
+      desc: "La grille de 365 cases (« Modifier ») laisse la place à « L’année » : les saisons, les coupes, une semaine jour par jour, les fermetures, « Tomber juste ». Un modèle neuf s’ouvre directement sur son année, et l’export CSV y est." },
+  ] },
   { v: '10.75', d: '2026-11-07', items: [   // FRISE-4 (§543) : une semaine réglée sur la frise
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une semaine se règle sur la frise',
       desc: "Sous la frise de « L’année » : une semaine, ses jours un par un avec − et +. On la ferme, on la rouvre comme la saison, ou on change le rythme à partir d’elle — la frise en fait une nouvelle saison. Un modèle vide se construit ainsi. Et « Exporter (CSV) » est là aussi." },

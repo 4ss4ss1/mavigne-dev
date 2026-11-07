@@ -328,3 +328,24 @@ Pour effacer la grille de 365 cases, la frise devait savoir tout ce qu’elle fa
 
 ### 543d. Ce qui reste ouvert
 - §28, bloc FRISE-4.
+
+## 544. ★★ FRISE-5 — LA GRILLE DE 365 CASES LAISSE LA PLACE À LA FRISE (07/11 — `src/planning.js` (`planOpenGridEditor`, `_planRenderGridEditor`, `planEditorSetMonth`, `planUpdateDay`, `planCloseGridEditor` et leurs expositions retirés ; le bouton « Modifier » ; `_planRenderCadre` ; `planCreateTemplate`) · `index.html` (APP, un commentaire) · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frise5.mjs` (neuf) · `scripts/mv-harnais-recalage.mjs` · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée à la baisse) · `scripts/tutos-couverture.json` (plafond 801 → 796) · `scripts/preflight-baseline.json` (C24b de planning.js 23 → 20) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-5.json` — base `dfa67fd` « frise4 » — **APP 10.75 → 10.76, SW 11.66 → 11.67**)
+
+### 544a. D’où ça vient
+Le plan du chantier (06/11) : « l’éditeur de 365 cases s’efface » quand la frise sait tout faire. Depuis FRISE-4 (§543), elle règle n’importe quel jour, pose et retire une fermeture, construit un modèle vide et exporte en CSV — tout ce que faisait la grille (elle n’éditait ni les horaires ni les codes).
+
+### 544b. Le modèle, et ce qui a été écarté
+- **Retirés** : les cinq fonctions de l’éditeur, leurs quatre expositions, le bouton « Modifier », la route `if(_planEditing){_planRenderGridEditor();return;}` de la roue. `_planEditing` ne porte plus que `{annee}` (et le brouillon).
+- **Un modèle neuf s’ouvre sur son année** (`window.planAnneeOuvrir(id)`) : vide, il n’a pas de fermetures et se construit avec − / + (FRISE-4).
+- ★ **La leçon du recalage survit à `planUpdateDay`** : « avec PLAN_DEF brut, toucher une seule case de janvier 2027 recopiait le janvier 2026 entier dans la base » (le commentaire parti avec la fonction). La frise part de `_planGetTpl` — recalée sur l’année — et « Enregistrer » écrit les douze mois qu’on a vus ; `mv-harnais-recalage` le tient désormais là (S4, S5, et la contre-épreuve « le brouillon de la frise repart de PLAN_DEF brut »). L’ancienne S6 (« un modèle maison n’hérite pas de standard au premier chiffre saisi ») tombe avec la saisie case par case : la frise montre l’année entière avant d’écrire.
+- ⚠️ **Le bump de `index.html`** : « 10.75 » y figure aussi dans le tracé SVG de l’icône œil (quatre fois) ; on remplace `v10.xx` et `boot.js?v=10.xx`, jamais le nombre nu.
+- Écarté : garder « Modifier » en secours (deux éditeurs pour la même grille, l’un sans les règles de l’autre) ; retirer les règles CSS `.plan-ge-*` dans ce lot (`styles.css` et le jeu des champs : à faire avec la charte).
+
+### 544c. Ce qui a été vérifié
+- `scripts/mv-harnais-frise5.mjs` (neuf) : plus une trace de l’éditeur dans l’appli (fonctions, appels, expositions, tutos), plus de « Modifier », la roue ne route que l’année, un modèle neuf s’ouvre sur son année, le CSV reste, « Enregistrer » écrit par `planSaveTpl` ; 6 cas, 3 contre-épreuves tenues.
+- `mv-harnais-recalage` (S4, S5 sur la frise, sa contre-épreuve) et `mv-harnais-regl-module` (l’hôte de l’année) verts.
+- **Le cliquet des gestes sans tuto** : quatre gestes partis avec l’éditeur, le compte tombe de 801 à 796 — la contre-épreuve « un geste nouveau sans tuto » de `mv-harnais-tutos` restait verte sous l’ancien plafond ; `scripts/tutos-couverture.json` abaissé à 796 (le harnais le demandait).
+- **Le cliquet C24b** (valeur crue dans un gestionnaire) : trois des siens partis avec l’éditeur (« Modifier » et ses onglets de mois), `src/planning.js` tombe de 23 à 20 — la contre-épreuve C24b de `harnais-sec7-contre` « ne prouvait plus rien » sous l’ancienne référence ; `scripts/preflight-baseline.json` regravé (`node scripts/preflight.mjs --baseline`) : seule baisse, 23 → 20, aucune hausse.
+
+### 544d. Ce qui reste ouvert
+- §28, bloc FRISE-5.

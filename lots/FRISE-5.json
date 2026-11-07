@@ -1,0 +1,32 @@
+{
+  "lot": "FRISE-5",
+  "section": "§544",
+  "base": "dfa67fde636160a282776b4a5ceb82a3e6fc49b9",
+  "inclut": [],
+  "date": "2026-11-07",
+  "tutos": {
+    "saute": "les 4 tutos concernés (annee, coupe, reglerannee, semaine) rejoués sur le build en deux parties, --part 1/2 et 2/2 : 16 passages sur 16 verts — le bac coupe une commande à 5 min, les quatre en demandent 6 ; une partie n'écrit pas rapports/tutos.json"
+  },
+  "fichiers": {
+    ".mv-base": "43b56d190834fd3189f29cd11ca00cf0d90d2360aadc181b2c1a631274779dfd",
+    "CLAUDE.md": "6ce398a243b66148576e8b105aaba600ac788daee2196277e4144bf853b4c81a",
+    "docs/claude/INDEX.md": "21868e80c05d809a24c70ac6f5293f2a49f098907a41c52d35cdf96d6827b68a",
+    "docs/claude/chantiers-530-579.md": "3d38cbbfc21ca48d04a526b61587ba0b07568fcafa564e11d34e5057c6c4f33c",
+    "docs/claude/journal.md": "a1eb984e4b5fed84889d0f3119c2b18ba57dcc06b18c0e493f896ae612c3c53e",
+    "docs/claude/modules.md": "ef6859a4a2231ff77b9663dd887f037b1f849defdaeef02b06fe10a2c24d402f",
+    "guide/10-planning.html": "c6b725e5d50b1bb4adcae7d35d90ef04ea1810ed38f139410a0f4f0badadd7fc",
+    "index.html": "b2cae9676fd3603447b0480c7ea83576d82f6aba20e42c8e4139329d692bc7b1",
+    "public/sw.js": "434451065a74b1838a6a510fb5aec01dde81afc9ba71cb1bc7c755914bd97c93",
+    "scripts/harnais-claude-md.mjs": "b53845f891db64626e1f472cd5a4b8222d02bc068d74dbda1bdb30601bc54c03",
+    "scripts/mv-harnais-liste.mjs": "c01decccea667b7a6cb1cac7abc86a702cb19921cb769366bc319a8351a09d7f",
+    "scripts/mv-harnais-recalage.mjs": "8c053e990bce9b76859680a866fb8742bb3a7244e3f10f9721432b447850f34c",
+    "scripts/mv-harnais-regl-module.mjs": "542c7ebd1473e7de2c96e9629de99b77e4fa17a6303a970a7425a8004545f7b4",
+    "scripts/preflight-baseline.json": "3e6b340c3656d01efbe48085cdf0728705c865b8cb106d22abab4a31db9158c9",
+    "scripts/tutos-couverture.json": "d165bd091c043bb453a9834af69a62e5d6a5e1d526cf0282b52a8fe537d90b97",
+    "scripts/typo-baseline.json": "88ca3caccae7106b6692131fca8b47d5c31b645ac3701fc10af2645f2c3f4e24",
+    "src/planning.js": "464e5f0d67da1c08ac8a3f2b28410f3bfa0f0558d18f949041897bf83a2d42c5",
+    "src/utils.js": "76f4819e9629326110517ea40dbb620e2124b541f77c0be498c56d69048c1aea",
+    "src/whats-new.js": "d1a420894efa05b0b7d88dc774bc19fa697ede314e7975390f2d7f0d9b18e12a",
+    "scripts/mv-harnais-frise5.mjs": "4e0bac7a0cba09572db156cce5f1a62a15a1b5ad7d10b8679f1ba9141b058ef9"
+  }
+}

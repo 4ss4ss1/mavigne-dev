@@ -1,6 +1,6 @@
 {
   "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23/C24/C25). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
-  "generated": "2026-11-05",
+  "generated": "2026-11-07",
   "C11_dead_ids": {
     "src/admin-gt.js": [],
     "src/app.js": [],
@@ -20,6 +20,7 @@
     "src/onboarding.js": [],
     "src/phyto.js": [],
     "src/pilotage.js": [],
+    "src/planning-annee.js": [],
     "src/planning-vue.js": [],
     "src/planning.js": [],
     "src/reglages.js": [],
@@ -35,8 +36,11 @@
     "src/gt/clients.js": [],
     "src/gt/coquille.js": [],
     "src/gt/facturation.js": [],
+    "src/gt/fiche.js": [],
+    "src/gt/incident.js": [],
     "src/gt/incidents.js": [],
     "src/gt/leads.js": [],
+    "src/gt/pieces.js": [],
     "src/gt/sante.js": []
   },
   "C14_empty_catch": {
@@ -58,6 +62,7 @@
     "src/onboarding.js": 0,
     "src/phyto.js": 0,
     "src/pilotage.js": 10,
+    "src/planning-annee.js": 0,
     "src/planning-vue.js": 0,
     "src/planning.js": 0,
     "src/reglages.js": 0,
@@ -71,8 +76,11 @@
     "src/gt/clients.js": 0,
     "src/gt/coquille.js": 0,
     "src/gt/facturation.js": 0,
+    "src/gt/fiche.js": 0,
+    "src/gt/incident.js": 0,
     "src/gt/incidents.js": 0,
     "src/gt/leads.js": 0,
+    "src/gt/pieces.js": 0,
     "src/gt/sante.js": 0
   },
   "C15_dead_fns": {
@@ -96,6 +104,7 @@
     "src/onboarding.js": [],
     "src/phyto.js": [],
     "src/pilotage.js": [],
+    "src/planning-annee.js": [],
     "src/planning-vue.js": [],
     "src/planning.js": [],
     "src/reglages.js": [],
@@ -109,8 +118,11 @@
     "src/gt/clients.js": [],
     "src/gt/coquille.js": [],
     "src/gt/facturation.js": [],
+    "src/gt/fiche.js": [],
+    "src/gt/incident.js": [],
     "src/gt/incidents.js": [],
     "src/gt/leads.js": [],
+    "src/gt/pieces.js": [],
     "src/gt/sante.js": []
   },
   "C16_native_dialogs": {
@@ -132,6 +144,7 @@
     "src/onboarding.js": 0,
     "src/phyto.js": 0,
     "src/pilotage.js": 0,
+    "src/planning-annee.js": 0,
     "src/planning-vue.js": 0,
     "src/planning.js": 0,
     "src/reglages.js": 0,
@@ -145,8 +158,11 @@
     "src/gt/clients.js": 0,
     "src/gt/coquille.js": 0,
     "src/gt/facturation.js": 0,
+    "src/gt/fiche.js": 0,
+    "src/gt/incident.js": 0,
     "src/gt/incidents.js": 0,
     "src/gt/leads.js": 0,
+    "src/gt/pieces.js": 0,
     "src/gt/sante.js": 0
   },
   "C18_dup_ids": {
@@ -171,6 +187,7 @@
     "src/onboarding.js": 1,
     "src/phyto.js": 0,
     "src/pilotage.js": 0,
+    "src/planning-annee.js": 0,
     "src/planning-vue.js": 0,
     "src/planning.js": 0,
     "src/reglages.js": 7,
@@ -184,8 +201,11 @@
     "src/gt/clients.js": 0,
     "src/gt/coquille.js": 0,
     "src/gt/facturation.js": 0,
+    "src/gt/fiche.js": 0,
+    "src/gt/incident.js": 0,
     "src/gt/incidents.js": 0,
     "src/gt/leads.js": 0,
+    "src/gt/pieces.js": 0,
     "src/gt/sante.js": 0
   },
   "C23_handler_scope": {
@@ -208,6 +228,7 @@
     "src/onboarding.js": [],
     "src/phyto.js": [],
     "src/pilotage.js": [],
+    "src/planning-annee.js": [],
     "src/planning-vue.js": [],
     "src/planning.js": [],
     "src/reglages.js": [],
@@ -221,8 +242,11 @@
     "src/gt/clients.js": [],
     "src/gt/coquille.js": [],
     "src/gt/facturation.js": [],
+    "src/gt/fiche.js": [],
+    "src/gt/incident.js": [],
     "src/gt/incidents.js": [],
     "src/gt/leads.js": [],
+    "src/gt/pieces.js": [],
     "src/gt/sante.js": []
   },
   "C24a_mauvais_escapeur": {
@@ -244,6 +268,7 @@
     "src/onboarding.js": [],
     "src/phyto.js": [],
     "src/pilotage.js": [],
+    "src/planning-annee.js": [],
     "src/planning-vue.js": [],
     "src/planning.js": [],
     "src/reglages.js": [],
@@ -257,8 +282,11 @@
     "src/gt/clients.js": [],
     "src/gt/coquille.js": [],
     "src/gt/facturation.js": [],
+    "src/gt/fiche.js": [],
+    "src/gt/incident.js": [],
     "src/gt/incidents.js": [],
     "src/gt/leads.js": [],
+    "src/gt/pieces.js": [],
     "src/gt/sante.js": []
   },
   "C24b_slot_js_nu": {
@@ -280,8 +308,9 @@
     "src/onboarding.js": 1,
     "src/phyto.js": 8,
     "src/pilotage.js": 2,
+    "src/planning-annee.js": 0,
     "src/planning-vue.js": 0,
-    "src/planning.js": 23,
+    "src/planning.js": 20,
     "src/reglages.js": 17,
     "src/reserve.js": 1,
     "src/taille-doc.js": 0,
@@ -293,8 +322,11 @@
     "src/gt/clients.js": 0,
     "src/gt/coquille.js": 0,
     "src/gt/facturation.js": 0,
+    "src/gt/fiche.js": 0,
+    "src/gt/incident.js": 0,
     "src/gt/incidents.js": 0,
     "src/gt/leads.js": 0,
+    "src/gt/pieces.js": 0,
     "src/gt/sante.js": 0
   },
   "C24c_interpolation_nue": {
@@ -316,6 +348,7 @@
     "src/onboarding.js": 0,
     "src/phyto.js": 20,
     "src/pilotage.js": 0,
+    "src/planning-annee.js": 0,
     "src/planning-vue.js": 0,
     "src/planning.js": 0,
     "src/reglages.js": 149,
@@ -329,8 +362,11 @@
     "src/gt/clients.js": 0,
     "src/gt/coquille.js": 0,
     "src/gt/facturation.js": 0,
+    "src/gt/fiche.js": 0,
+    "src/gt/incident.js": 0,
     "src/gt/incidents.js": 0,
     "src/gt/leads.js": 0,
+    "src/gt/pieces.js": 0,
     "src/gt/sante.js": 0
   },
   "C25_oncall_sans_appcheck": {

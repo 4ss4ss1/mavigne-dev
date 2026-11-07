@@ -6819,7 +6819,6 @@ function _planRenderCadre(){
   var body=_planCadreHost();
   if(!body)return;
   if(_planEditing&&_planEditing.annee&&window._planRenderAnnee){window._planRenderAnnee();return;}   // ★ FRISE-1 : l'année d'un modèle (l'ouverture de la roue repart de la liste)
-  if(_planEditing){_planRenderGridEditor();return;}
 
   var all=Object.assign({},PLAN_DEF,_pTplStore());
   var ids=Object.keys(all);
@@ -6968,7 +6967,6 @@ function _planRenderCadre(){
       +'</div>'
       +'<div class="plan-tpl-btns">'
         +'<button class="plan-btn-pdf" data-tuto="plan.annee" data-pl="'+_escAttr(id)+'" onclick="planAnneeOuvrir(this.dataset.pl)">L\u2019ann\u00e9e</button>'
-        +'<button class="plan-btn-saisir" onclick="planOpenGridEditor(\''+id+'\')">Modifier</button>'
         +'<button class="plan-btn-pdf" onclick="planExportCSV(\''+id+'\')">CSV \u2193</button>'
         +'<button class="plan-btn-pdf" onclick="planDirectImportCSV(\''+id+'\')">CSV \u2191</button>'
         +(!isDefault?'<button class="plan-btn-pdf" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
@@ -7015,7 +7013,7 @@ function planCreateTemplate(){
   _pTplStore()[id]={};
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
   window.fbSaveToast({planning_templates:PLANNING_TEMPLATES},'\u2705 Template "'+id+'" cr\u00e9\u00e9','#3D6B27');
-  planOpenGridEditor(id);
+  if(window.planAnneeOuvrir)window.planAnneeOuvrir(id);   // ★ FRISE-5 : un modèle neuf s'ouvre sur son année — vide, il se construit sur la frise (FRISE-4)
 }
 
 function planAssignTpl(nom,plId){
@@ -7203,103 +7201,15 @@ function planSaveMaj(){
   else window.fbSaveToast({config:window.CONFIG},_m,'#3D6B27');
   _planRenderCadre();
 }
-// ── Éditeur de grille planning ──
-function planOpenGridEditor(templateId){
-  _planEditing={id:templateId,month:planMonth};
-  _planRenderCadre();
-}
 
-function _planRenderGridEditor(){
-  var body=_planCadreHost();
-  if(!body||!_planEditing)return;
-  var id=_planEditing.id;
-  var m=_planEditing.month;
-  var tpl=Object.assign({},PLAN_DEF[id]||{},_pTplStore()[id]||{});
-  var total=_planDays(m);
 
-  var html='<button class="plan-back-btn" onclick="planCloseGridEditor()">\u2190 Retour templates</button>'
-    +'<div class="plan-card"><div class="plan-card-lbl">Template : '+id+'</div>';
 
-  // Récap annuel des heures de référence calculées
-  html+='<div class="plan-ref-recap">';
-  var annuelTotal=0;
-  for(var mi=0;mi<12;mi++){
-    var mRef=_planGetRefH(id,mi);
-    annuelTotal+=mRef;
-    html+='<div class="plan-ref-mo'+(mi===m?' active':'')+'" onclick="planEditorSetMonth('+mi+')">'      +'<span class="plan-ref-mo-n">'+PLAN_MOIS_C[mi]+'</span>'      +'<span class="plan-ref-mo-h">'+(mRef>0?_planFmt(mRef):'—')+'</span>'    +'</div>';
-  }
-  html+='</div>';
-  html+='<div class="plan-ref-total">Total annuel\u202f: <strong>'+_planFmt(annuelTotal)+'</strong> de r\u00e9f\u00e9rence</div>';
-
-  // Sélection mois
-  html+='<div class="plan-month-tabs" style="margin-bottom:12px">';
-  for(mi=0;mi<12;mi++){
-    html+='<button class="plan-mo-tab'+(mi===m?' active':'')+'" onclick="planEditorSetMonth('+mi+')">'+PLAN_MOIS_C[mi]+'</button>';
-  }
-  html+='</div>';
-
-  // Total mois courant
-  var mRefCur=_planGetRefH(id,m);
-  html+='<div class="plan-ref-cur">\u23a3 R\u00e9f\u00e9rence '+PLAN_MOIS[m]+' (calcul\u00e9e depuis la grille)\u202f: <strong>'+_planFmt(mRefCur)+'</strong></div>';
-
-  // Grille jours
-  html+='<div class="plan-grid-editor" id="plan-grid-editor">';
-  var moData=(tpl[m]||{});
-  for(var d=1;d<=total;d++){
-    var dow=_planDow(m,d),wk=dow===0||dow===6;
-    var h=moData[d]||0;
-    var rowBg=wk?'var(--bg-app)':'white';
-    html+='<div class="plan-ge-row" style="background:'+rowBg+';opacity:'+(wk?0.6:1)+'">'
-      +'<div class="plan-ge-day"><span class="plan-ge-n">'+d+'</span><span class="plan-ge-dow">'+PLAN_JOURS[dow]+'</span></div>'
-      +'<input type="number" min="0" max="12" step="0.5" value="'+(h||'')+'" placeholder="0" '
-        +'data-d="'+d+'" data-m="'+m+'" data-tpl="'+id+'" '
-        +'class="plan-ge-input" onchange="planUpdateDay(this)">'
-      +'<span class="plan-ge-unit">h</span>'
-    +'</div>';
-  }
-  html+='</div>';
-
-  // Actions
-  html+='<div class="plan-ge-actions">'
-    +'<button class="plan-btn-saisir" style="flex:1" onclick="planSaveTpl(\''+id+'\')">Enregistrer Firebase</button>'
-    +'<button class="plan-btn-pdf" onclick="planExportCSV(\''+id+'\')">CSV \u2193</button>'
-  +'</div>'
-  +'</div>';
-
-  body.innerHTML=html;
-}
-
-function planEditorSetMonth(m){if(_planEditing)_planEditing.month=m;_planRenderCadre();}
-
-function planUpdateDay(input){
-  var d=parseInt(input.getAttribute('data-d'));
-  var m=parseInt(input.getAttribute('data-m'));
-  var id=input.getAttribute('data-tpl');
-  var h=parseFloat(input.value)||0;
-  if(h<0)h=0;
-  if(!_pTplStore()[id])_pTplStore()[id]={};
-  if(!_pTplStore()[id][m])_pTplStore()[id][m]={};
-  // Fusionner avec défaut
-  // ⚠️⚠️ La grille de départ est le modèle intégré RECALÉ sur l'année affichée.
-  //   Avec PLAN_DEF brut, toucher UNE SEULE case de janvier 2027 recopiait le
-  //   janvier 2026 entier dans la base : le glissement passait du code aux
-  //   données, et il n'en ressortait plus.
-  //   ⚠️ La garde `PLAN_DEF[id]` reste : sans elle, un modèle maison hériterait
-  //   du mois de `standard` au premier chiffre saisi (_planTplDef y retombe).
-  var _bse=PLAN_DEF[id]?_planTplDef(id,_pY()):null;
-  var defData=_bse&&_bse[m]?Object.assign({},_bse[m]):{};
-  Object.assign(defData,_pTplStore()[id][m]);
-  if(h>0)defData[d]=h;else delete defData[d];
-  _pTplStore()[id][m]=defData;
-  window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-}
 
 function planSaveTpl(id){
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
   window.fbSaveToast({planning_templates:PLANNING_TEMPLATES},'\u2705 Template "'+id+'" enregistr\u00e9','#3D6B27');
 }
 
-function planCloseGridEditor(){_planEditing=null;_planRenderCadre();}
 
 // ── Import direct par template ──
 function planDirectImportCSV(id){
@@ -9858,10 +9768,6 @@ window._planEditingSet    = function(v){ _planEditing = v; };
 window.planSaveMaj          = planSaveMaj;
 window.planSetHsupMode      = planSetHsupMode;
 window.planLegalPreset      = planLegalPreset;
-window.planOpenGridEditor   = planOpenGridEditor;
-window.planCloseGridEditor  = planCloseGridEditor;
-window.planEditorSetMonth   = planEditorSetMonth;
-window.planUpdateDay        = planUpdateDay;
 window.planSaveTpl          = planSaveTpl;
 window.planAskDeleteTemplate    = planAskDeleteTemplate;
 window.planCancelDeleteTemplate = planCancelDeleteTemplate;

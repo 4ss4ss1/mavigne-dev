@@ -93,7 +93,7 @@ function rang(an, m, d) { // n-ième occurrence de ce jour de semaine dans le mo
 }
 
 // ── Le jeu de règles ─────────────────────────────────────────────────────────
-function jouer(brut, etiquette) {
+function jouer(brut, etiquette, brutAn) {
   const src = sansCommentaires(brut);
   const API = charger(brut);
   const { PLAN_DEF, PLAN_DEF_AN } = API;
@@ -101,14 +101,14 @@ function jouer(brut, etiquette) {
 
   // ── Statique : la signature du défaut ne doit plus exister ─────────────────
   const gt = corps(src, '_planGetTpl') || '';
-  const ud = corps(src, 'planUpdateDay') || '';
+  const srcAn = sansCommentaires(brutAn || BRUT_AN);   // ★ FRISE-5 (§544) : la grille de 365 cases est partie, la frise écrit l'année
+  const br = corps(srcAn, '_planAnneeBrouillon') || '', en = corps(srcAn, 'planAnneeEnregistrer') || '';
   const re = corps(src, '_pl2RenderEquipe') || '';
   A(PLAN_DEF_AN === 2026, 'S1 · PLAN_DEF_AN déclaré à 2026 (année de calage des modèles intégrés)');
   A(gt && !/PLAN_DEF\[plId\]\s*\|\|\s*PLAN_DEF\.standard/.test(gt), 'S2 · _planGetTpl ne sert plus PLAN_DEF brut');
   A(/_planTplDef\s*\(/.test(gt), 'S3 · _planGetTpl passe par _planTplDef');
-  A(ud && !/PLAN_DEF\[id\]\[m\]/.test(ud), 'S4 · planUpdateDay ne recopie plus le mois de PLAN_DEF brut');
-  A(/_planTplDef\s*\(/.test(ud), 'S5 · planUpdateDay part de la grille recalée');
-  A(/PLAN_DEF\[id\]\s*\?/.test(ud), 'S6 · planUpdateDay garde la garde PLAN_DEF[id] (un modèle maison n\u2019hérite pas de standard)');
+  A(/_planGetTpl\(E\.annee,_pY\(\)\)/.test(br) && !/PLAN_DEF/.test(br), 'S4 · la frise part de la grille servie par _planGetTpl (recalée), jamais de PLAN_DEF brut');
+  A(/for\(var m=0;m<12;m\+\+\)neuf\[m\]=E\.brouillon\[m\]/.test(en) && !/PLAN_DEF/.test(en), 'S5 · « Enregistrer » écrit les douze mois de l\u2019année vus dans la frise, rien de PLAN_DEF');
   A(/_planRecaleBar\s*\(\s*\)/.test(re), 'S7 · le bandeau est branché dans l\u2019onglet « Le mois »');
   // ★ Le bandeau de la grille et le planning imprimé posent la MÊME question : une
   //   seule source, sinon l'écran et le papier finissent par se contredire.
@@ -190,6 +190,7 @@ function jouer(brut, etiquette) {
 
 // ── Exécution ────────────────────────────────────────────────────────────────
 const brut = fs.readFileSync(SRC, 'utf8');
+const BRUT_AN = fs.readFileSync(SRC.replace(/planning\.js$/, 'planning-annee.js'), 'utf8');   // ★ FRISE-5 (§544)
 
 if (!CONTRE) {
   console.log('mv-harnais-recalage — modèle de planning recalé sur l\u2019année affichée');
@@ -203,9 +204,8 @@ console.log('mv-harnais-recalage --contre — chaque défaut réinjecté doit ro
 const defauts = [
   ['le repli sert de nouveau PLAN_DEF brut',
    s => s.replace('return (_st&&_st[plId])||_planTplDef(plId,_Y);', 'return (_st&&_st[plId])||PLAN_DEF[plId]||PLAN_DEF.standard;')],
-  ['planUpdateDay repart du mois de PLAN_DEF',
-   s => s.replace('var _bse=PLAN_DEF[id]?_planTplDef(id,_pY()):null;\n  var defData=_bse&&_bse[m]?Object.assign({},_bse[m]):{};',
-                  'var defData=PLAN_DEF[id]&&PLAN_DEF[id][m]?Object.assign({},PLAN_DEF[id][m]):{};')],
+  ['le brouillon de la frise repart de PLAN_DEF brut',   // ★ FRISE-5 (§544) : remplace « planUpdateDay repart du mois de PLAN_DEF »
+   s => s.replace('function _planAnneeBrouillon(E){return E.brouillon||_planAnneeCopie(_planGetTpl(E.annee,_pY())||{});}', 'function _planAnneeBrouillon(E){return E.brouillon||_planAnneeCopie(PLAN_DEF[E.annee]||{});}'), 'an'],
   ['le bandeau est débranché de l\u2019onglet « Le mois »',
    s => s.replace('_pl2YearTabs()+_planRecaleBar()+_pl2Toolbar()', '_pl2YearTabs()+_pl2Toolbar()')],
   ['les places à pourvoir ne sont plus déclarées',
@@ -219,13 +219,13 @@ const defauts = [
                   'var _et=(typeof _planYearHasData===\'function\'&&!_planYearHasData(yr))?{trous:0}:null;')],
 ];
 let cok = 0, cko = 0;
-for (const [nom, casser] of defauts) {
-  const abime = casser(brut);
-  if (abime === brut) { console.log('  \x1b[31mROUGE\x1b[0m contre-épreuve inopérante (motif absent) : ' + nom); cko++; continue; }
+for (const [nom, casser, cible] of defauts) {
+  const base = cible === 'an' ? BRUT_AN : brut, abime = casser(base);
+  if (abime === base) { console.log('  \x1b[31mROUGE\x1b[0m contre-épreuve inopérante (motif absent) : ' + nom); cko++; continue; }
   ok = 0; ko = 0; echecs.length = 0;
   const journal = console.log; console.log = () => {};
   let rouge = false;
-  try { jouer(abime, nom); rouge = ko > 0; } catch (e) { rouge = true; }
+  try { if (cible === 'an') jouer(brut, nom, abime); else jouer(abime, nom); rouge = ko > 0; } catch (e) { rouge = true; }
   console.log = journal;
   if (rouge) { cok++; console.log('  \x1b[32mvert\x1b[0m  le harnais attrape : ' + nom + (echecs.length ? '  → ' + echecs[0].split('·')[0].trim() : '')); }
   else { cko++; console.log('  \x1b[31mROUGE\x1b[0m défaut NON attrapé : ' + nom); }

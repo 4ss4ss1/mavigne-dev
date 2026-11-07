@@ -212,8 +212,9 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(/cadre:'mois'/.test(pln) && /templates:'mois'/.test(pln), 'les cl\u00e9s m\u00e9moris\u00e9es cadre et templates atterrissent sur le mois');
   T(/if\(tab==='cadre'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('planning'\); return; \}/.test(pln), 'planSwitchTab(\'cadre\') ouvre la roue');
   T(!/planTab==='cadre'/.test(pln), 'plus aucune branche planTab===cadre');
-  const cadre = extraire(pln, '_planRenderCadre') || '', editor = extraire(pln, '_planRenderGridEditor') || '';
-  T(/var body=_planCadreHost\(\);/.test(cadre) && /var body=_planCadreHost\(\);/.test(editor), 'le cadre et l\u2019\u00e9diteur de semaine \u00e9crivent dans l\u2019h\u00f4te de la feuille');
+  // ★ FRISE-5 (§544) : la grille de 365 cases est partie ; l'année d'un modèle (src/planning-annee.js) écrit dans la même feuille
+  const cadre = extraire(pln, '_planRenderCadre') || '', editor = extraire(readFileSync('src/planning-annee.js', 'utf8'), '_planRenderAnnee') || '';
+  T(/var body=_planCadreHost\(\);/.test(cadre) && /var body=_planCadreHost\(\)[,;]/.test(editor), 'le cadre et l\u2019ann\u00e9e d\u2019un mod\u00e8le \u00e9crivent dans l\u2019h\u00f4te de la feuille');
   const host = extraire(pln, '_planCadreHost') || '';
   T(/getElementById\('plan-cadre-host'\)\|\|document\.getElementById\('plan-body'\)/.test(host), '\u2026 avec repli sur #plan-body');
   T(/function _planCadreOpen\(\)\{ _planEditing=null; _planRenderCadre\(\); \}/.test(pln) && /window\._planCadreOpen=_planCadreOpen;/.test(pln), '_planCadreOpen repart de la liste, et est expos\u00e9');

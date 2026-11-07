@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (FRISE-4)** — **UNE SEMAINE SE RÈGLE SUR LA FRISE ; UNE ANNÉE VIDE SE CONSTRUIT** (§543). Base `dbd98c5` (« anneedec »). **APP 10.74 → 10.75, SW 11.65 → 11.66**. Dans `src/planning-annee.js` : sous la frise, une semaine choisie (`planAnneeSemaine`, précédente / suivante ; par défaut celle d’aujourd’hui) — ses jours un par un (`planAnneeJour`, n’importe quel jour), « Fermer la semaine » (`planAnneeFermeSem`), « Rouvrir comme la saison » (`planAnneeRemettre` sur une semaine, fermée comprise), « Changer le rythme à partir d’ici » (`planAnneeDesIci` : un jour de la semaine, de cette semaine à la fin de sa saison — la frise y lit une coupe) ; une année vide n’a pas de fermetures (elle se construit) ; « Exporter (CSV) » dans la vue. La frise sait désormais tout ce que fait la grille de 365 cases. `mv-harnais-frise4` neuf (8 cas, 3 contre-épreuves) ; tuto neuf « Comment faire pour régler une semaine d’un modèle ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (FRISE-5)** — **LA GRILLE DE 365 CASES LAISSE LA PLACE À LA FRISE** (§544). Base `dfa67fd` (« frise4 »). **APP 10.75 → 10.76, SW 11.66 → 11.67**. Retirés de `planning.js` : `planOpenGridEditor`, `_planRenderGridEditor`, `planEditorSetMonth`, `planUpdateDay`, `planCloseGridEditor`, leurs expositions, le bouton « Modifier » de la carte d’un modèle, la route de la roue (`_planRenderCadre` ne route plus que `_planEditing.annee`). `planCreateTemplate` ouvre l’année (`window.planAnneeOuvrir`). La garde du recalage (« un chiffre saisi en 2027 recopiait le mois 2026 ») passe de `planUpdateDay` à la frise : `mv-harnais-recalage` S4-S5 tiennent `_planAnneeBrouillon` (part de `_planGetTpl`, recalée) et `planAnneeEnregistrer` (les douze mois vus) ; `mv-harnais-regl-module` lit l’hôte de l’année. Les règles CSS `.plan-ge-*` restent, orphelines (à nettoyer avec la charte). ⚠️ `index.html` porte « 10.75 » aussi dans le tracé de l’icône œil : le bump vise `v10.xx` et `boot.js?v=`, pas le nombre nu. `mv-harnais-frise5` neuf (6 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2126,7 +2126,12 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 
 ### ★ FRISE-4 (07/11, §543) — une semaine sur la frise : ce qui reste
 - **À essayer chez Nico, FRISE-4 déployé** : un modèle › « L’année » — sous la frise, la semaine d’aujourd’hui ; « Suivante », un jour − / +, « Fermer la semaine » puis « Rouvrir comme la saison », « Changer le rythme à partir d’ici » sur un vendredi ; « Annuler ». Puis un modèle neuf, vide : ses saisons se règlent avec − et +.
-- **FRISE-5** : effacer l’éditeur de 365 cases (« Modifier ») — la frise sait tout faire ; « Nouveau modèle » ouvre l’année ; `mv-harnais-regl-module` tient le texte de l’éditeur (à suivre dans le lot).
+- ~~**FRISE-5** : effacer l’éditeur de 365 cases~~ — fait (§544).
+
+### ★ FRISE-5 (07/11, §544) — la grille de 365 cases retirée : ce qui reste
+- **À regarder chez Nico, FRISE-5 déployé** : la carte d’un modèle n’a plus « Modifier » ; « L’année » fait tout ; un modèle neuf (roue crantée › créer) s’ouvre sur son année, vide, et se construit.
+- **Les règles CSS `.plan-ge-*`** (styles.css, et `plan-ge-input` dans le jeu des champs de `mv-harnais-champs`) sont orphelines : à retirer avec la charte, sans urgence.
+- **La suite du chantier** : le lot 4 — le programme indicatif (affiché une semaine avant, accord national art. 10.4), « Mon année » pour chacun, la mention de la journée de solidarité au relevé ; le lot 5 — le rythme sur deux semaines, les heures de prise par jour (la fin des codes D/M/A).
 
 ## 29. Synchronisation de la mémoire
 
