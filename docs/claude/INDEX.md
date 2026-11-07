@@ -593,3 +593,4 @@
 | 537 | 537. ★★ CPJOURS-1 — LES CONGÉS SE DÉCOMPTENT PAR PÉRIODE : UNE SEMAINE DE CONGÉ COMPTE SES JOURS DE REPOS (… | `docs/claude/chantiers-530-579.md` |
 | 538 | 538. ★★ BASEAN-1 — LA BASE DE L’ANNÉE REMPLACE LES 1 607 H, ET LA JOURNÉE DE SOLIDARITÉ SE RÈGLE DANS LA RO… | `docs/claude/chantiers-530-579.md` |
 | 539 | 539. ★★ FRISE-1 — L’ANNÉE D’UN MODÈLE, EN FRISE : LA GRILLE RELUE EN SAISONS (06/11 — `src/planning.js` (`_… | `docs/claude/chantiers-530-579.md` |
+| 540 | 540. ★★ FRISE-2 — L’ANNÉE D’UN MODÈLE SE RÈGLE SUR LA FRISE (07/11 — `src/planning.js` (`_planAnneeCopie`, … | `docs/claude/chantiers-530-579.md` |

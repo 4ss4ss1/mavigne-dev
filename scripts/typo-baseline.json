@@ -57,7 +57,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 214
+    "ko": 216
   },
   "src/gt.js": {
     "dur": 0,
@@ -97,7 +97,7 @@
   "src/planning.js": {
     "dur": 112,
     "petit": 85,
-    "ko": 682
+    "ko": 725
   },
   "src/reglages.js": {
     "dur": 108,
@@ -127,17 +127,17 @@
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 104
+    "ko": 112
   },
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 544
+    "ko": 545
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 573
+    "ko": 575
   },
   "index.html": {
     "dur": 74,

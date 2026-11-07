@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.72', d: '2026-11-07', items: [   // FRISE-2 (§540) : l'année d'un modèle se règle sur la frise
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année d’un modèle se règle sur la frise',
+      desc: "Dans « L’année » d’un modèle, chaque saison se règle avec − et + : tous ses jours réguliers suivent, les jours à part et les fermetures ne bougent pas. « Tomber juste » propose une ou deux retouches qui posent l’année sur sa base. Rien n’est écrit avant « Enregistrer »." },
+  ] },
   { v: '10.71', d: '2026-11-06', items: [   // FRISE-1 (§539) : l'année d'un modèle, en frise (lecture)
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année d’un modèle, d’un coup d’œil',
       desc: "Dans la roue crantée du Planning, « L’année » sur un modèle : la grille relue en saisons, la semaine des vendanges à part, les fermetures, une barre par semaine face aux 35 h, son compte face à la base de l’année et le cadre vérifié. Lecture seule pour l’instant : la grille se modifie toujours avec « Modifier »." },

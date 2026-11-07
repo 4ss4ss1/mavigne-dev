@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.62
+// MA VIGNE — Service Worker v11.63
+// v11.63 (07/11/2026) — FRISE-2 (§540) : l’année d’un modèle se règle sur la frise — une saison − / +, « Tomber juste », enregistrer
 // v11.62 (06/11/2026) — FRISE-1 (§539) : l’année d’un modèle, en frise — la grille relue en saisons, semaines à part, fermetures, une barre par semaine, le compte face à la base
 // v11.61 (06/11/2026) — BASEAN-1 (§538) : la base de l’année — 35 h par semaine en moyenne, congés et fériés comptés aux heures prévues, à partir de 2027 — et la journée de solidarité réglée dans Le cadre
 // v11.60 (06/11/2026) — CPJOURS-1 (§537) : les congés se décomptent par période — une semaine de congé compte ses jours de repos (6 jours ouvrables ou 5 ouvrés selon le réglage), du premier jour travaillé à la veille de la reprise
@@ -4694,7 +4695,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.62';
+const CACHE_NAME   = 'mavigne-v11.63';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4711,7 +4712,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.62 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.63 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4731,7 +4732,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.62 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.63 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

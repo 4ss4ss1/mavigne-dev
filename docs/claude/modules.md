@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Régler l’année sur la frise (FRISE-2, §540)
+
+Dans « L’année » : une saison − / + (`planAnneePas`, ses jours réguliers seulement), « Tomber juste » (`_planAnneeSuggestions`), sur un brouillon
+(`_planEditing.brouillon`) que « Enregistrer » écrit en gardant les horaires du modèle. Les fonctions de la base lisent un brouillon (paramètre `G`).
+
 ### ★ L’année d’un modèle, en frise (FRISE-1, §539)
 
 Roue crantée › un modèle › « L’année » (`planAnneeOuvrir`, vue logée dans `_planEditing={annee}`). `_planAnneeLire(plId,yr)` : semaine type de chaque mois

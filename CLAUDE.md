@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **6 novembre 2026 (FRISE-1)** — **L’ANNÉE D’UN MODÈLE, EN FRISE : LA GRILLE RELUE EN SAISONS** (§539). Base `5f473d9` (« basean1 »). **APP 10.70 → 10.71, SW 11.61 → 11.62**. Lot 3a du chantier « le planning de l’année » (maquette v2) : roue crantée du Planning › un modèle › « L’année » (`planAnneeOuvrir`, la vue logée dans `_planEditing={annee}` pour que l’ouverture de la roue reparte de la liste). `_planAnneeLire` relit la grille : la semaine type de chaque mois (les heures les plus fréquentes, fériés et semaines fermées mis à part), les saisons (mois voisins de même semaine type), les semaines à part (3 jours ou plus qui s’écartent), les jours à part, les fermetures (jours ouvrés tous à 0 h) ; frise, une barre par semaine, la bande des congés, le compte face à la base, le cadre vérifié. Lecture seule. `mv-harnais-frise1` neuf, sur la vraie grille 2026 du modèle « standard » (11 cas, 4 contre-épreuves) ; tuto neuf « Comment faire pour voir l’année d’un modèle ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (FRISE-2)** — **L’ANNÉE D’UN MODÈLE SE RÈGLE SUR LA FRISE** (§540). Base `880c21a` (« frise1 »). **APP 10.71 → 10.72, SW 11.62 → 11.63**. Lot 3b (première part) du chantier « le planning de l’année ». Dans « L’année » : chaque saison − / + par jour de la semaine (`planAnneePas`, les jours réguliers seulement : jours à part, semaines à part, fermetures épargnés) ; « Tomber juste » (`_planAnneeSuggestions` : jours courts et longs d’une saison, la veille de Noël et de la Saint-Sylvestre, une semaine de plus prise sur la saison voisine — une ou deux retouches, dans le sens de l’écart, la juste d’abord) ; tout sur un brouillon (`_planEditing.brouillon`), « Enregistrer » écrit la grille de l’année du modèle en gardant ses horaires (`_timings`…), « Annuler » la laisse. `_planCreditFerie`, `_planModelBrut`, `_planSolidRatio`, `_planAnneeLire` lisent un brouillon (paramètre `G`). `mv-harnais-frise2` neuf (11 cas, 4 contre-épreuves) ; tuto neuf « Comment faire pour régler l’année d’un modèle ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2113,7 +2113,12 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ FRISE-1 (06/11, §539) — l’année d’un modèle, en frise : ce qui reste
 - **À regarder chez Nico, FRISE-1 déployé** : roue crantée du Planning › son modèle d’équipe › « L’année » — les saisons doivent ressembler à ce qu’il dit (hiver court, été long), la semaine des vendanges à part, les fermetures de 2026 hachurées ; sur 2027, le compte face à la base.
 - **Un mois coupé en deux** (la fin d’année dès le 15 novembre) se lit aujourd’hui comme une seule semaine type, l’autre moitié en jours à part (les vendredis libres de fin novembre) : la coupe en milieu de mois viendra avec l’édition (lot 3b).
-- **Le lot 3b** : l’édition sur la frise — semaines types, saisons et leurs coupes, semaines et jours à part, « Tomber juste » ; l’éditeur de 365 cases s’efface.
+- **Le lot 3b** : ~~saisons − / +, « Tomber juste », enregistrer~~ (FRISE-2, §540) ; reste — les coupes de mois, régler les semaines et les jours à part sur la frise, puis effacer l’éditeur de 365 cases (FRISE-3).
+
+### ★ FRISE-2 (07/11, §540) — régler l’année sur la frise : ce qui reste
+- **À essayer chez Nico, FRISE-2 déployé** : son modèle 2027 › « L’année » › « Tomber juste » — la retouche proposée doit parler son langage (un vendredi, la veille de Noël, une semaine d’été de plus) ; « Enregistrer », puis la fiche d’un salarié : le compteur suit.
+- **FRISE-3** : couper un mois en deux (la fin d’année dès le 15 novembre), régler une semaine à part ou un jour à part sur la frise, poser une fermeture — puis l’éditeur de 365 cases s’efface ; les codes D/M/A et les horaires par jour restent au lot 5.
+- ⚠️ **Découper `src/planning.js` (725 ko) au lot FRISE-3** : la frise sort dans `src/planning-annee.js` (ordre d’import, fonctions exposées, harnais FRISE-1/2 qui l’extraient). La référence de taille a été regravée à FRISE-2 sur cette promesse (§540c).
 
 ## 29. Synchronisation de la mémoire
 

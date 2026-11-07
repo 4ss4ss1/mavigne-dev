@@ -247,3 +247,23 @@ Lot 3a du chantier « le planning de l’année » : la maquette v2 (validée le
 
 ### 539d. Ce qui reste ouvert
 - §28, bloc FRISE-1.
+
+## 540. ★★ FRISE-2 — L’ANNÉE D’UN MODÈLE SE RÈGLE SUR LA FRISE (07/11 — `src/planning.js` (`_planAnneeCopie`, `_planAnneeTotal`, `_planAnneeCible`, `_planAnneePose`, `_planAnneeReguliers`, `_planAnneePasVal`, `_planAnneeNomS`, `_planAnneeRetouches`, `_planAnneeSuggestions`, `_planAnneeGrille`, `_planAnneeJoursEd`, `planAnneePas`, `planAnneeJuste`, `planAnneeAppliquer`, `planAnneeEnregistrer`, `planAnneeAnnuler` neufs ; `_planRenderAnnee` ; `_planCreditFerie`, `_planModelBrut`, `_planSolidRatio`, `_planAnneeLire` lisent un brouillon) · `src/tutos.js` (le tuto « reglerannee ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frise2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-2.json` — base `880c21a` « frise1 » — **APP 10.71 → 10.72, SW 11.62 → 11.63**)
+
+### 540a. D’où ça vient
+Lot 3b du chantier « le planning de l’année », première part : la maquette v2 règle l’année sur la frise, saison par saison, et « Tomber juste » propose les retouches. FRISE-1 (§539) la lisait ; FRISE-2 la règle.
+
+### 540b. Le modèle, et ce qui a été écarté
+- **Une saison − / +** (`planAnneePas`, le jour de la semaine choisi) va à ses **jours réguliers** — ceux qui suivent sa semaine type : jours à part, semaines à part et fermetures ne bougent pas (le jeudi 7 mai 2026 garde ses 5 h quand les jeudis d’été passent à 9 h). Un jour réduit ne descend pas sous 3 h 30, ni au-dessus du maximum du cadre.
+- **« Tomber juste »** (`_planAnneeSuggestions`) : les retouches d’une saison (jours courts ± 30 min ou 1 h, jours longs ± 30 min), la veille de Noël et de la Saint-Sylvestre (± un jour à part), une semaine de plus prise sur la saison voisine ; une ou deux, dans le sens de l’écart, la juste d’abord. Sur le modèle 2027 de la maquette, 1 827 h 30 pour 1 827 h : d’abord le jeudi 23 décembre à 6 h 30, comme au 24 décembre 2026.
+- **Un brouillon** (`_planEditing.brouillon`) : la grille de l’année copiée au premier geste ; le compte, la frise, le cadre le lisent (paramètre `G`). « Enregistrer » écrit les douze mois de l’année du modèle et garde ses clés d’horaires (`_timings`, `_timings_jour`, `_horaires_dma`) ; « Annuler » le jette ; « Retour sans enregistrer » le dit.
+- Écarté pour ce lot : couper un mois en deux et régler les semaines ou jours à part sur la frise (FRISE-3) ; effacer l’éditeur de 365 cases avant que la frise sache tout faire.
+
+### 540c. Ce qui a été vérifié
+- `scripts/mv-harnais-frise2.mjs` (neuf) : les vraies fonctions, la vraie grille 2026 du modèle « standard » et le modèle 2027 de la maquette — « Tomber juste » d’abord sur la veille de Noël, appliquer pose le total sur la base, le modèle enregistré ne bouge pas avant « Enregistrer », « Annuler », une saison − / + qui épargne la semaine fermée et le jour à part, l’enregistrement qui garde les horaires ; 11 cas, 4 contre-épreuves tenues.
+- Le tuto « Comment faire pour régler l’année d’un modèle ? » couvre les cinq gestes ; chaque étape attend la précédente (au miroir, aucune ne passe pour faite trop tôt).
+- **La taille des modules** : `mv-harnais-typo` a rougi — `src/planning.js` 682 → 725 ko, `src/tutos.js` 104 → 112 ko depuis la référence (au-delà des 5 % permis), BASEAN-1, FRISE-1 et FRISE-2 cumulés. La question du découpage posée : la frise (lecture, réglage, « Tomber juste ») est un bloc autonome, à sortir dans `src/planning-annee.js` au lot FRISE-3 ; la référence est regravée (`node scripts/mv-harnais-typo.mjs --baseline`, 31 fichiers), aucune autre mesure du cliquet ne remontant.
+- Ce qui n’a pas pu être vu : sur les vrais modèles de Nico, et sur un vrai téléphone.
+
+### 540d. Ce qui reste ouvert
+- §28, bloc FRISE-2.
