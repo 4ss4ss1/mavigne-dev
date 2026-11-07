@@ -876,6 +876,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-frise1.mjs --contre'],
   ['node scripts/mv-harnais-frise2.mjs'],              // FRISE-2 (§540) : l'année se règle sur la frise — saison − / +, jours à part épargnés, « Tomber juste », enregistrer sans perdre les horaires
   ['node scripts/mv-harnais-frise2.mjs --contre'],
+  ['node scripts/mv-harnais-frise3.mjs'],              // FRISE-3 (§541) : un mois coupé en deux (la fin d'année dès le 16 novembre), la coupe déplacée, les jours et semaines à part réglés
+  ['node scripts/mv-harnais-frise3.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

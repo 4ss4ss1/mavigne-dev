@@ -7,8 +7,8 @@
    aux rythmes de la maquette v2. Ce qu'on attend de la grille 2026, lu à la main : six saisons (janvier-février
    32 h, mars 34 h, avril 37 h, mai-septembre 39 h, octobre-novembre 32 h, décembre 28 h), quatre fermetures
    (1er → 4 janvier, 9 → 15 mars, 3 → 23 août, 28 → 31 décembre), la semaine de vendanges à part (7 → 13
-   septembre), quatre jours à part (le jeudi 7 mai court devant le vendredi 8 férié, les vendredis 20 et 27
-   novembre libres, la veille de Noël à 6 h 30).
+   septembre), deux jours à part (le jeudi 7 mai court devant le vendredi 8 férié, la veille de Noël à 6 h 30) —
+   depuis FRISE-3 (§541), les vendredis 20 et 27 novembre libres font la coupe de la fin d’année, dès le 16 novembre.
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import vm from 'node:vm';
 import { spawnSync } from 'node:child_process';
@@ -21,7 +21,7 @@ const DEFAUTS = {
   ferme: ['les semaines fermées ne sont plus vues', 'if(ouv.length&&ouv.every(function(x){return x.h<=0;})){s.ferme=true;', 'if(false){s.ferme=true;'],
   apart: ['la semaine de vendanges n’est plus « à part »', '    if(n>=3){s.apart=true;', '    if(n>=7){s.apart=true;'],
   mode:  ['la semaine type prend le maximum au lieu du plus fréquent', 'ordre.forEach(function(k){if(cpt[k]>bn){bn=cpt[k];best=k;}});', 'ordre.forEach(function(k){if(best==null||parseFloat(k)>parseFloat(best))best=k;});'],
-  jours: ['les jours à part disparaissent', '  var jours=J.filter(function(x){return !x.fer&&!x.ferme&&!x.apart&&x.h!==type[x.m][x.g];});', '  var jours=[];'],
+  jours: ['les jours à part disparaissent', '  var jours=J.filter(function(x){var T=type[x.coupe!=null?x.coupe:x.m];return !x.fer&&!x.ferme&&!x.apart&&x.h!==T[x.g];});', '  var jours=[];'],
 };
 if (CONTRE) {
   console.log('\n── FRISE-1 — contre-épreuve (un processus par défaut)\n');
@@ -72,14 +72,14 @@ vaut('six saisons, mois et heures par semaine', A.saisons.map(s => [s.m0, s.m1, 
 vaut('la semaine type de mars : 7 h 30 du lundi au jeudi, 4 h le vendredi', A.saisons[1].h, [7.5, 7.5, 7.5, 7.5, 4, 0, 0]);
 vaut('quatre fermetures, semaines voisines réunies', A.fermetures.map(f => md(A, f.i0) + '→' + md(A, f.i1)), ['01-01→01-04', '03-09→03-15', '08-03→08-23', '12-28→12-31']);
 vaut('la semaine de vendanges, à part', A.sem.filter(s => s.apart).map(s => md(A, s.j[0].i) + '→' + md(A, s.j[s.j.length - 1].i)), ['09-07→09-13']);
-vaut('quatre jours à part', A.jours.map(x => md(A, x.i) + ':' + x.h), ['05-07:5', '11-20:0', '11-27:0', '12-24:6.5']);
+vaut('deux jours à part — les vendredis libres de fin novembre suivent la fin d’année (coupe, FRISE-3 §541)', A.jours.map(x => md(A, x.i) + ':' + x.h), ['05-07:5', '12-24:6.5']);
 vaut('les fériés ne font ni jour ni semaine à part (le lundi de Pâques, l’Ascension)', A.jours.some(x => x.fer) || A.sem.some(s => s.apart && s.j.some(x => x.m === 3 && x.d === 6)), false);
 console.log('\n── un modèle 2027 « domaine ouvert »\n');
 const B = ctx.lire('ouvert', 2027);
 vaut('six saisons', B.saisons.map(s => [s.m0, s.m1, s.tot]), [[0, 1, 32], [2, 2, 34], [3, 3, 37], [4, 8, 39], [9, 10, 32], [11, 11, 28]]);
 vaut('aucune fermeture', B.fermetures.length, 0);
 vaut('les vendanges, à part', B.sem.filter(s => s.apart).map(s => md(B, s.j[0].i) + '→' + md(B, s.j[s.j.length - 1].i)), ['09-06→09-12']);
-vaut('les vendredis libres de fin novembre et la veille de Noël, à part', B.jours.map(x => md(B, x.i) + ':' + x.h), ['11-19:0', '11-26:0', '12-23:6.5']);
+vaut('la veille de Noël, à part (les vendredis de fin novembre suivent la fin d’année)', B.jours.map(x => md(B, x.i) + ':' + x.h), ['12-23:6.5']);
 vaut('la frise couvre l’année, sans trou ni recouvrement', B.plages.reduce((a, p, k) => a && (k === 0 ? p.i0 === 0 : p.i0 === B.plages[k - 1].i1 + 1), true) && B.plages[B.plages.length - 1].i1 === B.J.length - 1, true);
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

@@ -267,3 +267,23 @@ Lot 3b du chantier « le planning de l’année », première part : la maquette
 
 ### 540d. Ce qui reste ouvert
 - §28, bloc FRISE-2.
+
+## 541. ★★ FRISE-3 — UN MOIS COUPÉ EN DEUX SE LIT ET SE DÉPLACE SUR LA FRISE ; LES JOURS ET SEMAINES À PART SE RÈGLENT (07/11 — `src/planning.js` (`_planAnneeLire` : coupes, semaines à part après elles, `x.s` ; `_planAnneeReguliers` ; `_planAnneeBrouillon`, `planAnneeCoupe`, `planAnneeJour`, `planAnneeRemettre`, `_planAnneeEtat` neufs ; `_planRenderAnnee`) · `src/tutos.js` (le tuto « coupe ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frise3.mjs` (neuf) · `scripts/mv-harnais-frise1.mjs` · `scripts/mv-harnais-frise2.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-3.json` — base `3d910f1` « frise2 » — **APP 10.72 → 10.73, SW 11.63 → 11.64**)
+
+### 541a. D’où ça vient
+Lot 3b, deuxième part : la maquette v2 montrait « la fin d’année dès le 15 novembre ». FRISE-1 lisait chaque mois d’une seule semaine type : les vendredis libres de fin novembre sortaient en « jours à part ». FRISE-3 lit la coupe, la déplace, et règle les jours et semaines à part sur la frise.
+
+### 541b. Le modèle, et ce qui a été écarté
+- **Une coupe** : la fin (ou le début) d’un mois qui suit déjà la semaine type du mois voisin, sur au moins deux jours qui l’en distinguent ; elle part du lundi de la semaine où le premier jour se distingue (pas d’un samedi vide, ni d’un vendredi pareil des deux côtés). Novembre 2026 : la fin d’année dès le lundi 16.
+- ★ **Les coupes avant les semaines à part** : au premier passage, une fin de février avancée sur mars sortait en « semaine à part » (4 jours qui s’écartent de février) et bloquait la coupe — vu par le harnais FRISE-3 ; les semaines à part se lisent désormais face à la semaine type de la saison du jour (`type[x.coupe ?? x.m]`).
+- **Chaque jour a sa saison** (`x.s`) : la frise, les jours réguliers d’une saison (`_planAnneeReguliers`), les dates d’une saison (« 16 nov. → 31 déc. ») la lisent.
+- **Les gestes** : « 1 sem. plus tôt / plus tard » sur la saison qui commence (`planAnneeCoupe` : les sept jours réguliers de part et d’autre prennent la semaine type de l’autre saison) ; un jour à part − / + (`planAnneeJour`) ; « comme la saison » pour un jour ou une semaine à part (`planAnneeRemettre`). Tous sur le brouillon de FRISE-2, chacun compté (`E.n`, lu par les tutos via `_planAnneeEtat`).
+- Écarté : un sélecteur de date pour la coupe (un tuto ne sait pas choisir dans une liste native ; une semaine à la fois suffit) ; découper `planning.js` dans ce lot (reporté, §28).
+
+### 541c. Ce qui a été vérifié
+- `scripts/mv-harnais-frise3.mjs` (neuf) : les vraies fonctions et la vraie grille 2026 — la fin d’année dès le 16 novembre, mars avancé d’une semaine et sa coupe lue au 23 février, le jeudi 7 mai réglé puis remis comme la saison, la semaine de vendanges remise comme l’été, les gestes comptés ; 8 cas, 3 contre-épreuves tenues.
+- `mv-harnais-frise1` : deux jours à part au lieu de quatre (le changement voulu, écrit dans le harnais) ; son motif « jours » et celui de `mv-harnais-frise2` (« réguliers ») suivent les lignes réécrites, mêmes défauts.
+- Ce qui n’a pas pu être vu : sur les vrais modèles de Nico, et sur un vrai téléphone.
+
+### 541d. Ce qui reste ouvert
+- §28, bloc FRISE-3.

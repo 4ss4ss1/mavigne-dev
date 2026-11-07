@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.73', d: '2026-11-07', items: [   // FRISE-3 (§541) : coupes de mois, jours et semaines à part sur la frise
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'La fin d’année dès le 16 novembre, sur la frise',
+      desc: "Un mois coupé en deux se lit enfin comme tel : chaque saison dit où elle commence, et « 1 sem. plus tôt / plus tard » déplace sa coupe. Un jour à part se règle seul, ou revient « comme la saison » ; une semaine à part aussi. Toujours en brouillon jusqu’à « Enregistrer »." },
+  ] },
   { v: '10.72', d: '2026-11-07', items: [   // FRISE-2 (§540) : l'année d'un modèle se règle sur la frise
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année d’un modèle se règle sur la frise',
       desc: "Dans « L’année » d’un modèle, chaque saison se règle avec − et + : tous ses jours réguliers suivent, les jours à part et les fermetures ne bougent pas. « Tomber juste » propose une ou deux retouches qui posent l’année sur sa base. Rien n’est écrit avant « Enregistrer »." },

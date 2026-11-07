@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Coupes, jours et semaines à part (FRISE-3, §541)
+
+`_planAnneeLire` lit les coupes de mois (≥ 2 jours qui suivent déjà le mois voisin, depuis le lundi de leur semaine) avant les semaines à part ;
+chaque jour porte sa saison (`x.s`). Gestes : `planAnneeCoupe` (± une semaine), `planAnneeJour`, `planAnneeRemettre` ; `_planAnneeEtat` pour les tutos.
+
 ### ★ Régler l’année sur la frise (FRISE-2, §540)
 
 Dans « L’année » : une saison − / + (`planAnneePas`, ses jours réguliers seulement), « Tomber juste » (`_planAnneeSuggestions`), sur un brouillon

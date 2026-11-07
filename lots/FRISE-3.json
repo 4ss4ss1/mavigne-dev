@@ -1,0 +1,43 @@
+{
+  "lot": "FRISE-3",
+  "section": "§541",
+  "base": "3d910f1164593c5c46bbc3a1d3f42de42dff3c63",
+  "inclut": [],
+  "date": "2026-11-07",
+  "tutos": {
+    "ok": true,
+    "empreinte": "9721525c245b913ecd03a4d88d67cf9c2c3425a9b24ce29ec3d31931da6512cc",
+    "date": "2026-11-07T11:36:23.222Z",
+    "joues": {
+      "téléphone": 3,
+      "ordinateur": 3,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "d8f69a8457b9d15afd35ae5f7f1581779fa0900b7b47cf690aa5378450cb8062",
+    "CLAUDE.md": "6eb8f7120d6b953b2440e32ad8db2135195e12b5f81741ced9bef93b0bd43e8d",
+    "docs/claude/INDEX.md": "71df6b4b1223823f8d47f7b977b17c23a55a0f46e0fc4e96ce4eb4618b978e7d",
+    "docs/claude/chantiers-530-579.md": "c43add28cb0ba02f1f7870c7c980d044b5d83a6bc9a87b6229561f51201e38a5",
+    "docs/claude/journal.md": "9bb63ec228db66645631b5005ff12c63af0458c3dbf51d3ee96ab9eb1029b356",
+    "docs/claude/modules.md": "7e3783f5fb19bd535a34b6db2a421564ba28749c4a1b71522763fe165663b4a9",
+    "guide/10-planning.html": "4ac7e9ab518b6b30763554025b8ba74d812d983b6bd8ddd1e0c836b7dd82e0fe",
+    "index.html": "acd6d3be5a7ff9c328bd0db122280fd7b51aaae4efeca3c162d6f42a844bb23d",
+    "public/sw.js": "64436218e6c569116335c316198fd41518cbde181af06a6a817ed3b83529d965",
+    "scripts/harnais-claude-md.mjs": "2841f2f7aae360ab3fa3b9bd5a47ea512225c42d260717fcf8caef5f5ef41efc",
+    "scripts/mv-harnais-frise1.mjs": "7cad5e422cc7c7620e62cfc15ef21a57be0637e12c9e3ebd0bf46d54fa41204e",
+    "scripts/mv-harnais-frise2.mjs": "29dc8c2d18b0f932aa008fe54e0dca6ba8dccc36809f7b77b05cdf3422ddd70e",
+    "scripts/mv-harnais-liste.mjs": "d00aeddc32de5fe619d95f26bf63427ee8013680ec38f1ca4c17f19977c40e14",
+    "src/planning.js": "860c579da4cd2a42fa6b41d3f63662be76efbb5f9c624dd477b7e29897f66fba",
+    "src/tutos.js": "c223c53dae2d72966ed119e99d8c9d4e0ec08bc248f30e7d956093d6c3bc1d48",
+    "src/utils.js": "6013da283bf0288d06a863fad8967b88a50bfcaaac1e89ab365ca2e39872ebb6",
+    "src/whats-new.js": "86bb772a19c54efa0f2e162e3667385a21863bde3face04217d733f631bb4ccc",
+    "scripts/mv-harnais-frise3.mjs": "12a759ac09c0bb1e55b9600d77f3f9130b328b91d6d79e2e3f20f9a5bf96fff7"
+  }
+}
