@@ -92,7 +92,7 @@
   "src/planning-annee.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 33
+    "ko": 40
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -132,7 +132,7 @@
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 116
+    "ko": 120
   },
   "src/utils.js": {
     "dur": 5,

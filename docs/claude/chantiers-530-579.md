@@ -307,3 +307,24 @@ Lot 3b, deuxième part : la maquette v2 montrait « la fin d’année dès le 15
 
 ### 542d. Ce qui reste ouvert
 - Rien de propre au lot. La suite du chantier : les fermetures et les horaires sur la frise, puis effacer l’éditeur de 365 cases ; le lot 4 (programme indicatif, « Mon année ») ; le lot 5 (rythme sur deux semaines).
+
+## 543. ★★ FRISE-4 — UNE SEMAINE SE RÈGLE SUR LA FRISE ; UNE ANNÉE VIDE SE CONSTRUIT (07/11 — `src/planning-annee.js` (`_planAnneeSemDefaut`, `_planAnneeSemSel`, `planAnneeSemaine`, `planAnneeFermeSem`, `planAnneeDesIci` neufs ; `_planAnneeLire` (une année vide sans fermetures) ; `planAnneeRemettre` (une semaine fermée se rouvre) ; `_planAnneeEtat` (la semaine) ; `_planRenderAnnee` (le bloc de la semaine, la semaine vue dans les barres, « Exporter (CSV) »)) · `src/tutos.js` (le tuto « semaine ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frise4.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-4.json` — base `dbd98c5` « anneedec » — **APP 10.74 → 10.75, SW 11.65 → 11.66**)
+
+### 543a. D’où ça vient
+Pour effacer la grille de 365 cases, la frise devait savoir tout ce qu’elle fait : régler n’importe quel jour, poser et retirer une fermeture, construire un modèle vide. La grille n’éditait que les heures par jour et exportait en CSV — pas les horaires.
+
+### 543b. Le modèle, et ce qui a été écarté
+- **Une semaine choisie** sous la frise : « Précédente » / « Suivante » (par défaut la semaine d’aujourd’hui si l’année est l’année en cours, sinon la première qui travaille) ; elle se voit dans les barres (un contour). Ses jours se règlent un par un (`planAnneeJour`, déjà là pour les jours à part, vaut pour n’importe quel jour).
+- **Fermer / rouvrir** : « Fermer la semaine » met ses jours (hors fériés) à 0 — la frise la lit fermée ; « Rouvrir comme la saison » est `planAnneeRemettre` sur la semaine, qui inclut désormais les jours fermés.
+- **« Changer le rythme à partir d’ici »** : un jour de la semaine, sur les jours réguliers de la saison de cette semaine, d’elle jusqu’à la fin de la saison. La lecture de FRISE-3 y voit une coupe : une nouvelle saison naît sans qu’on la « crée » (la frise est lue des heures, jamais d’une liste de saisons).
+- **Une année vide n’a pas de fermetures** : sans aucune heure, chaque semaine serait « fermée » et aucune retouche n’aurait de jour régulier ; vide, elle a une seule saison à zéro, que − / + construit.
+- Écarté : des barres de semaine cliquables (trop fines au téléphone ; une `<div>` cliquable sans clavier) — « Précédente / Suivante » ; un sélecteur de date (un tuto ne choisit pas dans une liste native).
+
+### 543c. Ce qui a été vérifié
+- `scripts/mv-harnais-frise4.mjs` (neuf) : la vraie grille 2026 — la semaine du 12 janvier fermée puis rouverte, le vendredi dès la semaine du 19 octobre (et pas le 16), la nouvelle saison lue dès le 19 octobre, « Suivante » ; une année vide sans fermeture, son lundi construit ; 8 cas, 3 contre-épreuves tenues.
+- Le tuto « Comment faire pour régler une semaine d’un modèle ? » couvre les trois gestes neufs ; chaque étape attend le geste compté de la précédente.
+- **La taille** : `mv-harnais-typo` a rougi sur `src/planning-annee.js`, 33 → 40 ko (+7 ko, +21 %) — la question du découpage posée : un fichier de 40 ko ne se découpe pas (la règle des 5 % vise les gros modules) ; référence regravée (`scripts/typo-baseline.json`).
+- Ce qui n’a pas pu être vu : sur les vrais modèles de Nico, et sur un vrai téléphone.
+
+### 543d. Ce qui reste ouvert
+- §28, bloc FRISE-4.

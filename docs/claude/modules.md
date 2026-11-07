@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Une semaine sur la frise (FRISE-4, §543)
+
+Sous la frise : `planAnneeSemaine` (précédente / suivante), ses jours (`planAnneeJour`), `planAnneeFermeSem`, « Rouvrir comme la saison »
+(`planAnneeRemettre` sur la semaine), `planAnneeDesIci` (un jour de la semaine jusqu’à la fin de sa saison). Une année vide n’a pas de fermetures.
+
 ### ★ Où vit la frise (ANNEE-DEC, §542)
 
 `src/planning-annee.js`, chargé juste après `planning.js`. Ses emprunts au Planning (en tête, au nom des fonctions, lus à l’appel) et ses

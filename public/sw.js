@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.65
+// MA VIGNE — Service Worker v11.66
+// v11.66 (07/11/2026) — FRISE-4 (§543) : une semaine se règle sur la frise — jour par jour, fermée, rouverte, le rythme changé à partir d’elle ; une année vide se construit
 // v11.65 (07/11/2026) — ANNEE-DEC (§542) : l’année d’un modèle sort de planning.js dans planning-annee.js — rien ne change à l’écran
 // v11.64 (07/11/2026) — FRISE-3 (§541) : un mois coupé en deux se lit et se déplace sur la frise ; les jours et semaines à part se règlent
 // v11.63 (07/11/2026) — FRISE-2 (§540) : l’année d’un modèle se règle sur la frise — une saison − / +, « Tomber juste », enregistrer
@@ -4697,7 +4698,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.65';
+const CACHE_NAME   = 'mavigne-v11.66';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4714,7 +4715,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.65 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.66 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4734,7 +4735,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.65 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.66 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

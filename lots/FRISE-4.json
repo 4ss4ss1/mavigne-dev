@@ -1,0 +1,29 @@
+{
+  "lot": "FRISE-4",
+  "section": "§543",
+  "base": "dbd98c5458d951fc6a1efa1a211e4174c29bd655",
+  "inclut": [],
+  "date": "2026-11-07",
+  "tutos": {
+    "saute": "les 4 tutos concernés (annee, coupe, reglerannee, semaine) rejoués sur le build en deux parties, --part 1/2 et 2/2 : 16 passages sur 16 verts — le bac coupe une commande à 5 min, les quatre en demandent 6 ; une partie n'écrit pas rapports/tutos.json"
+  },
+  "fichiers": {
+    ".mv-base": "786db3cfd66ed910bf7fa4c74290aa7eb289eb0fc433a92969824055f442931b",
+    "CLAUDE.md": "03b9c0125a0f4a3d8ee7fc21e75b1386c135a2a7b14e2e0f884d58130dbc136e",
+    "docs/claude/INDEX.md": "c4d4c40d90aab3c0575673fae57f479864862d184202c181bd5442df3c8c604e",
+    "docs/claude/chantiers-530-579.md": "1901cea66be583d0ab2fff3ff537a6088e017e2fc8d306d76443c413167ee227",
+    "docs/claude/journal.md": "b5652dfa89e8c8a2c0d138953c31627374b33bf6a9f7428122a9b34213852380",
+    "docs/claude/modules.md": "7b7f833d48f2bb8997b6ca0878e65282329ca258a9e6aa8b879fbcfe2e4a69b5",
+    "guide/10-planning.html": "f1b794c59995667790e9b153bb1b57806a41dd6abaabfc2c3e96ef16ab61be20",
+    "index.html": "ea3570b1ad08e4e4ba56e754368c42f4295f7fd66e19e50278292f01d527ab9a",
+    "public/sw.js": "2cb42c8430eb738d8263f35f5e032fd3900fe74ca47d241658f36ef993fc0156",
+    "scripts/harnais-claude-md.mjs": "1252a9b4ea8a294f7fb7e73349f5ecfb4cf7e5e094cf8fd6d0475e9609e22623",
+    "scripts/mv-harnais-liste.mjs": "1f78d9f5670ae09b19bca3fa35331ed61b736dbc811ca0ff7d3b827a3b982471",
+    "scripts/typo-baseline.json": "ac6fdb4c8dbd259ea40042482892188cbe5d679b77b156c56bdf46815e29568b",
+    "src/planning-annee.js": "e011f1242669587f528f45ff9bd9293e1d85b3a358c72e743f293302c955a03b",
+    "src/tutos.js": "c48e972c551665cb5574b1cf4526fb3c70af30bd14cc21bf6f96b48dc0ae479f",
+    "src/utils.js": "c7bc05b8fa3021adb9cb7e379195d0427658076ee681169bf7b7033d2fc2a3d6",
+    "src/whats-new.js": "3998a8b615a9e08ccc097eff8459b4c0e27e3d595b70e174ffc33570171451b4",
+    "scripts/mv-harnais-frise4.mjs": "8d5ddff633e889177cec8026dba134d53124f888ecda47d0e0d538c0e9cfddf0"
+  }
+}

@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (ANNEE-DEC)** — **L’ANNÉE D’UN MODÈLE SORT DE planning.js : `src/planning-annee.js`** (§542). Base `4cf131e` (« frisr3 »). **APP 10.73 → 10.74, SW 11.64 → 11.65** (annonce muette : rien ne change à l’écran). La promesse de FRISE-2 (§540c), reportée à FRISE-3, tenue : les ~30 ko de la frise (lecture, réglage, coupes) passent dans `src/planning-annee.js`, chargé juste après `planning.js` (`app.js`). Frontière par window comme Le Cuvier (§164) : en tête de la frise, 15 emprunts au nom des fonctions du Planning (`function X(){ return window.X.apply(null, arguments); }`, lus à l’appel) ; `planning.js` expose ce qui manquait et `_planEditingGet` / `_planEditingSet` (l’état de la vue reste chez lui, l’ouverture de la roue le remet à zéro) ; la frise expose ses gestes et `_planRenderAnnee`. `planning.js` 748 → 718 ko, référence de taille regravée à la baisse. `mv-harnais-anneedec` neuf (9 cas, 3 contre-épreuves) ; FRISE-1 à 3 lisent les deux fichiers. **Ordre d’import** : `… → cave → cuvier → diagnostic → planning → planning-annee → reglages → …`. Déploiement : `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (FRISE-4)** — **UNE SEMAINE SE RÈGLE SUR LA FRISE ; UNE ANNÉE VIDE SE CONSTRUIT** (§543). Base `dbd98c5` (« anneedec »). **APP 10.74 → 10.75, SW 11.65 → 11.66**. Dans `src/planning-annee.js` : sous la frise, une semaine choisie (`planAnneeSemaine`, précédente / suivante ; par défaut celle d’aujourd’hui) — ses jours un par un (`planAnneeJour`, n’importe quel jour), « Fermer la semaine » (`planAnneeFermeSem`), « Rouvrir comme la saison » (`planAnneeRemettre` sur une semaine, fermée comprise), « Changer le rythme à partir d’ici » (`planAnneeDesIci` : un jour de la semaine, de cette semaine à la fin de sa saison — la frise y lit une coupe) ; une année vide n’a pas de fermetures (elle se construit) ; « Exporter (CSV) » dans la vue. La frise sait désormais tout ce que fait la grille de 365 cases. `mv-harnais-frise4` neuf (8 cas, 3 contre-épreuves) ; tuto neuf « Comment faire pour régler une semaine d’un modèle ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2122,7 +2122,11 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 
 ### ★ FRISE-3 (07/11, §541) — coupes, jours et semaines à part : ce qui reste
 - **À regarder chez Nico, FRISE-3 déployé** : son modèle 2026 › « L’année » — la fin d’année doit commencer le 16 novembre (et non plus deux vendredis « à part ») ; une coupe déplacée d’une semaine, puis « Annuler ».
-- **Ce qui reste à la frise** : poser ou retirer une fermeture, les horaires (prise de service, coupure), puis effacer l’éditeur de 365 cases ; les codes D/M/A et le rythme sur deux semaines au lot 5.
+- **Ce qui reste à la frise** : ~~poser ou retirer une fermeture~~ (FRISE-4, §543) ; les horaires ne vivaient pas dans la grille (rien à reprendre) ; reste — effacer l’éditeur de 365 cases (FRISE-5) ; les codes D/M/A et le rythme sur deux semaines au lot 5.
+
+### ★ FRISE-4 (07/11, §543) — une semaine sur la frise : ce qui reste
+- **À essayer chez Nico, FRISE-4 déployé** : un modèle › « L’année » — sous la frise, la semaine d’aujourd’hui ; « Suivante », un jour − / +, « Fermer la semaine » puis « Rouvrir comme la saison », « Changer le rythme à partir d’ici » sur un vendredi ; « Annuler ». Puis un modèle neuf, vide : ses saisons se règlent avec − et +.
+- **FRISE-5** : effacer l’éditeur de 365 cases (« Modifier ») — la frise sait tout faire ; « Nouveau modèle » ouvre l’année ; `mv-harnais-regl-module` tient le texte de l’éditeur (à suivre dans le lot).
 
 ## 29. Synchronisation de la mémoire
 
