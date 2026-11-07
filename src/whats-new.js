@@ -7,6 +7,7 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.74', d: '2026-11-07', items: [] },   // ANNEE-DEC (§542) : l’année d’un modèle sort de planning.js dans planning-annee.js — rien ne change pour un client
   { v: '10.73', d: '2026-11-07', items: [   // FRISE-3 (§541) : coupes de mois, jours et semaines à part sur la frise
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'La fin d’année dès le 16 novembre, sur la frise',
       desc: "Un mois coupé en deux se lit enfin comme tel : chaque saison dit où elle commence, et « 1 sem. plus tôt / plus tard » déplace sa coupe. Un jour à part se règle seul, ou revient « comme la saison » ; une semaine à part aussi. Toujours en brouillon jusqu’à « Enregistrer »." },

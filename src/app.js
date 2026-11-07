@@ -30,6 +30,7 @@ import './cave.js';
 import './cuvier.js';
 import './diagnostic.js';   // DIAG-1 (§429) : le diagnostic du Chai — lecture seule, il croise Cuvées, Bouteilles et Labo
 import './planning.js';
+import './planning-annee.js';   // ANNEE-DEC (§542) : l'année d'un modèle, sortie de planning.js — chargée juste après lui
 import './reglages.js';
 import './tracteur.js';
 import './phyto.js';

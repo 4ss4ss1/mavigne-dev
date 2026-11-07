@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (FRISE-3)** — **UN MOIS COUPÉ EN DEUX SE LIT ET SE DÉPLACE SUR LA FRISE ; LES JOURS ET SEMAINES À PART SE RÈGLENT** (§541). Base `3d910f1` (« frise2 »). **APP 10.72 → 10.73, SW 11.63 → 11.64**. `_planAnneeLire` lit les coupes (une fin ou un début de mois qui suit déjà la semaine type du mois voisin, sur au moins deux jours qui l’en distinguent ; la coupe part du lundi de sa semaine) AVANT les semaines à part, et donne à chaque jour sa saison (`x.s`) ; la fin d’année 2026 commence le 16 novembre. `planAnneeCoupe` (une semaine plus tôt / plus tard), `planAnneeJour` (un jour à part − / +), `planAnneeRemettre` (un jour ou une semaine à part « comme la saison »). `mv-harnais-frise3` neuf (8 cas, 3 contre-épreuves) ; FRISE-1 attend désormais deux jours à part (les vendredis de fin novembre font la coupe) ; tuto neuf « Comment faire pour déplacer une coupe ou régler un jour à part ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (ANNEE-DEC)** — **L’ANNÉE D’UN MODÈLE SORT DE planning.js : `src/planning-annee.js`** (§542). Base `4cf131e` (« frisr3 »). **APP 10.73 → 10.74, SW 11.64 → 11.65** (annonce muette : rien ne change à l’écran). La promesse de FRISE-2 (§540c), reportée à FRISE-3, tenue : les ~30 ko de la frise (lecture, réglage, coupes) passent dans `src/planning-annee.js`, chargé juste après `planning.js` (`app.js`). Frontière par window comme Le Cuvier (§164) : en tête de la frise, 15 emprunts au nom des fonctions du Planning (`function X(){ return window.X.apply(null, arguments); }`, lus à l’appel) ; `planning.js` expose ce qui manquait et `_planEditingGet` / `_planEditingSet` (l’état de la vue reste chez lui, l’ouverture de la roue le remet à zéro) ; la frise expose ses gestes et `_planRenderAnnee`. `planning.js` 748 → 718 ko, référence de taille regravée à la baisse. `mv-harnais-anneedec` neuf (9 cas, 3 contre-épreuves) ; FRISE-1 à 3 lisent les deux fichiers. **Ordre d’import** : `… → cave → cuvier → diagnostic → planning → planning-annee → reglages → …`. Déploiement : `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -786,7 +786,7 @@ Un fichier au mauvais endroit se déploie sans effet et **sans erreur**.
 `mvprint.py`, `comparateur-kml-parcelles.html`, ★ `INSTALLER-UN-DOMAINE.md` et `mkpdf.py` (§18c).
 
 **★ Ordre d'import RÉEL dans `app.js`** (revérifié par grep) :
-`styles.css → utils → firebase → onboarding → admin-gt → cave → **cuvier** → planning → reglages → **tracteur**
+`styles.css → utils → firebase → onboarding → admin-gt → cave → **cuvier** → planning → **planning-annee** (ANNEE-DEC, §542) → reglages → **tracteur**
 → phyto → pilotage → **reserve**`.
 ★ **`cuvier.js` JUSTE APRÈS `cave.js`** (§164) : il lit le Chai par `window` au premier geste, jamais au chargement.
 ⚠️ **`reserve.js` est importé EN DERNIER**, `phyto.js` **après** `tracteur.js`, et
@@ -2118,7 +2118,7 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ FRISE-2 (07/11, §540) — régler l’année sur la frise : ce qui reste
 - **À essayer chez Nico, FRISE-2 déployé** : son modèle 2027 › « L’année » › « Tomber juste » — la retouche proposée doit parler son langage (un vendredi, la veille de Noël, une semaine d’été de plus) ; « Enregistrer », puis la fiche d’un salarié : le compteur suit.
 - **FRISE-3** : couper un mois en deux (la fin d’année dès le 15 novembre), régler une semaine à part ou un jour à part sur la frise, poser une fermeture — puis l’éditeur de 365 cases s’efface ; les codes D/M/A et les horaires par jour restent au lot 5.
-- ⚠️ **Découper `src/planning.js`** — promis pour FRISE-3 (§540c), **reporté d’un lot, en connaissance de cause** : la frise bougeait encore (coupes, jours à part) ; la sortir avant aurait fait deux fois la frontière par window. À faire comme Le Cuvier (§164) — `src/planning-annee.js`, la frontière par window en fin des deux fichiers, l’état de la vue lu par fonction, les harnais FRISE-1 à 3 sur le nouveau fichier — **avant tout nouveau lot sur le Planning**.
+- ~~Découper `src/planning.js`~~ — fait à ANNEE-DEC (§542) : la frise vit dans `src/planning-annee.js`. Toute fonction de la frise qui emprunte au Planning passe par la frontière (un emprunt en tête, une exposition `window.X = X;` dans `planning.js`) — `mv-harnais-anneedec` le tient.
 
 ### ★ FRISE-3 (07/11, §541) — coupes, jours et semaines à part : ce qui reste
 - **À regarder chez Nico, FRISE-3 déployé** : son modèle 2026 › « L’année » — la fin d’année doit commencer le 16 novembre (et non plus deux vendredis « à part ») ; une coupe déplacée d’une semaine, puis « Annuler ».

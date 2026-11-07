@@ -287,3 +287,23 @@ Lot 3b, deuxième part : la maquette v2 montrait « la fin d’année dès le 15
 
 ### 541d. Ce qui reste ouvert
 - §28, bloc FRISE-3.
+
+## 542. ★ ANNEE-DEC — L’ANNÉE D’UN MODÈLE SORT DE planning.js : `src/planning-annee.js` (07/11 — `src/planning-annee.js` (neuf : la frise de FRISE-1 à 3, ses emprunts, ses expositions) · `src/planning.js` (le bloc sort ; la frontière des emprunts ; `_planEditingGet` / `_planEditingSet` ; la roue appelle `window._planRenderAnnee`) · `src/app.js` (l’import, juste après `planning.js`) · `src/utils.js` (APP) · `src/whats-new.js` (annonce muette) · `index.html` · `public/sw.js` · `scripts/mv-harnais-anneedec.mjs` (neuf) · `scripts/mv-harnais-frise1.mjs` · `scripts/mv-harnais-frise2.mjs` · `scripts/mv-harnais-frise3.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée à la baisse) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/ANNEE-DEC.json` — base `4cf131e` « frisr3 » — **APP 10.73 → 10.74, SW 11.64 → 11.65**)
+
+### 542a. D’où ça vient
+À FRISE-2 (§540c), `mv-harnais-typo` avait rougi : `planning.js` avait pris plus de 5 % depuis la référence. La référence avait été regravée sur une promesse — sortir la frise — reportée d’un lot à FRISE-3 (la frise bougeait encore), et notée « avant tout nouveau lot sur le Planning ». La voici tenue, sans rien changer à l’écran.
+
+### 542b. Le modèle, et ce qui a été écarté
+- **Le bloc entier de la frise** (FRISE-1 à 3, ~30 ko, de son commentaire de tête à `planOpenGridEditor` exclu) passe tel quel dans `src/planning-annee.js` : ses lignes ne changent pas, sauf l’état de la vue et deux variables.
+- **Les emprunts gardent les noms du Planning** : `function _planGetTpl(){ return window._planGetTpl.apply(null, arguments); }` et 14 autres, en tête — le code de la frise reste lisible tel qu’il était, les harnais qui l’extraient trouvent la vraie fonction dans `planning.js` (lu en premier). `planning.js` expose les 9 qui ne l’étaient pas.
+- **L’état de la vue reste dans `planning.js`** (`_planEditing`) : `_planCadreOpen`, dont `mv-harnais-regl-module` tient le texte, le remet toujours à zéro. La frise le lit par `_paE()` et l’écrit par `window._planEditingSet` — jamais par une copie (comme `_caveSectionAct()` pour le Cuvier).
+- `PLANNING_ENTRIES[` et `PLAN_MOIS[` se lisent `window.…` dans la frise. Rien ne s’exécute au chargement : les emprunts lisent window à l’appel.
+- Écarté : un module pur à dépendances injectées (comme `planning-vue.js`) — la frise touche l’écran et l’état, la frontière par window est le modèle du Cuvier ; renommer les emprunts (`_paTpl`…) — il aurait fallu réécrire la frise et les harnais.
+
+### 542c. Ce qui a été vérifié
+- `scripts/mv-harnais-anneedec.mjs` (neuf) : l’ordre d’import, l’import seul de `utils.js`, chaque emprunt exposé par `planning.js`, l’état par fonction, aucun `_planEditing` en direct, la frise sortie de `planning.js`, chaque geste exposé, le rendu appelé par window, rien d’exécuté au chargement ; 9 cas, 3 contre-épreuves tenues.
+- FRISE-1, 2, 3 lisent les deux fichiers et restent verts avec leurs contre-épreuves (FRISE-2 : le motif « annuler » suit `_paE()`, les mois passent par window dans son bac).
+- La taille : `planning.js` 748 → 718 ko, `planning-annee.js` 34 ko ; la référence regravée à la baisse.
+
+### 542d. Ce qui reste ouvert
+- Rien de propre au lot. La suite du chantier : les fermetures et les horaires sur la frise, puis effacer l’éditeur de 365 cases ; le lot 4 (programme indicatif, « Mon année ») ; le lot 5 (rythme sur deux semaines).

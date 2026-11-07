@@ -2,7 +2,7 @@
    HARNAIS — FRISE-1 (§539) : L'ANNÉE D'UN MODÈLE, RELUE EN SAISONS (LECTURE)
    Lancer : node scripts/mv-harnais-frise1.mjs          (le contrôle)
             node scripts/mv-harnais-frise1.mjs --contre  (chaque défaut reposé doit rougir)
-   Les VRAIES fonctions (_planAnneeLire, _planAnneeSaison, _feriesY, _mvEasterMD) et le VRAI modèle intégré
+   Les VRAIES fonctions (src/planning.js et, depuis ANNEE-DEC §542, src/planning-annee.js) (_planAnneeLire, _planAnneeSaison, _feriesY, _mvEasterMD) et le VRAI modèle intégré
    « standard » (PLAN_DEF, calé sur 2026), extraits de src/planning.js ; plus un modèle 2027 « domaine ouvert »
    aux rythmes de la maquette v2. Ce qu'on attend de la grille 2026, lu à la main : six saisons (janvier-février
    32 h, mars 34 h, avril 37 h, mai-septembre 39 h, octobre-novembre 32 h, décembre 28 h), quatre fermetures
@@ -25,7 +25,7 @@ const DEFAUTS = {
 };
 if (CONTRE) {
   console.log('\n── FRISE-1 — contre-épreuve (un processus par défaut)\n');
-  const src = lire('src/planning.js'); let tenues = 0, total = 0;
+  const src = (lire('src/planning.js') + '\n' + lire('src/planning-annee.js')); let tenues = 0, total = 0;
   for (const [cle, [quoi, ancre, rempl]] of Object.entries(DEFAUTS)) {
     total++; const n = src.split(ancre).length - 1;
     if (n !== 1) { console.log('  \x1b[31m✗\x1b[0m ' + quoi + ' — ancre trouvée ' + n + ' fois'); continue; }
@@ -39,7 +39,7 @@ if (CONTRE) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`);
   process.exit(tenues === total ? 0 : 1);
 }
-const PL = process.env.MV_FRISE1_PLANNING ? fs.readFileSync(process.env.MV_FRISE1_PLANNING, 'utf8') : lire('src/planning.js');
+const PL = process.env.MV_FRISE1_PLANNING ? fs.readFileSync(process.env.MV_FRISE1_PLANNING, 'utf8') : (lire('src/planning.js') + '\n' + lire('src/planning-annee.js'));
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);
   const i = src.indexOf('{', m.index); let d = 0;

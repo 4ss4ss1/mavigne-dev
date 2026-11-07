@@ -2,7 +2,7 @@
    HARNAIS — FRISE-2 (§540) : L'ANNÉE D'UN MODÈLE, À RÉGLER SUR LA FRISE
    Lancer : node scripts/mv-harnais-frise2.mjs          (le contrôle)
             node scripts/mv-harnais-frise2.mjs --contre  (chaque défaut reposé doit rougir)
-   Les VRAIES fonctions extraites de src/planning.js (le moteur d'édition, les gestes, la base de l'année, la lecture
+   Les VRAIES fonctions (src/planning.js et, depuis ANNEE-DEC §542, src/planning-annee.js) extraites de src/planning.js (le moteur d'édition, les gestes, la base de l'année, la lecture
    en saisons), le VRAI modèle « standard » de 2026, et un modèle 2027 « domaine ouvert » aux rythmes de la maquette v2
    SANS la veille de Noël à 6 h 30 — 1 827 h 30 pour une base de 1 827 h : la maquette l'avait montré, « Tomber juste »
    doit proposer d'abord le jeudi 23 décembre à 6 h 30, et l'appliquer pose le total sur la base.
@@ -18,11 +18,11 @@ const DEFAUTS = {
   reguliers: ['une retouche de saison écrase aussi les jours à part', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&x.h===S.h[g];});}', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart;});}'],
   veille:    ['« Tomber juste » ne sait plus raccourcir la veille de Noël', "  [[11,25,'No\\u00ebl'],[11,31,'la Saint-Sylvestre']].forEach(function(v){", '  [].forEach(function(v){'],
   horaires:  ['enregistrer perd les horaires du modèle', "  Object.keys(old).forEach(function(k){if(isNaN(parseInt(k,10)))neuf[k]=old[k];});", '  void old;'],
-  annuler:   ['« Annuler » garde le brouillon', 'function planAnneeAnnuler(){var E=_planEditing;if(!E||!E.annee)return;E.brouillon=null;', 'function planAnneeAnnuler(){var E=_planEditing;if(!E||!E.annee)return;'],
+  annuler:   ['« Annuler » garde le brouillon', 'function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;E.brouillon=null;', 'function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;'],
 };
 if (CONTRE) {
   console.log('\n── FRISE-2 — contre-épreuve (un processus par défaut)\n');
-  const src = lire('src/planning.js'); let tenues = 0, total = 0;
+  const src = (lire('src/planning.js') + '\n' + lire('src/planning-annee.js')); let tenues = 0, total = 0;
   for (const [cle, [quoi, ancre, rempl]] of Object.entries(DEFAUTS)) {
     total++; const n = src.split(ancre).length - 1;
     if (n !== 1) { console.log('  \x1b[31m✗\x1b[0m ' + quoi + ' — ancre trouvée ' + n + ' fois'); continue; }
@@ -36,7 +36,7 @@ if (CONTRE) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`);
   process.exit(tenues === total ? 0 : 1);
 }
-const PL = process.env.MV_FRISE2_PLANNING ? fs.readFileSync(process.env.MV_FRISE2_PLANNING, 'utf8') : lire('src/planning.js');
+const PL = process.env.MV_FRISE2_PLANNING ? fs.readFileSync(process.env.MV_FRISE2_PLANNING, 'utf8') : (lire('src/planning.js') + '\n' + lire('src/planning-annee.js'));
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);
   const i = src.indexOf('{', m.index); let d = 0;
@@ -52,9 +52,10 @@ const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');
 const ctx = vm.createContext({ window: { CONFIG: {} }, _MV_FERIES_CACHE: {}, PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
   _an: 2027, STORE: {}, SAUVE: [], isAdmin: () => true, _planFmt: h => String(h) + ' h' });
-vm.runInContext(MODES + '\nvar _planEditing=null;\nfunction _pY(){return _an;}\nfunction _planLegal(){return {maxJour:10,plafAnnuel:1607,hebdoLeg:35};}\nfunction _planRenderAnnee(){}\n'
+vm.runInContext(MODES + '\nvar _planEditing=null;\nfunction _paE(){return _planEditing;}\nwindow._planEditingSet=function(v){_planEditing=v;};\nfunction _pY(){return _an;}\nfunction _planLegal(){return {maxJour:10,plafAnnuel:1607,hebdoLeg:35};}\nfunction _planRenderAnnee(){}\n'
   + 'function _pTplStore(){return STORE;}\nfunction planSaveTpl(id){SAUVE.push(id);}\n'
   + NOMS.map(n => fonction(PL, n)).join('\n') + '\nthis.f={' + NOMS.join(',') + '};this.E=function(){return _planEditing;};this.setE=function(v){_planEditing=v;};', ctx);
+ctx.window.PLAN_MOIS = ctx.PLAN_MOIS;   // depuis ANNEE-DEC (§542), la frise lit les mois par window
 const F = ctx.f, FER27 = F._feriesY(2027);
 function rythme(d) { const m = d.getMonth(), j = d.getDate(), g = d.getDay();
   if (m === 8 && j >= 6 && j <= 11) return g >= 1 && g <= 6 ? 7 : 0;

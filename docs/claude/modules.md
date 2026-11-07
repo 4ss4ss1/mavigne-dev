@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Où vit la frise (ANNEE-DEC, §542)
+
+`src/planning-annee.js`, chargé juste après `planning.js`. Ses emprunts au Planning (en tête, au nom des fonctions, lus à l’appel) et ses
+expositions (en fin) sont sa frontière ; l’état de la vue (`_planEditing`) reste dans `planning.js`, lu et écrit par `_planEditingGet` / `_planEditingSet`.
+
 ### ★ Coupes, jours et semaines à part (FRISE-3, §541)
 
 `_planAnneeLire` lit les coupes de mois (≥ 2 jours qui suivent déjà le mois voisin, depuis le lundi de leur semaine) avant les semaines à part ;

@@ -595,3 +595,4 @@
 | 539 | 539. ★★ FRISE-1 — L’ANNÉE D’UN MODÈLE, EN FRISE : LA GRILLE RELUE EN SAISONS (06/11 — `src/planning.js` (`_… | `docs/claude/chantiers-530-579.md` |
 | 540 | 540. ★★ FRISE-2 — L’ANNÉE D’UN MODÈLE SE RÈGLE SUR LA FRISE (07/11 — `src/planning.js` (`_planAnneeCopie`, … | `docs/claude/chantiers-530-579.md` |
 | 541 | 541. ★★ FRISE-3 — UN MOIS COUPÉ EN DEUX SE LIT ET SE DÉPLACE SUR LA FRISE ; LES JOURS ET SEMAINES À PART SE… | `docs/claude/chantiers-530-579.md` |
+| 542 | 542. ★ ANNEE-DEC — L’ANNÉE D’UN MODÈLE SORT DE planning.js : `src/planning-annee.js` (07/11 — `src/planning… | `docs/claude/chantiers-530-579.md` |

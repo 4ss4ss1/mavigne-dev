@@ -2,7 +2,7 @@
    HARNAIS — FRISE-3 (§541) : UN MOIS COUPÉ EN DEUX, LES JOURS ET SEMAINES À PART RÉGLÉS SUR LA FRISE
    Lancer : node scripts/mv-harnais-frise3.mjs          (le contrôle)
             node scripts/mv-harnais-frise3.mjs --contre  (chaque défaut reposé doit rougir)
-   Les VRAIES fonctions et la VRAIE grille 2026 du modèle « standard ». Lu à la main avant le premier passage : en
+   Les VRAIES fonctions (src/planning.js et, depuis ANNEE-DEC §542, src/planning-annee.js) et la VRAIE grille 2026 du modèle « standard ». Lu à la main avant le premier passage : en
    novembre 2026, les vendredis 20 et 27 sont libres comme en décembre — la fin d'année commence le lundi 16 novembre
    (la coupe part du lundi de la semaine du premier vendredi libre) ; avancer « Mars » d'une semaine passe du 23 au
    26 février à 7 h 30 du lundi au jeudi ; le jeudi 7 mai (5 h) se règle seul, puis revient « comme la saison » (8 h 30) ;
@@ -22,7 +22,7 @@ const DEFAUTS = {
 };
 if (CONTRE) {
   console.log('\n── FRISE-3 — contre-épreuve (un processus par défaut)\n');
-  const src = lire('src/planning.js'); let tenues = 0, total = 0;
+  const src = (lire('src/planning.js') + '\n' + lire('src/planning-annee.js')); let tenues = 0, total = 0;
   for (const [cle, [quoi, ancre, rempl]] of Object.entries(DEFAUTS)) {
     total++; const n = src.split(ancre).length - 1;
     if (n !== 1) { console.log('  \x1b[31m✗\x1b[0m ' + quoi + ' — ancre trouvée ' + n + ' fois'); continue; }
@@ -36,7 +36,7 @@ if (CONTRE) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`);
   process.exit(tenues === total ? 0 : 1);
 }
-const PL = process.env.MV_FRISE3_PLANNING ? fs.readFileSync(process.env.MV_FRISE3_PLANNING, 'utf8') : lire('src/planning.js');
+const PL = process.env.MV_FRISE3_PLANNING ? fs.readFileSync(process.env.MV_FRISE3_PLANNING, 'utf8') : (lire('src/planning.js') + '\n' + lire('src/planning-annee.js'));
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);
   const i = src.indexOf('{', m.index); let d = 0;
@@ -49,7 +49,7 @@ const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');
 const ctx = vm.createContext({ window: {}, _MV_FERIES_CACHE: {}, isAdmin: () => true });
 ctx._planGetTpl = (pl, y) => (pl === 'standard' && y === 2026) ? PLAN_DEF.standard : {};
-vm.runInContext('var _planEditing=null;\nfunction _pY(){return 2026;}\nfunction _planLegal(){return {maxJour:10};}\nfunction _planRenderAnnee(){}\n'
+vm.runInContext('var _planEditing=null;\nfunction _paE(){return _planEditing;}\nwindow._planEditingSet=function(v){_planEditing=v;};\nfunction _pY(){return 2026;}\nfunction _planLegal(){return {maxJour:10};}\nfunction _planRenderAnnee(){}\n'
   + NOMS.map(n => fonction(PL, n)).join('\n') + '\nthis.f={' + NOMS.join(',') + '};this.setE=function(v){_planEditing=v;};this.E=function(){return _planEditing;};', ctx);
 const F = ctx.f;
 let verts = 0; const ECHECS = [];
