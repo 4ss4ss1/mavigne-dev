@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ L’année d’un modèle, en frise (FRISE-1, §539)
+
+Roue crantée › un modèle › « L’année » (`planAnneeOuvrir`, vue logée dans `_planEditing={annee}`). `_planAnneeLire(plId,yr)` : semaine type de chaque mois
+(heures les plus fréquentes), saisons, semaines à part (≥ 3 jours qui s’écartent), jours à part, fermetures (jours ouvrés tous à 0 h). Lecture seule.
+
 ### ★ La base de l’année et la journée de solidarité (BASEAN-1, §538)
 
 À partir de 2027 (`_planBaseActive`) : base = 7 h × les jours du lundi au vendredi (`_planBaseAn`), proratisée au contrat, + la journée

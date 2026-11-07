@@ -228,3 +228,22 @@ Vérifié (chronique juridique FRSEA 2025, fiches officielles) : 7 h de travail 
 
 ### 538d. Ce qui reste ouvert
 - §28, bloc BASEAN-1.
+
+## 539. ★★ FRISE-1 — L’ANNÉE D’UN MODÈLE, EN FRISE : LA GRILLE RELUE EN SAISONS (06/11 — `src/planning.js` (`_planAnneeLire`, `_planAnneeSaison`, `_planAnneeTon`, `_planAnneeDate`, `_planAnneePlage`, `_planAnneeJours`, `_planRenderAnnee`, `planAnneeOuvrir`, `planAnneeFermer`, `PLAN_MOIS_C` neufs ; `_planRenderCadre` ; la carte d’un modèle) · `src/tutos.js` (le tuto « annee ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frise1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-1.json` — base `5f473d9` « basean1 » — **APP 10.70 → 10.71, SW 11.61 → 11.62**)
+
+### 539a. D’où ça vient
+Lot 3a du chantier « le planning de l’année » : la maquette v2 (validée le 06/11) décrit l’année « mois par mois » — une frise, une semaine type par saison, une barre par semaine. Avant de pouvoir la modifier là (lot 3b), on la lit : la grille de 365 cases, telle qu’elle est, relue en saisons.
+
+### 539b. Le modèle, et ce qui a été écarté
+- **La semaine type d’un mois** : pour chaque jour de la semaine, les heures les plus fréquentes de ses jours, fériés et semaines fermées mis à part ; à égalité, la première rencontrée (novembre 2026 : deux vendredis à 4 h, deux libres → 4 h, les deux libres en jours à part). Les mois voisins de même semaine type font une saison : les modèles changent de rythme au 1er du mois.
+- **Une semaine à part** : 3 jours ou plus qui s’écartent de leur mois (les vendanges : lundi→samedi 7 h). **Un jour à part** : ce qui s’écarte encore (le jeudi 7 mai 2026 court devant le vendredi 8 férié, la veille de Noël). **Une fermeture** : une semaine dont les jours ouvrés hors fériés sont tous à 0 h, semaines voisines réunies.
+- **La vue loge dans `_planEditing={annee}`** : `_planCadreOpen` remet `_planEditing` à zéro, la roue rouverte repart donc de la liste sans le toucher (son texte est tenu par `mv-harnais-regl-module`).
+- Écarté : couper les mois en deux à la lecture (une coupe se décide, elle viendra avec l’édition) ; des couleurs écrites en dur (la rampe prend les jetons de la charte : vert, or pâle, or clair, terre, accent).
+
+### 539c. Ce qui a été vérifié
+- `scripts/mv-harnais-frise1.mjs` (neuf) : les vraies fonctions et la VRAIE grille 2026 du modèle « standard » — six saisons, quatre fermetures, la semaine de vendanges, quatre jours à part, tous attendus d’une lecture à la main avant le premier passage ; un modèle 2027 « domaine ouvert » ; 11 cas, 4 contre-épreuves tenues.
+- Le tuto « Comment faire pour voir l’année d’un modèle ? » couvre `planAnneeOuvrir` et `planAnneeFermer` (gestes sans tuto : plafond tenu).
+- Ce qui n’a pas pu être vu : la frise sur les vrais modèles de Nico et sur un vrai téléphone.
+
+### 539d. Ce qui reste ouvert
+- §28, bloc FRISE-1.

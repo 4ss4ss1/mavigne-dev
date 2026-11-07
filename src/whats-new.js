@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.71', d: '2026-11-06', items: [   // FRISE-1 (§539) : l'année d'un modèle, en frise (lecture)
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année d’un modèle, d’un coup d’œil',
+      desc: "Dans la roue crantée du Planning, « L’année » sur un modèle : la grille relue en saisons, la semaine des vendanges à part, les fermetures, une barre par semaine face aux 35 h, son compte face à la base de l’année et le cadre vérifié. Lecture seule pour l’instant : la grille se modifie toujours avec « Modifier »." },
+  ] },
   { v: '10.70', d: '2026-11-06', items: [   // BASEAN-1 (§538) : la base de l'année et la journée de solidarité
     { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'La base de l’année remplace les 1 607 h',
       desc: "À partir de 2027, le compteur de chacun suit la base de l’année : 7 h par jour du lundi au vendredi, soit 35 h par semaine en moyenne (1 827 h en 2027). Les congés et les fériés chômés y comptent pour leurs heures prévues : un congé pris en août ou en octobre ne retire plus rien. 2026 garde ses 1 607 h." },
