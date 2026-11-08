@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Le programme indicatif (PROG-1, §545)
+
+`_planAnneeProgramme(plId,yr)` (src/planning-annee.js) : la page art. 10.4 de chaque modèle, lue de la frise, à la suite de sa grille dans
+le planning de l’année (`_paDoc`). Formule : `_planAnneeModulation` (au-delà de 35 h par semaine).
+
 ### ★ La grille de 365 cases est partie (FRISE-5, §544)
 
 Un modèle se règle dans « L’année » (`src/planning-annee.js`) ; `planCreateTemplate` l’y ouvre. La garde du recalage vit dans la frise

@@ -9284,7 +9284,18 @@ var _PA_CSS =
 // Un groupe ne doit JAMAIS s'etaler sur deux pages : le budget vertical est
 // calcule pour qu'il tienne, cette regle est la ceinture.
 + '.pa-grp{page-break-inside:avoid;break-inside:avoid}'
-+ '.mvdoc-lim{font-size:6.8px!important;line-height:1.4!important;padding:5px 8px!important;margin-top:4px!important}';
++ '.mvdoc-lim{font-size:6.8px!important;line-height:1.4!important;padding:5px 8px!important;margin-top:4px!important}'
+// ★ PROG-1 (§545) — le programme indicatif : sa propre page, lisible en noir et blanc. Tailles RELATIVES (em, thin) :
+//   le cliquet typo ne laisse ni px en dur ni trop-petit regagner du terrain.
++ '.pa-prog{break-before:page;page-break-before:always}'
++ '.pa-prog-t{display:flex;flex-direction:column;gap:.2em;margin-bottom:.8em}'
++ '.pa-prog-t b{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:1.6em;color:#2B2118}'
++ '.pa-prog-t span{font-size:.8em;color:#8A7A62}'
++ '.pa-prog table{width:100%;border-collapse:collapse;font-size:.85em;margin-bottom:.8em}'
++ '.pa-prog th,.pa-prog td{border-bottom:thin solid #E5DFD3;padding:.35em .6em;text-align:left;vertical-align:top}'
++ '.pa-prog-id th{width:22%;color:#8A7A62;font-weight:600}'
++ '.pa-prog-per th{background:#FAF3E0;color:#5C4E3A;font-weight:700}'
++ '.pa-prog-n{font-size:.8em;line-height:1.45;color:#5C4E3A}';
 
 // Le document. Une page par modèle ; le nom du domaine et l'année sont répétés
 // sur chaque page, parce qu'une feuille arrachée du lot doit rester identifiable.
@@ -9348,7 +9359,8 @@ function _paDoc(yr,nom){
               +'rep\u00e9r\u00e9es par un lis\u00e9r\u00e9 rouge quand elles tombent un jour f\u00e9ri\u00e9 '
               +'ou un week-end.</div>') : '')
       + lim
-      + '</div>';
+      + '</div>'
+      + (window._planAnneeProgramme ? window._planAnneeProgramme(gr.id, yr) : '');   // ★ PROG-1 (§545) : le programme indicatif, page suivante
   }).join('');
 
   return window._mvDocOpen({
@@ -9763,6 +9775,11 @@ window._planCreditFerie      = _planCreditFerie;
 window._planGetTpl           = _planGetTpl;
 window._planModelBrut        = _planModelBrut;
 window._planRenderCadre      = _planRenderCadre;
+window._planBaseAn        = _planBaseAn;   // ★ PROG-1
+window._planJoursSem      = _planJoursSem;
+window._planSolid         = _planSolid;
+window._planSolidJour     = _planSolidJour;
+window.PLAN_SOLID_MODES   = PLAN_SOLID_MODES;
 window._planEditingGet    = function(){ return _planEditing; };   // l'état de la vue reste ici : la roue le remet à zéro
 window._planEditingSet    = function(v){ _planEditing = v; };
 window.planSaveMaj          = planSaveMaj;

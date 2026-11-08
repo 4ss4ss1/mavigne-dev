@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (FRISE-5)** — **LA GRILLE DE 365 CASES LAISSE LA PLACE À LA FRISE** (§544). Base `dfa67fd` (« frise4 »). **APP 10.75 → 10.76, SW 11.66 → 11.67**. Retirés de `planning.js` : `planOpenGridEditor`, `_planRenderGridEditor`, `planEditorSetMonth`, `planUpdateDay`, `planCloseGridEditor`, leurs expositions, le bouton « Modifier » de la carte d’un modèle, la route de la roue (`_planRenderCadre` ne route plus que `_planEditing.annee`). `planCreateTemplate` ouvre l’année (`window.planAnneeOuvrir`). La garde du recalage (« un chiffre saisi en 2027 recopiait le mois 2026 ») passe de `planUpdateDay` à la frise : `mv-harnais-recalage` S4-S5 tiennent `_planAnneeBrouillon` (part de `_planGetTpl`, recalée) et `planAnneeEnregistrer` (les douze mois vus) ; `mv-harnais-regl-module` lit l’hôte de l’année. Les règles CSS `.plan-ge-*` restent, orphelines (à nettoyer avec la charte). ⚠️ `index.html` porte « 10.75 » aussi dans le tracé de l’icône œil : le bump vise `v10.xx` et `boot.js?v=`, pas le nombre nu. `mv-harnais-frise5` neuf (6 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (PROG-1)** — **LE PROGRAMME INDICATIF DE MODULATION (art. 10.4) SUIT CHAQUE MODÈLE DANS LE PLANNING DE L’ANNÉE** (§545). Base `efedddd` (« frise5 »). **APP 10.76 → 10.77, SW 11.67 → 11.68**. Lot 4 du chantier, première part. `_planAnneeProgramme(plId,yr)` (src/planning-annee.js) lit la frise : les salariés du modèle, la formule (`_planAnneeModulation` : au-delà de 35 h par semaine, fériés chômés comptés ; ≤ 200 h → contingent hors modulation 150 h, ≤ 250 h → 100 h, au-delà « à revoir »), les périodes (saisons, semaines à part, fermetures) en forte / réduite / nulle activité avec leur horaire indicatif (`_planAnneeHoraireTxt`), la règle de décompte (base, solidarité, congés et fériés aux heures prévues — art. 4.3 et 10.4), la date limite d’affichage (25 décembre de l’année d’avant). Une page par modèle, à la suite de sa grille (`_paDoc`). `mv-harnais-prog1` neuf (11 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2132,6 +2132,10 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 - **À regarder chez Nico, FRISE-5 déployé** : la carte d’un modèle n’a plus « Modifier » ; « L’année » fait tout ; un modèle neuf (roue crantée › créer) s’ouvre sur son année, vide, et se construit.
 - **Les règles CSS `.plan-ge-*`** (styles.css, et `plan-ge-input` dans le jeu des champs de `mv-harnais-champs`) sont orphelines : à retirer avec la charte, sans urgence.
 - **La suite du chantier** : le lot 4 — le programme indicatif (affiché une semaine avant, accord national art. 10.4), « Mon année » pour chacun, la mention de la journée de solidarité au relevé ; le lot 5 — le rythme sur deux semaines, les heures de prise par jour (la fin des codes D/M/A).
+
+### ★ PROG-1 (07/11, §545) — le programme indicatif : ce qui reste
+- **À faire valider chez Nico** : le programme imprimé (Planning › le planning de l’année) — par sa comptable ou la FDSEA avant de l’afficher : la formule, et surtout la règle « congés et fériés aux heures prévues », choix du domaine (§28, chantier du planning de l’année).
+- **Le reste du lot 4** : « Mon année » pour chaque salarié (sa frise, son compteur, ses congés, son programme), et la mention de la journée de solidarité au relevé du mois.
 
 ## 29. Synchronisation de la mémoire
 

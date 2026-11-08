@@ -1,0 +1,29 @@
+{
+  "lot": "PROG-1",
+  "section": "§545",
+  "base": "efedddd082072a3ef3741592f0471c41493b90cc",
+  "inclut": [],
+  "date": "2026-11-08",
+  "tutos": {
+    "saute": "aucun tuto concerné : l'aiguillage n'en retient aucun (la page du programme s'imprime par le bouton du planning de l'année, qu'aucun tuto n'enseigne)"
+  },
+  "fichiers": {
+    ".mv-base": "15b64bacd4e03022ba15c75b11081ddeca6486ab17af750a6719cce58c4bec45",
+    "CLAUDE.md": "b8ca9e2b9309009b3ce58b35e1e508bbe667ee9f9ae482afec6e187e74208e5e",
+    "docs/claude/INDEX.md": "4a236b5a23760255e51c897844454a6c36f8e2dc2fcdae0fa6afed53cfbd2a14",
+    "docs/claude/chantiers-530-579.md": "e15e2f6a01e6d48e3cb004d2ae035481f50fdf3a5f83319ed6b4e3a10dedc8b7",
+    "docs/claude/journal.md": "efa920a367420329fa9473eda8c6255805de38380eff333ad42540fa0d3fcce8",
+    "docs/claude/modules.md": "bd31480d11b796968875e1a933c859c36424ea6505325d983dd09a9f43fd02f7",
+    "guide/10-planning.html": "8ff62d862a90588a482e09e728bf3be3f67299f9618a652568a149d85f0b638e",
+    "index.html": "7612f1564f495cce235b4255f677f0374b67153a7378faab39944949141c3ade",
+    "public/sw.js": "40849236d74bb67a77bbd501d83599559b20aafbeba003c45a971ec4562915ea",
+    "scripts/harnais-claude-md.mjs": "6ae33c87c54bb00eb5c852abd919d0bd1119bac770b7b8659f771061f1ff128d",
+    "scripts/mv-harnais-liste.mjs": "1c583da7ee819cb2e3e85f30bb353247d27e00eac589e170b75d3e1c89a832e0",
+    "scripts/typo-baseline.json": "31b60fbdc0140511f5e9a55b1ed80083f57e4bf514afc12db062a871f3c17fd5",
+    "src/planning-annee.js": "84199914e111de358aa415e5963f99b1580cdc041fc26bf9f94d48829091e43d",
+    "src/planning.js": "bc96e12fe08d65ad2bb2093cb5e1899e5b7fcbb2ad07904e47b0c65a2417ae93",
+    "src/utils.js": "a9f7fb5f9e11f705dd4ae3d6755fb63261029317e2619a31dd7dc6ae189e0f64",
+    "src/whats-new.js": "cfced5a4845a83ae12988c866aff7831242c4434506d079c321071677598a46b",
+    "scripts/mv-harnais-prog1.mjs": "72f06cfc79d6bcdc28516ef7500a2ad8c33bb664d87fd310d1207f6d86d5a423"
+  }
+}

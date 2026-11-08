@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.77', d: '2026-11-07', items: [   // PROG-1 (§545) : le programme indicatif de modulation
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le programme indicatif, prêt à afficher',
+      desc: "Le planning de l’année imprime désormais, après chaque modèle, son programme indicatif de modulation (accord national, art. 10.4) : les salariés concernés, la formule, les périodes de forte, faible ou nulle activité avec leur horaire, la règle de décompte, et la date limite d’affichage — une semaine avant le 1er janvier." },
+  ] },
   { v: '10.76', d: '2026-11-07', items: [   // FRISE-5 (§544) : la grille de 365 cases laisse la place à la frise
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Un modèle se règle sur son année',
       desc: "La grille de 365 cases (« Modifier ») laisse la place à « L’année » : les saisons, les coupes, une semaine jour par jour, les fermetures, « Tomber juste ». Un modèle neuf s’ouvre directement sur son année, et l’export CSV y est." },

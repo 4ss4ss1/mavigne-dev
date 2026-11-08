@@ -32,6 +32,10 @@ function _planModelBrut(){ return window._planModelBrut.apply(null, arguments); 
 function _planPlId(){ return window._planPlId.apply(null, arguments); }
 function _planRenderCadre(){ return window._planRenderCadre.apply(null, arguments); }
 function planSaveTpl(){ return window.planSaveTpl.apply(null, arguments); }
+function _planBaseAn(){ return window._planBaseAn.apply(null, arguments); }
+function _planJoursSem(){ return window._planJoursSem.apply(null, arguments); }
+function _planSolid(){ return window._planSolid.apply(null, arguments); }
+function _planSolidJour(){ return window._planSolidJour.apply(null, arguments); }
 function _paE(){ return window._planEditingGet(); }
 
 // ★★ FRISE-1 (§539) — L'ANNÉE D'UN MODÈLE, EN FRISE (LECTURE). Lot 3a du chantier « le planning de l'année » (maquette v2) :
@@ -368,6 +372,59 @@ function _planRenderAnnee(){
 function planAnneeOuvrir(id){if(!id)return;window._planEditingSet({annee:String(id)});_planRenderCadre();var b=_planCadreHost();if(b)b.scrollTop=0;}
 function planAnneeFermer(){window._planEditingSet(null);_planRenderCadre();}
 
+// ★★ PROG-1 (§545) — LE PROGRAMME INDICATIF (accord national du 23/12/1981, art. 10.4). Avant le début de la période de
+//   modulation, l'employeur établit pour l'équipe un programme indicatif : la formule (jusqu'à 200 h de modulation, contingent
+//   d'heures supplémentaires hors modulation de 150 h ; au-delà, 100 h ; jamais plus de 250 h), les salariés concernés, les
+//   périodes de forte, de faible et de nulle activité, l'horaire indicatif de chacune ; il s'affiche au moins une semaine
+//   avant le début de la période, et toute modification aussi (sauf force majeure). Le tout se LIT de la frise : saisons,
+//   semaines à part, fermetures, la modulation au-delà de 35 h par semaine (fériés chômés comptés pour leurs heures prévues).
+//   Une page par modèle, à la suite de sa grille, dans le planning de l'année ; rien ne s'écrit.
+function _planAnneeHoraireTxt(v){
+  var JL=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'],out=[],g=0;
+  while(g<7){if(!(v[g]>0)){g++;continue;}var k=g;while(k+1<7&&v[k+1]===v[g])k++;
+    out.push((k>g?JL[g]+(k>g+1?' au ':' et ')+JL[k]:JL[g])+' '+_planFmt(v[g]));g=k+1;}
+  return out.length?out.join(' \u00b7 '):'aucun jour travaill\u00e9';
+}
+function _planAnneeNature(t,ref){return t<=0?'Activit\u00e9 nulle':(t>ref?'Forte activit\u00e9':(t<ref?'Activit\u00e9 r\u00e9duite':'Activit\u00e9 normale'));}
+function _planAnneeModulation(plId,yr,A){
+  var L=_planLegal(),nv=_planBaseActive(yr),mod=0;
+  A.sem.forEach(function(s){var b=s.h;if(nv)s.j.forEach(function(x){if(x.fer)b+=_planCreditFerie(plId,yr,x.m,x.d);});if(b>L.hebdoLeg)mod+=b-L.hebdoLeg;});
+  return Math.round(mod*2)/2;
+}
+function _planAnneeProgramme(plId,yr){
+  var A=_planAnneeLire(plId,yr),J=A.J,L=_planLegal(),nv=_planBaseActive(yr),e=_escHtml,ref=L.hebdoLeg;
+  var mod=_planAnneeModulation(plId,yr,A);
+  var formule=mod<=200?'jusqu\u2019\u00e0 200 h de modulation \u2014 contingent d\u2019heures suppl\u00e9mentaires hors modulation de 150 h'
+    :(mod<=L.modulMax?'de 200 \u00e0 '+L.modulMax+' h de modulation \u2014 contingent d\u2019heures suppl\u00e9mentaires hors modulation de 100 h'
+    :'au-del\u00e0 de '+L.modulMax+' h \u2014 le programme d\u00e9passe le plafond de l\u2019accord : \u00e0 revoir avant de l\u2019afficher');
+  var lignes=[];
+  A.saisons.forEach(function(sa,si){var a=-1,b=-1;J.forEach(function(x){if(x.s===si&&!x.ferme&&!x.apart){if(a<0)a=x.i;b=x.i;}});if(a<0)return;
+    lignes.push({i:a,quand:_planAnneePlage(J,a,b),nat:_planAnneeNature(sa.tot,ref),h:sa.tot,hor:_planAnneeHoraireTxt(sa.h)});});
+  A.sem.forEach(function(s){if(!s.apart)return;var a=s.j[0].i,b=s.j[s.j.length-1].i,v=[0,0,0,0,0,0,0];s.j.forEach(function(x){v[x.g]=x.h;});
+    lignes.push({i:a,quand:_planAnneePlage(J,a,b)+' (semaine \u00e0 part)',nat:_planAnneeNature(s.h,ref),h:s.h,hor:_planAnneeHoraireTxt(v)});});
+  A.fermetures.forEach(function(f){lignes.push({i:f.i0,quand:_planAnneePlage(J,f.i0,f.i1),nat:'Activit\u00e9 nulle \u2014 fermeture',h:0,hor:'domaine ferm\u00e9'});});
+  lignes.sort(function(x,y){return x.i-y.i;});
+  var gens=_planMbrs().filter(function(m){return _planPlId(m)===plId;}).map(function(m){return m.nom;});
+  var base;
+  if(nv){var sl=_planSolid(yr),sj=_planSolidJour(yr),MO=window.PLAN_SOLID_MODES||{};
+    base='Base de l\u2019ann\u00e9e\u00a0: '+_planJoursSem(yr)+' jours du lundi au vendredi \u00d7 7 h = '+_planFmt(_planBaseAn(yr))+', soit 35 h par semaine en moyenne. '
+      +'Journ\u00e9e de solidarit\u00e9\u00a0: '+(sl?e((MO[sl.mode]||sl.mode).toLowerCase())+(sj?' (le '+(sj.d===1?'1er':sj.d)+' '+window.PLAN_MOIS[sj.m].toLowerCase()+')':'')+', 7 h':'\u00e0 r\u00e9gler')+'. '
+      +'Les cong\u00e9s pay\u00e9s et les jours f\u00e9ri\u00e9s ch\u00f4m\u00e9s comptent pour les heures pr\u00e9vues ce jour-l\u00e0\u00a0: ils ne se r\u00e9cup\u00e8rent pas (art. 4.3) et se paient sur le temps qui aurait \u00e9t\u00e9 travaill\u00e9 (art. 10.4).';}
+  else base='Dur\u00e9e annuelle de r\u00e9f\u00e9rence\u00a0: '+_planFmt(L.plafAnnuel)+' de travail effectif.';
+  var aff=(yr-1)+'-12-25',affTxt='25 d\u00e9cembre '+(yr-1);
+  return '<div class="pa-grp pa-prog">'
+    +'<div class="pa-prog-t"><b>Programme indicatif de modulation '+yr+'</b><span>Accord national du 23 d\u00e9cembre 1981 sur la dur\u00e9e du travail dans les exploitations agricoles, art. 10.4</span></div>'
+    +'<table class="pa-prog-id"><tr><th>P\u00e9riode</th><td>du 1er janvier au 31 d\u00e9cembre '+yr+'</td></tr>'
+    +'<tr><th>Salari\u00e9s concern\u00e9s</th><td>'+(gens.length?e(gens.join(' \u00b7 ')):'\u2014')+'</td></tr>'
+    +'<tr><th>Formule</th><td>'+_planFmt(mod)+' de modulation programm\u00e9es (au-del\u00e0 de 35 h par semaine)\u00a0: '+formule+'.</td></tr>'
+    +'<tr><th>D\u00e9compte</th><td>'+base+'</td></tr></table>'
+    +'<table class="pa-prog-per"><tr><th>P\u00e9riode</th><th>Nature</th><th>Par semaine</th><th>Horaire indicatif</th></tr>'
+    +lignes.map(function(l){return '<tr><td>'+l.quand+'</td><td>'+l.nat+'</td><td>'+(l.h>0?_planFmt(l.h):'\u2014')+'</td><td>'+l.hor+'</td></tr>';}).join('')+'</table>'
+    +'<div class="pa-prog-n">Horaires de prise et de fin de service\u00a0: voir la grille de ce mod\u00e8le. Programme \u00e9tabli le '+new Date().toLocaleDateString('fr-FR')
+    +'. \u00c0 afficher au moins une semaine avant le d\u00e9but de la p\u00e9riode, soit au plus tard le <b data-aff="'+aff+'">'+affTxt+'</b>\u00a0; toute modification se communique dans le m\u00eame d\u00e9lai, sauf cas de force majeure.</div>'
+    +'</div>';
+}
+
 
 // ── LA FRONTIÈRE : ce que la frise expose (les gestes, et le rendu que la roue du Planning appelle) ──
 window._planRenderAnnee     = _planRenderAnnee;
@@ -385,3 +442,4 @@ window._planAnneeEtat       = _planAnneeEtat;
 window.planAnneeSemaine     = planAnneeSemaine;   // ★ FRISE-4
 window.planAnneeFermeSem    = planAnneeFermeSem;
 window.planAnneeDesIci      = planAnneeDesIci;
+window._planAnneeProgramme  = _planAnneeProgramme;   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année

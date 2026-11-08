@@ -349,3 +349,24 @@ Le plan du chantier (06/11) : « l’éditeur de 365 cases s’efface » quand l
 
 ### 544d. Ce qui reste ouvert
 - §28, bloc FRISE-5.
+
+## 545. ★★ PROG-1 — LE PROGRAMME INDICATIF DE MODULATION (art. 10.4) SUIT CHAQUE MODÈLE DANS LE PLANNING DE L’ANNÉE (07/11 — `src/planning-annee.js` (`_planAnneeHoraireTxt`, `_planAnneeNature`, `_planAnneeModulation`, `_planAnneeProgramme` neufs ; quatre emprunts de plus) · `src/planning.js` (`_paDoc` : la page suit chaque modèle ; la frontière : `_planBaseAn`, `_planJoursSem`, `_planSolid`, `_planSolidJour`, `PLAN_SOLID_MODES` ; `_PA_CSS`) · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-prog1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/PROG-1.json` — base `efedddd` « frise5 » — **APP 10.76 → 10.77, SW 11.67 → 11.68**)
+
+### 545a. D’où ça vient
+Lot 4 du chantier « le planning de l’année ». L’accord national du 23/12/1981 (art. 10.4, avenant 19 de 2019) veut, avant le début de la période de modulation, un programme indicatif pour l’équipe : la formule, les salariés concernés, les périodes de forte, faible ou nulle activité, l’horaire indicatif de chacune ; affiché au moins une semaine avant, modifié dans le même délai sauf force majeure. Le but de Nico : « le salarié qui demande son planning en janvier doit recevoir un document clair avec les bonnes heures ».
+
+### 545b. Le modèle, et ce qui a été écarté
+- **Tout se lit de la frise** (`_planAnneeLire`) : les saisons (leur semaine type → l’horaire indicatif, leurs heures par semaine → la nature : au-delà de 35 h forte, en deçà réduite, à 0 nulle), les semaines à part (les vendanges), les fermetures (activité nulle).
+- **La formule** (`_planAnneeModulation`) : la somme, semaine par semaine, de ce qui dépasse 35 h (fériés chômés comptés pour leurs heures prévues, depuis la base de l’année) ; jusqu’à 200 h, contingent d’heures supplémentaires hors modulation de 150 h ; jusqu’à 250 h, 100 h ; au-delà, le programme le dit « à revoir avant de l’afficher ».
+- **La règle de décompte écrite en clair** : la base, la journée de solidarité (son mode, sa date), et le choix du domaine — congés et fériés chômés aux heures prévues, avec les articles qui le fondent (4.3, 10.4) ; avant 2027, les 1 607 h.
+- **La date limite d’affichage** : le 25 décembre de l’année d’avant (une semaine avant le 1er janvier).
+- **Une page par modèle**, à la suite de sa grille, dans le planning de l’année (la page de l’équipe, celle qu’on affiche) — pas dans le planning nominatif, qui est la feuille de chacun (« Mon année », la suite du lot).
+- Écarté : un document à part (deux boutons pour la même année) ; les heures de prise et de fin de service dans le tableau (elles sont dans la grille de la même feuille, le programme y renvoie).
+
+### 545c. Ce qui a été vérifié
+- `scripts/mv-harnais-prog1.mjs` (neuf) : les vraies fonctions — le modèle 2027 de la maquette (périodes, natures, horaires, vendanges, ~100 h donc 150 h, base, solidarité, 25 décembre 2026), la grille 2026 du modèle « standard » (quatre fermetures en activité nulle, 1 607 h, 25 décembre 2025), un modèle chargé (> 200 h donc 100 h) ; 11 cas, 3 contre-épreuves tenues.
+- **La typographie** : la mise en page de la page passe en tailles relatives (`em`, `thin`) — le cliquet refusait 4 px en dur et 3 tailles sous 12 px de plus ; `src/planning-annee.js` 40 → 46 ko (+15 %) : un fichier de 46 ko ne se découpe pas, référence regravée (`scripts/typo-baseline.json`).
+- Ce qui n’a pas pu être vu : la feuille imprimée elle-même (mise en page de la page du programme, sur papier).
+
+### 545d. Ce qui reste ouvert
+- §28, bloc PROG-1.
