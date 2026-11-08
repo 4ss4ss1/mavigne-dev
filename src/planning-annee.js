@@ -195,13 +195,67 @@ function planAnneeEnregistrer(){
   if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!E.brouillon)return;
   var id=E.annee,st=_pTplStore(),old=st[id]||{},neuf={};
   Object.keys(old).forEach(function(k){if(isNaN(parseInt(k,10)))neuf[k]=old[k];});     // les horaires (_timings…) restent
+  if(E.meta)['_timings','_timings_jour','_horaires_dma'].forEach(function(k){var v=E.meta[k];if(v&&Object.keys(v).length)neuf[k]=v;else delete neuf[k];});   // ★ HOR-1 : les horaires du brouillon
   for(var m=0;m<12;m++)neuf[m]=E.brouillon[m]||{};
-  st[id]=neuf;E.brouillon=null;E.sugg=false;planSaveTpl(id);_planRenderAnnee();
+  st[id]=neuf;E.brouillon=null;E.meta=null;E.sugg=false;planSaveTpl(id);_planRenderAnnee();
 }
-function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;E.brouillon=null;E.sugg=false;_planRenderAnnee();}
+function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;E.brouillon=null;E.meta=null;E.jourSel=null;E.sugg=false;_planRenderAnnee();}
 // ★ FRISE-3 (§541) — déplacer la coupe entre deux saisons d'une semaine ; régler un jour à part ; remettre un jour ou une semaine à part
 //   « comme la saison ». Les mêmes règles : le brouillon, les jours réguliers seulement, rien d'écrit avant « Enregistrer ».
 function _planAnneeBrouillon(E){return E.brouillon||_planAnneeCopie(_planGetTpl(E.annee,_pY())||{});}
+// ★★ HOR-1 (§550) — LES HORAIRES SUR LA FRISE (lot 5a, maquette v3 validée : « go », coupure unique). La prise de poste se règle
+//   par saison — elle s'écrit dans les mois de la saison (_timings[m].d), là où le relevé, les retards et le planning imprimé la
+//   lisent déjà ; la coupure reste celle du domaine (PLAN_PAUSE_MIN, roue crantée) ; la fin ne se tape jamais : début + heures +
+//   coupure (dès 6 h). Un jour peut avoir sa propre prise (_timings_jour[m][d] = {d:'09:00'}) ; les codes D, M et A d'un modèle
+//   importé s'écrivent, une fois, en heures exactes ({d,f}). Tout sur le brouillon (E.meta), écrit par « Enregistrer ».
+function _planAnneeMetaCopie(T){var o={};['_timings','_timings_jour','_horaires_dma'].forEach(function(k){o[k]=(T&&T[k]&&typeof T[k]==='object')?JSON.parse(JSON.stringify(T[k])):{};});return o;}
+function _planAnneeMeta(E){return (E&&E.meta)||_planAnneeMetaCopie(_planGetTpl(E.annee,_pY())||{});}
+function _planAnneeMetaEd(E){if(!E.meta)E.meta=_planAnneeMetaCopie(_planGetTpl(E.annee,_pY())||{});if(!E.brouillon)E.brouillon=_planAnneeBrouillon(E);return E.meta;}
+function _paMinT(t){var q=String(t||'').split(':');return (parseInt(q[0],10)||0)*60+(parseInt(q[1],10)||0);}
+function _paHHMM(min){min=Math.max(240,Math.min(720,min));return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0');}
+function _paHm(t){var x=_paMinT(t),h=Math.floor(x/60),m=x%60;return h+'\u00a0h\u00a0'+(m<10?'0':'')+m;}
+// l'horaire d'un jour, lu comme _planDefTiming le lit — mais sur le brouillon (mv-harnais-hor1 les compare)
+function _planAnneeHoraire(meta,m,d,h){
+  if(!(h>0))return null;
+  var P=(window.PLAN_PAUSE_MIN!=null?window.PLAN_PAUSE_MIN:60),hm=function(v){return (typeof v==='string'&&/^([01]?\d|2[0-3]):[0-5]\d$/.test(v))?v:'';};
+  var fin=function(dbt,cont){var e=_paMinT(dbt)+Math.round(h*60)+((!cont&&h>=6)?P:0);return String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');};
+  var tj=meta&&meta._timings_jour&&meta._timings_jour[m]&&meta._timings_jour[m][d],mt=meta&&meta._timings&&meta._timings[m];
+  if(tj&&typeof tj==='object'&&hm(tj.d))return {d:hm(tj.d),f:hm(tj.f)||fin(hm(tj.d),false),jour:true};
+  if(typeof tj==='string'&&tj){var dma=(meta._horaires_dma&&typeof meta._horaires_dma==='object')?meta._horaires_dma:{},bd=(mt&&(mt.d||mt.debut))||'07:00',bf=(mt&&(mt.f||mt.fin))||'16:30',dd=hm(dma.decale)||'09:00',fc=hm(dma.fin)||'16:30';
+    if(tj==='M')return {d:dd,f:fc,code:'M'};if(tj==='A')return {d:dd,f:bf,code:'A'};return {d:bd,f:fc,code:'D'};}
+  if(mt){var dbt=mt.d||mt.debut||'07:00';return {d:dbt,f:fin(dbt,mt.continu)};}
+  var T=window.PLAN_DEF_T&&window.PLAN_DEF_T[h];return T?{d:T.d,f:T.f}:{d:'07:00',f:fin('07:00',false)};
+}
+function _planAnneePriseSaison(A,si,meta){var x=A.J.find(function(y){return y.s===si&&!y.fer&&!y.ferme&&!y.apart&&y.h>0&&!(meta._timings_jour&&meta._timings_jour[y.m]&&meta._timings_jour[y.m][y.d]);});
+  if(!x)return '07:00';var t=_planAnneeHoraire(meta,x.m,x.d,x.h);return t?t.d:'07:00';}
+function _planAnneeHorairesTxt(A,si,meta){var S=A.saisons[si],JL=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'],out=[],g=0;
+  while(g<7){if(!(S.h[g]>0)){g++;continue;}var k=g;while(k+1<7&&S.h[k+1]===S.h[g])k++;
+    var x=A.J.find(function(y){return y.s===si&&y.g===g&&!y.fer&&!y.ferme&&!y.apart&&y.h===S.h[g];}),t=x?_planAnneeHoraire(meta,x.m,x.d,x.h):null;
+    if(t)out.push((k>g?JL[g]+(k>g+1?' au ':' et ')+JL[k]:JL[g])+' '+_paHm(t.d)+' \u2192 '+_paHm(t.f));g=k+1;}
+  var r=out.join(' \u00b7 ');return r?r.charAt(0).toUpperCase()+r.slice(1):'';}
+function _planAnneeCodes(meta){var n=0,TJ=meta&&meta._timings_jour||{};Object.keys(TJ).forEach(function(m){Object.keys(TJ[m]||{}).forEach(function(d){if(typeof TJ[m][d]==='string'&&TJ[m][d])n++;});});return n;}
+function planAnneePrise(el){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!el)return;
+  var si=parseInt(el.dataset.s,10),p=parseInt(el.dataset.p,10)||0,meta=_planAnneeMetaEd(E),A=_planAnneeLire(E.annee,_pY(),E.brouillon),S=A.saisons[si];if(!S||!p)return;
+  var nv=_paHHMM(_paMinT(_planAnneePriseSaison(A,si,meta))+p);
+  for(var m=S.m0;m<=S.m1;m++)meta._timings[m]=Object.assign({},meta._timings[m]||{},{d:nv});
+  E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
+}
+function planAnneeJourSel(el){var E=_paE();if(!E||!E.annee||!el)return;E.jourSel={m:parseInt(el.dataset.m,10),d:parseInt(el.dataset.j,10)};_planRenderAnnee();}
+function planAnneePriseJour(el){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!el||!E.jourSel)return;
+  var meta=_planAnneeMetaEd(E),m=E.jourSel.m,d=E.jourSel.d,p=parseInt(el.dataset.p,10)||0;
+  if(!meta._timings_jour[m])meta._timings_jour[m]={};
+  if(!p){delete meta._timings_jour[m][d];}
+  else{var h=parseFloat(E.brouillon[m]&&E.brouillon[m][d])||0,t=_planAnneeHoraire(meta,m,d,h)||{d:'07:00'};meta._timings_jour[m][d]={d:_paHHMM(_paMinT(t.d)+p)};}
+  E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
+}
+function planAnneeDma(){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee)return;
+  var meta=_planAnneeMetaEd(E),TJ=meta._timings_jour,n=0;
+  Object.keys(TJ).forEach(function(m){Object.keys(TJ[m]||{}).forEach(function(d){var c=TJ[m][d];if(typeof c!=='string'||!c)return;var t=_planAnneeHoraire(meta,+m,+d,1);TJ[m][d]={d:t.d,f:t.f};n++;});});
+  E.n=(E.n||0)+1;_planRenderAnnee();if(n&&window.showToast)window.showToast(n+' jour'+(n>1?'s':'')+' en clair \u2014 \u00ab\u00a0Enregistrer\u00a0\u00bb pour garder','#3D6B27');
+}
 function planAnneeCoupe(el){
   if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!el)return;
   var si=parseInt(el.dataset.s,10),n=parseInt(el.dataset.n,10),G=_planAnneeBrouillon(E),A=_planAnneeLire(E.annee,_pY(),G),S=A.saisons[si],P=A.saisons[si-1];
@@ -257,12 +311,14 @@ function planAnneeDesIci(el){
 function _planRenderAnnee(){
   var body=document.getElementById('plan-body'),E=_paE();if(!body)return;   // ★ ANNEE-TAB : l'onglet L'année
   if(!E||!E.annee)E=_paEtat={annee:_planAnneeModeleDefaut()};
+  var MT=_planAnneeMeta(E);   // ★ HOR-1 : les horaires (brouillon ou modèle)
   var id=E.annee,yr=_pY(),G=_planAnneeGrille(),A=_planAnneeLire(id,yr,G),J=A.J,N=J.length,L=_planLegal(),nv=_planBaseActive(yr),adm=(typeof isAdmin==='function')&&isAdmin(),sel=_planAnneeSemSel(A,E,yr);
   var tot=0;J.forEach(function(x){tot+=x.h;});
   var fer=0,nf=0;if(nv)J.forEach(function(x){if(x.fer){var c=_planCreditFerie(id,yr,x.m,x.d,G);if(c>0){fer+=c;nf++;}}});
   var brut=nv?_planModelBrut(id,yr,G):tot,att=_planAnneeCible(id,yr),ec=Math.round((brut-att)*10)/10;
   var gens=_planMbrs().filter(function(m){return _planPlId(m)===id;});
-  var h=_planAnneeChoix(id,E)+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>';
+  var _nc=adm?_planAnneeCodes(MT):0;
+  var h=_planAnneeChoix(id,E)+(_nc?'<div class="plan-card" style="margin-bottom:10px"><div style="font-size:var(--pt-txt,13px)">Ce mod\u00e8le porte '+_nc+' code'+(_nc>1?'s':'')+' D, M ou A (horaires d\u00e9cal\u00e9s)\u00a0: les \u00e9crire en heures, une fois, sans rien changer aux heures ni \u00e0 la paie.</div><button class="plan-btn-saisir" style="margin-top:8px" onclick="planAnneeDma()">\u00c9crire les horaires en clair</button></div>':'')+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>';
   h+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px"><b style="font-size:var(--pt-xl,24px);font-variant-numeric:tabular-nums">'+_paH(brut)+'</b>'
     +'<span style="color:var(--texte-doux)">sur '+_paH(att)+(nv?', la base de l\u2019ann\u00e9e':', le plafond annuel')+'</span>'
     +(Math.abs(ec)<0.05?'<span class="mvpas mvpas-statut mvpas-fait">juste</span>':'<span class="mvpas mvpas-statut mvpas-surveiller">'+(ec<0?'il manque '+_paH(-ec):_paH(ec)+' de trop')+'</span>')+'</div>'
@@ -326,7 +382,9 @@ function _planRenderAnnee(){
           return '<div style="'+row+'"><span style="flex:1">'+JC[x.g]+' '+(x.d===1?'1er':x.d)+' '+PLAN_MOIS_FR[x.m]+'</span>'
             +(x.fer?'<span style="color:var(--texte-doux)">'+_escHtml(x.fer)+'</span>'
               :'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+JN[x.g]+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'+hv(x.h)
-              +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+JN[x.g]+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>')+'</div>';}).join('')+'</div>'
+              +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+JN[x.g]+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>'
+              +(function(){var t=_planAnneeHoraire(MT,x.m,x.d,x.h);return t?'<button class="plan-btn-pdf"'+(x===Sw.j.find(function(y){return !y.fer&&y.h>0;})?' data-tuto="plan.annee.heure"':'')+' data-m="'+x.m+'" data-j="'+x.d+'" aria-label="Horaire du '+JN[x.g].toLowerCase()+' '+x.d+'" onclick="planAnneeJourSel(this)">'+_paHm(t.d)+' \u2192 '+_paHm(t.f)+(t.jour?' \u00b7 d\u00e9cal\u00e9':'')+'</button>':'';})())+'</div>';}).join('')+'</div>'
+      +(function(){var js=E.jourSel;if(!js)return '';var x=Sw.j.find(function(y){return y.m===js.m&&y.d===js.d;});if(!x||x.fer||!(x.h>0))return '';var t=_planAnneeHoraire(MT,x.m,x.d,x.h);return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--pt-txt,13px);padding:6px 0"><span style="flex:1;min-width:12em">Prise le '+JN[x.g].toLowerCase()+' '+(x.d===1?'1er':x.d)+' '+window.PLAN_MOIS[x.m].toLowerCase()+'</span>'+'<button class="plan-btn-pdf" data-p="-15" aria-label="Prise 15 minutes plus t\u00f4t ce jour-l\u00e0" onclick="planAnneePriseJour(this)">\u2212</button><b style="font-variant-numeric:tabular-nums">'+_paHm(t.d)+'</b>'+'<button class="plan-btn-pdf" data-tuto="plan.annee.prisej" data-p="15" aria-label="Prise 15 minutes plus tard ce jour-l\u00e0" onclick="planAnneePriseJour(this)">+</button>'+(t.jour?'<button class="plan-btn-pdf" data-p="0" onclick="planAnneePriseJour(this)">Comme la saison</button>':'')+'<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">fin \u00e0 '+_paHm(t.f)+'</span></div>';})()
       +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
       +(Sw.ferme?'<button class="plan-btn-pdf" data-tuto="plan.annee.rsem" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Rouvrir comme la saison</button>'
                :'<button class="plan-btn-pdf" data-tuto="plan.annee.fsem" data-w="'+sel+'" onclick="planAnneeFermeSem(this)">Fermer la semaine</button>'
@@ -349,6 +407,7 @@ function _planRenderAnnee(){
         +'<button class="plan-btn-pdf"'+(si===1?' data-tuto="plan.annee.coupe"':'')+' data-s="'+si+'" data-n="-7" onclick="planAnneeCoupe(this)">1 sem. plus t\u00f4t</button>'
         +'<button class="plan-btn-pdf" data-s="'+si+'" data-n="7" onclick="planAnneeCoupe(this)">1 sem. plus tard</button></div>':'')
       +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:6px">'+_planAnneeResumeTxt(sa.h)+'</div>'
+      +(a>=0?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:var(--pt-txt,13px)"><span>Prise de poste</span>'+(adm?'<button class="plan-btn-pdf" data-s="'+si+'" data-p="-15" aria-label="Prise 15 minutes plus t\u00f4t" onclick="planAnneePrise(this)">\u2212</button>':'')+'<b style="font-variant-numeric:tabular-nums">'+_paHm(_planAnneePriseSaison(A,si,MT))+'</b>'+(adm?'<button class="plan-btn-pdf"'+(si===0?' data-tuto="plan.annee.prise"':'')+' data-s="'+si+'" data-p="15" aria-label="Prise 15 minutes plus tard" onclick="planAnneePrise(this)">+</button>':'')+'<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">'+_planAnneeHorairesTxt(A,si,MT)+'</span></div>':'')
       +(adm?'<details'+(si===0?' open':'')+' style="margin-top:6px"><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">R\u00e9gler les jours</summary>'+_planAnneeJoursEd(sa.h,si,adm)+'</details>':_planAnneeJours(sa.h))+'</div>';});
   var ap=A.sem.filter(function(s){return s.apart;});
   if(ap.length)h+='<div style="font-size:var(--pt-txt,13px)"><b>Semaines \u00e0 part</b>'+ap.map(function(s){var a=s.j[0].i,b=s.j[s.j.length-1].i;
@@ -484,6 +543,10 @@ function _planAnneeMini(plId,yr){
 window._planRenderAnnee     = _planRenderAnnee;
 window.planAnneeOuvrir      = planAnneeOuvrir;
 window.planAnneeModele      = planAnneeModele;   // ★ ANNEE-TAB
+window.planAnneePrise       = planAnneePrise;    // ★ HOR-1
+window.planAnneeJourSel     = planAnneeJourSel;
+window.planAnneePriseJour   = planAnneePriseJour;
+window.planAnneeDma         = planAnneeDma;
 window._planAnneeOnglet     = _planAnneeOnglet;
 window._planAnneeBande      = _planAnneeBande;
 window.planAnneePas         = planAnneePas;

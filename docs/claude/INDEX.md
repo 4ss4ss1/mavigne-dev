@@ -603,3 +603,4 @@
 | 547 | 547. ★ RELSOL-1 — LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS (07/11 — `src/planning.js` (`_planRelSolidarit… | `docs/claude/chantiers-530-579.md` |
 | 548 | 548. ★★ ANNEE-TAB — L’ANNÉE A SON ONGLET DANS LE PLANNING ; UNE NOTATION DES HEURES PROPRE (07/11 — `src/pl… | `docs/claude/chantiers-530-579.md` |
 | 549 | 549. ★ ONGLETS-1 — LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL (07/11 — `index.html` (l’ordre, les nom… | `docs/claude/chantiers-530-579.md` |
+| 550 | 550. ★★ HOR-1 — LES HORAIRES SUR LA FRISE : LA PRISE DE POSTE PAR SAISON, CELLE D’UN JOUR, LES CODES D/M/A … | `docs/claude/chantiers-530-579.md` |

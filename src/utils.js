@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.81';
+export const APP_VERSION = '10.82';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2806,6 +2806,7 @@ var MV_AIDE = {
       ['La base de l’année', "depuis 2027 : 7 h × les jours du lundi au vendredi, soit 35 h par semaine en moyenne (1 827 h en 2027). Les congés et les fériés chômés y comptent pour leurs heures prévues : ils ne retirent rien et ne se rattrapent pas. Le compteur de chacun la suit, au prorata de son contrat. Jusqu’en 2026, c’est le plafond de 1 607 h de travail effectif."],
       ['La journée de solidarité', "se règle chaque année dans la roue crantée du Planning : étalée sur l’année (7 h de plus dans la base), un jour férié travaillé (jamais le 1er mai, sans majoration), un autre jour (jamais un dimanche), ou offerte. 7 h pour un temps plein, au prorata d’un temps partiel, sans prorata de présence ; dispensés : déjà faite chez un autre employeur cette année, ou moins de 18 ans quand c’est un férié. Elle figure au relevé du mois où elle se fait (étalée ou offerte : en décembre), dans « Pour le salarié » : rien ne change la paie."],
       ['L’année d’un modèle', "l’onglet « L’année » du Planning, un modèle choisi en haut : la grille relue en saisons — une couleur par semaine type, la semaine à part (les vendanges), les fermetures hachurées, une barre par semaine face aux 35 h, le compte face à la base et le cadre vérifié. Chaque saison se règle avec − et + (ses jours réguliers seulement) et dit où elle commence — « 1 sem. plus tôt / plus tard » déplace sa coupe, même en milieu de mois ; un jour à part se règle seul ou revient « comme la saison », une semaine à part aussi ; « Tomber juste » propose une ou deux retouches qui posent l’année sur sa cible ; sous la frise, une semaine se règle jour par jour, se ferme, se rouvre, ou change le rythme à partir d’elle (une nouvelle saison) ; une année vide se construit ainsi ; rien n’est écrit avant « Enregistrer ». C’est là qu’un modèle se règle : la grille de 365 cases n’existe plus, un modèle neuf s’ouvre sur son année, et « Exporter (CSV) » y est."],
+      ['Les horaires', "dans l’onglet Année, chaque saison a sa prise de poste, réglable par quart d’heure ; la fin ne se tape pas : début + heures du jour + la coupure du domaine (roue crantée), dès 6 h. Dans la semaine, toucher l’horaire d’un jour lui donne sa propre prise (« décalé ») ; « Comme la saison » la retire. Un modèle importé avec des codes D, M ou A les voit s’écrire en heures, une fois, sans rien changer."],
     ['Taux horaires, acomptes, heures sup et motifs d’absence', ": administrateurs seulement. Les taux ne sont jamais enregistrés sur un appareil ; le téléphone d’un salarié ne reçoit que ses propres jours, et l’équipe sans motif."]
     ]
   },

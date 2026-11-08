@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.82', d: '2026-11-07', items: [   // HOR-1 (§550) : les horaires sur la frise
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les horaires se règlent sur la frise',
+      desc: "Dans l’onglet Année, chaque saison a sa prise de poste, au quart d’heure ; la fin se calcule (heures du jour + la coupure du domaine). Dans la semaine, un jour peut prendre plus tard, à part. Un modèle importé avec des codes D, M ou A les écrit en heures, d’un bouton." },
+  ] },
   { v: '10.81', d: '2026-11-07', items: [   // ONGLETS-1 (§549) : Mois, Année, Personnel
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Mois, Année, Personnel',
       desc: "Les onglets du Planning se rangent et se nomment autrement : Mois, puis Année, puis Personnel (l’ancien « Les gens »). Rien d’autre ne change." },

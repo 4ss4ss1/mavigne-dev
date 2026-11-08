@@ -445,3 +445,24 @@ Nico (07/11), à la livraison d’ANNEE-TAB : « il aurait fallu mettre mois, an
 
 ### 549d. Ce qui reste ouvert
 - Rien de propre au lot.
+
+## 550. ★★ HOR-1 — LES HORAIRES SUR LA FRISE : LA PRISE DE POSTE PAR SAISON, CELLE D’UN JOUR, LES CODES D/M/A EN CLAIR (07/11 — `src/planning.js` (`_planDefTiming` : la prise propre d’un jour ; `PLAN_DEF_T` exposé) · `src/planning-annee.js` (`_planAnneeMetaCopie`, `_planAnneeMeta`, `_planAnneeMetaEd`, `_paMinT`, `_paHHMM`, `_paHm`, `_planAnneeHoraire`, `_planAnneePriseSaison`, `_planAnneeHorairesTxt`, `_planAnneeCodes`, `planAnneePrise`, `planAnneeJourSel`, `planAnneePriseJour`, `planAnneeDma` neufs ; `planAnneeEnregistrer`, `planAnneeAnnuler`, `_planRenderAnnee`) · `src/tutos.js` (le tuto « horaires ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-hor1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` (un exempté) · `scripts/typo-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/HOR-1.json` — base `90d92d5` « onglets1 » — **APP 10.81 → 10.82, SW 11.72 → 11.73**)
+
+### 550a. D’où ça vient
+Lot 5a du chantier, maquette v3 validée par Nico (07/11) : « go (coupure unique) ». L’heure de prise vivait dans un tableau caché mois par mois (`_timings`, rempli par l’import CSV) et dans des codes D/M/A par jour (`_timings_jour`, avec `_horaires_dma`) qui disaient « ce jour-là on prend à 9 h » sans l’écrire.
+
+### 550b. Le modèle, et ce qui a été écarté
+- **La prise d’une saison** se règle sur sa carte (± 15 min) et s’écrit dans `_timings[m].d` de chacun de ses mois — là où `_planDefTiming` la lit déjà : le relevé, les retards et le planning imprimé n’ont rien à réapprendre. Les horaires de chaque groupe de jours s’affichent (« Lundi au jeudi 7 h 00 → 16 h 30 · vendredi 7 h 00 → 12 h 00 »).
+- **La coupure reste unique** (`PLAN_PAUSE_MIN`, roue crantée), comme Nico l’a tranché ; la fin ne se tape jamais : début + heures + coupure dès 6 h (la règle de `_computeEnd`).
+- **Un jour décalé** : dans la semaine, toucher l’horaire d’un jour ouvre sa prise (± 15 min, « Comme la saison ») ; `_timings_jour[m][d] = {d:'09:00'}`. `_planDefTiming` lit cet objet avant les codes (un objet sans heure valable retombe sur le mois).
+- **Les codes D/M/A en clair** : une bannière les compte, « Écrire les horaires en clair » les remplace par leurs deux heures exactes (`{d,f}`, lues telles quelles) — rien ne change aux heures ni à la paie.
+- **Sur le brouillon** : `E.meta` (copie des horaires du modèle) ; « Enregistrer » les écrit avec la grille, « Annuler » les jette. La frise lit chaque jour par `_planAnneeHoraire`, la copie de la lecture de `_planDefTiming` sur le brouillon — le harnais les compare jour par jour.
+- Écarté : une coupure par saison (Nico : unique) ; écrire la prise d’une saison jour par jour (le mois est la maille que l’appli lit déjà) ; convertir les codes sans que l’admin le demande.
+
+### 550c. Ce qui a été vérifié
+- `scripts/mv-harnais-hor1.mjs` (neuf) : `_planDefTiming` lit la prise propre d’un jour (9 h 00 → 18 h 30 pour 8 h 30), `{d,f}` tel quel, l’objet vide retombe sur le mois ; la frise et `_planDefTiming` d’accord sur onze jours (mois réglé, codes D/M/A, jour propre, défaut par heures) ; « + 15 min » sur janvier-février, la prise d’un jour posée puis retirée, les codes convertis à l’identique, « Enregistrer » ; 9 cas, 3 contre-épreuves tenues.
+- Le tuto « Comment faire pour régler les horaires d’une saison ? » couvre la prise d’une saison et celle d’un jour ; `planAnneeDma` est exempté (le domaine d’entraînement n’a pas de codes).
+- **La taille** : `src/planning-annee.js` 52 → 61 ko (+17 %) — un fichier de 61 ko ne se découpe pas ; référence regravée (`scripts/typo-baseline.json`).
+
+### 550d. Ce qui reste ouvert
+- §28, bloc HOR-1.

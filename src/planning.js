@@ -889,10 +889,14 @@ function _planDefTiming(pl,plId,m,d,yr){
         var bf=base.f||base.fin||'16:30';
         var _dma=(_ct._horaires_dma&&typeof _ct._horaires_dma==='object')?_ct._horaires_dma:{};
         var _hm=function(v,def){ return (typeof v==='string'&&/^([01]?\d|2[0-3]):[0-5]\d$/.test(v))?v:def; };
+        // ★ HOR-1 (§550) — une prise PROPRE À CE JOUR, en clair : {d:'09:00'} (la fin se calcule : début + heures + coupure)
+        //   ou {d,f} (un code D/M/A converti par « L'année » : ses deux heures, exactes). Un objet sans heure valable ne vaut rien.
+        if(tCode&&typeof tCode==='object'){var _hj=_hm(tCode.d,'');if(_hj)return{d:_hj,f:_hm(tCode.f,'')||_computeEnd(_hj,pl,false),continu:false};tCode='';}
         var dDec=_hm(_dma.decale,'09:00'), fCom=_hm(_dma.fin,'16:30');
-        if(tCode==='M')return{d:dDec,f:fCom,continu:false};
-        if(tCode==='A')return{d:dDec,f:bf,  continu:false};
-        return{d:bd,f:fCom,continu:false}; // D (défaut, 1er jour ou isolé)
+        if(!tCode){ /* objet vide : on retombe sur l'horaire du mois */ }
+        else if(tCode==='M')return{d:dDec,f:fCom,continu:false};
+        else if(tCode==='A')return{d:dDec,f:bf,  continu:false};
+        else return{d:bd,f:fCom,continu:false}; // D (défaut, 1er jour ou isolé)
       }
       // 2. Horaire mensuel : utiliser l'heure de début du mois + calculer fin depuis pl
       // → gère l'annualisation : vendredi 5h en juin (début 07:00) → 07:00→12:00
@@ -9808,7 +9812,8 @@ window._planJoursSem      = _planJoursSem;
 window._planSolid         = _planSolid;
 window._planSolidJour     = _planSolidJour;
 window.PLAN_SOLID_MODES   = PLAN_SOLID_MODES;
-window._planModeles       = _planModeles;   // ★ ANNEE-TAB (§548) : les modèles, pour le choix de l'onglet L'année
+window._planModeles       = _planModeles;
+window.PLAN_DEF_T         = PLAN_DEF_T;   // ★ HOR-1 (§550) : les horaires par défaut, lus par la frise   // ★ ANNEE-TAB (§548) : les modèles, pour le choix de l'onglet L'année
 window.planSaveMaj          = planSaveMaj;
 window.planSetHsupMode      = planSetHsupMode;
 window.planLegalPreset      = planLegalPreset;

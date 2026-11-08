@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (ONGLETS-1)** — **LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL** (§549). Base `a2a0356` (« anneetab »). **APP 10.80 → 10.81, SW 11.71 → 11.72**. Nico (07/11), après ANNEE-TAB : « il aurait fallu mettre mois, année, personnels (les gens mais sans mettre les gens) ». La barre devient Mois · Année · Personnel (les `data-tab` ne changent pas : `mois`, `annee`, `gens`) ; l’aide, le guide du Planning et les quatre tutos de la frise suivent. `mv-harnais-onglets1` neuf (4 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (HOR-1)** — **LES HORAIRES SUR LA FRISE : LA PRISE DE POSTE PAR SAISON, CELLE D’UN JOUR, LES CODES D/M/A EN CLAIR** (§550). Base `90d92d5` (« onglets1 »). **APP 10.81 → 10.82, SW 11.72 → 11.73**. Lot 5a (maquette v3, « go », coupure unique). La prise d’une saison (`planAnneePrise`, ± 15 min) s’écrit dans `_timings[m].d` de ses mois ; la coupure reste `PLAN_PAUSE_MIN` ; la fin se calcule. Un jour : `_timings_jour[m][d] = {d:'09:00'}` (`planAnneeJourSel`, `planAnneePriseJour`) ; `_planDefTiming` lit cet objet (et `{d,f}`, exact) avant les codes ; « Écrire les horaires en clair » (`planAnneeDma`) convertit les codes D/M/A en `{d,f}`. La frise lit chaque jour par `_planAnneeHoraire`, la copie exacte de `_planDefTiming` sur le brouillon (`E.meta`, écrit par « Enregistrer »). `mv-harnais-hor1` neuf (9 cas, 3 contre-épreuves) ; tuto neuf « Comment faire pour régler les horaires d’une saison ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2153,6 +2153,12 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ ONGLETS-1 (07/11, §549) — Mois, Année, Personnel
 - ⚠️ **Les noms des onglets du Planning sont ceux de Nico** : « Mois », « Année », « Personnel », dans cet ordre, sans article. « Les gens » ne s’écrit plus nulle part de visible (le `data-tab` reste `gens`, une clé interne). `mv-harnais-onglets1` le tient.
 - **La suite** : le lot 5a — les horaires sur la frise (coupure unique du domaine) ; puis 5b — les semaines A et B.
+
+### ★ HOR-1 (07/11, §550) — les horaires sur la frise : ce qui reste
+- **À essayer chez Nico, HOR-1 déployé** : Planning › Année › son modèle — la prise de chaque saison ; s’il porte des codes D/M/A (son modèle « nico »), le bouton « Écrire les horaires en clair », puis « Enregistrer » ; le relevé d’un jour décalé doit dire les mêmes heures qu’avant.
+- **Une coupe de mois** (la fin d’année dès le 16 novembre) : la prise d’une saison s’écrit par mois (`_timings` est mensuel) — les jours de novembre qui suivent déjà décembre gardent la prise de novembre. À reprendre si Nico le voit.
+- **Le programme indicatif** pourrait dire les heures de prise de chaque période (aujourd’hui il renvoie à la grille).
+- **Le lot 5b** : les semaines A et B (maquette v3).
 
 ## 29. Synchronisation de la mémoire
 
