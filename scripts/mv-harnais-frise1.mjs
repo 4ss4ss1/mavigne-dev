@@ -21,7 +21,7 @@ const DEFAUTS = {
   ferme: ['les semaines fermées ne sont plus vues', 'if(ouv.length&&ouv.every(function(x){return x.h<=0;})){s.ferme=true;', 'if(false){s.ferme=true;'],
   apart: ['la semaine de vendanges n’est plus « à part »', '    if(n>=3){s.apart=true;', '    if(n>=7){s.apart=true;'],
   mode:  ['la semaine type prend le maximum au lieu du plus fréquent', 'ordre.forEach(function(k){if(cpt[k]>bn){bn=cpt[k];best=k;}});', 'ordre.forEach(function(k){if(best==null||parseFloat(k)>parseFloat(best))best=k;});'],
-  jours: ['les jours à part disparaissent', '  var jours=J.filter(function(x){var T=type[x.coupe!=null?x.coupe:x.m];return !x.fer&&!x.ferme&&!x.apart&&x.h!==T[x.g];});', '  var jours=[];'],
+  jours: ['les jours à part disparaissent', '  var jours=J.filter(function(x){var T=tyM(x.coupe!=null?x.coupe:x.m,x);return !x.fer&&!x.ferme&&!x.apart&&x.h!==T[x.g];});', '  var jours=[];'],   // FRISE-AB (§551) : la semaine type du jour, paire ou impaire
 };
 if (CONTRE) {
   console.log('\n── FRISE-1 — contre-épreuve (un processus par défaut)\n');

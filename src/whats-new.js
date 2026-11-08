@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.83', d: '2026-11-07', items: [   // FRISE-AB (§551) : les semaines A et B
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Un vendredi sur deux : les semaines A et B',
+      desc: "Dans l’onglet Année, « Une semaine sur deux » ouvre la semaine B d’une saison : ses jours se règlent à part. Les deux semaines alternent, le compte de l’année prend leur moyenne ; le programme indicatif et « Mon année » les disent." },
+    { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Semaine A ou B ?',
+      desc: "Quand ta saison alterne deux semaines, « Mon année » te dit si cette semaine est la A ou la B." },
+  ] },
   { v: '10.82', d: '2026-11-07', items: [   // HOR-1 (§550) : les horaires sur la frise
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les horaires se règlent sur la frise',
       desc: "Dans l’onglet Année, chaque saison a sa prise de poste, au quart d’heure ; la fin se calcule (heures du jour + la coupure du domaine). Dans la semaine, un jour peut prendre plus tard, à part. Un modèle importé avec des codes D, M ou A les écrit en heures, d’un bouton." },

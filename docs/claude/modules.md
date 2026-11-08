@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ Les semaines A et B (FRISE-AB, §551)
+
+`_planAnneeLire` lit l’alternance (semaines paires / impaires, sans exception) ; une saison `ab` porte `h` (A), `hB` (B), `tot` (la moyenne) ; chaque
+jour sa lettre. « Une semaine sur deux » (`planAnneeAB`), « Une seule semaine » (`planAnneeUneSemaine`).
+
 ### ★ Les horaires sur la frise (HOR-1, §550)
 
 La prise d’une saison → `_timings[m].d` de ses mois ; un jour → `_timings_jour[m][d] = {d}` (ou `{d,f}` pour un code converti) ; la coupure : `PLAN_PAUSE_MIN`.

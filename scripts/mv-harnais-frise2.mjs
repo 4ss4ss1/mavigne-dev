@@ -15,7 +15,7 @@ const R = path.resolve(path.dirname(ICI), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const DEFAUTS = {
-  reguliers: ['une retouche de saison écrase aussi les jours à part', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&x.h===S.h[g];});}', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart;});}'],
+  reguliers: ['une retouche de saison écrase aussi les jours à part', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&(!L||x.lettre===L)&&x.h===v[g];});}', 'return A.J.filter(function(x){return x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&(!L||x.lettre===L);});}'],   // FRISE-AB (§551) : par lettre
   veille:    ['« Tomber juste » ne sait plus raccourcir la veille de Noël', "  [[11,25,'No\\u00ebl'],[11,31,'la Saint-Sylvestre']].forEach(function(v){", '  [].forEach(function(v){'],
   horaires:  ['enregistrer perd les horaires du modèle', "  Object.keys(old).forEach(function(k){if(isNaN(parseInt(k,10)))neuf[k]=old[k];});", '  void old;'],
   annuler:   ['« Annuler » garde le brouillon', 'function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;E.brouillon=null;', 'function planAnneeAnnuler(){var E=_paE();if(!E||!E.annee)return;'],

@@ -466,3 +466,23 @@ Lot 5a du chantier, maquette v3 validée par Nico (07/11) : « go (coupure uniqu
 
 ### 550d. Ce qui reste ouvert
 - §28, bloc HOR-1.
+
+## 551. ★★ FRISE-AB — LES SEMAINES A ET B : UNE SAISON PEUT ALTERNER DEUX SEMAINES (07/11 — `src/planning-annee.js` (`_planAnneeLire` : `_mode`, l’alternance, `tyM`, les lettres ; `_planAnneeReguliers` par lettre ; `_planAnneeJoursEd` par lettre ; `_planAnneeCleS`, `_planAnneeResumeAB`, `_planAnneeEditeurSaison`, `planAnneeAB`, `planAnneeUneSemaine`, `_planAnneeSemaineAB` neufs ; `planAnneePas`, `_planAnneeRetouches`, `_planAnneeProgramme`, `_planAnneeMini`, `_planRenderAnnee`) · `src/planning.js` (« Mon année » : la semaine A ou B) · `src/tutos.js` (le tuto « unsurdeux ») · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-ab1.mjs` (neuf) · `scripts/mv-harnais-frise1.mjs` · `scripts/mv-harnais-frise2.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/FRISE-AB.json` — base `c825df0` « hor1 » — **APP 10.82 → 10.83, SW 11.73 → 11.74**)
+
+### 551a. D’où ça vient
+Lot 5b du chantier, maquette v3 validée (07/11) : « Quand l’équipe ne travaille qu’un vendredi sur deux, la saison a deux semaines : A et B. Elles alternent d’elles-mêmes, et le compte de l’année prend leur moyenne. »
+
+### 551b. Le modèle, et ce qui a été écarté
+- **L’alternance se lit dans la grille**, jamais d’un drapeau : pour chaque mois et chaque jour de la semaine, les semaines paires et impaires de l’année (comptées depuis la première semaine de janvier) tiennent-elles chacune leur valeur, sans exception, sur au moins deux semaines chacune ? Un seul jour qui s’écarte suffit à refuser — un jour à part, une semaine à part ne la font pas naître (la grille 2026 de Nico : aucune saison à deux semaines).
+- **Chaque jour a sa semaine type** (`tyM` : paire ou impaire de son mois, ou de la coupe qui le prend) : les coupes, les semaines à part, les jours à part la lisent ; chaque jour porte sa lettre (A = la semaine du premier jour régulier de la saison). Une saison à deux semaines : `ab`, `h` (A), `hB` (B), `tot` = leur moyenne (sa nature, ses heures par semaine).
+- **L’éditer** : « Une semaine sur deux » ouvre la ligne B (l’état de la vue, `E.ab`) ; la première retouche de la B (`planAnneePas`, `data-l="B"`, ses jours réguliers B seulement) fait naître l’alternance que la frise lit ; « Une seule semaine » rend à la B les heures de la A.
+- **Le dire** : la carte (« Semaine A : … · Semaine B : … », « en moyenne », « la semaine du 5 janvier est une semaine A »), le programme indicatif (les deux horaires), la petite frise, « Mon année » (« cette semaine : semaine A — la prochaine, semaine B »).
+- Écarté : un drapeau A/B enregistré dans le modèle (la frise se lit des heures, pas d’une liste) ; « Tomber juste » sur une saison à deux semaines (les retouches d’une seule semaine type n’y ont pas de sens) — dit dans §28.
+
+### 551c. Ce qui a été vérifié
+- `scripts/mv-harnais-ab1.mjs` (neuf) : la vraie grille 2026 — aucune saison à deux semaines ; la ligne B ouverte ; le vendredi B à 3 h 30 sur janvier-février (16 et 30 janvier, 13 et 27 février), les vendredis A à 4 h ; la frise lit A 4 h / B 3 h 30 / 31 h 45 de moyenne ; les jours à part inchangés ; le programme écrit les deux semaines ; « Une seule semaine » ; 8 cas, 3 contre-épreuves tenues.
+- **La taille** : `src/planning-annee.js` 61 → 66 ko (+8 %) — un fichier de 66 ko ne se découpe pas ; référence regravée (`scripts/typo-baseline.json`).
+- FRISE-1 à 4, HOR-1, MONAN-1, PROG-1 verts, contre-épreuves comprises (deux motifs suivent les lignes réécrites : « jours » de FRISE-1, « réguliers » de FRISE-2).
+
+### 551d. Ce qui reste ouvert
+- §28, bloc FRISE-AB.

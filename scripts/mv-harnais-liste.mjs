@@ -896,6 +896,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-onglets1.mjs --contre'],
   ['node scripts/mv-harnais-hor1.mjs'],                // HOR-1 (§550) : les horaires sur la frise — prise par saison, prise d'un jour, codes D/M/A en clair, lus comme _planDefTiming
   ['node scripts/mv-harnais-hor1.mjs --contre'],
+  ['node scripts/mv-harnais-ab1.mjs'],                 // FRISE-AB (§551) : les semaines A et B — l'alternance lue sans faux positif, la ligne B, « Une seule semaine », le programme
+  ['node scripts/mv-harnais-ab1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

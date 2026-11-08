@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (HOR-1)** — **LES HORAIRES SUR LA FRISE : LA PRISE DE POSTE PAR SAISON, CELLE D’UN JOUR, LES CODES D/M/A EN CLAIR** (§550). Base `90d92d5` (« onglets1 »). **APP 10.81 → 10.82, SW 11.72 → 11.73**. Lot 5a (maquette v3, « go », coupure unique). La prise d’une saison (`planAnneePrise`, ± 15 min) s’écrit dans `_timings[m].d` de ses mois ; la coupure reste `PLAN_PAUSE_MIN` ; la fin se calcule. Un jour : `_timings_jour[m][d] = {d:'09:00'}` (`planAnneeJourSel`, `planAnneePriseJour`) ; `_planDefTiming` lit cet objet (et `{d,f}`, exact) avant les codes ; « Écrire les horaires en clair » (`planAnneeDma`) convertit les codes D/M/A en `{d,f}`. La frise lit chaque jour par `_planAnneeHoraire`, la copie exacte de `_planDefTiming` sur le brouillon (`E.meta`, écrit par « Enregistrer »). `mv-harnais-hor1` neuf (9 cas, 3 contre-épreuves) ; tuto neuf « Comment faire pour régler les horaires d’une saison ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (FRISE-AB)** — **LES SEMAINES A ET B : UNE SAISON PEUT ALTERNER DEUX SEMAINES** (§551). Base `c825df0` (« hor1 »). **APP 10.82 → 10.83, SW 11.73 → 11.74**. Lot 5b (maquette v3). `_planAnneeLire` lit l’alternance : un jour de la semaine dont les semaines paires et impaires de l’année tiennent chacune leur valeur sans exception, sur au moins deux semaines chacune (un jour à part ne la fait pas naître — la grille 2026 n’en a aucune) ; chaque jour porte sa semaine type (`tyM`) et sa lettre (`x.lettre`, la A = la semaine du premier jour de la saison) ; une saison a `ab`, `h` (A), `hB` (B), `tot` (la moyenne). « Une semaine sur deux » (`planAnneeAB`) ouvre la ligne B ; sa première retouche (`planAnneePas`, `data-l`) fait naître l’alternance ; « Une seule semaine » (`planAnneeUneSemaine`) la retire. Le programme, la petite frise et « Mon année » (« cette semaine : semaine A ») les disent ; « Tomber juste » laisse les saisons à deux semaines. `mv-harnais-ab1` neuf (8 cas, 3 contre-épreuves) ; tuto neuf « Comment faire pour un vendredi sur deux ? ». Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2159,6 +2159,11 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 - **Une coupe de mois** (la fin d’année dès le 16 novembre) : la prise d’une saison s’écrit par mois (`_timings` est mensuel) — les jours de novembre qui suivent déjà décembre gardent la prise de novembre. À reprendre si Nico le voit.
 - **Le programme indicatif** pourrait dire les heures de prise de chaque période (aujourd’hui il renvoie à la grille).
 - **Le lot 5b** : les semaines A et B (maquette v3).
+
+### ★ FRISE-AB (07/11, §551) — les semaines A et B ; le chantier du planning de l’année : ce qui reste
+- **À essayer chez Nico, FRISE-AB déployé** : Planning › Année › une saison › « Régler les jours » › « Une semaine sur deux » ; un vendredi de la semaine B à repos ; la frise, le compte (la moyenne), « Mon année » d’un salarié ; puis « Une seule semaine » ou « Annuler ».
+- **Ce que la saison à deux semaines ne fait pas encore** : « Tomber juste » ne la retouche pas ; « Changer le rythme à partir d’ici » et le déplacement de coupe ne règlent que sa semaine A ; ses horaires affichés sont ceux de la A.
+- **Le chantier « le planning de l’année » est au bout de son plan** (lots 1 à 5) : ouverts — le relevé d’un dispensé le jour de solidarité, un congé posé le jour de solidarité, l’Alsace-Moselle, la prise d’une saison coupée en milieu de mois (par mois), les règles CSS `.plan-ge-*` orphelines, les heures de prise dans le programme indicatif.
 
 ## 29. Synchronisation de la mémoire
 
