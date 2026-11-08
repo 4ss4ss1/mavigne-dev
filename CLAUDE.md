@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (RELSOL-1)** — **LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS ; LE LOT 4 EST CLOS** (§547). Base `989c574` (« monan1 »). **APP 10.78 → 10.79, SW 11.69 → 11.70**. `_planRelSolidarite(mbr,m)` : un férié travaillé ou un autre jour → au relevé du mois où il tombe (« le lundi 17 mai, non rémunérée », 7 h au prorata) ; étalée ou offerte → en décembre ; un dispensé → « dispensé » avec la raison ; un TESA (payé à l’heure) ou avant 2027 → rien. La ligne va « pour le salarié » dans `_pfCompta` (rien ne change la paie ; l’écran et le papier la lisent tous deux). `mv-harnais-relsol1` neuf (9 cas, 3 contre-épreuves). Le lot 4 du chantier (programme indicatif, « Mon année », solidarité au relevé) est clos ; reste le lot 5. Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (ANNEE-TAB)** — **L’ANNÉE A SON ONGLET DANS LE PLANNING ; UNE NOTATION DES HEURES PROPRE** (§548). Base `e0bc8bb` (« relsol1 »). **APP 10.79 → 10.80, SW 11.70 → 11.71**. Demande de Nico (07/11, avec le « go » du lot 5) : « les notations des heures par jour dans l’année, c’est sale et pas pro ; un onglet à côté de Le mois et Les gens ». Onglet `annee` (index.html, `_PLAN_VALID_TAB`, `_planRenderBody` → `window._planAnneeOnglet`, la bande `_planAnneeBande`) ; le modèle se choisit en haut (`planAnneeModele`) ; la roue ne porte plus « L’année » ni d’état d’édition (`_planEditing` retiré de planning.js ; l’état vit dans la frise, `_paEtat`). Notation `_paH` : « 8 h 30 », « 1 827 h », « repos », le vrai signe moins ; les jours d’une saison (repliables, la première ouverte) et de la semaine en lignes. Les quatre tutos de la frise passent par l’onglet. `mv-harnais-anneetab` neuf (11 cas, 3 contre-épreuves) ; frise2, frise5, anneedec, monan1, regl-module recalés. Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2145,6 +2145,10 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 - **À regarder chez Nico, RELSOL-1 déployé** : avec la solidarité « étalée sur l’année » (son choix), le relevé de décembre 2027 d’un salarié porte la ligne dans « Pour le salarié » ; les autres mois, rien.
 - **Le lot 5 du chantier** : le rythme sur deux semaines (des semaines A et B qui alternent dans une saison) et les heures de prise par jour (la fin des codes D/M/A de la grille, `_horaires_dma`) — maquette d’abord.
 - **Encore ouverts du chantier** : le relevé d’un dispensé le jour de solidarité (mode férié ou autre jour : 7 h prévues sur tout le modèle) ; un jour de congé posé le jour de solidarité (CPJOURS-1 le compte férié) ; l’Alsace-Moselle ; les règles CSS `.plan-ge-*` orphelines.
+
+### ★ ANNEE-TAB (07/11, §548) — l’onglet L’année : ce qui reste
+- **À regarder chez Nico, ANNEE-TAB déployé** : Planning › « L’année » sur téléphone et sur ordinateur — la lecture des heures (« 8 h 30 », « repos »), les jours en lignes ; s’il reste du « sale », dire où.
+- **Le lot 5, validé (« go », coupure unique)** : 5a — les horaires sur la frise (la prise de poste par saison, écrite dans `_timings` des mois de la saison ; la coupure reste le réglage du domaine, `PLAN_PAUSE_MIN` ; une prise propre à un jour dans le bloc de la semaine ; les codes D/M/A convertis une fois en heures) ; 5b — les semaines A et B (maquette v3, `docs/maquettes/`).
 
 ## 29. Synchronisation de la mémoire
 

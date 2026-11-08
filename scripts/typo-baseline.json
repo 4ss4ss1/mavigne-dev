@@ -92,7 +92,7 @@
   "src/planning-annee.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 46
+    "ko": 52
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -102,7 +102,7 @@
   "src/planning.js": {
     "dur": 112,
     "petit": 85,
-    "ko": 699
+    "ko": 702
   },
   "src/reglages.js": {
     "dur": 108,
@@ -132,7 +132,7 @@
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 120
+    "ko": 119
   },
   "src/utils.js": {
     "dur": 5,
@@ -142,7 +142,7 @@
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 577
+    "ko": 579
   },
   "index.html": {
     "dur": 74,

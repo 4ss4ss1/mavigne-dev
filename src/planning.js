@@ -45,7 +45,6 @@ var _planEdRemp = false;   // bascule « jour de remplacement » de l'éditeur d
 var _planAbsSel = 'autre'; // motif d'absence selectionne dans l'editeur de jour
 // ★ RECUP-1 — l'absence sur une partie de la journee (creneau), et le motif d'un horaire raccourci
 var _planAbsPart=false,_planAbsDe='',_planAbsA='',_planRedMo='';
-var _planEditing = null; // {templateId, month} pour l'éditeur grille
 // ── Horaires chaleur (planning aménagé > 30°) — état du panneau, par appareil ──
 var _planCanic = { du:'', au:'', deb:'06:00', fin:'14:00', continu:true, open:false };
 
@@ -3265,7 +3264,7 @@ var PLAN_BG='#1C1A2E',PLAN_ACC='var(--plan-acc)',PLAN_ACC2='var(--plan-acc)';
 //   Tracteur et la Cave. Les clés mémorisées 'cadre' et 'templates' atterrissent
 //   sur le mois ; planSwitchTab('cadre') ouvre la roue — personne ne voit le vide.
 var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'mois',cadre:'mois'};
-var _PLAN_VALID_TAB={mois:1,gens:1,moi:1,eqmois:1};   // ★★ VUE-EQUIPE-1 (§251) : « eqmois » = l'equipe du mois, vue salarie.
+var _PLAN_VALID_TAB={mois:1,gens:1,moi:1,eqmois:1,annee:1};   // ★ ANNEE-TAB (§548) : « annee » = l'année d'un modèle, son onglet   // ★★ VUE-EQUIPE-1 (§251) : « eqmois » = l'equipe du mois, vue salarie.
 // ⚠️ PAS « equipe » : c'est une ANCIENNE cle d'onglet, migree vers « mois » par _PLAN_TAB_MIGR ci-dessus — la reprendre
 //   renvoyait le salarie sur Mon mois a chaque rendu (chaque donnee recue). Trouve par mv-harnais-vueeq1 (V2).
 
@@ -3294,6 +3293,7 @@ function _planRenderHeader(){
   var sb=document.getElementById('plan-stats-band');
   if(!sb)return;
   // La bande de chiffres suit l'onglet.
+  if(planTab==='annee'&&isAdmin()){ sb.innerHTML=window._planAnneeBande?window._planAnneeBande():''; } else   // ★ ANNEE-TAB (§548)
   if(planTab==='gens'&&isAdmin()){
     var _act=_pl2Actifs();
     var _hT=_act.reduce(function(s,m){return s+_planCalcMonth(m,planMonth);},0);
@@ -3354,6 +3354,7 @@ function _planRenderHeader(){
 function _planRenderBody(){
   if(!isAdmin()){ if(planTab==='eqmois')_planRenderEqSal(); else _planRenderMon(); _pl2AbarSync(); return; }
   if(planTab==='gens')_planRenderGens();
+  else if(planTab==='annee'&&window._planAnneeOnglet)window._planAnneeOnglet();   // ★ ANNEE-TAB (§548)
   else _pl2RenderEquipe();
   _pl2AbarSync();
   _plGensDock();   // PLAN-2 (§280)
@@ -6842,12 +6843,12 @@ function planCpRemove(){
 // #plan-body sinon — le même code sert les deux, rien n'est recopié.
 function _planCadreHost(){ return document.getElementById('plan-cadre-host')||document.getElementById('plan-body'); }
 // Ouverture par la roue : on part toujours de la liste, jamais d'un éditeur laissé ouvert.
-function _planCadreOpen(){ _planEditing=null; _planRenderCadre(); }
+function _planModeles(){ return Object.keys(Object.assign({},PLAN_DEF,_pTplStore())); }
+function _planCadreOpen(){ _planRenderCadre(); }   // ★ ANNEE-TAB (§548) : plus d'état d'édition dans la roue — l'année a son onglet
 window._planCadreOpen=_planCadreOpen;
 function _planRenderCadre(){
   var body=_planCadreHost();
   if(!body)return;
-  if(_planEditing&&_planEditing.annee&&window._planRenderAnnee){window._planRenderAnnee();return;}   // ★ FRISE-1 : l'année d'un modèle (l'ouverture de la roue repart de la liste)
 
   var all=Object.assign({},PLAN_DEF,_pTplStore());
   var ids=Object.keys(all);
@@ -6995,7 +6996,6 @@ function _planRenderCadre(){
         +'<div class="plan-tpl-sub">Assign\u00e9\u00a0: '+assignes+'</div>'
       +'</div>'
       +'<div class="plan-tpl-btns">'
-        +'<button class="plan-btn-pdf" data-tuto="plan.annee" data-pl="'+_escAttr(id)+'" onclick="planAnneeOuvrir(this.dataset.pl)">L\u2019ann\u00e9e</button>'
         +'<button class="plan-btn-pdf" onclick="planExportCSV(\''+id+'\')">CSV \u2193</button>'
         +'<button class="plan-btn-pdf" onclick="planDirectImportCSV(\''+id+'\')">CSV \u2191</button>'
         +(!isDefault?'<button class="plan-btn-pdf" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
@@ -9800,18 +9800,15 @@ window._pTplStore            = _pTplStore;
 window._pY                   = _pY;
 window._planBaseActive       = _planBaseActive;
 window._planBaseAttendue     = _planBaseAttendue;
-window._planCadreHost        = _planCadreHost;
 window._planCreditFerie      = _planCreditFerie;
 window._planGetTpl           = _planGetTpl;
 window._planModelBrut        = _planModelBrut;
-window._planRenderCadre      = _planRenderCadre;
 window._planBaseAn        = _planBaseAn;   // ★ PROG-1
 window._planJoursSem      = _planJoursSem;
 window._planSolid         = _planSolid;
 window._planSolidJour     = _planSolidJour;
 window.PLAN_SOLID_MODES   = PLAN_SOLID_MODES;
-window._planEditingGet    = function(){ return _planEditing; };   // l'état de la vue reste ici : la roue le remet à zéro
-window._planEditingSet    = function(v){ _planEditing = v; };
+window._planModeles       = _planModeles;   // ★ ANNEE-TAB (§548) : les modèles, pour le choix de l'onglet L'année
 window.planSaveMaj          = planSaveMaj;
 window.planSetHsupMode      = planSetHsupMode;
 window.planLegalPreset      = planLegalPreset;

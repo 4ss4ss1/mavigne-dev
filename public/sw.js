@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.70
+// MA VIGNE — Service Worker v11.71
+// v11.71 (07/11/2026) — ANNEE-TAB (§548) : l’année d’un modèle a son onglet dans le Planning ; une notation des heures propre (« 8 h 30 », « repos »)
 // v11.70 (07/11/2026) — RELSOL-1 (§547) : la journée de solidarité au relevé du mois où elle se fait
 // v11.69 (07/11/2026) — MONAN-1 (§546) : « Mon année » — la frise, le compteur de l’année, les congés et le planning imprimé de chaque salarié
 // v11.68 (07/11/2026) — PROG-1 (§545) : le programme indicatif de modulation (art. 10.4) suit chaque modèle dans le planning de l’année
@@ -4702,7 +4703,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.70';
+const CACHE_NAME   = 'mavigne-v11.71';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4719,7 +4720,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.70 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.71 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4739,7 +4740,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.70 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.71 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

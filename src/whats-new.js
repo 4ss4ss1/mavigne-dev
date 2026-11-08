@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.80', d: '2026-11-07', items: [   // ANNEE-TAB (§548) : l'onglet L'année, une notation propre
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année a son onglet',
+      desc: "Dans le Planning, à côté de « Le mois » et « Les gens » : « L’année ». Le modèle se choisit en haut ; les heures se lisent proprement (« 8 h 30 », « repos ») ; les jours d’une saison et d’une semaine se règlent en lignes, plus en sept colonnes serrées — au téléphone comme sur ordinateur." },
+  ] },
   { v: '10.79', d: '2026-11-07', items: [   // RELSOL-1 (§547) : la journée de solidarité au relevé
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'La journée de solidarité sur le relevé',
       desc: "Le relevé du mois où elle se fait la mentionne, dans « Pour le salarié » : « le lundi 17 mai, non rémunérée », 7 h. Étalée sur l’année ou offerte : en décembre. Un salarié dispensé : « dispensé », avec la raison. Rien ne change la paie." },

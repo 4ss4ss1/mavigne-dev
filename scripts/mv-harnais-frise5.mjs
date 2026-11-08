@@ -15,7 +15,7 @@ const CONTRE = process.argv.includes('--contre');
 const lire = (f, env) => fs.readFileSync(process.env[env] || path.join(R, f), 'utf8');
 const DEFAUTS = {
   creation: ['un modèle neuf rouvre l’éditeur de 365 cases', '  if(window.planAnneeOuvrir)window.planAnneeOuvrir(id);', '  planOpenGridEditor(id);'],
-  route:    ['la roue route de nouveau vers l’éditeur', '  if(_planEditing&&_planEditing.annee&&window._planRenderAnnee){window._planRenderAnnee();return;}', '  if(_planEditing&&_planEditing.annee&&window._planRenderAnnee){window._planRenderAnnee();return;}\n  if(_planEditing){_planRenderGridEditor();return;}'],
+  route:    ['la roue route de nouveau vers l’éditeur', 'function _planRenderCadre(){\n', 'function _planRenderCadre(){\n  if(window._planEditing){_planRenderGridEditor();return;}\n'],   // ANNEE-TAB (§548) : la roue ne route plus rien, l’année a son onglet
   csv:      ['l’export CSV disparaît de l’année', "onclick=\"planExportCSV(this.dataset.pl)\">Exporter (CSV)</button>", "onclick=\"void 0\">Exporter (CSV)</button>"],
 };
 if (CONTRE) {
@@ -43,7 +43,7 @@ const restes = PARTIS.filter(n => new RegExp('\\b' + n + '\\b').test(sansComm(TO
 T(restes.length === 0, 'plus une fonction, un appel ni une exposition de l’éditeur dans l’appli', restes.join(', '));
 T(!/>Modifier<\/button>/.test(sansComm(PL)), 'la carte d’un modèle n’a plus de bouton « Modifier »');
 const cadre = (PL.match(/^function _planRenderCadre\(\)\{[\s\S]*?\n\}/m) || [''])[0];
-T(/_planEditing&&_planEditing\.annee&&window\._planRenderAnnee/.test(cadre) && !/_planRenderGridEditor/.test(cadre), 'la roue du Planning ne route plus que l’année d’un modèle');
+T(!/_planRenderGridEditor/.test(cadre) && !/_planRenderAnnee/.test(cadre) && /planTab==='annee'&&window\._planAnneeOnglet/.test(PL), 'la roue du Planning ne route plus rien : l’année a son onglet (ANNEE-TAB)');
 const creer = (PL.match(/^function planCreateTemplate\(\)\{[\s\S]*?\n\}/m) || [''])[0];
 T(/window\.planAnneeOuvrir\(id\)/.test(creer), 'un modèle neuf s’ouvre sur son année');
 T(/onclick="planExportCSV\(this\.dataset\.pl\)">Exporter \(CSV\)<\/button>/.test(AN) && /^window\.planExportCSV\s*=/m.test(PL), 'l’export CSV reste, depuis l’année');

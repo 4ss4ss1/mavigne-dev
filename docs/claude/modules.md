@@ -1128,6 +1128,10 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ L’onglet L’année (ANNEE-TAB, §548)
+
+Planning › « L’année » (admin) : `_planAnneeOnglet`, le choix du modèle (`planAnneeModele`), l’état dans la frise (`_paEtat`), la notation `_paH`.
+
 ### ★ La solidarité au relevé (RELSOL-1, §547)
 
 `_planRelSolidarite(mbr,m)` : la ligne « Journée de solidarité » de « Pour le salarié » (`_pfCompta`), le mois où elle se fait (étalée, offerte : décembre).

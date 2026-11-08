@@ -16,7 +16,7 @@ const CONTRE = process.argv.includes('--contre');
 const lire = (f, env) => fs.readFileSync(process.env[env] || path.join(R, f), 'utf8');
 const DEFAUTS = {
   emprunt: ['un emprunt de la frise n’est plus exposé par le Planning', 'src/planning.js', 'MV_DEC_PL', 'window._planGetTpl', 'window._planGetTplX'],
-  charge:  ['la frise lit le Planning au chargement', 'src/planning-annee.js', 'MV_DEC_AN', "function _paE(){ return window._planEditingGet(); }\n", "function _paE(){ return window._planEditingGet(); }\nvar _paAn=window._pY();\n"],
+  charge:  ['la frise lit le Planning au chargement', 'src/planning-annee.js', 'MV_DEC_AN', "function _paE(){ return _paEtat; }\n", "function _paE(){ return _paEtat; }\nvar _paAn=window._pY();\n"],
   geste:   ['un geste de la frise n’est plus exposé', 'src/planning-annee.js', 'MV_DEC_AN', 'window.planAnneeCoupe       = planAnneeCoupe;', '//'],
 };
 if (CONTRE) {
@@ -43,14 +43,14 @@ T(imports.length === 1 && /from '\.\/utils\.js';$/.test(imports[0]), 'la frise n
 const emprunts = [...AN.matchAll(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm)].map(m => m[1]);
 const absents = emprunts.filter(n => !new RegExp('^window\\.' + n + '\\s*=', 'm').test(PL));
 T(emprunts.length >= 10 && absents.length === 0, 'chaque emprunt (' + emprunts.length + ') est exposé par planning.js', absents.join(', '));
-T(/^window\._planEditingGet\s*=/m.test(PL) && /^window\._planEditingSet\s*=/m.test(PL), 'l’état de la vue se lit et s’écrit par fonction (_planEditingGet / Set)');
+T(/^var _paEtat=null;/m.test(AN) && !/_planEditing/.test(PL.replace(/^\s*\/\/.*$/gm, '')), 'l’état de la vue vit dans la frise (_paEtat), plus dans planning.js (ANNEE-TAB)');
 T(!/_planEditing(?!Get|Set)/.test(AN.replace(/^\s*\/\/.*$/gm, '')), 'la frise ne touche jamais _planEditing en direct');
 const frise = ['_planAnneeLire', '_planRenderAnnee', 'planAnneeOuvrir', 'planAnneePas', 'planAnneeCoupe', '_planAnneeSuggestions'];
 T(frise.every(n => new RegExp('^function ' + n + '\\s*\\(', 'm').test(AN)) && frise.every(n => !new RegExp('^function ' + n + '\\s*\\(', 'm').test(PL)), 'la frise vit dans planning-annee.js, plus dans planning.js');
 const gestes = [...new Set([...AN.matchAll(/onclick=\\?"(planAnnee\w+)\(/g)].map(m => m[1]))];
 const nonExposes = gestes.filter(n => !new RegExp('^window\\.' + n + '\\s*=\\s*' + n + ';', 'm').test(AN));
 T(gestes.length >= 8 && nonExposes.length === 0, 'chaque geste de la frise (' + gestes.length + ') est exposé', nonExposes.join(', '));
-T(/window\._planRenderAnnee\(\)/.test(PL) && /^window\._planRenderAnnee\s*=\s*_planRenderAnnee;/m.test(AN), 'la roue du Planning appelle le rendu par window');
+T(/window\._planAnneeOnglet\(\)/.test(PL) && /^window\._planAnneeOnglet\s*=\s*_planAnneeOnglet;/m.test(AN), 'l’onglet L’année appelle la frise par window');
 // rien ne s'exécute au chargement : au niveau 0, des déclarations, des expositions, des commentaires
 let prof = 0, mauvais = [];
 AN.split('\n').forEach((l, k) => { const t = l.trim();

@@ -204,20 +204,20 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
     'aucun chemin \u00ab R\u00e9glages \u203a Vigne \u203a \u2026 \u00bb ne subsiste dans le guide');
 
   /* 8. NAV-2 — le Planning */
-  T(!/data-tab="cadre"/.test(html) && nb(html, /data-tab="(mois|gens)"/g) === 2, 'la barre du Planning a deux onglets, sans « Le cadre »');
+  T(!/data-tab="cadre"/.test(html) && nb(html, /data-tab="(mois|gens|annee)"/g) === 3, 'la barre du Planning a trois onglets — Le mois, Les gens, L’année (ANNEE-TAB) —, sans « Le cadre »');
   T(nb(html, /_mvReglOpen\('planning'\)/g) === 1, 'la roue du Planning est sur son en-t\u00eate');
   const iP = html.indexOf('id="ovReglPlanning"'), hP = html.indexOf('id="plan-cadre-host"'), dP = html.indexOf('id="regl-docs-planning"');
   T(iP > 0 && hP > iP && dP > hP && dP < html.indexOf('id="ovHubAide"'), 'la feuille du Planning porte l\u2019h\u00f4te du cadre puis les documents');
-  T(/var _PLAN_VALID_TAB=\{mois:1,gens:1,moi:1,eqmois:1\};/.test(pln), '_PLAN_VALID_TAB ne conna\u00eet plus cadre');
+  T(/var _PLAN_VALID_TAB=\{mois:1,gens:1,moi:1,eqmois:1,annee:1\};/.test(pln) && !/_PLAN_VALID_TAB=\{[^}]*cadre/.test(pln), '_PLAN_VALID_TAB ne conna\u00eet plus cadre, et conna\u00eet l\u2019ann\u00e9e (ANNEE-TAB)');
   T(/cadre:'mois'/.test(pln) && /templates:'mois'/.test(pln), 'les cl\u00e9s m\u00e9moris\u00e9es cadre et templates atterrissent sur le mois');
   T(/if\(tab==='cadre'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('planning'\); return; \}/.test(pln), 'planSwitchTab(\'cadre\') ouvre la roue');
   T(!/planTab==='cadre'/.test(pln), 'plus aucune branche planTab===cadre');
   // ★ FRISE-5 (§544) : la grille de 365 cases est partie ; l'année d'un modèle (src/planning-annee.js) écrit dans la même feuille
   const cadre = extraire(pln, '_planRenderCadre') || '', editor = extraire(readFileSync('src/planning-annee.js', 'utf8'), '_planRenderAnnee') || '';
-  T(/var body=_planCadreHost\(\);/.test(cadre) && /var body=_planCadreHost\(\)[,;]/.test(editor), 'le cadre et l\u2019ann\u00e9e d\u2019un mod\u00e8le \u00e9crivent dans l\u2019h\u00f4te de la feuille');
+  T(/var body=_planCadreHost\(\);/.test(cadre) && /var body=document\.getElementById\('plan-body'\)/.test(editor), 'le cadre \u00e9crit dans l\u2019h\u00f4te de la feuille, l\u2019ann\u00e9e d\u2019un mod\u00e8le dans son onglet (ANNEE-TAB)');
   const host = extraire(pln, '_planCadreHost') || '';
   T(/getElementById\('plan-cadre-host'\)\|\|document\.getElementById\('plan-body'\)/.test(host), '\u2026 avec repli sur #plan-body');
-  T(/function _planCadreOpen\(\)\{ _planEditing=null; _planRenderCadre\(\); \}/.test(pln) && /window\._planCadreOpen=_planCadreOpen;/.test(pln), '_planCadreOpen repart de la liste, et est expos\u00e9');
+  T(/function _planCadreOpen\(\)\{ _planRenderCadre\(\); \}/.test(pln) && /window\._planCadreOpen=_planCadreOpen;/.test(pln), '_planCadreOpen ouvre la liste, et est expos\u00e9');
   T(/planning:\s*\{\s*ov:'ovReglPlanning'/.test(app) && /if\(mod==='planning'\)\{ if\(window\._planCadreOpen\) window\._planCadreOpen\(\); \}/.test(open), 'la roue du Planning rend le cadre par _planCadreOpen, pas par renderReglages');
   T(/act:'etp',\s*mod:'planning'/.test(reg), 'MV_DOCS : Heures & ETP porte son module (planning)');
   const volet = extraire(reg, '_docsEstVolet');
@@ -238,7 +238,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
       '_mvReglDocGo (ex\u00e9cut\u00e9) : direct pour un document simple ; ferme les roues, ouvre le hub, puis docsGo pour un volet', appels.join(' '));
   }
   const fp = fiche('planning');
-  T(!/Le cadre/.test(fp) && /Deux onglets/.test(fp) && /roue crant\u00e9e du Planning/.test(fp), 'la fiche Planning dit deux onglets et la roue, plus « Le cadre »');
+  T(!/Le cadre/.test(fp) && /Trois onglets/.test(fp) && /roue crant\u00e9e du Planning/.test(fp), 'la fiche Planning dit trois onglets et la roue, plus « Le cadre »');
   T(!/Planning \u203a Le cadre/.test(G10) && !/onglet Mod\u00e8les/.test(G10) && /Deux onglets, et une roue crant\u00e9e/.test(G10), 'le guide Planning ne nomme plus l\u2019onglet Le cadre ni l\u2019onglet Mod\u00e8les');
 
   /* 9. NAV-3 — le Pilotage */

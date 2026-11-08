@@ -407,3 +407,25 @@ Le dernier point du lot 4, promis à BASEAN-1 (§538) : la chronique FRSEA (2025
 
 ### 547d. Ce qui reste ouvert
 - §28, bloc RELSOL-1 (et la suite du chantier : le lot 5).
+
+## 548. ★★ ANNEE-TAB — L’ANNÉE A SON ONGLET DANS LE PLANNING ; UNE NOTATION DES HEURES PROPRE (07/11 — `src/planning-annee.js` (`_paEtat`, `_paE`, `_paH`, `_planAnneeResumeTxt`, `_planAnneeChoix`, `planAnneeModele`, `_planAnneeModeleDefaut`, `_planAnneeOnglet`, `_planAnneeBande` neufs ; `_planAnneeJours`, `_planAnneeJoursEd`, `_planRenderAnnee`, `planAnneeOuvrir` réécrits ; `planAnneeFermer` retiré) · `src/planning.js` (`_planEditing` retiré ; `_planCadreOpen` ; `_planModeles` ; l’onglet dans `_PLAN_VALID_TAB`, `_planRenderBody`, `_planRenderHeader` ; le bouton « L’année » de la roue retiré ; la frontière) · `index.html` (l’onglet, APP) · `src/tutos.js` (quatre tutos par l’onglet) · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-anneetab.mjs` (neuf) · `scripts/mv-harnais-frise2.mjs` · `scripts/mv-harnais-frise5.mjs` · `scripts/mv-harnais-anneedec.mjs` · `scripts/mv-harnais-monan1.mjs` · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/typo-baseline.json` (regravée) · `scripts/tutos-couverture.json` (un exempté, plafond 795) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/ANNEE-TAB.json` — base `e0bc8bb` « relsol1 » — **APP 10.79 → 10.80, SW 11.70 → 11.71**)
+
+### 548a. D’où ça vient
+Nico (07/11), avec le « go » du lot 5 : « vérifier les affichages des notations des heures par jour dans l’année, c’est sale et pas pro ; peut-être créer un onglet à côté de Le mois et Les gens, sera plus ergonomique (sur téléphone et PC) ». Les jours se lisaient « 8h30 » dans sept colonnes serrées, chacune avec ses − / + ; l’année vivait dans la roue crantée.
+
+### 548b. Le modèle, et ce qui a été écarté
+- **Un onglet « L’année »** (admin) après « Les gens » : `_PLAN_VALID_TAB`, `_planRenderBody` (→ `window._planAnneeOnglet`), sa bande de chiffres (le modèle, la base, l’écart). Le modèle se choisit en haut (`planAnneeModele`, refusé tant qu’un brouillon attend) ; par défaut celui du plus grand nombre.
+- **L’état de la vue vit dans la frise** (`_paEtat`) : la roue ne porte plus l’année, `_planEditing` disparaît de planning.js et `_planCadreOpen` n’a plus rien à remettre à zéro (`mv-harnais-regl-module` en tient le nouveau texte). `planAnneeOuvrir` (un modèle neuf) ferme la roue et ouvre l’onglet.
+- **La notation** (`_paH`) : « 8 h 30 », « 4 h », « 1 827 h », espaces insécables, le vrai signe moins ; un jour à zéro dit « repos ». Partout à l’écran (frise, cartes, semaine, jours à part, retouches, petite frise) ; le programme imprimé garde sa notation (`_planFmt`, ses contrôles).
+- **Les jours en lignes** : une saison montre son rythme en une phrase (« Lundi au jeudi 8 h 30 · vendredi 5 h »), ses jours se règlent en lignes dans « Régler les jours » (la première saison ouverte) ; la semaine choisie et « Changer le rythme à partir d’ici » aussi.
+- Écarté : garder « L’année » dans la roue en plus de l’onglet (deux chemins vers le même écran) ; masquer les − / + derrière un mode « réglage » (un geste de plus à chaque fois).
+
+### 548c. Ce qui a été vérifié
+- `scripts/mv-harnais-anneetab.mjs` (neuf) : l’onglet, sa validité, son routage, sa bande, la roue sans « L’année », le choix du modèle, la frise dans l’onglet, la notation (`_paH` joué), les jours en lignes, « repos » ; 11 cas, 3 contre-épreuves tenues.
+- Recalés sur le changement voulu : `mv-harnais-regl-module` (trois onglets, l’aide « Trois onglets », `_planCadreOpen`, l’hôte de l’année, la liste des onglets), `mv-harnais-frise5` (la roue ne route plus rien), `mv-harnais-anneedec` (l’état dans la frise, l’onglet appelle la frise), `mv-harnais-frise2` et `mv-harnais-monan1` (la notation).
+- Les quatre tutos de la frise passent par l’onglet ; « voir l’année d’un modèle » enseigne le choix du modèle au lieu du retour.
+- **Les tutos** : le domaine d’entraînement n’a qu’un modèle — « choisir un autre modèle » ne s’y joue pas. Le choix s’affiche donc toujours (on sait quel modèle on règle) et le tuto le montre ; `planAnneeModele` est exempté, raison écrite (`scripts/tutos-couverture.json`) ; le tuto couvre l’onglet (`planSwitchTab`) : gestes sans tuto 796 → 795, plafond abaissé.
+- **La taille** : `src/planning-annee.js` 46 → 52 ko (+13 %) — un fichier de 52 ko ne se découpe pas ; référence regravée (`scripts/typo-baseline.json`).
+
+### 548d. Ce qui reste ouvert
+- §28, bloc ANNEE-TAB.

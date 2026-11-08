@@ -45,17 +45,17 @@ const PLAN_DEF = vm.runInNewContext('(' + SRC.slice(i0 + 15, j0 + 1) + ')');
 const ctx = vm.createContext({ window: {}, _MV_FERIES_CACHE: {}, PLAN_MOIS_FR: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] });
 ctx._planGetTpl = (pl, y) => (pl === 'standard' && y === 2026) ? PLAN_DEF.standard : {};
 vm.runInContext('function _planFmt(h){return String(h)+" h";}\nfunction _escAttr(x){return String(x);}\n'
-  + ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeTon', '_planAnneeDate', '_planAnneePlage', '_planAnneeMini'].map(n => fonction(SRC, n)).join('\n') + '\nthis.mini=_planAnneeMini;', ctx);
+  + ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeTon', '_planAnneeDate', '_planAnneePlage', '_paH', '_planAnneeMini'].map(n => fonction(SRC, n)).join('\n') + '\nthis.mini=_planAnneeMini;', ctx);
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? ' — ' + det : '')); } }
 console.log('\n── MONAN-1 — la petite frise de la vraie grille 2026\n');
 const H = ctx.mini('standard', 2026);
 const lignes = [...H.matchAll(/<\/span>([^<]+)<\/div>/g)].map(m => m[1]);
 T(lignes[0] === '1er\u00a0→ 4\u00a0janv. · fermé'.replace('1er\u00a0→', '1er → ') || /^1er → 4\u00a0janv\. · fermé$/.test(lignes[0]), 'd’abord la fermeture du 1er au 4 janvier', lignes[0]);
-T(/^5 → 28\u00a0févr\. · 32 h par semaine$/.test(lignes[1]) || /^5\u00a0janv\. → 28\u00a0févr\. · 32 h par semaine$/.test(lignes[1]), 'puis la saison du 5 janvier au 28 février, 32 h par semaine', lignes[1]);
+T(/^5 → 28\u00a0févr\. · 32\u00a0h par semaine$/.test(lignes[1]) || /^5\u00a0janv\. → 28\u00a0févr\. · 32\u00a0h par semaine$/.test(lignes[1]), 'puis la saison du 5 janvier au 28 février, 32 h par semaine', lignes[1]);
 T(lignes.filter(l => / · fermé$/.test(l)).length === 4, 'les quatre fermetures', String(lignes.filter(l => / · fermé$/.test(l)).length));
 T(lignes.some(l => /\(semaine à part\)$/.test(l) && /sept\./.test(l)), 'la semaine des vendanges, à part');
-T(lignes.some(l => /^16\u00a0nov\. → 27\u00a0déc\. · 28 h par semaine$/.test(l)), 'la fin d’année du 16 novembre au 27 décembre (la fermeture du 28 la termine), 28 h');
+T(lignes.some(l => /^16\u00a0nov\. → 27\u00a0déc\. · 28\u00a0h par semaine$/.test(l)), 'la fin d’année du 16 novembre au 27 décembre (la fermeture du 28 la termine), 28 h');
 console.log('\n── la vue d’un salarié et son planning imprimé\n');
 const mon = fonction(PL, '_planBuildMonHtml');
 T(/return sumHtml\+anHtml\+daysHtml/.test(mon), 'la carte « Mon année » entre son mois et ses jours');

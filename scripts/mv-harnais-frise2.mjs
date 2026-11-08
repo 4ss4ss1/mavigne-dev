@@ -45,7 +45,7 @@ function fonction(src, nom) {
 }
 const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planJoursSem', '_planBaseAn', '_planSolid', '_planSolidJour', '_planEstSolid',
   '_planSolidRatio', '_planCreditFerie', '_planModelBrut', '_planBaseAttendue', '_planAnneeSaison', '_planAnneeLire',
-  '_planAnneeCopie', '_planAnneeTotal', '_planAnneeCible', '_planAnneePose', '_planAnneeReguliers', '_planAnneePasVal', '_planAnneeNomS',
+  '_planAnneeCopie', '_planAnneeTotal', '_planAnneeCible', '_planAnneePose', '_planAnneeReguliers', '_planAnneePasVal', '_paH', '_planAnneeNomS',
   '_planAnneeRetouches', '_planAnneeSuggestions', 'planAnneePas', 'planAnneeAppliquer', 'planAnneeEnregistrer', 'planAnneeAnnuler'];
 const MODES = /var PLAN_SOLID_MODES=\{[^;]*\};/.exec(PL)[0];
 const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);

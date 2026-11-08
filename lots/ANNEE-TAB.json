@@ -1,0 +1,36 @@
+{
+  "lot": "ANNEE-TAB",
+  "section": "§548",
+  "base": "e0bc8bb6d1218c33d70cce5dabdbb670804b0d52",
+  "inclut": [],
+  "date": "2026-11-08",
+  "tutos": {
+    "saute": "les 4 tutos concernés (annee, coupe, reglerannee, semaine) rejoués sur le build après la dernière correction, en deux parties, --part 1/2 et 2/2 : 16 passages sur 16 verts — le bac coupe une commande à 5 min ; une partie n'écrit pas rapports/tutos.json"
+  },
+  "fichiers": {
+    ".mv-base": "61e0e814164eee47fba6622d624542c73c7b384e043584bafe8c3701d5bae533",
+    "CLAUDE.md": "ca346fa88c18f1c3696dd713d0ca84aae2bb49e04e071d675dca4b7963f81600",
+    "docs/claude/INDEX.md": "9d51f400a7b0de97e893077c07ececbd288f9bc177b86c5d90828b4c4a92e3fb",
+    "docs/claude/chantiers-530-579.md": "cfc5ddb6fb2321c1f2f783d2d85d0be426a36fff9f3fde043d668946de0e3300",
+    "docs/claude/journal.md": "ac6d4e32d5c5a9b9bef455d6cc21207c92af949af93506e3787d2d2f45cc1e2e",
+    "docs/claude/modules.md": "5b4fa121501b7d7e0b26fc703028c8c58e5e63e0e7458128533c4a85d564c381",
+    "guide/10-planning.html": "11b52798208778a41ac912d3a53823a48b6ba222f36f5f5bd6b902bd645ea2b2",
+    "index.html": "7a259120ded4e53fc33830764fa91f2de2332d1b4185d44d44f38e22e7e765b8",
+    "public/sw.js": "93995d4baf63cdb9797dd30e06728a6e3ab82409cde4dd2fea72bfecd766d70b",
+    "scripts/harnais-claude-md.mjs": "b3ca197e09525349f6b14a5274233bd67666dfda2f99b38f10e9f17f24f16c80",
+    "scripts/mv-harnais-anneedec.mjs": "2ea3bfd87d280726f1d032f7eece0f7ee4d2a432435220e9fabb247f9e0da03a",
+    "scripts/mv-harnais-frise2.mjs": "46b0623a6d9ce8cae0d8e2619a86f338b37392acd2f26a823f8e3ef76eb360a8",
+    "scripts/mv-harnais-frise5.mjs": "0e14a51b91eb3353a5ba654fb387e2972dd6193af7ed33f62f5e2292c7787cdd",
+    "scripts/mv-harnais-liste.mjs": "fae1e6b70fce822c9630e02f660bcba8bcdec0dfa666a0cca28adbcc12ac3e97",
+    "scripts/mv-harnais-monan1.mjs": "d4e658f71f81a12b7381d05768406fdcd6c1e26900424f2fad62f8cfd2271a05",
+    "scripts/mv-harnais-regl-module.mjs": "3e8206c3728acccb551b48a18418501d630682cb3e4fe66222c0c6004368195d",
+    "scripts/tutos-couverture.json": "f4ab1bf53eac7d51a1a249f8813016a9b8d0893b751e8318160407dbacf775a3",
+    "scripts/typo-baseline.json": "66fc4c3d8513cac7767d53845a03715fb947bf0c069761a52c7e36ba9bdf34a0",
+    "src/planning-annee.js": "9d947b7e9ecbfc24433616737a2fc4d289c733d9ba8169400e685e8824c1f587",
+    "src/planning.js": "9a8f56b57d056c6a9b8ca1cab901551358ab26aa551763b40665748e9ac3e62d",
+    "src/tutos.js": "a44dc1526e554afaec5d828d3a3a9ba3afcc07017f9e4d59548541eb891a56fa",
+    "src/utils.js": "44d6342e118da7974c2e80af0a9d2792b469adbb707c4caf7b96f398bc6d644b",
+    "src/whats-new.js": "77718625fe46d474fc6e44ff844433a1b32e12df0e7463374b320526dd1e5ddf",
+    "scripts/mv-harnais-anneetab.mjs": "97b771aa04b07511ca40994ddb693539de4854898bc526b7746f1fe5f87a3f90"
+  }
+}

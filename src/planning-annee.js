@@ -8,9 +8,8 @@
 // ⚠️ Chargé JUSTE APRÈS planning.js (app.js). Il lit le Planning par window, et le Planning le lit par window
 //   (CLAUDE.md §24 n°6) : « LA FRONTIÈRE » — les emprunts ici en tête, les expositions en fin des deux fichiers —
 //   est le seul passage. Un emprunt porte le nom de la fonction du Planning et lit window AU MOMENT DE L'APPEL.
-// ⚠️ L'état de la vue (le modèle ouvert, son brouillon) reste DANS planning.js (_planEditing) : l'ouverture de la
-//   roue le remet à zéro (_planCadreOpen). Ici il se lit par _paE() et s'écrit par window._planEditingSet — jamais
-//   par une copie.
+// ⚠️ L'état de la vue (le modèle ouvert, son brouillon, la semaine choisie) vit ICI (_paEtat) depuis ANNEE-TAB (§548) :
+//   l'année a son onglet dans le Planning, la roue crantée ne la porte plus.
 // ⚠️ Rien ne s'exécute au chargement hors déclarations et expositions (mv-harnais-anneedec).
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -22,7 +21,6 @@ function _pTplStore(){ return window._pTplStore.apply(null, arguments); }
 function _pY(){ return window._pY.apply(null, arguments); }
 function _planBaseActive(){ return window._planBaseActive.apply(null, arguments); }
 function _planBaseAttendue(){ return window._planBaseAttendue.apply(null, arguments); }
-function _planCadreHost(){ return window._planCadreHost.apply(null, arguments); }
 function _planCreditFerie(){ return window._planCreditFerie.apply(null, arguments); }
 function _planFmt(){ return window._planFmt.apply(null, arguments); }
 function _planGetTpl(){ return window._planGetTpl.apply(null, arguments); }
@@ -30,13 +28,23 @@ function _planLegal(){ return window._planLegal.apply(null, arguments); }
 function _planMbrs(){ return window._planMbrs.apply(null, arguments); }
 function _planModelBrut(){ return window._planModelBrut.apply(null, arguments); }
 function _planPlId(){ return window._planPlId.apply(null, arguments); }
-function _planRenderCadre(){ return window._planRenderCadre.apply(null, arguments); }
+function _planModeles(){ return window._planModeles.apply(null, arguments); }
 function planSaveTpl(){ return window.planSaveTpl.apply(null, arguments); }
 function _planBaseAn(){ return window._planBaseAn.apply(null, arguments); }
 function _planJoursSem(){ return window._planJoursSem.apply(null, arguments); }
 function _planSolid(){ return window._planSolid.apply(null, arguments); }
 function _planSolidJour(){ return window._planSolidJour.apply(null, arguments); }
-function _paE(){ return window._planEditingGet(); }
+// ★ ANNEE-TAB (§548) — L'ÉTAT DE LA VUE VIT ICI : le modèle ouvert, son brouillon, la semaine choisie, les retouches.
+//   L'année a son onglet ; la roue crantée ne la porte plus, et rien dans planning.js ne la remet à zéro.
+var _paEtat=null;
+function _paE(){ return _paEtat; }
+// La notation des heures à l'écran : « 8 h 30 », « 1 827 h » — espaces insécables, chiffres alignés.
+function _paH(h){if(h==null||isNaN(h))return '\u2014';var neg=h<0,a=Math.abs(h),hh=Math.floor(a+1e-9),mm=Math.round((a-hh)*60);if(mm===60){hh++;mm=0;}
+  return (neg?'\u2212':'')+hh.toLocaleString('fr-FR')+'\u00a0h'+(mm?'\u00a0'+(mm<10?'0':'')+mm:'');}
+function _planAnneeResumeTxt(v){var JL=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'],out=[],g=0;
+  while(g<7){if(!(v[g]>0)){g++;continue;}var k=g;while(k+1<7&&v[k+1]===v[g])k++;
+    out.push((k>g?JL[g]+(k>g+1?' au ':' et ')+JL[k]:JL[g])+' '+_paH(v[g]));g=k+1;}
+  var r=out.length?out.join(' \u00b7 '):'aucun jour travaill\u00e9';return r.charAt(0).toUpperCase()+r.slice(1);}
 
 // ★★ FRISE-1 (§539) — L'ANNÉE D'UN MODÈLE, EN FRISE (LECTURE). Lot 3a du chantier « le planning de l'année » (maquette v2) :
 //   la grille de 365 cases relue en saisons. Chaque mois prend, jour de la semaine par jour de la semaine, les heures les plus
@@ -103,14 +111,14 @@ function _planAnneeTon(t){
 }
 function _planAnneeDate(J,i,long){var x=J[i];return (x.d===1?'1er':x.d)+'\u00a0'+(long?window.PLAN_MOIS[x.m].toLowerCase():PLAN_MOIS_FR[x.m]);}
 function _planAnneePlage(J,a,b){if(a===b)return _planAnneeDate(J,a);return (J[a].m===J[b].m?(J[a].d===1?'1er':J[a].d):_planAnneeDate(J,a))+' \u2192 '+_planAnneeDate(J,b);}
-function _planAnneeJours(v){var JC=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-  return '<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:6px">'+v.map(function(x,g){
-    return '<div style="text-align:center;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:3px 0;border:1px solid var(--gris-clair);border-radius:6px">'+JC[g]
-      +'<b style="display:block;font-size:var(--pt-txt,13px);color:'+(x>0?'var(--texte)':'var(--texte-pale,#a3a19b)')+'">'+(x>0?_planFmt(x):'\u2013')+'</b></div>';}).join('')+'</div>';}
+function _planAnneeJours(v){var JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0 16px;margin-top:6px">'+v.map(function(x,g){
+    return '<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)"><span>'+JN[g]+'</span>'
+      +'<b style="font-variant-numeric:tabular-nums;color:'+(x>0?'var(--texte)':'var(--texte-doux)')+'">'+(x>0?_paH(x):'repos')+'</b></div>';}).join('')+'</div>';}
 // ★★ FRISE-2 (§540) — L'ANNÉE D'UN MODÈLE, À RÉGLER SUR LA FRISE. Une saison se règle jour par jour (− / + 30 min) : la retouche
 //   va à ses jours « réguliers » (ceux qui suivent sa semaine type) ; jours à part, semaines à part et fermetures ne bougent pas.
 //   « Tomber juste » propose une ou deux retouches qui posent le total sur la cible (la base de l'année ; avant 2027, le plafond
-//   annuel). Tout se fait sur un BROUILLON (_planEditing.brouillon) : « Enregistrer » écrit la grille de l'année du modèle, ses
+//   annuel). Tout se fait sur un BROUILLON (_paEtat.brouillon) : « Enregistrer » écrit la grille de l'année du modèle, ses
 //   horaires (_timings…) gardés ; « Annuler » la laisse comme elle était.
 function _planAnneeCopie(G){var c={};for(var m=0;m<12;m++){var M=G&&G[m],o={};if(M&&typeof M==='object')for(var k in M){var d=parseInt(k,10),v=parseFloat(M[k]);if(!isNaN(d)&&String(d)===String(k)&&v>0)o[d]=v;}c[m]=o;}return c;}
 function _planAnneeTotal(plId,yr,G){if(_planBaseActive(yr))return _planModelBrut(plId,yr,G);var t=0;for(var m=0;m<12;m++)for(var k in (G[m]||{}))t+=parseFloat(G[m][k])||0;return t;}
@@ -128,14 +136,14 @@ function _planAnneeRetouches(plId,yr,G,maxJ){
     S.h.forEach(function(x,g){if(x===mx)longs.push(g);else if(x>0&&x===mn)courts.push(g);});
     function ajout(gs,v,dd,cout,cle){var nv=_planAnneePasVal(v,dd);if(nv===v||nv>maxJ||nv<3.5)return;
       var jours=[];gs.forEach(function(g){jours=jours.concat(_planAnneeReguliers(A,si,g));});if(!jours.length)return;
-      M.push({cle:cle,cout:cout,lib:_planAnneeNomS(S)+'\u00a0: '+liste(gs)+' '+_planFmt(nv)+' au lieu de '+_planFmt(v),fn:function(Q){jours.forEach(function(x){_planAnneePose(Q,x.m,x.d,nv);});}});}
+      M.push({cle:cle,cout:cout,lib:_planAnneeNomS(S)+'\u00a0: '+liste(gs)+' '+_paH(nv)+' au lieu de '+_paH(v),fn:function(Q){jours.forEach(function(x){_planAnneePose(Q,x.m,x.d,nv);});}});}
     if(courts.length)[0.5,1,-0.5,-1].forEach(function(dd){if(mn+dd<mx)ajout(courts,mn,dd,Math.abs(dd)>0.5?2:1,'c'+si);});
     [0.5,-0.5].forEach(function(dd){ajout(longs,mx,dd,3,'l'+si);});
   });
   [[11,25,'No\u00ebl'],[11,31,'la Saint-Sylvestre']].forEach(function(v){            // la veille des fêtes : un jour à part
     var k=A.J.findIndex(function(x){return x.m===v[0]&&x.d===v[1];});
     for(var i=k-1;i>=0;i--){var x=A.J[i];if(x.fer)continue;if(x.h>0){[-0.5,-1,0.5].forEach(function(dd){var nv=x.h+dd;if(nv<3.5||nv>maxJ)return;
-        M.push({cle:'j'+x.m+'-'+x.d,cout:Math.abs(dd)>0.5?2:1,lib:JL[x.g].charAt(0).toUpperCase()+JL[x.g].slice(1)+' '+(x.d===1?'1er':x.d)+' '+window.PLAN_MOIS[x.m].toLowerCase()+', veille de '+v[2]+'\u00a0: '+_planFmt(nv)+' au lieu de '+_planFmt(x.h),fn:function(Q){_planAnneePose(Q,x.m,x.d,nv);}});});break;}}
+        M.push({cle:'j'+x.m+'-'+x.d,cout:Math.abs(dd)>0.5?2:1,lib:JL[x.g].charAt(0).toUpperCase()+JL[x.g].slice(1)+' '+(x.d===1?'1er':x.d)+' '+window.PLAN_MOIS[x.m].toLowerCase()+', veille de '+v[2]+'\u00a0: '+_paH(nv)+' au lieu de '+_paH(x.h),fn:function(Q){_planAnneePose(Q,x.m,x.d,nv);}});});break;}}
   });
   for(var si=0;si+1<A.saisons.length;si++){(function(a,b,ia){                     // une semaine de plus, prise sur la saison voisine
     var mA=a.m1,mB=b.m0,nbA=new Date(yr,mA+1,0).getDate();
@@ -160,14 +168,14 @@ function _planAnneeSuggestions(plId,yr,G,cible,maxJ){
   return out;
 }
 function _planAnneeGrille(){var E=_paE();if(!E||!E.annee)return null;return E.brouillon||_planGetTpl(E.annee,_pY())||{};}
-function _planAnneeJoursEd(v,si,adm){var JC=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+function _planAnneeJoursEd(v,si,adm){var JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
   if(!adm)return _planAnneeJours(v);
-  return '<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:6px">'+v.map(function(x,g){
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 16px;margin-top:6px">'+v.map(function(x,g){
     var tu=(si===0&&g===4)?' data-tuto="plan.annee.pas"':'';
-    return '<div style="text-align:center;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:3px 0;border:1px solid var(--gris-clair);border-radius:6px">'+JC[g]
-      +'<b style="display:block;font-size:var(--pt-txt,13px);color:'+(x>0?'var(--texte)':'var(--texte-pale,#a3a19b)')+'">'+(x>0?_planFmt(x):'\u2013')+'</b>'
-      +'<span style="display:flex;justify-content:center;gap:2px;margin-top:2px"><button class="plan-btn-pdf" data-s="'+si+'" data-g="'+g+'" data-d="-0.5" aria-label="'+JC[g]+' moins 30 min" onclick="planAnneePas(this)">\u2212</button>'
-      +'<button class="plan-btn-pdf" data-s="'+si+'" data-g="'+g+'" data-d="0.5"'+tu+' aria-label="'+JC[g]+' plus 30 min" onclick="planAnneePas(this)">+</button></span></div>';}).join('')+'</div>';}
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)"><span style="flex:1">'+JN[g]+'</span>'
+      +'<button class="plan-btn-pdf" data-s="'+si+'" data-g="'+g+'" data-d="-0.5" aria-label="'+JN[g]+' moins 30 min" onclick="planAnneePas(this)">\u2212</button>'
+      +'<b style="min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums;color:'+(x>0?'var(--texte)':'var(--texte-doux)')+'">'+(x>0?_paH(x):'repos')+'</b>'
+      +'<button class="plan-btn-pdf" data-s="'+si+'" data-g="'+g+'" data-d="0.5"'+tu+' aria-label="'+JN[g]+' plus 30 min" onclick="planAnneePas(this)">+</button></div>';}).join('')+'</div>';}
 function planAnneePas(el){
   if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!el)return;
   var si=parseInt(el.dataset.s,10),g=parseInt(el.dataset.g,10),dd=parseFloat(el.dataset.d)||0,yr=_pY();
@@ -218,7 +226,7 @@ function planAnneeRemettre(el){
   E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
 }
 // pour les tutos : ce que montre la vue, sans rien exposer d'autre
-function _planAnneeEtat(){var E=_paE();return {ouvert:!!(E&&E.annee),brouillon:!!(E&&E.brouillon),n:(E&&E.n)||0,semaine:(E&&E.semaine!=null)?E.semaine:null};}
+function _planAnneeEtat(){var E=_paE();return {ouvert:!!(E&&E.annee),modele:(E&&E.annee)||null,brouillon:!!(E&&E.brouillon),n:(E&&E.n)||0,semaine:(E&&E.semaine!=null)?E.semaine:null};}
 // ★★ FRISE-4 (§543) — UNE SEMAINE, RÉGLÉE SUR LA FRISE : la frise sait tout faire de la grille de 365 cases. On choisit une semaine
 //   (précédente / suivante ; par défaut celle d'aujourd'hui, ou la première qui travaille) ; ses jours se règlent un par un (− / +,
 //   n'importe quel jour) ; on la ferme, on la rouvre « comme la saison » ; et « changer le rythme à partir d'ici » règle un jour
@@ -247,19 +255,19 @@ function planAnneeDesIci(el){
   E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
 }
 function _planRenderAnnee(){
-  var body=_planCadreHost(),E=_paE();if(!body||!E||!E.annee)return;
+  var body=document.getElementById('plan-body'),E=_paE();if(!body)return;   // ★ ANNEE-TAB : l'onglet L'année
+  if(!E||!E.annee)E=_paEtat={annee:_planAnneeModeleDefaut()};
   var id=E.annee,yr=_pY(),G=_planAnneeGrille(),A=_planAnneeLire(id,yr,G),J=A.J,N=J.length,L=_planLegal(),nv=_planBaseActive(yr),adm=(typeof isAdmin==='function')&&isAdmin(),sel=_planAnneeSemSel(A,E,yr);
   var tot=0;J.forEach(function(x){tot+=x.h;});
   var fer=0,nf=0;if(nv)J.forEach(function(x){if(x.fer){var c=_planCreditFerie(id,yr,x.m,x.d,G);if(c>0){fer+=c;nf++;}}});
   var brut=nv?_planModelBrut(id,yr,G):tot,att=_planAnneeCible(id,yr),ec=Math.round((brut-att)*10)/10;
   var gens=_planMbrs().filter(function(m){return _planPlId(m)===id;});
-  var h='<button class="plan-back-btn" data-tuto="plan.annee.retour" onclick="planAnneeFermer()">'+(E.brouillon?'Retour sans enregistrer':'Retour aux mod\u00e8les')+'</button>'
-    +'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>';
-  h+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px"><b style="font-size:var(--pt-xl,24px);font-variant-numeric:tabular-nums">'+_planFmt(brut)+'</b>'
-    +'<span style="color:var(--texte-doux)">sur '+_planFmt(att)+(nv?', la base de l\u2019ann\u00e9e':', le plafond annuel')+'</span>'
-    +(Math.abs(ec)<0.05?'<span class="mvpas mvpas-statut mvpas-fait">juste</span>':'<span class="mvpas mvpas-statut mvpas-surveiller">'+(ec<0?'il manque '+_planFmt(-ec):_planFmt(ec)+' de trop')+'</span>')+'</div>'
+  var h=_planAnneeChoix(id,E)+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>';
+  h+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px"><b style="font-size:var(--pt-xl,24px);font-variant-numeric:tabular-nums">'+_paH(brut)+'</b>'
+    +'<span style="color:var(--texte-doux)">sur '+_paH(att)+(nv?', la base de l\u2019ann\u00e9e':', le plafond annuel')+'</span>'
+    +(Math.abs(ec)<0.05?'<span class="mvpas mvpas-statut mvpas-fait">juste</span>':'<span class="mvpas mvpas-statut mvpas-surveiller">'+(ec<0?'il manque '+_paH(-ec):_paH(ec)+' de trop')+'</span>')+'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:4px">'
-    +(nv?_planFmt(tot)+' de travail + '+_planFmt(fer)+' de f\u00e9ri\u00e9s ch\u00f4m\u00e9s ('+nf+' jours), compt\u00e9s pour leurs heures pr\u00e9vues':_planFmt(tot)+' de travail pr\u00e9vu')
+    +(nv?_paH(tot)+' de travail + '+_paH(fer)+' de f\u00e9ri\u00e9s ch\u00f4m\u00e9s ('+nf+' jours), compt\u00e9s pour leurs heures pr\u00e9vues':_paH(tot)+' de travail pr\u00e9vu')
     +' \u00b7 '+(gens.length?_escHtml(gens.map(function(m){return m.nom;}).join(', ')):'personne n\u2019y est inscrit')+'</div>';
   if(adm){                                                     // ★ FRISE-2 : tomber juste, enregistrer, annuler
     h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">';
@@ -271,8 +279,8 @@ function _planRenderAnnee(){
     if(E.sugg){E.sg=_planAnneeSuggestions(id,yr,G,att,L.maxJour);
       h+='<div style="display:grid;gap:8px;margin-top:10px">'+(E.sg.length?'':'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Aucune retouche simple ne tombe juste\u00a0: r\u00e8gle une saison avec \u2212 et +.</div>');
       E.sg.forEach(function(c,k){h+='<div style="border:1px solid var(--gris-clair);border-radius:10px;padding:10px;display:grid;gap:6px">'
-          +c.mv.map(function(m){return '<div style="font-size:var(--pt-txt,13px)">'+_escHtml(m.lib)+' <span style="color:var(--texte-doux)">('+(m.d>0?'+':'')+_planFmt(m.d)+')</span></div>';}).join('')
-          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--pt-micro,11px);color:var(--texte-doux)"><span>= <b>'+_planFmt(c.t)+'</b>'+(Math.abs(c.reste)<0.05?' \u00b7 juste':(c.reste>0?' \u00b7 il manque '+_planFmt(c.reste):' \u00b7 '+_planFmt(-c.reste)+' de trop'))+'</span>'
+          +c.mv.map(function(m){return '<div style="font-size:var(--pt-txt,13px)">'+_escHtml(m.lib)+' <span style="color:var(--texte-doux)">('+(m.d>0?'+':'')+_paH(m.d)+')</span></div>';}).join('')
+          +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:var(--pt-micro,11px);color:var(--texte-doux)"><span>= <b>'+_paH(c.t)+'</b>'+(Math.abs(c.reste)<0.05?' \u00b7 juste':(c.reste>0?' \u00b7 il manque '+_paH(c.reste):' \u00b7 '+_paH(-c.reste)+' de trop'))+'</span>'
           +'<button class="plan-btn-pdf"'+(k===0?' data-tuto="plan.annee.appl"':'')+' data-k="'+k+'" onclick="planAnneeAppliquer(this)">Appliquer</button></div></div>';});
       h+='</div>';}
   }
@@ -285,12 +293,12 @@ function _planRenderAnnee(){
   A.plages.forEach(function(p){var l=p.i0/N*100,wd=(p.i1-p.i0+1)/N*100,st='position:absolute;top:0;bottom:0;left:'+l+'%;width:'+wd+'%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;overflow:hidden;white-space:nowrap;border-right:1px solid var(--carte,#fff)';
     if(p.ferme){h+='<div style="'+st+';background:'+ferme+';color:var(--texte-doux)" title="'+_escAttr('Ferm\u00e9 \u2014 '+_planAnneePlage(J,p.i0,p.i1))+'"></div>';return;}
     var sh=p.apart?A.sem[p.w].h:A.saisons[p.s].tot,tn=_planAnneeTon(sh);
-    var tip=(p.apart?'Semaine \u00e0 part':'Saison')+' \u2014 '+_planAnneePlage(J,p.i0,p.i1)+' \u00b7 '+_planFmt(sh)+' par semaine';
-    h+='<div style="'+st+';background:'+tn.bg+';color:'+tn.fg+(p.apart?';box-shadow:inset 0 0 0 2px var(--texte)':'')+'" title="'+_escAttr(tip)+'">'+(wd>3.2?_planFmt(sh):'')+'</div>';});
+    var tip=(p.apart?'Semaine \u00e0 part':'Saison')+' \u2014 '+_planAnneePlage(J,p.i0,p.i1)+' \u00b7 '+_paH(sh)+' par semaine';
+    h+='<div style="'+st+';background:'+tn.bg+';color:'+tn.fg+(p.apart?';box-shadow:inset 0 0 0 2px var(--texte)':'')+'" title="'+_escAttr(tip)+'">'+(wd>3.2?_paH(sh):'')+'</div>';});
   h+='</div><div style="position:relative;height:12px;margin-top:2px">';
   J.forEach(function(x){if(!x.fer)return;h+='<span style="position:absolute;top:2px;left:'+((x.i+0.5)/N*100)+'%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--texte-doux)" title="'+_escAttr(x.fer+' \u2014 '+_planAnneeDate(J,x.i,true))+'"></span>';});
   h+='</div><div style="position:relative;height:84px;border-bottom:1px solid var(--gris-clair)">';
-  A.sem.forEach(function(s,k){var a=s.j[0].i,b=s.j[s.j.length-1].i,l=a/N*100,wd=(b-a+1)/N*100,vu=(adm&&k===sel)?';outline:2px solid var(--texte);outline-offset:1px':'',tip='Semaine du '+_planAnneePlage(J,a,b)+' \u2014 '+(s.h>0?_planFmt(s.h):'rien de pr\u00e9vu');
+  A.sem.forEach(function(s,k){var a=s.j[0].i,b=s.j[s.j.length-1].i,l=a/N*100,wd=(b-a+1)/N*100,vu=(adm&&k===sel)?';outline:2px solid var(--texte);outline-offset:1px':'',tip='Semaine du '+_planAnneePlage(J,a,b)+' \u2014 '+(s.h>0?_paH(s.h):'rien de pr\u00e9vu');
     if(s.ferme){h+='<div style="position:absolute;bottom:0;height:5px;left:calc('+l+'% + 1px);width:calc('+wd+'% - 2px);background:'+ferme+vu+'" title="'+_escAttr(tip+' \u00b7 ferm\u00e9')+'"></div>';return;}
     if(s.h<=0)return;var tn=_planAnneeTon(s.apart?s.h:(A.saisons[_planAnneeSaison(A.saisons,s.j[0].m)]||{tot:s.h}).tot);
     h+='<div style="position:absolute;bottom:0;left:calc('+l+'% + 1px);width:calc('+wd+'% - 2px);height:'+(Math.min(s.h,50)/50*100)+'%;background:'+tn.bg+';border-radius:2px 2px 0 0'+vu+'" title="'+_escAttr(tip)+'"></div>';});
@@ -304,29 +312,31 @@ function _planRenderAnnee(){
     h+='</div>';}
   h+='</div>';
   // les saisons, les semaines à part, les fermetures, les jours à part
-  if(adm&&A.sem[sel]){                                         // ★ FRISE-4 : la semaine choisie, réglée jour par jour
-    var Sw=A.sem[sel],a0=Sw.j[0].i,b0=Sw.j[Sw.j.length-1].i,JC=['Lu','Ma','Me','Je','Ve','Sa','Di'],si0=-1;
+  if(adm&&A.sem[sel]){                                         // ★ FRISE-4 · ANNEE-TAB : la semaine choisie, réglée jour par jour, en lignes
+    var Sw=A.sem[sel],a0=Sw.j[0].i,b0=Sw.j[Sw.j.length-1].i,JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],JC=['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'],si0=-1;
     Sw.j.forEach(function(x){if(si0<0&&!x.fer)si0=x.s;});var Ssw=A.saisons[si0];
     var diff=!!Ssw&&Sw.j.some(function(x){return !x.fer&&x.h!==Ssw.h[x.g];}),finS=-1;J.forEach(function(x){if(x.s===si0&&!x.ferme&&!x.apart)finS=x.i;});
-    h+='<div data-tuto="plan.annee.semp" style="margin-top:12px;border:1px solid var(--gris-clair);border-radius:10px;padding:10px;display:grid;gap:8px">'
+    var row='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)';
+    var hv=function(v){return '<b style="min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums;color:'+(v>0?'var(--texte)':'var(--texte-doux)')+'">'+(v>0?_paH(v):'repos')+'</b>';};
+    h+='<div data-tuto="plan.annee.semp" style="margin-top:14px;border:1px solid var(--gris-clair);border-radius:10px;padding:12px;display:grid;gap:8px">'
       +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><button class="plan-btn-pdf" data-d="-1" onclick="planAnneeSemaine(this)">Pr\u00e9c\u00e9dente</button>'
-      +'<b style="flex:1;text-align:center">Semaine du '+_planAnneePlage(J,a0,b0)+' \u00b7 '+_planFmt(Sw.h)+(Sw.ferme?' \u00b7 ferm\u00e9e':'')+'</b>'
+      +'<b style="flex:1;text-align:center">Semaine du '+_planAnneePlage(J,a0,b0)+' \u00b7 '+_paH(Sw.h)+(Sw.ferme?' \u00b7 ferm\u00e9e':'')+'</b>'
       +'<button class="plan-btn-pdf" data-tuto="plan.annee.sem" data-d="1" onclick="planAnneeSemaine(this)">Suivante</button></div>'
-      +'<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px">'+Sw.j.map(function(x){
-          return '<div style="text-align:center;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:3px 0;border:1px solid var(--gris-clair);border-radius:6px">'+JC[x.g]+' '+x.d
-            +'<b style="display:block;font-size:var(--pt-txt,13px);color:'+(x.h>0?'var(--texte)':'var(--texte-pale,#a3a19b)')+'">'+(x.fer?'f\u00e9ri\u00e9':(x.h>0?_planFmt(x.h):'\u2013'))+'</b>'
-            +(x.fer?'':'<span style="display:flex;justify-content:center;gap:2px;margin-top:2px"><button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+JC[x.g]+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'
-              +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+JC[x.g]+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button></span>')+'</div>';}).join('')+'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 16px">'+Sw.j.map(function(x){
+          return '<div style="'+row+'"><span style="flex:1">'+JC[x.g]+' '+(x.d===1?'1er':x.d)+' '+PLAN_MOIS_FR[x.m]+'</span>'
+            +(x.fer?'<span style="color:var(--texte-doux)">'+_escHtml(x.fer)+'</span>'
+              :'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+JN[x.g]+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'+hv(x.h)
+              +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+JN[x.g]+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>')+'</div>';}).join('')+'</div>'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
       +(Sw.ferme?'<button class="plan-btn-pdf" data-tuto="plan.annee.rsem" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Rouvrir comme la saison</button>'
                :'<button class="plan-btn-pdf" data-tuto="plan.annee.fsem" data-w="'+sel+'" onclick="planAnneeFermeSem(this)">Fermer la semaine</button>'
                 +(diff?'<button class="plan-btn-pdf" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Comme la saison</button>':''))+'</div>';
-    if(!Sw.ferme&&Ssw)h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5"><b style="color:var(--texte)">Changer le rythme \u00e0 partir d\u2019ici</b> \u2014 les jours r\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\u2019au '+_planAnneeDate(J,finS,true):'')+'\u00a0; la frise en fera une nouvelle saison.</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px">'+Ssw.h.map(function(v,g){
-          return '<div style="text-align:center;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:3px 0;border:1px solid var(--gris-clair);border-radius:6px">'+JC[g]
-            +'<b style="display:block;font-size:var(--pt-txt,13px);color:'+(v>0?'var(--texte)':'var(--texte-pale,#a3a19b)')+'">'+(v>0?_planFmt(v):'\u2013')+'</b>'
-            +'<span style="display:flex;justify-content:center;gap:2px;margin-top:2px"><button class="plan-btn-pdf" data-w="'+sel+'" data-g="'+g+'" data-p="-0.5" aria-label="'+JC[g]+' moins 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">\u2212</button>'
-            +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JC[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></span></div>';}).join('')+'</div>';
+    if(!Sw.ferme&&Ssw)h+='<details open><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Changer le rythme \u00e0 partir d\u2019ici</summary>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0">Les jours r\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\u2019au '+_planAnneeDate(J,finS,true):'')+'\u00a0; la frise en fera une nouvelle saison.</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 16px">'+Ssw.h.map(function(v,g){
+          return '<div style="'+row+'"><span style="flex:1">'+JN[g]+'</span>'
+            +'<button class="plan-btn-pdf" data-w="'+sel+'" data-g="'+g+'" data-p="-0.5" aria-label="'+JN[g]+' moins 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">\u2212</button>'+hv(v)
+            +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JN[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></div>';}).join('')+'</div></details>';
     h+='</div>';
   }
   h+='<div style="display:grid;gap:8px;margin-top:14px">';
@@ -334,20 +344,21 @@ function _planRenderAnnee(){
     J.forEach(function(x){if(x.s===si&&!x.ferme&&!x.apart){if(a<0)a=x.i;b=x.i;}});
     h+='<div style="border:1px solid var(--gris-clair);border-radius:10px;padding:10px">'
       +'<div style="display:flex;align-items:center;gap:8px"><span style="flex:none;width:12px;height:12px;border-radius:3px;background:'+tn.bg+';border:1px solid var(--gris-clair)"></span>'
-      +'<b>'+(a>=0?_planAnneePlage(J,a,b):window.PLAN_MOIS[sa.m0])+'</b><span style="margin-left:auto;color:var(--texte-doux)">'+_planFmt(sa.tot)+' par semaine</span></div>'
+      +'<b>'+(a>=0?_planAnneePlage(J,a,b):window.PLAN_MOIS[sa.m0])+'</b><span style="margin-left:auto;color:var(--texte-doux)">'+_paH(sa.tot)+' par semaine</span></div>'
       +(adm&&si>0&&a>=0?'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">D\u00e8s le '+_planAnneeDate(J,a,true)
         +'<button class="plan-btn-pdf"'+(si===1?' data-tuto="plan.annee.coupe"':'')+' data-s="'+si+'" data-n="-7" onclick="planAnneeCoupe(this)">1 sem. plus t\u00f4t</button>'
         +'<button class="plan-btn-pdf" data-s="'+si+'" data-n="7" onclick="planAnneeCoupe(this)">1 sem. plus tard</button></div>':'')
-      +_planAnneeJoursEd(sa.h,si,adm)+'</div>';});
+      +'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:6px">'+_planAnneeResumeTxt(sa.h)+'</div>'
+      +(adm?'<details'+(si===0?' open':'')+' style="margin-top:6px"><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">R\u00e9gler les jours</summary>'+_planAnneeJoursEd(sa.h,si,adm)+'</details>':_planAnneeJours(sa.h))+'</div>';});
   var ap=A.sem.filter(function(s){return s.apart;});
   if(ap.length)h+='<div style="font-size:var(--pt-txt,13px)"><b>Semaines \u00e0 part</b>'+ap.map(function(s){var a=s.j[0].i,b=s.j[s.j.length-1].i;
-      return '<div style="color:var(--texte-doux);margin-top:3px">'+_planAnneePlage(J,a,b)+' \u00b7 '+_planFmt(s.h)+(adm?' <button class="plan-btn-pdf" data-w="'+s.j[0].w+'" onclick="planAnneeRemettre(this)">comme la saison</button>':'')+'</div>';}).join('')+'</div>';
+      return '<div style="color:var(--texte-doux);margin-top:3px">'+_planAnneePlage(J,a,b)+' \u00b7 '+_paH(s.h)+(adm?' <button class="plan-btn-pdf" data-w="'+s.j[0].w+'" onclick="planAnneeRemettre(this)">comme la saison</button>':'')+'</div>';}).join('')+'</div>';
   if(A.fermetures.length)h+='<div style="font-size:var(--pt-txt,13px)"><b>Fermetures</b><div style="color:var(--texte-doux);margin-top:3px">'
     +A.fermetures.map(function(f){return _planAnneePlage(J,f.i0,f.i1);}).join(' \u00b7 ')+'</div></div>';
   if(A.jours.length){var JL=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
     h+='<div style="font-size:var(--pt-txt,13px)"><b>Jours \u00e0 part</b>'+A.jours.slice(0,12).map(function(x){
         var ty=(A.saisons[x.s]||{h:A.type[x.m]}).h[x.g],k=A.jours.indexOf(x);
-        return '<div style="color:var(--texte-doux);margin-top:3px">'+JL[x.g]+' '+_planAnneeDate(J,x.i,true)+'\u00a0: '+(x.h>0?_planFmt(x.h):'rien')+' (au lieu de '+(ty>0?_planFmt(ty):'rien')+')'
+        return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 0;border-bottom:1px solid var(--gris-clair)"><span style="flex:1;min-width:12em">'+JL[x.g]+' '+_planAnneeDate(J,x.i,true)+'\u00a0: <b>'+(x.h>0?_paH(x.h):'repos')+'</b> <span style="color:var(--texte-doux)">au lieu de '+(ty>0?_paH(ty):'repos')+'</span></span>'
           +(adm?' <button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'
             +'<button class="plan-btn-pdf"'+(k===0?' data-tuto="plan.annee.jour"':'')+' data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="plus 30 min" onclick="planAnneeJour(this)">+</button>'
             +'<button class="plan-btn-pdf"'+(k===0?' data-tuto="plan.annee.remettre"':'')+' data-m="'+x.m+'" data-j="'+x.d+'" onclick="planAnneeRemettre(this)">comme la saison</button>':'')+'</div>';}).join('')
@@ -360,17 +371,37 @@ function _planRenderAnnee(){
   for(var k=0;k+12<=A.sem.length;k++){var sm=0;for(var q=k;q<k+12;q++)sm+=A.sem[q].h;if(sm/12>max12)max12=sm/12;}
   function ln(ok,t){return '<div style="display:flex;gap:8px;align-items:baseline;font-size:var(--pt-txt,13px);margin-top:5px"><span class="mvpas mvpas-statut '+(ok?'mvpas-fait':'mvpas-surveiller')+'">'+(ok?'ok':'\u00e0 voir')+'</span><span>'+t+'</span></div>';}
   h+='<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--gris-clair)"><b>Le cadre</b>'
-    +ln(maxJ<=L.maxJour,_planFmt(L.maxJour)+' par jour au plus \u2014 la plus longue\u00a0: '+_planFmt(maxJ))
-    +ln(maxW<=L.maxHebdo,_planFmt(L.maxHebdo)+' par semaine au plus \u2014 la plus charg\u00e9e\u00a0: '+_planFmt(maxW))
-    +ln(max12<=L.maxMoy,_planFmt(L.maxMoy)+' en moyenne sur 12 semaines \u2014 au plus '+_planFmt(Math.round(max12*2)/2))
-    +ln(mod<=L.modulMax,'Heures de modulation programm\u00e9es\u00a0: '+_planFmt(mod)+' sur '+_planFmt(L.modulMax))
-    +ln(minJ>=3.5||minJ===99,'Jour r\u00e9duit \u2014 le plus court\u00a0: '+(minJ===99?'\u2013':_planFmt(minJ)))
+    +ln(maxJ<=L.maxJour,_paH(L.maxJour)+' par jour au plus \u2014 la plus longue\u00a0: '+_paH(maxJ))
+    +ln(maxW<=L.maxHebdo,_paH(L.maxHebdo)+' par semaine au plus \u2014 la plus charg\u00e9e\u00a0: '+_paH(maxW))
+    +ln(max12<=L.maxMoy,_paH(L.maxMoy)+' en moyenne sur 12 semaines \u2014 au plus '+_paH(Math.round(max12*2)/2))
+    +ln(mod<=L.modulMax,'Heures de modulation programm\u00e9es\u00a0: '+_paH(mod)+' sur '+_paH(L.modulMax))
+    +ln(minJ>=3.5||minJ===99,'Jour r\u00e9duit \u2014 le plus court\u00a0: '+(minJ===99?'\u2013':_paH(minJ)))
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;line-height:1.5">Dimanches travaill\u00e9s\u00a0: '+(dim||'aucun')+'. R\u00e8gle une saison avec \u2212 et + (ses jours r\u00e9guliers), d\u00e9place sa coupe d\u2019une semaine, r\u00e8gle un jour \u00e0 part ou remets-le comme la saison. Une semaine se r\u00e8gle jour par jour plus haut\u00a0: la fermer, la rouvrir, ou changer le rythme \u00e0 partir d\u2019elle.</div></div>';
   h+='</div>';
   body.innerHTML=h;
 }
-function planAnneeOuvrir(id){if(!id)return;window._planEditingSet({annee:String(id)});_planRenderCadre();var b=_planCadreHost();if(b)b.scrollTop=0;}
-function planAnneeFermer(){window._planEditingSet(null);_planRenderCadre();}
+function planAnneeOuvrir(id){if(!id)return;
+  if(!(_paEtat&&_paEtat.annee===String(id)))_paEtat={annee:String(id)};
+  try{var R=window._MV_REGL&&window._MV_REGL.planning;if(R&&typeof window.closeOv==='function')window.closeOv(null,R.ov);}catch(e){if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: '+e});}
+  if(typeof window.planSwitchTab==='function')window.planSwitchTab('annee');}
+function planAnneeModele(el){var id=el&&el.dataset?el.dataset.pl:'';if(!id)return;var E=_paE();
+  if(E&&E.brouillon&&E.annee!==id){if(window.showToast)window.showToast('Enregistrez ou annulez d\u2019abord les modifications de \u00ab\u00a0'+E.annee+'\u00a0\u00bb','#B85A1A');return;}
+  if(!(E&&E.annee===id))_paEtat={annee:String(id)};
+  if(typeof window.renderPlanning==='function')window.renderPlanning();else _planRenderAnnee();}
+function _planAnneeModeleDefaut(){var ids=_planModeles(),n={},best=null;
+  _planMbrs().forEach(function(m){var k=_planPlId(m);if(ids.indexOf(k)>=0)n[k]=(n[k]||0)+1;});
+  ids.forEach(function(k){if(best==null||(n[k]||0)>(n[best]||0))best=k;});
+  return best||ids[0]||'standard';}
+function _planAnneeChoix(id,E){var ids=_planModeles();   // toujours là, même avec un seul modèle : on sait lequel on règle
+  // le motif « choix » de la charte : un cadre .mvbtn-choix, des .mvbtn-option, l'état par aria-pressed — aucun style sur place
+  return '<div style="margin-bottom:10px;overflow-x:auto"><div class="mvbtn-choix" role="group" aria-label="Le mod\u00e8le" data-tuto="plan.annee.modele">'+ids.map(function(k){
+    return '<button class="mvbtn mvbtn-option" aria-pressed="'+(k===id)+'" data-pl="'+_escAttr(k)+'" onclick="planAnneeModele(this)">'+_escHtml(k)+'</button>';}).join('')+'</div></div>';}
+function _planAnneeOnglet(){if(!_paEtat||!_paEtat.annee)_paEtat={annee:_planAnneeModeleDefaut()};_planRenderAnnee();}
+function _planAnneeBande(){var yr=_pY(),E=_paE(),id=(E&&E.annee)||_planAnneeModeleDefaut(),G=(E&&E.brouillon)||_planGetTpl(id,yr)||{},nv=_planBaseActive(yr);
+  var tot=_planAnneeTotal(id,yr,G),att=_planAnneeCible(id,yr),ec=Math.round((tot-att)*10)/10;
+  return '<div class="mvu-kpi"><div class="mvu-kpi-v">'+_paH(tot)+'</div><div class="mvu-kpi-l">Le mod\u00e8le</div></div>'
+    +'<div class="mvu-kpi"><div class="mvu-kpi-v">'+_paH(att)+'</div><div class="mvu-kpi-l">'+(nv?'Base ':'Plafond ')+yr+'</div></div>'
+    +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+(Math.abs(ec)<0.05?'var(--vert-med)':'var(--orange)')+'">'+(Math.abs(ec)<0.05?'juste':(ec>0?'+':'\u2212')+_paH(Math.abs(ec)))+'</div><div class="mvu-kpi-l">\u00c9cart</div></div>';}
 
 // ★★ PROG-1 (§545) — LE PROGRAMME INDICATIF (accord national du 23/12/1981, art. 10.4). Avant le début de la période de
 //   modulation, l'employeur établit pour l'équipe un programme indicatif : la formule (jusqu'à 200 h de modulation, contingent
@@ -434,14 +465,14 @@ function _planAnneeMini(plId,yr){
   A.plages.forEach(function(p){var l=p.i0/N*100,wd=(p.i1-p.i0+1)/N*100,st='position:absolute;top:0;bottom:0;left:'+l+'%;width:'+wd+'%;border-right:1px solid var(--carte,#fff)';
     if(p.ferme){h+='<div style="'+st+';background:'+ferme+'" title="'+_escAttr('Ferm\u00e9 \u2014 '+_planAnneePlage(J,p.i0,p.i1))+'"></div>';return;}
     var sh=p.apart?A.sem[p.w].h:A.saisons[p.s].tot,tn=_planAnneeTon(sh);
-    h+='<div style="'+st+';background:'+tn.bg+'" title="'+_escAttr(_planAnneePlage(J,p.i0,p.i1)+' \u00b7 '+_planFmt(sh)+' par semaine')+'"></div>';});
+    h+='<div style="'+st+';background:'+tn.bg+'" title="'+_escAttr(_planAnneePlage(J,p.i0,p.i1)+' \u00b7 '+_paH(sh)+' par semaine')+'"></div>';});
   var t=new Date();if(t.getFullYear()===yr){var x=J.find(function(y){return y.m===t.getMonth()&&y.d===t.getDate();});
     if(x)h+='<div style="position:absolute;top:0;bottom:0;left:'+(x.i/N*100)+'%;width:2px;background:var(--texte)" title="Aujourd\u2019hui"></div>';}
   h+='</div><div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px"><span>janv.</span><span>avr.</span><span>juil.</span><span>oct.</span><span>d\u00e9c.</span></div>';
   var P=[];
   A.saisons.forEach(function(sa,si){var a=-1,b=-1;J.forEach(function(x){if(x.s===si&&!x.ferme&&!x.apart){if(a<0)a=x.i;b=x.i;}});
-    if(a>=0)P.push({i:a,t:_planAnneePlage(J,a,b)+' \u00b7 '+_planFmt(sa.tot)+' par semaine',bg:_planAnneeTon(sa.tot).bg});});
-  A.sem.forEach(function(s){if(s.apart)P.push({i:s.j[0].i,t:_planAnneePlage(J,s.j[0].i,s.j[s.j.length-1].i)+' \u00b7 '+_planFmt(s.h)+' (semaine \u00e0 part)',bg:_planAnneeTon(s.h).bg});});
+    if(a>=0)P.push({i:a,t:_planAnneePlage(J,a,b)+' \u00b7 '+_paH(sa.tot)+' par semaine',bg:_planAnneeTon(sa.tot).bg});});
+  A.sem.forEach(function(s){if(s.apart)P.push({i:s.j[0].i,t:_planAnneePlage(J,s.j[0].i,s.j[s.j.length-1].i)+' \u00b7 '+_paH(s.h)+' (semaine \u00e0 part)',bg:_planAnneeTon(s.h).bg});});
   A.fermetures.forEach(function(f){P.push({i:f.i0,t:_planAnneePlage(J,f.i0,f.i1)+' \u00b7 ferm\u00e9',bg:ferme});});
   P.sort(function(a,b){return a.i-b.i;});
   return h+'<div style="display:grid;gap:3px;margin-top:8px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+P.map(function(q){
@@ -452,7 +483,9 @@ function _planAnneeMini(plId,yr){
 // ── LA FRONTIÈRE : ce que la frise expose (les gestes, et le rendu que la roue du Planning appelle) ──
 window._planRenderAnnee     = _planRenderAnnee;
 window.planAnneeOuvrir      = planAnneeOuvrir;
-window.planAnneeFermer      = planAnneeFermer;
+window.planAnneeModele      = planAnneeModele;   // ★ ANNEE-TAB
+window._planAnneeOnglet     = _planAnneeOnglet;
+window._planAnneeBande      = _planAnneeBande;
 window.planAnneePas         = planAnneePas;
 window.planAnneeJuste       = planAnneeJuste;
 window.planAnneeAppliquer   = planAnneeAppliquer;
