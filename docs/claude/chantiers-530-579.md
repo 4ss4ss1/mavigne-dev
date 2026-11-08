@@ -429,3 +429,19 @@ Nico (07/11), avec le « go » du lot 5 : « vérifier les affichages des notati
 
 ### 548d. Ce qui reste ouvert
 - §28, bloc ANNEE-TAB.
+
+## 549. ★ ONGLETS-1 — LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL (07/11 — `index.html` (l’ordre, les noms, APP) · `src/utils.js` (APP, MV_AIDE) · `src/tutos.js` · `src/whats-new.js` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-onglets1.mjs` (neuf) · `scripts/mv-harnais-regl-module.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/ONGLETS-1.json` — base `a2a0356` « anneetab » — **APP 10.80 → 10.81, SW 11.71 → 11.72**)
+
+### 549a. D’où ça vient
+Nico (07/11), à la livraison d’ANNEE-TAB : « il aurait fallu mettre mois, année, personnels (les gens mais sans mettre les gens) ». ANNEE-TAB avait ajouté « L’année » après « Le mois » et « Les gens ».
+
+### 549b. Le modèle
+- **La barre** : Mois, Année, Personnel — dans cet ordre, sans article. Les clés internes (`data-tab` : `mois`, `annee`, `gens`) ne changent pas : aucun code n’a à suivre.
+- **Les mots** suivent partout où on les lit : l’aide du Planning (« Trois onglets : Mois…, Année…, Personnel… » ; « Reculez d’un mois dans Personnel »), le guide (le sous-titre, la liste des onglets — Année y entre —, les chemins « Planning › Personnel »), les quatre tutos de la frise (« l’onglet « Année », entre « Mois » et « Personnel » »). L’historique des nouveautés garde ses mots d’époque.
+
+### 549c. Ce qui a été vérifié
+- `scripts/mv-harnais-onglets1.mjs` (neuf) : l’ordre et les noms de la barre, l’aide, le guide, les tutos, et plus un « Les gens » visible ; 4 cas, 3 contre-épreuves tenues.
+- `mv-harnais-regl-module` tenait le titre du guide « Deux onglets, et une roue crantée » — ANNEE-TAB l’avait laissé faux ; il dit désormais « Trois onglets ».
+
+### 549d. Ce qui reste ouvert
+- Rien de propre au lot.

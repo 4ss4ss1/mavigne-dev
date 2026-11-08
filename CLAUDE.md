@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (ANNEE-TAB)** — **L’ANNÉE A SON ONGLET DANS LE PLANNING ; UNE NOTATION DES HEURES PROPRE** (§548). Base `e0bc8bb` (« relsol1 »). **APP 10.79 → 10.80, SW 11.70 → 11.71**. Demande de Nico (07/11, avec le « go » du lot 5) : « les notations des heures par jour dans l’année, c’est sale et pas pro ; un onglet à côté de Le mois et Les gens ». Onglet `annee` (index.html, `_PLAN_VALID_TAB`, `_planRenderBody` → `window._planAnneeOnglet`, la bande `_planAnneeBande`) ; le modèle se choisit en haut (`planAnneeModele`) ; la roue ne porte plus « L’année » ni d’état d’édition (`_planEditing` retiré de planning.js ; l’état vit dans la frise, `_paEtat`). Notation `_paH` : « 8 h 30 », « 1 827 h », « repos », le vrai signe moins ; les jours d’une saison (repliables, la première ouverte) et de la semaine en lignes. Les quatre tutos de la frise passent par l’onglet. `mv-harnais-anneetab` neuf (11 cas, 3 contre-épreuves) ; frise2, frise5, anneedec, monan1, regl-module recalés. Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (ONGLETS-1)** — **LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL** (§549). Base `a2a0356` (« anneetab »). **APP 10.80 → 10.81, SW 11.71 → 11.72**. Nico (07/11), après ANNEE-TAB : « il aurait fallu mettre mois, année, personnels (les gens mais sans mettre les gens) ». La barre devient Mois · Année · Personnel (les `data-tab` ne changent pas : `mois`, `annee`, `gens`) ; l’aide, le guide du Planning et les quatre tutos de la frise suivent. `mv-harnais-onglets1` neuf (4 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2149,6 +2149,10 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 ### ★ ANNEE-TAB (07/11, §548) — l’onglet L’année : ce qui reste
 - **À regarder chez Nico, ANNEE-TAB déployé** : Planning › « L’année » sur téléphone et sur ordinateur — la lecture des heures (« 8 h 30 », « repos »), les jours en lignes ; s’il reste du « sale », dire où.
 - **Le lot 5, validé (« go », coupure unique)** : 5a — les horaires sur la frise (la prise de poste par saison, écrite dans `_timings` des mois de la saison ; la coupure reste le réglage du domaine, `PLAN_PAUSE_MIN` ; une prise propre à un jour dans le bloc de la semaine ; les codes D/M/A convertis une fois en heures) ; 5b — les semaines A et B (maquette v3, `docs/maquettes/`).
+
+### ★ ONGLETS-1 (07/11, §549) — Mois, Année, Personnel
+- ⚠️ **Les noms des onglets du Planning sont ceux de Nico** : « Mois », « Année », « Personnel », dans cet ordre, sans article. « Les gens » ne s’écrit plus nulle part de visible (le `data-tab` reste `gens`, une clé interne). `mv-harnais-onglets1` le tient.
+- **La suite** : le lot 5a — les horaires sur la frise (coupure unique du domaine) ; puis 5b — les semaines A et B.
 
 ## 29. Synchronisation de la mémoire
 

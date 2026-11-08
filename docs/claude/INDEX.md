@@ -602,3 +602,4 @@
 | 546 | 546. ★★ MONAN-1 — « MON ANNÉE » : LA FRISE, LE COMPTEUR, LES CONGÉS ET LE PLANNING IMPRIMÉ DE CHAQUE SALARI… | `docs/claude/chantiers-530-579.md` |
 | 547 | 547. ★ RELSOL-1 — LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS (07/11 — `src/planning.js` (`_planRelSolidarit… | `docs/claude/chantiers-530-579.md` |
 | 548 | 548. ★★ ANNEE-TAB — L’ANNÉE A SON ONGLET DANS LE PLANNING ; UNE NOTATION DES HEURES PROPRE (07/11 — `src/pl… | `docs/claude/chantiers-530-579.md` |
+| 549 | 549. ★ ONGLETS-1 — LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL (07/11 — `index.html` (l’ordre, les nom… | `docs/claude/chantiers-530-579.md` |

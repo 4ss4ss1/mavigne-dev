@@ -1,0 +1,28 @@
+{
+  "lot": "ONGLETS-1",
+  "section": "§549",
+  "base": "a2a0356e38f118a7304aba48b4146591efb04714",
+  "inclut": [],
+  "date": "2026-11-08",
+  "tutos": {
+    "saute": "les 4 tutos concernés (annee, coupe, reglerannee, semaine) rejoués sur le build en deux parties, --part 1/2 et 2/2 : 16 passages sur 16 verts — le bac coupe une commande à 5 min ; une partie n'écrit pas rapports/tutos.json"
+  },
+  "fichiers": {
+    ".mv-base": "25f93366cd22ceef2049a8d1e0b9efd483e9169289d69eb774d8344cd9c1c7d7",
+    "CLAUDE.md": "0ec003e1379141f5fb0a7e2605dac0dad16d66813f064944738774be74c953ef",
+    "docs/claude/INDEX.md": "0a55145a056c3339ef5d57f939415fe4bd32ca5f1986c661a5d50c42f5bdfcff",
+    "docs/claude/chantiers-530-579.md": "b3cfa67729536bf2d3a3952e221394fc90fe82d2ebba631ea10c19546e349db1",
+    "docs/claude/journal.md": "eb92f0b0f24a1f6eb506679cf969a602a7cfa2ee902bb58fef68707f4b86822b",
+    "docs/claude/modules.md": "a1c1efb8a47ef927dbc5309fd044f558d342b26873042caed060d13dd5167f0b",
+    "guide/10-planning.html": "eb405ca5d98d0d9b58be73e99536201c7d9cf0104d3c4e6fafce13ceb393c068",
+    "index.html": "6a79417dbaad59b2a544608ecf3f36b9463da21e351ef1b74e8bbcc6f818c509",
+    "public/sw.js": "d0728aee7a92c0c498bb727ebd757db504f40898810825a93c65027caf0f27dc",
+    "scripts/harnais-claude-md.mjs": "bb73eea9d97cf243f8207ff830249e4ce7ceb53338a2cf60d15cb41bde4c8ddc",
+    "scripts/mv-harnais-liste.mjs": "2aa1ad15dfa3c7923018983d1b15a3479ce483cfc34bc46634fca2e94c8b1d20",
+    "scripts/mv-harnais-regl-module.mjs": "782fccf6d94d0bad8b2abba70d1909143452e7fb0512490f41d10a69f5b51b5d",
+    "src/tutos.js": "f778d9b7a219028ef7ec6d800094cae8ff4fd9f00547294cc825b94fdc0a6323",
+    "src/utils.js": "dda7001a32b95fb5633481aef0a99921b6ef90de1abb402e71c06fb9c171cdb3",
+    "src/whats-new.js": "75cc216c0aa003e70848f6400c99a5e49b1498f1dc95264b9e9396188cc0552a",
+    "scripts/mv-harnais-onglets1.mjs": "266ee29435b4328f018ffb650762cb017594b10a37afd526f1c35f167b3e3fe6"
+  }
+}

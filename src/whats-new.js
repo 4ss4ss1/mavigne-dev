@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.81', d: '2026-11-07', items: [   // ONGLETS-1 (§549) : Mois, Année, Personnel
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Mois, Année, Personnel',
+      desc: "Les onglets du Planning se rangent et se nomment autrement : Mois, puis Année, puis Personnel (l’ancien « Les gens »). Rien d’autre ne change." },
+  ] },
   { v: '10.80', d: '2026-11-07', items: [   // ANNEE-TAB (§548) : l'onglet L'année, une notation propre
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année a son onglet',
       desc: "Dans le Planning, à côté de « Le mois » et « Les gens » : « L’année ». Le modèle se choisit en haut ; les heures se lisent proprement (« 8 h 30 », « repos ») ; les jours d’une saison et d’une semaine se règlent en lignes, plus en sept colonnes serrées — au téléphone comme sur ordinateur." },

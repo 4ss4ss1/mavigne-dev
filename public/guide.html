@@ -2327,16 +2327,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="planning">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></div>
-    <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · et la roue crantée</div></div>
+    <div><h2>Planning RH</h2><div class="sub">Mois · Année · Personnel · et la roue crantée</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois et, en lecture seule, qui est là dans l'équipe — jamais un motif d'absence.</p>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Deux onglets, et une roue crantée</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Trois onglets, et une roue crantée</h3>
   <ul class="dot">
-    <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
-    <li><b>Les gens</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (résumé pour la paie, jours,
+    <li><b>Mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
+    <li><b>Année</b> — la frise d'un modèle : ses saisons, ses semaines, son compte face à la base. C'est là qu'il se règle.</li>
+    <li><b>Personnel</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (résumé pour la paie, jours,
     compteur, congés et acomptes, relevé PDF), le récap annuel et les anciens salariés.</li>
     <li><b>La roue crantée</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg>, en haut à droite — ce qui se règle une fois par an :
     modèles de semaine, coupure, convention collective, règle de décompte des congés, sort des heures
@@ -2356,7 +2357,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   aujourd'hui, présents demain.</p>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Cocher, puis agir</h3>
-  <p>Dans <b>Le mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>
+  <p>Dans <b>Mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>
   <ul class="dot">
     <li>Le <b>numéro du jour</b>, en haut de la grille, coche toute l'équipe ce jour-là.</li>
     <li>Un <b>nom</b>, à gauche, coche sa ligne entière sur la vue affichée.</li>
@@ -2477,7 +2478,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     (accord national, art. 10.4) : les salariés concernés, la formule (jusqu'à 200&nbsp;h de modulation, contingent hors
     modulation de 150&nbsp;h ; au-delà, 100&nbsp;h), les périodes de forte, faible ou nulle activité avec leur horaire
     indicatif, la règle de décompte. Il s'affiche au moins une semaine avant le début de la période.</li>
-    <li>L'onglet <b>« L'année »</b> du Planning (le modèle se choisit en haut) montre sa grille relue en saisons : une couleur
+    <li>L'onglet <b>« Année »</b> du Planning (le modèle se choisit en haut) montre sa grille relue en saisons : une couleur
     par semaine type, la semaine des vendanges à part, les fermetures hachurées, une barre par semaine face aux 35&nbsp;h,
     son compte face à la base de l'année et le cadre vérifié. Chaque saison s'y règle avec − et + (ses jours réguliers),
     « Tomber juste » propose une ou deux retouches qui posent l'année sur sa cible, et rien n'est écrit avant « Enregistrer ».
@@ -2578,7 +2579,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> La fiche d'un salarié</h3>
-  <p>Touchez un nom dans <b>Les gens</b>. La fiche s'ouvre sur le mois affiché ; les flèches sous le nom
+  <p>Touchez un nom dans <b>Personnel</b>. La fiche s'ouvre sur le mois affiché ; les flèches sous le nom
   changent de mois sans la fermer, et le bouton <b>Relevé</b> édite le PDF.</p>
   <ul class="dot">
     <li><b>Résumé</b> — le cadre <b>Pour la compta</b> : une ligne par chose que la compta saisit, toujours dans le
@@ -2863,11 +2864,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <details><summary>Comment ajouter un salarié au planning&nbsp;?</summary>
     <div class="dbody">Créez-le d'abord comme membre dans <span class="path">Réglages › Équipe</span> :
     il apparaît aussitôt dans la grille. Les anciens salariés restent accessibles depuis
-    <span class="path">Planning › Les gens</span>, en bas de la liste, avec leurs heures et leurs PDF.</div></details>
+    <span class="path">Planning › Personnel</span>, en bas de la liste, avec leurs heures et leurs PDF.</div></details>
   <details><summary>J'ai passé une fiche en Inactif, ses heures ont-elles disparu&nbsp;?</summary>
     <div class="dbody">Non. Le statut <b>Inactif</b> ferme l'accès à l'application, il n'efface aucune
     heure. Reculez sur un mois où la personne était sous contrat : elle reprend sa ligne dans
-    <span class="path">Planning › Les gens</span>, avec ses heures, et elle sort de la section
+    <span class="path">Planning › Personnel</span>, avec ses heures, et elle sort de la section
     <b>Anciens salariés</b> pour ce mois-là — elle n'apparaît jamais deux fois. Ses heures comptent
     aussi dans le récap annuel, dans les totaux du mois, dans la cadence du Pilotage et sur le
     planning de l'année imprimé.</div></details>

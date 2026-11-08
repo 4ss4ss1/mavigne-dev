@@ -239,7 +239,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   }
   const fp = fiche('planning');
   T(!/Le cadre/.test(fp) && /Trois onglets/.test(fp) && /roue crant\u00e9e du Planning/.test(fp), 'la fiche Planning dit trois onglets et la roue, plus « Le cadre »');
-  T(!/Planning \u203a Le cadre/.test(G10) && !/onglet Mod\u00e8les/.test(G10) && /Deux onglets, et une roue crant\u00e9e/.test(G10), 'le guide Planning ne nomme plus l\u2019onglet Le cadre ni l\u2019onglet Mod\u00e8les');
+  T(!/Planning \u203a Le cadre/.test(G10) && !/onglet Mod\u00e8les/.test(G10) && /Trois onglets, et une roue crant\u00e9e/.test(G10), 'le guide Planning ne nomme plus l\u2019onglet Le cadre ni l\u2019onglet Mod\u00e8les');
 
   /* 9. NAV-3 — le Pilotage */
   T(!/pil-outils|_PIL_TOOLS/.test(pil) && !/pil-outils/.test(CSS), 'plus de bouton \u00ab Outils \u00bb, ni de menu, ni de CSS');
