@@ -370,3 +370,22 @@ Lot 4 du chantier « le planning de l’année ». L’accord national du 23/12/
 
 ### 545d. Ce qui reste ouvert
 - §28, bloc PROG-1.
+
+## 546. ★★ MONAN-1 — « MON ANNÉE » : LA FRISE, LE COMPTEUR, LES CONGÉS ET LE PLANNING IMPRIMÉ DE CHAQUE SALARIÉ (07/11 — `src/planning-annee.js` (`_planAnneeMini` neuf, exposé) · `src/planning.js` (`_planBuildMonHtml` : la carte ; `_paDocNom` : le programme du modèle) · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-monan1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` (un exempté) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/MONAN-1.json` — base `ea00de0` « prog1 » — **APP 10.77 → 10.78, SW 11.68 → 11.69**)
+
+### 546a. D’où ça vient
+Lot 4 du chantier, deuxième part : la maquette v1 (« Section Salarié : Mon année ») et le but de Nico — « le salarié qui demande son planning en janvier doit recevoir un document clair avec les bonnes heures ». Le planning nominatif existait (`_paDocNom`), atteignable seulement depuis les réglages de l’admin.
+
+### 546b. Le modèle, et ce qui a été écarté
+- **La carte « Mon année »** dans la vue d’un salarié (`_planBuildMonHtml`), entre son mois et ses jours : ses heures comptées à fin du mois affiché sur sa base (ou son plafond avant 2027) et la fin d’année prévue (`_planAnnu`, seulement s’il est annualisé), ses congés posés et à prendre, sa petite frise, et son PDF.
+- **La petite frise** (`_planAnneeMini`) : la même lecture que « L’année » (saisons, semaines à part, fermetures), en lecture seule, avec chaque période en clair dans l’ordre de l’année ; une saison s’arrête à la fermeture qui la suit (la fin d’année 2026 : du 16 novembre au 27 décembre).
+- **Le PDF** reprend `planAnnuelNomPdf` (le geste existait, depuis les réglages) par `data-*` — aucune valeur crue dans le geste (C24b) ; la feuille porte désormais le programme indicatif de son modèle (PROG-1).
+- Écarté : la grande frise de l’admin dans la vue du salarié (faite pour régler, pas pour lire) ; le programme de toute l’équipe dans sa feuille (celui de son modèle suffit).
+
+### 546c. Ce qui a été vérifié
+- `scripts/mv-harnais-monan1.mjs` (neuf) : la petite frise de la vraie grille 2026 (l’ordre de l’année, la fermeture du 1er au 4 janvier puis la saison du 5 janvier, les quatre fermetures, les vendanges, la fin d’année du 16 novembre au 27 décembre — mon attente disait le 31 : la fermeture du 28 la termine), la carte dans la vue, son PDF par `data-*`, le programme dans la feuille ; 10 cas, 3 contre-épreuves tenues.
+- **Le geste du PDF** (`planAnnuelNomPdf`) devient un geste à l’écran (il n’était appelé que depuis les réglages, par JavaScript) : le compte des gestes sans tuto passait 796 → 797. Exempté dans `scripts/tutos-couverture.json`, raison écrite : il ouvre une fenêtre d’impression (rien à jouer sur le domaine d’entraînement), et la carte vit dans la vue d’un salarié, que l’utilisateur du domaine fictif — admin — ne voit pas.
+- Ce qui n’a pas pu être vu : la carte sur un vrai téléphone de salarié.
+
+### 546d. Ce qui reste ouvert
+- §28, bloc MONAN-1.

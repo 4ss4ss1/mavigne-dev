@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (PROG-1)** — **LE PROGRAMME INDICATIF DE MODULATION (art. 10.4) SUIT CHAQUE MODÈLE DANS LE PLANNING DE L’ANNÉE** (§545). Base `efedddd` (« frise5 »). **APP 10.76 → 10.77, SW 11.67 → 11.68**. Lot 4 du chantier, première part. `_planAnneeProgramme(plId,yr)` (src/planning-annee.js) lit la frise : les salariés du modèle, la formule (`_planAnneeModulation` : au-delà de 35 h par semaine, fériés chômés comptés ; ≤ 200 h → contingent hors modulation 150 h, ≤ 250 h → 100 h, au-delà « à revoir »), les périodes (saisons, semaines à part, fermetures) en forte / réduite / nulle activité avec leur horaire indicatif (`_planAnneeHoraireTxt`), la règle de décompte (base, solidarité, congés et fériés aux heures prévues — art. 4.3 et 10.4), la date limite d’affichage (25 décembre de l’année d’avant). Une page par modèle, à la suite de sa grille (`_paDoc`). `mv-harnais-prog1` neuf (11 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (MONAN-1)** — **« MON ANNÉE » : LA FRISE, LE COMPTEUR, LES CONGÉS ET LE PLANNING IMPRIMÉ DE CHAQUE SALARIÉ** (§546). Base `ea00de0` (« prog1 »). **APP 10.77 → 10.78, SW 11.68 → 11.69**. Lot 4, deuxième part. Dans la vue d’un salarié (`_planBuildMonHtml`), une carte « Mon année » entre son mois et ses jours : son compteur de l’année (`_planAnnu`, la base depuis 2027), ses congés posés et à prendre, la frise de son modèle en petit (`_planAnneeMini`, src/planning-annee.js : couleurs des saisons, fermetures, semaine à part, un trait pour aujourd’hui, chaque période en clair), et « Mon planning de l’année (PDF) » (`planAnnuelNomPdf`, par `data-*`) ; son planning imprimé (`_paDocNom`) porte désormais le programme indicatif de son modèle. `mv-harnais-monan1` neuf (10 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2135,7 +2135,11 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 
 ### ★ PROG-1 (07/11, §545) — le programme indicatif : ce qui reste
 - **À faire valider chez Nico** : le programme imprimé (Planning › le planning de l’année) — par sa comptable ou la FDSEA avant de l’afficher : la formule, et surtout la règle « congés et fériés aux heures prévues », choix du domaine (§28, chantier du planning de l’année).
-- **Le reste du lot 4** : « Mon année » pour chaque salarié (sa frise, son compteur, ses congés, son programme), et la mention de la journée de solidarité au relevé du mois.
+- **Le reste du lot 4** : ~~« Mon année »~~ (MONAN-1, §546) ; la mention de la journée de solidarité au relevé du mois.
+
+### ★ MONAN-1 (07/11, §546) — « Mon année » : ce qui reste
+- **À regarder chez Nico, MONAN-1 déployé** : sur le téléphone d’un salarié, Planning — la carte « Mon année » sous son mois ; le PDF : sa feuille puis le programme de son modèle.
+- **La fin du lot 4** : la journée de solidarité au relevé du mois (le mois où elle est faite, ou « étalée sur l’année »), conseillée sur la fiche de paie.
 
 ## 29. Synchronisation de la mémoire
 

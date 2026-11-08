@@ -1128,6 +1128,11 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ « Mon année » (MONAN-1, §546)
+
+Dans la vue d’un salarié (`_planBuildMonHtml`) : la carte « Mon année » — compteur (`_planAnnu`), congés, petite frise (`_planAnneeMini`),
+« Mon planning de l’année (PDF) » (`planAnnuelNomPdf`) ; le planning nominatif porte le programme de son modèle.
+
 ### ★ Le programme indicatif (PROG-1, §545)
 
 `_planAnneeProgramme(plId,yr)` (src/planning-annee.js) : la page art. 10.4 de chaque modèle, lue de la frise, à la suite de sa grille dans

@@ -4417,6 +4417,17 @@ function _planBuildMonHtml(mbr,canEdit){
     +(canEdit?'<button class="pl2-fiche-link" onclick="openPlanFiche(\''+_escAttr(mbr.nom)+'\')">\ud83d\udc64 Ma fiche compl\u00e8te \u2014 cong\u00e9s \u00b7 heures sup \u00b7 acomptes \u00b7 PDF <span class="pl2-chev">\u203a</span></button>':'')
     +'</div>';
 
+  // ★★ MONAN-1 (§546) — « MON ANNÉE » : ce qu'un salarié demande en janvier, dans sa vue — la frise de son modèle, son compteur
+  //   de l'année (la base depuis 2027), ses congés, et son planning de l'année imprimé (avec le programme indicatif de son modèle).
+  var _yrA=planYear,_an=_planAnnu(mbr,planMonth),_annu=!!(_an&&_an.annualise);
+  var anHtml='<div class="plan-card" data-tuto="plan.monannee">'
+    +'<div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:var(--pt-base,14px)">Mon ann\u00e9e '+_yrA+'</b><span style="margin-left:auto;font-size:var(--pt-micro,11px);color:var(--texte-doux)">mod\u00e8le '+_escHtml(plId)+'</span></div>'
+    +(_annu?'<div style="font-size:var(--pt-txt,13px);margin-top:.4em">'+_planFmt(_an.cumul)+' compt\u00e9es \u00e0 fin '+PLAN_MOIS[planMonth].toLowerCase()+' sur '+_planFmt(_an.plafond)+(_an.base?' de base':' de plafond')+' \u00b7 fin d\u2019ann\u00e9e pr\u00e9vue\u00a0: '+_planFmt(_an.projection)+'</div>':'')
+    +'<div style="font-size:var(--pt-txt,13px);margin-top:.3em">Cong\u00e9s\u00a0: '+cpPris+' j pos\u00e9s \u00b7 '+cpSolde+' j \u00e0 prendre</div>'
+    +(window._planAnneeMini?window._planAnneeMini(plId,_yrA):'')
+    +'<button class="plan-btn-pdf" style="margin-top:.8em;width:100%" data-n="'+_escAttr(mbr.nom)+'" data-a="'+_yrA+'" onclick="planAnnuelNomPdf(this.dataset.n,this.dataset.a)">Mon planning de l\u2019ann\u00e9e (PDF)</button>'
+    +'</div>';
+
   // Jours
   var daysHtml='<div class="plan-days-list">';
   for(var d=1;d<=total;d++){
@@ -4471,7 +4482,7 @@ function _planBuildMonHtml(mbr,canEdit){
   daysHtml+='</div>';
   if(canEdit)daysHtml+='<div class="plan-edit-hint">'+_mvIcon('crayon',16)+' Appuyez sur un jour pour le modifier \u2014 toute l\u2019\u00e9quipe se g\u00e8re depuis l\u2019onglet <b>Le mois</b>.</div>';
 
-  return sumHtml+daysHtml+_planLegalCard(mbr);
+  return sumHtml+anHtml+daysHtml+_planLegalCard(mbr);
 }
 
 // ── Compteur heures supplementaires (CDI/CDD) — carte saisie admin ──
@@ -9448,7 +9459,8 @@ function _paDocNom(yr,nom,e){
     +'<div class="pa-s">'+(nj+jEcole)+' jours \u00b7 total comptabilis\u00e9</div></div></div>'
     +vent
     +lim
-    +'</div>';
+    +'</div>'
+    +(window._planAnneeProgramme?window._planAnneeProgramme(plId,yr):'');   // ★ MONAN-1 (§546) : son planning porte aussi le programme indicatif de son modèle
 
   return window._mvDocOpen({
     titre:'Planning '+yr+' \u2014 '+nom,

@@ -599,3 +599,4 @@
 | 543 | 543. ★★ FRISE-4 — UNE SEMAINE SE RÈGLE SUR LA FRISE ; UNE ANNÉE VIDE SE CONSTRUIT (07/11 — `src/planning-an… | `docs/claude/chantiers-530-579.md` |
 | 544 | 544. ★★ FRISE-5 — LA GRILLE DE 365 CASES LAISSE LA PLACE À LA FRISE (07/11 — `src/planning.js` (`planOpenGr… | `docs/claude/chantiers-530-579.md` |
 | 545 | 545. ★★ PROG-1 — LE PROGRAMME INDICATIF DE MODULATION (art. 10.4) SUIT CHAQUE MODÈLE DANS LE PLANNING DE L’… | `docs/claude/chantiers-530-579.md` |
+| 546 | 546. ★★ MONAN-1 — « MON ANNÉE » : LA FRISE, LE COMPTEUR, LES CONGÉS ET LE PLANNING IMPRIMÉ DE CHAQUE SALARI… | `docs/claude/chantiers-530-579.md` |

@@ -425,6 +425,29 @@ function _planAnneeProgramme(plId,yr){
     +'</div>';
 }
 
+// ★★ MONAN-1 (§546) — « MON ANNÉE » : la frise d'un salarié, en petit et en lecture, dans sa vue du Planning. Les couleurs
+//   des saisons, les fermetures hachurées, la semaine à part ; un trait pour aujourd'hui ; dessous, chaque période en clair
+//   (ses dates, ses heures par semaine). Rien ne s'y règle : c'est la feuille qu'on regarde, pas celle qu'on écrit.
+function _planAnneeMini(plId,yr){
+  var A=_planAnneeLire(plId,yr),J=A.J,N=J.length,ferme='repeating-linear-gradient(135deg,var(--gris-clair) 0 4px,transparent 4px 8px)';
+  var h='<div style="position:relative;height:26px;border-radius:7px;overflow:hidden;background:var(--fond-doux,var(--gris-clair));margin-top:8px">';
+  A.plages.forEach(function(p){var l=p.i0/N*100,wd=(p.i1-p.i0+1)/N*100,st='position:absolute;top:0;bottom:0;left:'+l+'%;width:'+wd+'%;border-right:1px solid var(--carte,#fff)';
+    if(p.ferme){h+='<div style="'+st+';background:'+ferme+'" title="'+_escAttr('Ferm\u00e9 \u2014 '+_planAnneePlage(J,p.i0,p.i1))+'"></div>';return;}
+    var sh=p.apart?A.sem[p.w].h:A.saisons[p.s].tot,tn=_planAnneeTon(sh);
+    h+='<div style="'+st+';background:'+tn.bg+'" title="'+_escAttr(_planAnneePlage(J,p.i0,p.i1)+' \u00b7 '+_planFmt(sh)+' par semaine')+'"></div>';});
+  var t=new Date();if(t.getFullYear()===yr){var x=J.find(function(y){return y.m===t.getMonth()&&y.d===t.getDate();});
+    if(x)h+='<div style="position:absolute;top:0;bottom:0;left:'+(x.i/N*100)+'%;width:2px;background:var(--texte)" title="Aujourd\u2019hui"></div>';}
+  h+='</div><div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px"><span>janv.</span><span>avr.</span><span>juil.</span><span>oct.</span><span>d\u00e9c.</span></div>';
+  var P=[];
+  A.saisons.forEach(function(sa,si){var a=-1,b=-1;J.forEach(function(x){if(x.s===si&&!x.ferme&&!x.apart){if(a<0)a=x.i;b=x.i;}});
+    if(a>=0)P.push({i:a,t:_planAnneePlage(J,a,b)+' \u00b7 '+_planFmt(sa.tot)+' par semaine',bg:_planAnneeTon(sa.tot).bg});});
+  A.sem.forEach(function(s){if(s.apart)P.push({i:s.j[0].i,t:_planAnneePlage(J,s.j[0].i,s.j[s.j.length-1].i)+' \u00b7 '+_planFmt(s.h)+' (semaine \u00e0 part)',bg:_planAnneeTon(s.h).bg});});
+  A.fermetures.forEach(function(f){P.push({i:f.i0,t:_planAnneePlage(J,f.i0,f.i1)+' \u00b7 ferm\u00e9',bg:ferme});});
+  P.sort(function(a,b){return a.i-b.i;});
+  return h+'<div style="display:grid;gap:3px;margin-top:8px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+P.map(function(q){
+    return '<div style="display:flex;align-items:center;gap:6px"><span style="flex:none;width:10px;height:10px;border-radius:3px;background:'+q.bg+';border:1px solid var(--gris-clair)"></span>'+q.t+'</div>';}).join('')+'</div>';
+}
+
 
 // ── LA FRONTIÈRE : ce que la frise expose (les gestes, et le rendu que la roue du Planning appelle) ──
 window._planRenderAnnee     = _planRenderAnnee;
@@ -442,4 +465,5 @@ window._planAnneeEtat       = _planAnneeEtat;
 window.planAnneeSemaine     = planAnneeSemaine;   // ★ FRISE-4
 window.planAnneeFermeSem    = planAnneeFermeSem;
 window.planAnneeDesIci      = planAnneeDesIci;
-window._planAnneeProgramme  = _planAnneeProgramme;   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année
+window._planAnneeProgramme  = _planAnneeProgramme;
+window._planAnneeMini       = _planAnneeMini;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année

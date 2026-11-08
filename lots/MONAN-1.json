@@ -1,0 +1,29 @@
+{
+  "lot": "MONAN-1",
+  "section": "§546",
+  "base": "ea00de089d1a66de26b52407add92c1e01c3276f",
+  "inclut": [],
+  "date": "2026-11-08",
+  "tutos": {
+    "saute": "aucun tuto concerné : l'aiguillage n'en retient aucun ; le seul geste neuf (le PDF de « Mon année ») est exempté, raison écrite dans scripts/tutos-couverture.json"
+  },
+  "fichiers": {
+    ".mv-base": "a9ee3d70ba68597f926e1ddf0957242617ab887d5ed91431177d35478f1e8966",
+    "CLAUDE.md": "3d13691f947869c55f6f64d564b51a940eb427b49c1530215dc9b64e66f50919",
+    "docs/claude/INDEX.md": "cb00306105e808bd59bd08e04c4cc718af90b4cece6df9877f9cd0769937af18",
+    "docs/claude/chantiers-530-579.md": "f048fa28b6cbc356458938a18ca38a4ef306d929f532136825fce1be4b68c8c9",
+    "docs/claude/journal.md": "a388c1e6ae5658d7eab910d232166981d1bf6bbee7fc8d3bd5aba2c4a6151d24",
+    "docs/claude/modules.md": "6ef3013f172e89b6b377e7293914d2278128bf32fbbeac9c69999725db6ed088",
+    "guide/10-planning.html": "94e45e8e3ea7622e6bd1af90a8abf9b27959cc59a394e8ece11a74ca45842b23",
+    "index.html": "899fb06be705238b1b6e3afbba811d4bda5d72ed41820f9cf7076a1888b00a5a",
+    "public/sw.js": "e5cf24bc4c689b1067e08c5c5e9becdcc81300b408a2be8758bb37fe88ddc475",
+    "scripts/harnais-claude-md.mjs": "838269a6450b667d6e3b8d89203105487f724c896bcdc689b2a76107a1f88674",
+    "scripts/mv-harnais-liste.mjs": "e1b5c9dbb64e81e1c2bdfce2b361e887810c1b948ad4fc28271ffde53b7ac351",
+    "scripts/tutos-couverture.json": "858a15f2758bb02f8848d6c184876ba9eee81512c5cebbf0848a36ac3b4eefd6",
+    "src/planning-annee.js": "24fd4a52fd6fbe2e03d34ba6db3f04205d302c5ff7591b95859593bf842f63a0",
+    "src/planning.js": "bac3c207d47171c2883a2b4027a5d7c63f6902f5dd63f08421457fa826c549eb",
+    "src/utils.js": "8967213491b2dfa19b7d1e6ac9fa2519a4ce3a43caa46401155c5a2239824170",
+    "src/whats-new.js": "5ce45ad26f5d30379b7bdf47da8ce504db262f16b8b349f48a76150d6c08fda5",
+    "scripts/mv-harnais-monan1.mjs": "59430d9e1a07e1ae4eea09fe0e7c4da7cf6f1bff37a74a76e639d00473b5a155"
+  }
+}

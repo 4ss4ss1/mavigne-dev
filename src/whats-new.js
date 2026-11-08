@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.78', d: '2026-11-07', items: [   // MONAN-1 (§546) : « Mon année »
+    { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Mon année, dans mon Planning',
+      desc: "Sous ton mois, une carte « Mon année » : la frise de ton modèle (tes saisons, les fermetures, aujourd’hui), tes heures comptées sur l’année et la fin d’année prévue, tes congés posés et à prendre. « Mon planning de l’année (PDF) » imprime ta feuille, suivie du programme indicatif de ton modèle." },
+  ] },
   { v: '10.77', d: '2026-11-07', items: [   // PROG-1 (§545) : le programme indicatif de modulation
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le programme indicatif, prêt à afficher',
       desc: "Le planning de l’année imprime désormais, après chaque modèle, son programme indicatif de modulation (accord national, art. 10.4) : les salariés concernés, la formule, les périodes de forte, faible ou nulle activité avec leur horaire, la règle de décompte, et la date limite d’affichage — une semaine avant le 1er janvier." },

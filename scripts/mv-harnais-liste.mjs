@@ -886,6 +886,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-frise5.mjs --contre'],
   ['node scripts/mv-harnais-prog1.mjs'],               // PROG-1 (§545) : le programme indicatif (art. 10.4) — périodes, formule, décompte, date d'affichage
   ['node scripts/mv-harnais-prog1.mjs --contre'],
+  ['node scripts/mv-harnais-monan1.mjs'],              // MONAN-1 (§546) : « Mon année » — la petite frise, la carte du salarié, son planning imprimé avec le programme
+  ['node scripts/mv-harnais-monan1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles
