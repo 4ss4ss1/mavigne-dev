@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.79', d: '2026-11-07', items: [   // RELSOL-1 (§547) : la journée de solidarité au relevé
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'La journée de solidarité sur le relevé',
+      desc: "Le relevé du mois où elle se fait la mentionne, dans « Pour le salarié » : « le lundi 17 mai, non rémunérée », 7 h. Étalée sur l’année ou offerte : en décembre. Un salarié dispensé : « dispensé », avec la raison. Rien ne change la paie." },
+  ] },
   { v: '10.78', d: '2026-11-07', items: [   // MONAN-1 (§546) : « Mon année »
     { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Mon année, dans mon Planning',
       desc: "Sous ton mois, une carte « Mon année » : la frise de ton modèle (tes saisons, les fermetures, aujourd’hui), tes heures comptées sur l’année et la fin d’année prévue, tes congés posés et à prendre. « Mon planning de l’année (PDF) » imprime ta feuille, suivie du programme indicatif de ton modèle." },

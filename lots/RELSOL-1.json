@@ -1,0 +1,28 @@
+{
+  "lot": "RELSOL-1",
+  "section": "§547",
+  "base": "989c574c297a39fb27525004ceaf21cc83aea6fc",
+  "inclut": [],
+  "date": "2026-11-08",
+  "tutos": {
+    "saute": "aucun tuto concerné : l'aiguillage n'en retient aucun (une ligne du relevé, aucun geste neuf)"
+  },
+  "fichiers": {
+    ".mv-base": "5ef83895207c5a49519bbfedffe407a624760b083a293b6ec231759d04a283af",
+    "CLAUDE.md": "e6df8b737148483a20d56abd13d079b69c531895ddaf3eb19d0fe9898d6848cc",
+    "docs/claude/INDEX.md": "cb4e66822095809f09dbf8c957379bec5dafffdbadef0556c7f3bb2fa924f10b",
+    "docs/claude/chantiers-530-579.md": "2f3c03f0f639d3a3fe628d2cb91d6d195f460774bdbcde117776e5908d6f993e",
+    "docs/claude/journal.md": "34e87bc3b287381b3f2a54fae73231a0bb93d1fddd4471770ff3248ada4421dc",
+    "docs/claude/modules.md": "414b8a466fa61b9f264cc77604800eb8747eb69e031d09bc8313e72220228197",
+    "guide/10-planning.html": "76d581f2c017bf83f78cf0cb4e4fd769448baeaf07bbb40f0f902bf9846784b9",
+    "index.html": "f2933fbee9185e9ddfabb26e1c120fac8943b7b8406cf479e0b85f9ab9997be3",
+    "public/sw.js": "c6a498599f61473273e5949fc7dcdd99a83ace5df3e6d73797edd3eca7b69538",
+    "scripts/harnais-claude-md.mjs": "27268927cb23dd1b700eb426a87b63a0bab161fc3a3cb9afbff8385faf9b481d",
+    "scripts/mv-harnais-autete1.mjs": "c6e17019c550e55bdadba546f760c99cc46f9093159da13aa255fcc602b0a142",
+    "scripts/mv-harnais-liste.mjs": "77678ec6d5fb3e7b11f3ae641c2466a6d8df6914f31a0f6f40bf2e29fe50c3c7",
+    "src/planning.js": "12e9fefda07eb180e6abb1ec08a8a2411f426d64c9dc96bda9f588647822d840",
+    "src/utils.js": "5e85cd278488358a707765f31e49cbe12bc4952568bbb412db464a80d0f1d1ed",
+    "src/whats-new.js": "3cfee26577168485a83966af57e62df8093e60dccda7dc05ee8fd735517f2120",
+    "scripts/mv-harnais-relsol1.mjs": "a1c9cc357639520a619d317cd6d071c11af97be754ebdc61a41e2aa05c0585a5"
+  }
+}

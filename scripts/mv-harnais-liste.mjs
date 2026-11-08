@@ -888,6 +888,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-prog1.mjs --contre'],
   ['node scripts/mv-harnais-monan1.mjs'],              // MONAN-1 (§546) : « Mon année » — la petite frise, la carte du salarié, son planning imprimé avec le programme
   ['node scripts/mv-harnais-monan1.mjs --contre'],
+  ['node scripts/mv-harnais-relsol1.mjs'],             // RELSOL-1 (§547) : la journée de solidarité au relevé du mois où elle se fait (étalée, offerte : décembre ; dispensé, TESA, avant 2027)
+  ['node scripts/mv-harnais-relsol1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

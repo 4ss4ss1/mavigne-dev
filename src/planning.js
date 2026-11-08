@@ -353,6 +353,22 @@ function _planSolidFait(mbr,yr){
 function _planSolidJour(yr){var s=_planSolid(yr);if(!s||(s.mode!=='ferie'&&s.mode!=='jour')||!/^\d\d-\d\d$/.test(s.jour||''))return null;
   return {m:parseInt(s.jour.slice(0,2),10)-1,d:parseInt(s.jour.slice(3),10)};}
 function _planEstSolid(yr,m,d){var j=_planSolidJour(yr);return !!(j&&j.m===m&&j.d===d);}
+// ★★ RELSOL-1 (§547) — LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS (conseillé sur la fiche de paie — chronique FRSEA 2025).
+//   Un férié travaillé ou un autre jour : au relevé du mois où il tombe, « le lundi 17 mai, non rémunérée » ; étalée sur l'année
+//   ou offerte : une fois, au relevé de décembre ; un salarié dispensé : le mois du jour (ou décembre), avec la raison. Rien ne
+//   change la paie (7 h non rémunérées pour un mensualisé, au prorata d'un temps partiel) : c'est une ligne « pour le salarié ».
+function _planRelSolidarite(mbr,m){
+  var yr=_pY(),s=_planSolid(yr);if(!mbr||!s||!_planBaseActive(yr))return null;
+  if(typeof window._mvAnnualise==='function'&&!window._mvAnnualise(mbr))return null;      // payé à l'heure : rien à dire
+  var j=_planSolidJour(yr),mj=j?j.m:11,plId=_planPlId(mbr),h=7*_planSolidRatio(plId,yr);
+  if(s.mode==='offerte')return m===11?{v:'offerte',p:'non travaill\u00e9e cette ann\u00e9e'}:null;
+  if(!_planSolidFait(mbr,yr)){var d=s.dispenses&&s.dispenses[_planSolidCle(mbr)];
+    return m===mj?{v:'dispens\u00e9',p:d==='ailleurs'?'d\u00e9j\u00e0 faite chez un autre employeur cette ann\u00e9e':'moins de 18 ans\u00a0: elle tombe un f\u00e9ri\u00e9'}:null;}
+  if(s.mode==='etalee')return m===11?{v:_planFmt(h),p:'\u00e9tal\u00e9e sur l\u2019ann\u00e9e, non r\u00e9mun\u00e9r\u00e9e'}:null;
+  if(!j||j.m!==m)return null;
+  var JL=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  return {v:_planFmt(h),p:'le '+JL[new Date(yr,j.m,j.d).getDay()]+' '+(j.d===1?'1er':j.d)+' '+PLAN_MOIS[j.m].toLowerCase()+', non r\u00e9mun\u00e9r\u00e9e'};
+}
 // Temps partiel : la part du temps plein, lue sur le modèle (au-dessus de 90 % de la base, c'est un temps plein).
 function _planSolidRatio(plId,yr,G){var t=G||_planGetTpl(plId,yr)||{},F=_feriesY(yr),tot=0;
   for(var m=0;m<12;m++){var M=t[m];if(M&&typeof M==='object')for(var k in M){var v=parseFloat(M[k]);if(v>0&&!isNaN(parseInt(k,10)))tot+=v;}
@@ -5270,6 +5286,8 @@ function _pfCompta(mbr,P,D,V,A){
   if(rp>0.0001)I.push(['','R\u00e9cup prise<small>'+_pfJoursTxt(rpj.map(function(x){return x.d;})).replace(/^./,function(x){return x.toUpperCase();})+'</small>','<b>'+F(rp)+'</b>']);
   ['formation','famille'].forEach(function(k){var j=JS(function(x){return x.payeType===k&&x.paye>0.0001;});
     if(j.length)I.push(['',(k==='formation'?'Formation':'\u00c9v\u00e9nement familial')+'<small>'+_pfJoursTxt(j.map(function(x){return x.d;})).replace(/^./,function(x){return x.toUpperCase();})+', pay\u00e9</small>','<b>'+F(som(j,'paye'))+'</b>']);});
+  var sol=_planRelSolidarite(mbr,m);   // ★ RELSOL-1 (§547) : la journée de solidarité, le mois où elle se fait
+  if(sol)I.push(['','Journ\u00e9e de solidarit\u00e9<small>'+sol.p+'</small>','<b>'+sol.v+'</b>']);
   // ── Le bas : le mois en heures, qui s'additionne ; les heures sup semaine par semaine ; les jours comptés au planning.
   var enPlus=Math.max(0,P.faites+V.AB.total+(P.recupNC||0)-V.prevA);
   var pied='Le mois\u00a0: '+F(V.prevA)+' pr\u00e9vues, '+F(V.faitA)+' faites, '+F(V.AB.total)+' d\u2019absence'+(enPlus>0.0001?', '+F(enPlus)+' faites en plus du planning':'')+'.';

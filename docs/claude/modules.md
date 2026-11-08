@@ -1128,6 +1128,10 @@ défaut) et **L'équipe** (clé `eqmois`, lecture seule : présent / absent sans
 ⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
 monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
 
+### ★ La solidarité au relevé (RELSOL-1, §547)
+
+`_planRelSolidarite(mbr,m)` : la ligne « Journée de solidarité » de « Pour le salarié » (`_pfCompta`), le mois où elle se fait (étalée, offerte : décembre).
+
 ### ★ « Mon année » (MONAN-1, §546)
 
 Dans la vue d’un salarié (`_planBuildMonHtml`) : la carte « Mon année » — compteur (`_planAnnu`), congés, petite frise (`_planAnneeMini`),

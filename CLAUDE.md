@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **7 novembre 2026 (MONAN-1)** — **« MON ANNÉE » : LA FRISE, LE COMPTEUR, LES CONGÉS ET LE PLANNING IMPRIMÉ DE CHAQUE SALARIÉ** (§546). Base `ea00de0` (« prog1 »). **APP 10.77 → 10.78, SW 11.68 → 11.69**. Lot 4, deuxième part. Dans la vue d’un salarié (`_planBuildMonHtml`), une carte « Mon année » entre son mois et ses jours : son compteur de l’année (`_planAnnu`, la base depuis 2027), ses congés posés et à prendre, la frise de son modèle en petit (`_planAnneeMini`, src/planning-annee.js : couleurs des saisons, fermetures, semaine à part, un trait pour aujourd’hui, chaque période en clair), et « Mon planning de l’année (PDF) » (`planAnnuelNomPdf`, par `data-*`) ; son planning imprimé (`_paDocNom`) porte désormais le programme indicatif de son modèle. `mv-harnais-monan1` neuf (10 cas, 3 contre-épreuves). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **7 novembre 2026 (RELSOL-1)** — **LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS ; LE LOT 4 EST CLOS** (§547). Base `989c574` (« monan1 »). **APP 10.78 → 10.79, SW 11.69 → 11.70**. `_planRelSolidarite(mbr,m)` : un férié travaillé ou un autre jour → au relevé du mois où il tombe (« le lundi 17 mai, non rémunérée », 7 h au prorata) ; étalée ou offerte → en décembre ; un dispensé → « dispensé » avec la raison ; un TESA (payé à l’heure) ou avant 2027 → rien. La ligne va « pour le salarié » dans `_pfCompta` (rien ne change la paie ; l’écran et le papier la lisent tous deux). `mv-harnais-relsol1` neuf (9 cas, 3 contre-épreuves). Le lot 4 du chantier (programme indicatif, « Mon année », solidarité au relevé) est clos ; reste le lot 5. Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -2139,7 +2139,12 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 
 ### ★ MONAN-1 (07/11, §546) — « Mon année » : ce qui reste
 - **À regarder chez Nico, MONAN-1 déployé** : sur le téléphone d’un salarié, Planning — la carte « Mon année » sous son mois ; le PDF : sa feuille puis le programme de son modèle.
-- **La fin du lot 4** : la journée de solidarité au relevé du mois (le mois où elle est faite, ou « étalée sur l’année »), conseillée sur la fiche de paie.
+- ~~**La fin du lot 4** : la journée de solidarité au relevé du mois~~ — fait (RELSOL-1, §547).
+
+### ★ RELSOL-1 (07/11, §547) — la solidarité au relevé ; le chantier du planning de l’année : ce qui reste
+- **À regarder chez Nico, RELSOL-1 déployé** : avec la solidarité « étalée sur l’année » (son choix), le relevé de décembre 2027 d’un salarié porte la ligne dans « Pour le salarié » ; les autres mois, rien.
+- **Le lot 5 du chantier** : le rythme sur deux semaines (des semaines A et B qui alternent dans une saison) et les heures de prise par jour (la fin des codes D/M/A de la grille, `_horaires_dma`) — maquette d’abord.
+- **Encore ouverts du chantier** : le relevé d’un dispensé le jour de solidarité (mode férié ou autre jour : 7 h prévues sur tout le modèle) ; un jour de congé posé le jour de solidarité (CPJOURS-1 le compte férié) ; l’Alsace-Moselle ; les règles CSS `.plan-ge-*` orphelines.
 
 ## 29. Synchronisation de la mémoire
 

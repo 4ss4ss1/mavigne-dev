@@ -389,3 +389,21 @@ Lot 4 du chantier, deuxième part : la maquette v1 (« Section Salarié : Mon an
 
 ### 546d. Ce qui reste ouvert
 - §28, bloc MONAN-1.
+
+## 547. ★ RELSOL-1 — LA JOURNÉE DE SOLIDARITÉ AU RELEVÉ DU MOIS (07/11 — `src/planning.js` (`_planRelSolidarite` neuf ; `_pfCompta`) · `src/utils.js` (APP, MV_AIDE) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-relsol1.mjs` (neuf) · `scripts/mv-harnais-autete1.mjs` (fenêtre de sw.js) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/RELSOL-1.json` — base `989c574` « monan1 » — **APP 10.78 → 10.79, SW 11.69 → 11.70**)
+
+### 547a. D’où ça vient
+Le dernier point du lot 4, promis à BASEAN-1 (§538) : la chronique FRSEA (2025) conseille de mentionner la journée de solidarité sur la fiche de paie ; le relevé du mois est ce que la compta lit pour la faire.
+
+### 547b. Le modèle, et ce qui a été écarté
+- **Le mois où elle se fait** : un férié travaillé ou un autre jour → son mois, avec le jour en clair ; étalée sur l’année ou offerte → une seule fois, en décembre ; un dispensé → le mois du jour (ou décembre), « dispensé » et la raison ; un TESA (payé à l’heure, la journée se paie normalement) et les années d’avant la base → rien.
+- **Une ligne « pour le salarié »** (`K.I` de `_pfCompta`), pas une ligne de la compta : les lignes de la compta sont celles qu’elle saisit, toujours présentes, toujours dans le même ordre ; la solidarité ne change pas la paie (7 h non rémunérées pour un mensualisé, au prorata d’un temps partiel). L’écran (`_pfCadreCompta`) et le papier lisent la même source.
+- Écarté : une ligne de la compta présente tous les mois (« aucune » onze mois sur douze) ; la répéter chaque mois quand elle est étalée.
+
+### 547c. Ce qui a été vérifié
+- `scripts/mv-harnais-relsol1.mjs` (neuf) : les vraies fonctions sur 2027 — Pentecôte (mai seulement, le jour en clair, 7 h), un dispensé, un TESA, un autre jour (juin), étalée et offerte (décembre), 2026 (rien), et la ligne dans `_pfCompta` ; 9 cas, 3 contre-épreuves tenues.
+- **`mv-harnais-autete1` (I4)** cherchait sa ligne de lot (AUJ-TETE-1, v10.91) dans les 80 premières lignes de `public/sw.js` ; chaque lot en ajoute une en tête, celle-ci l’a poussée à la ligne 81 : la fenêtre passe à 160 lignes, comme COMPT-5 (§487) l’avait déjà élargie.
+- Ce qui n’a pas pu être vu : un vrai relevé de décembre 2027.
+
+### 547d. Ce qui reste ouvert
+- §28, bloc RELSOL-1 (et la suite du chantier : le lot 5).
