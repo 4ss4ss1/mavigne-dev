@@ -1277,6 +1277,7 @@ function _caveSyncSecTabs(){
 }
 
 function renderCave() {
+  if(window._mvAjourPage) window._mvAjourPage('page-cave');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   // Filet de tolerance : une valeur hors des TROIS sections connues replie sur
   // l'Elevage. Sans lui, une valeur reposee par un autre module masque les trois
   // vues et la Cave s'ouvre VIDE, sans erreur et sans test qui le voie.

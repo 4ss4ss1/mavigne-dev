@@ -1459,12 +1459,22 @@ function _recFicheHtml(nom, D){
 /* ─────────── Les gestes ─────────── */
 function _recSetVue(v){ _recVue = v === 'jour' ? 'jour' : 'parc'; renderVendRec(); }
 /* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
+// ★★ AJOUR-1 (§552) — au téléphone, la fiche ne se peignait qu'à l'ouverture : « Modifier » ou « Ajouter une pesée »
+//   (une feuille posée sur elle) enregistraient et redessinaient la liste, la fiche gardait l'ancienne pesée (vu au §533).
+//   Sa peinture est à part et déclarée vive (utils.js, _mvFicheVive) : redevenue la fenêtre du dessus, elle se repeint.
+function _recFichePeindre(){
+  var corps = document.getElementById('rec-fiche-corps'); if(!corps || !_recSelNom) return false;
+  corps.innerHTML = _recFicheHtml(_recSelNom, _recDonnees(_matAnCourant()));
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovRecFiche');
+  return true;
+}
 function _recSel(nom){
   _recSelNom = nom || null;
   if(_matLarge()){ renderVendRec(); return; }
   if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovRecFiche'); return; }
-  var corps = document.getElementById('rec-fiche-corps'); if(!corps) return;
-  corps.innerHTML = _recFicheHtml(nom, _recDonnees(_matAnCourant()));
+  // Déclarée vive à l'ouverture, pas au chargement : cuvier.js n'exécute rien en se chargeant (mv-harnais-cuvier, règle F).
+  if(window._mvFicheVive) window._mvFicheVive('ovRecFiche', _recFichePeindre);
+  if(!_recFichePeindre()) return;
   if(typeof window.openOv === 'function') window.openOv('ovRecFiche');
 }
 /* D'un onglet à l'autre sur la même parcelle : « Voir sa maturité », « Voir sa récolte ». */
@@ -4213,6 +4223,9 @@ function _vendSheetClose(){
   /* ⚠️ Une feuille qui en enchaîne une autre se ferme puis se rouvre aussitôt, et son « open » ne se pose qu'à
      l'image suivante (requestAnimationFrame) : le minuteur verrait la place libre. Le numéro d'ouverture tranche. */
   if(_vendFicheAttente){ var seq=_vendSheetSeq; setTimeout(function(){ if(seq===_vendSheetSeq) _vendFicheRevenir(); }, 0); }
+  // ★★ AJOUR-1 (§552) : cette famille n'est pas un `.overlay` (app.js ne la voit pas se fermer) — ce qui réapparaît se
+  //   redessine à l'image suivante si un enregistrement est passé (la fiche écartée, revenue au minuteur, passe avant).
+  if(window._mvAjourPlanifier) window._mvAjourPlanifier(true);
 }
 
 // —— Injection du champ « client » dans l'overlay récolte (cave.js seul) ——
@@ -8810,17 +8823,27 @@ function _matVoirPlus(k){ if(!k){ return; } _matVoirTout[k] = !_matVoirTout[k]; 
 function _matSetVue(v){ _matVue = v === 'courbes' ? 'courbes' : 'ordre'; renderVendAna(); }
 function _matSetAn(an){ _matAn = String(an || ''); _matSelNom = null; _recSelNom = null; _matVoirTout = { jamais:false, rent:false }; _vendRenderTab(); }   // ★ REC-1 : commune aux Maturités et aux Récoltes
 /* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
+// ★★ AJOUR-1 (§552) — même défaut que la fiche récolte : « Noter une mesure » (la saisie en série) et « Classer » (les
+//   couleurs), ouverts depuis la fiche, redessinaient la liste. La peinture est à part, l'ouverture garde son ordre
+//   (le corps, la fenêtre, puis les courbes, qui mesurent la fenêtre ouverte).
+function _matFichePeindre(ouvrir){
+  var nom = _matSelNom; if(!nom) return false;
+  var spd = (_vendCfg().sucre_par_degre) || 16.83, an = _matAnCourant(), ref = _matRefDe(an);
+  var r = _matSynth(_matFen, ref, an), corps = document.getElementById('mat-fiche-corps');
+  if(!corps || !r.tous[nom]) return false;
+  corps.innerHTML = _matFicheHtml(nom, r, spd, _matFour(), !ref);
+  if(ouvrir && typeof window.openOv === 'function') window.openOv('ovMatFiche');
+  _matPeindreFiche(r, spd, _matFour());
+  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovMatFiche');
+  return true;
+}
 function _matSel(nom){
   _matSelNom = nom || null;
   if(_matLarge()){ renderVendAna(); return; }
   if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovMatFiche'); renderVendAna(); return; }
-  var spd = (_vendCfg().sucre_par_degre) || 16.83, an = _matAnCourant(), ref = _matRefDe(an);
-  var r = _matSynth(_matFen, ref, an), corps = document.getElementById('mat-fiche-corps');
-  if(!corps || !r.tous[nom]) return;
-  corps.innerHTML = _matFicheHtml(nom, r, spd, _matFour(), !ref);
-  if(typeof window.openOv === 'function') window.openOv('ovMatFiche');
-  _matPeindreFiche(r, spd, _matFour());
-  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  if(window._mvFicheVive) window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });   // à l'ouverture (règle F)
+  _matFichePeindre(true);
 }
 
 /* ─────────── La saisie en série ───────────

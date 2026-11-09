@@ -244,8 +244,9 @@ function muter(S, fic, avant, apres) {
   return Object.assign({}, S, { [fic]: S[fic].replace(avant, apres) });
 }
 const CONTRES = [
+  // AJOUR-1 (§552) : la ligne porte aussi le signal de fermeture (la page dessous se redessine) — l'ancien code ne l'avait pas.
   ['l’ANCIEN _mvBack (famille .overlay seule), mot pour mot', (S) => muter(S, 'app',
-    'var top=_mvTopSurface();\n  if(top){ top.close(); return true; }',
+    'var top=_mvTopSurface();\n  if(top){ top.close(); if(window._mvAjourPlanifier) window._mvAjourPlanifier(true); return true; }',
     'var ov=_mvTopOverlay();\n  if(ov){ ov.classList.remove(\'open\'); return true; }')],
   ['la porte CGU ajoutée aux surfaces fermables', (S) => muter(S, 'app',
     "{q:'#mvv-ov.open',", "{q:'.mvt-ov', f:function(el){ el.classList.remove('mvt-ov'); }},\n  {q:'#mvv-ov.open',")],

@@ -605,3 +605,4 @@
 | 549 | 549. ★ ONGLETS-1 — LES ONGLETS DU PLANNING : MOIS, ANNÉE, PERSONNEL (07/11 — `index.html` (l’ordre, les nom… | `docs/claude/chantiers-530-579.md` |
 | 550 | 550. ★★ HOR-1 — LES HORAIRES SUR LA FRISE : LA PRISE DE POSTE PAR SAISON, CELLE D’UN JOUR, LES CODES D/M/A … | `docs/claude/chantiers-530-579.md` |
 | 551 | 551. ★★ FRISE-AB — LES SEMAINES A ET B : UNE SAISON PEUT ALTERNER DEUX SEMAINES (07/11 — `src/planning-anne… | `docs/claude/chantiers-530-579.md` |
+| 552 | 552. ★★ AJOUR-1 — CE QU’ON ENREGISTRE SE VOIT TOUT DE SUITE : LA PAGE DESSOUS À LA FERMETURE D’UNE FENÊTRE,… | `docs/claude/chantiers-530-579.md` |

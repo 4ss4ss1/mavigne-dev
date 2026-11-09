@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.83';
+export const APP_VERSION = '10.84';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -6724,6 +6724,121 @@ export function _mvRangsTexte(hors){
 window._mvHorsRangs = _mvHorsRangs;
 window._mvJRangs = _mvJRangs;
 window._mvRangsTexte = _mvRangsTexte;
+// ★ AJOUR-1 (§552) : une correction du planning ou du coéquipier se voit « partout aussitôt » — le mémo de cinq secondes
+//   repart de la donnée à chaque enregistrement et à chaque donnée reçue (_mvAjourOublier, plus bas).
+window._mvRgOublier = function(){ _MV_RG = { t: 0, m: {} }; };
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// ★★ AJOUR-1 (§552) — CE QU'ON ENREGISTRE SE VOIT TOUT DE SUITE, SANS FERMER LA FICHE NI RELANCER L'APPLI
+// ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// Nico (06/11) : « quand on fait une modification, la mise à jour doit être instantanée ». Un enregistrement local ne
+// rafraîchissait rien de lui-même (l'écho de sa propre écriture est ignoré quatre secondes, firebase.js ; RENDU-1 ne
+// redessine que ce qui arrive d'un autre téléphone) : chaque geste redessinait ce qu'il savait — souvent la liste seule.
+//   · LA PAGE DESSOUS. Une fiche ouverte sur une page ; on y enregistre ; seul son bouton de fermeture redessinait la page.
+//     Le retour Android, un toucher à côté, Échap retirent la classe `open` (app.js, _mvBack) : la page restait à l'état
+//     d'avant (vécu au Tracteur : l'amendement à 100 % dans la fiche, l'avancement d'avant sur la page). Désormais une
+//     fenêtre qui se ferme après un enregistrement fait redessiner ce qui réapparaît : la page — sauf si elle l'a déjà
+//     été depuis le dernier enregistrement (chaque rendu de page le note : _mvAjourPage ; pas de second rendu).
+//   · LA FICHE OUVERTE. Une feuille ouverte depuis une fiche (Valider, Modifier, Noter une mesure) enregistre, se ferme,
+//     redessine la liste — jamais la fiche dessous. Une fiche déclare comment se repeindre (_mvFicheVive) ; redevenue la
+//     fenêtre du dessus avec un enregistrement passé depuis sa dernière peinture, elle se repeint, défilement et sections
+//     ouvertes gardés. Sa peinture la note fraîche (_mvFicheFraiche) : le module qui la repeint déjà n'en cause pas une
+//     seconde. Une saisie en cours dans la fiche n'est jamais écrasée.
+//   · LES MÉMOS DE CALCUL (qui est dans les rangs, les comptes de plantation) repartent de la donnée à chaque
+//     enregistrement et à chaque donnée reçue (_mvAjourOublier).
+//   Le compteur avance à CHAQUE enregistrement local : fbSave (firebase.js) appelle _mvAjourEcrit avant tout retour, démo
+//   et entraînement compris. Les déclencheurs de fermeture : app.js (_mvOvSync, _mvBack, _mvdsClose), cuvier.js
+//   (_vendSheetClose). mv-harnais-ajour1 rejoue ce bloc tel quel et tient le classement de chaque fenêtre de l'appli.
+// ── AJOUR-1 : début du bloc ──
+var _MV_AJ = { n: 0, page: {}, fiches: {}, image: 0, fermeture: false };
+function _mvAjourOublier(){
+  try { if(typeof window._mvRgOublier === 'function') window._mvRgOublier(); } catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvAjourOublier#rangs'); }
+  try { if(typeof window._cptInvalider === 'function') window._cptInvalider(); } catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvAjourOublier#comptes'); }
+}
+// Un enregistrement local (fbSave) : le compteur avance, les mémos repartent, la fiche du dessus se vérifie à l'image suivante.
+window._mvAjourEcrit = function(key){ _MV_AJ.n++; _mvAjourOublier(); _mvAjourPlanifier(false); return _MV_AJ.n; };
+// Une donnée reçue (relecture, autre téléphone : app.js, applyFbData) : les mémos repartent ; le rendu, lui, suit RENDU-1.
+window._mvAjourRecu = function(key){ _mvAjourOublier(); };
+// Chaque rendu de PAGE le note (renderHome, renderTracteur, renderCave…) : la page est à jour de tout ce qui précède.
+window._mvAjourPage = function(pid){ if(pid) _MV_AJ.page[pid] = _MV_AJ.n; };
+// Une fiche qui sait se repeindre : son overlay, et la fonction qui la peint d'après l'état de son module.
+window._mvFicheVive = function(ov, peindre){ if(ov && typeof peindre === 'function') _MV_AJ.fiches[ov] = { peindre: peindre, n: -1 }; };
+window._mvFicheFraiche = function(ov){ var f = _MV_AJ.fiches[ov]; if(f) f.n = _MV_AJ.n; };
+function _mvAjourPlanifier(fermeture){
+  if(fermeture) _MV_AJ.fermeture = true;
+  if(_MV_AJ.image) return;
+  var planifier = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : function(f){ return setTimeout(f, 16); };
+  _MV_AJ.image = planifier(function(){
+    _MV_AJ.image = 0;                                       // remis à zéro AVANT : une panne n'enraye pas la suite
+    var fe = _MV_AJ.fermeture; _MV_AJ.fermeture = false;
+    try { _mvAjourVerifier(fe); } catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvAjourVerifier'); }
+  }) || 1;
+}
+// Ce qui est au-dessus maintenant : une fenêtre (la repeindre si elle le sait et qu'elle est en retard), ou la page
+// (seulement après une fermeture — un enregistrement fait depuis la page la redessine lui-même).
+function _mvAjourVerifier(fermeture){
+  if(!window.currentUser) return 'hors-session';
+  var top = (typeof window._mvTopSurface === 'function') ? window._mvTopSurface() : null, el = top && top.el;
+  if(el){
+    var f = el.id && _MV_AJ.fiches[el.id];
+    if(f && f.n < _MV_AJ.n && el.classList.contains('open')) return _mvFicheRepeindre(el, f);
+    return 'fenetre';
+  }
+  if(!fermeture) return 'rien';
+  var p = document.querySelector('.page.active'), pid = p ? p.id : '';
+  if(!pid || typeof window._mvRendrePageActive !== 'function') return 'rien';
+  var vu = _MV_AJ.page[pid];
+  if(vu !== undefined && vu >= _MV_AJ.n) return 'page-a-jour';
+  return (window._mvRendrePageActive() === 'saisie') ? 'saisie' : 'page';   // pendant une saisie : la prochaine fermeture
+}
+function _mvFicheRepeindre(el, f){
+  var a = document.activeElement;
+  if(a && a !== document.body && el.contains(a) && typeof window._mvSaisieEnCours === 'function' && window._mvSaisieEnCours()) return 'saisie';
+  var etat = _mvFicheEtat(el);
+  try { f.peindre(); } catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvFicheRepeindre#' + el.id); }
+  f.n = _MV_AJ.n;
+  _mvFicheRendre(el, etat);
+  // Une seconde fois à l'image suivante : des courbes peintes après coup changent la hauteur (même geste que CUVFICHE-1).
+  var planifier = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : function(fn){ return setTimeout(fn, 16); };
+  planifier(function(){ _mvFicheRendre(el, etat); });
+  return 'fiche';
+}
+// Ce qu'on garde d'une peinture à l'autre : le défilement de chaque zone qui défile, et les sections <details> ouvertes.
+function _mvFicheCle(x, racine){
+  if(x === racine) return '@';
+  if(x.id) return '#' + x.id;
+  var c = (typeof x.className === 'string' && x.className.trim()) ? '.' + x.className.trim().split(/\s+/)[0] : '';
+  var t = String(x.tagName || '').toLowerCase() + c;
+  return t + '|' + Array.prototype.indexOf.call(racine.querySelectorAll(t), x);
+}
+function _mvFicheTrouver(racine, k){
+  if(k === '@') return racine;
+  if(k.charAt(0) === '#'){ var id = k.slice(1); return racine.querySelector('#' + ((window.CSS && window.CSS.escape) ? window.CSS.escape(id) : id)); }
+  var s = k.split('|');
+  return racine.querySelectorAll(s[0])[+s[1]] || null;
+}
+function _mvFicheCleDet(d){
+  if(d.id) return '#' + d.id;
+  var v = d.getAttribute('data-vf') || d.getAttribute('data-k');
+  if(v) return '=' + v;
+  var s = d.querySelector('summary');
+  return 's:' + (s ? String(s.textContent || '').trim().slice(0, 60) : '');
+}
+function _mvFicheEtat(el){
+  var sc = [], dt = {}, tous = [el].concat(Array.prototype.slice.call(el.querySelectorAll('*')));
+  for(var i = 0; i < tous.length; i++){ if(tous[i].scrollTop > 0) sc.push({ k: _mvFicheCle(tous[i], el), t: tous[i].scrollTop }); }
+  Array.prototype.forEach.call(el.querySelectorAll('details[open]'), function(d){ dt[_mvFicheCleDet(d)] = 1; });
+  return { sc: sc, dt: dt };
+}
+function _mvFicheRendre(el, etat){
+  if(!etat) return;
+  Array.prototype.forEach.call(el.querySelectorAll('details'), function(d){ if(etat.dt[_mvFicheCleDet(d)]) d.open = true; });
+  etat.sc.forEach(function(s){ var x = _mvFicheTrouver(el, s.k); if(x) x.scrollTop = s.t; });
+}
+window._mvAjourPlanifier = _mvAjourPlanifier;
+// Lecture seule, pour les harnais et le diagnostic : le compteur, les pages notées, les fiches déclarées.
+window._mvAjourEtat = function(){ return { n: _MV_AJ.n, page: Object.assign({}, _MV_AJ.page), fiches: Object.keys(_MV_AJ.fiches) }; };
+// ── AJOUR-1 : fin du bloc ──
 
 window.MV_FORMAT          = MV_FORMAT;   // VER-1
 window._mvLectureSeule    = _mvLectureSeule;   // DROITS-1

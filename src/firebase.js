@@ -1960,6 +1960,10 @@ async function _saveParcellesMerged(localValue, baseFile, jeton) {
 //    que le `throw` servait a eviter, et il incombe desormais a l'appelant (saveData).
 var _mvRoDit = false;   // DROITS-1 : le message « lecture seule » n'est dit qu'une fois par session
 window.fbSave = async function (key, value) {
+  // ★★ AJOUR-1 (§552) — l'écran apprend qu'on vient d'enregistrer (utils.js, _mvAjourEcrit) : AVANT tout retour, démo et
+  //   entraînement compris — ils écrivent en mémoire et doivent se repeindre comme un vrai domaine. La fenêtre qui se
+  //   fermera ensuite fera redessiner ce qui réapparaît (la page, ou la fiche du dessous qui sait se repeindre).
+  if (window._mvAjourEcrit) { try { window._mvAjourEcrit(key); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbSave#ajour'); } }
   // Demo (bac a sable local) : on n'ecrit JAMAIS dans Firestore. L'etat en memoire + le
   // localStorage (deja ecrits par saveData) donnent l'experience interactive ; au rechargement
   // la demo repart du jeu de donnees d'origine (re-lu depuis Firestore). Aucune pollution,

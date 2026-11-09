@@ -132,6 +132,7 @@ function applyFbData(key, value) {
     return;
   }
   _mvKeyLoaded[key] = true;   // #wipe : cle chargee au moins une fois depuis Firestore
+  if(window._mvAjourRecu) window._mvAjourRecu(key);   // ★★ AJOUR-1 (§552) : les mémos (rangs, comptes) repartent de la donnée reçue
   if(key === 'parcelles') {
     var arr = window.PARCELLES;
     if(arr){ arr.length = 0; value.forEach(function(x){ arr.push(x); }); }
@@ -5358,7 +5359,7 @@ function _mvTopOverlay(){
 }
 function _mvBack(){
   var top=_mvTopSurface();
-  if(top){ top.close(); return true; }
+  if(top){ top.close(); if(window._mvAjourPlanifier) window._mvAjourPlanifier(true); return true; }   // ★★ AJOUR-1 (§552) : la surface fermée par le retour, de toute famille
   var a=document.querySelector('.page.active');
   if(a && a.id!==_landingPage()){ _goLanding(); return true; }
   return false; // deja au hub -> laisser quitter l'app
@@ -5938,6 +5939,7 @@ function _hvJour(iso){ var n=new Date(), h=new Date(n.getTime()-864e5); if(iso==
 function _hvHeure(r){ var m=/^([0-9a-f]{10,12})-/.exec(String((r&&r.id)||'')); if(!m)return ''; var d=new Date(parseInt(m[1],16)); return isNaN(d.getTime())?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 
 function renderHome(){
+  if(window._mvAjourPage) window._mvAjourPage('page-home');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède
   applyHomeLayout();
   // Réactiver l'onglet Accueil dans tous les headers vigne
   ['','p','j'].forEach(function(sfx){
@@ -6447,6 +6449,7 @@ function _mvTraceHa(v){ return (Math.round((parseFloat(v)||0)*100)/100).toFixed(
 function renderMaTrace(){
   var c=document.getElementById('mtr-body');
   if(!c)return;
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovMaTrace');   // ★★ AJOUR-1 (§552) : peinte, donc à jour
   var nom=(currentUser&&currentUser.nom)||'';
   var d=_mvTraceData(nom);
   var per=(typeof _visuSaison==='function')?_visuSaison():((getSaisonActive()||{}).nom||'');
@@ -6510,6 +6513,8 @@ function renderMaTrace(){
   c.innerHTML=h;
 }
 
+// ★★ AJOUR-1 (§552) : une parcelle touchée sur la carte de « Ma trace » ouvre sa fiche par-dessus ; ce qu'on y valide se voit au retour.
+if(window._mvFicheVive) window._mvFicheVive('ovMaTrace', function(){ renderMaTrace(); });
 function openMaTrace(){
   // PREP-1 (§134) : « Ma trace » est celle d'un membre de l'équipe — GUERETTECH n'en a pas.
   if(window._mvPrepOn()){ if(typeof showToast==='function') showToast('Pr\u00e9paration : \u00ab Ma trace \u00bb est celle d\u2019un membre de l\u2019\u00e9quipe','#B85A1A'); return; }
@@ -7332,6 +7337,7 @@ window._pOrdMapSync=_pOrdMapSync;
 
 function renderParcelles(){
   if(!window._dataReady){ var _skc=document.getElementById('pList'); if(_skc)_skc.innerHTML=window._mvSk('parcelles'); return; }
+  if(window._mvAjourPage) window._mvAjourPage('page-parcelles');   // ★★ AJOUR-1 (§552)
   // Encart priorité (message + tâche prioritaire)
   var _prioIts=(typeof _prioItems==='function')?_prioItems():[];
   var _prioTaskOK=_prioIts.length>0;
@@ -8663,8 +8669,12 @@ function _dpRenderRendHist(p){
   box.style.display=html?'':'none';
 }
 
-function openDP(nom){
-  const p=PARCELLES.find(x=>x.nom===nom);if(!p)return;
+// ★★ AJOUR-1 (§552) — LA FICHE PARCELLE SE REPEINT. La peinture sort de l'ouverture : « Valider », les niveaux, les passages, une
+//   réparation ponctuelle enregistrent depuis une feuille posée SUR la fiche, puis redessinent la liste — la fiche restait
+//   « En cours ». Déclarée vive (utils.js, _mvFicheVive) : redevenue la fenêtre du dessus, elle se repeint. `repeinte` garde
+//   la météo affichée (la même parcelle : pas un appel réseau ni un clignement à chaque geste).
+function _dpPeindre(nom,repeinte){
+  const p=PARCELLES.find(x=>x.nom===nom);if(!p)return false;
   const cl=getPCls(p);
   document.getElementById('dp-nom').textContent=p.nom;
   // FORME-1 (§301) : en haut de la fiche, la forme de la parcelle (son contour) ; cachée quand elle n'en a pas.
@@ -8697,7 +8707,7 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
   try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
   try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
   try{ _dpFillArrach(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_dpFillArrach'); }
-  try{ _dpFillParcMeteo(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#3'); }
+  if(!repeinte){ try{ _dpFillParcMeteo(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#3'); } }
   const pe=document.getElementById('dp-pct');
   pe.textContent=cl.pct+'%';
   pe.style.cssText='float:right;font-family:var(--font-titre,"Cormorant Garamond",serif);font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
@@ -8841,8 +8851,14 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
   // Bouton réparation ponctuelle (écriture seulement)
   const repBtn=document.getElementById('dp-rep-btn');
   if(repBtn)repBtn.style.display=canWrite()?'flex':'none';
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovParcelle');
+  return true;
+}
+function openDP(nom){
+  if(!_dpPeindre(nom)) return;
   openOv('ovParcelle');
 }
+if(window._mvFicheVive) window._mvFicheVive('ovParcelle', function(){ if(_dpCurrentNom) _dpPeindre(_dpCurrentNom, true); });
 
 // ════ RÉPARATION PONCTUELLE ════
 // Journal d'une réparation ad hoc (piquet/amarre/fil, multi) — n'affecte PAS l'avancement de la tâche planifiée « Reparation ».
@@ -9931,6 +9947,7 @@ function _mvdsClose(){
   var bg=document.querySelector('.mvds-bg');
   if(bg&&bg.parentNode)bg.parentNode.removeChild(bg);
   _MVDS_NEXT=null;_MVDS_UNDO=null;
+  if(window._mvAjourPlanifier) window._mvAjourPlanifier(true);   // ★★ AJOUR-1 (§552) : la feuille de fin sort du DOM, aucune classe ne le dit
 }
 
 function _mvdsNext(){
@@ -11525,6 +11542,7 @@ function _jAvas(r, col){
 }
 function renderJournalList(){
   if(!window._dataReady){ var _skj=document.getElementById('timeline'); if(_skj)_skj.innerHTML=window._mvSk('journal'); return; }
+  if(window._mvAjourPage) window._mvAjourPage('page-journal');   // ★★ AJOUR-1 (§552)
   // Rafraîchir les chips de parcelle à chaque rendu
   renderParcelleFilterChips();
   let data=JOURNAL.filter(r=>{
@@ -11751,14 +11769,18 @@ function _mvOvSync(){
     var nl=document.querySelectorAll('.overlay.open'), open=[];
     for(var i=0;i<nl.length;i++) open.push(nl[i]);
     // 1) depiler ce qui s'est ferme (closeOv, _mvBack, ou remove('open') direct d'un module)
-    var restore=null;
+    var restore=null, _ajFerme=false;
     for(var k=_mvOvStack.length-1;k>=0;k--){
       if(open.indexOf(_mvOvStack[k].el)<0){
         _mvOvUndress(_mvOvStack[k].el);
         restore=_mvOvStack[k].trigger||restore; // le plus ancien depile gagne
         _mvOvStack.splice(k,1);
+        _ajFerme=true;
       }
     }
+    // ★★ AJOUR-1 (§552) : une fenêtre fermée, quelle que soit la manière (bouton, retour, toucher à côté, Échap, un module
+    //   qui retire `open`) — ce qui réapparaît se redessine à l'image suivante si un enregistrement est passé (utils.js).
+    if(_ajFerme && window._mvAjourPlanifier) window._mvAjourPlanifier(true);
     // 2) empiler les nouveaux
     for(var j=0;j<open.length;j++){
       if(_mvOvIdx(open[j])<0){

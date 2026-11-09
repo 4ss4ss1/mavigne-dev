@@ -64,6 +64,7 @@ function switchPhytoTab(tab){
 }
 
 function renderPhyto(){
+  if(window._mvAjourPage) window._mvAjourPage('page-phyto');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   // Phyto est un module autonome du dock (page-phyto). Les ids du registre et du catalogue
   // sont inchangés : renderPhytoTrac / renderCatalogueTrac / ephyRender fonctionnent tels quels.
   if(window.renderPhytoTrac) window.renderPhytoTrac();

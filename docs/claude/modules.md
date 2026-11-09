@@ -271,6 +271,17 @@ ceux qui ont déjà personnalisé leur accueil, où la règle générale l'aurai
 
 ---
 
+### ★ Ce qu’on enregistre se voit tout de suite (AJOUR-1, §552)
+
+`fbSave` compte chaque enregistrement (`window._mvAjourEcrit`, avant tout retour, démo et tutos compris). Une fenêtre qui se ferme —
+`_mvOvSync` (tout `.overlay` dépilé, quelle que soit la manière), `_mvBack` (toutes les surfaces), `_mvdsClose`, `_vendSheetClose` — fait
+vérifier ce qui réapparaît à l’image suivante (`window._mvAjourPlanifier(true)`, utils.js) : la fiche déclarée
+(`window._mvFicheVive('ovX', peindre)`) se repeint si un enregistrement est passé depuis sa peinture (`window._mvFicheFraiche('ovX')`),
+défilement et `<details>` gardés, jamais pendant une saisie ; sinon la page, si son rendu ne s’est pas noté à jour depuis
+(`window._mvAjourPage('page-x')`, en tête des dix rendus de `_mvRendrePageActive`). Fiches vives : `ovParcelle` (`_dpPeindre`),
+`ovRecFiche` (`_recFichePeindre`), `ovMatFiche` (`_matFichePeindre`), `ovMaTrace` (`renderMaTrace`). Les mémos `_MV_RG` et des comptes
+repartent à chaque enregistrement et donnée reçue. Une fenêtre neuve se classe dans `mv-harnais-ajour1`.
+
 ## 13. Parcelles, carte & KML
 
 - Polygones Leaflet colorés dynamiquement par l'avancement (`refreshMapColors`/`pctColor`).

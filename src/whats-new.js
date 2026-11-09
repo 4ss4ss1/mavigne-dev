@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.84', d: '2026-11-08', items: [   // AJOUR-1 (§552) : ce qu'on enregistre se voit tout de suite ; l'annonce de MODELES-1 (§536), partie sans bump
+    { niv: 0, pour: ['tous'], emoji: 'rotation', titre: 'Les fiches se mettent à jour tout de suite',
+      desc: "Après « Valider », « Modifier » ou « Noter une mesure », la fiche ouverte montre le changement sans qu’il faille la fermer et la rouvrir : la fiche d’une parcelle, d’une récolte, d’une maturité, et « Ma trace ». L’écran du dessous est à jour quand on la ferme, même avec le bouton Retour du téléphone — au Tracteur, l’avancement d’une session." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les modèles de semaine s’enregistrent de nouveau',
+      desc: "Sur un domaine resté à l’ancien rangement des modèles, l’enregistrement d’un modèle de semaine était refusé. Les modèles se comptent maintenant un par un : l’enregistrement passe, et plusieurs modèles effacés d’un coup restent bloqués." },
+  ] },
   { v: '10.83', d: '2026-11-07', items: [   // FRISE-AB (§551) : les semaines A et B
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Un vendredi sur deux : les semaines A et B',
       desc: "Dans l’onglet Année, « Une semaine sur deux » ouvre la semaine B d’une saison : ses jours se règlent à part. Les deux semaines alternent, le compte de l’année prend leur moyenne ; le programme indicatif et « Mon année » les disent." },

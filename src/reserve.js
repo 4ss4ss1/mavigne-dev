@@ -234,6 +234,7 @@ window.INTRANTS = INTRANTS;
 
 // ═══════════════════════════ RENDU PRINCIPAL ═══════════════════════════
 function renderReserve(){
+  if(window._mvAjourPage) window._mvAjourPage('page-reserve');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   var page=document.getElementById('page-reserve');
   if(!page) return;
   _rsvEnsureOverlays();

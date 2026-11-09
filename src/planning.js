@@ -3274,6 +3274,7 @@ var _PLAN_VALID_TAB={mois:1,gens:1,moi:1,eqmois:1,annee:1};   // ★ ANNEE-TAB (
 
 function renderPlanning(){
   if(!window._dataReady){ var _pb=document.getElementById('plan-body'); if(_pb)_pb.innerHTML=window._mvSk('planning'); return; }
+  if(window._mvAjourPage) window._mvAjourPage('page-planning');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   var pg=document.getElementById('page-planning');
   if(!pg)return;
   _planMigrateYears();

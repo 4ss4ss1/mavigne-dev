@@ -1,0 +1,46 @@
+{
+  "lot": "AJOUR-1",
+  "section": "§552",
+  "base": "f38e34db5b0277406960338bcac22bb6c131b25c",
+  "inclut": [],
+  "date": "2026-11-09",
+  "tutos": {
+    "ok": true,
+    "empreinte": "a6a2545e3dca849c0e40dd7efc0f606e691a891ce99dccdf73261f2b403ec49c",
+    "date": "2026-11-09T06:04:18.096Z",
+    "joues": {
+      "téléphone": 18,
+      "ordinateur": 18,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "193f91255f5f906f0dc29d4e669e22c3374ea25919ef9c3c3c3c57d9813fa4d7",
+    "CLAUDE.md": "4cc4d040f572d491a2136c65e2272d7cd43bacec332ef1df7177269d1d47d88c",
+    "docs/claude/INDEX.md": "108578245e9ecee17177117c354cb7886f4819ac9fa843c729048487eb72ce62",
+    "docs/claude/chantiers-530-579.md": "3ba595745e911889a8a5a197025c480fd7b0727ad85b44fbc823f93f153a08fa",
+    "docs/claude/journal.md": "a6fb1a12ca2279282b3ac36d2e5a7ee1983bef7f802310ada55bf78ea48b3bc3",
+    "docs/claude/modules.md": "81e31fa8d6d8c214de33d83d94601358dd2a680667a80586c226ff8f27fb90bb",
+    "guide/01-demarrer.html": "50474449754bd455c7d22d9b1d16cb8262020a3af7a403fd49c14132025a43c0",
+    "index.html": "42ab4aaeaf635d6e935524b4e9752d426ea30f39f72d6330a757a322fec05a7a",
+    "public/sw.js": "001613e6338af936749a25e98d0f19afd5f705869dcbb0c678f037ade5ed5a2b",
+    "scripts/mv-harnais-arrachage.mjs": "c1e31354d0690ce19c7f0c5e85ad9e449db59e5f2fdfe64b96cd4abefa1136b3",
+    "scripts/mv-harnais-liste.mjs": "bfce23a477b74352c955f7444454376eb713dbcd454e79b6b88466183af42b8a",
+    "scripts/mv-harnais-retour.mjs": "025ebada90f292ff5a6520d4cf34b79bbec99960bf3b2f4403b62aacaed9d623",
+    "src/app.js": "360748124406ae54684152f4cb8f1268fa50d36bc3ac433eb988d9753e0aecb4",
+    "src/cave.js": "1cd9004da10a83dfbbf985f87a96b5c10565ae760571ce4e655db26f64fced44",
+    "src/cuvier.js": "bd31ff41b07a0a21069530438492b7c30569618b60c4c0d3eb24622555e139c8",
+    "src/firebase.js": "1f1eff65ef5b476971bfe441e904f3d3f4c635ff6334bf5f96d59eedaf33067c",
+    "src/phyto.js": "05f938e5a830282b2aa50b4cf8cf1c98eae423d8236b66c84df28e9e4febaf5f",
+    "src/pilotage.js": "e4a00a21d2c6b33f42faf31a4cc448f39700ecdff4731dd890c8358521c1fe41",
+    "src/planning.js": "54e581f12968b51365df75fe63bdc6bc9fc63925fb6350f56ed198ce6495c940",
+    "src/reglages.js": "0f8d11d92c814fd42b0c070e8cd69ac4d90dcc226ea7bdd0692c7ea95eb63f6d",
+    "src/reserve.js": "15dd690825ebe503f0fb420e7e134ddcb67c99d1864b5cca5ea1274ce0170934",
+    "src/tracteur.js": "e08515995104d2cce33242ee4e82e3e6f58491ed87f0280bd9fa2d795dfe5d30",
+    "src/utils.js": "f692979b140f0de1a4bea44270e1c55beee21a6891ea8d853e317029315014d6",
+    "src/whats-new.js": "72ae2968c90654c649e64a7f4b4093872a04066b62f82f3a3affd10e3c0e6912",
+    "scripts/mv-harnais-ajour1.mjs": "0a2490d987976d9260999c2591c2c15d020223cf841bf03f3fff6fae6e8c3244"
+  }
+}

@@ -1659,6 +1659,7 @@ if(typeof window!=='undefined') window._trPont={ chrMes:_chrMes, chrNom:_chrNom,
   openOv:_openOv, saveData:_saveData, trHeuresFr:_trHeuresFr, getTracteurSel:getTracteurSel, renderEntretiens:renderEntretiens, renderTracteur:renderTracteur,
   selId:function(){ return _tracSelId; }, onglet:function(){ return _tracOnglet; } };
 function renderTracteur(){
+  if(window._mvAjourPage) window._mvAjourPage('page-tracteur');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
   var _SS=(SESSIONS||[]).filter(_sessInSaison);

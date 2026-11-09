@@ -12925,6 +12925,7 @@ function _pilBind(){
 // ── Rendu principal (appelé par goTo('pilotage')) ──
 function renderPilotage(){
   var page=document.getElementById('page-pilotage'); if(!page) return;
+  if(window._mvAjourPage) window._mvAjourPage('page-pilotage');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   _PIL_STATE=_pilLoadState(); _PIL_TAB=_pilLoadTab(); _pecLoadSt();
   _pilExoOublier(); _pilCdVueOublier();
   _pecCss();
