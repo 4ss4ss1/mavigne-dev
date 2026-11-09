@@ -904,6 +904,11 @@ qu'il appelle). Un téléphone en vue salarié n'enregistre jamais ces trois doc
 sous `_MV_PLAN_BASE_YEAR` (2026). Ne jamais écrire dans cette forme. ★ Le premier enregistrement de modèles l’écrit rangée : la garde compte les modèles, plus les clés (MODELES-1, §536 — avant, ce premier enregistrement était refusé dès 3 modèles).
 ⚠️ **Tout le monde est clé par NOM** (`MEMBRES`, entrées, hsup, acomptes) : renommer un salarié sans migrer ses clés
 le coupe de son historique.
+★★ **RATTACHE-1 (§554) — le modèle d'un salarié** : `m.planning_id` (lu par `_planPlId`, pour TOUS ses mois, passés compris) est le
+MIROIR de la grille du contrat en cours (l'embauche qui l'ouvre, dans `m.hist` ; `_mvHistMirror`). Le changer = `window._mvHistGrille(m, id)`
+(la source, puis le miroir) — **jamais `m.planning_id = …` seul** : Réglages affichait l'ancienne grille et le premier événement du contrat
+(`_emhCommit`) la recopiait. `_emhCommit` garde le modèle suivi d'une fiche décalée avant ce lot. Un modèle supprimé sur une année ne détache
+personne s'il existe sur une autre (`_planSupprEffet`) ; sur sa dernière année, ses salariés passent sur « standard » par `_mvHistGrille`.
 
 **Une entrée de jour — cinq formes, et aucune autre n'est écrite :**
 

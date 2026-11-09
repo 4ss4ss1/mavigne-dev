@@ -2353,7 +2353,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Personnel</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (résumé pour la paie, jours,
     compteur, congés et acomptes, relevé PDF), le récap annuel et les anciens salariés.</li>
     <li><b>La roue crantée</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg>, en haut à droite — ce qui se règle une fois par an :
-    modèles de semaine, coupure, convention collective, règle de décompte des congés, sort des heures
+    modèles de semaine et qui suit lequel, coupure, convention collective, règle de décompte des congés, sort des heures
     faites au-delà du planning. C'était l'onglet « Le cadre » ; un réglage annuel n'a pas sa place à
     côté du mois. La roue porte aussi les <b>relevés à imprimer</b> : relevé mensuel, relevé d'un
     salarié, planning de l'année, planning de l'année d'un salarié, Heures &amp; ETP.</li>
@@ -2506,6 +2506,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     jour, se ferme, se rouvre, ou change le rythme à partir d'elle (la frise en fait une nouvelle saison) ; un modèle vide se
     construit ainsi. C'est là qu'un modèle se règle : la grille de 365 cases n'existe plus, un modèle neuf s'ouvre sur son
     année, et « Exporter (CSV) » y est.</li>
+    <li><b>Qui suit quel modèle</b> se règle dans la roue crantée, « Assignation planning » : le modèle choisi vaut pour tous
+    les mois de la personne, les mois passés compris, et devient la grille horaire de son contrat en cours (Réglages › Équipe).
+    Dans l'onglet Année, la ligne sous le total d'un modèle dit qui le suit. Supprimer un modèle sur une année ne change le
+    modèle de personne tant qu'il existe sur une autre année ; un modèle qui n'existe plus nulle part remet ceux qui le
+    suivaient sur « standard » — la fenêtre de confirmation le dit avant.</li>
     <li>La <b>journée de solidarité</b> se règle chaque année dans la roue crantée du Planning : étalée sur
     l'année (7&nbsp;h de plus dans la base), un jour férié travaillé (jamais le 1er mai, sans majoration), un autre jour
     (jamais un dimanche), ou offerte. 7&nbsp;h pour un temps plein, au prorata d'un temps partiel ; dispensés : déjà
@@ -3575,7 +3580,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   campagnes passées, les documents déjà imprimés et l’historique du chat gardent l’ancien nom.</p>
 
   <h4>La fiche d'un salarié : un contrat en cours, et un historique</h4>
-  <p>La fiche s'ouvre sur le <b>contrat en cours</b> — type, dates, grille horaire, taux, et s'il est
+  <p>La fiche s'ouvre sur le <b>contrat en cours</b> — type, dates, grille horaire (le modèle de planning que la
+  personne suit : il se change dans la roue crantée du Planning, « Assignation planning »), taux, et s'il est
   annualisé ou payé à l'heure. En dessous, <b>l'historique</b> : une ligne par changement, la plus
   récente en haut.</p>
   <p>Le bouton <b>« Ajouter un événement »</b> ne demande pas une valeur mais <b>ce qui s'est passé</b>.

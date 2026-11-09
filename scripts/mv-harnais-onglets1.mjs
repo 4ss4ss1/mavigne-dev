@@ -16,6 +16,7 @@ const DEFAUTS = {
   ordre: ['Personnel repasse avant Année', 'index.html', 'MV_O1_HTML', s => { const L = s.split('\n'), a = L.findIndex(l => /data-tab="annee"/.test(l)), g = L.findIndex(l => /data-tab="gens"/.test(l)); [L[a], L[g]] = [L[g], L[a]]; return L.join('\n'); }],
   nom:   ['« Les gens » revient dans la barre', 'index.html', 'MV_O1_HTML', s => s.replace('</span>Personnel</button>', '</span>Les gens</button>')],
   aide:  ['l’aide redit « Les gens »', 'src/utils.js', 'MV_O1_UT', s => s.replace('Reculez d’un mois dans Personnel :', 'Reculez d’un mois dans Les gens :')],
+  menu:  ['le menu « … » du Planning redit « Les gens »', 'src/planning.js', 'MV_O1_PL', s => s.replace('dans la fiche de chacun, \\u00ab\\u00a0Personnel\\u00a0\\u00bb', 'dans la fiche de chacun, \\u00ab\\u00a0Les gens\\u00a0\\u00bb')],
 };
 if (CONTRE) {
   console.log('\n── ONGLETS-1 — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0;
@@ -30,7 +31,7 @@ if (CONTRE) {
   }
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
-const HTML = lire('index.html', 'MV_O1_HTML'), UT = lire('src/utils.js', 'MV_O1_UT'), G = lire('guide/10-planning.html'), TU = lire('src/tutos.js');
+const HTML = lire('index.html', 'MV_O1_HTML'), UT = lire('src/utils.js', 'MV_O1_UT'), G = lire('guide/10-planning.html'), TU = lire('src/tutos.js'), PL = lire('src/planning.js', 'MV_O1_PL');
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? ' — ' + det : '')); } }
 console.log('\n── ONGLETS-1 — Mois, Année, Personnel\n');
@@ -40,5 +41,10 @@ const sansHist = UT.replace(/^\s*\/\/.*$/gm, '');
 T(/\['Trois onglets', ": Mois, [^"]*Année, [^"]*Personnel, /.test(UT) && !/Les gens/.test(sansHist), 'l’aide : les trois noms, dans l’ordre, et plus un « Les gens »');
 T(/Mois · Année · Personnel/.test(G) && !/Les gens|<b>Le mois<\/b>/.test(G), 'le guide du Planning : les trois noms, et plus un « Les gens »');
 T(!/« Les gens »|« Le mois »/.test(TU) && /« Année », entre « Mois » et « Personnel »/.test(TU), 'les tutos nomment les onglets comme la barre');
+// ★ RATTACHE-1 (§554) — le menu « … » de la semaine écrivait encore « Les gens » (Relevés d’heures du mois) : les chaînes de planning.js aussi,
+//   commentaires retirés (ils racontent l’histoire et peuvent nommer l’ancien onglet).
+const plTextes = PL.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter(l => !/^\s*\/\//.test(l)).map(l => l.replace(/\s\/\/ .*$/, '')).join('\n');
+const plGens = (plTextes.match(/'[^'\n]*Les gens[^'\n]*'/g) || []);
+T(!plGens.length && /\\u00ab\\u00a0Personnel\\u00a0\\u00bb/.test(PL), 'le Planning n’écrit plus « Les gens » à l’écran (menu « … » compris)', plGens.join(' | ').slice(0, 160));
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

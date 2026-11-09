@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.86', d: '2026-11-09', items: [   // RATTACHE-1 (§554) : le modèle qu'un salarié suit et la grille de son contrat ; supprimer un modèle sur une année
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le modèle d’un salarié et la grille de son contrat disent la même chose',
+      desc: "Choisir le modèle d’un salarié dans la roue crantée du Planning (« Assignation planning ») change aussi la grille horaire de son contrat en cours : Réglages › Équipe la montre. Un renouvellement, une fin de contrat ou une nouvelle embauche ne le remettent plus sur l’ancienne grille sans rien dire." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Supprimer un modèle sur une année ne détache plus personne',
+      desc: "Un modèle supprimé sur une seule année reste celui de ses salariés les autres années : personne ne repasse sur « standard ». Seul un modèle qui n’existe plus sur aucune année les y remet, et la fenêtre de confirmation le dit avant." },
+  ] },
   { v: '10.85', d: '2026-11-09', items: [   // INTRANT-1 (§553) : la fiche d'un intrant — la pièce, corriger, retirer un achat, supprimer
     { niv: 0, pour: ['admin'], emoji: 'carton', titre: 'Les fournitures se comptent à la pièce',
       desc: "Piquets, agrafes, bouchons, filtres : la fiche d’une fourniture se compte maintenant en pièces (ou toujours en kg, ou en L), et la pièce est proposée d’office. À l’achat, « Par sacs », « Par bidons » ou « Par lots » multiplie par la contenance ; « Au total » prend la quantité telle quelle." },

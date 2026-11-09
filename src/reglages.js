@@ -970,6 +970,17 @@ function _emhGrilles(){
 }
 // Ecrit le journal, reconstruit les miroirs, enregistre. Un seul chemin.
 function _emhCommit(m,H,msg){
+  // ★★ RATTACHE-1 (§554) — LE CONTRAT QUI ÉTAIT EN COURS GARDE LE MODÈLE RÉELLEMENT SUIVI. planning_id est le miroir de sa grille ;
+  //   mais la roue crantée du Planning l'écrivait seul avant ce lot. Une fiche ainsi décalée retombait, au premier événement
+  //   (renouvellement, fin, retrait, nouvelle embauche), sur la grille notée à l'embauche : le planning de la personne changeait
+  //   d'un coup, sans un mot. Sa grille reprend donc planning_id avant le miroir ; une nouvelle embauche apporte la sienne, et
+  //   retirer l'embauche en cours rend celle du contrat d'avant (son embauche n'est plus dans H : rien à reprendre).
+  var _av=window._mvPeriodes(m),_cur=_av.length?_av[_av.length-1]:null;
+  if(_cur&&m.planning_id&&(_cur.grille||'standard')!==m.planning_id){
+    for(var _i=H.length-1;_i>=0;_i--){
+      if(H[_i]&&H[_i].t==='embauche'&&String(H[_i].d||'')===String(_cur.debut||'')){H=H.slice();H[_i]=Object.assign({},H[_i],{grille:m.planning_id});break;}
+    }
+  }
   m.hist=window._mvHist({hist:H});
   window._mvHistMirror(m);
   window.saveData('membres',msg||'\u{1F4C7} Historique mis \u00e0 jour');
@@ -1023,7 +1034,9 @@ function _emhNowHtml(m,last,adm,auj){
      +(annu?'Annualis\u00e9 \u00b7 plafond proratis\u00e9':'Pay\u00e9 \u00e0 l\u2019heure \u00b7 pas d\u2019annualisation')+'</span></div>'
    +'<div class="emh-dates">depuis le <b>'+_emhFmt(last.debut)+'</b>\u00a0\u00b7 '
      +(last.fin?('jusqu\u2019au <b>'+_emhFmt(last.fin)+'</b>'):'<b>sans terme</b>')+'</div>'
-   +'<div class="emh-row"><span>Grille horaire</span><b style="font-size:var(--pt-txt,13px)">'+_escHtml(last.grille||'standard')+'</b></div>'
+   // ★ RATTACHE-1 (§554) : le modèle que la personne suit (planning_id, que lit tout le Planning — _planPlId), pas la grille notée à
+   //   l'embauche : sur une fiche décalée avant ce lot, la carte disait « standard » pendant que le planning suivait un autre modèle.
+   +'<div class="emh-row"><span>Grille horaire</span><b style="font-size:var(--pt-txt,13px)">'+_escHtml(m.planning_id||last.grille||'standard')+'</b></div>'
    +(adm?('<div class="emh-row"><span>Taux horaire charg\u00e9</span><b>'
      +((tx!=null&&tx>0)?(String(Math.round(tx*100)/100).replace('.',',')+'\u00a0\u20AC'):'\u2014')+'</b></div>'):'')
    +'</div>';
@@ -2707,7 +2720,7 @@ function _emhForm(nom,t){
   var m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;}); if(!m) return;
   var P=window._mvPeriodes(m), last=P.length?P[P.length-1]:null, auj=_paieAuj();
   window._EMH={nom:nom,t:t,d:auj,type:(last&&last.type)||'CDI',fin:'',
-        grille:(last&&last.grille)||'standard',
+        grille:m.planning_id||(last&&last.grille)||'standard',   // ★ RATTACHE-1 (§554) : le modèle suivi, pas une grille d'embauche restée en arrière
         v:((typeof window._mvPaieTauxEffAt==='function')?(window._mvPaieTauxEffAt(m,auj)||0):0)};
   if(t==='embauche'){ window._EMH.d=''; window._EMH.type='CDD'; }
   var h='<div class="modal-hd"><div class="modal-title">'+_mvIcon(_EMH_LBL[t].i,18)+' '+_EMH_LBL[t].n+'</div></div><div class="modal-body">';

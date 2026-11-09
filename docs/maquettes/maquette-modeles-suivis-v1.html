@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — les modèles et ceux qui les suivent, maquette v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--texte-pale:#A3A19B;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);--presse:rgba(28,26,22,.095);
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--sur-accent:#FFFFFF;--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.13);--ok-texte:#217343;
+  --attention:#A15C00;--attention-doux:rgba(161,92,0,.13);--attention-texte:#975600;
+  --danger:#C2381B;--danger-doux:rgba(194,56,27,.12);--danger-texte:#BA361A;
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+  /* ── l'intensité de la semaine : du repos de la vigne aux vendanges ── */
+  --i1:#DCE7D3;--i1t:#26341E;   /* 29 h et moins  */
+  --i2:#C2D6B4;--i2t:#20301A;   /* 30 à 33 h 30   */
+  --i3:#E9DDAF;--i3t:#3A3115;   /* 34 à 35 h 30   */
+  --i4:#D9B067;--i4t:#36260A;   /* 36 à 38 h 30   */
+  --i5:#A0563A;--i5t:#FFFFFF;   /* 39 à 41 h 30   */
+  --i6:#7A2850;--i6t:#FFFFFF;   /* 42 h et plus   */
+  --ferme-a:#E7E6E2;--ferme-b:#F6F5F2;--ferme-t:#55534E;
+  --repere:#1B1A18;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+  --i1:#2C3A26;--i1t:#DDE8D4;--i2:#3B4F31;--i2t:#E6F0DE;--i3:#55492A;--i3t:#F2E8C6;--i4:#7A5A22;--i4t:#F8E9C8;--i5:#A0563A;--i5t:#FFFFFF;--i6:#9A3E6B;--i6t:#FFFFFF;
+  --ferme-a:#272624;--ferme-b:#1D1C1B;--ferme-t:#B4B2AC;--repere:#EDECE9;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+  --i1:#2C3A26;--i1t:#DDE8D4;--i2:#3B4F31;--i2t:#E6F0DE;--i3:#55492A;--i3t:#F2E8C6;--i4:#7A5A22;--i4t:#F8E9C8;--i5:#A0563A;--i5t:#FFFFFF;--i6:#9A3E6B;--i6t:#FFFFFF;
+  --ferme-a:#272624;--ferme-b:#1D1C1B;--ferme-t:#B4B2AC;--repere:#EDECE9;
+}}
+
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.01em;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── la page de la maquette ── */
+.entete{position:sticky;top:0;z-index:30;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro)}
+.entete nav a:hover{background:var(--survol)}
+.entete button{font-size:var(--pt-micro);border:1px solid var(--ligne-forte);background:var(--bg-card);color:var(--texte);border-radius:var(--r-full);padding:4px 10px;cursor:pointer}
+@media (max-width:700px){.entete{position:static}}
+.page{max-width:1240px;margin:0 auto;padding:28px 20px 80px;overflow-x:clip}
+.intro{max-width:76ch;margin-bottom:26px;color:var(--texte-med);font-size:var(--pt-base)}
+.intro b{color:var(--texte)}
+.intro p+p{margin-top:8px}
+.bloc{margin-top:56px}
+.bloc>h2{font-size:var(--pt-xl)}
+.bloc>.ou{color:var(--texte-med);max-width:80ch;margin-top:8px;font-size:var(--pt-base)}
+.paire{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;margin-top:22px;align-items:start}
+@media (min-width:1000px){.paire{grid-template-columns:400px minmax(0,1fr)}}
+.colonne h3{font-size:var(--pt-md);margin-bottom:8px}
+.legende-ecran{color:var(--texte-med);font-size:var(--pt-micro);margin:0 0 8px;max-width:60ch}
+.etiquette{display:inline-block;font-size:var(--pt-nano);font-weight:700;letter-spacing:.02em;border-radius:var(--r-full);padding:2px 9px;margin-bottom:8px}
+.etiquette.avant{background:var(--danger-doux);color:var(--danger-texte)}
+.etiquette.apres{background:var(--ok-doux);color:var(--ok-texte)}
+.ecrans{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+
+/* ── les cadres : téléphone, ordinateur ── */
+.tel{width:390px;max-width:100%;min-width:0;margin:0;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;display:flex;flex-direction:column}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 6px;font-size:var(--pt-micro);color:var(--texte-med);flex:none}
+.tel-corps{padding:0 12px 18px;flex:1}
+.pc{width:100%;min-width:0;background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.pc-barre{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg-doux);border-bottom:1px solid var(--ligne)}
+.pc-barre i{width:9px;height:9px;border-radius:50%;background:var(--ligne-forte);display:block}
+.pc-barre span{margin-left:10px;color:var(--texte-doux);font-size:var(--pt-nano)}
+.pc-corps{padding:16px 22px 22px;overflow-x:auto}
+
+/* ── l'appli, telle qu'elle se dessine ── */
+.app-tete{display:flex;align-items:center;gap:10px;padding:6px 2px 10px}
+.app-tete h4{font-family:var(--font-titre);font-size:var(--pt-md);margin:0;font-weight:600}
+.app-tete .roue{margin-left:auto;width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne-forte);display:grid;place-items:center;color:var(--texte-med);font-size:15px}
+.onglets{display:flex;gap:4px;border-bottom:1px solid var(--ligne);margin:0 0 12px}
+.onglets span{padding:7px 12px;font-size:var(--pt-txt);color:var(--texte-med);border-bottom:2px solid transparent;margin-bottom:-1px}
+.onglets span.on{color:var(--texte);font-weight:600;border-bottom-color:var(--accent)}
+.choix{display:flex;gap:0;border:1px solid var(--ligne-forte);border-radius:var(--r-md);overflow:hidden;width:max-content;max-width:100%;margin-bottom:10px}
+.choix span{padding:7px 12px;font-size:var(--pt-txt);border-left:1px solid var(--ligne-forte);white-space:nowrap}
+.choix span:first-child{border-left:0}
+.choix span.on{background:var(--accent);color:var(--sur-accent);font-weight:600}
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.carte+.carte{margin-top:10px}
+.carte-lbl{font-size:var(--pt-micro);color:var(--texte-med);font-weight:600}
+.total{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px}
+.total b{font-size:var(--pt-xl);font-variant-numeric:tabular-nums;font-weight:600}
+.total .sur{color:var(--texte-doux)}
+.pastille{display:inline-block;font-size:var(--pt-nano);font-weight:700;border-radius:var(--r-full);padding:2px 9px}
+.pastille.att{background:var(--attention-doux);color:var(--attention-texte)}
+.pastille.ok{background:var(--ok-doux);color:var(--ok-texte)}
+.micro{font-size:var(--pt-nano);color:var(--texte-doux);line-height:1.5;margin-top:4px}
+.surligne{outline:2px dashed var(--danger);outline-offset:3px;border-radius:4px}
+.bt{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:7px 14px;border-radius:var(--r-md);border:1px solid var(--ligne-forte);background:var(--bg-card);font-size:var(--pt-txt);font-weight:600;color:var(--texte);cursor:default;white-space:nowrap}
+.bt.pri{background:var(--accent);border-color:var(--accent);color:var(--sur-accent)}
+.bt.pt{min-height:30px;padding:4px 10px;font-weight:500}
+.rangee{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.encadre{border:1px solid var(--ligne);border-left:4px solid var(--attention);background:var(--attention-doux);border-radius:var(--r-md);padding:10px 12px;margin-top:10px}
+.encadre b{display:block;font-size:var(--pt-txt)}
+.encadre p{font-size:var(--pt-micro);color:var(--texte-med);margin-top:2px}
+.encadre.info{border-left-color:var(--accent);background:var(--accent-doux)}
+.suivi{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:var(--pt-txt)}
+.suivi .qui{color:var(--texte-med)}
+.puce{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:3px 10px 3px 4px;font-size:var(--pt-micro);font-weight:600;background:var(--bg-card)}
+.puce i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-style:normal;font-size:10px;font-weight:700}
+.ligne{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--ligne);font-size:var(--pt-txt)}
+.ligne:last-child{border-bottom:0}
+.ligne .q{flex:1;min-width:0}
+.ligne .q small{display:block;color:var(--texte-doux);font-size:var(--pt-nano)}
+.ligne b.h{min-width:4.6em;text-align:center;font-variant-numeric:tabular-nums}
+.ligne .mn{width:30px;height:30px;border-radius:var(--r-md);border:1px solid var(--ligne-forte);display:grid;place-items:center;font-weight:700;background:var(--bg-card)}
+.ferie-nom{color:var(--texte-doux)}
+.radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--ligne-forte);flex:none}
+.radio.on{border-color:var(--accent);box-shadow:inset 0 0 0 4px var(--bg-card);background:var(--accent)}
+.case{width:18px;height:18px;border-radius:4px;border:2px solid var(--ligne-forte);flex:none;display:grid;place-items:center;font-size:12px;color:var(--sur-accent)}
+.case.on{border-color:var(--accent);background:var(--accent)}
+.feuille{background:var(--bg-card);border-radius:18px 18px 0 0;padding:14px 16px 18px;box-shadow:0 -10px 30px -12px rgba(20,18,14,.25);margin:12px -12px -18px;border-top:1px solid var(--ligne)}
+.feuille .poignee{width:42px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.feuille h5{font-family:var(--font-titre);font-size:var(--pt-md);margin:0 0 4px;font-weight:600}
+.effet{border:1px solid var(--ligne);border-radius:var(--r-md);background:var(--bg-doux);padding:10px 12px;margin-top:10px;font-size:var(--pt-micro);color:var(--texte-med)}
+.effet b{color:var(--texte)}
+.frise{position:relative;height:30px;border-radius:7px;overflow:hidden;background:var(--bg-doux);display:flex;margin-top:12px}
+.frise span{height:100%;border-right:1px solid var(--bg-card)}
+.frise.grise{opacity:.42;filter:saturate(.4)}
+.mois{display:flex;justify-content:space-between;font-size:var(--pt-nano);color:var(--texte-doux);margin-top:3px}
+.annot{position:relative;margin-top:10px;padding:8px 10px 8px 12px;border-left:3px solid var(--danger);background:var(--danger-doux);border-radius:0 var(--r-md) var(--r-md) 0;font-size:var(--pt-micro);color:var(--texte)}
+.annot.bien{border-left-color:var(--ok);background:var(--ok-doux)}
+.deux{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:760px){.deux{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.decision{margin-top:22px;border:1px solid var(--ligne-forte);border-radius:var(--r-lg);background:var(--bg-card);padding:16px 18px;max-width:880px}
+.decision h3{font-size:var(--pt-md)}
+.decision ol{margin:10px 0 0;padding-left:20px}
+.decision li{margin-top:6px;font-size:var(--pt-txt)}
+.decision .reco{margin-top:10px;font-size:var(--pt-txt);color:var(--texte)}
+.decision .reco b{color:var(--ok-texte)}
+table.recap{border-collapse:collapse;width:100%;max-width:980px;margin-top:14px;font-size:var(--pt-txt);background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);overflow:hidden}
+table.recap th,table.recap td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--ligne);vertical-align:top}
+table.recap th{font-size:var(--pt-micro);color:var(--texte-med);background:var(--bg-doux)}
+.pied{margin-top:60px;color:var(--texte-doux);font-size:var(--pt-micro);max-width:80ch}
+</style>
+</head>
+<body>
+<header class="entete">
+  <h1>Les modèles et ceux qui les suivent</h1>
+  <span class="base">Maquette v1 · points 3, 4 et 5 de RATTACHE-1 (§554) · 9 novembre 2026 · données fictives</span>
+  <nav aria-label="Sections">
+    <a href="#qui">3 · Qui suit ce modèle</a>
+    <a href="#feries">4 · Les fériés du modèle</a>
+    <a href="#suivante">5 · L’année suivante</a>
+    <a href="#decisions">Décisions</a>
+    <button type="button" id="theme" aria-label="Changer de thème">Thème : auto</button>
+  </nav>
+</header>
+<main class="page">
+  <section class="intro">
+    <p><b>Le cas remonté le 9 novembre.</b> Un salarié restait sur « standard » depuis son embauche. Le modèle à son nom, que l’admin réglait, n’était suivi par personne : chaque réglage ne changeait le planning de personne, et rien ne le disait clairement.</p>
+    <p><b>Déjà corrigé par RATTACHE-1</b> (points 1, 2 et 6) : la roue crantée écrit la grille du contrat en cours ; un événement du contrat ne la défait plus ; supprimer un modèle sur une année ne détache personne ; « Personnel » dans le menu « … ».</p>
+    <p><b>Ce que cette maquette propose</b>, dans l’onglet Année : dire qui suit le modèle et inscrire sur place (3) ; montrer et régler les fériés qu’un modèle prévoit travaillés (4) ; préparer l’année suivante à partir des modèles du domaine, pas du modèle intégré de l’appli (5). Trois décisions à prendre, en bas.</p>
+    <p>Domaine fictif : Arthur, Léo, Marie, Paul, Lucie ; modèles « standard », « arthur », « equipe », « saisonnier ».</p>
+  </section>
+
+  <!-- ══════════════════ 3 · QUI SUIT CE MODÈLE ══════════════════ -->
+  <section class="bloc" id="qui">
+    <h2>3 · Qui suit ce modèle</h2>
+    <p class="ou">Aujourd’hui, l’onglet Année règle un modèle sans dire clairement s’il sert à quelqu’un. Proposé : le dire en tête, et inscrire depuis l’onglet, avec ce que l’inscription change avant de la confirmer.</p>
+    <div class="paire">
+      <div class="colonne">
+        <span class="etiquette avant">Aujourd’hui</span>
+        <p class="legende-ecran">Le modèle « arthur » de 2026, tel que l’admin le règle.</p>
+        <div class="tel" role="img" aria-label="Téléphone : l’onglet Année aujourd’hui">
+          <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+          <div class="tel-corps">
+            <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+            <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+            <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+            <div class="carte">
+              <div class="carte-lbl">L’année du modèle « arthur » · 2026</div>
+              <div class="total"><b>1 548 h</b><span class="sur">sur 1 607 h, le plafond annuel</span><span class="pastille att">il manque 59 h</span></div>
+              <div class="micro">1 548 h de travail prévu · <span class="surligne">personne n’y est inscrit</span></div>
+              <div class="rangee"><span class="bt">Tomber juste</span><span class="bt">Exporter (CSV)</span></div>
+              <div class="frise" aria-hidden="true"><span style="width:16%;background:var(--i2)"></span><span style="width:8%;background:var(--i3)"></span><span style="width:40%;background:var(--i4)"></span><span style="width:4%;background:var(--i6)"></span><span style="width:16%;background:var(--i4)"></span><span style="width:16%;background:var(--i2)"></span></div>
+              <div class="mois"><span>janv.</span><span>avr.</span><span>juil.</span><span>oct.</span><span>déc.</span></div>
+            </div>
+            <div class="annot">Seul signe que ce modèle ne sert à personne : 11 px, en gris, en fin de ligne. On règle, on enregistre, et aucun planning ne bouge.</div>
+          </div>
+        </div>
+      </div>
+      <div class="colonne">
+        <span class="etiquette apres">Proposé</span>
+        <p class="legende-ecran">Personne ne suit le modèle : l’avertissement passe en tête, avec le geste. « Inscrire… » ouvre une feuille qui dit ce que l’inscription change.</p>
+        <div class="ecrans">
+          <div class="tel" role="img" aria-label="Téléphone : l’avertissement et la feuille d’inscription">
+            <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+            <div class="tel-corps">
+              <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+              <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+              <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+              <div class="carte">
+                <div class="carte-lbl">L’année du modèle « arthur » · 2026</div>
+                <div class="encadre"><b>Personne ne suit « arthur ».</b><p>Le régler ne change le planning de personne. Inscrivez ceux qui travaillent à ce rythme.</p><div class="rangee"><span class="bt pri">Inscrire…</span></div></div>
+                <div class="total"><b>1 548 h</b><span class="sur">sur 1 607 h</span><span class="pastille att">il manque 59 h</span></div>
+              </div>
+              <div class="feuille">
+                <div class="poignee"></div>
+                <h5>Inscrire sur « arthur »</h5>
+                <p class="micro" style="margin-top:0">Qui travaille à ce rythme ? Une personne suit un seul modèle.</p>
+                <div class="ligne"><span class="case on">✓</span><span class="q">Arthur<small>suit « standard » depuis son embauche</small></span></div>
+                <div class="ligne"><span class="case"></span><span class="q">Léo<small>suit « equipe »</small></span></div>
+                <div class="ligne"><span class="case"></span><span class="q">Marie<small>suit « standard »</small></span></div>
+                <div class="ligne"><span class="case"></span><span class="q">Paul<small>suit « standard »</small></span></div>
+                <div class="effet"><b>Arthur passe de « standard » à « arthur » sur tous ses mois, les mois passés compris.</b> De janvier à octobre, ses heures prévues passent de 1 692 h à 1 548 h (− 144 h) : son compteur de l’année suit. Un mois déjà figé pour la compta garde ce qui est parti. La grille horaire de son contrat devient « arthur ».</div>
+                <div class="rangee"><span class="bt pri">Inscrire Arthur</span><span class="bt">Annuler</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="pc" role="img" aria-label="Ordinateur : le modèle et ceux qui le suivent">
+            <div class="pc-barre"><i></i><i></i><i></i><span>mavigneapp.fr — Planning › Année</span></div>
+            <div class="pc-corps">
+              <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+              <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+              <div class="carte">
+                <div class="carte-lbl">L’année du modèle « arthur » · 2026</div>
+                <div class="suivi"><span class="qui">Suivi par</span><span class="puce"><i style="background:#3D6B27">A</i>Arthur</span><span class="bt pt">Modifier</span></div>
+                <div class="total"><b>1 548 h</b><span class="sur">sur 1 607 h, le plafond annuel</span><span class="pastille att">il manque 59 h</span></div>
+                <div class="frise" aria-hidden="true"><span style="width:16%;background:var(--i2)"></span><span style="width:8%;background:var(--i3)"></span><span style="width:40%;background:var(--i4)"></span><span style="width:4%;background:var(--i6)"></span><span style="width:16%;background:var(--i4)"></span><span style="width:16%;background:var(--i2)"></span></div>
+                <div class="mois"><span>janv.</span><span>févr.</span><span>mars</span><span>avr.</span><span>mai</span><span>juin</span><span>juil.</span><span>août</span><span>sept.</span><span>oct.</span><span>nov.</span><span>déc.</span></div>
+              </div>
+              <div class="annot bien">Après « Inscrire » : la ligne « Suivi par » dit qui suit ce rythme, et « Modifier » rouvre la même feuille. La roue crantée garde son « Assignation planning » : les deux écrivent la même chose.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="decision">
+      <h3>D1 · Inscrire à partir d’un mois ?</h3>
+      <p class="micro" style="font-size:var(--pt-txt);color:var(--texte-med)">Aujourd’hui, un modèle s’attache à une personne pour tous ses mois. Quand son rythme change en cours d’année, trois façons de faire :</p>
+      <ol>
+        <li><b>Tous les mois</b> — ce que fait l’appli. La feuille dit l’effet sur les mois passés avant de confirmer.</li>
+        <li><b>Par le contrat</b> — une embauche à la date du changement (Réglages › Équipe) porte sa grille ; mais elle coupe le compteur en deux. À éviter pour un CDI.</li>
+        <li><b>Dater l’inscription</b> — le modèle d’une personne change au 1er d’un mois, les mois d’avant gardent l’ancien. Un lot moteur : le modèle d’une personne est lu une fois pour tout son mois, à 69 endroits de planning.js.</li>
+      </ol>
+      <p class="reco"><b>Recommandé :</b> 1 dans ce lot, l’effet écrit avant la confirmation ; 3 seulement si le cas revient.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════ 4 · LES FÉRIÉS DU MODÈLE ══════════════════ -->
+  <section class="bloc" id="feries">
+    <h2>4 · Les fériés du modèle</h2>
+    <p class="ou">Un modèle importé peut porter des heures un jour férié. La grille du mois les affiche, le relevé et le compte de l’année les comptent travaillées ; la frise, elle, montre le nom du férié et ne permet plus de le régler depuis que la grille de 365 cases est partie. Proposé : le férié se voit avec ses heures, se chôme d’un geste, et l’onglet les liste.</p>
+    <div class="paire">
+      <div class="colonne">
+        <span class="etiquette avant">Aujourd’hui</span>
+        <p class="legende-ecran">La semaine du 9 novembre 2026 du modèle « arthur ». Le modèle porte 8 h le mercredi 11.</p>
+        <div class="tel" role="img" aria-label="Téléphone : la semaine avec le 11 novembre">
+          <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+          <div class="tel-corps">
+            <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+            <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+            <div class="carte">
+              <div class="rangee" style="margin-top:0;align-items:center"><span class="bt pt">Précédente</span><b style="flex:1;text-align:center;font-size:var(--pt-txt)">Semaine du 9 → 15 nov. · 28 h 30</b><span class="bt pt">Suivante</span></div>
+              <div class="ligne"><span class="q">lun. 9 nov.</span><span class="mn">−</span><b class="h">8 h</b><span class="mn">+</span></div>
+              <div class="ligne"><span class="q">mar. 10 nov.</span><span class="mn">−</span><b class="h">8 h</b><span class="mn">+</span></div>
+              <div class="ligne"><span class="q">mer. 11 nov.</span><span class="ferie-nom surligne">Armistice</span></div>
+              <div class="ligne"><span class="q">jeu. 12 nov.</span><span class="mn">−</span><b class="h">4 h 30</b><span class="mn">+</span></div>
+              <div class="ligne"><span class="q">ven. 13 nov.</span><span class="mn">−</span><b class="h" style="color:var(--texte-doux)">repos</b><span class="mn">+</span></div>
+            </div>
+            <div class="annot">La semaine compte 28 h 30, dont 8 h que l’écran ne montre nulle part. Pour les retirer, il ne reste que le CSV : exporter, corriger, réimporter.</div>
+          </div>
+        </div>
+      </div>
+      <div class="colonne">
+        <span class="etiquette apres">Proposé</span>
+        <p class="legende-ecran">Le férié garde son nom et montre ses heures ; « Chômer » le passe à 0. Une carte de l’onglet liste les fériés de l’année du modèle, avec « Chômer les 8 ».</p>
+        <div class="ecrans">
+          <div class="tel" role="img" aria-label="Téléphone : le férié avec ses heures, et la carte des fériés">
+            <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+            <div class="tel-corps">
+              <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+              <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+              <div class="carte">
+                <div class="rangee" style="margin-top:0;align-items:center"><span class="bt pt">Précédente</span><b style="flex:1;text-align:center;font-size:var(--pt-txt)">Semaine du 9 → 15 nov. · 28 h 30</b><span class="bt pt">Suivante</span></div>
+                <div class="ligne"><span class="q">lun. 9 nov.</span><span class="mn">−</span><b class="h">8 h</b><span class="mn">+</span></div>
+                <div class="ligne"><span class="q">mar. 10 nov.</span><span class="mn">−</span><b class="h">8 h</b><span class="mn">+</span></div>
+                <div class="ligne" style="background:var(--attention-doux);margin:0 -8px;padding:7px 8px;border-radius:var(--r-md)"><span class="q">mer. 11 nov.<small>Armistice · travaillé au modèle</small></span><span class="mn">−</span><b class="h">8 h</b><span class="mn">+</span><span class="bt pt">Chômer</span></div>
+                <div class="ligne"><span class="q">jeu. 12 nov.</span><span class="mn">−</span><b class="h">4 h 30</b><span class="mn">+</span></div>
+                <div class="ligne"><span class="q">ven. 13 nov.</span><span class="mn">−</span><b class="h" style="color:var(--texte-doux)">repos</b><span class="mn">+</span></div>
+              </div>
+              <div class="carte">
+                <div class="carte-lbl">Les fériés de 2026 dans « arthur »</div>
+                <div class="encadre"><b>8 fériés portent des heures.</b><p>Chômé, un férié vaut 0 h au modèle en 2026. Dès 2027, il compte pour ses heures prévues (la base de l’année).</p><div class="rangee"><span class="bt pri">Chômer les 8</span></div></div>
+                <div class="ligne"><span class="q">1er janv.<small>Jour de l’An</small></span><b class="h">8 h</b><span class="bt pt">Chômer</span></div>
+                <div class="ligne"><span class="q">6 avr.<small>Lundi de Pâques</small></span><b class="h">8 h</b><span class="bt pt">Chômer</span></div>
+                <div class="ligne"><span class="q">1er mai<small>Fête du Travail</small></span><b class="h">8 h</b><span class="bt pt">Chômer</span></div>
+                <div class="ligne"><span class="q">8 mai<small>Victoire 1945</small></span><b class="h">8 h</b><span class="bt pt">Chômer</span></div>
+                <div class="ligne"><span class="q">25 déc.<small>Noël</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                <p class="micro">Et 4 autres, dans l’ordre de l’année.</p>
+              </div>
+            </div>
+          </div>
+          <div class="pc" role="img" aria-label="Ordinateur : les fériés après « Chômer les 8 »">
+            <div class="pc-barre"><i></i><i></i><i></i><span>mavigneapp.fr — Planning › Année</span></div>
+            <div class="pc-corps">
+              <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+              <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+              <div class="carte">
+                <div class="carte-lbl">L’année du modèle « arthur » · 2026</div>
+                <div class="total"><b>1 484 h</b><span class="sur">sur 1 607 h, le plafond annuel</span><span class="pastille att">il manque 123 h</span></div>
+                <div class="rangee"><span class="bt pri">Enregistrer</span><span class="bt">Annuler</span></div>
+                <p class="micro">Modifications pas encore enregistrées · 8 fériés chômés (− 64 h).</p>
+              </div>
+              <div class="carte">
+                <div class="carte-lbl">Les fériés de 2026 dans « arthur »</div>
+                <div class="deux">
+                  <div>
+                    <div class="ligne"><span class="q">1er janv.<small>Jour de l’An</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">6 avr.<small>Lundi de Pâques</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">1er mai<small>Fête du Travail</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">8 mai<small>Victoire 1945</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">14 mai<small>Ascension</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                  </div>
+                  <div>
+                    <div class="ligne"><span class="q">25 mai<small>Lundi de Pentecôte</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">14 juil.<small>Fête nationale</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">11 nov.<small>Armistice</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <div class="ligne"><span class="q">25 déc.<small>Noël</small></span><b class="h" style="color:var(--texte-doux)">chômé</b><span class="bt pt">Travailler</span></div>
+                    <p class="micro">15 août et 1er novembre tombent un week-end en 2026.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="annot bien">« Travailler » remet les heures de la saison ce jour-là. La journée de solidarité, si le domaine la fait un férié (roue crantée), reste travaillée et le dit.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="decision">
+      <h3>D2 · Un férié qui porte des heures, par défaut ?</h3>
+      <p class="micro" style="font-size:var(--pt-txt);color:var(--texte-med)">À l’import d’un CSV, à la préparation de l’année suivante, et sur les modèles déjà là :</p>
+      <ol>
+        <li><b>Proposé chômé</b> — la liste s’affiche, un seul « Chômer les N », rien ne se fait sans le geste.</li>
+        <li><b>Gardé travaillé</b> — on ne touche à rien, la carte le signale seulement.</li>
+      </ol>
+      <p class="reco"><b>Recommandé :</b> 1. Un domaine qui travaille un férié le décide (vendanges, solidarité) ; il le garde d’un appui.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════ 5 · L'ANNÉE SUIVANTE ══════════════════ -->
+  <section class="bloc" id="suivante">
+    <h2>5 · L’année suivante</h2>
+    <p class="ou">Quand un modèle n’existe pas encore sur une année, l’appli montre le modèle intégré (celui livré avec l’appli : 7 h l’hiver, vendredi court, vendanges à part), replacé sur les bons jours. Rien ne dit que ce n’est pas le modèle du domaine ; l’enregistrer crée un modèle bâti dessus. Et « Année suivante — préparer » ouvre une année vide. Proposé : partir des modèles du domaine de l’année d’avant, et le dire.</p>
+    <div class="paire">
+      <div class="colonne">
+        <span class="etiquette avant">Aujourd’hui</span>
+        <p class="legende-ecran">L’onglet Année sur 2027, modèle « arthur », qui n’existe que sur 2026.</p>
+        <div class="tel" role="img" aria-label="Téléphone : 2027, le modèle intégré sans le dire">
+          <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+          <div class="tel-corps">
+            <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+            <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+            <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+            <div class="carte">
+              <div class="carte-lbl">L’année du modèle « arthur » · 2027</div>
+              <div class="total"><b>1 662 h</b><span class="sur">sur 1 834 h, la base de l’année</span><span class="pastille att">il manque 172 h</span></div>
+              <div class="micro">1 534 h de travail + 128 h de fériés chômés · personne n’y est inscrit</div>
+              <div class="frise surligne" aria-hidden="true"><span style="width:20%;background:var(--i1)"></span><span style="width:8%;background:var(--i2)"></span><span style="width:12%;background:var(--i3)"></span><span style="width:25%;background:var(--i5)"></span><span style="width:4%;background:var(--ferme-a)"></span><span style="width:6%;background:var(--i6)"></span><span style="width:25%;background:var(--i1)"></span></div>
+              <div class="mois"><span>janv.</span><span>avr.</span><span>juil.</span><span>oct.</span><span>déc.</span></div>
+            </div>
+            <div class="annot">Ce n’est pas le rythme d’Arthur : c’est le modèle intégré, replacé sur 2027. Le régler puis « Enregistrer » crée un « arthur » 2027 bâti dessus — c’est arrivé chez le domaine qui a signalé.</div>
+            <div class="annot">Menu « … » : « Année 2028 — préparer depuis 2026 ». L’année d’après est toujours dans la liste, alors le menu propose celle d’encore après — et il ouvre une année vide : rien n’est préparé.</div>
+          </div>
+        </div>
+      </div>
+      <div class="colonne">
+        <span class="etiquette apres">Proposé</span>
+        <p class="legende-ecran">Sur une année où le modèle manque : partir du modèle du domaine de l’année d’avant, ou d’une année vide. Dans le menu « … », « Préparer 2027 » recopie les modèles choisis, d’un coup.</p>
+        <div class="ecrans">
+          <div class="tel" role="img" aria-label="Téléphone : le modèle manque sur 2027, partir de 2026">
+            <div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div>
+            <div class="tel-corps">
+              <div class="app-tete"><h4>Planning</h4><span class="roue" aria-hidden="true">⚙</span></div>
+              <div class="onglets"><span>Mois</span><span class="on">Année</span><span>Personnel</span></div>
+              <div class="choix"><span>standard</span><span class="on">arthur</span><span>equipe</span><span>saisonnier</span></div>
+              <div class="carte">
+                <div class="carte-lbl">« arthur » n’existe pas encore en 2027</div>
+                <div class="encadre info"><b>Point de départ : votre « arthur » de 2026.</b><p>Replacé sur les jours de 2027 : un lundi reste un lundi. 2 jours restent à poser (un mois n’a pas les mêmes semaines d’une année à l’autre) ; 7 fériés tombent sur des jours travaillés, proposés chômés.</p></div>
+                <div class="rangee"><span class="bt pri">Partir de 2026</span><span class="bt">Partir d’une année vide</span></div>
+                <div class="frise grise" aria-hidden="true"><span style="width:16%;background:var(--i2)"></span><span style="width:8%;background:var(--i3)"></span><span style="width:40%;background:var(--i4)"></span><span style="width:4%;background:var(--i6)"></span><span style="width:16%;background:var(--i4)"></span><span style="width:16%;background:var(--i2)"></span></div>
+                <div class="mois"><span>janv.</span><span>avr.</span><span>juil.</span><span>oct.</span><span>déc.</span></div>
+                <p class="micro">Aperçu : rien n’est écrit avant votre choix, puis « Enregistrer ».</p>
+              </div>
+            </div>
+          </div>
+          <div class="pc" role="img" aria-label="Ordinateur : préparer 2027 depuis les modèles 2026">
+            <div class="pc-barre"><i></i><i></i><i></i><span>mavigneapp.fr — Planning › … › Préparer 2027</span></div>
+            <div class="pc-corps">
+              <div class="carte" style="max-width:640px">
+                <h4 style="font-family:var(--font-titre);font-size:var(--pt-md);margin:0 0 2px;font-weight:600">Préparer 2027 depuis vos modèles 2026</h4>
+                <p class="micro" style="margin-top:0">Chaque modèle est replacé sur les jours de 2027. Rien n’est écrit sur 2026.</p>
+                <div class="ligne"><span class="case on">✓</span><span class="q">standard<small>Paul, Marie · 3 jours à poser</small></span></div>
+                <div class="ligne"><span class="case on">✓</span><span class="q">arthur<small>Arthur · existe déjà en 2027 : coché, il est remplacé</small></span><span class="case on">✓</span><span style="font-size:var(--pt-micro)">le remplacer</span></div>
+                <div class="ligne"><span class="case on">✓</span><span class="q">equipe<small>Léo, Lucie · 2 jours à poser</small></span></div>
+                <div class="ligne"><span class="case"></span><span class="q">saisonnier<small>personne ne le suit</small></span></div>
+                <div class="effet" style="display:grid;gap:6px">
+                  <div style="display:flex;gap:8px;align-items:flex-start"><span class="case on">✓</span><span>Rouvrir les semaines fermées comme leur saison — en 2027, les congés se posent sur la fiche de chacun (la base de l’année).</span></div>
+                  <div style="display:flex;gap:8px;align-items:flex-start"><span class="case on">✓</span><span>Chômer les fériés qui tombent sur un jour travaillé (21 en tout).</span></div>
+                </div>
+                <p class="micro"><b style="color:var(--texte)">3 modèles préparés · 7 jours à poser · « arthur » 2027 remplacé.</b> Un modèle 2027 déjà là n’est remplacé que coché.</p>
+                <div class="rangee"><span class="bt pri">Préparer 2027</span><span class="bt">Annuler</span></div>
+              </div>
+              <div class="carte" style="max-width:640px">
+                <div class="carte-lbl">Planning › Mois, janvier 2027 — le bandeau</div>
+                <div class="encadre info"><b>La grille de 2027 reprend vos modèles 2026.</b><p>Replacés sur les bons jours : 7 jours restent à poser. Rien n’est ajouté à votre place.</p><div class="rangee"><span class="bt pt">Préparer 2027</span></div></div>
+                <p class="micro">Aujourd’hui ce bandeau dit « report du modèle 2026 » et sert le modèle intégré : il dira vrai.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="decision">
+      <h3>D3 · Une année sans modèle : sur quoi l’appli calcule-t-elle ?</h3>
+      <p class="micro" style="font-size:var(--pt-txt);color:var(--texte-med)">Tant qu’un modèle manque sur une année, le Pilotage (capacité, renfort), les relevés à venir et le planning imprimé lisent quand même des heures :</p>
+      <ol>
+        <li><b>Le modèle du domaine de l’année d’avant</b>, replacé sur les bons jours — ce que le bandeau annonce déjà.</li>
+        <li><b>Le modèle intégré de l’appli</b> — ce qu’il fait aujourd’hui, pour tous les modèles qu’il ne connaît pas.</li>
+      </ol>
+      <p class="reco"><b>Recommandé :</b> 1 ; le modèle intégré seulement pour un domaine qui n’a encore aucun modèle. Les heures de 2027 changeront dans le Pilotage des domaines qui n’ont pas encore préparé l’année : elles deviendront justes.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════ DÉCISIONS ══════════════════ -->
+  <section class="bloc" id="decisions">
+    <h2>Les trois décisions</h2>
+    <p class="ou">Ce qu’il faut trancher avant l’intégration, et ce que je recommande. Une fois tranché : trois lots, dans cet ordre, chacun comparé à cette maquette avant d’être livré.</p>
+    <table class="recap">
+      <thead><tr><th>Décision</th><th>Recommandé</th><th>Le lot</th></tr></thead>
+      <tbody>
+        <tr><td><b>D1</b> · Inscrire à partir d’un mois ?</td><td>Tous les mois (ce que fait l’appli), l’effet sur les mois passés écrit avant de confirmer.</td><td><b>MODSUIVI-1</b> · « Suivi par », l’avertissement, la feuille « Inscrire » (onglet Année, téléphone et ordinateur).</td></tr>
+        <tr><td><b>D2</b> · Un férié qui porte des heures ?</td><td>Proposé chômé : la liste, un seul « Chômer les N », rien sans le geste.</td><td><b>FERIES-1</b> · le férié avec ses heures et « Chômer » dans la semaine ; la carte des fériés de l’année.</td></tr>
+        <tr><td><b>D3</b> · Une année sans modèle ?</td><td>Le modèle du domaine de l’année d’avant, replacé ; l’intégré seulement sans aucun modèle.</td><td><b>PREPAN-1</b> · « Partir de 2026 / d’une année vide », « Préparer 2027 », le bandeau qui dit vrai, le calcul d’une année sans modèle.</td></tr>
+      </tbody>
+    </table>
+    <p class="pied">Maquette : rien n’est branché, les écrans sont dessinés à la main dans la charte de l’appli (clair et sombre). Données fictives. Base du dépôt : 737ac8d (« intrant1 ») et RATTACHE-1 (§554).</p>
+  </section>
+</main>
+<script>
+(function(){
+  var b=document.getElementById('theme'),m=['auto','clair','sombre'],i=0;
+  b.addEventListener('click',function(){
+    i=(i+1)%3;var r=document.documentElement;
+    if(m[i]==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',m[i]==='clair'?'light':'dark');
+    b.textContent='Thème : '+m[i];
+  });
+})();
+</script>
+</body>
+</html>

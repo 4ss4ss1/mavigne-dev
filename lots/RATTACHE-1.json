@@ -1,0 +1,34 @@
+{
+  "lot": "RATTACHE-1",
+  "section": "§554",
+  "base": "737ac8d9e501e5f9120827df8d4e73774996932f",
+  "inclut": [],
+  "date": "2026-11-09",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "94fc0089178ea2215f795b89cc5269d1a74487de322087fc9a29a1098375192d",
+    "CLAUDE.md": "1937ce8edcb784a537071033253ae0424c5a50e9cc8f4d6b6cc2a5c48327d7bf",
+    "docs/claude/INDEX.md": "0c955e3c87c4487bc5e8da744b611921864aca2672ae2115433c9da779b2c008",
+    "docs/claude/chantiers-530-579.md": "154cbed854a8e670fb7d9d4025e8311268ad6a9d34bb919f52f53ce2f78661c3",
+    "docs/claude/journal.md": "5bbaba5deda505a673bd1654f2bf808ab10204a3a82c4bd60719e0bc58af8ec1",
+    "docs/claude/modules.md": "3e7ab6e5e35d419a11832b27ca41d6c5618dc77d06a291a309bd05e57533a5df",
+    "docs/maquettes/LISEZMOI.md": "65bd027489858871f844d3dc64296c6c8908090c9082d6e50c75d85213372367",
+    "guide/10-planning.html": "0914bf6619de5f9663f62df11e7866643d4a72bcebf592ac392eadd665a5591a",
+    "guide/12-reglages.html": "d2b8b85083e826a9283fdf26ab23e26ca76bff81e229c4cc40fb54e9bdbe0fd0",
+    "index.html": "5a1d20ea0065cb218f04147d5bc54d484be9706134926c490183dd42dce157a6",
+    "public/sw.js": "4108554cbdcaf1a2d0aa53800f80b1a94aab1bc1e02baa81fbc7832605daf5d8",
+    "scripts/harnais-claude-md.mjs": "46d4ba3fc2bf37a67bd372ce6832b1d485318efb98c7ea920e518103a15ecf59",
+    "scripts/mv-captures.mjs": "61d0cd1aa33589365f00375bdfd7b3323b9ad0c5cb2833fc81f5fec505d050b3",
+    "scripts/mv-harnais-liste.mjs": "c9830aeafb50f3f77833be3d2aa7683ffb306f3152f71a561dbaea6155a772eb",
+    "scripts/mv-harnais-onglets1.mjs": "c72236dc280694a89bc6a6f3a506b26f35b82a9e09f50e421273c697320ecfc0",
+    "src/planning.js": "b4d014d29e800eb19347d0fc8e43a70365bb685aafacaa0f61d079930a273480",
+    "src/reglages.js": "6a45783e20e2c701d7e5593e63c6e2f151f4376905937821a81522ed547ec536",
+    "src/utils.js": "075d12f2630637141f800330335ddfba085b13ec3c20c08c771c87c171fc1117",
+    "src/whats-new.js": "0a9412d8771e30631bb70e61d477f72a235164d07f2b7b5faee6a1f4c3e1df09",
+    "docs/maquettes/maquette-modeles-suivis-v1.html": "2ee01cfcb86170c9e26c550d9427053a41292063f4ed8c6cc90ef7876146ccbe",
+    "scripts/mv-harnais-rattache1.mjs": "722f50cd23d756d5e427d48da9dbd259e146563b8add32be7631975e2fe7d1f1"
+  }
+}

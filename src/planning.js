@@ -3756,7 +3756,7 @@ function _planRecaleBar(){
 function _pl2PlusHtml(){
   var L=[['cp','Cong\u00e9s sur une p\u00e9riode','une personne, du \u2026 au \u2026'],['chaleur','Horaires chaleur sur une p\u00e9riode','toute l\u2019\u00e9quipe, du \u2026 au \u2026'],
     ['cave','Journ\u00e9es de cave','cochez les cases de ceux qui \u00e9taient en cave, puis \u00ab\u00a0Cave\u00a0\u00bb dans la barre'],
-    ['annee','Ann\u00e9e '+((Math.max.apply(null,_planYearList().concat([planYear])))+1),'pr\u00e9parer depuis '+planYear],['releves','Relev\u00e9s d\u2019heures du mois','dans la fiche de chacun, \u00ab\u00a0Les gens\u00a0\u00bb']];
+    ['annee','Ann\u00e9e '+((Math.max.apply(null,_planYearList().concat([planYear])))+1),'pr\u00e9parer depuis '+planYear],['releves','Relev\u00e9s d\u2019heures du mois','dans la fiche de chacun, \u00ab\u00a0Personnel\u00a0\u00bb']];
   return '<div class="pl2-plus-voile" onclick="_pl2Plus(false)"></div><div class="pl2-plus" role="dialog" aria-label="Plus d\u2019actions">'
     +'<div class="pl2-plus-t">Semaine et au-del\u00e0</div>'
     +L.map(function(x){ return '<button type="button" class="pl2-plus-l" data-k="'+x[0]+'" onclick="_pl2PlusVa(this.dataset.k)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>'; }).join('')
@@ -7009,7 +7009,7 @@ function _planRenderCadre(){
     +'</div>';
     if(delConfirm){
       html+='<div class="plan-card mvencadre mvencadre-danger" style="margin-top:-6px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap">'
-        +'<span style="flex:1;font-size:var(--pt-txt,13px);color:var(--rouge)">Supprimer \u00ab\u00a0'+id+'\u00a0\u00bb ? Les membres assign\u00e9s passeront \u00e0 "standard".</span>'
+        +'<span style="display:block;margin:0 0 8px;font-size:var(--pt-txt,13px);color:var(--rouge)">'+_planSupprTxt(id)+'</span>'
         +'<button class="mvbtn mvbtn-danger" onclick="planDeleteTemplate(\''+id+'\')">Confirmer</button>'
         +'<button class="plan-btn-pdf" onclick="planCancelDeleteTemplate()">Annuler</button>'
       +'</div>';
@@ -7051,10 +7051,14 @@ function planCreateTemplate(){
   if(window.planAnneeOuvrir)window.planAnneeOuvrir(id);   // ★ FRISE-5 : un modèle neuf s'ouvre sur son année — vide, il se construit sur la frise (FRISE-4)
 }
 
+// ★★ RATTACHE-1 (§554) — LE MODÈLE D'UN SALARIÉ EST LA GRILLE DE SON CONTRAT EN COURS ; planning_id en est le miroir
+//   (_mvHistMirror, utils.js). Écrit seul ici avant ce lot, il laissait le contrat sur l'ancienne grille : Réglages l'affichait,
+//   et le premier événement du contrat (embauche, renouvellement, fin, retrait) la recopiait dans planning_id, sans un mot.
+//   Remonté du terrain (09/11) : un salarié resté sur « standard » depuis son embauche, et son modèle réglé en vain.
 function planAssignTpl(nom,plId){
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
   if(!mbr)return;
-  mbr.planning_id=plId;
+  if(typeof window._mvHistGrille==='function')window._mvHistGrille(mbr,plId);else mbr.planning_id=plId;
   window.MEMBRES=window.MEMBRES;
   window.fbSaveToast({membres:window.MEMBRES},'\u2705 '+nom+' \u2192 planning "'+plId+'"','#3D6B27');
 }
@@ -7261,14 +7265,36 @@ function planCancelDeleteTemplate(){
   window._planDeleteConfirm=null;
   _planRenderCadre();
 }
+// ★★ RATTACHE-1 (§554) — SUPPRIMER UN MODÈLE SUR UNE ANNÉE NE DÉTACHE PERSONNE S'IL EXISTE AILLEURS. Un modèle est rangé par
+//   année (PLANNING_TEMPLATES[année][id]) ; le rattachement d'un salarié n'en a pas (planning_id). Avant, supprimer le modèle
+//   d'une seule année remettait sur « standard » tous ceux qui le suivaient, pour TOUTES les années. Seul un modèle qui n'existe
+//   plus nulle part renvoie ses salariés sur « standard » — contrat compris (_mvHistGrille), sinon le prochain événement du
+//   contrat les remettrait sur un modèle disparu. La fenêtre de confirmation dit lequel des deux cas, avant.
+function _planSupprEffet(id){
+  var Y=String(_pY()),ailleurs=[];
+  Object.keys(PLANNING_TEMPLATES).forEach(function(k){if(/^\d{4}$/.test(k)&&k!==Y&&PLANNING_TEMPLATES[k]&&PLANNING_TEMPLATES[k][id])ailleurs.push(k);});
+  ailleurs.sort();
+  var gens=ailleurs.length?[]:(window.MEMBRES||[]).filter(function(m){return m&&m.planning_id===id;}).map(function(m){return m.nom;});
+  return {annee:Y,ailleurs:ailleurs,gens:gens};
+}
+function _planSupprTxt(id){
+  var fx=_planSupprEffet(id),n=fx.gens.length,q='\u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb';
+  if(fx.ailleurs.length)return 'Supprimer '+q+' de '+fx.annee+'\u00a0? Il reste sur '+fx.ailleurs.join(', ')+'\u00a0: personne ne change de mod\u00e8le.';
+  if(!n)return 'Supprimer '+q+'\u00a0? Personne ne le suit.';
+  var noms=fx.gens.slice(0,3).map(function(x){return _escHtml(x);}).join(', ')+(n>3?' et '+(n-3)+' autre'+(n>4?'s':''):'');
+  return 'Supprimer '+q+'\u00a0? Il n\u2019existe sur aucune autre ann\u00e9e\u00a0: '+noms+' passer'+(n>1?'ont':'a')+' sur \u00ab\u00a0standard\u00a0\u00bb.';
+}
 function planDeleteTemplate(id){
   window._planDeleteConfirm=null;
   if(!_pTplStore()[id]){showToast('Template introuvable','var(--rouge)');return;}
+  var fx=_planSupprEffet(id),maj={planning_templates:PLANNING_TEMPLATES};
   delete _pTplStore()[id];
-  // Réassigner les membres sur "standard"
-  (window.MEMBRES||[]).forEach(function(m){if(m.planning_id===id)m.planning_id='standard';});
+  if(fx.gens.length){
+    (window.MEMBRES||[]).forEach(function(m){if(m&&m.planning_id===id){if(typeof window._mvHistGrille==='function')window._mvHistGrille(m,'standard');else m.planning_id='standard';}});
+    maj.membres=window.MEMBRES;
+  }
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-  window.fbSaveToast({planning_templates:PLANNING_TEMPLATES,membres:window.MEMBRES},'\uD83D\uDDD1 Template "'+id+'" supprim\u00e9','#B85A1A');
+  window.fbSaveToast(maj,'\uD83D\uDDD1 Template "'+id+'" supprim\u00e9'+(fx.ailleurs.length?' de '+fx.annee:''),'#B85A1A');
   _planRenderCadre();
 }
 

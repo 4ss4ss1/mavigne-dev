@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.85';
+export const APP_VERSION = '10.86';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2782,6 +2782,7 @@ var MV_AIDE = {
       ['Trois onglets', ": Mois, la grille de toute l’équipe. Année, la frise d’un modèle — c’est là qu’il se règle. Personnel, une ligne par salarié et sa fiche — sur ordinateur, la fiche s’ouvre à droite de la liste — le récap annuel et les anciens salariés. Le reste — cadre légal, modèles, congés du domaine — vit dans la roue crantée du Planning."],
       ['L’équipe, côté salarié', "montre qui est là, jour par jour, sur le mois en cours : présent ou absent, jamais le motif — même un congé s’affiche « Abs » —, ni les heures, l’écart ou les congés des autres. Une absence d’une partie de la journée compte « présent ». Sa propre ligne est en tête ; la ligne Présents compte qui est là parmi ceux attendus ce jour-là (les équipes collectives n’y entrent pas). Lecture seule."],
       ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
+      ['Qui suit quel modèle', "se règle dans la roue crantée, « Assignation planning » : le modèle choisi vaut pour tous les mois de la personne, les mois passés compris, et devient la grille horaire de son contrat en cours (Réglages › Équipe). Dans l’onglet Année, la ligne sous le total d’un modèle dit qui le suit. Supprimer un modèle sur une année ne change le modèle de personne tant qu’il existe sur une autre année ; un modèle qui n’existe plus nulle part remet ceux qui le suivaient sur « standard » — la fenêtre de confirmation le dit avant."],
       ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
       ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, cave, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
@@ -5002,6 +5003,29 @@ window._mvHistMirror = function(m){
     });
   } else delete m.contrats;
   return m;
+};
+
+// ★★ RATTACHE-1 (§554) — CHANGER LE MODÈLE D'UN SALARIÉ, C'EST CHANGER LA GRILLE DE SON CONTRAT EN COURS.
+//   planning_id est le miroir de la grille du contrat en cours (ci-dessus). La roue crantée du Planning (« Assignation
+//   planning ») l'écrivait seul : le journal gardait l'ancienne grille, Réglages l'affichait, et le premier événement du
+//   contrat la recopiait dans planning_id, sans un mot. Ici, la source d'abord, puis le miroir.
+//   Fiche jamais migrée (journal vide) : le journal se dérive de planning_id, il suffit de l'écrire — rien n'est créé.
+//   Signature : (m, grille) — un membre, l'identifiant du modèle. Rend true si la fiche a changé.
+window._mvHistGrille = function(m, grille){
+  if(!m || !grille) return false;
+  grille = String(grille);
+  var H = (Array.isArray(m.hist) && m.hist.length) ? window._mvHist(m) : [], k = -1;
+  for(var i = H.length - 1; i >= 0; i--){ if(H[i].t === 'embauche'){ k = i; break; } }
+  if(k < 0){
+    if(m.planning_id === grille) return false;
+    m.planning_id = grille;
+    return true;
+  }
+  if(H[k].grille === grille && m.planning_id === grille) return false;
+  H[k].grille = grille;
+  m.hist = window._mvHist({ hist: H });
+  window._mvHistMirror(m);
+  return true;
 };
 
 window._mvContrats = function(m){
