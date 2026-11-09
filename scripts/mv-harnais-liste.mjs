@@ -904,6 +904,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-intrant1.mjs --contre'],
   ['node scripts/mv-harnais-rattache1.mjs'],           // RATTACHE-1 (§554) : le modèle suivi et la grille du contrat — la roue écrit le contrat, un événement ne le défait plus, supprimer une année ne détache personne
   ['node scripts/mv-harnais-rattache1.mjs --contre'],
+  ['node scripts/mv-harnais-modsuivi1.mjs'],           // MODSUIVI-1 (§555) : qui suit ce modèle — « Suivi par », l'avertissement, la feuille « Inscrire », l'effet compté avant, l'écriture par _mvHistGrille
+  ['node scripts/mv-harnais-modsuivi1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

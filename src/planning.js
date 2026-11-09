@@ -9856,6 +9856,7 @@ window._planGetRefH             = _planGetRefH;
 window._planPlId                = _planPlId;
 window._planFmt                 = _planFmt;
 window._planInContract          = _planInContract;
+window._planPlanned             = _planPlanned;   // ★ MODSUIVI-1 (§555) : la frise compte l'effet d'une inscription
 window._planMbrs                = _planMbrs;
 window._planMbrsMois            = _planMbrsMois;
 window._planMbrsAn              = _planMbrsAn;

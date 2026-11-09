@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.87', d: '2026-11-09', items: [   // MODSUIVI-1 (§555) : qui suit ce modèle — l'onglet Année le dit, et inscrit sur place
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’onglet Année dit qui suit le modèle',
+      desc: "En tête de la carte d’un modèle : « Suivi par » et ses salariés, ou « Personne ne suit », quand le régler ne changerait le planning de personne. « Inscrire… » ou « Modifier » ouvrent une feuille : cochez ceux qui travaillent à ce rythme ; avant de confirmer, elle dit ce que ça change sur leurs heures prévues des mois passés. Un tuto montre le geste." },
+  ] },
   { v: '10.86', d: '2026-11-09', items: [   // RATTACHE-1 (§554) : le modèle qu'un salarié suit et la grille de son contrat ; supprimer un modèle sur une année
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Le modèle d’un salarié et la grille de son contrat disent la même chose',
       desc: "Choisir le modèle d’un salarié dans la roue crantée du Planning (« Assignation planning ») change aussi la grille horaire de son contrat en cours : Réglages › Équipe la montre. Un renouvellement, une fin de contrat ou une nouvelle embauche ne le remettent plus sur l’ancienne grille sans rien dire." },

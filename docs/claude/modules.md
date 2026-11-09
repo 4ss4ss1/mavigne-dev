@@ -909,6 +909,8 @@ MIROIR de la grille du contrat en cours (l'embauche qui l'ouvre, dans `m.hist` ;
 (la source, puis le miroir) — **jamais `m.planning_id = …` seul** : Réglages affichait l'ancienne grille et le premier événement du contrat
 (`_emhCommit`) la recopiait. `_emhCommit` garde le modèle suivi d'une fiche décalée avant ce lot. Un modèle supprimé sur une année ne détache
 personne s'il existe sur une autre (`_planSupprEffet`) ; sur sa dernière année, ses salariés passent sur « standard » par `_mvHistGrille`.
+★ **MODSUIVI-1 (§555)** : l'onglet Année dit qui suit le modèle en tête de sa carte (`_planAnneeSuivi`) et inscrit sur place (la feuille `ovPlanInscr`,
+`planAnneeInscrire` → `planAnneeInscrOk`) — par la même primitive ; l'effet affiché se compte sur les mois finis de l'ANNÉE EN COURS (`_planAnneeInscrEffet`).
 
 **Une entrée de jour — cinq formes, et aucune autre n'est écrite :**
 

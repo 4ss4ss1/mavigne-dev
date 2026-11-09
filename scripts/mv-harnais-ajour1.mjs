@@ -70,7 +70,7 @@ const CLASSES = {
   ovJEquipe: ['FORMULAIRE', 'équipe au journal'], ovCommune: ['FORMULAIRE', 'commune'], ovEditHha: ['FORMULAIRE', 'heures par hectare'],
   ovRenTache: ['FORMULAIRE', 'renommer'], ovRenParcelle: ['FORMULAIRE', 'renommer'], ovRenMembre: ['FORMULAIRE', 'renommer'], ovRenActivite: ['FORMULAIRE', 'renommer'],
   ovEditDomNom: ['FORMULAIRE', 'nom du domaine'], ovDanger: ['FORMULAIRE', 'confirmation'], ovPlanDay: ['FORMULAIRE', 'journée du planning'],
-  ovPlanCP: ['FORMULAIRE', 'congés'], ovCaveOp: ['FORMULAIRE', 'opération de cave'], ovCuveeMgmt: ['FORMULAIRE', 'cuvée'],
+  ovPlanCP: ['FORMULAIRE', 'congés'], ovPlanInscr: ['FORMULAIRE', 'inscrire sur un modèle (Planning › Année, MODSUIVI-1 §555)'], ovCaveOp: ['FORMULAIRE', 'opération de cave'], ovCuveeMgmt: ['FORMULAIRE', 'cuvée'],
   ovVendRec: ['FORMULAIRE', 'récolte'], ovVendCuve: ['FORMULAIRE', 'cuve'], ovVendMesure: ['FORMULAIRE', 'mesure'], ovCaveConvert: ['FORMULAIRE', 'conversion'],
   ovCaveAnaEdit: ['FORMULAIRE', 'analyse'], ovCaveAna: ['FORMULAIRE', 'analyse'], ovSession: ['FORMULAIRE', 'nouvelle session'], ovActivite: ['FORMULAIRE', 'activité'],
   ovConducteur: ['FORMULAIRE', 'conducteur'], ovEditCond: ['FORMULAIRE', 'conducteur'], ovEditSession: ['FORMULAIRE', 'session'], ovTraitEdit: ['FORMULAIRE', 'traitement'],

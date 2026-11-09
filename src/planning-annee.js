@@ -34,6 +34,8 @@ function _planBaseAn(){ return window._planBaseAn.apply(null, arguments); }
 function _planJoursSem(){ return window._planJoursSem.apply(null, arguments); }
 function _planSolid(){ return window._planSolid.apply(null, arguments); }
 function _planSolidJour(){ return window._planSolidJour.apply(null, arguments); }
+function _planPlanned(){ return window._planPlanned.apply(null, arguments); }
+function _planInContract(){ return window._planInContract.apply(null, arguments); }
 // ★ ANNEE-TAB (§548) — L'ÉTAT DE LA VUE VIT ICI : le modèle ouvert, son brouillon, la semaine choisie, les retouches.
 //   L'année a son onglet ; la roue crantée ne la porte plus, et rien dans planning.js ne la remet à zéro.
 var _paEtat=null;
@@ -352,6 +354,96 @@ function planAnneeDesIci(el){
   A.J.forEach(function(x){if(x.i>=debut&&x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&x.h===v)_planAnneePose(G,x.m,x.d,nv);});
   E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
 }
+// ★★ MODSUIVI-1 (§555) — QUI SUIT CE MODÈLE (maquette « modèles suivis » v1, point 3 ; D1 validée le 09/11 : tous les mois, l'effet
+//   écrit avant de confirmer). Remonté du terrain : un modèle réglé en vain, suivi par personne, que la frise ne disait qu'en
+//   11 px gris en fin de ligne. En tête de la carte : « Suivi par » et ses salariés, ou « Personne ne suit … » ; « Inscrire… » et
+//   « Modifier » ouvrent la feuille (ovPlanInscr, index.html) : chaque salarié actif, le modèle qu'il suit aujourd'hui, et avant de
+//   confirmer ce que l'inscription change. L'écriture passe par _mvHistGrille (RATTACHE-1, §554) : planning_id et la grille du
+//   contrat en cours, ensemble. Décocher quelqu'un le remet sur « standard » ; de « standard » même, on ne sort qu'en s'inscrivant
+//   ailleurs. ⚠️ Le modèle d'une personne vaut pour TOUTES ses années (planning_id n'a pas d'année) : l'effet se compte sur les mois
+//   finis de l'année en cours, quelle que soit l'année affichée.
+var _paInscr=null;   // la feuille ouverte : {modele, coches:{nom:true}}
+function _planAnneeSuivi(id,gens,adm){
+  if(!gens.length)return '<div class="mvencadre mvencadre-attention" id="pa-suivi" data-tuto="plan.annee.suivi" style="margin-top:10px"><b>Personne ne suit \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb.</b>'
+    +'<div style="font-size:var(--pt-micro,11px);margin-top:2px">Le r\u00e9gler ne change le planning de personne. Inscrivez ceux qui travaillent \u00e0 ce rythme.</div>'
+    +(adm?'<div style="margin-top:8px"><button class="plan-btn-saisir" data-tuto="plan.annee.inscrire" onclick="planAnneeInscrire()">Inscrire\u2026</button></div>':'')+'</div>';
+  return '<div id="pa-suivi" data-tuto="plan.annee.suivi" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:var(--pt-txt,13px)"><span style="color:var(--texte-doux)">Suivi par</span>'
+    +gens.map(function(m){return '<span style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris-clair);border-radius:999px;padding:2px 10px 2px 2px;font-weight:600;font-size:var(--pt-micro,11px)">'
+      +'<span class="pl2-ava" style="width:22px;height:22px;background:'+_escAttr(m.couleur||'var(--vert-med)')+'">'+_escHtml(String(m.nom||'').charAt(0))+'</span>'+_escHtml(m.nom)+'</span>';}).join('')
+    +(adm?'<button class="plan-btn-pdf" data-tuto="plan.annee.inscrire" onclick="planAnneeInscrire()">Modifier</button>':'')+'</div>';
+}
+function _planAnneeJourTxt(iso){var q=String(iso||'').split('-');if(q.length!==3)return '';var d=parseInt(q[2],10),m=parseInt(q[1],10)-1;return (d===1?'1er':d)+'\u00a0'+(PLAN_MOIS_FR[m]||'')+'\u00a0'+q[0];}
+// ce que la personne suit aujourd'hui, et depuis quand quand le contrat le dit (journal tenu : une embauche porte sa grille)
+function _planAnneeInscrSub(m,id){
+  var cur=_planPlId(m),P=(Array.isArray(m.hist)&&m.hist.length&&typeof window._mvPeriodes==='function')?window._mvPeriodes(m):[],last=P.length?P[P.length-1]:null;
+  var dep=(last&&(last.grille||'standard')===cur)?(P.length===1?' depuis son embauche':(last.debut?' depuis le '+_planAnneeJourTxt(last.debut):'')):'';
+  return (cur===id?'suit d\u00e9j\u00e0 ce mod\u00e8le':'suit \u00ab\u00a0'+_escHtml(cur)+'\u00a0\u00bb')+dep;
+}
+// L'effet d'un changement sur les heures PRÉVUES de la personne (au modèle, sans les saisies), jours sous contrat, sur les mois finis
+//   de l'année en cours : celle des compteurs. Rend {m1, de, vers, figes} — m1 = le dernier mois fini (−1 en janvier).
+function _planAnneeInscrEffet(m,de,vers){
+  var t=new Date(),cy=t.getFullYear(),m1=t.getMonth()-1;
+  var r=window._planSurAnnee(cy,function(){var a=0,b=0;
+    for(var mo=0;mo<=m1;mo++){var nb=new Date(cy,mo+1,0).getDate();for(var d=1;d<=nb;d++){if(!_planInContract(m,mo,d))continue;a+=_planPlanned(de,mo,d,cy);b+=_planPlanned(vers,mo,d,cy);}}
+    return {a:a,b:b};});
+  var H=(window.PLANNING_HSUP||{})[m.nom]||{},fig=[];
+  for(var k=0;k<=m1;k++){var x=H[cy+'-'+String(k+1).padStart(2,'0')];if(x&&x.fige)fig.push(window.PLAN_MOIS[k].toLowerCase());}
+  return {m1:m1,de:r.a,vers:r.b,figes:fig};
+}
+function _planAnneeInscrChangements(){
+  var I=_paInscr,out=[];if(!I)return out;
+  _planMbrs().forEach(function(m){var cur=_planPlId(m),on=!!I.coches[m.nom];
+    if(on&&cur!==I.modele)out.push({m:m,de:cur,vers:I.modele});
+    else if(!on&&cur===I.modele&&I.modele!=='standard')out.push({m:m,de:cur,vers:'standard'});});
+  return out;
+}
+function _planAnneeInscrEffetTxt(c){
+  var e=_planAnneeInscrEffet(c.m,c.de,c.vers),q=function(x){return '\u00ab\u00a0'+_escHtml(x)+'\u00a0\u00bb';},n=_escHtml(c.m.nom),dif=e.vers-e.de,retrait=!!_paInscr&&c.vers!==_paInscr.modele;
+  var h='<b>'+n+(retrait?' repasse sur '+q(c.vers):' passe de '+q(c.de)+' \u00e0 '+q(c.vers))+' sur tous ses mois, les mois pass\u00e9s compris.</b> ';
+  h+=e.m1<0?'Aucun mois de l\u2019ann\u00e9e n\u2019est encore fini\u00a0: rien de pass\u00e9 ne bouge cette ann\u00e9e. '
+    :((e.m1===0?'En janvier':'De janvier \u00e0 '+window.PLAN_MOIS[e.m1].toLowerCase())+', ses heures pr\u00e9vues '+(Math.abs(dif)<0.05?'ne changent pas ('+_paH(e.de)+')':'passent de '+_paH(e.de)+' \u00e0 '+_paH(e.vers)+' ('+(dif>0?'+':'\u2212')+'\u00a0'+_paH(Math.abs(dif))+')\u00a0: son compteur de l\u2019ann\u00e9e suit')+'. ');
+  if(e.figes.length)h+=(e.figes.length>1?'Ses mois fig\u00e9s pour la compta ('+e.figes.join(', ')+') gardent':'Son mois fig\u00e9 pour la compta ('+e.figes[0]+') garde')+' ce qui est parti. ';
+  return h+'La grille horaire de son contrat devient '+q(c.vers)+'.';
+}
+function _planAnneeInscrPeindre(){
+  var I=_paInscr;if(!I)return;var b=document.getElementById('pins-body');if(!b)return;
+  var ok=document.getElementById('pins-ok'),M=_planMbrs(),ch=_planAnneeInscrChangements();
+  var h=M.length?'':'<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);padding:8px 0">Aucun salari\u00e9 actif.</div>';
+  M.forEach(function(m){var on=!!I.coches[m.nom],fixe=(I.modele==='standard'&&_planPlId(m)==='standard');
+    h+='<button type="button" class="sdeq-ckl" role="checkbox" aria-checked="'+on+'" data-nom="'+_escAttr(m.nom)+'"'+(fixe?' disabled':'')+' data-tuto="plan.annee.inscr.ligne" onclick="planAnneeInscrToggle(this)">'
+      +'<span class="sdeq-cb"></span><span style="flex:1;min-width:0"><b>'+_escHtml(m.nom)+'</b><span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:400">'
+      +_planAnneeInscrSub(m,I.modele)+(fixe?' \u2014 pour l\u2019en sortir, inscrivez-le sur un autre mod\u00e8le':'')+'</span></span></button>';});
+  if(ch.length)h+='<div id="pins-effet" class="mvencadre" style="margin-top:12px;font-size:var(--pt-micro,11px);line-height:1.5;display:grid;gap:8px">'
+    +ch.map(function(c){return '<div>'+_planAnneeInscrEffetTxt(c)+'</div>';}).join('')+'</div>';
+  b.innerHTML=h;
+  if(ok){var nIn=ch.filter(function(c){return c.vers===I.modele;}).length,nOut=ch.length-nIn;
+    ok.textContent=!ch.length?'Rien \u00e0 changer':(nOut===0?(nIn===1?'Inscrire '+ch[0].m.nom:'Inscrire '+nIn+' personnes'):'Enregistrer');
+    ok.disabled=!ch.length;}
+}
+function planAnneeInscrire(){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee)return;
+  var id=E.annee,c={};_planMbrs().forEach(function(m){if(_planPlId(m)===id)c[m.nom]=true;});
+  _paInscr={modele:id,coches:c};
+  var t=document.getElementById('pins-titre');if(t)t.textContent='Inscrire sur \u00ab\u00a0'+id+'\u00a0\u00bb';   // un textContent, posé à l'ouverture
+  _planAnneeInscrPeindre();
+  if(typeof window.openOv==='function')window.openOv('ovPlanInscr');
+}
+function planAnneeInscrToggle(el){
+  var I=_paInscr;if(!I||!el||el.disabled)return;var nom=el.getAttribute('data-nom');if(!nom)return;
+  if(I.coches[nom])delete I.coches[nom];else I.coches[nom]=true;
+  _planAnneeInscrPeindre();
+}
+function planAnneeInscrFermer(){_paInscr=null;if(typeof window.closeOv==='function')window.closeOv(null,'ovPlanInscr');}
+function planAnneeInscrOk(){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var I=_paInscr;if(!I)return;var ch=_planAnneeInscrChangements();if(!ch.length){planAnneeInscrFermer();return;}
+  ch.forEach(function(c){if(typeof window._mvHistGrille==='function')window._mvHistGrille(c.m,c.vers);else c.m.planning_id=c.vers;});
+  var nIn=ch.filter(function(c){return c.vers===I.modele;}),q='\u00ab\u00a0'+I.modele+'\u00a0\u00bb';
+  var msg=nIn.length===ch.length?(ch.length===1?ch[0].m.nom+' suit '+q:ch.length+' salari\u00e9s suivent '+q)
+    :(nIn.length?nIn.length+' inscrit'+(nIn.length>1?'s':'')+' sur '+q+', '+(ch.length-nIn.length)+' sur \u00ab\u00a0standard\u00a0\u00bb':(ch.length===1?ch[0].m.nom+' repasse':ch.length+' salari\u00e9s repassent')+' sur \u00ab\u00a0standard\u00a0\u00bb');
+  window.MEMBRES=window.MEMBRES;
+  if(typeof window.fbSaveToast==='function')window.fbSaveToast({membres:window.MEMBRES},'\u2705 '+msg,'#3D6B27');
+  planAnneeInscrFermer();_planRenderAnnee();
+}
 function _planRenderAnnee(){
   var body=document.getElementById('plan-body'),E=_paE();if(!body)return;   // ★ ANNEE-TAB : l'onglet L'année
   if(!E||!E.annee)E=_paEtat={annee:_planAnneeModeleDefaut()};
@@ -362,13 +454,13 @@ function _planRenderAnnee(){
   var brut=nv?_planModelBrut(id,yr,G):tot,att=_planAnneeCible(id,yr),ec=Math.round((brut-att)*10)/10;
   var gens=_planMbrs().filter(function(m){return _planPlId(m)===id;});
   var _nc=adm?_planAnneeCodes(MT):0;
-  var h=_planAnneeChoix(id,E)+(_nc?'<div class="plan-card" style="margin-bottom:10px"><div style="font-size:var(--pt-txt,13px)">Ce mod\u00e8le porte '+_nc+' code'+(_nc>1?'s':'')+' D, M ou A (horaires d\u00e9cal\u00e9s)\u00a0: les \u00e9crire en heures, une fois, sans rien changer aux heures ni \u00e0 la paie.</div><button class="plan-btn-saisir" style="margin-top:8px" onclick="planAnneeDma()">\u00c9crire les horaires en clair</button></div>':'')+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>';
+  var h=_planAnneeChoix(id,E)+(_nc?'<div class="plan-card" style="margin-bottom:10px"><div style="font-size:var(--pt-txt,13px)">Ce mod\u00e8le porte '+_nc+' code'+(_nc>1?'s':'')+' D, M ou A (horaires d\u00e9cal\u00e9s)\u00a0: les \u00e9crire en heures, une fois, sans rien changer aux heures ni \u00e0 la paie.</div><button class="plan-btn-saisir" style="margin-top:8px" onclick="planAnneeDma()">\u00c9crire les horaires en clair</button></div>':'')+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>'+_planAnneeSuivi(id,gens,adm);   // ★ MODSUIVI-1 (§555)
   h+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px"><b style="font-size:var(--pt-xl,24px);font-variant-numeric:tabular-nums">'+_paH(brut)+'</b>'
     +'<span style="color:var(--texte-doux)">sur '+_paH(att)+(nv?', la base de l\u2019ann\u00e9e':', le plafond annuel')+'</span>'
     +(Math.abs(ec)<0.05?'<span class="mvpas mvpas-statut mvpas-fait">juste</span>':'<span class="mvpas mvpas-statut mvpas-surveiller">'+(ec<0?'il manque '+_paH(-ec):_paH(ec)+' de trop')+'</span>')+'</div>'
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:4px">'
     +(nv?_paH(tot)+' de travail + '+_paH(fer)+' de f\u00e9ri\u00e9s ch\u00f4m\u00e9s ('+nf+' jours), compt\u00e9s pour leurs heures pr\u00e9vues':_paH(tot)+' de travail pr\u00e9vu')
-    +' \u00b7 '+(gens.length?_escHtml(gens.map(function(m){return m.nom;}).join(', ')):'personne n\u2019y est inscrit')+'</div>';
+    +'</div>';   // ★ MODSUIVI-1 (§555) : qui suit le modèle se dit en tête de la carte, plus en fin de ligne
   if(adm){                                                     // ★ FRISE-2 : tomber juste, enregistrer, annuler
     h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">';
     if(Math.abs(ec)>=0.05)h+='<button class="plan-btn-saisir" data-tuto="plan.annee.juste" onclick="planAnneeJuste()">'+(E.sugg?'Masquer les retouches':'Tomber juste')+'</button>';
@@ -609,4 +701,8 @@ window.planAnneeSemaine     = planAnneeSemaine;   // ★ FRISE-4
 window.planAnneeFermeSem    = planAnneeFermeSem;
 window.planAnneeDesIci      = planAnneeDesIci;
 window._planAnneeProgramme  = _planAnneeProgramme;
-window._planAnneeMini       = _planAnneeMini;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année
+window._planAnneeMini       = _planAnneeMini;
+window.planAnneeInscrire    = planAnneeInscrire;   // ★ MODSUIVI-1 (§555) : qui suit ce modèle
+window.planAnneeInscrToggle = planAnneeInscrToggle;
+window.planAnneeInscrFermer = planAnneeInscrFermer;
+window.planAnneeInscrOk     = planAnneeInscrOk;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année

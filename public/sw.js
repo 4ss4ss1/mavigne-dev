@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.77
+// MA VIGNE — Service Worker v11.78
+// v11.78 (09/11/2026) — MODSUIVI-1 (§555) : qui suit ce modèle — l’onglet Année le dit en tête de la carte (« Suivi par », « Personne ne suit »), « Inscrire… » ouvre une feuille qui dit l’effet sur les mois passés avant de confirmer ; un tuto
 // v11.77 (09/11/2026) — RATTACHE-1 (§554) : le modèle qu’un salarié suit et la grille de son contrat — la roue crantée écrit le contrat en cours, un événement du contrat ne le remet plus sur l’ancienne grille ; supprimer un modèle sur une année ne détache personne ; « Personnel » dans le menu « … »
 // v11.76 (09/11/2026) — INTRANT-1 (§553) : la fiche d’un intrant — la pièce pour les fournitures, « Par sacs / Au total » à l’achat, plus de fiche en double après un achat refusé ; « Modifier » (nom, type, unité, contenance), « Retirer » un achat, « Supprimer » la fiche, avec Annuler
 // v11.75 (08/11/2026) — AJOUR-1 (§552) : ce qu’on enregistre se voit tout de suite — la page dessous redessinée à la fermeture d’une fenêtre (retour compris), les fiches parcelle, récolte, maturité et Ma trace repeintes
@@ -4709,7 +4710,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.77';
+const CACHE_NAME   = 'mavigne-v11.78';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4726,7 +4727,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.77 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.78 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4746,7 +4747,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.77 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.78 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1,0 +1,50 @@
+{
+  "lot": "MODSUIVI-1",
+  "section": "§555",
+  "base": "a9739c7332a218dc35b7d45d7f7c82711fe0c781",
+  "inclut": [],
+  "date": "2026-11-09",
+  "tutos": {
+    "ok": true,
+    "empreinte": "9f3f947096bfc36879740c450f63bdceb47f033339bb82f024e15902888bdc94",
+    "date": "2026-11-09T20:45:46.684Z",
+    "joues": {
+      "téléphone": 7,
+      "ordinateur": 7,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "inscrire",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "850142237290ac36a5cf2ef5476ebd2aec05e4ea9d30447ebe210193026adc26",
+    "CLAUDE.md": "fb53b0f7da594825c5579fdc1cbf67d8bb6a272cd69683741c93af28f080ba4b",
+    "docs/claude/INDEX.md": "9de58143db8f1901ef893c56ccd7b75f48d5a33ec9db36fd6d0639fe83edeae8",
+    "docs/claude/chantiers-530-579.md": "842fa5527c33094579bdafffffd2dccaffa25dfeedbc5e877c629ef5ae95b3df",
+    "docs/claude/journal.md": "7493e62c23bff4a8d920ac886db19bb7be8170dad59023644e9ba5ccb0c2b3c7",
+    "docs/claude/modules.md": "04ce6e5e951a22e3f34c280e02224c073d09e772930c7101fc39a9f46aca04d1",
+    "guide/10-planning.html": "50af61f0fcf96896c02ce49c57afb5131fd60a3472debef0631d0a9160abab53",
+    "index.html": "f697f274efa8cdf3e944390292dec37bb1f7f79653b613a8c2638bbeb98483a0",
+    "public/sw.js": "3fb92f5480be4d550045896b0f2caddedef75dbe12f2850343721e682430b9ee",
+    "scripts/harnais-claude-md.mjs": "5468bd301ce7a708e8d39313944bc03b0f58fc5f602f94bb4a328ba924a11e65",
+    "scripts/mv-captures.mjs": "ee7e2437ed794587335b77b40a6163c81aa7a78f17e42e69aeedc4f061712486",
+    "scripts/mv-harnais-ajour1.mjs": "e2ef752870df9426f9bda18d3217cf13633d6e0fbbe5475019203fd6b3d8e2c2",
+    "scripts/mv-harnais-liste.mjs": "7444bc5a9a6b04fb65ea76a5e1870d10baaa3db56f2745fb788bcc7c9effaf3a",
+    "scripts/tutos-couverture.json": "fbe2ed08a605cc251fbde39313551875137c0cc5d39afec7dcb193927d3313c3",
+    "scripts/typo-baseline.json": "10d903a4753865fe60956a471610db0f0068e3cd6ea8b79b151d46715e1ae3f8",
+    "src/planning-annee.js": "c7f0c66dc30e9ef3da77af9a59acc6b198b8cbef5e8fa86c00449bc6a706d1ae",
+    "src/planning.js": "3305f016d217583425f1e8b67afd946d6e1e9e874780cce9baf43ae6f1f7077a",
+    "src/tutos.js": "cc0c7e5d764d36f971cd2fc9025a4362332bd159e5c1e0beecd3a5f5b0e88eea",
+    "src/utils.js": "942891bce317cc10dbc3542ec8718939b88e5d9d8c8916155c0a0894eed7e91e",
+    "src/whats-new.js": "4e373bb611b2223b78b0b991c4be7be7e8c113270a7d1da259ddabe6babe1994",
+    "scripts/mv-harnais-modsuivi1.mjs": "98242c892832ccef5f8756c67f9642488f3fb43c890f3e12d89b1c62722850e1"
+  }
+}
