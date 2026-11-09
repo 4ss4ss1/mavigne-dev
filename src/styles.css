@@ -3888,6 +3888,16 @@ td .sdeq-trace{padding:2px 0 0;}
 .mvr-segb{ flex:1; font-family:var(--font-ui); font-size:var(--pt-micro,12px); font-weight:600; color:var(--texte-doux,#7A7060);
   background:none; border:none; border-radius:8px; padding:8px 4px; cursor:pointer; min-height:38px; }
 .mvr-segb.on{ background:var(--accent); color:var(--sur-accent); }   /* RSV-BTN : le choix fait prend la couleur d'action (plus le terre) */
+/* ★ INTRANT-1 (§553) : la fiche d’un intrant — ses achats (chacun retirable), puis la zone qui supprime la fiche. */
+.mvr-pa{ display:flex; flex-direction:column; }
+.mvr-pa-l{ display:flex; align-items:center; gap:var(--e-3,12px); padding:var(--e-2,8px) 0; }
+.mvr-pa-l + .mvr-pa-l{ border-top:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+.mvr-pa-t{ flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--e-1,4px); font-family:var(--font-ui); }
+.mvr-pa-t b{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
+.mvr-pa-t span{ font-size:var(--pt-micro,12px); color:var(--texte-doux); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mvr-pf-danger{ margin-top:var(--e-5,20px); padding-top:var(--e-4,16px); border-top:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+.mvr-pf-danger .mvr-btn{ width:100%; }
+.mvr-pf-actions{ margin-top:var(--e-5,20px); }
 
 /* ── Inventaire d'ouverture ── */
 .mvr-irow{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid rgba(138,90,56,0.10); }

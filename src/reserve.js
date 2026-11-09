@@ -218,6 +218,22 @@ function _stock(p){
   return { q:_invOuv(p)+_achatsQ(p)-c.q, known:c.known, conso:c.q, ouv:_invOuv(p), achats:_achatsQ(p) };
 }
 function _nbUnites(p,q){ return p.contenance?Math.round(q/p.contenance*10)/10:null; }
+// ★★ INTRANT-1 (§553) — LA PIÈCE, ET L'UNITÉ QUI S'ACCORDE
+//   Remonté du terrain (09/11) : des piquets enregistrés en kg. La liste « Unité » ne proposait que kg et L — les
+//   fournitures (piquet, fil, agrafe, bouchon, filtre…) étaient entrées dans les types d'intrant sans elle. Pour une
+//   fourniture (consommé en saisie manuelle), l'unité n'est qu'une étiquette : la pièce n'entre dans aucun calcul.
+//   Elle reste fermée au phyto et à l'œno, dont le consommé se calcule en kg ou en L (registre, Cuvier, SO₂).
+var _RSV_UNITE_PIECE = 'pièce';
+function _rsvUnitesPour(cat){ return (cat==='phyto'||cat==='oeno') ? ['kg','L'] : ['kg','L',_RSV_UNITE_PIECE]; }
+function _rsvUniteDefaut(cat){ return (cat==='vigne'||cat==='cave'||cat==='trac') ? _RSV_UNITE_PIECE : 'kg'; }
+function _rsvContLblDe(u){ return u==='L' ? 'bidon' : (u===_RSV_UNITE_PIECE ? 'lot' : 'sac'); }
+// L'unité à l'écran : « pièce » s'accorde (2 pièces), kg et L ne bougent pas, une unité d'avant passe telle quelle.
+function _rsvU(u, q){
+  u = (u==null||u==='') ? 'kg' : String(u);
+  if(u!==_RSV_UNITE_PIECE) return u;
+  return Math.abs(Number(q)||0)>=2 ? 'pièces' : 'pièce';
+}
+window._rsvUnite = _rsvU;   // ★ INTRANT-1 : Pilotage › Économie › Achats l'emprunte au rendu (pilotage.js)
 
 // Le stock d'un produit vu depuis un AUTRE module (le Cuvier). `suit` dit si
 // ce produit se consomme bien depuis les cuves : sinon l'ecran de saisie
@@ -268,7 +284,7 @@ function renderReserve(){
       +'</div>'
       +'<div class="mvu-tabs mvr-tabs">'
         +'<button class="mvu-tab'+(_rsvTab==='futs'?' on':'')+'" onclick="_rsvTabTo(\'futs\')"><span class="mvu-tab-em">'+_mvIcon('barrique',18)+'</span>Fûts</button>'
-        +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">'+_mvIcon('fiole',18)+'</span>Intrants</button>'
+        +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" data-tuto="rsv.intrants" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">'+_mvIcon('fiole',18)+'</span>Intrants</button>'
         +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">'+_mvIcon('liste',18)+'</span>Bilan matière</button>'
       +'</div>'
     +'</div>'
@@ -815,7 +831,7 @@ function _rsvIntrantsHtml(){
   var neg=INTRANTS.produits.filter(function(p){var s=_stock(p);return s.known&&s.q<0;});
   neg.forEach(function(p){
     var s=_stock(p);
-    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+p.unite+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.'+_rsvNegEstime(p)+'</span></div>';
+    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+_escHtml(_rsvU(p.unite,s.q))+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.'+_rsvNegEstime(p)+'</span></div>';
   });
   if(!INTRANTS.produits.length){
     h+='<div class="mvr-empty">'+_mvIcon('eprouvette',40)+'<div>Aucun intrant suivi.</div>'+(adm?'<div class="mvr-empty-h">Enregistre un achat pour créer ton premier intrant et démarrer le bilan matière.</div>':'')+'</div>';
@@ -829,9 +845,9 @@ function _rsvIntrantsHtml(){
     h+='<div class="mvr-pcard"><div class="mvr-pband '+(_CATCLS[p.cat]||'')+'"></div><div class="mvr-pin">'
       +'<div class="mvr-ptop"><div class="mvr-pw"><div class="mvr-pnom">'+_escHtml(p.nom)+'</div>'+((p.sub||p.amm)?'<div class="mvr-psub2">'+(p.sub?_escHtml(p.sub):'')+((p.sub&&p.amm)?' \u00b7 ':'')+(p.amm?'AMM '+_escHtml(p.amm):'')+'</div>':'')+'</div><div class="mvr-pcat '+(_CATCLS[p.cat]||'')+'">'+(_CATLBL[p.cat]||p.cat)+'</div></div>';
     if(pending){
-      h+='<div class="mvr-pending">'+_mvIcon('rotation',16)+' <b>Consommé à activer.</b> Entrées : '+_fmt(s.ouv+s.achats)+' '+p.unite+'. Le consommé se calculera depuis le registre une fois les doses structurées (lot suivant), ou passe l\'intrant en saisie manuelle.</div>';
+      h+='<div class="mvr-pending">'+_mvIcon('rotation',16)+' <b>Consommé à activer.</b> Entrées : '+_fmt(s.ouv+s.achats)+' '+_escHtml(_rsvU(p.unite,s.ouv+s.achats))+'. Le consommé se calculera depuis le registre une fois les doses structurées (lot suivant), ou passe l\'intrant en saisie manuelle.</div>';
     } else {
-      h+='<div class="mvr-pstock"><span class="mvr-psv" style="color:'+stCol+'">'+_fmt(s.q)+'</span><span class="mvr-psu">'+p.unite+' en stock</span></div>'
+      h+='<div class="mvr-pstock" data-tuto="rsv.stock" data-pid="'+_escAttr(p.id)+'"><span class="mvr-psv" style="color:'+stCol+'">'+_fmt(s.q)+'</span><span class="mvr-psu">'+_escHtml(_rsvU(p.unite,s.q))+' en stock</span></div>'
         +(nu!=null&&s.q>=0?'<div class="mvr-punits">\u2248 '+_fmt(nu)+' '+(p.contLbl||'unité')+(nu>1?'s':'')+'</div>':'');
       h+='<div class="mvr-pbilan"><span>Ouv. '+_fmt(s.ouv)+'</span><span class="mvr-pin-v">+ '+_fmt(s.achats)+' achats</span><span class="mvr-pout-v">− '+_fmt(s.conso)+' conso'+(p.conso_src==='manual'?' <button class="mvr-cedit" onclick="_rsvConsoEdit(\''+_escAttr(p.id)+'\')">\u270F\uFE0F</button>':'')+'</span></div>';
     }
@@ -840,13 +856,15 @@ function _rsvIntrantsHtml(){
     // vaut pas un prix moyen calcule sur six — le lecteur doit pouvoir trancher.
     var _pu=_rsvPrixU(p), _nsp=_rsvPrixUSansPrix(p);
     if(_pu>0){
-      h+='<div class="mvr-pbilan"><span>Prix moyen <b>'+_escHtml(_eur2(_pu))+'\u00a0\u20AC/'+_escHtml(p.unite)+'</b></span>'
+      h+='<div class="mvr-pbilan"><span>Prix moyen <b>'+_escHtml(_eur2(_pu))+'\u00a0\u20AC/'+_escHtml(_rsvU(p.unite,1))+'</b></span>'
         +(_nsp>0?('<span class="mvr-pout-v">'+_nsp+' achat'+(_nsp>1?'s':'')+' sans prix</span>'):'')
         +'</div>';
     }
     h+='<div class="mvr-pfoot"><span class="mvr-pmv">'+_consoSrcLbl(p)+'</span>'
       +(pending?'':'<span class="mvr-badge '+((s.known&&s.q<0)?'mvr-b-ko':'mvr-b-ok')+'">'+((s.known&&s.q<0)?'\u26A0 écart':'\u2713 cohérent')+'</span>')
       +'</div>';
+    // ★ INTRANT-1 (§553) : corriger la fiche (nom, type, unité, contenance), retirer un achat, la supprimer — administrateur.
+    if(adm) h+='<div class="mvr-frow"><button type="button" class="mvr-mini" data-tuto="rsv.modifier" data-pid="'+_escAttr(p.id)+'" onclick="_rsvOpenProd(this.dataset.pid)">'+_mvIcon('crayon',16)+' Modifier</button></div>';
     h+='</div></div>';
   });
   return h;
@@ -874,7 +892,7 @@ window._rsvConsoEdit=function(id){
     icone:'✏️',
     titre:'Consommé cette saison',
     sub:p.nom,                       // pose via textContent : pas d'echappement a faire ici
-    unite:p.unite||'',
+    unite:_rsvU(p.unite,2),
     valeur:(p.conso_manuel||0),
     cb:function(v){
       p.conso_manuel=parseFloat(String(v).replace(',','.'))||0;
@@ -895,8 +913,7 @@ function _rsvOpenAchat(){
   document.getElementById('mvr-a-date').value=_today();
   ['mvr-a-fact','mvr-a-four','mvr-a-unites','mvr-a-qte','mvr-a-lot','mvr-a-prix','mvr-np-nom','mvr-np-cont'].forEach(function(k){var el=document.getElementById(k);if(el)el.value='';});
   _rsvEphySel=null; _rsvEphyRes=[];
-  _rsvSetSaisie('u');
-  _rsvOnProdChange();
+  _rsvOnProdChange();   // ★ INTRANT-1 : il choisit aussi le mode de saisie (Par sacs / Au total)
   if(window.openOv) window.openOv('ovRsvAchat');
 }
 window._rsvOpenAchat=_rsvOpenAchat;
@@ -906,7 +923,8 @@ function _rsvOnProdChange(){
   var isNew=(v==='__new__');
   document.getElementById('mvr-np-block').style.display=isNew?'':'none';
   if(isNew) _rsvNpCatChange();
-  _rsvUpdContHint();
+  // ★ INTRANT-1 (§553) : sans contenance, « Par sacs » ne peut rien calculer — le formulaire s'ouvre sur « Au total ».
+  _rsvSetSaisie(((_rsvCurProd().contenance||0)>0)?'u':'q');
 }
 window._rsvOnProdChange=_rsvOnProdChange;
 
@@ -925,8 +943,23 @@ function _rsvEphyReset(){
   var ep=document.getElementById('mvr-np-epick'); if(ep){ ep.style.display='none'; ep.innerHTML=''; }
   var nom=document.getElementById('mvr-np-nom'); if(nom) nom.value='';
 }
+// L'atelier déduit du type d'intrant, écrit dans son encadré (le formulaire d'achat et la fiche d'un intrant, INTRANT-1).
+function _rsvAteNote(ded, cat){
+  if(!ded) return;
+  var k=_rsvAteDe(cat);
+  ded.innerHTML='Atelier <b>'+_escHtml(_ATELBL[k])+'</b> \u2014 d\u00e9duit du type d\u2019intrant, rien \u00e0 saisir.';
+  ded.style.borderColor='color-mix(in srgb,'+_ATECOL[k]+' 38%, transparent)';
+  ded.style.background='color-mix(in srgb,'+_ATECOL[k]+' 9%, transparent)';
+}
 function _rsvNpCatChange(){
   var cat=document.getElementById('mvr-np-cat').value;
+  // ★ INTRANT-1 (§553) : les unités que ce type admet, et celle qui lui va d'office — la pièce pour les fournitures.
+  //   Changer de type remet l'unité d'office : sinon le phyto (kg), premier de la liste, laissait ses kilos aux piquets.
+  var su=document.getElementById('mvr-np-unite');
+  if(su){
+    su.innerHTML=_rsvUnitesPour(cat).map(function(u){ return '<option value="'+_escAttr(u)+'">'+_escHtml(u)+'</option>'; }).join('');
+    su.value=_rsvUniteDefaut(cat);
+  }
   // ⚠️ LA SOURCE DE CONSOMMATION N'EST PAS UN DETAIL. `registre` va chercher des
   //   doses dans TRAITEMENTS, `cave_so2` des grammes dans les operations de cave.
   //   Un piquet ou un filtre n'a NI l'un NI l'autre : laisser `registre` par
@@ -937,13 +970,7 @@ function _rsvNpCatChange(){
   if(src) src.value=(cat==='oeno')?'cuvier':((cat==='phyto')?'registre':'manual');
   // L'atelier deduit s'affiche : une deduction qu'on ne peut pas verifier est
   // indistinguable d'une invention.
-  var ded=document.getElementById('mvr-np-ate');
-  if(ded){
-    var k=_rsvAteDe(cat);
-    ded.innerHTML='Atelier <b>'+_escHtml(_ATELBL[k])+'</b> \u2014 d\u00e9duit du type d\u2019intrant, rien \u00e0 saisir.';
-    ded.style.borderColor='color-mix(in srgb,'+_ATECOL[k]+' 38%, transparent)';
-    ded.style.background='color-mix(in srgb,'+_ATECOL[k]+' 9%, transparent)';
-  }
+  _rsvAteNote(document.getElementById('mvr-np-ate'), cat);
   if(cat==='phyto' && _rsvEphyOn()){ _rsvNpShow('ephy'); _rsvEphyReset(); }
   else { _rsvNpShow('man'); _rsvEphySel=null; }
   _rsvUpdContHint();
@@ -999,13 +1026,30 @@ function _rsvCurProd(){
   }
   return INTRANTS.produits.find(function(x){return x.id===v;})||{unite:'kg',contenance:0};
 }
-function _rsvContLbl(){ var u=document.getElementById('mvr-np-unite').value; return u==='L'?'bidon':'sac'; }
+function _rsvContLbl(){ return _rsvContLblDe(document.getElementById('mvr-np-unite').value); }
+// ★ INTRANT-1 (§553) — LE FORMULAIRE PARLE DU CONTENANT, PLUS D'« UNITÉS ».
+//   « Par unités » voulait dire « nombre de sacs × contenance » ; posé sous une liste « Unité », il se lisait « à
+//   l'unité » — le piège remonté du terrain. Les mots suivent l'unité : sacs (kg), bidons (L), lots (pièce).
+function _rsvCond(p){ var l=String((p&&p.contLbl)||_rsvContLblDe(p&&p.unite)).trim().split(/\s+/)[0]; return l||'sac'; }
+function _rsvPl(m){ return /[sx]$/.test(m)?m:m+'s'; }
+function _rsvContQuoi(u){ return u===_RSV_UNITE_PIECE?'combien de pièces dans un lot':(u==='L'?'le volume d’un bidon':'le poids d’un sac'); }
+function _rsvContTitre(u){ return u===_RSV_UNITE_PIECE?'Pièces dans un lot':(u==='L'?'Volume d’un bidon (L)':(u==='kg'?'Poids d’un sac (kg)':'Contenance ('+u+')')); }
+function _rsvContEx(u){ return u===_RSV_UNITE_PIECE?'ex. 50':(u==='L'?'ex. 5':'ex. 25'); }
 function _rsvUpdContHint(){
-  var p=_rsvCurProd();
-  document.getElementById('mvr-a-qunit').textContent='en '+(p.unite||'kg');
+  var p=_rsvCurProd(), u=p.unite||'kg', ct=p.contenance||0, c=_rsvCond(p), cs=_rsvPl(c);
+  var neuf=(document.getElementById('mvr-a-prod').value==='__new__');
   var n=parseFloat(document.getElementById('mvr-a-unites').value)||0;
-  var ct=p.contenance||0;
-  document.getElementById('mvr-a-conthint').textContent=ct?((n||0)+' '+(p.contLbl||'unité')+((n||0)>1?'s':'')+' \u00D7 '+ct+' '+(p.unite||'kg')):'renseigne la contenance ci-dessus';
+  var mets=function(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; };
+  mets('mvr-sg-u','Par '+cs);
+  mets('mvr-a-ulbl','Nombre de '+cs);
+  mets('mvr-a-qunit','en '+_rsvU(u,2));
+  mets('mvr-np-contl',_rsvContTitre(u));
+  var cn=document.getElementById('mvr-np-cont'); if(cn) cn.placeholder=_rsvContEx(u);
+  var qt=document.getElementById('mvr-a-qte'); if(qt) qt.placeholder=(u===_RSV_UNITE_PIECE?'ex. 500':'ex. 150');
+  mets('mvr-a-conthint', ct
+    ? (n>0 ? (_fmt(n)+' '+(n>1?cs:c)+' \u00D7 '+_fmt(ct)+' '+_rsvU(u,ct)+' = '+_fmt(n*ct)+' '+_rsvU(u,n*ct)) : (c+' de '+_fmt(ct)+' '+_rsvU(u,ct)))
+    : (neuf ? ('Indique '+_rsvContQuoi(u)+' plus haut, ou passe en \u00ab\u00a0Au total\u00a0\u00bb.')
+            : 'Cette fiche n\u2019a pas de contenance\u00a0: passe en \u00ab\u00a0Au total\u00a0\u00bb, ou ajoute-la avec \u00ab\u00a0Modifier\u00a0\u00bb sur la fiche.'));
 }
 window._rsvUpdContHint=_rsvUpdContHint;
 
@@ -1043,39 +1087,247 @@ window._rsvPrixOuNull=_rsvPrixOuNull;
 function _rsvSaveAchat(){
   if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
   var sel=document.getElementById('mvr-a-prod').value;
-  var prodId;
-  if(sel==='__new__'){
+  var neuf=(sel==='__new__');
+  // ★★ INTRANT-1 (§553) — TOUT SE VÉRIFIE AVANT DE CRÉER LA FICHE.
+  //   La fiche d'un nouvel intrant entrait dans la liste AVANT le contrôle de la quantité : un refus la laissait en
+  //   mémoire (enregistrée au geste suivant), et le second essai en créait une deuxième du même nom — remonté du
+  //   terrain : deux fiches de piquets, dont une vide. Rien ne s'écrit tant qu'un contrôle peut encore refuser.
+  var np=null, p=null;
+  if(neuf){
     var nom=document.getElementById('mvr-np-nom').value.trim();
     if(!nom){ showToast('Donne un nom à l\'intrant','#B85A1A'); return; }
     // ARRACH-5 : une prestation n'est pas un intrant — elle se note sur l'étape d'arrachage.
     if(typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
+    if(INTRANTS.produits.some(function(x){ return x&&_rsvNorm(x.nom)===_rsvNorm(nom); })){ showToast('\u00ab\u00a0'+nom+'\u00a0\u00bb existe d\u00e9j\u00e0\u00a0: choisis-le dans la liste \u00ab\u00a0Intrant\u00a0\u00bb','#B85A1A'); return; }
     var cat=document.getElementById('mvr-np-cat').value;
-    var src=document.getElementById('mvr-np-src').value;
-    var unite=document.getElementById('mvr-np-unite').value;
-    var cont=parseFloat(document.getElementById('mvr-np-cont').value)||0;
-    var np={id:_rid(), nom:nom, cat:cat, unite:unite, contenance:cont, contLbl:(unite==='L'?'bidon':'sac'), conso_src:src, conso_manuel:0, amm:(_rsvEphySel&&_rsvEphySel.amm)||'', sub:(_rsvEphySel&&_rsvEphySel.sub)||'', ephy_type:(_rsvEphySel&&_rsvEphySel.type)||''};
-    INTRANTS.produits.push(np);
-    prodId=np.id;
-  } else { prodId=sel; }
-  var p=INTRANTS.produits.find(function(x){return x.id===prodId;});
+    var unite=document.getElementById('mvr-np-unite').value||_rsvUniteDefaut(cat);
+    np={id:_rid(), nom:nom, cat:cat, unite:unite, contenance:(parseFloat(document.getElementById('mvr-np-cont').value)||0), contLbl:_rsvContLblDe(unite), conso_src:document.getElementById('mvr-np-src').value, conso_manuel:0, amm:(_rsvEphySel&&_rsvEphySel.amm)||'', sub:(_rsvEphySel&&_rsvEphySel.sub)||'', ephy_type:(_rsvEphySel&&_rsvEphySel.type)||''};
+    p=np;
+  } else {
+    p=INTRANTS.produits.find(function(x){return x.id===sel;});
+    if(!p){ showToast('Choisis un intrant','#B85A1A'); return; }
+  }
+  // La quantité selon le mode choisi — chaque refus dit ce qui manque (avant : un seul message pour tous les cas).
+  var ct=p.contenance||0, c=_rsvCond(p), cs=_rsvPl(c);
   var n=parseFloat(document.getElementById('mvr-a-unites').value)||0;
-  var q=parseFloat(document.getElementById('mvr-a-qte').value)|| (n*(p.contenance||0)) ||0;
-  if(!q){ showToast('Renseigne une quantité (unités ou directe)','#B85A1A'); return; }
+  var qd=parseFloat(document.getElementById('mvr-a-qte').value)||0;
+  var q=0, unites=null;
+  if(_rsvSaisie==='u'){
+    if(!(n>0)){ showToast('Indique le nombre de '+cs,'#B85A1A'); return; }
+    if(!(ct>0)){ showToast(neuf?('Indique '+_rsvContQuoi(p.unite)+', ou passe en \u00ab\u00a0Au total\u00a0\u00bb'):'Cette fiche n\u2019a pas de contenance\u00a0: passe en \u00ab\u00a0Au total\u00a0\u00bb','#B85A1A'); return; }
+    q=n*ct; unites=n;
+  } else if(_rsvSaisie==='q'){
+    if(!(qd>0)){ showToast('Indique la quantit\u00e9 totale','#B85A1A'); return; }
+    q=qd;
+  } else {
+    q=(qd>0)?qd:((n>0&&ct>0)?n*ct:0); unites=(n>0)?n:null;
+    if(!(q>0)){ showToast('Indique la quantit\u00e9 totale'+(ct>0?(', ou le nombre de '+cs):''),'#B85A1A'); return; }
+  }
   var four=document.getElementById('mvr-a-four').value.trim();
   // ARRACH-5 : une facture de prestataire déjà notée sur une étape d'arrachage ne se saisit pas ici.
   var _fact=document.getElementById('mvr-a-fact').value.trim();
-  if(p&&typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(p.nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
+  if(!neuf&&typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(p.nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
   if(_fact&&typeof window._mvFactureOu==='function'&&window._mvFactureOu(four,_fact,'achat')==='presta'){ showToast('Cette facture est d\u00e9j\u00e0 not\u00e9e sur une \u00e9tape d\u2019arrachage','#B85A1A'); return; }
+  // Tous les contrôles sont passés : la fiche neuve et son achat s'écrivent ensemble.
+  if(np) INTRANTS.produits.push(np);
   _uniqPush(INTRANTS.achat_four, four);
-  INTRANTS.achats.push({id:_rid(), prodId:prodId, date:document.getElementById('mvr-a-date').value||_today(),
-    four:four, q:q, unites:n||null, lot:document.getElementById('mvr-a-lot').value.trim(),
-    fact:document.getElementById('mvr-a-fact').value.trim(), prix:_rsvPrixOuNull('mvr-a-prix')});
+  INTRANTS.achats.push({id:_rid(), prodId:p.id, date:document.getElementById('mvr-a-date').value||_today(),
+    four:four, q:q, unites:unites, lot:document.getElementById('mvr-a-lot').value.trim(),
+    fact:_fact, prix:_rsvPrixOuNull('mvr-a-prix')});
   saveIntrants();
   if(window.closeOv) window.closeOv(null,'ovRsvAchat');
   _rsvRenderBody();
   showToast('\u2713 Achat enregistré','#3D6B27');
 }
 window._rsvSaveAchat=_rsvSaveAchat;
+
+// ═══════════════════════ ★★ INTRANT-1 (§553) — LA FICHE D'UN INTRANT ═══════════════════════
+// Remonté du terrain (09/11) : des piquets saisis en kg, et aucun moyen de corriger — ni l'unité, ni le nom, ni un
+// achat mal saisi, ni la fiche en trop. Trois gestes, réservés à l'administrateur, dans une seule fenêtre :
+//   · MODIFIER — nom, type, unité, contenance, source du consommé. Changer l'unité corrige l'ÉTIQUETTE : les
+//     quantités déjà saisies gardent leur nombre (500 kg deviennent 500 pièces) — rien n'est converti, rien ne
+//     pourrait l'être. La fiche n'est pas reconstruite : seuls ces champs changent (AMM, consommé manuel… §24 n°12).
+//   · RETIRER UN ACHAT — tout de suite, « Annuler » six secondes (ANNULER-1, §471) ; la fenêtre repeint sa liste,
+//     jamais ses champs (une correction en cours reste).
+//   · SUPPRIMER LA FICHE — avec ses achats et son inventaire ; « Annuler » remet chaque élément à sa place. Refusé
+//     quand une opération la cite par son identifiant (adjonction du Cuvier, traitement du Chai, apport de
+//     fertilisation) : l'opération perdrait son produit, et le bilan matière sa sortie.
+var _rsvPfId = null;
+var _RSV_UNITES = ['kg','L',_RSV_UNITE_PIECE];
+var _RSV_CATS = ['phyto','oeno','vigne','cave','trac','gen'];   // l'ordre du formulaire d'achat ; les libellés sont ceux des cartes (_CATLBL)
+function _rsvPfProd(){ return _rsvPfId ? ((INTRANTS.produits||[]).find(function(x){ return x&&x.id===_rsvPfId; })||null) : null; }
+// Ce qui cite une fiche par son identifiant.
+function _rsvProdRefs(pid){
+  var cuv=0, chai=0, fer=0, CV=window.CAVE_VENDANGE, CE=window.CAVE_ELEVAGE;
+  ((CV&&CV.cuves_vinif)||[]).forEach(function(c){ ((c&&c.operations)||[]).forEach(function(o){ if(o&&o.prod_id===pid) cuv++; }); });
+  ((CE&&CE.operations)||[]).forEach(function(o){ if(o&&o.data&&o.data.prod_id===pid) chai++; });
+  (INTRANTS.fertil||[]).forEach(function(f){ if(f&&f.prodId===pid) fer++; });
+  var parts=[];
+  if(cuv) parts.push(cuv+' adjonction'+(cuv>1?'s':'')+' du Cuvier');
+  if(chai) parts.push(chai+' traitement'+(chai>1?'s':'')+' du Chai');
+  if(fer) parts.push(fer+' apport'+(fer>1?'s':'')+' de fertilisation');
+  var n=cuv+chai+fer, liste=parts.length>1?(parts.slice(0,-1).join(', ')+' et '+parts[parts.length-1]):(parts[0]||'');
+  return { n:n, cuv:cuv, chai:chai, fer:fer,
+    txt:n?('Cet intrant sert \u00e0 '+liste+'\u00a0: il ne peut pas \u00eatre supprim\u00e9. Corrige plut\u00f4t son nom ou son unit\u00e9.'):'' };
+}
+// Les unités que la fenêtre propose : celles du type, plus une unité d'avant que la fiche porterait (rien ne la
+// change en silence). La pièce n'est jamais gardée sur un phyto ou un œno.
+function _rsvPfUnites(p, cat, val){
+  var su=document.getElementById('mvr-pf-unite'); if(!su) return;
+  var us=_rsvUnitesPour(cat).slice();
+  if(p&&p.unite&&_RSV_UNITES.indexOf(p.unite)<0&&us.indexOf(p.unite)<0) us.push(p.unite);
+  su.innerHTML=us.map(function(u){ return '<option value="'+_escAttr(u)+'">'+_escHtml(u)+'</option>'; }).join('');
+  su.value=(us.indexOf(val)>=0)?val:_rsvUniteDefaut(cat);
+}
+// L'étiquette de la contenance, et ce que devient le stock quand l'unité change (rien n'est converti : on le dit).
+function _rsvPfLibelles(p){
+  var su=document.getElementById('mvr-pf-unite'), u=(su&&su.value)||'';
+  if(!u) return;   // un choix en cours : le tuto écrit « pièce » lettre à lettre
+  var cl=document.getElementById('mvr-pf-contl'); if(cl) cl.textContent=_rsvContTitre(u);
+  var cn=document.getElementById('mvr-pf-cont'); if(cn) cn.placeholder=_rsvContEx(u);
+  var un=document.getElementById('mvr-pf-unote');
+  if(un){
+    var avant=(p&&p.unite)||'kg';
+    if(p&&u!==avant){ var s=_stock(p).q; un.textContent='Les quantit\u00e9s d\u00e9j\u00e0 saisies gardent leur nombre\u00a0: '+_fmt(s)+'\u00a0'+_rsvU(avant,s)+' deviennent '+_fmt(s)+'\u00a0'+_rsvU(u,s)+'.'; }
+    else un.textContent='';
+  }
+}
+// Ses achats, chacun retirable ; en bas, la suppression de la fiche — ou ce qui l'empêche.
+function _rsvPfListe(p){
+  if(!p) return;
+  var L=(INTRANTS.achats||[]).filter(function(a){ return a&&a.prodId===p.id; })
+    .sort(function(a,b){ var x=String(a.date||''), y=String(b.date||''); return x<y?1:(x>y?-1:0); });
+  var lb=document.getElementById('mvr-pf-achl'); if(lb) lb.textContent=L.length?('Ses achats ('+L.length+')'):'Ses achats';
+  var box=document.getElementById('mvr-pf-achats');
+  if(box) box.innerHTML=L.length?L.map(function(a){
+      var q=Number(a.q)||0;
+      var meta=[_frDate(a.date), a.four||'', a.fact?('facture '+a.fact):''].filter(Boolean).join(' \u00b7 ');
+      return '<div class="mvr-pa-l"><div class="mvr-pa-t"><b>'+_escHtml(_fmt(q)+'\u00a0'+_rsvU(p.unite,q))+'</b>'+(meta?'<span>'+_escHtml(meta)+'</span>':'')+'</div>'
+        +(a.id?'<button type="button" class="mvr-mini" data-aid="'+_escAttr(a.id)+'" onclick="_rsvDelAchat(this.dataset.aid)">Retirer</button>':'')+'</div>';
+    }).join(''):'<div class="mvr-hint">Aucun achat pour cet intrant.</div>';
+  var dz=document.getElementById('mvr-pf-del');
+  if(dz){
+    var r=_rsvProdRefs(p.id), nInv=(INTRANTS.inventaires||[]).filter(function(v){ return v&&v.prodId===p.id; }).length;
+    var quoi=L.length?(L.length>1?(' et ses '+L.length+' achats'):' et son achat'):'';
+    dz.innerHTML=r.n?('<div class="mvr-hint">'+_escHtml(r.txt)+'</div>')
+      :('<button type="button" class="mvr-btn mvr-btn-dgr" onclick="_rsvDelProd()">'+_escHtml('Supprimer l\u2019intrant'+quoi)+'</button>'
+        +'<div class="mvr-hint">'+(nInv?'Son inventaire part aussi. ':'')+'\u00ab\u00a0Annuler\u00a0\u00bb remet tout pendant six secondes.</div>');
+  }
+}
+function _rsvOpenProd(pid){
+  if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
+  var p=(INTRANTS.produits||[]).find(function(x){ return x&&x.id===pid; });
+  if(!p){ showToast('Cet intrant n\u2019existe plus','#B85A1A'); return; }
+  _rsvEnsureOverlays();
+  _rsvPfId=pid;
+  var g=function(id){ return document.getElementById(id); };
+  var sub=g('mvr-pf-sub'); if(sub) sub.textContent=(p.nom||'')+' \u00b7 '+(_CATLBL[p.cat]||p.cat||'');
+  var nm=g('mvr-pf-nom'); if(nm){ nm.value=p.nom||''; nm.disabled=!!p.amm; }
+  var nn=g('mvr-pf-nomnote');
+  if(nn) nn.textContent=p.amm?('Nom du catalogue E-Phy (AMM '+p.amm+')\u00a0: il ne se modifie pas.')
+    :((p.conso_src==='registre')?'Le consomm\u00e9 se lit dans le registre phyto sous ce nom\u00a0: le renommer coupe le lien avec les traitements d\u00e9j\u00e0 not\u00e9s.':'');
+  var sc=g('mvr-pf-cat');
+  if(sc){
+    var cats=_RSV_CATS.slice();
+    if(p.cat&&cats.indexOf(p.cat)<0) cats.push(p.cat);   // un type d'avant reste proposé : rien ne change en silence
+    sc.innerHTML=cats.map(function(c){ return '<option value="'+_escAttr(c)+'">'+_escHtml(_CATLBL[c]||c)+'</option>'; }).join('');
+    sc.value=p.cat||'gen';
+  }
+  _rsvPfUnites(p, p.cat, p.unite||'kg');
+  var ct=g('mvr-pf-cont'); if(ct) ct.value=(Number(p.contenance)>0)?String(p.contenance):'';
+  var ss=g('mvr-pf-src'), so=g('mvr-np-src');   // les mêmes choix que le formulaire d'achat, recopiés : une seule liste à tenir
+  if(ss){ if(so&&so.innerHTML) ss.innerHTML=so.innerHTML; ss.value=p.conso_src||'registre'; }
+  _rsvAteNote(g('mvr-pf-ate'), p.cat);
+  _rsvPfLibelles(p);
+  _rsvPfListe(p);
+  if(window.openOv) window.openOv('ovRsvProd');
+}
+window._rsvOpenProd=_rsvOpenProd;
+// Un autre type ou une autre unité : la fenêtre suit, rien ne s'enregistre avant « Enregistrer ».
+function _rsvPfMaj(el){
+  var p=_rsvPfProd(); if(!p) return;
+  if(el&&el.id==='mvr-pf-cat'){
+    var cat=el.value, su=document.getElementById('mvr-pf-unite');
+    // L'unité choisie reste si le nouveau type l'admet ; la source du consommé reprend celle du type, comme à la
+    // création (_rsvNpCatChange) — un piquet passé du phyto aux fournitures ne cherche plus dans le registre.
+    _rsvPfUnites(p, cat, su?su.value:p.unite);
+    var ss=document.getElementById('mvr-pf-src'); if(ss) ss.value=(cat==='oeno')?'cuvier':((cat==='phyto')?'registre':'manual');
+    _rsvAteNote(document.getElementById('mvr-pf-ate'), cat);
+  }
+  _rsvPfLibelles(p);
+}
+window._rsvPfMaj=_rsvPfMaj;
+function _rsvSaveProd(){
+  if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
+  var p=_rsvPfProd();
+  if(!p){ if(window.closeOv) window.closeOv(null,'ovRsvProd'); showToast('Cet intrant n\u2019existe plus','#B85A1A'); return; }
+  var g=function(id){ var el=document.getElementById(id); return el?String(el.value==null?'':el.value):''; };
+  var nom=p.amm?p.nom:g('mvr-pf-nom').trim();
+  if(!nom){ showToast('Donne un nom \u00e0 l\u2019intrant','#B85A1A'); return; }
+  if(nom!==p.nom&&typeof window._mvNomPrestation==='function'&&window._mvNomPrestation(nom)){ showToast('Une prestation se note sur l\u2019\u00e9tape d\u2019arrachage (fiche de la parcelle), pas dans La R\u00e9serve','#B85A1A'); return; }
+  if((INTRANTS.produits||[]).some(function(x){ return x&&x!==p&&_rsvNorm(x.nom)===_rsvNorm(nom); })){ showToast('Un autre intrant s\u2019appelle d\u00e9j\u00e0 \u00ab\u00a0'+nom+'\u00a0\u00bb','#B85A1A'); return; }
+  var cat=g('mvr-pf-cat')||p.cat, unite=g('mvr-pf-unite')||p.unite||'kg', src=g('mvr-pf-src')||p.conso_src;
+  // Garde (§24 n°18) : la liste ne propose pas une unité que le type refuse — l'enregistrement le vérifie quand même.
+  if(_rsvUnitesPour(cat).indexOf(unite)<0&&(unite!==p.unite||unite===_RSV_UNITE_PIECE)){ showToast('Cette unit\u00e9 ne va pas avec ce type d\u2019intrant\u00a0: choisis kg ou L','#B85A1A'); return; }
+  var tc=g('mvr-pf-cont').trim().replace(',','.'), ct=(tc==='')?0:parseFloat(tc);
+  if(!(isFinite(ct)&&ct>=0)){ showToast('La contenance est un nombre positif, ou rien','#B85A1A'); return; }
+  var change=(unite!==p.unite);
+  // La fiche n'est PAS reconstruite (§24 n°12) : seuls les champs de la fenêtre changent.
+  p.nom=nom; p.cat=cat; p.contenance=ct; p.conso_src=src;
+  if(change){ p.unite=unite; p.contLbl=_rsvContLblDe(unite); }
+  saveIntrants();
+  if(window.closeOv) window.closeOv(null,'ovRsvProd');
+  _rsvPfId=null;
+  _rsvRenderBody();
+  showToast('Intrant modifi\u00e9'+(change?(' \u2014 compt\u00e9 en '+_rsvU(unite,2)):''),'#3D6B27');
+}
+window._rsvSaveProd=_rsvSaveProd;
+// Retirer un achat : tout de suite, « Annuler » le remet à sa place (ANNULER-1, §471).
+function _rsvDelAchat(aid){
+  if(!isAdmin()) return;
+  var i=(INTRANTS.achats||[]).findIndex(function(a){ return a&&a.id===aid; });
+  if(i<0) return;
+  var a=INTRANTS.achats[i], p=(INTRANTS.produits||[]).find(function(x){ return x&&x.id===a.prodId; })||null;
+  INTRANTS.achats.splice(i,1);
+  saveIntrants(); _rsvPfListe(_rsvPfProd()); _rsvRenderBody();
+  var q=Number(a.q)||0, lbl=_fmt(q)+'\u00a0'+_rsvU(p?p.unite:'',q)+(a.date?(' du '+_frDate(a.date)):'');
+  var annuler=function(){
+    if(INTRANTS.achats.some(function(x){ return x&&x.id===aid; })) return;   // déjà revenu (un autre appareil, un double appui)
+    INTRANTS.achats.splice(Math.min(i,INTRANTS.achats.length),0,a);
+    saveIntrants(); _rsvPfListe(_rsvPfProd()); _rsvRenderBody(); showToast('Achat remis','#3D6B27');
+  };
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler('Achat retir\u00e9 \u00b7 '+lbl, annuler);
+  else showToast('Achat retir\u00e9','#C0392B');
+}
+window._rsvDelAchat=_rsvDelAchat;
+// Supprimer la fiche, avec ses achats et son inventaire ; « Annuler » remet chaque élément à sa place d'origine.
+function _rsvDelProd(){
+  if(!isAdmin()) return;
+  var p=_rsvPfProd(); if(!p) return;
+  var r=_rsvProdRefs(p.id);
+  if(r.n){ showToast(r.txt,'#B85A1A'); return; }   // la fenêtre ne propose pas le bouton ; la suppression se garde elle-même
+  var pid=p.id, ip=INTRANTS.produits.indexOf(p), ach=[], inv=[];
+  INTRANTS.achats.forEach(function(a,i){ if(a&&a.prodId===pid) ach.push([i,a]); });
+  INTRANTS.inventaires.forEach(function(v,i){ if(v&&v.prodId===pid) inv.push([i,v]); });
+  INTRANTS.produits=INTRANTS.produits.filter(function(x){ return x!==p; });
+  INTRANTS.achats=INTRANTS.achats.filter(function(a){ return !(a&&a.prodId===pid); });
+  INTRANTS.inventaires=INTRANTS.inventaires.filter(function(v){ return !(v&&v.prodId===pid); });
+  saveIntrants();
+  if(window.closeOv) window.closeOv(null,'ovRsvProd');
+  _rsvPfId=null;
+  _rsvRenderBody();
+  var annuler=function(){
+    if(INTRANTS.produits.some(function(x){ return x&&x.id===pid; })) return;
+    INTRANTS.produits.splice(Math.min(ip,INTRANTS.produits.length),0,p);
+    ach.forEach(function(e){ INTRANTS.achats.splice(Math.min(e[0],INTRANTS.achats.length),0,e[1]); });
+    inv.forEach(function(e){ INTRANTS.inventaires.splice(Math.min(e[0],INTRANTS.inventaires.length),0,e[1]); });
+    saveIntrants(); _rsvRenderBody(); showToast('Intrant remis','#3D6B27');
+  };
+  var nA=ach.length, msg='Intrant supprim\u00e9 \u00b7 '+p.nom+(nA?(nA>1?(' et ses '+nA+' achats'):' et son achat'):'');
+  if(typeof window.showToastAnnuler==='function') window.showToastAnnuler(msg, annuler);
+  else showToast('Intrant supprim\u00e9','#C0392B');
+}
+window._rsvDelProd=_rsvDelProd;
 
 // ── Overlay INVENTAIRE d'ouverture ──
 function _rsvOpenInv(){
@@ -1085,7 +1337,7 @@ function _rsvOpenInv(){
   var list=INTRANTS.produits.map(function(p){
     var cur=_invOuv(p);
     return '<div class="mvr-irow"><div class="mvr-iname">'+_escHtml(p.nom)+'<span>'+(_CATLBL[p.cat]||p.cat)+'</span></div>'
-      +'<input type="number" class="mvr-fi mvr-iq" data-pid="'+_escAttr(p.id)+'" value="'+(cur||'')+'" placeholder="0"><span class="mvr-iu">'+p.unite+'</span></div>';
+      +'<input type="number" class="mvr-fi mvr-iq" data-pid="'+_escAttr(p.id)+'" value="'+(cur||'')+'" placeholder="0"><span class="mvr-iu">'+_escHtml(_rsvU(p.unite,2))+'</span></div>';
   }).join('');
   document.getElementById('mvr-i-list').innerHTML=list;
   if(window.openOv) window.openOv('ovRsvInv');
@@ -1121,7 +1373,7 @@ function _rsvAuditHtml(){
       h+='<tr><td>'+_escHtml(p.nom)+' <span class="mvr-tag-'+(p.cat==='oeno'?'o':'p')+'">'+(_CATLBL[p.cat]||p.cat)+'</span></td>'
         +'<td>'+_fmt(s.ouv)+'</td><td>+'+_fmt(s.achats)+'</td>'
         +'<td>'+(pending?'<span class="mvr-td-pend">à activer</span>':'\u2212'+_fmt(s.conso))+'</td>'
-        +'<td class="'+((s.known&&s.q<0)?'mvr-neg':'')+'">'+(pending?'\u2014':_fmt(s.q)+' '+p.unite)+'</td>'
+        +'<td class="'+((s.known&&s.q<0)?'mvr-neg':'')+'">'+(pending?'\u2014':_fmt(s.q)+' '+_escHtml(_rsvU(p.unite,s.q)))+'</td>'
         +'<td>'+(pending?'\u2014':((s.known&&s.q<0)?_mvIconInline('alerte',16):_mvIconInline('check',16)))+'</td></tr>';
     });
     h+='</tbody></table></div>';
@@ -1211,7 +1463,7 @@ function _rsvDoc(c){
   _rsvTriProduits(INTRANTS.produits || [], c).forEach(function(p){
     var s=_stock(p); var pending=(p.conso_src==='registre'&&!s.known);
     rows+='<tr><td class="l">'+_escHtml(p.nom)+' ('+(_CATLBL[p.cat]||p.cat)+')</td><td>'+_fmt(s.ouv)+'</td><td>+'+_fmt(s.achats)+'</td>'
-      +'<td>'+(pending?'à activer':'\u2212'+_fmt(s.conso))+'</td><td><b>'+(pending?'\u2014':_fmt(s.q)+' '+_escHtml(p.unite))+'</b></td>'
+      +'<td>'+(pending?'à activer':'\u2212'+_fmt(s.conso))+'</td><td><b>'+(pending?'\u2014':_fmt(s.q)+' '+_escHtml(_rsvU(p.unite,s.q)))+'</b></td>'
       +'<td>'+(pending?'\u2014':((s.known&&s.q<0)?'ecart':'ok'))+'</td></tr>';
   });
   var futRows='';
@@ -1434,7 +1686,7 @@ function _rsvEnsureOverlays(){
         +'</div>'
         +'<div id="mvr-np-man" style="display:none"><div class="mvr-fl">Nom de l\'intrant</div><input class="mvr-fi" id="mvr-np-nom" placeholder="ex. Bouillie Bordelaise RSR"></div>'
         +'<div class="mvr-f2"><div><div class="mvr-fl">Unité</div><select class="mvr-fi" id="mvr-np-unite" onchange="_rsvUpdContHint()"><option value="kg">kg</option><option value="L">L</option></select></div>'
-        +'<div><div class="mvr-fl">Contenance / unité</div><input type="number" class="mvr-fi" id="mvr-np-cont" placeholder="ex. 25" oninput="_rsvUpdContHint()"></div></div>'
+        +'<div><div class="mvr-fl" id="mvr-np-contl">Poids d’un sac (kg)</div><input type="number" class="mvr-fi" id="mvr-np-cont" placeholder="ex. 25" oninput="_rsvUpdContHint()"></div></div>'
         +'<div class="mvr-fl">Consommé calculé via</div><select class="mvr-fi" id="mvr-np-src"><option value="registre">Registre phyto</option><option value="cuvier">Adjonctions du Cuvier</option><option value="cave_so2">Opérations Cave (SO\u2082)</option><option value="manual">Saisie manuelle</option></select>'
         +'<div class="mvr-ded" id="mvr-np-ate"></div>'
         +'</div>'
@@ -1442,12 +1694,28 @@ function _rsvEnsureOverlays(){
       +'<div class="mvr-f2"><div><div class="mvr-fl">Date</div><input type="date" class="mvr-fi" id="mvr-a-date"></div>'
       +'<div><div class="mvr-fl">N° facture</div><input class="mvr-fi" id="mvr-a-fact" placeholder="FA-2026-…"></div></div>'
       +'<div class="mvr-fl">Fournisseur</div><input class="mvr-fi" id="mvr-a-four" list="mvr-a-four-list" placeholder="ex. Comptoir Viti Beaune" autocomplete="off"><datalist id="mvr-a-four-list"></datalist>'
-      +'<div class="mvr-fl">Saisir la quantité</div><div class="mvr-seg"><button class="mvr-segb on" id="mvr-sg-u" onclick="_rsvSetSaisie(\'u\')">Par unités</button><button class="mvr-segb" id="mvr-sg-q" onclick="_rsvSetSaisie(\'q\')">Directe</button><button class="mvr-segb" id="mvr-sg-b" onclick="_rsvSetSaisie(\'b\')">Les deux</button></div>'
-      +'<div class="mvr-f2"><div id="mvr-a-uwrap"><div class="mvr-fl">Nb d\'unités</div><input type="number" class="mvr-fi" id="mvr-a-unites" placeholder="ex. 6" oninput="_rsvCalcQ()"><div class="mvr-hint" id="mvr-a-conthint"></div></div>'
-      +'<div id="mvr-a-qdwrap"><div class="mvr-fl">Quantité totale</div><input type="number" class="mvr-fi" id="mvr-a-qte" placeholder="kg / L"><div class="mvr-hint" id="mvr-a-qunit">en kg</div></div></div>'
+      +'<div class="mvr-fl">Saisir la quantité</div><div class="mvr-seg"><button class="mvr-segb on" id="mvr-sg-u" onclick="_rsvSetSaisie(\'u\')">Par sacs</button><button class="mvr-segb" id="mvr-sg-q" onclick="_rsvSetSaisie(\'q\')">Au total</button><button class="mvr-segb" id="mvr-sg-b" onclick="_rsvSetSaisie(\'b\')">Les deux</button></div>'
+      +'<div class="mvr-f2"><div id="mvr-a-uwrap"><div class="mvr-fl" id="mvr-a-ulbl">Nombre de sacs</div><input type="number" class="mvr-fi" id="mvr-a-unites" placeholder="ex. 6" oninput="_rsvCalcQ()"><div class="mvr-hint" id="mvr-a-conthint"></div></div>'
+      +'<div id="mvr-a-qdwrap"><div class="mvr-fl">Quantité totale</div><input type="number" class="mvr-fi" id="mvr-a-qte" placeholder="ex. 150"><div class="mvr-hint" id="mvr-a-qunit">en kg</div></div></div>'
       +'<div class="mvr-f2"><div><div class="mvr-fl">N° de lot</div><input class="mvr-fi" id="mvr-a-lot" placeholder="optionnel"></div>'
       +'<div><div class="mvr-fl">Prix HT (€)</div><input type="number" class="mvr-fi" id="mvr-a-prix" placeholder="optionnel"></div></div>'
       +'<div class="mvr-btnrow" style="margin-top:18px"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvAchat\')">Annuler</button><button class="mvr-btn mvr-btn-p" onclick="_rsvSaveAchat()">\u2713 Enregistrer l\'achat</button></div>'
+    +'</div></div></div>'
+  // ── INTRANT-1 (§553) : la fiche d'un intrant — corriger, retirer un achat, supprimer ──
+  +'<div class="overlay" id="ovRsvProd" onclick="closeOv(event,\'ovRsvProd\')"><div class="modal" onclick="event.stopPropagation()">'
+    +'<div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">Modifier l’intrant</div><div class="modal-sub" id="mvr-pf-sub"></div></div>'
+    +'<div class="modal-body">'
+      +'<div class="mvr-fl">Nom de l’intrant</div><input class="mvr-fi" id="mvr-pf-nom" autocomplete="off">'
+      +'<div class="mvr-hint" id="mvr-pf-nomnote"></div>'
+      +'<div class="mvr-fl">Type d’intrant</div><select class="mvr-fi" id="mvr-pf-cat" onchange="_rsvPfMaj(this)"></select>'
+      +'<div class="mvr-ded" id="mvr-pf-ate"></div>'
+      +'<div class="mvr-f2"><div><div class="mvr-fl">Unité</div><select class="mvr-fi" id="mvr-pf-unite" data-tuto="rsv.unite" onchange="_rsvPfMaj(this)" oninput="_rsvPfMaj(this)"></select></div>'
+      +'<div><div class="mvr-fl" id="mvr-pf-contl">Poids d’un sac (kg)</div><input type="number" class="mvr-fi" id="mvr-pf-cont" placeholder="ex. 25"></div></div>'
+      +'<div class="mvr-hint" id="mvr-pf-unote"></div>'
+      +'<div class="mvr-fl">Consommé calculé via</div><select class="mvr-fi" id="mvr-pf-src"></select>'
+      +'<div class="mvr-fl" id="mvr-pf-achl">Ses achats</div><div class="mvr-pa" id="mvr-pf-achats"></div>'
+      +'<div class="mvr-btnrow mvr-pf-actions"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvProd\')">Fermer</button><button class="mvr-btn mvr-btn-p" data-tuto="rsv.pf.save" onclick="_rsvSaveProd()">'+_mvIcon('check',16)+' Enregistrer</button></div>'
+      +'<div class="mvr-pf-danger" id="mvr-pf-del"></div>'
     +'</div></div></div>'
   // ── Inventaire ──
   +'<div class="overlay" id="ovRsvInv" onclick="closeOv(event,\'ovRsvInv\')"><div class="modal" onclick="event.stopPropagation()">'

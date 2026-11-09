@@ -900,6 +900,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ab1.mjs --contre'],
   ['node scripts/mv-harnais-ajour1.mjs'],              // AJOUR-1 (§552) : ce qu'on enregistre se voit tout de suite — la page dessous à la fermeture, la fiche vive repeinte, chaque fenêtre classée
   ['node scripts/mv-harnais-ajour1.mjs --contre'],
+  ['node scripts/mv-harnais-intrant1.mjs'],            // INTRANT-1 (§553) : la fiche d'un intrant — la pièce, le formulaire sans fiche fantôme, corriger, retirer un achat, supprimer, Annuler
+  ['node scripts/mv-harnais-intrant1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

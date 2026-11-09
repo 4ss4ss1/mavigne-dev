@@ -1,5 +1,5 @@
 {
-  "plafond": 795,
+  "plafond": 794,
   "exempts": {
     "planAnneeDma": "HOR-1 (§550) : écrit en heures les codes D, M et A d’un modèle importé — n’apparaît que si le modèle en porte, et le domaine d’entraînement n’en a aucun",
     "planAnneeModele": "ANNEE-TAB (§548) : choisit le modèle en haut de l’onglet L’année — le domaine d’entraînement n’a qu’un modèle, il n’y a rien à choisir ; le tuto « voir l’année d’un modèle » montre le choix",
@@ -53,6 +53,8 @@
     "_phenoCorriger": "PHENO-1D (§509) : corriger une note fausse — la fenêtre dit quelle note sera supprimée, « Annuler » la rend",
     "_phenoCuvCoche": "PHENO-1D (§509) : cocher ou décocher une parcelle de la cuvée — le bouton recompte",
     "_phenoReponse": "PHENO-1D (§509) : répondre à « Vous êtes sûr ? » avant un grand saut — la question dit ce qui manque et en combien de jours",
-    "_phenoMenuDate": "PHENO-1D (§509) : ouvrir la date du relevé — un bouton qui dit la date"
+    "_phenoMenuDate": "PHENO-1D (§509) : ouvrir la date du relevé — un bouton qui dit la date",
+    "_rsvDelAchat": "INTRANT-1 (§553) : « Retirer » un achat dans la fiche d’un intrant (admin) — le bouton dit ce qu’il fait, « Annuler » le remet six secondes ; la fiche s’ouvre avec le tuto « corriger une fiche d’intrant »",
+    "_rsvDelProd": "INTRANT-1 (§553) : « Supprimer l’intrant et ses achats », en bas de la fiche (admin) — le bouton nomme ce qui part, « Annuler » remet tout six secondes ; refusé si une opération cite la fiche"
   }
 }

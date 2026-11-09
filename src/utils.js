@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.84';
+export const APP_VERSION = '10.85';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2917,7 +2917,9 @@ var MV_AIDE = {
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],
       ['La roue crantée', "en haut à droite imprime les deux inventaires, fûts et intrants. Administrateur seulement."],
       ['Le prix moyen d’un intrant', "n’est pas saisi ici : il se calcule sur vos factures, euros divisés par quantité, et s’affiche sur la fiche. Les lignes sans prix sont écartées du calcul plutôt que comptées à zéro — sinon la moyenne serait tirée vers le bas sans en avoir l’air."],
-      ['Les prix se mettent ailleurs', "dans <b>Pilotage › Économie › Achats</b>, qui rassemble tout ce qui a été acquis — intrants, fûts, passages chez le réparateur. C’est voulu : le prix arrive avec la facture, des semaines après le geste, et on le saisit en une fois plutôt qu’écran par écran."],
+      ['Le prix d’un achat', "se saisit à l’achat s’il est connu (champ « Prix HT », facultatif) ; sinon il se chiffre plus tard dans Pilotage › Économie › Achats, qui rassemble tout ce qui a été acquis — intrants, fûts, passages chez le réparateur."],
+      ['L’unité d’un intrant', "kg ou L pour tous ; la pièce pour les fournitures (vigne, cave, tracteur, général), proposée d’office pour un piquet, une agrafe ou un filtre. À l’achat, « Par sacs » (ou bidons, ou lots) multiplie le nombre par la contenance ; « Au total » prend la quantité telle quelle."],
+      ['Corriger une fiche', ": « Modifier » sur la fiche d’un intrant (administrateur) — son nom, son type, son unité, sa contenance. Changer l’unité corrige l’étiquette : les quantités gardent leur nombre (500 kg deviennent 500 pièces). Dans la même fenêtre, « Retirer » enlève un achat mal saisi, et une fiche en trop se supprime tout en bas — sauf si une opération du Cuvier, du Chai ou de la fertilisation s’en sert. « Annuler » rattrape le geste six secondes."],
       ['Le bilan se calcule seul', ": inventaire d’ouverture + achats − consommation. Aucun stock à tenir à la main."],
       ['L’inventaire d’ouverture', "est le point zéro. Sans lui, l’écart constaté ne veut rien dire."],
       ['Un stock négatif', "n’est pas un défaut d’affichage : il manque une facture d’achat, le consommé est surestimé, ou — pour un intrant œno — les adjonctions du Cuvier reposent sur un <b>volume estimé</b>. L’alerte compte ces dernières, pour éviter de chercher une facture qui n’existe pas."],

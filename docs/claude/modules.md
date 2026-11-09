@@ -1554,6 +1554,13 @@ l'équipe » était faux depuis le premier jour.**
   `window._mvFutParc(INTRANTS, window.CAVE_ELEVAGE, null)`.
   **Quand un moteur partagé est appelé depuis un nouveau module, aller lire comment l'appelle celui
   qui s'en sert déjà.**
+- ★★ **INTRANT-1 (§553) — l’unité et la fiche d’un intrant.** `unite` ∈ kg · L · `'pièce'` (la pièce pour les
+  fournitures seules, `_rsvUnitesPour` ; d’office pour vigne, cave, tracteur, `_rsvUniteDefaut`) ; l’écran l’accorde
+  par `_rsvU` (`window._rsvUnite`, emprunté par Économie › Achats). « Modifier » (admin) ouvre `ovRsvProd` :
+  `_rsvOpenProd` → `_rsvSaveProd` change les seuls champs de la fenêtre (changer l’unité ne convertit rien) ;
+  `_rsvDelAchat` / `_rsvDelProd` passent par `showToastAnnuler` ; `_rsvProdRefs` refuse de supprimer une fiche citée
+  par `prod_id` (Cuvier, Chai) ou `prodId` (fertilisation). `_rsvSaveAchat` vérifie TOUT avant d’écrire : la fiche
+  neuve et son achat entrent ensemble (la fiche fantôme, §553b).
 
 ---
 

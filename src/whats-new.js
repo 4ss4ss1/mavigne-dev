@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.85', d: '2026-11-09', items: [   // INTRANT-1 (§553) : la fiche d'un intrant — la pièce, corriger, retirer un achat, supprimer
+    { niv: 0, pour: ['admin'], emoji: 'carton', titre: 'Les fournitures se comptent à la pièce',
+      desc: "Piquets, agrafes, bouchons, filtres : la fiche d’une fourniture se compte maintenant en pièces (ou toujours en kg, ou en L), et la pièce est proposée d’office. À l’achat, « Par sacs », « Par bidons » ou « Par lots » multiplie par la contenance ; « Au total » prend la quantité telle quelle." },
+    { niv: 0, pour: ['admin'], emoji: 'crayon', titre: 'Corriger, retirer, supprimer une fiche d’intrant',
+      desc: "« Modifier » sur la fiche d’un intrant change son nom, son type, son unité ou sa contenance — les quantités gardent leur nombre : 500 kg deviennent 500 pièces. Dans la même fenêtre, « Retirer » enlève un achat mal saisi, et une fiche en trop se supprime tout en bas. « Annuler » rattrape le geste six secondes." },
+    { niv: 0, pour: ['admin'], emoji: 'check', titre: 'Plus de fiche en double après un achat refusé',
+      desc: "Quand un achat était refusé (une quantité manquante), la fiche du nouvel intrant était déjà créée : au second essai, il y en avait deux du même nom, dont une vide. Rien ne s’enregistre plus tant que l’achat n’est pas accepté, et le refus dit ce qui manque. Une fiche en double déjà là se supprime avec « Modifier »." },
+  ] },
   { v: '10.84', d: '2026-11-08', items: [   // AJOUR-1 (§552) : ce qu'on enregistre se voit tout de suite ; l'annonce de MODELES-1 (§536), partie sans bump
     { niv: 0, pour: ['tous'], emoji: 'rotation', titre: 'Les fiches se mettent à jour tout de suite',
       desc: "Après « Valider », « Modifier » ou « Noter une mesure », la fiche ouverte montre le changement sans qu’il faille la fermer et la rouvrir : la fiche d’une parcelle, d’une récolte, d’une maturité, et « Ma trace ». L’écran du dessous est à jour quand on la ferme, même avec le bouton Retour du téléphone — au Tracteur, l’avancement d’une session." },

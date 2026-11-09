@@ -1,0 +1,43 @@
+{
+  "lot": "INTRANT-1",
+  "section": "§553",
+  "base": "7fc16b5fc8cd0be4263898dea33bacee2bb5331d",
+  "inclut": [],
+  "date": "2026-11-09",
+  "tutos": {
+    "ok": true,
+    "empreinte": "6f058380650fccf1c0b3e40786538863b90605ae5605b6d2128eb156f55aa8de",
+    "date": "2026-11-09T14:39:09.229Z",
+    "joues": {
+      "téléphone": 19,
+      "ordinateur": 19,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "0d390fa211f51e333ee451863673bf9c43c011b823cac0b39eb0bd1282455a6a",
+    "CLAUDE.md": "0fbffc6cc95ec5ce12dffc3deef00a9d1754a8a0ed5a8176b05eff03663dfdc9",
+    "docs/claude/INDEX.md": "6138414e0861aeb5c1914b16a8d3cfac659e4dce95cb8b53e81761a649039c19",
+    "docs/claude/chantiers-530-579.md": "6e74d1e0c987626047839b4e841845b92f774232d97aa365294ea9988d489c90",
+    "docs/claude/journal.md": "6d0647a38a18906dbe7ed9c41752dd466a5e923113ea5eb62f5a41227175f5ab",
+    "docs/claude/modules.md": "3710149f8523341bedb5ff2aab76fc5e2f4958893c126f4bc06c81b0fff52d1d",
+    "guide/09-reserve.html": "1af7d5265bd31e753287e383f84f3230afba5749791de521eea376969bb4acc1",
+    "index.html": "16c5a0a5237f99db7f6ad9038cb126045746904f72a78a1333a575be14843355",
+    "public/sw.js": "286ace5aa8926ae57338bc27e6df68d673fb7d1ab7ac06a762c6ce6b3934c9e7",
+    "scripts/harnais-claude-md.mjs": "c1dfbc0b87311eecdd3dd9ba48946a0d36c44b7e99b9fe0ee4ae65e35c41456c",
+    "scripts/mv-harnais-ajour1.mjs": "8faeb51f3c16e71c50703b104105d9aeab1e88c055d8d214361ed3a566b93627",
+    "scripts/mv-harnais-liste.mjs": "bd9a91dca0c997cdc8723a0ce9352a3d2f4be56a51a50698885a6741af16c7a3",
+    "scripts/mv-harnais-regl-module.mjs": "c7d09af022ed13c47f7574180cf4a51717a329926ed1bfefa69edb6ecc6a8816",
+    "scripts/tutos-couverture.json": "eb770316a4f5ff82cde9df848f29f77c49dd57739cc24bbf90c3acce61c22af9",
+    "scripts/typo-baseline.json": "8d525d205f3b539f8e2eb43f55383aa0bbf07833113698abd29a2e7388e152db",
+    "src/pilotage.js": "5d0caef73a482e5e675442cbc3d0a48445b76ca20bfb8e9be8e0d773026b8c74",
+    "src/reserve.js": "78c3a3d5ffcb82768a429397c25b4557dad9f2687c1559befdaf0df578179fec",
+    "src/styles.css": "4d1adb7c98febaa4d046aa9f14ae68a6ad7e032e26529318623389173cc8609e",
+    "src/tutos.js": "067388e3fa8b2026e56039a0b4dbe9fc68edbe99285b32d6ae0dfe0aec2f5a69",
+    "src/utils.js": "e48bdf59a0c57949d408f7fbee434c81d463c109141a8d89263be3b4fb8a852d",
+    "src/whats-new.js": "711f2c03b1ce2b2ba1a216d119eeaf17dc8caed8fb3b9506c5eaa5b4dbf877c6",
+    "scripts/mv-harnais-intrant1.mjs": "b5c74bdf1e6c7f2c837ee51d4269736d38c4ebcd60cea8829b1afe6b14795be1"
+  }
+}

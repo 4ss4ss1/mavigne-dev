@@ -7,7 +7,7 @@
   "src/app.js": {
     "dur": 85,
     "petit": 53,
-    "ko": 980
+    "ko": 983
   },
   "src/cave.js": {
     "dur": 28,
@@ -47,7 +47,7 @@
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 594
+    "ko": 595
   },
   "src/diagnostic.js": {
     "dur": 0,
@@ -57,7 +57,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 216
+    "ko": 217
   },
   "src/gt.js": {
     "dur": 0,
@@ -112,7 +112,7 @@
   "src/reserve.js": {
     "dur": 14,
     "petit": 4,
-    "ko": 107
+    "ko": 128
   },
   "src/taille-doc.js": {
     "dur": 0,
@@ -132,17 +132,17 @@
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 124
+    "ko": 128
   },
   "src/utils.js": {
     "dur": 5,
     "petit": 2,
-    "ko": 547
+    "ko": 557
   },
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 580
+    "ko": 583
   },
   "index.html": {
     "dur": 74,

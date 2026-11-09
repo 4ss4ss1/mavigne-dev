@@ -2232,10 +2232,21 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>La famille choisie <b>range l'achat dans un atelier</b> — vigne, cave ou tracteur — et
     l'écran vous le montre au moment de la saisie. Vous ne remplissez rien de plus : c'est le même
     champ qu'avant, avec quatre choix supplémentaires.</li>
-    <li>Pour chaque produit : inventaire d'ouverture, achats datés, contenance, fournisseur.</li>
+    <li>Pour chaque produit : inventaire d'ouverture, achats datés, contenance, fournisseur — et son
+    <b>unité</b> : kg ou L pour tous, la <b>pièce</b> pour les fournitures, proposée d'office pour un
+    piquet, une agrafe ou un filtre.</li>
+    <li>À l'achat, <b>« Par sacs »</b> (ou bidons, ou lots) multiplie le nombre par la contenance ;
+    <b>« Au total »</b> prend la quantité telle quelle. Un achat refusé ne crée rien : le message dit ce
+    qui manque.</li>
     <li>Les produits phyto se déclarent depuis <b>E-Phy</b> (AMM et substance enregistrées), avec un
     repli manuel si nécessaire. L'œnologie reste en texte libre — E-Phy ne couvre ni le SO₂ ni les levures.</li>
   </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></span><div><b>Corriger une fiche.</b>
+  « Modifier » sur la fiche d'un intrant (administrateur) change son nom, son type, son unité ou sa
+  contenance. Changer l'unité corrige l'étiquette : les quantités gardent leur nombre — 500 kg deviennent
+  500 pièces. Dans la même fenêtre, « Retirer » enlève un achat mal saisi, et une fiche en trop se
+  supprime tout en bas, sauf si une opération du Cuvier, du Chai ou de la fertilisation s'en sert.
+  « Annuler » rattrape le geste six secondes.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le bilan matière</h3>
   <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
@@ -2263,11 +2274,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   L'alerte <b>compte ces adjonctions-là</b> : sans ce chiffre, on cherche une facture qui n'existe
   pas.</div></div>
 
-  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></span><div><b>Les prix ne se
-  saisissent pas ici.</b> Un achat enregistré dans La Réserve part sans montant et apparaît dans
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></span><div><b>Le prix d'un achat</b>
+  se saisit à l'achat s'il est connu (champ « Prix HT », facultatif). Sinon, l'achat apparaît dans
   <b>Pilotage › Économie › Achats</b>, où vous le chiffrez quand la facture arrive — en une fois,
-  avec les fûts et les passages chez le réparateur. C'est voulu : le prix arrive des semaines après
-  le geste, et il n'intéresse pas celui qui range la marchandise.<br><br>
+  avec les fûts et les passages chez le réparateur.<br><br>
   Le <b>prix moyen</b> affiché sur chaque fiche se calcule tout seul sur vos factures — les euros
   divisés par les quantités. Les lignes sans prix sont <b>écartées du calcul</b> plutôt que comptées
   à zéro : sinon la moyenne serait tirée vers le bas sans en avoir l'air.</div></div>

@@ -300,7 +300,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(nb(html, /_mvReglOpen\('phyto'\)/g) === 1 && /id="ovReglPhyto"/.test(html) && /id="regl-docs-phyto"/.test(html), 'le Phyto a sa roue et sa feuille de documents');
   T(/phyto:\s*\{\s*ov:'ovReglPhyto'/.test(app) && /reserve:\s*\{\s*ov:'ovReglReserve'/.test(app), 'le registre _MV_REGL conna\u00eet Phyto et R\u00e9serve');
   T(/window\.isAdmin\(\)\)\?'<button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen\(\\'reserve\\'\)"/.test(rsv), 'la R\u00e9serve rend sa roue en JS, admin seulement');
-  T(/id="ovReglReserve"/.test(html) && /id="regl-docs-reserve"/.test(html) && /Aucun prix ne se saisit ici/.test(html), 'la feuille de la R\u00e9serve porte les inventaires et dit o\u00f9 vont les prix');
+  T(/id="ovReglReserve"/.test(html) && /id="regl-docs-reserve"/.test(html) && /Le prix d’un achat<\/div><div class="sr-sub">Saisi à l’achat s’il est connu/.test(html), 'la feuille de la R\u00e9serve porte les inventaires et dit o\u00f9 vont les prix (INTRANT-1 : saisi \u00e0 l\u2019achat ou plus tard dans \u00c9conomie)');
   T(/mod==='phyto'\|\|mod==='reserve'/.test(open), 'la roue du Phyto et de la R\u00e9serve ne rappelle aucun \u00e9crivain');
   T(/id="regl-tbtn-app"[^\n]*<\/span>Moi<\/button>/.test(html) && !/<\/span>App<\/button>/.test(html), 'le troisi\u00e8me onglet de R\u00e9glages s\u2019appelle Moi (cl\u00e9 app inchang\u00e9e)');
   const iDom = html.indexOf('id="regl-view-domaine"'), iDon = html.indexOf('id="set-sec-donnees"'), iExp = html.indexOf('id="regl-export-row"'), iEq = html.indexOf('id="regl-view-equipe"');

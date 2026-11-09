@@ -74,9 +74,13 @@ function _nb(n) { return Math.round(Number(n) || 0).toLocaleString('fr-FR'); }
 // FERTI-8 (§466) : deux apports de Terrafumur, aux teneurs différentes d'une campagne à l'autre, pour « Vos produits ».
 function _tuIntrants() {
   var op = function (id, cree, N, P, K, MO) { return { id: id, cree: cree, prodId: 'tu-terra', prod: { nom: 'Terrafumur', ref: 'NF U 44-051', origine: 'norme', amm: '', four: 'Coopérative de la Côte', nat: 'compost', vg: '', N: N, P: P, K: K, MO: MO, CN: null, typ: 'Ia', ab: true }, dose: 2, kgSac: 25, prix: null, pu: 't', cout: null, sacs: null, parcs: ['Clos du Moulin'], trac: {}, sem: '', enf: 'non', man: {} }; };
-  return { produits: [{ id: 'tu-terra', nom: 'Terrafumur', cat: 'vigne', unite: 'kg', contenance: 25, contLbl: 'sac', conso_src: 'manual', conso_manuel: 0, amm: '' }],
+  // ★ INTRANT-1 (§553) : des piquets enregistrés en kg (le cas remonté du terrain), pour le tuto « corriger une fiche d'intrant ».
+  return { produits: [{ id: 'tu-terra', nom: 'Terrafumur', cat: 'vigne', unite: 'kg', contenance: 25, contLbl: 'sac', conso_src: 'manual', conso_manuel: 0, amm: '' },
+                      { id: 'tu-piq', nom: 'Piquets acacia', cat: 'vigne', unite: 'kg', contenance: 0, contLbl: 'sac', conso_src: 'manual', conso_manuel: 0, amm: '' }],
+           achats: [{ id: 'tu-piq-a1', prodId: 'tu-piq', date: _tuJour(-3), four: 'Comptoir viticole', q: 500, unites: null, lot: '', fact: '', prix: null }],
            fertil: [op('tu-f1', '2024-11-14', 2, 1.7, 3.5, 30), op('tu-f2', '2025-11-20', 2.2, 1.6, 3.8, 32)] };
 }
+function _tuPiquets() { var I = window.INTRANTS || {}; return (I.produits || []).find(function (p) { return p && p.id === 'tu-piq'; }) || null; }
 function _tuFerNouveau() { return _vis(_q('[data-tuto="phy.nouveau.pc"]')) ? '[data-tuto="phy.nouveau.pc"]' : '[data-tuto="phy.nouveau"]'; }
 // ★ COEQ-3 (§524) : une session d'ensemencement à deux, en cours depuis hier (Paul conduit, Jean coéquipier), pour les tutos du coéquipier.
 function _tuSessions() { return [{ id: 'tu-coeq', activite: 'Ensemencement', conducteur: 'Paul', coequipier: 'Jean', statut: 'En cours', date: _tuJour(-1), avancement: 30, parcellesSkip: [],
@@ -606,6 +610,36 @@ var TU_TUTOS = [
         ok: 'Les teneurs de cette campagne-là sont reprises.' },
       { type: 'regarder', cible: '[data-tuto="fer.src"]',
         txt: function () { return 'La date des teneurs est rappelée. Comparez-les avec le sac ou l’analyse de cette année\u00a0: retouchées, elles partent avec ce nouvel apport. Sur votre domaine, rien n’a bougé.'; } }
+    ] },
+  // ★ INTRANT-1 (§553) — corriger une fiche d'intrant : des piquets saisis en kg, repassés en pièces (le cas remonté du terrain).
+  //   Il couvre l'onglet Intrants, « Modifier », le choix de l'unité et « Enregistrer » ; « Retirer » un achat et
+  //   « Supprimer » la fiche disent ce qu'ils font et se rattrapent par « Annuler » (exemptés motivés).
+  { id: 'intrant', titre: 'Comment faire pour corriger une fiche d’intrant\u00a0?', fin: 'corriger une fiche d’intrant',
+    module: 'Réserve', pages: ['reserve'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['_rsvTabTo', '_rsvOpenProd', '_rsvPfMaj', '_rsvSaveProd'],
+    retenir: ['Réserve › onglet Intrants › « Modifier » sur la fiche.',
+              'Changer l’unité corrige l’étiquette : le nombre déjà saisi ne bouge pas (500 kg deviennent 500 pièces).',
+              'Dans la même fenêtre, « Retirer » enlève un achat mal saisi ; une fiche en trop se supprime tout en bas.'],
+    etapes: [
+      { type: 'aller', page: 'reserve', pourquoi: 'Les intrants se suivent dans le module Réserve.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="rsv.intrants"]',
+        txt: function () { return '{T} l’onglet « ' + (L('[data-tuto="rsv.intrants"]') || 'Intrants') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="rsv.intrants"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Voici les intrants suivis, chacun avec son stock.' },
+      { type: 'toucher', cible: '[data-tuto="rsv.modifier"][data-pid="tu-piq"]',
+        txt: function () { return 'Les piquets ont été enregistrés en kg au lieu de pièces. {T} « ' + (L('[data-tuto="rsv.modifier"][data-pid="tu-piq"]') || 'Modifier') + ' » sur leur fiche.'; },
+        fait: function () { return _ouvert('ovRsvProd') && !!_q('[data-tuto="rsv.unite"]'); },
+        ok: 'La fiche s’ouvre : son nom, son type, son unité, et ses achats en dessous.' },
+      { type: 'taper', cible: '[data-tuto="rsv.unite"]', exemple: 'pièce',
+        txt: function () { return 'Dans « Unité », choisissez « pièce ».'; }, txtReel: 'l’unité qui convient.',
+        valide: function (x) { return x === 'pièce'; },
+        ok: function () { return L('#mvr-pf-unote') || 'Le nombre ne change pas : 500 kg deviennent 500 pièces.'; } },
+      { type: 'toucher', cible: '[data-tuto="rsv.pf.save"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="rsv.pf.save"]') || 'Enregistrer') + ' ».'; },
+        fait: function () { var p = _tuPiquets(); return !_ouvert('ovRsvProd') && !!(p && p.unite === 'pièce'); },
+        ok: 'La fiche est corrigée.' },
+      { type: 'regarder', cible: '[data-tuto="rsv.stock"][data-pid="tu-piq"]',
+        txt: function () { var b = '[data-tuto="rsv.stock"][data-pid="tu-piq"]'; return 'La fiche compte maintenant ses piquets en pièces\u00a0: ' + (L(b + ' .mvr-psv') + '\u00a0' + L(b + ' .mvr-psu')).trim() + ', le même nombre. Sur votre domaine, rien n’a bougé\u00a0: c’était un entraînement.'; } }
     ] },
   // ★ TUTO-8 (§388) — les maturités (MATU-1) : la saisie en série. Il fait redescendre le compte des gestes sans tuto.
   { id: 'maturites', titre: 'Comment faire pour noter des mesures de maturité\u00a0?', fin: 'noter des mesures de maturité',

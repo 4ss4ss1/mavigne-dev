@@ -9303,7 +9303,7 @@ function _pexData(ex, noCmp, coupeIso){
     if(byM[k]) byM[k].ach+=eur;
     var pr=prodBy[a.prodId]||null;
     achRows.push({ date:iso, nom:(pr&&pr.nom)||'\u2014', four:a.four||'',
-                   q:Number(a.q)||0, unite:(pr&&pr.unite)||'', eur:eur });
+                   q:Number(a.q)||0, unite:(pr&&pr.unite)?((typeof window._rsvUnite==='function')?window._rsvUnite(pr.unite,Number(a.q)||0):pr.unite):'', eur:eur });   // INTRANT-1 (§553) : « 500 pièces », l'unité s'accorde (reserve.js)
   });
   achRows.sort(function(a,b){ return a.date<b.date?1:-1; });
   // ── 3 bis) ACHATS PRÉVUS — FERTI-2 (02/10) ─────────────────────────
@@ -10304,7 +10304,7 @@ function _pachLignes(){
     if(!a||!a.id) return;
     var pr=prodBy[a.prodId]||null;
     out.push({ src:'rsv', id:a.id, date:String(a.date||'').slice(0,10),
-      quoi:((pr&&pr.nom)||'Intrant')+(a.q?(' \u00b7 '+_pilHa(a.q)+' '+((pr&&pr.unite)||'')):''),
+      quoi:((pr&&pr.nom)||'Intrant')+(a.q?(' \u00b7 '+_pilHa(a.q)+' '+((pr&&pr.unite)?((typeof window._rsvUnite==='function')?window._rsvUnite(pr.unite,a.q):pr.unite):'')):''),   // INTRANT-1 : l'unité s'accorde
       four:a.four||'', ate:_pexAteDe((pr&&pr.cat)||'gen'),
       prix:(a.prix!=null&&isFinite(Number(a.prix)))?Number(a.prix):null, fact:a.fact||'' });
   });
