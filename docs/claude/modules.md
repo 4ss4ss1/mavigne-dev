@@ -911,6 +911,8 @@ MIROIR de la grille du contrat en cours (l'embauche qui l'ouvre, dans `m.hist` ;
 personne s'il existe sur une autre (`_planSupprEffet`) ; sur sa dernière année, ses salariés passent sur « standard » par `_mvHistGrille`.
 ★ **MODSUIVI-1 (§555)** : l'onglet Année dit qui suit le modèle en tête de sa carte (`_planAnneeSuivi`) et inscrit sur place (la feuille `ovPlanInscr`,
 `planAnneeInscrire` → `planAnneeInscrOk`) — par la même primitive ; l'effet affiché se compte sur les mois finis de l'ANNÉE EN COURS (`_planAnneeInscrEffet`).
+★ **FERIES-1 (§556)** : la semaine choisie montre les heures d'un férié travaillé au modèle (`_planAnneeFerieSem`, « Chômer » / « Travailler ») ; la section
+« Les fériés de l'année » les chôme d'un geste (`_planAnneeFeriesBloc`, `planAnneeFeriesChomer`) — au brouillon ; la journée de solidarité n'y est jamais touchée.
 
 **Une entrée de jour — cinq formes, et aucune autre n'est écrite :**
 

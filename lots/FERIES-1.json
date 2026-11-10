@@ -1,0 +1,47 @@
+{
+  "lot": "FERIES-1",
+  "section": "§556",
+  "base": "ccf7e814e99181699727afbf48dc4d1951960baa",
+  "inclut": [],
+  "date": "2026-11-10",
+  "tutos": {
+    "ok": true,
+    "empreinte": "0fe353fbf125383e28e6cbded7131c0d1ffdeb584fd6bd01e6690eeb53795d5a",
+    "date": "2026-11-09T21:38:14.374Z",
+    "joues": {
+      "téléphone": 7,
+      "ordinateur": 7,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "feries",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "2a78edff51786cef11c853f822dbbd5fb368e5cec1eb9baf5cf597576bd7c562",
+    "CLAUDE.md": "5ad4222875da32677a655ba2f2cce68a5195b4272a1de142c7acdd7dc2a37a72",
+    "docs/claude/INDEX.md": "46296324cfcd36e0c4714dda33c3fb6b01ad2ca8d1ecf0f9593ece698301efc2",
+    "docs/claude/chantiers-530-579.md": "cc4777d8b9c7767bc9d72713ed9c0ad3e17f4f72308f0a7eb16b7d67110a526f",
+    "docs/claude/journal.md": "ca456863d786abf6d48e17e8a5e5d7237ce34b456af7802892052475f18dc9b2",
+    "docs/claude/modules.md": "57336852b70f9e53513dd91417d852a18d6426a093ce483b296a63a353d7ec08",
+    "guide/10-planning.html": "3d43e35c4d24780671c28bf5e32f39a2b9b939395924c519cd8c295ceb398227",
+    "index.html": "00fc8b3a351e99dc39d7f77fa4e19fce0539331222229c9cdc85a70cc0d2755a",
+    "public/sw.js": "76b51774e17db3a2ed598d9fb5425c8fea47e51d8e188712c3fb80d78805a6e4",
+    "scripts/harnais-claude-md.mjs": "0695214fbb9c9ab3e439cfb6d02370f241f4a67b60e6629db53272cd414abe5b",
+    "scripts/mv-captures.mjs": "16ce1f418621d43ab5d6f68d827398143e8631662f1d59e602c82ff5ae8a4ebf",
+    "scripts/mv-harnais-liste.mjs": "33cbc20c9887514f56e639378bf985534a871e009b152cd498e7f0c58e4bede7",
+    "scripts/typo-baseline.json": "e077daeea02d2b200d9d163e8672c60e71b002676e9764f1f650eb9fbb3f2835",
+    "src/planning-annee.js": "8fe2b7ff368a9e53139800ace0448389f222d5fee1f6ec85ea7334ff7a725c27",
+    "src/tutos.js": "01d510b99edbb3de9e63ea527922f54a9b4789ca7e904221263c58973b0ce1b9",
+    "src/utils.js": "0f08326a414f1550a4a90645e83349e127b2a016f147b68e4d03a145a317dc13",
+    "src/whats-new.js": "f5e6ae40076e69ed5f6094c93a120dd56a02ff95db477ed6e442dc95cb0e73da",
+    "scripts/mv-harnais-feries1.mjs": "18ed5104fea872b8148b95c1b267270459881f0888132480af88da1a1acff056"
+  }
+}

@@ -494,6 +494,43 @@ var TU_TUTOS = [
         fait: function (memo) { var s = (window.MEMBRES || []).find(function (m) { return m.nom === 'Sophie'; }), o = document.getElementById('ovPlanInscr'); return !!memo.insD && !!s && s.planning_id === 'mi-temps' && !(o && o.classList.contains('open')); },
         ok: '« Suivi par Sophie » : son planning suit maintenant « mi-temps ».' },
     ] },
+  // ★ FERIES-1 (§556) — les fériés du modèle : chômer d'un geste ceux qui portent des heures. Le même modèle « mi-temps » que le
+  //   tuto « inscrire » (posé en mémoire au départ) : lundi → mercredi 7 h, fériés compris — quatre en portent en 2026.
+  { id: 'feries', titre: 'Comment faire pour chômer les fériés d’un modèle\u00a0?', fin: 'chômer les fériés d’un modèle',
+    module: 'Planning', pages: ['planning'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['planAnneeFeriesChomer', 'planAnneeFerie'],
+    avant: function (memo) {
+      var T = window.PLANNING_TEMPLATES, y = typeof window._pY === 'function' ? window._pY() : new Date().getFullYear(); if (!T) return;
+      if (!T[y]) T[y] = {};
+      if (!T[y]['mi-temps']) { var g = {}; for (var m = 0; m < 12; m++) { g[m] = {}; var nb = new Date(y, m + 1, 0).getDate(); for (var d = 1; d <= nb; d++) { var w = new Date(y, m, d).getDay(); if (w >= 1 && w <= 3) g[m][d] = 7; } } T[y]['mi-temps'] = g; }
+      memo.ferY = y;
+    },
+    retenir: ['Planning › Année, sous la semaine : « Les fériés de l’année » dit combien portent des heures au modèle.',
+              '« Chômer les N » les passe à 0 h d’un geste ; « Chômer » et « Travailler » un par un, dans la liste ou dans la semaine.',
+              'Rien n’est écrit avant « Enregistrer » ; la journée de solidarité, si le domaine la fait un férié, n’est jamais touchée.'],
+    etapes: [
+      { type: 'aller', page: 'planning', pourquoi: 'Les fériés d’un modèle se règlent dans l’onglet « Année » du Planning.' },
+      { type: 'toucher', cible: '[data-tuto="plan.tab.annee"]',
+        txt: function () { return '{T} l’onglet « Année », entre « Mois » et « Personnel ».'; },
+        fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); var v = !!(e && e.ouvert) && !!_q('.mvbtn-option[data-pl="mi-temps"]'); if (v) memo.ferA = true; return v; },
+        ok: 'La frise du modèle le plus suivi, et en haut la liste des modèles.' },
+      { type: 'toucher', cible: '.mvbtn-option[data-pl="mi-temps"]',
+        txt: function () { return '{T} le modèle « mi-temps », en haut.'; },
+        fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); var v = !!memo.ferA && !!e && e.modele === 'mi-temps' && !!_q('[data-tuto="plan.annee.feries.tous"]'); if (v) memo.ferB = true; return v; },
+        ok: 'Sous la semaine, « Les fériés de l’année » : quatre portent des heures. Le relevé les compterait travaillés, majoration comprise.' },
+      { type: 'toucher', cible: '[data-tuto="plan.annee.feries.tous"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.annee.feries.tous"]') + ' ».'; },
+        fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); var v = !!memo.ferB && !!e && !!e.brouillon && !_q('[data-tuto="plan.annee.feries.tous"]') && !!_q('[data-tuto="plan.annee.ferie.travailler"]'); if (v) memo.ferN = e.n; return v; },
+        ok: 'Les quatre à 0 h, au brouillon : rien n’est écrit avant « Enregistrer ».' },
+      { type: 'toucher', cible: '[data-tuto="plan.annee.ferie.travailler"]',
+        txt: function () { return 'Un férié que vous travaillez vraiment : {T} « Travailler ».'; },
+        fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); var v = memo.ferN != null && !!e && e.n > memo.ferN; if (v) memo.ferC = true; return v; },
+        ok: 'Il reprend les heures de sa saison, ce jour de la semaine.' },
+      { type: 'toucher', cible: '[data-tuto="plan.annee.ann"]',
+        txt: function () { return 'C’était pour voir : {T} « ' + L('[data-tuto="plan.annee.ann"]') + ' ».'; },
+        fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); return !!memo.ferC && !!e && !e.brouillon; },
+        ok: 'Le modèle est comme avant.' },
+    ] },
   // ★ FRISE-AB (§551) — un vendredi sur deux : une saison à deux semaines qui alternent.
   { id: 'unsurdeux', titre: 'Comment faire pour un vendredi sur deux\u00a0?', fin: 'régler deux semaines qui alternent',
     module: 'Planning', pages: ['planning'], pour: 'admin', duree: '2 min', depart: 'home',

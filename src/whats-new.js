@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.88', d: '2026-11-09', items: [   // FERIES-1 (§556) : les fériés du modèle — vus, chômés ou travaillés d'un geste
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les fériés du modèle se voient et se chôment',
+      desc: "Dans l’onglet Année, un férié que le modèle prévoit travaillé montre ses heures dans la semaine, avec « Chômer » ; « Travailler » lui rend celles de sa saison. Sous la semaine, « Les fériés de l’année » dit combien en portent et les chôme d’un geste. Rien n’est écrit avant « Enregistrer » ; la journée de solidarité n’est jamais touchée. Un tuto montre le geste." },
+  ] },
   { v: '10.87', d: '2026-11-09', items: [   // MODSUIVI-1 (§555) : qui suit ce modèle — l'onglet Année le dit, et inscrit sur place
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’onglet Année dit qui suit le modèle',
       desc: "En tête de la carte d’un modèle : « Suivi par » et ses salariés, ou « Personne ne suit », quand le régler ne changerait le planning de personne. « Inscrire… » ou « Modifier » ouvrent une feuille : cochez ceux qui travaillent à ce rythme ; avant de confirmer, elle dit ce que ça change sur leurs heures prévues des mois passés. Un tuto montre le geste." },

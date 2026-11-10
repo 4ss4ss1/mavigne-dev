@@ -354,6 +354,70 @@ function planAnneeDesIci(el){
   A.J.forEach(function(x){if(x.i>=debut&&x.s===si&&x.g===g&&!x.fer&&!x.ferme&&!x.apart&&x.h===v)_planAnneePose(G,x.m,x.d,nv);});
   E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
 }
+// ★★ FERIES-1 (§556) — LES FÉRIÉS DU MODÈLE (maquette « modèles suivis » v1, point 4 ; D2 validée le 09/11 : un férié qui porte des
+//   heures est PROPOSÉ chômé, en un seul geste, rien sans le geste). Un modèle importé pouvait porter des heures un jour férié : la
+//   grille du mois les affichait, le relevé et le compte de l'année les comptaient travaillées (majoration comprise), et la frise
+//   montrait le nom du férié à la place de ses heures, sans rien pour les régler depuis que la grille de 365 cases est partie
+//   (FRISE-5) — seul le CSV les corrigeait. Dans la semaine : le férié dit ses heures, « Chômer » le passe à 0, « Travailler » lui
+//   rend les heures de sa saison. Sous la semaine, la section des fériés de l'année : « Chômer les N ». Tout va au brouillon,
+//   rien n'est écrit avant « Enregistrer ». La journée de solidarité, quand le domaine la fait un férié, n'y est jamais touchée :
+//   ses heures viennent de son réglage (_planPlanned), pas du modèle.
+function _planAnneeFeries(A,yr){
+  var sj=_planSolidJour(yr),out=[];
+  A.J.forEach(function(x){if(!x.fer)return;var S=A.saisons[x.s],sv=S?(((x.lettre==='B'&&S.hB)?S.hB:S.h)[x.g]||0):0;
+    out.push({m:x.m,d:x.d,g:x.g,nom:x.fer,h:x.h,we:x.g>=5,sol:!!(sj&&sj.m===x.m&&sj.d===x.d),saison:sv});});
+  return out;
+}
+function _planAnneeFerieDate(f){var JL=['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'];return JL[f.g]+'\u00a0'+(f.d===1?'1er':f.d)+'\u00a0'+PLAN_MOIS_FR[f.m];}
+// la ligne d'un férié dans la semaine choisie (FRISE-4) : le nom et l'état, puis les gestes
+function _planAnneeFerieSem(x,A,yr,jn,adm){
+  var f=_planAnneeFeries(A,yr).filter(function(y){return y.m===x.m&&y.d===x.d;})[0]||{nom:x.fer,h:x.h,sol:false,saison:0};
+  var nom='<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">'+_escHtml(f.nom)+' \u00b7 ';
+  if(f.sol)return nom+'journ\u00e9e de solidarit\u00e9</span>';
+  if(f.h>0)return nom+'travaill\u00e9 au mod\u00e8le</span>'+(adm?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+jn+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>':'')
+    +'<b style="min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums">'+_paH(f.h)+'</b>'
+    +(adm?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+jn+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>'
+      +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-a="chomer" onclick="planAnneeFerie(this)">Ch\u00f4mer</button>':'');
+  return nom+'ch\u00f4m\u00e9</span>'+((adm&&f.saison>0)?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-a="travailler" onclick="planAnneeFerie(this)">Travailler</button>':'');
+}
+// la section des fériés de l'année, sous la semaine : combien portent des heures, « Chômer les N », chacun avec son geste
+function _planAnneeFeriesBloc(A,id,yr,adm,ouvert){
+  var F=_planAnneeFeries(A,yr),P=F.filter(function(f){return f.h>0&&!f.sol;}),L=F.filter(function(f){return !f.we||f.h>0;}),W=F.filter(function(f){return f.we&&!(f.h>0);});
+  var h='<div id="pa-feries" data-tuto="plan.annee.feries" style="margin-top:14px;padding-top:10px;border-top:1px solid var(--gris-clair)"><b>Les f\u00e9ri\u00e9s de '+yr+' dans \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb</b>';
+  if(P.length)h+='<div class="mvencadre mvencadre-attention" style="margin-top:8px"><b>'+P.length+' f\u00e9ri\u00e9'+(P.length>1?'s portent':' porte')+' des heures.</b>'
+    +'<div style="font-size:var(--pt-micro,11px);margin-top:2px">'+(_planBaseActive(yr)?'Ch\u00f4m\u00e9, un f\u00e9ri\u00e9 compte quand m\u00eame pour ses heures pr\u00e9vues (la base de l\u2019ann\u00e9e)\u00a0; travaill\u00e9 au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise.'
+      :'Ch\u00f4m\u00e9, un f\u00e9ri\u00e9 vaut 0\u00a0h au mod\u00e8le en '+yr+'\u00a0; travaill\u00e9 au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise. D\u00e8s 2027, un f\u00e9ri\u00e9 ch\u00f4m\u00e9 comptera pour ses heures pr\u00e9vues.')+'</div>'
+    +(adm?'<div style="margin-top:8px"><button class="plan-btn-saisir" data-tuto="plan.annee.feries.tous" onclick="planAnneeFeriesChomer()">Ch\u00f4mer les '+P.length+'</button></div>':'')+'</div>';
+  else h+='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:6px">Aucun f\u00e9ri\u00e9 n\u2019est travaill\u00e9 au mod\u00e8le.</div>';
+  var row='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)',tr=false;
+  h+='<details'+((P.length||ouvert)?' open':'')+' style="margin-top:8px"><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Les '+L.length+' f\u00e9ri\u00e9s en semaine</summary>'
+    +L.map(function(f){var g='';
+      if(f.sol)g='<span style="color:var(--texte-doux)">journ\u00e9e de solidarit\u00e9</span>';
+      else if(f.h>0)g='<b style="font-variant-numeric:tabular-nums">'+_paH(f.h)+'</b>'+(adm?'<button class="plan-btn-pdf" data-m="'+f.m+'" data-j="'+f.d+'" data-a="chomer" onclick="planAnneeFerie(this)">Ch\u00f4mer</button>':'');
+      else{g='<span style="color:var(--texte-doux)">ch\u00f4m\u00e9</span>';if(adm&&f.saison>0){g+='<button class="plan-btn-pdf" data-m="'+f.m+'" data-j="'+f.d+'" data-a="travailler"'+(tr?'':' data-tuto="plan.annee.ferie.travailler"')+' onclick="planAnneeFerie(this)">Travailler</button>';tr=true;}}
+      return '<div style="'+row+'"><span style="flex:1;min-width:0">'+_planAnneeFerieDate(f)+'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(f.nom)+'</span></span>'+g+'</div>';}).join('')
+    +(W.length?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px">'+W.map(function(f){return (f.d===1?'1er':f.d)+'\u00a0'+PLAN_MOIS_FR[f.m];}).join(' et ')+' tomb'+(W.length>1?'ent':'e')+' un week-end en '+yr+'.</div>':'')
+    +'</details></div>';
+  return h;
+}
+// « Chômer » / « Travailler » un férié (le brouillon) ; « Travailler » lui rend les heures de sa saison, ce jour de la semaine
+function planAnneeFerie(el){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!el)return;
+  var m=parseInt(el.dataset.m,10),j=parseInt(el.dataset.j,10),a=el.dataset.a,yr=_pY(),G=_planAnneeBrouillon(E),A=_planAnneeLire(E.annee,yr,G);
+  var f=_planAnneeFeries(A,yr).filter(function(y){return y.m===m&&y.d===j;})[0];if(!f||f.sol)return;
+  if(a==='chomer'){if(!(f.h>0))return;_planAnneePose(G,m,j,0);}
+  else if(a==='travailler'){if(!(f.saison>0)||f.h>0)return;_planAnneePose(G,m,j,f.saison);}
+  else return;
+  E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
+}
+// « Chômer les N » : tous les fériés qui portent des heures, sauf la journée de solidarité — un geste, au brouillon
+function planAnneeFeriesChomer(){
+  if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee)return;
+  var yr=_pY(),G=_planAnneeBrouillon(E),A=_planAnneeLire(E.annee,yr,G),n=0;
+  _planAnneeFeries(A,yr).forEach(function(f){if(f.h>0&&!f.sol){_planAnneePose(G,f.m,f.d,0);n++;}});
+  if(!n)return;E.brouillon=G;E.n=(E.n||0)+1;E.sugg=false;_planRenderAnnee();
+  if(window.showToast)window.showToast(n+' f\u00e9ri\u00e9'+(n>1?'s ch\u00f4m\u00e9s':' ch\u00f4m\u00e9')+' \u2014 \u00ab\u00a0Enregistrer\u00a0\u00bb pour garder','#3D6B27');
+}
 // ★★ MODSUIVI-1 (§555) — QUI SUIT CE MODÈLE (maquette « modèles suivis » v1, point 3 ; D1 validée le 09/11 : tous les mois, l'effet
 //   écrit avant de confirmer). Remonté du terrain : un modèle réglé en vain, suivi par personne, que la frise ne disait qu'en
 //   11 px gris en fin de ligne. En tête de la carte : « Suivi par » et ses salariés, ou « Personne ne suit … » ; « Inscrire… » et
@@ -516,7 +580,7 @@ function _planRenderAnnee(){
       +'<button class="plan-btn-pdf" data-tuto="plan.annee.sem" data-d="1" onclick="planAnneeSemaine(this)">Suivante</button></div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 16px">'+Sw.j.map(function(x){
           return '<div style="'+row+'"><span style="flex:1">'+JC[x.g]+' '+(x.d===1?'1er':x.d)+' '+PLAN_MOIS_FR[x.m]+'</span>'
-            +(x.fer?'<span style="color:var(--texte-doux)">'+_escHtml(x.fer)+'</span>'
+            +(x.fer?_planAnneeFerieSem(x,A,yr,JN[x.g],adm)   // ★ FERIES-1 (§556) : le férié montre ses heures, se chôme, se travaille
               :'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+JN[x.g]+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'+hv(x.h)
               +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+JN[x.g]+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>'
               +(function(){var t=_planAnneeHoraire(MT,x.m,x.d,x.h);return t?'<button class="plan-btn-pdf"'+(x===Sw.j.find(function(y){return !y.fer&&y.h>0;})?' data-tuto="plan.annee.heure"':'')+' data-m="'+x.m+'" data-j="'+x.d+'" aria-label="Horaire du '+JN[x.g].toLowerCase()+' '+x.d+'" onclick="planAnneeJourSel(this)">'+_paHm(t.d)+' \u2192 '+_paHm(t.f)+(t.jour?' \u00b7 d\u00e9cal\u00e9':'')+'</button>':'';})())+'</div>';}).join('')+'</div>'
@@ -533,6 +597,7 @@ function _planRenderAnnee(){
             +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JN[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></div>';}).join('')+'</div></details>';
     h+='</div>';
   }
+  h+=_planAnneeFeriesBloc(A,id,yr,adm,!!E.brouillon);   // ★ FERIES-1 (§556) : ouverte tant qu'un brouillon est en cours
   h+='<div style="display:grid;gap:8px;margin-top:14px">';
   A.saisons.forEach(function(sa,si){var tn=_planAnneeTon(sa.tot),a=-1,b=-1;
     J.forEach(function(x){if(x.s===si&&!x.ferme&&!x.apart){if(a<0)a=x.i;b=x.i;}});
@@ -705,4 +770,6 @@ window._planAnneeMini       = _planAnneeMini;
 window.planAnneeInscrire    = planAnneeInscrire;   // ★ MODSUIVI-1 (§555) : qui suit ce modèle
 window.planAnneeInscrToggle = planAnneeInscrToggle;
 window.planAnneeInscrFermer = planAnneeInscrFermer;
-window.planAnneeInscrOk     = planAnneeInscrOk;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année
+window.planAnneeInscrOk     = planAnneeInscrOk;
+window.planAnneeFerie       = planAnneeFerie;   // ★ FERIES-1 (§556) : les fériés du modèle
+window.planAnneeFeriesChomer = planAnneeFeriesChomer;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année
