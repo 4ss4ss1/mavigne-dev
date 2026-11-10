@@ -424,7 +424,8 @@ function renderReglages(){
         +'</div>';
       }).join('')+_cmpLienArchives()+'<button onclick="window._repairSessSaisons&&window._repairSessSaisons()" style="width:100%;margin-top:10px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">'+_mvIcon('outil',16)+' Recaler les sessions tracteur sur leur saison</button>'+'<button onclick="window._mvRepairSaisonProg&&window._mvRepairSaisonProg()" style="width:100%;margin-top:8px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">'+_mvIcon('rotation',16)+' Reconstruire l’avancement d’après le journal</button>';
       sl.querySelectorAll('.sc-info').forEach(function(el){
-        el.addEventListener('click',function(){activateSaison(window.SAISONS[+el.dataset.idx].nom);});
+        // ★ CLOT-1 (§557) : toucher une période DEMANDE avant de basculer toute l'équipe (« Juste la consulter » : cet appareil seul).
+        el.addEventListener('click',function(){_perActiverDemande(window.SAISONS[+el.dataset.idx].nom);});
       });
       sl.querySelectorAll('.sc-edit-saison').forEach(function(el){
         el.addEventListener('click',function(e){e.stopPropagation();openEditSaison(window.SAISONS[+el.dataset.idx].nom);});
@@ -1174,6 +1175,62 @@ function activateSaison(nom){
   if(typeof window._switchSaison==='function') window._switchSaison(nom); // local : pointeur + recalc TRAVAUX + rendu
   renderReglages();window.renderParcelles();window.computePStats();
 }
+// ★ CLOT-1 (§557) — RENDRE UNE PÉRIODE ACTIVE SE DEMANDE.
+//   Avant : toucher une période de la liste (Réglages › Campagne) appelait activateSaison sur-le-champ — un appui, et toute
+//   l'équipe basculait : les parcelles repartaient de zéro sur la période touchée (remonté du terrain le 10/11, avec la
+//   clôture). Rien n'était effacé (activateSaison range l'avancement de l'ancienne sous son nom), mais rien ne le disait, et
+//   un appui pour REGARDER une période suffisait. La confirmation dit l'effet, chiffres à l'appui ; « Juste la consulter »
+//   change la période regardée sur cet appareil seul (_switchSaison, qui n'écrit rien). activateSaison reste le seul point
+//   de bascule.
+// Le bloc d'avancement d'une période : celui de l'active est p.taches, les autres sont rangés dans p.tachesAll.
+function _perBlocDe(p, nom, act){
+  if(!p) return {};
+  var b=(nom===act)?p.taches:((p.tachesAll&&typeof p.tachesAll==='object'&&!Array.isArray(p.tachesAll))?p.tachesAll[nom]:null);
+  return (b&&typeof b==='object'&&!Array.isArray(b))?b:{};
+}
+// Les travaux notés d'une période : une tâche d'une parcelle compte si elle porte un avancement (un « Validé », un passage,
+// un niveau) — la règle de la garde des parcelles (_tachesObjHasProg, app.js).
+function _perNbNotes(nom, act, parcelles){
+  var a=(typeof window._tachesObjHasProg==='function')?window._tachesObjHasProg:null, n=0;
+  (parcelles||[]).forEach(function(p){
+    var b=_perBlocDe(p, nom, act);
+    Object.keys(b).forEach(function(k){ var o={}; o[k]=b[k]; if(a?a(o):(b[k]==='Validé')) n++; });
+  });
+  return n;
+}
+function _perNotesTxt(n){ return n===0?'aucun travail noté':(n+(n>1?' travaux notés':' travail noté')); }
+// Le texte de la confirmation — texte BRUT : openConfirmDel l'écrit en textContent.
+function _perActiverTexte(nom, act, saisons, parcelles, auj){
+  var S=saisons||[];
+  var cible=S.find(function(s){ return s&&s.nom===nom; })||{};
+  var ancienne=S.find(function(s){ return s&&s.nom===act; })||{};
+  var sub='Toute l’équipe passera sur « '+nom+' » : les parcelles afficheront son avancement ('+_perNotesTxt(_perNbNotes(nom,act,parcelles))+').';
+  if(act) sub+=' Celui de « '+act+' » ('+_perNotesTxt(_perNbNotes(act,act,parcelles))+') reste rangé sous son nom : rien n’est effacé, on peut y revenir.';
+  if(act&&ancienne.fin&&auj&&auj<=String(ancienne.fin)) sub+=' « '+act+' » court encore jusqu’au '+_cmpFr(ancienne.fin)+'.';
+  if(!cible.debut||!cible.fin) sub+=' « '+nom+' » n’a pas de dates : aucune saisie ne s’y rattache tant qu’elles manquent (le crayon).';
+  else if(auj&&auj<String(cible.debut)) sub+=' « '+nom+' » ne commence que le '+_cmpFr(cible.debut)+'.';
+  else if(auj&&auj>String(cible.fin)) sub+=' « '+nom+' » est finie depuis le '+_cmpFr(cible.fin)+'.';
+  return { titre:'Rendre « '+nom+' » active\u00a0?', sub:sub };
+}
+function _perActiverDemande(nom){
+  if(!nom) return;
+  var act=((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'';
+  if(nom===act){ showToast('« '+nom+' » est déjà la période active','#3D6B27'); return; }
+  if(typeof window.openConfirmDel!=='function'){
+    if(window.logError) window.logError({level:'warning',cat:'saisons',msg:'CLOT-1 : fenêtre de confirmation absente — période non activée'});
+    return;
+  }
+  var t=_perActiverTexte(nom, act, window.SAISONS, window.PARCELLES, (typeof window._mvToday==='function')?window._mvToday():'');
+  window.openConfirmDel(t.titre, t.sub, function(){
+    activateSaison(nom);
+    showToast('« '+nom+' » est la période active de toute l’équipe','#3D6B27');
+  }, 'calendrier', 'Rendre active pour l’équipe', 'var(--terre)', { label:'Juste la consulter, sur cet appareil', cb:function(){
+    if(typeof window._switchSaison==='function') window._switchSaison(nom);
+    renderReglages();
+  }});
+}
+window._perActiverDemande=_perActiverDemande;
+window._perActiverTexte=_perActiverTexte;
 // ★ TACHEPER-1 (§352) — UNE TÂCHE COCHÉE DANS UNE PÉRIODE EXISTE DANS LE DOMAINE. Écrivain unique, partagé par la création
 //   (saveSaison), la modification (saveEditSaison) et la réparation à l'ouverture (app.js, _perReparerTaches).
 //   Avant : seule la création ajoutait au domaine une tâche de la convention cochée ; la modification enregistrait la coche et
@@ -3426,16 +3483,24 @@ function _clotSuggestNext(){
   return { type:'', year: yr+1, from: sa };
 }
 
-// Décale d'un an la période qu'on clôture. Un millésime dans le nom est incrémenté ; sinon on
-// suffixe l'année d'arrivée. Aucune date « conventionnelle » n'est imposée : ce sont les tiennes.
-function _clotDatesFor(type, yr){
+// ★ CLOT-1 (§557) — LA PÉRIODE QUI SUIT, PAS LA MÊME UN AN PLUS TARD, ET RIEN DE DEVINÉ.
+//   Avant : la proposition reprenait la période qu'on ferme décalée d'un an, nom compris — l'automne 2026 devenait
+//   l'automne 2027, de septembre à novembre 2027 : dix mois sans période, ou des dates acceptées sans avoir été lues. Et
+//   une case vidée passait (une période sans dates, que rien ne rattache). Désormais : le lendemain de la fin de celle
+//   qu'on ferme ; le nom et la date de fin se DEMANDENT (cases vides, rien ne passe sans eux : _clotControle).
+function _clotDatesFor(){
   var sa=(window.getSaisonActive && window.getSaisonActive())||{};
-  if(!sa.debut||!sa.fin) return { nom:'', deb:'', fin:'' };
-  var bump=function(iso){ var p=String(iso).split('-'); return (parseInt(p[0],10)+1)+'-'+p[1]+'-'+p[2]; };
-  var nom=String(sa.nom||'');
-  nom=/\d{4}/.test(nom) ? nom.replace(/\d{4}/g,function(y){return String(parseInt(y,10)+1);})
-                         : (nom+' '+(yr||new Date().getFullYear()));
-  return { nom:nom, deb:bump(sa.debut), fin:bump(sa.fin) };
+  if(!sa.fin) return { nom:'', deb:'', fin:'' };
+  return { nom:'', deb:_cmpISO(_cmpN(sa.fin)+1), fin:'' };
+}
+// Un exemple de nom, en filigrane — d'après le mois où la suivante commence. Un exemple, pas une proposition.
+function _clotNomEx(deb){
+  var p=String(deb||'').split('-'), y=parseInt(p[0],10)||new Date().getFullYear(), m=parseInt(p[1],10)||1;
+  if(m>=11) return 'Hiver '+y+' \u2013 '+(y+1);
+  if(m<=2) return 'Hiver '+(y-1)+' \u2013 '+y;
+  if(m<=6) return 'Printemps '+y;
+  if(m<=8) return '\u00c9t\u00e9 '+y;
+  return 'Vendange '+y;
 }
 
 
@@ -3445,14 +3510,14 @@ function _clotOverlayHTML(ctx){
   var stat = function(v,l){ return '<div class="mvcarte-fond" style="padding:12px 6px;text-align:center">'
     + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-lg,24px);color:#1C1813">'+v+'</div>'
     + '<div style="font-size:var(--pt-nano,11px);color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
-  var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
+  var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+_escHtml((s.debut&&s.fin)?(' \u00b7 '+_cmpFr(s.debut)+' \u2192 '+_cmpFr(s.fin)):' \u00b7 dates manquantes')+'</option>'; }).join('');   // ★ CLOT-1 (§557) : ses dates
   var activateInner = (ctx.prepared && ctx.prepared.length)
     ? '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Campagne déjà préparée</label>'
       + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%">'+prepOpts+'</select></div>'
       + '<div class="mvencadre mvencadre-ok" style="display:flex;gap:9px;align-items:flex-start"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
-    : '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
+    : '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start"><span>ℹ️</span><div>Aucune période préparée après « '+_escHtml(ctx.endNom)+' ». Utilisez <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
   var garde = ctx.warn
-    ? '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:6px"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
+    ? '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:6px"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Vous pouvez clôturer quand même — l’avancement reste consultable — mais vérifiez que la campagne est bien terminée.</div></div>'
     : '';
 
   return ''
@@ -3475,7 +3540,9 @@ function _clotOverlayHTML(ctx){
           + '<div style="font-size:var(--pt-micro,11px);color:#C9A84C">Campagne qui se termine</div>'
           + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:66px;line-height:1;margin:6px 0 2px">'+(ctx.pct||0)+'%</div>'
           + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-size:22px">'+esc+'</div>'
-          + '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>'
+          + (ctx.court   // ★ CLOT-1 (§557) : une période qui court n'est pas encore une « belle campagne »
+              ? '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('chrono',16)+' Pas encore finie : elle court jusqu’au '+_escHtml(ctx.finFr)+'.</div>'
+              : '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>')
         + '</div>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px">'
           + stat((ctx.surfTot||0).toFixed(2), 'ha travaillés')
@@ -3483,31 +3550,40 @@ function _clotOverlayHTML(ctx){
           + stat(ctx.nSess||0, 'Sessions tracteur')
           + stat(ctx.nTrait||0, 'Traitements phyto')
         + '</div>'
+        + (ctx.court ? '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:15px"><span>'+_mvIcon('alerte',16)+'</span><div><b>« '+_escHtml(ctx.endNom)+' » n’est pas finie : elle court jusqu’au '+_escHtml(ctx.finFr)+'.</b> La clôturer maintenant fait repartir les parcelles de zéro pour toute l’équipe, dès aujourd’hui — le travail fait reste rangé sous son nom. À la dernière étape, vous pourrez <b>préparer la prochaine sans clôturer</b>.</div></div>' : '')   // ★ CLOT-1 (§557)
         + '<div class="mvencadre mvencadre-attention" style="display:flex;gap:9px;align-items:flex-start;margin-top:15px"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
       + '</div>'
       + '<div id="clot-s2" style="display:none">'
         + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
-        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Crée la suivante, ou active une campagne déjà préparée à l\'avance.</div>'
+        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Créez la suivante, ou activez une période déjà préparée.</div>'
         + '<div style="display:flex;gap:8px;margin-bottom:16px">'
           + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Créer la prochaine</button>'
           + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,13px);font-weight:600;cursor:pointer">Activer une préparée</button>'
         + '</div>'
         + '<div id="clot-create" style="display:block">'
-          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
-            + '<div style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45">La p\u00e9riode ci-dessous reprend « '+_clotEsc(ctx.endNom)+' » d\u00e9cal\u00e9e d\u2019un an, avec la m\u00eame liste de travaux. Ajustez ce qui doit l\u2019\u00eatre.</div></div>'
-          + '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Nom de la campagne</label>'
-            + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);color:#6B655C;font-weight:600;margin-bottom:6px">La période suivante</label>'
+            + '<div style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45">Elle commence le lendemain de la fin de « '+_escHtml(ctx.endNom)+' »'+(ctx.debFr?', le '+_escHtml(ctx.debFr):'')+'. Donnez-lui un nom et une date de fin\u00a0: c\u2019est la date qui rattache chaque saisie \u00e0 sa p\u00e9riode. Elle reprend la liste de travaux de « '+_escHtml(ctx.endNom)+' », modifiable ensuite dans R\u00e9glages \u203a Campagne.</div></div>'   // ★ CLOT-1 (§557)
+          + '<div style="margin-bottom:13px"><label class="mvchamp-l" style="display:block;margin-bottom:6px">Nom de la période</label>'
+            + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" placeholder="'+_escHtml('ex. '+(ctx.nomEx||''))+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
-            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" onblur="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
+            + '<div><label class="mvchamp-l" style="display:block;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" onblur="window._clotSyncConfirm&&window._clotSyncConfirm()" class="mvchamp" style="width:100%"></div>'
           + '</div>'
+          + '<div id="clot-note" style="font-size:var(--pt-micro,12px);color:#6B655C;line-height:1.45;margin-top:8px"></div>'   // ★ CLOT-1 (§557) : la période tapée et ce qui ne va pas, à la frappe
           + garde
         + '</div>'
         + '<div id="clot-activate" style="display:none">'+activateInner+'</div>'
       + '</div>'
       + '<div id="clot-s3" style="display:none">'
         + '<div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:22px;margin-bottom:4px">Confirmer la clôture</div>'
-        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
+        + '<div style="font-size:var(--pt-txt,13px);color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui se passe quand vous validez.</div>'
+        + (ctx.court   // ★ CLOT-1 (§557) — la décision du 23/10 : préparer la suivante sans clôturer l'actuelle
+            ? '<div id="clot-court3" class="mvencadre mvencadre-attention" style="margin-bottom:16px">'
+              + '<div style="display:flex;gap:9px;align-items:flex-start"><span>'+_mvIcon('alerte',16)+'</span><div><b>« '+_escHtml(ctx.endNom)+' » court jusqu’au '+_escHtml(ctx.finFr)+'.</b> Clôturer maintenant fait repartir les parcelles de zéro pour toute l’équipe, dès aujourd’hui.</div></div>'
+              + '<button id="clot-preparer" type="button" onclick="window._clotPreparer&&window._clotPreparer()" style="display:block;width:100%;margin-top:12px;padding:14px;border-radius:12px;border:1px solid #14110D;background:#14110D;color:#F0E2C8;font-family:inherit;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer">Préparer « <span id="clot-cf-new3">'+_escHtml(ctx.sug.nom||'')+'</span> » sans clôturer</button>'
+              + '<div id="clot-preparer-txt" style="font-size:var(--pt-micro,12px);line-height:1.45;margin-top:8px">L’équipe continue sur « '+_escHtml(ctx.endNom)+' ». La nouvelle attend dans la liste de la campagne : à la fin, clôturez en choisissant « Activer une préparée ».</div>'
+            + '</div>'
+            : '')
         + '<div style="display:flex;align-items:stretch;margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #E7E3DA">'
           + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:600;font-size:var(--pt-sm,16px);line-height:1.15">'+esc+'</div><div style="font-family:var(--font-titre,\'Cormorant Garamond\',serif);font-weight:700;font-size:var(--pt-xxl,32px);color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
           + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
@@ -3545,11 +3621,16 @@ function openClotureFlow(){
   var nTrait = (window.TRAITEMENTS||[]).filter(function(t){ if(!t)return false; var n=(_sfd&&_sfd(t.date))||''; return n===actNom; }).length;
   var nTaches = (window.getTachesSaison?window.getTachesSaison():[]).length;
   var sug = _clotSuggestNext();
-  var dd = _clotDatesFor(sug.type, sug.year);
-  _CLOT = { step:1, mode:'create', type:sug.type, endNom:actNom, endPct:pct, _sugYear:sug.year };
-  var prepared = (window.SAISONS||[]).filter(function(s){ return s && !s.active; });
+  var dd = _clotDatesFor();
+  // ★ CLOT-1 (§557) : une période qui court encore (aujourd'hui ≤ sa fin) se signale, et se prépare sans clôturer.
+  var auj = (typeof window._mvToday==='function') ? window._mvToday() : '';
+  var court=!!(sa.fin&&auj&&auj<=String(sa.fin));
+  _CLOT = { step:1, mode:'create', type:sug.type, endNom:actNom, endPct:pct, _sugYear:sug.year, court:court };
+  // ★ CLOT-1 (§557) : « Activer une préparée » ne propose que les périodes qui commencent APRÈS celle qu'on ferme (les passées
+  //   n'y ont rien à faire) — et celles sans dates, pour que le refus dise le chemin (le crayon).
+  var prepared = (window.SAISONS||[]).filter(function(s){ return s && !s.active && (!s.debut || !sa.debut || String(s.debut)>String(sa.debut)); });
   var nReste = (typeof window._cptReste === 'function') ? parcActives.reduce(function(s,p){ return s + (window._cptReste(p) || 0); }, 0) : 0;   // ★ RESTE-1 (§535)
-  var html = _clotOverlayHTML({ pct:pct, endNom:actNom, surfTot:surfTot, nSess:nSess, nTrait:nTrait, nTaches:nTaches, sug:dd, prepared:prepared, warn:(pct<_CLOT_WARN_PCT), reste:nReste });
+  var html = _clotOverlayHTML({ pct:pct, endNom:actNom, surfTot:surfTot, nSess:nSess, nTrait:nTrait, nTaches:nTaches, sug:dd, prepared:prepared, warn:(pct<_CLOT_WARN_PCT), reste:nReste, court:court, finFr:(sa.fin?_cmpFr(sa.fin):''), debFr:(dd.deb?_cmpFr(dd.deb):''), nomEx:_clotNomEx(dd.deb) });
   var old = document.getElementById('ovCloture'); if(old && old.parentNode) old.parentNode.removeChild(old);
   var wrap = document.createElement('div'); wrap.innerHTML = html;
   if(wrap.firstElementChild) document.body.appendChild(wrap.firstElementChild);
@@ -3568,12 +3649,22 @@ function _clotStep(n){
   var nx=document.getElementById('clot-next');
   if(nx){
     if(n<3){ nx.textContent='Continuer'; nx.style.background='#14110D'; nx.style.color='#F0E2C8'; nx.style.borderColor='#14110D'; nx.onclick=function(){ if(window._clotNext)window._clotNext(); }; }
-    else { nx.textContent='Clôturer la campagne'; nx.style.background='#7A1020'; nx.style.color='#fff'; nx.style.borderColor='#7A1020'; nx.onclick=function(){ if(window._clotExec)window._clotExec(); }; }
+    else { nx.textContent=_CLOT.court?'Clôturer quand même':'Clôturer la campagne'; nx.style.background='#7A1020'; nx.style.color='#fff'; nx.style.borderColor='#7A1020'; nx.onclick=function(){ if(window._clotExec)window._clotExec(); }; }
   }
   var sc=document.getElementById('clot-scroll'); if(sc)sc.scrollTop=0;
-  if(n===3) _clotSyncConfirm();
+  if(n===3){
+    // ★ CLOT-1 (§557) : « Préparer sans clôturer » ne vaut que pour une période à créer (une préparée existe déjà).
+    var _pr=document.getElementById('clot-preparer'), _pt=document.getElementById('clot-preparer-txt'), _cr=(_CLOT.mode==='create');
+    if(_pr) _pr.style.display=_cr?'block':'none';
+    if(_pt) _pt.style.display=_cr?'block':'none';
+    _clotSyncConfirm();
+  }
 }
-function _clotNext(){ _clotStep((_CLOT.step||1)+1); }
+function _clotNext(){
+  // ★ CLOT-1 (§557) : la confirmation ne s'ouvre qu'avec un nom et des dates qui tiennent (ou une période préparée datée).
+  if((_CLOT.step||1)===2){ var _m=_clotControle(_CLOT.mode, _clotLire(), window.SAISONS); if(_m){ _clotSyncConfirm(); showToast(_m,'#B85A1A'); return; } }
+  _clotStep((_CLOT.step||1)+1);
+}
 function _clotBack(){ _clotStep((_CLOT.step||1)-1); }
 function _clotClose(){ var o=document.getElementById('ovCloture'); if(o&&o.parentNode)o.parentNode.removeChild(o); document.body.style.overflow=''; }
 
@@ -3595,6 +3686,56 @@ function _clotSyncConfirm(){
   else { name=(((document.getElementById('clot-prep')||{}).value)||'')||'Nouvelle campagne'; }
   var t1=document.getElementById('clot-cf-new'); if(t1)t1.textContent=name;
   var t2=document.getElementById('clot-cf-new2'); if(t2)t2.textContent=name;
+  var t3=document.getElementById('clot-cf-new3'); if(t3)t3.textContent=name;   // ★ CLOT-1 (§557)
+  // ★ CLOT-1 (§557) : sous les dates, la période tapée et ce qui ne va pas (date impossible, fin avant le début, chevauchement).
+  var no=document.getElementById('clot-note');
+  if(no && _CLOT.mode==='create'){
+    var v=_clotLire(), a=_perDatesAlertes(v.d0, v.f0, null);
+    no.innerHTML=_mvIcon('calendrier',16)+' Période : <b>'+_escHtml(_nsPeriode(v.d0.v,v.f0.v)||'\u2014')+'</b>'+(a.length?'<br>'+_perAlertesHtml(a):'');
+  }
+}
+
+// ★ CLOT-1 (§557) — CE QUE L'ÉCRAN DIT, LU UNE FOIS : les dates par _perDateLue (une date impossible n'est pas une case vide).
+function _clotLire(){
+  var g=function(id){ return document.getElementById(id); };
+  return { nom:String(((g('clot-name')||{}).value)||'').trim(), d0:_perDateLue(g('clot-deb')), f0:_perDateLue(g('clot-fin')),
+           prep:String(((g('clot-prep')||{}).value)||'') };
+}
+// ★ CLOT-1 (§557) — CE QUI DOIT ÊTRE VRAI AVANT DE PASSER À LA SUIVANTE. Une source pour l'étape 2, la préparation et la
+//   clôture. Rend '' si tout tient, sinon le message (texte brut).
+function _clotControle(mode, v, saisons){
+  var S=saisons||[];
+  if(mode==='create'){
+    if(!v.nom) return 'Donnez un nom à la nouvelle période';
+    if(S.some(function(s){ return s && String(s.nom||'').trim().toLowerCase()===v.nom.toLowerCase(); })) return '« '+v.nom+' » existe déjà — choisissez un autre nom';
+    if(v.d0.ko||v.f0.ko) return _perDateKoMsg(v.d0.ko, v.f0.ko);
+    if(!v.d0.v||!v.f0.v) return 'Début et fin obligatoires — c’est la date qui rattache une saisie';
+    if(v.f0.v<v.d0.v) return 'La fin précède le début';
+    // Un chevauchement fait perdre ses heures à l'une des deux (_saisonForDate prend la plus tardive) : refusé, toute période.
+    var chev=S.filter(function(s){ return s&&s.debut&&s.fin&&v.d0.v<=String(s.fin)&&v.f0.v>=String(s.debut); }).map(function(s){ return s.nom; });
+    if(chev.length) return 'Ces dates chevauchent '+chev.join(', ')+' : une date ne se rattache qu’à une seule période';
+    return '';
+  }
+  if(!v.prep) return 'Choisissez une période préparée';
+  var p=S.find(function(s){ return s&&s.nom===v.prep; });
+  if(!p) return '« '+v.prep+' » n’existe plus';
+  if(!p.debut||!p.fin) return '« '+v.prep+' » n’a pas de dates : réglez-les avec son crayon, dans Réglages › Campagne';
+  return '';
+}
+// ★ CLOT-1 (§557) — PRÉPARER LA SUIVANTE SANS CLÔTURER (décision du 23/10 : la nouvelle est seulement préparée, l'actuelle
+//   reste active). Proposé quand la période en cours n'est pas finie. N'archive rien, n'active rien : la période attend dans
+//   la liste ; à la fin, la clôture la propose dans « Activer une préparée ».
+function _clotPreparer(){
+  if(_CLOT.mode!=='create') return;
+  var v=_clotLire(), m=_clotControle('create', v, window.SAISONS);
+  if(m){ showToast(m,'#B85A1A'); return; }
+  var sa=(window.getSaisonActive && window.getSaisonActive())||{};
+  var _herit=(window.getTachesSaison?window.getTachesSaison():[]).map(function(x){return x.nom;});
+  window.SAISONS.push({ nom:v.nom, periode:_nsPeriode(v.d0.v,v.f0.v), debut:v.d0.v, fin:v.f0.v, active:false, taches:_herit });
+  window.saveData('saisons');
+  _clotClose();
+  renderReglages();
+  showToast('« '+v.nom+' » est prête — « '+(sa.nom||'')+' » reste active jusqu’à sa clôture','#3D6B27');
 }
 
 var _CLOT_EN_COURS = false;
@@ -3603,14 +3744,10 @@ async function _clotExec(){
   var saison=(window.getSaisonActive && window.getSaisonActive())||{};
   // ARCH-1 : la nouvelle campagne n'est activee QUE si l'archive est reellement
   // enregistree. Sinon rien ne change : ni archive a moitie, ni campagne close sans photo.
-  // (Les controles de saisie du mode « create » passent AVANT l'archivage.)
-  if(_CLOT.mode==='create'){
-    var nm0=(((document.getElementById('clot-name')||{}).value)||'').trim();
-    if(!nm0){ if(window.showToast)showToast('Nom de campagne requis','#B85A1A'); return; }
-    if((window.SAISONS||[]).some(function(s){ return (s.nom||'').trim().toLowerCase()===nm0.toLowerCase(); })){ if(window.showToast)showToast('\u00ab '+nm0+' \u00bb existe d\u00e9j\u00e0','#B85A1A'); return; }
-  } else if(!(((document.getElementById('clot-prep')||{}).value)||'')){
-    if(window.showToast)showToast('Choisis une campagne préparée','#B85A1A'); return;
-  }
+  // ★ CLOT-1 (§557) : les controles de l'ecran (nom, dates, chevauchement ; periode preparee datee) passent AVANT
+  //   l'archivage — avant, une case de date videe creait une periode sans dates, que rien ne rattachait.
+  var _v=_clotLire(), _m=_clotControle(_CLOT.mode, _v, window.SAISONS);
+  if(_m){ if(window.showToast)showToast(_m,'#B85A1A'); return; }
   _CLOT_EN_COURS = true;
   var avant = deepClone(window.HISTORIQUE||[]);
   try{
@@ -3631,19 +3768,13 @@ async function _clotExec(){
   _CLOT_EN_COURS = false;
   var newNom='';
   if(_CLOT.mode==='create'){
-    var nm=(((document.getElementById('clot-name')||{}).value)||'').trim();
-    var deb=((document.getElementById('clot-deb')||{}).value)||'';
-    var fin=((document.getElementById('clot-fin')||{}).value)||'';
-    if(!nm){ if(window.showToast)showToast('Nom de campagne requis','#B85A1A'); return; }
-    if((window.SAISONS||[]).some(function(s){ return (s.nom||'').trim().toLowerCase()===nm.toLowerCase(); })){ if(window.showToast)showToast('« '+nm+' » existe déjà','#B85A1A'); return; }
     // La nouvelle campagne hérite de la liste de tâches de celle qu'on clôture (le flux force
     // d'abord la vue sur la période active). Modifiable ensuite dans Réglages.
     var _herit=(window.getTachesSaison?window.getTachesSaison():[]).map(function(x){return x.nom;});
-    window.SAISONS.push({ nom:nm, periode:_nsPeriode(deb,fin), debut:deb, fin:fin, active:false, taches:_herit });
-    newNom=nm;
+    window.SAISONS.push({ nom:_v.nom, periode:_nsPeriode(_v.d0.v,_v.f0.v), debut:_v.d0.v, fin:_v.f0.v, active:false, taches:_herit });
+    newNom=_v.nom;
   } else {
-    newNom=((document.getElementById('clot-prep')||{}).value)||'';
-    if(!newNom){ if(window.showToast)showToast('Choisis une campagne préparée','#B85A1A'); return; }
+    newNom=_v.prep;
   }
   try{ activateSaison(newNom); }catch(e){ if(window.showToast)showToast('Activation impossible','#B85A1A'); return; }
   _clotClose();
@@ -3658,6 +3789,7 @@ window._clotClose      = _clotClose;
 window._clotSeg        = _clotSeg;
 window._clotSyncConfirm= _clotSyncConfirm;
 window._clotExec       = _clotExec;
+window._clotPreparer   = _clotPreparer;   // ★ CLOT-1 (§557)
 
 
 // Calcule les stats d'un snapshot

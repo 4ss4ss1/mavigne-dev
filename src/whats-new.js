@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.89', d: '2026-11-10', items: [   // CLOT-1 (§557) : passer à la période suivante sans perdre le travail en cours
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Changer de période se confirme',
+      desc: "Toucher une période dans Réglages › Campagne la rendait active pour toute l’équipe, sans rien demander : les parcelles repartaient de zéro sur cette période. L’appli demande maintenant, et dit ce que l’équipe verra ; « Juste la consulter » la montre sur votre appareil seul. Rien n’était effacé : l’avancement d’une période reste toujours rangé sous son nom." },
+    { niv: 0, pour: ['admin'], emoji: 'drapeau', titre: 'La clôture demande les dates de la période suivante',
+      desc: "La suivante commence le lendemain de la fin de l’actuelle ; vous lui donnez un nom et une date de fin, et des dates qui en chevauchent une autre sont refusées. Avant, la clôture proposait la même période un an plus tard, et une case vidée créait une période sans dates." },
+    { niv: 0, pour: ['admin'], emoji: 'pousse', titre: 'Préparer la période suivante sans clôturer',
+      desc: "Tant que la période en cours n’est pas finie, la clôture le dit et propose de préparer la suivante sans clôturer : l’équipe continue sur l’actuelle. À la fin, clôturez en choisissant la période préparée. Clôturer avant la date reste possible." },
+  ] },
   { v: '10.88', d: '2026-11-09', items: [   // FERIES-1 (§556) : les fériés du modèle — vus, chômés ou travaillés d'un geste
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Les fériés du modèle se voient et se chôment',
       desc: "Dans l’onglet Année, un férié que le modèle prévoit travaillé montre ses heures dans la semaine, avec « Chômer » ; « Travailler » lui rend celles de sa saison. Sous la semaine, « Les fériés de l’année » dit combien en portent et les chôme d’un geste. Rien n’est écrit avant « Enregistrer » ; la journée de solidarité n’est jamais touchée. Un tuto montre le geste." },

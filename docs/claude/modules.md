@@ -466,6 +466,7 @@ nom de la saison**. Cassé net pour tout domaine nommant ses périodes autrement
   l'enveloppe et son gestionnaire (`_nsToggleTache`, `_esToggleTache`) restent écrits en clair dans chaque fenêtre (§427e). La
   modification ne touche à rien (nom, tâches, dates) tant qu'une date est impossible ou que la fin précède le début. ⚠️ Le préfixe
   `es-` est partagé avec la fenêtre des sessions du tracteur (`es-note` est son champ « Note ») : vérifier un identifiant neuf.
+- ★ **Changer de période active se DEMANDE, la clôture demande les dates — CLOT-1 (§557)** : toucher une période de la liste ouvre `_perActiverDemande` (confirmation chiffrée ; « Juste la consulter » = `_switchSaison`) ; `activateSaison` reste le seul point de bascule. La clôture propose la période qui SUIT (le lendemain de la fin), demande nom et fin, et tout passe par `_clotControle` (étape 2, `_clotPreparer`, `_clotExec`) ; une période qui court encore se prépare sans clôturer (`_clotPreparer` : inactive, rien d’archivé).
 
 ⚠️ **Ne pas confondre PÉRIODE, CAMPAGNE et MILLÉSIME** — les axes du §11c.
 

@@ -555,6 +555,8 @@ export const HARNAIS = [
   ['node scripts/mv-taille-docs.mjs --test', 'auto-controle-calcul-de'],
   ['node scripts/mv-harnais-arch.mjs', 'archive-de-campagne-et'],
   ['node scripts/mv-harnais-arch.mjs --contre', 'archive-de-campagne-et'],
+  ['node scripts/mv-harnais-clot1.mjs', 'archive-de-campagne-et'],   // CLOT-1 (§557) : passer à la période suivante sans perdre le travail en cours — l'appli entière
+  ['node scripts/mv-harnais-clot1.mjs --contre', 'archive-de-campagne-et'],
   ['node scripts/mv-harnais-stock.mjs', 'file-hors-ligne-et-stockage'],
   ['node scripts/mv-harnais-stock.mjs --contre', 'file-hors-ligne-et-stockage'],
   ['node scripts/mv-harnais-envoi.mjs', 'envoi-jamais-perdu'],

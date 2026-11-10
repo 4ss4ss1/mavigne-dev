@@ -72,7 +72,9 @@ function monter(S, opts = {}) {
   const parts = noms.map(n => bloc(S.regl, n));
   const sfd = bloc(S.utils, 'function _saisonForDate(');
   const clot = bloc(S.regl, 'async function _clotExec(');
-  if (parts.some(x => !x) || !sfd || !clot) throw new Error('extraction impossible (ancre absente)');
+  // ★ CLOT-1 (§557) : _clotExec lit l'écran par _clotLire et le contrôle par _clotControle (les dates par _perDateLue).
+  const ctl = ['function _perDateLue(', 'function _perDateKoMsg(', 'function _clotLire(', 'function _clotControle('].map(n => bloc(S.regl, n));
+  if (parts.some(x => !x) || !sfd || !clot || ctl.some(x => !x)) throw new Error('extraction impossible (ancre absente)');
   const W = {
     SAISONS: JSON.parse(JSON.stringify(SAISONS)), JOURNAL: JSON.parse(JSON.stringify(JOURNAL)),
     SESSIONS: JSON.parse(JSON.stringify(SESSIONS)), PARCELLES: [{ nom: 'A', statut: 'Actif', taches: {} }],
@@ -82,6 +84,7 @@ function monter(S, opts = {}) {
     fbSave: async () => { W.fbAppels++; return opts.fb ? opts.fb() : { ok: true }; },
   };
   const DOC = { 'clot-name': { value: 'Été 2026' }, 'clot-deb': { value: '2026-08-01' }, 'clot-fin': { value: '2026-10-31' } };
+  for (const k of Object.keys(DOC)) Object.assign(DOC[k], { setAttribute() {}, removeAttribute() {} });   // CLOT-1 : _perDateLue marque la case
   const code = 'var window=W; var navigator={onLine:' + (opts.horsLigne ? 'false' : 'true') + '};'
     + 'var document={getElementById:function(id){return DOC[id]||null;}};'
     + 'function showToast(m){W.toasts.push(m);} function deepClone(x){return JSON.parse(JSON.stringify(x));}'
@@ -89,7 +92,7 @@ function monter(S, opts = {}) {
     + 'var _CLOT={mode:"create"}; var _ARC_PLAFOND=' + (opts.plafond || 1000000) + ';'
     + 'function _nsPeriode(){return "";} function activateSaison(n){W.activees.push(n);} function _clotClose(){}'
     + 'function renderHistorique(){}\n'
-    + sfd + '\nW._saisonForDate=_saisonForDate;\n' + parts.join('\n') + '\nvar _CLOT_EN_COURS=false;\n' + clot
+    + sfd + '\nW._saisonForDate=_saisonForDate;\n' + parts.join('\n') + '\n' + ctl.join('\n') + '\nvar _CLOT_EN_COURS=false;\n' + clot
     + '\nreturn {W:W, deCamp:_arcDeLaCampagne, alleger:_arcAlleger, taille:_arcTaille, enreg:_arcEnregistrer, snap:_arcSnapshot, clot:_clotExec};';
   return new Function('W', 'DOC', 'Buffer', code)(W, DOC, Buffer);
 }

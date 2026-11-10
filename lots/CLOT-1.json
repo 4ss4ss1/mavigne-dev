@@ -1,0 +1,30 @@
+{
+  "lot": "CLOT-1",
+  "section": "§557",
+  "base": "742853a7fceef22ab9e1254a9e3557bf14d98812",
+  "inclut": [],
+  "date": "2026-11-10",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "b1450eedea886a2c4258161bbd6c0c8d138c56103ae7477941eecbb683c01149",
+    "CLAUDE.md": "2a3eb60725862612331bd244c9fd240b34ed67b54c0745d5882180f107597dde",
+    "docs/claude/INDEX.md": "9d4590c8fcae4e7516364ada76f700c66630f2e14d7a21fc91f73ca965393108",
+    "docs/claude/chantiers-530-579.md": "697b9f6b2ce219486f3ed394c19a785a4b32be566c212761ab3f4b8b59a56caa",
+    "docs/claude/journal.md": "e6b6709fa7e4ab41cd1664b1e1a6db05b7528eff6d135af0caa4f357f0c30a6b",
+    "docs/claude/modules.md": "992c24e42a18026acb3e6383b01bdd8d7d645f8c5d7277fcef3bdc93b080e3da",
+    "guide/05-saisons.html": "f7126903f9516bdc66c3a13395d66552b50f68fe7a79c082892f73b72f0d9071",
+    "index.html": "a1331e1a09211b936f4e563df4904724f2e47986f4d470d9aed30c14ae15506a",
+    "public/sw.js": "90846f73d4788f0793475a498df7dff8cb3a87ce1ea20dc4f122d21e4e4f1816",
+    "scripts/harnais-claude-md.mjs": "e74154ea127f2101b5dbd4c0b6ddf4b39cd17744fe54056735cef1c1336992aa",
+    "scripts/mv-harnais-arch.mjs": "6e61e3d654889257e4f9eb569f06606f2c7e77d96b6cdc3548974c5c36b9a879",
+    "scripts/mv-harnais-liste.mjs": "e1b63929fb27e5474e80e03057987d9a97c4da60ce490d8560a06b88e52f2f77",
+    "scripts/tutos-couverture.json": "93c4461873c7560c144daefa96a2e837d5a02e3ace4f665cdd171d0438ab9277",
+    "src/reglages.js": "70033d8f287f95c4c5044e4661c16a431b334476f5e3b268a20f04663a8ce5c0",
+    "src/utils.js": "65f1900ae280fd1fd3ecbcaad739ea2128a68a465eb085dfd394efab4f8c841b",
+    "src/whats-new.js": "3c0a5e9c78b19e2fb4c56af3e1d9f037aea323696dad2c330726a76542d800d0",
+    "scripts/mv-harnais-clot1.mjs": "1e00024a33af09467a25d178b94462455c7e0f2fe40f7896669c9ba531df6787"
+  }
+}

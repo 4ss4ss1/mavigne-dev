@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.88';
+export const APP_VERSION = '10.89';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2991,6 +2991,7 @@ var MV_AIDE = {
         return _mvAideSections('#regl-tabs-row .mvu-tab', 'onglets',
           "Ce qui n’appartient à aucun module : le domaine, l’équipe, votre compte.");
       },
+      ['La campagne', "dans l’onglet Domaine : ses périodes et leurs dates — c’est la date d’une saisie qui la range dans sa période. Toucher une période demande avant de la rendre active pour toute l’équipe ; « Juste la consulter » la montre sur cet appareil seul. « Clôturer la campagne » archive la période en cours et démarre la suivante, qui commence le lendemain : son nom et sa date de fin se demandent. Tant que la période en cours n’est pas finie, préparez la suivante sans clôturer — l’équipe continue sur l’actuelle. L’avancement d’une période close reste rangé sous son nom : rien n’est effacé."],
       ['La mise à jour', "se fait toute seule : quand vous quittez l’application ou que vous y revenez, si aucune fenêtre n’est ouverte et que rien n’est en cours de saisie. Sinon, une barre « Nouvelle version prête » s’affiche au-dessus du menu (sur ordinateur, en bas de la barre de gauche) : un appui, quelques secondes. Ici, Moi › Application › Mise à jour vérifie à la main."],
       ['Les réglages de la Vigne et du Tracteur', "ne sont plus ici : chaque module les règle chez lui, par la roue crantée de son en-tête — tâches, barème et plantations pour la Vigne, parc, activités et chrono pour le Tracteur. La Cave fait pareil depuis peu."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
