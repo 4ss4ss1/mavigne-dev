@@ -7,6 +7,7 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.90', d: '2026-11-10', items: [] },   // MODELES-DEC (§558) : qui suit un modèle et ses fériés sortent de planning-annee.js dans planning-modeles.js — rien ne change pour un client
   { v: '10.89', d: '2026-11-10', items: [   // CLOT-1 (§557) : passer à la période suivante sans perdre le travail en cours
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Changer de période se confirme',
       desc: "Toucher une période dans Réglages › Campagne la rendait active pour toute l’équipe, sans rien demander : les parcelles repartaient de zéro sur cette période. L’appli demande maintenant, et dit ce que l’équipe verra ; « Juste la consulter » la montre sur votre appareil seul. Rien n’était effacé : l’avancement d’une période reste toujours rangé sous son nom." },

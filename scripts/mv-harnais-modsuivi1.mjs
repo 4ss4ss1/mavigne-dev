@@ -3,12 +3,13 @@
    Lancer : node scripts/mv-harnais-modsuivi1.mjs          (le contrôle)
             node scripts/mv-harnais-modsuivi1.mjs --contre  (chaque défaut reposé doit rougir)
    Maquette « modèles suivis » v1, point 3 ; décision D1 (09/11) : tous les mois, l'effet écrit avant de confirmer.
-   Les VRAIES fonctions, extraites des fichiers : la carte et la feuille (planning-annee.js), le modèle d'un jour et son repli
+   Les VRAIES fonctions, extraites des fichiers : la carte et la feuille (planning-modeles.js depuis MODELES-DEC, §558 ; l'état et
+   les mois de la frise dans planning-annee.js), le modèle d'un jour et son repli
    (planning.js : _planPlanned, _planGetTpl et le recalage), le journal du contrat (utils.js : _mvHist, _mvPeriodes,
    _mvHistMirror, _mvHistGrille). Stubs : le DOM de la feuille, openOv / closeOv, fbSaveToast, la fenêtre de contrat
    (_planInContract : toujours sous contrat), l'horloge (posée au 9 novembre 2026, puis au 15 janvier 2027).
    Domaine fictif : Arthur, Léo, Marie, Paul — aucun nom, aucune date venus d'un client.
-   Contre-épreuve : chaque défaut est posé dans une copie de planning-annee.js HORS du dépôt et joué dans un processus à part.
+   Contre-épreuve : chaque défaut est posé dans une copie de planning-modeles.js HORS du dépôt et joué dans un processus à part.
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -26,13 +27,13 @@ const DEFAUTS = {
   fige:     ['les mois figés pour la compta ne sont plus dits', "if(e.figes.length)h+=", "if(false)h+="],
 };
 if (CONTRE) {
-  console.log('\n── MODSUIVI-1 — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0; const src = lire('src/planning-annee.js');
+  console.log('\n── MODSUIVI-1 — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0; const src = lire('src/planning-modeles.js');
   for (const [cle, [quoi, ancre, rempl]] of Object.entries(DEFAUTS)) {
     total++; const n = src.split(ancre).length - 1;
     if (n !== 1) { console.log('  \x1b[31m✗\x1b[0m ' + quoi + ' — ancre trouvée ' + n + ' fois'); continue; }
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mv-ms1-')), fp = path.join(tmp, 'planning-annee.js');
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mv-ms1-')), fp = path.join(tmp, 'planning-modeles.js');
     fs.writeFileSync(fp, src.replace(ancre, rempl));
-    const r = spawnSync(process.execPath, [ICI], { encoding: 'utf8', timeout: 60000, env: Object.assign({}, process.env, { MV_MS1_AN: fp }) });
+    const r = spawnSync(process.execPath, [ICI], { encoding: 'utf8', timeout: 60000, env: Object.assign({}, process.env, { MV_MS1_MO: fp }) });
     fs.rmSync(tmp, { recursive: true, force: true });
     const det = String(r.stdout || '').split('\n').filter(l => l.includes('✗')).slice(0, 1).join('').replace(/\x1b\[[0-9;]*m/g, '').trim();
     if (r.status !== 0) { tenues++; console.log('  \x1b[32m✓\x1b[0m ' + quoi + ' — vu' + (det ? ' (' + det.slice(0, 100) + ')' : '')); }
@@ -42,7 +43,7 @@ if (CONTRE) {
 }
 
 /* ══ EXTRACTION ══ */
-const AN = lire('src/planning-annee.js', 'MV_MS1_AN'), PL = lire('src/planning.js'), UT = lire('src/utils.js');
+const AN = lire('src/planning-annee.js'), MO = lire('src/planning-modeles.js', 'MV_MS1_MO'), PL = lire('src/planning.js'), UT = lire('src/utils.js');
 function corps(src, debut, nom, f) {
   const i = src.indexOf(debut); if (i < 0) throw new Error('ABSENTE de ' + f + ' : ' + nom);
   const j0 = src.indexOf('{', i); let d = 0;
@@ -73,10 +74,10 @@ try {
     'function _planPlId(m){ return m.planning_id || "standard"; }',
     'function _planMbrs(){ return (window.MEMBRES || []).filter(function(m){ return m.statut !== "Inactif"; }); }',
     'function _planInContract(){ return true; }',
-    ligne(AN, 'var PLAN_MOIS_FR=', 'src/planning-annee.js'), 'var _paEtat = null;', fn(AN, '_paE', 'src/planning-annee.js'), fn(AN, '_paH', 'src/planning-annee.js'),
-    ligne(AN, 'var _paInscr=', 'src/planning-annee.js'),
+    ligne(AN, 'var PLAN_MOIS_FR=', 'src/planning-annee.js'), 'window.PLAN_MOIS_FR = PLAN_MOIS_FR;', 'var _paEtat = null;', fn(AN, '_paE', 'src/planning-annee.js'), fn(AN, '_paH', 'src/planning-annee.js'),
+    ligne(MO, 'var _paInscr=', 'src/planning-modeles.js'),
     ...['_planAnneeSuivi', '_planAnneeJourTxt', '_planAnneeInscrSub', '_planAnneeInscrEffet', '_planAnneeInscrChangements', '_planAnneeInscrEffetTxt', '_planAnneeInscrPeindre',
-      'planAnneeInscrire', 'planAnneeInscrToggle', 'planAnneeInscrFermer', 'planAnneeInscrOk'].map(n => fn(AN, n, 'src/planning-annee.js')),
+      'planAnneeInscrire', 'planAnneeInscrToggle', 'planAnneeInscrFermer', 'planAnneeInscrOk'].map(n => fn(MO, n, 'src/planning-modeles.js')),
     'return { _planAnneeSuivi, _planAnneeJourTxt, _planAnneeInscrSub, _planAnneeInscrEffet, planAnneeInscrire, planAnneeInscrToggle, planAnneeInscrFermer, planAnneeInscrOk,',
     '  etat: function(e){ _paEtat = e; }, inscr: function(){ return _paInscr; }, modeles: function(T){ PLANNING_TEMPLATES = T; window.PLANNING_TEMPLATES = T; } };',
   ].join('\n');

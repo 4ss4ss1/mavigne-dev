@@ -1,0 +1,48 @@
+{
+  "lot": "MODELES-DEC",
+  "section": "§558",
+  "base": "ed911a33cc0002406aa52407ab59fe99e53c918b",
+  "inclut": [],
+  "date": "2026-11-10",
+  "tutos": {
+    "ok": true,
+    "empreinte": "db1824243e9682180748c05ca259864cf708e4341b3582eb836e33042ec53213",
+    "date": "2026-11-10T17:29:49.073Z",
+    "joues": {
+      "téléphone": 8,
+      "ordinateur": 8,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "inscrire",
+      "feries",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "00e1eae5c244a3f971087d61a180a5fb058760476cce16b1376844f953df352a",
+    "CLAUDE.md": "08ad386c63d933b806bbd3ccda8e060bbc477c302f118d73ea35ab1f190e1c4a",
+    "docs/claude/INDEX.md": "060ea1b199b8c4d4becf05fafe43d0e235c6d7ffe932c7a069ff8561934d8793",
+    "docs/claude/chantiers-530-579.md": "aa948a9bfe9dbc1acb8b05ba0c42121bca616c780d63da7d56e81969d5704f16",
+    "docs/claude/journal.md": "4de7d71d8c60e671153e38432f987e51ebc4952c5e3cf70470698589c9467672",
+    "docs/claude/modules.md": "761f8d6d3fbae6b8286a0468bb956587e4db17c035b507f0fb21215afb15a3c4",
+    "index.html": "807b4a562e0a93d14a561efeb6f632d77c7a883ddce8c57c079a2d91a3dda07e",
+    "public/sw.js": "c21719e6c9e6c1155e9bfba3cc9f351f7f368ac712a59d5dd1a651a5dd419a5a",
+    "scripts/harnais-claude-md.mjs": "c79db55dc8fdc28217e4a7fa8c6ca11a6db8a17006d0387f03cb0040be4e8379",
+    "scripts/mv-harnais-anneedec.mjs": "a2787730c6831ef80306328eec09f4a4234afcf9d84c71d20c378c43fc332786",
+    "scripts/mv-harnais-feries1.mjs": "bb7cbf6f09ea2fcd985b3012fa538a97870479acd0737492d5bc736c26522d75",
+    "scripts/mv-harnais-modsuivi1.mjs": "1fc11a46e8feef44d5b38c7c5a39153a4d8bfc489faddc1a24de5a245fd8163c",
+    "scripts/typo-baseline.json": "de1f9eddee65d2b11670bfecaa7e242cf96578479570c789c866e6bd1f854ec3",
+    "src/app.js": "442911370c67e047edbf9126ce86aa4b1e062498fd18fad74a17ca206343f6b1",
+    "src/planning-annee.js": "481eccc119dbf1654ca4c892c70c47f93743fdf0156b09bda0a80cb24e934fa6",
+    "src/utils.js": "a3faa276919dd825adc7fa8843db4a4dd812b6238bd3ee64306048c2ae80c6e5",
+    "src/whats-new.js": "37d30f9fa4b7c332d49b9dbb561780466b73beb93de7921fccd3985032c5a857",
+    "src/planning-modeles.js": "c61ed7473a8f966fce9aa503e615117461dcda55483676643e79eede3b542828"
+  }
+}

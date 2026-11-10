@@ -666,3 +666,27 @@ Et « Activer une campagne préparée » listait toutes les périodes inactives,
 
 ### 557d. Ce qui reste ouvert
 - §28, bloc CLOT-1.
+
+## 558. ★ MODELES-DEC — QUI SUIT UN MODÈLE ET SES FÉRIÉS SORTENT DE planning-annee.js : `src/planning-modeles.js` (10/11 — `src/planning-modeles.js` (neuf : les blocs de MODSUIVI-1 et FERIES-1, leurs emprunts, leurs expositions) · `src/planning-annee.js` (le bloc sort ; trois emprunts au module ; deux emprunts au Planning qui ne servaient qu’au bloc retirés ; six expositions pour le module) · `src/app.js` (l’import, juste après `planning-annee.js`) · `src/utils.js` (APP) · `src/whats-new.js` (annonce muette) · `index.html` · `public/sw.js` · `scripts/mv-harnais-anneedec.mjs` (étendu au module) · `scripts/mv-harnais-modsuivi1.mjs` · `scripts/mv-harnais-feries1.mjs` · `scripts/typo-baseline.json` (regravée : la frise à la baisse, le module entre) · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` · `.mv-base` · `lots/MODELES-DEC.json` — base `ed911a3` « clot1 » — **APP 10.89 → 10.90, SW 11.80 → 11.81**)
+
+### 558a. D’où ça vient
+FERIES-1 (§556c) : `mv-harnais-typo` avait rougi deux lots de suite sur `planning-annee.js` (66 → 75 → 83 ko), deux références regravées ; PREPAN-1 l’aurait encore alourdi. Le découpage avait été noté « avant PREPAN-1 » (§28) ; Nico a dit « suite » à la question « lot à part ou en tête de PREPAN-1 » : le lot à part, plus simple à vérifier — rien ne change à l’écran.
+
+### 558b. Le modèle, et ce qui a été écarté
+- **Les deux blocs** (MODSUIVI-1 et FERIES-1, ~16 ko, du commentaire de tête de FERIES-1 à `_planRenderAnnee` exclu) passent tels quels dans `src/planning-modeles.js`, au patron d’ANNEE-DEC (§542). Seule retouche : `PLAN_MOIS_FR[` se lit `window.PLAN_MOIS_FR[` (trois fois), comme `PLAN_MOIS` dans la frise.
+- **Les emprunts gardent leur nom**, en tête : sept au Planning (`_pY`, `_planMbrs`, `_planPlId`, `_planPlanned`, `_planInContract`, `_planSolidJour`, `_planBaseActive`, tous déjà exposés), six à la frise (`_paE`, `_paH`, `_planRenderAnnee`, `_planAnneeLire`, `_planAnneeBrouillon`, `_planAnneePose`) — que la frise expose désormais, avec `PLAN_MOIS_FR`. **La frise emprunte au module** trois fonctions de son rendu (`_planAnneeSuivi`, `_planAnneeFerieSem`, `_planAnneeFeriesBloc`) ; ses emprunts `_planPlanned` et `_planInContract`, qui ne servaient qu’au bloc, partent. Les six gestes du module s’exposent en fin de fichier ; `planAnneeJour` (le − / + d’un férié) reste un geste de la frise que le module dessine. Rien ne s’exécute au chargement.
+- `src/app.js` charge le module juste après la frise. Le preflight lui donne l’avertissement de la frise (pas de `const DEBUG` : une déclaration exécutée au chargement casserait la règle de la frontière) — 25 → 26 avertissements, aucune erreur.
+- **Écarté** : y mettre aussi la roue (« Assignation planning », `planAssignTpl` dans `planning.js`) — elle vit avec les réglages du Planning, et le lot ne devait rien changer d’autre ; renommer les emprunts — les harnais les trouvent par leur nom.
+
+### 558c. Ce qui a été vérifié
+- `scripts/mv-harnais-anneedec.mjs` étendu : 15 cas (9 → 15) — l’import juste après la frise, l’import seul de `utils.js`, chaque emprunt du module exposé (par `planning.js` ou la frise) et chaque emprunt de la frise exposé (par `planning.js` ou le module), les modèles vivant dans le module et plus dans la frise, chaque geste exposé, rien au chargement ; contre-épreuves 3 → 7 (la frise qui n’expose plus `_planAnneePose`, un geste du module, le module qui lit le Planning au chargement, la section des fériés plus exposée à la frise). Un premier jeu rouge, juste : `planAnneeJour` est dessiné par le module mais exposé par la frise — la règle l’accepte désormais.
+- `mv-harnais-modsuivi1` et `mv-harnais-feries1` lisent les fonctions des modèles dans le module (FERIES-1 lit les trois fichiers ; son extraction saute les emprunts, chaque fichier empruntant à l’autre) : 26 et 25 cas verts, 6/6 et 6/6.
+- Les contrôles de l’onglet Année rejoués verts (anneetab, frise1 à 5, hor1, ab1, prog1, monan1, onglets1, rattache1) ; `mv-harnais-ajour1` 70.
+- La taille : `planning-annee.js` 83 → 67 ko, `planning-modeles.js` 19 ko ; la référence regravée (la frise à la baisse, le module entre).
+- **Reposé sur la base neuve** : le lot CLOT-1 d’une autre conversation (la clôture de période, §557) a été poussé entre-temps et touchait onze des fichiers du lot (la doc, les versions, `utils.js`, `whats-new.js`, `index.html`, `sw.js`). Les six fichiers propres au lot (le module, la frise, `app.js`, trois harnais), intacts en amont, ont été remis tels quels ; les versions, la doc et la référence des tailles refaites sur `ed911a3` — d’où §558, APP 10.90, SW 11.81.
+- **Construit et rejoué dans Chromium** (`rapports/tutos.json` vert, sur les sources livrées) : les 8 tutos de l’onglet Année — téléphone 8, ordinateur 8, panneau, miroir.
+- **La chaîne complète, sur la base neuve** (`ed911a3`) : 724 commandes, 1 285 s, **0 rouge**.
+- Ce qui n’a pas pu être vu : un vrai téléphone. Rien ne change à l’écran : aucune capture à comparer.
+
+### 558d. Ce qui reste ouvert
+- §28, bloc RATTACHE-1 : PREPAN-1, qui va dans `planning-modeles.js`.

@@ -92,7 +92,12 @@
   "src/planning-annee.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 83
+    "ko": 67
+  },
+  "src/planning-modeles.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 19
   },
   "src/planning-vue.js": {
     "dur": 0,
@@ -107,7 +112,7 @@
   "src/reglages.js": {
     "dur": 108,
     "petit": 82,
-    "ko": 495
+    "ko": 506
   },
   "src/reserve.js": {
     "dur": 14,
@@ -142,7 +147,7 @@
   "src/whats-new.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 585
+    "ko": 587
   },
   "index.html": {
     "dur": 74,

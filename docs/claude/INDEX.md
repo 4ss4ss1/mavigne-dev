@@ -611,3 +611,4 @@
 | 555 | 555. ★★ MODSUIVI-1 — QUI SUIT CE MODÈLE : L’ONGLET ANNÉE LE DIT EN TÊTE DE LA CARTE, ET INSCRIT SUR PLACE (… | `docs/claude/chantiers-530-579.md` |
 | 556 | 556. ★★ FERIES-1 — LES FÉRIÉS DU MODÈLE : VUS DANS LA SEMAINE, CHÔMÉS OU TRAVAILLÉS D’UN GESTE (09/11 — `sr… | `docs/claude/chantiers-530-579.md` |
 | 557 | 557. ★★ CLOT-1 — PASSER À LA PÉRIODE SUIVANTE SANS PERDRE LE TRAVAIL EN COURS : TOUCHER UNE PÉRIODE SE CONF… | `docs/claude/chantiers-530-579.md` |
+| 558 | 558. ★ MODELES-DEC — QUI SUIT UN MODÈLE ET SES FÉRIÉS SORTENT DE planning-annee.js : `src/planning-modeles.… | `docs/claude/chantiers-530-579.md` |

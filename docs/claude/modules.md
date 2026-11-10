@@ -1195,6 +1195,10 @@ Sous la frise : `planAnneeSemaine` (précédente / suivante), ses jours (`planAn
 
 `src/planning-annee.js`, chargé juste après `planning.js`. Ses emprunts au Planning (en tête, au nom des fonctions, lus à l’appel) et ses
 expositions (en fin) sont sa frontière ; l’état de la vue (`_planEditing`) reste dans `planning.js`, lu et écrit par `_planEditingGet` / `_planEditingSet`.
+★ **MODELES-DEC (§558)** : `src/planning-modeles.js`, chargé juste après la frise, tient ce qui touche les modèles dans l’onglet Année — qui les suit
+(MODSUIVI-1) et leurs fériés (FERIES-1), demain l’année suivante (PREPAN-1). Même frontière : ses emprunts au Planning et à la frise en tête, ses gestes
+et les trois fonctions que la frise lui emprunte (`_planAnneeSuivi`, `_planAnneeFerieSem`, `_planAnneeFeriesBloc`) en fin ; la frise expose pour lui `_paE`,
+`_paH`, `_planAnneeLire`, `_planAnneeBrouillon`, `_planAnneePose` et `PLAN_MOIS_FR`.
 
 ### ★ Coupes, jours et semaines à part (FRISE-3, §541)
 

@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 const ICI = fileURLToPath(import.meta.url);
 const R = path.resolve(path.dirname(ICI), '..');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SOURCES = () => lire('src/planning.js') + '\n' + lire('src/planning-annee.js');
+const SOURCES = () => lire('src/planning.js') + '\n' + lire('src/planning-annee.js') + '\n' + lire('src/planning-modeles.js');   // MODELES-DEC (§558) : les fériés vivent dans planning-modeles.js
 const DEFAUTS = {
   solid:    ['la journée de solidarité compte parmi les fériés à chômer', 'P=F.filter(function(f){return f.h>0&&!f.sol;})', 'P=F.filter(function(f){return f.h>0;})'],
   tous:     ['« Chômer les N » n’écrit rien au brouillon', "if(f.h>0&&!f.sol){_planAnneePose(G,f.m,f.d,0);n++;}", 'if(f.h>0&&!f.sol){n++;}'],
@@ -40,11 +40,16 @@ if (process.argv.includes('--contre')) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
 const PL = process.env.MV_FER1_SOURCES ? fs.readFileSync(process.env.MV_FER1_SOURCES, 'utf8') : SOURCES();
+// la vraie fonction, pas son emprunt : la frise et le module des modèles s'empruntent l'un à l'autre (« return window.X.apply »)
 function fonction(src, nom) {
-  const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);
-  const i = src.indexOf('{', m.index); let d = 0;
-  for (let j = i; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}') { d--; if (d === 0) return src.slice(m.index, j + 1); } }
-  throw new Error('accolades : ' + nom);
+  const re = new RegExp('^function ' + nom + '\\s*\\(', 'gm'); let m;
+  while ((m = re.exec(src))) {
+    const i = src.indexOf('{', m.index); let d = 0, corps = null;
+    for (let j = i; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}') { d--; if (d === 0) { corps = src.slice(m.index, j + 1); break; } } }
+    if (!corps) throw new Error('accolades : ' + nom);
+    if (!new RegExp('^function ' + nom + '\\(\\)\\{ return window\\.' + nom + '\\.apply\\(null, arguments\\); \\}$').test(corps)) return corps;
+  }
+  throw new Error('ABSENTE : ' + nom);
 }
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det !== undefined ? ' — ' + String(det).slice(0, 220) : '')); } }
@@ -55,7 +60,8 @@ try {
   const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planCreditFerie', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeReguliers',
     '_planAnneeBrouillon', '_planAnneeGrille', '_planAnneeCleS', '_planAnneeDate', '_planAnneePlage', '_planAnneeHoraireTxt', '_paH',
     '_planAnneeFeries', '_planAnneeFerieDate', '_planAnneeFerieSem', '_planAnneeFeriesBloc', 'planAnneeFerie', 'planAnneeFeriesChomer'];
-  ctx = vm.createContext({ window: { CONFIG: {}, PLAN_MOIS: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'], showToast: () => {} }, _MV_FERIES_CACHE: {},
+  ctx = vm.createContext({ window: { CONFIG: {}, PLAN_MOIS: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'], showToast: () => {},
+      PLAN_MOIS_FR: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'] }, _MV_FERIES_CACHE: {},
     PLAN_MOIS_FR: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
     _escHtml: s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'), ADM: true, SOLID: null, RENDUS: 0 });
   ctx.isAdmin = () => ctx.ADM;
