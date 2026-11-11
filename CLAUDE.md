@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **11 novembre 2026 (PREPAN-2)** — **L’ANNÉE SUIVANTE, AU GESTE : « N’EXISTE PAS ENCORE », « PARTIR DE 2026 », « PRÉPARER 2027 »** (§560). Base `378fdda` (« prepan1 », PREPAN-1 poussé tel que livré). **APP 10.91 → 10.92, SW 11.82 → 11.83**. Dans `planning-modeles.js` : un modèle absent de l’année affichée le dit en tête de sa carte dans l’onglet Année (d’où part la frise, les jours à poser, les fériés travaillés), « Partir de 2026 » (le report, horaires compris) ou « Partir d’une année vide », puis « Enregistrer » — qui garde désormais les horaires du modèle repris ; « Préparer 2027 » (menu « … », à la place de « Année 2028 — préparer depuis 2026 » ; bouton du bandeau) : la feuille `ovPlanPrep` recopie d’un coup les modèles cochés, replacés, un modèle déjà là remplacé seulement coché, avec deux options (rouvrir les semaines fermées comme leur saison, chômer les fériés travaillés), puis affiche 2027. Le tuto « preparer ». `mv-harnais-prepan2` neuf (28 cas, 6/6) ; 8 tutos rejoués ; captures conformes à la maquette. **La série de la maquette des modèles est terminée** (§28). Déploiement : `npm run site` → `npm run build` → `firebase deploy --only hosting`.
+> Dernière consolidation : **11 novembre 2026 (INTRANT-2)** — **« SUPPRIMER L’INTRANT » PASSE LA PROTECTION ANTI-PERTE, ET RIEN D’AUTRE** (§561). Base `95a4b4e` (« prepan2 »). **Pas de numéro de version** (deux modules ; la nouvelle empreinte du code met les appareils à jour). Rapport de la console GT (10/11, un domaine client) : « fbSave intrants BLOQUE (anti-ecrasement) · cur=3 new=0 » — la garde refuse une chute de plus de moitié en une écriture et suppose qu’à la main on retire un élément à la fois ; « Supprimer l’intrant » (INTRANT-1, §553) retire une fiche avec ses achats d’un coup. Rien de perdu (coffre, valeur du serveur rechargée). Les contrôles d’INTRANT-1 ne passaient pas par la vraie garde. **Ce qui change** : le geste annonce la valeur qu’il écrit (`window._mvAnnoncerBaisse`) ; la garde, fusion et directe, laisse passer pendant 15 s une écriture qui tombe exactement sur ce compte, et aucune autre (`_mvBaisseAnnoncee`). Règle générale au §24 (Build n°24). `mv-harnais-intrant2` neuf (15 cas par la vraie garde, 9 contre-épreuves) ; 22 tutos rejoués, 92 passages verts (téléphone 22, ordinateur 22, miroir, côte à côte), rien envoyé au serveur — tous concernés : firebase.js change. Déploiement : `npm run build` → `firebase deploy --only hosting`.
 
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
@@ -1442,6 +1442,12 @@ Le fondu n'est plus `forwards` : les deux mondes se rejoignent après 0,24 s. �
     `saveIntrants`), et le second essai en créait une deuxième — deux fiches du même nom chez un client. Un `return` de refus
     ne vient jamais APRÈS un `push` ou une affectation sur l’état partagé : construire à part, tout contrôler, écrire ensemble.
 
+24. ★★ **UN GESTE QUI RETIRE PLUSIEURS ÉLÉMENTS D’UN COUP ANNONCE SA BAISSE À LA GARDE** (INTRANT-2, §561). La protection
+    anti-perte refuse une chute de plus de moitié en une écriture : elle suppose qu’à la main on retire un élément à la fois. Une
+    suppression en cascade (une fiche et ses achats) sur une petite collection y ressemble à un écrasement — vécu : « fbSave intrants
+    BLOQUE · cur=3 new=0 ». Avant `fbSave`, `window._mvAnnoncerBaisse(clé, valeurÉcrite)` ; et un harnais qui fait passer le geste par la
+    VRAIE garde — un `saveX` remplacé par un faux ne voit rien.
+
 **CSS / HTML**
 1. **`display:flex|block` sur `#page-xxx` interdit.**
 2. Un **`.modal` doit avoir un parent `.overlay`**.
@@ -2205,6 +2211,11 @@ L’audit et la maquette vivent dans `docs/maquettes/` (`audit-console-gt-2026-1
 - **À vérifier chez Nico, CLOT-1 déployé** : Réglages › Domaine › Campagne — toucher une période (la confirmation et ses chiffres, « Juste la consulter », « Rendre active pour l’équipe ») ; « Clôturer la campagne » sur une période qui court (l’avertissement, la date de début proposée, le nom et la fin à saisir, un chevauchement refusé, « Préparer sans clôturer », « Clôturer quand même ») ; téléphone et PC à 125 %, clair et sombre — l’écran de clôture écrit ses couleurs en dur (fond clair) : le sombre est à regarder.
 - **Le tuto** de « Préparer sans clôturer » : exempté (`scripts/tutos-couverture.json`), à écrire avec le chantier des clôtures de campagne (benchmark puis maquette).
 - **Vu en route, hors lot** : `deleteSaison` sur la période active en active une autre SANS bascule (pas d’`activateSaison`) — sur cet appareil, les parcelles gardent l’avancement de la supprimée jusqu’au rechargement (`_migrateTachesSaison` la range alors sous son nom) ; `parcelles` est écoutée en direct mais `saisons` est statique : après une bascule, un téléphone resté ouvert affiche 0 et range ses validations dans le bloc de la nouvelle période jusqu’à sa réouverture (rien de perdu : le journal les garde, la reconstruction les reprend) — même question que le réglage du domaine en direct (§490d) ; dans Node (`mv-app-node`), `window.renderParcelles` et `computePStats` ne sont posées par personne : `activateSaison` y lève après la bascule et `_clotExec` l’avale (« Activation impossible ») — `mv-harnais-reste1` passait par là sans le voir, `mv-harnais-clot1` les bouchonne ; le sous-titre de la fenêtre de confirmation (`#ocd-sub`, `color:#666` en dur dans `index.html`) est peu lisible en sombre — vu au rendu de ce lot, dont le texte est long : `var(--texte-doux)`, au prochain lot qui touche `index.html`.
+
+### ★ INTRANT-2 (11/11, §561) — la suppression d’une fiche et la protection : ce qui reste
+- **Chez le domaine qui l’a signalé, une fois déployé** : supprimer la ligne « La Réserve » de Réglages › Saisies non enregistrées (« Renvoyer » écrirait 0 élément, non annoncé : refusé de nouveau) ; « Supprimer l’intrant » marche ensuite d’un geste.
+- **Limite connue** : une suppression faite HORS LIGNE part après les 15 s de l’annonce — refusée à l’envoi, au coffre, rien de perdu ; en ligne, un geste à la fois. La vraie réponse : une garde qui reconnaît une suppression voulue par la base de l’appareil (il avait tout vu, et il a retiré) — un chantier qui touche la fusion de toutes les clés.
+- **Règle** : tout nouveau geste qui retire plusieurs éléments d’une clé de `_MV_GUARD_FLOORS` en une écriture annonce sa baisse (§24, Build n°24).
 
 ## 29. Synchronisation de la mémoire
 

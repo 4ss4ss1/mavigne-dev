@@ -738,3 +738,27 @@ Le point 5 de la maquette des modèles (§554c), sa partie « gestes » : PREPAN
 
 ### 560d. Ce qui reste ouvert
 - Rien de la série des modèles (§28). Les points « À vérifier chez Nico » de RATTACHE-1 à PREPAN-2 restent à regarder sur le vrai appareil.
+
+## 561. ★★ INTRANT-2 — « SUPPRIMER L’INTRANT » PASSE LA PROTECTION ANTI-PERTE, ET RIEN D’AUTRE (11/11 — `src/firebase.js` (`_mvBaisses`, `_MV_BAISSE_MS`, `window._mvAnnoncerBaisse`, `_mvBaisseAnnoncee` neufs ; les deux lignes de garde, fusion et directe) · `src/reserve.js` (`_rsvDelProd` annonce sa baisse) · `scripts/mv-harnais-intrant2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `docs/claude/modules.md` (§20c) · `.mv-base` · `lots/INTRANT-2.json` — base `95a4b4e` « prepan2 » — **pas de numéro de version** : deux modules, la nouvelle empreinte du code suffit à mettre les appareils à jour)
+
+### 561a. D’où ça vient
+Un rapport d’erreur de la console GT (10/11, un domaine client, écran Réserve) : « fbSave intrants BLOQUE (anti-ecrasement) · cur=3 new=0 », niveau critique. Nico : « Est-ce que ce problème est résolu ? » — non, un effet d’INTRANT-1 (§553). Puis « Oui » à l’objectif reformulé : qu’une suppression demandée dans La Réserve passe la protection, sans l’affaiblir contre un vrai écrasement.
+
+### 561b. La cause, lue dans le code
+- La garde (`_mvSauverFusion` ; `_mvBlockDestructive` pour l’écriture directe) refuse une écriture qui fait tomber une clé protégée sous la moitié de ce que porte le serveur, dès son plancher (`intrants` : 3, comptés par `_mvIntrantsCount` — fiches, achats, inventaires, fûts, fertilisation). Son commentaire le dit : elle suppose qu’une suppression à la main retire un élément à la fois.
+- `_rsvDelProd` (INTRANT-1) retire une fiche avec ses achats et son inventaire en UNE écriture : sur une petite Réserve, 3 → 0 (une fiche et ses deux achats) ou 3 → 1 (la fiche pleine des deux « Piquets ») — refusé. Rien de perdu : la valeur au coffre, l’appareil rechargé depuis le serveur, le message rouge affiché.
+- **Pourquoi les contrôles ne l’ont pas vu** : `mv-harnais-intrant1` remplaçait `saveIntrants` par un faux ; les tutos rendent la main dans `fbSave` avant la garde (entraînement). Personne n’avait fait passer la suppression par la vraie protection.
+
+### 561c. Le modèle, et ce qui a été écarté
+- **La baisse annoncée** : juste avant d’enregistrer, `_rsvDelProd` passe à `window._mvAnnoncerBaisse('intrants', INTRANTS)` la valeur qu’il va écrire ; la garde en retient le COMPTE (son propre `_mvDocSize`, pas un second calcul) pour 15 s. Les deux lignes de garde laissent passer une écriture de cette clé qui tombe EXACTEMENT sur un compte annoncé, avec une trace `info` « Baisse annoncée acceptée ». Plusieurs annonces se gardent (deux suppressions coup sur coup). Le passe n’est pas consommé au premier usage : une écriture relancée (`_retryAsync`) doit passer aussi — l’échéance et le compte exact bornent la porte.
+- **Écartés** : baisser le plancher ou le seuil de `intrants` (affaiblit la protection pour tous) ; sortir `intrants` de la garde (comptabilité matière bio) ; enregistrer en plusieurs fois (la seconde écriture croise la première) ; reconnaître une suppression voulue par la base de l’appareil (plus juste en principe, mais touche la fusion de toutes les clés — §28).
+- `_rsvDelAchat` n’annonce rien : un élément de moins ne fait jamais chuter de plus de moitié une collection d’au moins deux.
+- **Pas de numéro de version** : deux modules ; le build donne une nouvelle empreinte au code, dont le service worker dépend (inject-precache). **Pas d’annonce** : la 10.85 disait déjà « une fiche en trop se supprime » — c’est la promesse tenue.
+
+### 561d. Ce qui a été vérifié
+- `scripts/mv-harnais-intrant2.mjs` (neuf) : 15 cas — le vrai `_rsvDelProd`, puis la vraie ligne de garde de la fusion (extraite telle quelle) et la vraie `_mvBlockDestructive`, avec le vrai compte et une horloge qu’on avance. Le cas signalé passe (sans annonce : refusé, exactement « cur=3 new=0 ») ; la fiche pleine des deux « Piquets » passe ; refusés : un état vide pendant l’annonce d’un autre compte, le bon compte après 15 s, une autre clé (registre phyto), un compte que personne n’a annoncé ; deux suppressions coup sur coup passent. **9/9 contre-épreuves.** Premier jet : le cas « coup sur coup » ne départageait rien (2 sur 4 n’est pas « moins de la moitié ») — réécrit avant de compter.
+- Rejoués verts : `mv-harnais-intrant1` (39), les harnais qui lisent la garde (`auth1`, `envoi`, `fusion-docs`, `ids1`, `ids1b`, `modeles1`, `prep`, `taille2`), `globaux`. Preflight : 0 erreur, 27 avertissements, comme la base (mesurée). Tutos : 22 tutos rejoués, 92 passages verts (téléphone 22, ordinateur 22, miroir, côte à côte), rien envoyé au serveur — tous concernés : firebase.js change.
+- **Non rejouée ici** : la chaîne complète — deux fichiers touchés, les contrôles qui les lisent rejoués ; elle se joue chez Nico au build (`prebuild`).
+
+### 561e. Ce qui reste ouvert
+- §28, bloc INTRANT-2.

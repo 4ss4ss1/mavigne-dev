@@ -1720,7 +1720,7 @@ async function _mvSauverFusion(key, local, base, jeton) {
     var fusion = (distant === undefined) ? local : _mvFusion(base, local, distant);
     if (distant !== undefined && Object.prototype.hasOwnProperty.call(_MV_GUARD_FLOORS, key)) {
       var curN = _mvDocSize(key, distant), newN = _mvDocSize(key, fusion);
-      if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) return { bloque: true, curN: curN, newN: newN };
+      if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5 && !(typeof _mvBaisseAnnoncee === 'function' && _mvBaisseAnnoncee(key, newN))) return { bloque: true, curN: curN, newN: newN };   // ★★ INTRANT-2 : une baisse annoncée passe
     }
     var _ecrit = _fbClone(key, fusion), _oct = _mvTailleControle(key, _ecrit);   // ★★ TAILLE-2 : ce qui serait écrit
     if (_oct > MV_LIMITE_DOC) return { trop: true, octets: _oct };                // le serveur refuserait : rien ne part
@@ -1865,6 +1865,34 @@ function _mvDocSize(key, val) {
   if (val && typeof val === 'object') return Object.keys(val).length;
   return (val == null) ? 0 : 1;
 }
+// ★★ INTRANT-2 (§561) — UNE BAISSE ANNONCÉE PAR LE GESTE PASSE ; AUCUNE AUTRE.
+//   La garde refuse une chute de plus de moitié en UNE écriture : la signature d'un écrasement par un état vide. Elle
+//   supposait qu'une suppression à la main retire un élément à la fois. « Supprimer l'intrant » (INTRANT-1, §553) retire
+//   une fiche AVEC ses achats et son inventaire : sur une petite Réserve, 3 éléments → 0, refusé — vécu le 10/11 (un
+//   domaine client, « fbSave intrants BLOQUE · cur=3 new=0 », rien de perdu). Le geste annonce donc, juste avant
+//   d'enregistrer, la valeur qu'il va écrire : la garde en retient le COMPTE (_mvDocSize, son propre calcul) et laisse
+//   passer une écriture de cette clé qui tombe EXACTEMENT sur ce compte, pendant quinze secondes (les reprises d'un envoi
+//   lent passent aussi). Un écrasement par un état vide à un autre moment, ou vers un autre compte, reste refusé.
+//   Plusieurs annonces se gardent ensemble (deux suppressions coup sur coup).
+//   ⚠️ Limite connue : une suppression faite HORS LIGNE part après l'échéance — refusée à l'envoi, elle va au coffre
+//   (rien de perdu) ; §28.
+var _mvBaisses = {};
+var _MV_BAISSE_MS = 15000;
+window._mvAnnoncerBaisse = function (key, valeurApres) {
+  try {
+    var now = Date.now();
+    var l = (_mvBaisses[key] || []).filter(function (a) { return a.jusqu > now; });
+    l.push({ n: _mvDocSize(key, valeurApres), jusqu: now + _MV_BAISSE_MS });
+    _mvBaisses[key] = l;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvAnnoncerBaisse'); }
+};
+function _mvBaisseAnnoncee(key, newN) {
+  var now = Date.now(), l = (_mvBaisses[key] || []).filter(function (a) { return a.jusqu > now; });
+  _mvBaisses[key] = l;
+  var ok = l.some(function (a) { return a.n === newN; });
+  if (ok && window.logError) window.logError({ level: 'info', cat: 'guard', msg: 'Baisse annonc\u00e9e accept\u00e9e : ' + key, detail: 'new=' + newN });
+  return ok;
+}
 // Plancher d'activation par cle : en-dessous (domaine neuf, peu de donnees) le garde
 // ne fait rien. Au-dessus, on REFUSE une ecriture qui ferait chuter la taille de plus
 // de moitie -- signature d'un ecrasement par un etat par defaut/vide. Collections
@@ -1904,7 +1932,7 @@ async function _mvBlockDestructive(key, value) {
     if (!snap.exists()) return false;                 // doc neuf -> jamais bloque
     var curN = _mvDocSize(key, snap.data().value);
     var newN = _mvDocSize(key, value);
-    if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) {
+    if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5 && !(typeof _mvBaisseAnnoncee === 'function' && _mvBaisseAnnoncee(key, newN))) {   // ★★ INTRANT-2 : une baisse annoncée passe
       if (window.logError) window.logError(Object.assign({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + curN + ' new=' + newN }, _mvGardeEcran(key)));
       return true;
     }

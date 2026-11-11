@@ -1312,6 +1312,11 @@ function _rsvDelProd(){
   INTRANTS.produits=INTRANTS.produits.filter(function(x){ return x!==p; });
   INTRANTS.achats=INTRANTS.achats.filter(function(a){ return !(a&&a.prodId===pid); });
   INTRANTS.inventaires=INTRANTS.inventaires.filter(function(v){ return !(v&&v.prodId===pid); });
+  // ★★ INTRANT-2 (§561) : la fiche part avec ses achats et son inventaire en UNE écriture ; sur une petite Réserve, la
+  //   protection anti-perte y voyait un écrasement (3 éléments → 0, refusé le 10/11). Le geste lui annonce la valeur
+  //   exacte qu'il écrit : celle-là passe, aucune autre (firebase.js). Retirer UN achat n'en a pas besoin : un élément
+  //   de moins ne fait jamais chuter de plus de moitié une collection d'au moins deux.
+  if(typeof window._mvAnnoncerBaisse==='function') window._mvAnnoncerBaisse('intrants', INTRANTS);
   saveIntrants();
   if(window.closeOv) window.closeOv(null,'ovRsvProd');
   _rsvPfId=null;

@@ -904,6 +904,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ajour1.mjs --contre'],
   ['node scripts/mv-harnais-intrant1.mjs'],            // INTRANT-1 (§553) : la fiche d'un intrant — la pièce, le formulaire sans fiche fantôme, corriger, retirer un achat, supprimer, Annuler
   ['node scripts/mv-harnais-intrant1.mjs --contre'],
+  ['node scripts/mv-harnais-intrant2.mjs'],            // INTRANT-2 (§561) : « Supprimer l'intrant » passe la vraie protection anti-perte (baisse annoncée), et rien d'autre
+  ['node scripts/mv-harnais-intrant2.mjs --contre'],
   ['node scripts/mv-harnais-rattache1.mjs'],           // RATTACHE-1 (§554) : le modèle suivi et la grille du contrat — la roue écrit le contrat, un événement ne le défait plus, supprimer une année ne détache personne
   ['node scripts/mv-harnais-rattache1.mjs --contre'],
   ['node scripts/mv-harnais-modsuivi1.mjs'],           // MODSUIVI-1 (§555) : qui suit ce modèle — « Suivi par », l'avertissement, la feuille « Inscrire », l'effet compté avant, l'écriture par _mvHistGrille

@@ -1581,6 +1581,9 @@ l'équipe » était faux depuis le premier jour.**
   `_rsvDelAchat` / `_rsvDelProd` passent par `showToastAnnuler` ; `_rsvProdRefs` refuse de supprimer une fiche citée
   par `prod_id` (Cuvier, Chai) ou `prodId` (fertilisation). `_rsvSaveAchat` vérifie TOUT avant d’écrire : la fiche
   neuve et son achat entrent ensemble (la fiche fantôme, §553b).
+- ★★ **INTRANT-2 (§561)** — `_rsvDelProd` retire plusieurs éléments en une écriture : il annonce sa baisse à la garde
+  (`window._mvAnnoncerBaisse('intrants', INTRANTS)`, firebase.js) juste avant `saveIntrants` ; sans cela, une petite Réserve
+  (3 éléments) tombait sous la moitié et la protection anti-perte refusait (vécu le 10/11).
 
 ---
 
