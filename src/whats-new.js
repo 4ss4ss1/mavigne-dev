@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.92', d: '2026-11-10', items: [   // PREPAN-2 (§560) : l'année suivante au geste
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Préparer l’année suivante d’un geste',
+      desc: "Menu « … » de la semaine : « Préparer 2027 » recopie vos modèles cochés, replacés sur les jours de 2027 — un modèle déjà là n’est remplacé que coché ; au choix, les semaines fermées rouvertes comme leur saison et les fériés travaillés chômés. Dans l’onglet Année, un modèle qui n’existe pas encore sur l’année le dit : « Partir de 2026 » ou « d’une année vide », puis « Enregistrer ». Un tuto montre le geste." },
+  ] },
   { v: '10.91', d: '2026-11-10', items: [   // PREPAN-1 (§559) : une année sans modèle part du modèle du domaine de l'année d'avant
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une année sans modèle reprend les vôtres',
       desc: "Tant qu’un modèle n’est pas enregistré pour 2027, l’appli part de votre modèle 2026, replacé sur les bons jours (un lundi reste un lundi) — plus du modèle intégré de l’appli, qui ne sert que si le domaine n’a encore aucun modèle à ce nom. Le bandeau de la grille et le planning imprimé disent d’où vient la grille ; le Pilotage et les relevés de l’année lisent les mêmes heures, désormais justes." },

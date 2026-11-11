@@ -531,6 +531,39 @@ var TU_TUTOS = [
         fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); return !!memo.ferC && !!e && !e.brouillon; },
         ok: 'Le modèle est comme avant.' },
     ] },
+  // ★ PREPAN-2 (§560) — préparer l'année suivante d'un geste. Le même modèle « mi-temps » que les tutos « inscrire » et « feries »,
+  //   posé en mémoire au départ sur l'année affichée : personne ne le suit, il n'est donc pas coché d'office.
+  { id: 'preparer', titre: 'Comment faire pour préparer l’année suivante\u00a0?', fin: 'préparer l’année suivante',
+    module: 'Planning', pages: ['planning'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['planPrepOuvrir', 'planPrepToggle', 'planPrepOk'],
+    avant: function (memo) {
+      var T = window.PLANNING_TEMPLATES, y = typeof window._pY === 'function' ? window._pY() : new Date().getFullYear(); if (!T) return;
+      if (!T[y]) T[y] = {};
+      if (!T[y]['mi-temps']) { var g = {}; for (var m = 0; m < 12; m++) { g[m] = {}; var nb = new Date(y, m + 1, 0).getDate(); for (var d = 1; d <= nb; d++) { var w = new Date(y, m, d).getDay(); if (w >= 1 && w <= 3) g[m][d] = 7; } } T[y]['mi-temps'] = g; }
+      memo.prepY = y;
+    },
+    retenir: ['Planning › Mois, le menu « … » de la semaine : « Préparer » l’année d’après (ou le bouton du bandeau, sur une année sans modèle).',
+              'Cochez les modèles à recopier : chacun est replacé sur les jours de la nouvelle année ; un modèle déjà là n’est remplacé que coché.',
+              'Deux options : rouvrir les semaines fermées comme leur saison, chômer les fériés qui tombent sur un jour travaillé.'],
+    etapes: [
+      { type: 'aller', page: 'planning', pourquoi: 'L’année suivante se prépare depuis le Planning.' },
+      { type: 'toucher', cible: '[data-tuto="plan.plus"]',
+        txt: function () { return '{T} « … », au bout de la barre de la semaine.'; },
+        fait: function (memo) { var v = !!_q('.pl2-plus-l[data-k="preparer"]') && document.body.classList.contains('pl2-plus-ouvert'); if (v) memo.prA = true; return v; },
+        ok: 'Les gestes rares du Planning, dont l’année d’après.' },
+      { type: 'toucher', cible: '.pl2-plus-l[data-k="preparer"]',
+        txt: function () { return '{T} « ' + L('.pl2-plus-l[data-k="preparer"] b') + ' ».'; },
+        fait: function (memo) { var o = document.getElementById('ovPlanPrep'), t = document.getElementById('prep-titre'); var v = !!memo.prA && !!o && o.classList.contains('open') && !!_q('[data-tuto="plan.prep.ligne"][data-id="mi-temps"]'); if (v) { memo.prB = true; memo.prT = parseInt(String((t && t.textContent) || '').replace(/\D+/g, ''), 10); } return v; },
+        ok: 'Vos modèles de cette année, chacun avec qui le suit et ses jours à poser.' },
+      { type: 'toucher', cible: '[data-tuto="plan.prep.ligne"][data-id="mi-temps"]',
+        txt: function () { return 'Personne ne le suit encore, il n’est pas coché : {T} « mi-temps ».'; },
+        fait: function (memo) { var l = _q('[data-tuto="plan.prep.ligne"][data-id="mi-temps"]'); var v = !!memo.prB && !!l && l.getAttribute('aria-checked') === 'true'; if (v) memo.prC = true; return v; },
+        ok: 'Le bilan en bas dit ce qui sera préparé, et les jours qui resteront à poser.' },
+      { type: 'toucher', cible: '[data-tuto="plan.prep.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.prep.ok"]') + ' ».'; },
+        fait: function (memo) { var T = window.PLANNING_TEMPLATES || {}, o = document.getElementById('ovPlanPrep'); return !!memo.prC && memo.prT > 2000 && !!(T[memo.prT] && T[memo.prT]['mi-temps']) && !(o && o.classList.contains('open')); },
+        ok: 'L’année d’après a ses modèles, replacés sur ses jours : le Planning l’affiche.' },
+    ] },
   // ★ FRISE-AB (§551) — un vendredi sur deux : une saison à deux semaines qui alternent.
   { id: 'unsurdeux', titre: 'Comment faire pour un vendredi sur deux\u00a0?', fin: 'régler deux semaines qui alternent',
     module: 'Planning', pages: ['planning'], pour: 'admin', duree: '2 min', depart: 'home',

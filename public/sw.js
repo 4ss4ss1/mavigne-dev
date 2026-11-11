@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.82
+// MA VIGNE — Service Worker v11.83
+// v11.83 (10/11/2026) — PREPAN-2 (§560) : l’année suivante au geste — « n’existe pas encore » et « Partir de 2026 / d’une année vide » dans l’onglet Année, « Préparer 2027 » (menu « … », bandeau) ; un tuto
 // v11.82 (10/11/2026) — PREPAN-1 (§559) : une année sans modèle part du modèle du domaine de l’année d’avant, replacé (D3) ; le modèle intégré seulement sans aucun modèle du domaine ; le bandeau et le planning imprimé disent la source
 // v11.81 (10/11/2026) — MODELES-DEC (§558) : qui suit un modèle et ses fériés sortent de planning-annee.js dans planning-modeles.js, derrière la même frontière — rien ne change à l’écran
 // v11.80 (10/11/2026) — CLOT-1 (§557) : passer à la période suivante sans perdre le travail en cours — toucher une période demande avant de basculer l’équipe (« Juste la consulter »), la clôture demande le nom et la date de fin de la suivante (le lendemain, sans chevauchement) et propose de la préparer sans clôturer tant que l’actuelle court
@@ -4714,7 +4715,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.82';
+const CACHE_NAME   = 'mavigne-v11.83';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4731,7 +4732,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.82 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.83 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4751,7 +4752,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.82 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.83 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

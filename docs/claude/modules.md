@@ -1202,6 +1202,9 @@ et les trois fonctions que la frise lui emprunte (`_planAnneeSuivi`, `_planAnnee
 ★ **PREPAN-1 (§559)** : une année sans modèle enregistré sert le modèle DU DOMAINE de l’année d’avant (le plus récent), replacé — `_planTplSource`,
 `_planTplReport` (mémorisé par identité de la grille source), `_planGetTpl` ; le modèle intégré seulement sans aucun modèle du domaine. `_planRecaleEtat`
 dit la source (`ans`, `integre`, `nd`) ; `_planRecaleSourceTxt` la phrase du bandeau et du planning imprimé ; `_planModeles` compte les reprises.
+★ **PREPAN-2 (§560)** : dans `planning-modeles.js`, la carte « n’existe pas encore » (`_planAnneeManque`, « Partir de 2026 / d’une année vide »,
+`planAnneePartir`) et la feuille « Préparer 2027 » (`ovPlanPrep`, `planPrepOuvrir` → `planPrepOk` ; `_planPrepGrille` : le report, les semaines fermées
+rouvertes, les fériés chômés) ; le menu « … » et le bandeau du mois l’ouvrent. `planAnneeEnregistrer` garde les horaires du modèle repris.
 
 ### ★ Coupes, jours et semaines à part (FRISE-3, §541)
 

@@ -912,6 +912,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-feries1.mjs --contre'],
   ['node scripts/mv-harnais-prepan1.mjs'],             // PREPAN-1 (§559) : une année sans modèle part du modèle du domaine de l'année d'avant (D3) — la source, le recalage, le cache, le bandeau, la liste des modèles
   ['node scripts/mv-harnais-prepan1.mjs --contre'],
+  ['node scripts/mv-harnais-prepan2.mjs'],             // PREPAN-2 (§560) : l'année suivante au geste — « n'existe pas encore », « Partir de 2026 / d'une année vide », « Préparer 2027 » (menu, bandeau), les horaires gardés
+  ['node scripts/mv-harnais-prepan2.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

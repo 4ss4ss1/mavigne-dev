@@ -38,6 +38,7 @@ function _planSolidJour(){ return window._planSolidJour.apply(null, arguments); 
 function _planAnneeSuivi(){ return window._planAnneeSuivi.apply(null, arguments); }
 function _planAnneeFerieSem(){ return window._planAnneeFerieSem.apply(null, arguments); }
 function _planAnneeFeriesBloc(){ return window._planAnneeFeriesBloc.apply(null, arguments); }
+function _planAnneeManque(){ return window._planAnneeManque.apply(null, arguments); }   // ★ PREPAN-2 (§560)
 // ★ ANNEE-TAB (§548) — L'ÉTAT DE LA VUE VIT ICI : le modèle ouvert, son brouillon, la semaine choisie, les retouches.
 //   L'année a son onglet ; la roue crantée ne la porte plus, et rien dans planning.js ne la remet à zéro.
 var _paEtat=null;
@@ -241,7 +242,7 @@ function planAnneeAppliquer(el){
 }
 function planAnneeEnregistrer(){
   if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee||!E.brouillon)return;
-  var id=E.annee,st=_pTplStore(),old=st[id]||{},neuf={};
+  var id=E.annee,st=_pTplStore(),old=st[id]||_planGetTpl(id,_pY())||{},neuf={};   // ★ PREPAN-2 (§560) : un modèle neuf sur l'année garde les horaires du modèle qu'il reprend
   Object.keys(old).forEach(function(k){if(isNaN(parseInt(k,10)))neuf[k]=old[k];});     // les horaires (_timings…) restent
   if(E.meta)['_timings','_timings_jour','_horaires_dma'].forEach(function(k){var v=E.meta[k];if(v&&Object.keys(v).length)neuf[k]=v;else delete neuf[k];});   // ★ HOR-1 : les horaires du brouillon
   for(var m=0;m<12;m++)neuf[m]=E.brouillon[m]||{};
@@ -366,7 +367,7 @@ function _planRenderAnnee(){
   var brut=nv?_planModelBrut(id,yr,G):tot,att=_planAnneeCible(id,yr),ec=Math.round((brut-att)*10)/10;
   var gens=_planMbrs().filter(function(m){return _planPlId(m)===id;});
   var _nc=adm?_planAnneeCodes(MT):0;
-  var h=_planAnneeChoix(id,E)+(_nc?'<div class="plan-card" style="margin-bottom:10px"><div style="font-size:var(--pt-txt,13px)">Ce mod\u00e8le porte '+_nc+' code'+(_nc>1?'s':'')+' D, M ou A (horaires d\u00e9cal\u00e9s)\u00a0: les \u00e9crire en heures, une fois, sans rien changer aux heures ni \u00e0 la paie.</div><button class="plan-btn-saisir" style="margin-top:8px" onclick="planAnneeDma()">\u00c9crire les horaires en clair</button></div>':'')+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>'+_planAnneeSuivi(id,gens,adm);   // ★ MODSUIVI-1 (§555)
+  var h=_planAnneeChoix(id,E)+(_nc?'<div class="plan-card" style="margin-bottom:10px"><div style="font-size:var(--pt-txt,13px)">Ce mod\u00e8le porte '+_nc+' code'+(_nc>1?'s':'')+' D, M ou A (horaires d\u00e9cal\u00e9s)\u00a0: les \u00e9crire en heures, une fois, sans rien changer aux heures ni \u00e0 la paie.</div><button class="plan-btn-saisir" style="margin-top:8px" onclick="planAnneeDma()">\u00c9crire les horaires en clair</button></div>':'')+'<div class="plan-card"><div class="plan-card-lbl">L\u2019ann\u00e9e du mod\u00e8le \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb \u00b7 '+yr+'</div>'+_planAnneeSuivi(id,gens,adm)+_planAnneeManque(id,yr,adm,E);   // ★ MODSUIVI-1 (§555) ; ★ PREPAN-2 (§560) : le modèle absent de l'année le dit
   h+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:8px"><b style="font-size:var(--pt-xl,24px);font-variant-numeric:tabular-nums">'+_paH(brut)+'</b>'
     +'<span style="color:var(--texte-doux)">sur '+_paH(att)+(nv?', la base de l\u2019ann\u00e9e':', le plafond annuel')+'</span>'
     +(Math.abs(ec)<0.05?'<span class="mvpas mvpas-statut mvpas-fait">juste</span>':'<span class="mvpas mvpas-statut mvpas-surveiller">'+(ec<0?'il manque '+_paH(-ec):_paH(ec)+' de trop')+'</span>')+'</div>'
@@ -621,4 +622,6 @@ window._paH                 = _paH;
 window._planAnneeLire       = _planAnneeLire;
 window._planAnneeBrouillon  = _planAnneeBrouillon;
 window._planAnneePose       = _planAnneePose;
+window._planAnneeCopie      = _planAnneeCopie;      // ★ PREPAN-2 (§560)
+window._planAnneeMetaCopie  = _planAnneeMetaCopie;
 window.PLAN_MOIS_FR         = PLAN_MOIS_FR;   // ★ MONAN-1 : la frise en petit, dans « Mon année »   // ★ PROG-1 : la page du programme indicatif, lue par le planning de l'année

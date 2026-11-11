@@ -1,0 +1,53 @@
+{
+  "lot": "PREPAN-2",
+  "section": "§560",
+  "base": "378fdda959c782b374bf62946d25e6e99730b1b2",
+  "inclut": [],
+  "date": "2026-11-11",
+  "tutos": {
+    "ok": true,
+    "empreinte": "e85a379b48140bd31f2b32fcb30aa945b9f818706b3694718ec400a9eaac46e3",
+    "date": "2026-11-11T10:01:08.930Z",
+    "joues": {
+      "téléphone": 8,
+      "ordinateur": 8,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "feries",
+      "preparer",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "ea0554f5664a0512ea8bc6adfcfb2bfb9dbefb7cb71722fbef92ab4a1fafeb1f",
+    "CLAUDE.md": "366db97ad8a194d3f4bbb6b194f1a6ad7bd6f3c0a301596fe5236d54645760a1",
+    "docs/claude/INDEX.md": "64f9bc74ea7828c4c26f099f1fd85196736b9ff6ee7034686e7c60aafee1613d",
+    "docs/claude/chantiers-530-579.md": "f1e1f1f5268e24e70a9e4abec4d8f6ad8cb7173cda8f06560d7965369a020663",
+    "docs/claude/journal.md": "ef1aeccb4bcd31f80ab377524dc9e811b49c46817a1aec59566d7f602834303f",
+    "docs/claude/modules.md": "eddece615398f420b512932015a3f9023f2b39a16b54ae6702b7593c2bcdc8b3",
+    "guide/10-planning.html": "9a5742ced8fb436fb404e818aef71db8a58bed59229027a65c66308cd3f61583",
+    "index.html": "722531ef158ff18e9a863e8edd5103881ab294678b0dd46ddf4cd64def878e52",
+    "public/sw.js": "89d8e49f383c252b17805870a872fd5c29cec165ad627bbe5544d75b9236f828",
+    "scripts/harnais-claude-md.mjs": "e31c0100592e6e71aeadc3341653c22b683c454cc2d0232af862621c6e96d731",
+    "scripts/mv-captures.mjs": "a508ed96e33aaca2d45ca87f5ab7777039a72c3801e0dfb047090282eab84cb2",
+    "scripts/mv-harnais-ajour1.mjs": "1075abe8829571c90e6bac6e17c2cd89bd72d7129cf99ba8b5997f6e0a893222",
+    "scripts/mv-harnais-liste.mjs": "a8a9bf9f0b379404a63d9ac3e9fa2d2cae879a7d6dded6c29632d472743a1754",
+    "scripts/mv-harnais-planux1.mjs": "5fc02879552fed45fe7b634081f9eac32fe8818f31da46f38f5665f85702448e",
+    "scripts/tutos-couverture.json": "463a57710918e731d441c82c451b521554739e7edfb015feec7c1fc4206b93d2",
+    "scripts/typo-baseline.json": "dc1605c739b9de300f31517bde36170a9517addbcdb5a0e3255dba43f15d0f85",
+    "src/planning-annee.js": "e98b0e24b2fb223591686beecf46ba33ed99d5b87480782cce9dbe59165a37b7",
+    "src/planning-modeles.js": "71ea38c638ab86846bbd9360ead73b39c3df4ee037a0b3b9febbbe4c112a870b",
+    "src/planning.js": "8134f01fe51281c03a3dd05fa4b88989dd74579d78488cd9344fd44d23d664ed",
+    "src/tutos.js": "9dd73d9cfb8bc0cfc30c378aeaf04c69d518ac955740361d2868b9c3906a6a47",
+    "src/utils.js": "53f0ffb80a5e905801a5dc8de7ca428675353ea0017364ce863407e618420df9",
+    "src/whats-new.js": "8a675adbc595f5bd24ddc337807ae2aded04f053bc2ad0b127c01a4e84f5a704",
+    "scripts/mv-harnais-prepan2.mjs": "d325baaff4c7940503b3e8de7d6c3ea2c519aa2b2064fe44e67efa02ae16bb09"
+  }
+}

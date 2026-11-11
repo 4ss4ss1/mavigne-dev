@@ -57,6 +57,8 @@
     "_rsvDelAchat": "INTRANT-1 (§553) : « Retirer » un achat dans la fiche d’un intrant (admin) — le bouton dit ce qu’il fait, « Annuler » le remet six secondes ; la fiche s’ouvre avec le tuto « corriger une fiche d’intrant »",
     "_rsvDelProd": "INTRANT-1 (§553) : « Supprimer l’intrant et ses achats », en bas de la fiche (admin) — le bouton nomme ce qui part, « Annuler » remet tout six secondes ; refusé si une opération cite la fiche",
     "planAnneeInscrFermer": "MODSUIVI-1 (§555) : fermer la feuille « Inscrire sur un modèle » (Annuler, ×, toucher à côté) — un geste de sortie, sans effet ; la feuille s’ouvre et s’enregistre avec le tuto « inscrire »",
-    "_clotPreparer": "CLOT-1 (§557) : « Préparer sans clôturer » n’apparaît qu’à la dernière étape de la clôture, quand la période en cours n’est pas finie — son tuto viendra avec le chantier des clôtures de campagne (benchmark puis maquette)"
+    "_clotPreparer": "CLOT-1 (§557) : « Préparer sans clôturer » n’apparaît qu’à la dernière étape de la clôture, quand la période en cours n’est pas finie — son tuto viendra avec le chantier des clôtures de campagne (benchmark puis maquette)",
+    "planAnneePartir": "PREPAN-2 (§560) : « Partir de 2026 / d’une année vide » — n’apparaît que sur une année sans modèle enregistré, que le domaine d’entraînement n’ouvre pas sans changer d’année ; la carte dit d’où part la frise et que rien n’est écrit avant « Enregistrer », le tuto « preparer » montre le même report",
+    "planPrepFermer": "PREPAN-2 (§560) : fermer la feuille « Préparer » (Annuler, ×, toucher à côté) — un geste de sortie, sans effet ; la feuille s’ouvre et s’enregistre avec le tuto « preparer »"
   }
 }

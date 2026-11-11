@@ -211,7 +211,7 @@ function _planYearHasData(y){
   return had;
 }
 function planSetYear(y){ y=parseInt(y,10); if(isNaN(y))return; planYear=y; _pl2Wi=null; _pl2Sel={}; renderPlanning(); }
-function planAddYear(){ var list=_planYearList(); var next=(list.length?Math.max.apply(null,list):(new Date()).getFullYear())+1; _planExtraYears.push(next); planSetYear(next); if(window.showToast)showToast('Ann\u00e9e '+next+' ajout\u00e9e','#3D6B27'); }
+// ★ PREPAN-2 (§560) : planAddYear (« Année 2028 — préparer depuis 2026 », une année vide) est partie — le menu « … » prépare l'année d'après la vue (planPrepOuvrir).
 function _pl2YearTabs(){
   // ★ PLAN-UX-1 (§501) — maquette-ux-v2, Planning : la bascule d'année tient en « ‹ 2026 › » (elle prenait trois cartes de 28 px) ;
   //   « année suivante » passe dans le menu « … » de la barre de la semaine.
@@ -3489,7 +3489,7 @@ function _pl2Toolbar(){
       +'<button class="'+(_pl2View==='wk'?'on':'')+'" onclick="pl2SetView(\'wk\')">Sem.</button>'
       +'<button class="'+(_pl2View==='mo'?'on':'')+'" onclick="pl2SetView(\'mo\')">Mois</button>'
     +'</div>'
-    +(isAdmin()?'<button type="button" class="pl2-plus-b" onclick="_pl2Plus(true)" aria-label="Plus d\u2019actions\u00a0: cong\u00e9s, chaleur, journ\u00e9es de cave, ann\u00e9e suivante, relev\u00e9s">\u2026</button>'+_pl2PlusHtml():'')
+    +(isAdmin()?'<button type="button" class="pl2-plus-b" data-tuto="plan.plus" onclick="_pl2Plus(true)" aria-label="Plus d\u2019actions\u00a0: cong\u00e9s, chaleur, journ\u00e9es de cave, pr\u00e9parer l\u2019ann\u00e9e suivante, relev\u00e9s">\u2026</button>'+_pl2PlusHtml():'')
   +'</div>';
 }
 function _pl2IsToday(d){var t=new Date();return t.getFullYear()===planYear&&t.getMonth()===planMonth&&t.getDate()===d;}
@@ -3770,9 +3770,11 @@ function _planRecaleBar(){
           :' Aucun jour ne manque.')
       +'</div>'
     +'</div>'
-    +'<button onclick="planSwitchTab(\u0027cadre\u0027)" style="cursor:pointer;font-family:inherit;font-size:var(--pt-txt,13px);'
+    +((et.ans||[]).length   // ★ PREPAN-2 (§560) : vos modèles d'une année d'avant servent — « Préparer 2027 » les recopie au geste
+      ?'<button class="plan-btn-saisir" data-y="'+Y+'" data-tuto="plan.bandeau.preparer" onclick="planPrepOuvrir(+this.dataset.y)" style="white-space:nowrap">Pr\u00e9parer '+Y+'</button>'
+      :'<button onclick="planSwitchTab(\u0027cadre\u0027)" style="cursor:pointer;font-family:inherit;font-size:var(--pt-txt,13px);'
       +'font-weight:600;padding:8px 13px;border-radius:10px;border:1.5px solid var(--or);background:transparent;'
-      +'color:var(--texte);white-space:nowrap">Ouvrir le mod\u00e8le</button>'
+      +'color:var(--texte);white-space:nowrap">Ouvrir le mod\u00e8le</button>')
   +'</div>';
 }
 
@@ -3783,7 +3785,7 @@ function _planRecaleBar(){
 function _pl2PlusHtml(){
   var L=[['cp','Cong\u00e9s sur une p\u00e9riode','une personne, du \u2026 au \u2026'],['chaleur','Horaires chaleur sur une p\u00e9riode','toute l\u2019\u00e9quipe, du \u2026 au \u2026'],
     ['cave','Journ\u00e9es de cave','cochez les cases de ceux qui \u00e9taient en cave, puis \u00ab\u00a0Cave\u00a0\u00bb dans la barre'],
-    ['annee','Ann\u00e9e '+((Math.max.apply(null,_planYearList().concat([planYear])))+1),'pr\u00e9parer depuis '+planYear],['releves','Relev\u00e9s d\u2019heures du mois','dans la fiche de chacun, \u00ab\u00a0Personnel\u00a0\u00bb']];
+    ['preparer','Pr\u00e9parer '+(planYear+1),'depuis vos mod\u00e8les '+planYear],/* ★ PREPAN-2 (§560) : l'année d'après la vue, plus « l'année d'encore après » qui ouvrait une année vide */['releves','Relev\u00e9s d\u2019heures du mois','dans la fiche de chacun, \u00ab\u00a0Personnel\u00a0\u00bb']];
   return '<div class="pl2-plus-voile" onclick="_pl2Plus(false)"></div><div class="pl2-plus" role="dialog" aria-label="Plus d\u2019actions">'
     +'<div class="pl2-plus-t">Semaine et au-del\u00e0</div>'
     +L.map(function(x){ return '<button type="button" class="pl2-plus-l" data-k="'+x[0]+'" onclick="_pl2PlusVa(this.dataset.k)"><b>'+x[1]+'</b><span>'+x[2]+'</span></button>'; }).join('')
@@ -3794,7 +3796,7 @@ function _pl2PlusVa(k){
   _pl2Plus(false);
   if(k==='cp') openPlanCP();
   else if(k==='chaleur') openPlanChaleur();
-  else if(k==='annee') planAddYear();
+  else if(k==='preparer'){ if(window.planPrepOuvrir)window.planPrepOuvrir(planYear+1); }   // ★ PREPAN-2 (§560)
   else if(k==='releves'){ planSwitchTab('gens'); if(window.showToast) showToast('Le relev\u00e9 de chacun s\u2019ouvre depuis sa fiche','#3D6B27'); }
   else if(k==='cave'){ if(window.showToast) showToast('Cochez les cases de ceux qui \u00e9taient en cave, puis \u00ab Cave \u00bb dans la barre','#3D6B27'); }
 }
@@ -9796,7 +9798,6 @@ window.planFicheOpenDay     = planFicheOpenDay;
 window.planSetCpMode        = planSetCpMode;
 window.planSetCpPeriode     = planSetCpPeriode;
 window.planSetYear          = planSetYear;
-window.planAddYear          = planAddYear;
 window._planMigrateYears    = _planMigrateYears;
 window._feriesY             = _feriesY;
 window._planFerie           = _planFerie;
@@ -9885,6 +9886,7 @@ window._planPlId                = _planPlId;
 window._planFmt                 = _planFmt;
 window._planInContract          = _planInContract;
 window._planPlanned             = _planPlanned;   // ★ MODSUIVI-1 (§555) : la frise compte l'effet d'une inscription
+window._planTplReport           = _planTplReport;   // ★ PREPAN-2 (§560) : le module des modèles lit le report (la carte « n'existe pas encore », « Préparer »)
 window._planMbrs                = _planMbrs;
 window._planMbrsMois            = _planMbrsMois;
 window._planMbrsAn              = _planMbrsAn;

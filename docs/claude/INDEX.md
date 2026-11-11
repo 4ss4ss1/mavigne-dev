@@ -613,3 +613,4 @@
 | 557 | 557. ★★ CLOT-1 — PASSER À LA PÉRIODE SUIVANTE SANS PERDRE LE TRAVAIL EN COURS : TOUCHER UNE PÉRIODE SE CONF… | `docs/claude/chantiers-530-579.md` |
 | 558 | 558. ★ MODELES-DEC — QUI SUIT UN MODÈLE ET SES FÉRIÉS SORTENT DE planning-annee.js : `src/planning-modeles.… | `docs/claude/chantiers-530-579.md` |
 | 559 | 559. ★★ PREPAN-1 — UNE ANNÉE SANS MODÈLE PART DU MODÈLE DU DOMAINE DE L’ANNÉE D’AVANT (D3), ET LE DIT (10/1… | `docs/claude/chantiers-530-579.md` |
+| 560 | 560. ★★ PREPAN-2 — L’ANNÉE SUIVANTE, AU GESTE : « N’EXISTE PAS ENCORE », « PARTIR DE 2026 », « PRÉPARER 202… | `docs/claude/chantiers-530-579.md` |
