@@ -66,7 +66,7 @@ function suite(S) {
     A = monde(S, {}); const it = A.X.savoir(A.now);
     Dr = monde(S, { dre: true }).X.savoir(LUNDI);
     T('À savoir : la pluie du lundi (85 %) avec ses heures ; le samedi pluvieux, avant lui, ne compte pas', it.some(x => x.t === 'pluie' && /lundi/.test(x.ti) && x.v === '85\u00a0%' && /entre 8\u00a0h et 16\u00a0h/.test(x.d)) && !it.some(x => /samedi/.test(x.ti)));
-    T('À savoir : le gel du lundi, le vent du mardi après-midi (31 km/h) ; le vent du samedi ne compte pas', it.some(x => x.t === 'att' && /Gel annonc\u00e9 lundi/.test(x.ti) && x.v === '-2\u00b0') && it.some(x => /Vent mardi apr\u00e8s-midi/.test(x.ti) && x.v === '31\u00a0km/h') && !it.some(x => /40/.test(x.v)));
+    T('À savoir : en octobre, pas de « Gel annoncé » (la vigne dort — PHENO-2A, §563) ; le vent du mardi après-midi (31 km/h) ; le vent du samedi ne compte pas', !it.some(x => /Gel annonc/.test(x.ti)) && it.some(x => /Vent mardi apr\u00e8s-midi/.test(x.ti) && x.v === '31\u00a0km/h') && !it.some(x => /40/.test(x.v)));
     T('À savoir : un délai de rentrée en cours passe en tête, en rouge, avec ses parcelles et son heure de fin', Dr[0] && Dr[0].t === 'dan' && Dr[0].d.startsWith('Les Crais et Bel Air') && Dr[0].v === 'jusqu\u2019\u00e0 16\u00a0h\u00a000');
     const Ah = monde(S, { maintenant: LUNDI }); Ah.X.rS(); T('la carte À savoir rend ses lignes et son compte', Ah.els['home-savoir'].innerHTML.includes('class="hk-as-l pluie"') && Ah.els['home-savoir-n'].textContent === String(it.length) && Ah.els['home-savoir-n'].className === 'mvpas mvpas-compteur');
     Sa = monde(S, {}); Sa.X.rSa(); const h = Sa.els['home-saison'].innerHTML; if (process.env.MV_VOIR) console.log(h);

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.94', d: '2026-11-11', items: [
+    { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Le stade noté sert au registre et au gel',
+      desc: "Dans un nouveau traitement, le stade phénologique se propose d’après le relevé des stades (celui des parcelles traitées, au jour du traitement). Et «\u00a0Gel annoncé\u00a0» ne parle plus que des parcelles débourrées\u00a0: rien d’octobre à février, quand la vigne dort." },
+  ] },
   { v: '10.93', d: '2026-11-11', items: [   // AJOUR-2 (§562) : la roue des réglages vive ; une fiche au-dessus repeinte sans se rouvrir
     { niv: 0, pour: ['admin'], emoji: 'rotation', titre: 'Les réglages se tiennent à jour',
       desc: "Une activité renommée, un tracteur ajouté : la liste des réglages du module le montre dès que la petite fenêtre se ferme — même si l’on referme la fiche du dessous sans l’enregistrer." },

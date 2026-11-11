@@ -616,3 +616,4 @@
 | 560 | 560. ★★ PREPAN-2 — L’ANNÉE SUIVANTE, AU GESTE : « N’EXISTE PAS ENCORE », « PARTIR DE 2026 », « PRÉPARER 202… | `docs/claude/chantiers-530-579.md` |
 | 561 | 561. ★★ INTRANT-2 — « SUPPRIMER L’INTRANT » PASSE LA PROTECTION ANTI-PERTE, ET RIEN D’AUTRE (11/11 — `src/f… | `docs/claude/chantiers-530-579.md` |
 | 562 | 562. ★ AJOUR-2 — LA ROUE DES RÉGLAGES SE TIENT À JOUR ; UNE FICHE DÉJÀ AU-DESSUS SE REPEINT SANS SE ROUVRIR… | `docs/claude/chantiers-530-579.md` |
+| 563 | 563. ★★ PHENO-2A — LE STADE NOTÉ SERT AU REGISTRE ET À L’ALERTE GEL (11/11 — `src/app.js` (`_PHENO_REGISTRE… | `docs/claude/chantiers-530-579.md` |

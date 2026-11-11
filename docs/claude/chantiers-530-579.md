@@ -786,3 +786,21 @@ Nico : « suite », après AJOUR-1 (§552) qui laissait douze fenêtres « à re
 
 ### 562d. Ce qui reste ouvert
 - §28, bloc AJOUR-2.
+
+## 563. ★★ PHENO-2A — LE STADE NOTÉ SERT AU REGISTRE ET À L’ALERTE GEL (11/11 — `src/app.js` (`_PHENO_REGISTRE`, `_phenoAuJour`, `_phenoStadeRegistre`, `_phenoDebourrees` ; « Gel annoncé » d’`_accSavoirItems`) · `src/phyto.js` (la proposition dans l’assistant) · `guide/07-phyto.html` · `src/utils.js` (APP 10.94) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.85) · `scripts/mv-harnais-pheno2a.mjs` (neuf) · `scripts/mv-harnais-accv2.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/PHENO-2A.json` · base `e040fc6`)
+
+### 563a. D’où ça vient
+Le plan (`plan-mise-en-place-2026-10-25.md`) : PHENO-2, « les quatre branchements : stade BBCH proposé au registre ; protection restante raccourcie pendant la pousse (coefficient réglé par l’admin) ; créneau du soir pour les parcelles en fleur (coucher du soleil calculé, formule NOAA) ; alerte gel limitée aux parcelles débourrées ». En deux : **2A** (ce lot : le registre, le gel — ils ne touchent ni au calcul de la protection ni à la tuile « Traiter ? ») puis **2B**.
+
+### 563b. Ce qui change
+- **Le stade proposé au registre** (`_phenoStadeRegistre`, exposée ; `phyto.js`) : quand le stade du nouveau traitement est vide, l’assistant prend, pour chaque parcelle traitée, le stade noté le plus récent **au jour du traitement** (`_phenoAuJour` : une note postérieure ne compte pas), le traduit en intitulé du registre (`_PHENO_REGISTRE` : agglomérés et séparés → « Pré-floraison (BBCH 57) », 61 et 65 → « Floraison (BBCH 60–69) », etc. ; le coton, sans équivalent, ne propose rien), et propose celui qui couvre le plus de surface ; sous le choix : « Proposé d’après le relevé des stades », les autres stades rencontrés, les parcelles sans stade. Il reste à choisir.
+- **« Gel annoncé »** (À savoir, `_accSavoirItems`) : le gel ne menace que les parcelles débourrées (stade ≥ 09 au jour même, `_phenoDebourrees`). **D’octobre à février, rien** (la vigne dort) ; de mars à septembre : si des stades sont notés et qu’aucune parcelle n’est débourrée, rien ; sinon l’alerte dit les débourrées (ou leur nombre, au-delà de trois) ; **sans aucun stade noté de l’année, l’alerte comme avant**, suivie de « stades non notés » — l’appli ne sait pas.
+- `styles.css` frôle 1 024 ko (le contrôle de la typographie le garde) : le texte d’aide reprend la classe du relevé (`phr-m`) plutôt qu’une règle neuve.
+
+### 563c. Mesuré
+- `mv-harnais-pheno2a` : 6 assertions — le stade proposé au jour du traitement (la note d’après ignorée), le bon intitulé pour chaque code, la surface qui départage, les autres et les sans-stade comptés, les débourrées (≥ 09, pas l’arrachée, pas avant la note), la règle du gel, la proposition dans l’assistant ; **6/6 mutants**.
+- Chaîne (732 commandes) : un rouge à moi — **ACCV-2** jouait « Gel annoncé lundi » dans sa scène d’octobre : la règle du lot (rien d’octobre à février) l’enlève ; l’assertion dit maintenant qu’en octobre il n’y a pas de gel annoncé (21/21, 8/8). Plus `build-guide --check`, attendu.
+- `test:ux` : vert (18) ; aucun des 22 tutos concerné, le côte à côte non touché.
+
+### 563d. Ce qui reste ouvert
+- **PHENO-2B** : la protection restante raccourcie pendant la pousse (stade 16 à 79, coefficient réglé par l’admin — la maquette : « un contact couvre 7 jours, pas 10 ») ; le créneau du soir pour les parcelles en fleur (2 h avant, 3 h après le coucher du soleil — l’arrêté abeilles ; le coucher calculé, formule NOAA).

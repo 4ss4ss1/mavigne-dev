@@ -1,0 +1,29 @@
+{
+  "lot": "PHENO-2A",
+  "section": "§563",
+  "base": "e040fc63bd29660ed4665f917bfa889e2162b6e9",
+  "inclut": [],
+  "date": "2026-11-11",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "5c9a6bf3849917911b1d9d197d9063339941155fa0e626cd019a068f5c5570ef",
+    "CLAUDE.md": "6e8b4e68cd8156dd4fb9037e69c81c7b514f21144748dc0705d7da220ada7311",
+    "docs/claude/INDEX.md": "1f9cab1ed896619bc37e80a9c515b43db27ee30e0bb69b0cbae1c5b007752094",
+    "docs/claude/chantiers-530-579.md": "d3d08c8bf9297d9becb6db662837b163a0ec4e6a9959403de4c04f32ec1a3257",
+    "docs/claude/journal.md": "258fb2f3bb7f82349ffaf5945f595282cc7b085349de0cb6a9fdbc87ff473303",
+    "guide/07-phyto.html": "fb26913cb7d1bb88499406c763348308d2cd3657141bf722b546cc066eacd3c2",
+    "index.html": "72e44f2656ea24eaff2415cb00ec8bef2d7922643499ddf504791120a2e8c5a2",
+    "public/sw.js": "b29dcfb8d5ac2a1ed911ba9c616a7e596be6755b113facb856b76e94c2fe2169",
+    "scripts/harnais-claude-md.mjs": "e10cd7cf57691a811ea46212e8d2f2da964dea2320fe2dbef041e316eb93f857",
+    "scripts/mv-harnais-accv2.mjs": "22e1af4904a6027e7a1eb5591a5214298fd55a6e4fbaf9a1dd3b78d95fc254e7",
+    "scripts/mv-harnais-liste.mjs": "cead2e0a8162552d655f3d3a12bc9ff04c0fcb05588cd54b58086bb8a42ccaba",
+    "src/app.js": "885442f4dd61a9fcca926d5ae445b0f0553349a0bcef32bef81f88c779c67e60",
+    "src/phyto.js": "1161f5ac05285956266ed285483bd6552801418245434c4051e3686fe232db57",
+    "src/utils.js": "5a7b68eabb9437c33c5bfdacd04937b0ffe1886c88882e0fad73203bcce9a224",
+    "src/whats-new.js": "c00f22a5668cae5329bd3f2777657deb9a6a381a90e903fa4b582ecfc82c0741",
+    "scripts/mv-harnais-pheno2a.mjs": "cc4e1975c6329f2145de120a1610b57a439a5b02396970e8cac241958f26a764"
+  }
+}

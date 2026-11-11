@@ -5764,7 +5764,10 @@ function _accSavoirItems(now){
     for(var k=1;k<Math.min(5,md.time.length);k++){ var iso=md.time[k]; if(!ouvre(iso)||!((md.pp&&md.pp[k])>=50)) continue;
       var hs=[]; if(mh&&Array.isArray(mh.time)&&Array.isArray(mh.precip)) mh.time.forEach(function(t,i){ if(String(t).slice(0,10)===iso){ var h=+String(t).slice(11,13); if(h>=6&&h<=20&&(mh.precip[i]||0)>0.1) hs.push(h); } });
       out.push({t:'pluie', i:'pluie', ti:'Pluie probable '+nomJ(iso), d:hs.length?'entre '+hs[0]+'\u00a0h et '+(hs[hs.length-1]+1)+'\u00a0h':'sur le vignoble', v:md.pp[k]+'\u00a0%'}); break; }
-    for(var g=0;g<Math.min(4,md.time.length);g++){ var iso2=md.time[g]; if(md.tmin&&md.tmin[g]!=null&&md.tmin[g]<0&&ouvre(iso2)){ out.push({t:'att', i:'thermometre', ti:'Gel annonc\u00e9 '+nomJ(iso2), d:'minimum '+Math.round(md.tmin[g])+'\u00b0', v:Math.round(md.tmin[g])+'\u00b0'}); break; } }
+    // ★ PHENO-2A (§563) : le gel ne menace que les parcelles débourrées — d'octobre à février, la vigne dort : rien ; de mars à septembre,
+    //   les parcelles débourrées dites ; sans aucun stade noté de l'année, l'alerte comme avant (l'appli ne sait pas).
+    var _gm=Number(auj.slice(5,7)), _gD=(typeof _phenoDebourrees==='function')?_phenoDebourrees(auj):{ notes:0, parcelles:[] };
+    if(_gm>=3&&_gm<=9&&!(_gD.notes&&!_gD.parcelles.length)) for(var g=0;g<Math.min(4,md.time.length);g++){ var iso2=md.time[g]; if(md.tmin&&md.tmin[g]!=null&&md.tmin[g]<0&&ouvre(iso2)){ var _gN=_gD.parcelles.map(function(p){ return p.nom; }); out.push({t:'att', i:'thermometre', ti:'Gel annonc\u00e9 '+nomJ(iso2), d:'minimum '+Math.round(md.tmin[g])+'\u00b0'+(_gD.notes?' \u00b7 '+(_gN.length>3?_gN.length+' parcelles d\u00e9bourr\u00e9es':'d\u00e9bourr\u00e9e'+(_gN.length>1?'s':'')+'\u00a0: '+_gN.join(', ')):' \u00b7 stades non not\u00e9s'), v:Math.round(md.tmin[g])+'\u00b0'}); break; } }
   }
   if(mh&&Array.isArray(mh.time)&&Array.isArray(mh.wind)){
     var vu={}; for(var i=0;i<mh.time.length;i++){ var t=String(mh.time[i]), d=t.slice(0,10), h=+t.slice(11,13); if(h<7||h>19||!ouvre(d)||(d===auj&&h<now.getHours())||d<auj) continue; var w=+mh.wind[i]||0; if(!vu[d]||w>vu[d].w) vu[d]={w:w,h:h}; }
@@ -11000,6 +11003,29 @@ var _phenoTempEnCours=null;
 function _phenoCle(g,an){ return 'mvPhenoT1:'+Number(g.lat).toFixed(3)+','+Number(g.lng).toFixed(3)+':'+an; }
 // ★ PHENO-1C (§508) — le résumé que montre Pilotage › Aujourd'hui › Terrain (la maquette) : le stade dominant, les parcelles à noter, la
 //   prochaine date prévue — tirée des températures déjà gardées sur l'appareil (le cockpit ne fait aucune requête). Hors saison : rien.
+// ★ PHENO-2A (§563) — LE STADE NOTÉ SERT AILLEURS (plan PHENO-2, deux branchements sur quatre) : le registre propose le stade des parcelles
+//   traitées, tiré du relevé (le stade le plus récent de chacune, au plus tard le jour du traitement) ; « Gel annoncé » ne parle que
+//   des parcelles débourrées. La correspondance relevé → registre : les intitulés du registre (STADES_PHENO) et leurs codes BBCH.
+var _PHENO_REGISTRE={ 9:'Pointe verte (BBCH 09)', 12:'2 feuilles \u00e9tal\u00e9es (BBCH 12)', 16:'6\u20138 feuilles (BBCH 16)', 55:'Pr\u00e9-floraison (BBCH 57)', 57:'Pr\u00e9-floraison (BBCH 57)',
+  61:'Floraison (BBCH 60\u201369)', 65:'Floraison (BBCH 60\u201369)', 71:'Nouaison (BBCH 71)', 79:'Fermeture de grappe (BBCH 79)', 81:'V\u00e9raison (BBCH 81)' };
+function _phenoAuJour(p,d){
+  var an=String(d||todayStr()).slice(0,4), L=_phenoListe(an).filter(function(e){ return (p.pid&&e.pid?e.pid===p.pid:e.nom===p.nom)&&String(e.d)<=String(d||todayStr()); });
+  L.sort(function(a,b){ return String(a.d).localeCompare(String(b.d))||String(a.t||'').localeCompare(String(b.t||'')); });
+  return L.length?L[L.length-1]:null;
+}
+function _phenoStadeRegistre(noms,d){
+  var P=(window.PARCELLES||[]).filter(function(p){ return p&&(noms||[]).indexOf(p.nom)>=0; }), parS={}, n=0;
+  P.forEach(function(p){ var e=_phenoAuJour(p,d), s=e?_PHENO_REGISTRE[Number(e.b)]:null; if(s){ parS[s]=(parS[s]||0)+(parseFloat(p.surface)||0)+1e-9; n++; } });
+  var ks=Object.keys(parS); if(!ks.length) return null;
+  ks.sort(function(a,b){ return parS[b]-parS[a]; });
+  return { stade:ks[0], divers:ks.length>1, sans:P.length-n, autres:ks.slice(1) };
+}
+window._phenoStadeRegistre=_phenoStadeRegistre;
+function _phenoDebourrees(auj){
+  var an=String(auj).slice(0,4), notes=_phenoListe(an).length;
+  var P=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }).filter(function(p){ var e=_phenoAuJour(p,auj); return !!(e&&Number(e.b)>=9); });
+  return { notes:notes, parcelles:P };
+}
 function _phenoResume(){
   var auj=todayStr(); if(!_phenoEnSaison(auj)) return null;
   var an=_phenoAn(), V=_phenoVue(an,auj), notees=V.L.filter(function(x){ return x.e; }), r={ aNoter:V.aNoter.length, notees:notees.length, total:V.L.length, phrase:'', prochaine:null };

@@ -498,6 +498,9 @@ function _tratRender(){
     /* ★ window.STADES_PHENO : la liste est déclarée dans app.js. Lue au nom nu,
        Rollup la renommait puis le tree-shaking la supprimait — ce bouton ouvrait
        sur une ReferenceError, l'overlay ne s'affichait jamais. */
+    // ★ PHENO-2A (§563) : le stade proposé, tiré du relevé des stades (le plus récent de chaque parcelle au jour du traitement) ; il reste à choisir.
+    var _prop=(!_trat.stade&&typeof window._phenoStadeRegistre==='function')?window._phenoStadeRegistre(_trat.parcelles,_trat.date):null;
+    if(_prop) _trat.stade=_prop.stade;
     var stadeOpts=window.STADES_PHENO.map(function(s){
       return '<option value="'+_escHtml(s)+'"'+(s===_trat.stade?' selected':'')+'>'+_escHtml(s)+'</option>';
     }).join('');
@@ -507,7 +510,9 @@ function _tratRender(){
       +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
       +'<div style="margin-bottom:12px"><div class="mvchamp-l" style="margin-bottom:6px">'+reqStadeLabel+'</div>'
       +'<select id="trat-stade" class="mvchamp" style="width:100%">'
-      +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select></div>'
+      +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select>'
+      +(_prop?'<div class="phr-m">'+_escHtml('Propos\u00e9 d\u2019apr\u00e8s le relev\u00e9 des stades'+(_prop.divers?' \u2014 des parcelles \u00e0 d\u2019autres stades\u00a0: '+_prop.autres.join(', '):'')+(_prop.sans?' \u00b7 '+_prop.sans+' parcelle'+(_prop.sans>1?'s':'')+' sans stade not\u00e9':''))+'</div>':'')
+      +'</div>'
       +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">D&#xe9;but</div>'
