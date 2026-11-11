@@ -106,7 +106,10 @@ function jouer(brut, etiquette, brutAn) {
   const re = corps(src, '_pl2RenderEquipe') || '';
   A(PLAN_DEF_AN === 2026, 'S1 · PLAN_DEF_AN déclaré à 2026 (année de calage des modèles intégrés)');
   A(gt && !/PLAN_DEF\[plId\]\s*\|\|\s*PLAN_DEF\.standard/.test(gt), 'S2 · _planGetTpl ne sert plus PLAN_DEF brut');
-  A(/_planTplDef\s*\(/.test(gt), 'S3 · _planGetTpl passe par _planTplDef');
+  // ★ PREPAN-1 (§559) : _planGetTpl passe par le report (_planTplReport) — le modèle du domaine de l’année d’avant, replacé ; à défaut
+  //   seulement, le modèle intégré recalé (_planTplDefInfo → _planTplDef). L’esprit de S3 tient : rien n’est servi sans recalage.
+  const rp = corps(src, '_planTplReport') || '';
+  A(/_planTplReport\s*\(/.test(gt) && /_planTplDefInfo\s*\(/.test(rp) && /_planRecale\s*\(/.test(rp), 'S3 · _planGetTpl passe par le report : le modèle du domaine replacé, sinon l’intégré recalé (_planTplDef)');
   A(/_planGetTpl\(E\.annee,_pY\(\)\)/.test(br) && !/PLAN_DEF/.test(br), 'S4 · la frise part de la grille servie par _planGetTpl (recalée), jamais de PLAN_DEF brut');
   A(/for\(var m=0;m<12;m\+\+\)neuf\[m\]=E\.brouillon\[m\]/.test(en) && !/PLAN_DEF/.test(en), 'S5 · « Enregistrer » écrit les douze mois de l\u2019année vus dans la frise, rien de PLAN_DEF');
   A(/_planRecaleBar\s*\(\s*\)/.test(re), 'S7 · le bandeau est branché dans l\u2019onglet « Le mois »');
@@ -203,7 +206,7 @@ if (!CONTRE) {
 console.log('mv-harnais-recalage --contre — chaque défaut réinjecté doit rougir');
 const defauts = [
   ['le repli sert de nouveau PLAN_DEF brut',
-   s => s.replace('return (_st&&_st[plId])||_planTplDef(plId,_Y);', 'return (_st&&_st[plId])||PLAN_DEF[plId]||PLAN_DEF.standard;')],
+   s => s.replace('return _planTplReport(plId,_Y).g;', 'return PLAN_DEF[plId]||PLAN_DEF.standard;')],   // ★ PREPAN-1 (§559) : le repli passe par le report
   ['le brouillon de la frise repart de PLAN_DEF brut',   // ★ FRISE-5 (§544) : remplace « planUpdateDay repart du mois de PLAN_DEF »
    s => s.replace('function _planAnneeBrouillon(E){return E.brouillon||_planAnneeCopie(_planGetTpl(E.annee,_pY())||{});}', 'function _planAnneeBrouillon(E){return E.brouillon||_planAnneeCopie(PLAN_DEF[E.annee]||{});}'), 'an'],
   ['le bandeau est débranché de l\u2019onglet « Le mois »',

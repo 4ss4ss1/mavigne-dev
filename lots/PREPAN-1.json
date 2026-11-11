@@ -1,0 +1,31 @@
+{
+  "lot": "PREPAN-1",
+  "section": "§559",
+  "base": "aac2bb5fa8b2927b2ea5ef138129e7488c77610c",
+  "inclut": [],
+  "date": "2026-11-11",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "cde75a4c31b7a5483df07c12cf2d3c674e685dc8f03d342c7d40a72216e44524",
+    "CLAUDE.md": "9a5d8fa5f5623143765dec36f8457405112980d466d0511e963cb0e3f33c2730",
+    "docs/claude/INDEX.md": "f7bed06b922e758c25365f294fbfb71af07ac1eab986460a0ead7e7117d76d61",
+    "docs/claude/chantiers-530-579.md": "36ebc5b43a1403baa6cdd736c5d401950e6d820e24f035e13190349ac1e2b94c",
+    "docs/claude/journal.md": "6c4c8af213e79f996abb2a340a8990f03b9dfa9ea2b1c303c3de6f8fe1fe38df",
+    "docs/claude/modules.md": "e85cc4b858cfaf007d8a244ce56f4a3d8d8af7a4f5fd2b67e395844d8fbf9ce0",
+    "guide/10-planning.html": "5f56c4e69bdc7c742032630fc781ad0954367f031e11427bbcc0a532768e8387",
+    "index.html": "59f56f87cc019fa9b014bfec0c9265ed11aeb8d0593206c051c75b9fa4d497e2",
+    "public/sw.js": "8b8d9382cb0d60677ab0f6b254ea74a96fe4738fe5c0131e877e5279ce828624",
+    "scripts/harnais-claude-md.mjs": "ad45124f16af6030363b480887ca97ca4f3e8818589afc31e269d6b3e9040bfc",
+    "scripts/mv-captures.mjs": "1da0c763d158fd39cc7464dcb21f71d681b5aa4d5d14fa53cc496a4b5face1a2",
+    "scripts/mv-harnais-effectif-periode.mjs": "322a02d35a708ff222c27e1198cc4cb10c9636ef10f55f9895eb857169a6052b",
+    "scripts/mv-harnais-liste.mjs": "edf30f5065725ee82b8c757596120233f6922d28dc6ca3cf59a57c5f5a25d676",
+    "scripts/mv-harnais-recalage.mjs": "c7b817c0d966e32470a5d686ca5b9a4440e6a77df7cba0bd83ec9fd3ae51677d",
+    "src/planning.js": "c17a03403841a33b5ca601196948dcab0bfeab8c47a779dddf7da52bd8c9cd2d",
+    "src/utils.js": "bdb3345997c8bcb8d62a5fb2159e652886e6024593ebdc54b482e537ddfdadd4",
+    "src/whats-new.js": "cb7451426db9385761159c8a1db4fb4b0f5b1aaf1e8d50151fb4ddc70de5c3b2",
+    "scripts/mv-harnais-prepan1.mjs": "56e09143a408db8e8fa365c927cd9d203841cc7e94219681b9773ca86047f50f"
+  }
+}

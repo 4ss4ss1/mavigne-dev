@@ -1199,6 +1199,9 @@ expositions (en fin) sont sa frontière ; l’état de la vue (`_planEditing`) r
 (MODSUIVI-1) et leurs fériés (FERIES-1), demain l’année suivante (PREPAN-1). Même frontière : ses emprunts au Planning et à la frise en tête, ses gestes
 et les trois fonctions que la frise lui emprunte (`_planAnneeSuivi`, `_planAnneeFerieSem`, `_planAnneeFeriesBloc`) en fin ; la frise expose pour lui `_paE`,
 `_paH`, `_planAnneeLire`, `_planAnneeBrouillon`, `_planAnneePose` et `PLAN_MOIS_FR`.
+★ **PREPAN-1 (§559)** : une année sans modèle enregistré sert le modèle DU DOMAINE de l’année d’avant (le plus récent), replacé — `_planTplSource`,
+`_planTplReport` (mémorisé par identité de la grille source), `_planGetTpl` ; le modèle intégré seulement sans aucun modèle du domaine. `_planRecaleEtat`
+dit la source (`ans`, `integre`, `nd`) ; `_planRecaleSourceTxt` la phrase du bandeau et du planning imprimé ; `_planModeles` compte les reprises.
 
 ### ★ Coupes, jours et semaines à part (FRISE-3, §541)
 

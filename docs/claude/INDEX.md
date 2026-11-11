@@ -612,3 +612,4 @@
 | 556 | 556. ★★ FERIES-1 — LES FÉRIÉS DU MODÈLE : VUS DANS LA SEMAINE, CHÔMÉS OU TRAVAILLÉS D’UN GESTE (09/11 — `sr… | `docs/claude/chantiers-530-579.md` |
 | 557 | 557. ★★ CLOT-1 — PASSER À LA PÉRIODE SUIVANTE SANS PERDRE LE TRAVAIL EN COURS : TOUCHER UNE PÉRIODE SE CONF… | `docs/claude/chantiers-530-579.md` |
 | 558 | 558. ★ MODELES-DEC — QUI SUIT UN MODÈLE ET SES FÉRIÉS SORTENT DE planning-annee.js : `src/planning-modeles.… | `docs/claude/chantiers-530-579.md` |
+| 559 | 559. ★★ PREPAN-1 — UNE ANNÉE SANS MODÈLE PART DU MODÈLE DU DOMAINE DE L’ANNÉE D’AVANT (D3), ET LE DIT (10/1… | `docs/claude/chantiers-530-579.md` |

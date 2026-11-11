@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.91', d: '2026-11-10', items: [   // PREPAN-1 (§559) : une année sans modèle part du modèle du domaine de l'année d'avant
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Une année sans modèle reprend les vôtres',
+      desc: "Tant qu’un modèle n’est pas enregistré pour 2027, l’appli part de votre modèle 2026, replacé sur les bons jours (un lundi reste un lundi) — plus du modèle intégré de l’appli, qui ne sert que si le domaine n’a encore aucun modèle à ce nom. Le bandeau de la grille et le planning imprimé disent d’où vient la grille ; le Pilotage et les relevés de l’année lisent les mêmes heures, désormais justes." },
+  ] },
   { v: '10.90', d: '2026-11-10', items: [] },   // MODELES-DEC (§558) : qui suit un modèle et ses fériés sortent de planning-annee.js dans planning-modeles.js — rien ne change pour un client
   { v: '10.89', d: '2026-11-10', items: [   // CLOT-1 (§557) : passer à la période suivante sans perdre le travail en cours
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Changer de période se confirme',

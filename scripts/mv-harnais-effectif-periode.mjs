@@ -67,6 +67,8 @@ const NOMS = [
   //    (recalage du modele integre sur l'annee affichee). Sans elles, la fonction
   //    leve, le catch de l'appelant avale, et le harnais ne demarre meme pas.
   '_planRecaleMap', '_planRecale', '_planTplDef',
+  // ★ PREPAN-1 (§559) : le repli passe par le report (le modèle du domaine de l’année d’avant, sinon l’intégré)
+  '_planTplDefInfo', '_planTplSource', '_planTplReport',
   '_planDays', '_planGetTpl', '_planGetRefH', '_planFmt',
   '_planInContract', '_planJourCouvert', '_planDansCtr',
   '_planInContractRead', '_planInContractCtr', '_planWide',
@@ -104,7 +106,7 @@ function makeEnv(opts) {
     'var PLAN_PAUSE_MIN=60;',
     ligne(s, /^var PLAN_RECUP_DEBUT=.*$/m, 'PLAN_RECUP_DEBUT'),   // SEM-1 : la date de la regle, lue dans le module
     ligne(s, /^var PLAN_DEF_AN=.*$/m, 'PLAN_DEF_AN'),
-    'var _PLAN_RECALE_CACHE={};',
+    'var _PLAN_RECALE_CACHE={};', 'var _PLAN_REPORT_CACHE={};',
     'var PLANNING_TEMPLATES=' + JSON.stringify(opts.templates || {}) + ';',
     'var PLANNING_ENTRIES=' + JSON.stringify(opts.entrees || {}) + ';',
     'var planYear=' + (opts.an != null ? opts.an : 2026) + ';',

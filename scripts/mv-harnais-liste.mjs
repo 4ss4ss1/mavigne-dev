@@ -910,6 +910,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-modsuivi1.mjs --contre'],
   ['node scripts/mv-harnais-feries1.mjs'],             // FERIES-1 (§556) : les fériés du modèle — la section de l'année, la ligne de la semaine, « Chômer » / « Travailler » / « Chômer les N », la journée de solidarité
   ['node scripts/mv-harnais-feries1.mjs --contre'],
+  ['node scripts/mv-harnais-prepan1.mjs'],             // PREPAN-1 (§559) : une année sans modèle part du modèle du domaine de l'année d'avant (D3) — la source, le recalage, le cache, le bandeau, la liste des modèles
+  ['node scripts/mv-harnais-prepan1.mjs --contre'],
   ['node scripts/mv-harnais-compt1.mjs'],              // COMPT-1 (§483) : le compteur des tracteurs — estimé entre deux relevés, relevé au passage, trois contrôles
   ['node scripts/mv-harnais-compt1.mjs --contre'],
   ['node scripts/mv-harnais-compt2.mjs'],              // COMPT-2 (§484) : la révision se recalcule, le compteur exigé au démarrage, les tracteurs non suivis laissés tranquilles

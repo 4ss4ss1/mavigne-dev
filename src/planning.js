@@ -811,14 +811,34 @@ function _planTplDefInfo(plId,yr){
   _planTplDef(plId,yr);
   return _PLAN_RECALE_CACHE[plId+'|'+yr];
 }
+// ★★ PREPAN-1 (§559) — D3, validée le 09/11 : UNE ANNÉE SANS MODÈLE PART DU MODÈLE DU DOMAINE DE L'ANNÉE D'AVANT. Avant, un
+//   modèle absent d'une année servait le modèle intégré de l'appli (7 h l'hiver, vendredi court, vendanges à part), replacé —
+//   rien ne disait que ce n'était pas le modèle du domaine : le Pilotage (capacité, renfort), les relevés à venir et le planning
+//   imprimé de 2027 lisaient un rythme que personne n'avait décidé, et l'enregistrer créait un modèle bâti dessus (remonté du
+//   terrain le 09/11). Désormais : le modèle ENREGISTRÉ le plus récent d'une année d'avant, replacé par `_planRecale` (un lundi
+//   reste un lundi ; ce qui n'a pas de place sort dans perdus / vides, rien n'est inventé — règle du 11/09). Le modèle intégré
+//   seulement quand le domaine n'a ce modèle sur aucune année d'avant. Une année suivante ne sert jamais une année d'avant.
+//   Un modèle enregistré pour l'année, lui, n'est jamais touché : c'est la donnée du client, posée pour cette année-là.
+function _planTplSource(plId,yr){
+  var best=null;
+  Object.keys(PLANNING_TEMPLATES||{}).forEach(function(k){ var y=parseInt(k,10),st=PLANNING_TEMPLATES[k]; if(y<yr&&st&&st[plId]&&(best===null||y>best))best=y; });
+  return best===null?null:{an:best,g:PLANNING_TEMPLATES[best][plId]};
+}
+// Le report, avec ce qu'il a coûté : {src: l'année du modèle du domaine qui sert (null : le modèle intégré), g, perdus, vides}.
+//   Mémorisé tant que la grille source est le même objet (un modèle se remplace entier : enregistrement, CSV, synchronisation).
+var _PLAN_REPORT_CACHE={};
+function _planTplReport(plId,yr){
+  var s=_planTplSource(plId,yr);
+  if(!s){ var inf=_planTplDefInfo(plId,yr)||{}; return {src:null,g:inf.g,perdus:inf.perdus||[],vides:inf.vides||[]}; }
+  var k=plId+'|'+yr,c=_PLAN_REPORT_CACHE[k];
+  if(!c||c.ref!==s.g||c.an!==s.an){ var r=_planRecale(s.g,s.an,yr); c=_PLAN_REPORT_CACHE[k]={ref:s.g,an:s.an,g:r.g,perdus:r.perdus,vides:r.vides}; }
+  return {src:s.an,g:c.g,perdus:c.perdus,vides:c.vides};
+}
 function _planGetTpl(plId,yr){
   var _Y=(yr!=null?yr:_pY());
   var _st=PLANNING_TEMPLATES[_Y];
-  // ⚠️ Le repli sur le modèle intégré RECALE désormais sur _Y. Servir la grille
-  //    2026 telle quelle était le défaut : silencieux, et invisible aux totaux.
-  //    Un modèle ENREGISTRÉ pour l'année, lui, n'est jamais touché : c'est la
-  //    donnée du client, posée pour cette année-là.
-  return (_st&&_st[plId])||_planTplDef(plId,_Y);
+  if(_st&&_st[plId])return _st[plId];
+  return _planTplReport(plId,_Y).g;
 }
 function _planGetRefH(plId,m){
   // Toujours calculer depuis la grille du template (PLAN_DEF + overrides Firebase).
@@ -3698,21 +3718,28 @@ function _pl2RenderEquipe(){
 //   `ids` = les modèles concernés, que l'appelant seul sait établir (l'équipe du
 //   mois affiché pour la grille, les groupes de l'année pour le document).
 //   Renvoie null quand il n'y a rien à signaler.
+//   ★ PREPAN-1 (§559) : la source se dit — `ans`, les années des modèles du domaine qui servent ; `integre`, vrai si le modèle
+//   intégré sert pour l'un d'eux (aucun modèle du domaine avant). Sur PLAN_DEF_AN, l'intégré n'a rien à replacer : rien à dire.
 function _planRecaleEtat(yr,ids){
-  if(yr===PLAN_DEF_AN)return null;
-  var st=PLANNING_TEMPLATES[yr]||{},vus={},noms=[],perdus=0,vides=0;
-  (ids||[]).forEach(function(id0){
-    var id=id0;
+  var st=PLANNING_TEMPLATES[yr]||{},vus={},noms=[],perdus=0,vides=0,ans={},integre=false,nd=0;
+  (ids||[]).forEach(function(id){
     if(st[id])return;                  // modèle enregistré pour CETTE année : rien à signaler
-    if(!PLAN_DEF[id])id='standard';    // modèle absent de l'année : c'est `standard` qui sert
-    if(vus[id])return;
-    vus[id]=1; noms.push(id);
-    var inf=_planTplDefInfo(id,yr)||{};
+    var inf=_planTplReport(id,yr);     // ce que sert _planGetTpl : le modèle du domaine d'une année d'avant, sinon l'intégré
+    if(inf.src==null&&yr===PLAN_DEF_AN)return;   // le modèle intégré est calé sur cette année : rien n'est replacé
+    var nom=(inf.src!=null||PLAN_DEF[id])?id:'standard',cle=(inf.src!=null?'d|':'i|')+nom;   // sans source ni modèle intégré à son nom : « standard » intégré
+    if(vus[cle])return;
+    vus[cle]=1; if(noms.indexOf(nom)<0)noms.push(nom);
+    if(inf.src!=null){ans[inf.src]=1;nd++;} else integre=true;
     perdus+=(inf.perdus||[]).length;
     vides +=(inf.vides ||[]).length;
   });
   if(!noms.length)return null;
-  return {noms:noms,perdus:perdus,vides:vides,trous:perdus+vides};
+  return {noms:noms,perdus:perdus,vides:vides,trous:perdus+vides,ans:Object.keys(ans).map(Number).sort(),integre:integre,nd:nd};
+}
+// La phrase de la source, pour le bandeau et le document : « vos modèles 2026 », « le modèle intégré de l'appli », ou les deux.
+function _planRecaleSourceTxt(et){
+  var a=(et&&et.ans)||[],t=a.length?(((et.nd||0)>1?'vos mod\u00e8les ':'votre mod\u00e8le ')+a.join(' et ')):'';   // un seul modèle du domaine : « votre modèle 2026 »
+  return t+(et&&et.integre?(t?' et le mod\u00e8le int\u00e9gr\u00e9 de l\u2019appli':'le mod\u00e8le int\u00e9gr\u00e9 de l\u2019appli'):'');
 }
 
 function _planRecaleBar(){
@@ -3732,11 +3759,11 @@ function _planRecaleBar(){
       +'background:var(--bg-card);padding:11px 13px;margin-bottom:10px">'
     +'<div style="flex:1;min-width:0">'
       +'<div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.3">'
-        +_mvIcon('info',16)+'<span>La grille de '+Y+' est un report du mod\u00e8le '+PLAN_DEF_AN+'</span>'
+        +_mvIcon('info',16)+'<span>La grille de '+Y+' reprend '+_planRecaleSourceTxt(et)+'</span>'   // ★ PREPAN-1 (§559) : la source dite
       +'</div>'
       +'<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:4px">'
         +'Aucun mod\u00e8le n\u2019est enregistr\u00e9 pour '+Y+'. '+lbl+' sur les bons jours de la semaine\u202f: '
-        +'sans \u00e7a, un lundi de '+PLAN_DEF_AN+' tombait un mardi en '+Y+'.'
+        +'un lundi reste un lundi.'
         +(trous
           ?(' <b>'+trous+' jour'+(pl?'s':'')+' rest'+(pl?'ent':'e')+' \u00e0 poser</b> \u2014 une ann\u00e9e n\u2019a pas '
             +'les m\u00eames semaines qu\u2019une autre, et rien n\u2019a \u00e9t\u00e9 ajout\u00e9 \u00e0 votre place.')
@@ -6849,7 +6876,8 @@ function planCpRemove(){
 // #plan-body sinon — le même code sert les deux, rien n'est recopié.
 function _planCadreHost(){ return document.getElementById('plan-cadre-host')||document.getElementById('plan-body'); }
 // Ouverture par la roue : on part toujours de la liste, jamais d'un éditeur laissé ouvert.
-function _planModeles(){ return Object.keys(Object.assign({},PLAN_DEF,_pTplStore())); }
+// ★ PREPAN-1 (§559) : une année liste aussi les modèles du domaine qu'elle reprend d'une année d'avant (D3) — « arthur » 2026 se choisit en 2027.
+function _planModeles(){ var Y=_pY(),o=Object.assign({},PLAN_DEF); Object.keys(PLANNING_TEMPLATES||{}).forEach(function(k){ var y=parseInt(k,10); if(y<Y&&PLANNING_TEMPLATES[k])Object.assign(o,PLANNING_TEMPLATES[k]); }); return Object.keys(Object.assign(o,_pTplStore())); }
 function _planCadreOpen(){ _planRenderCadre(); }   // ★ ANNEE-TAB (§548) : plus d'état d'édition dans la roue — l'année a son onglet
 window._planCadreOpen=_planCadreOpen;
 function _planRenderCadre(){
@@ -9384,7 +9412,7 @@ function _paDoc(yr,nom){
   var _et=(typeof _planRecaleEtat==='function')?_planRecaleEtat(yr,grps.map(function(g){return g.id;})):null;
   if(_et){
     lim += '<div class="mvdoc-lim"><b>L\u2019ann\u00e9e '+yr+' n\u2019a pas encore de mod\u00e8le enregistr\u00e9.</b> '
-        + 'Le document reprend le mod\u00e8le int\u00e9gr\u00e9, replac\u00e9 sur les bons jours de la semaine de '+yr+'. '
+        + 'Le document reprend '+_planRecaleSourceTxt(_et)+', replac\u00e9'+((_et.ans||[]).length+(_et.integre?1:0)>1?'s':'')+' sur les bons jours de la semaine de '+yr+'. '   // ★ PREPAN-1 (§559)
         + (_et.trous
             ? (_et.trous+' jour'+(_et.trous>1?'s':'')+' n\u2019'+(_et.trous>1?'ont':'a')+' pas d\u2019\u00e9quivalent d\u2019une ann\u00e9e '
                + '\u00e0 l\u2019autre et rest'+(_et.trous>1?'ent':'e')+' \u00e0 poser : compl\u00e9tez le mod\u00e8le avant de diffuser '
