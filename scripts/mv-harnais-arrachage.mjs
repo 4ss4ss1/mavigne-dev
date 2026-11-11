@@ -146,7 +146,7 @@ if (!CONTRE) {
   const nu = APP.replace(/^\s*\/\/.*$/gm, '');
   t('saveArrachage exposé sur window', /window\.saveArrachage\s*=\s*saveArrachage/.test(nu));
   // AJOUR-1 (§552) : la peinture de la fiche est sortie d'openDP (_dpPeindre, qui la repeint aussi au retour d'une feuille).
-  t('la fiche (openDP → _dpPeindre) peint la ligne d’arrachage', /function _dpPeindre\(nom,repeinte\)\{[\s\S]*?_dpFillArrach\(p\)[\s\S]*?\n\}\nfunction openDP\(nom\)\{\n  if\(!_dpPeindre\(nom\)\) return;/.test(nu));
+  t('la fiche (openDP → _dpPeindre) peint la ligne d’arrachage', /function _dpPeindre\(nom,repeinte\)\{[\s\S]*?_dpFillArrach\(p\)[\s\S]*?\n\}\nfunction openDP\(nom\)\{[\s\S]{0,400}?if\(!_dpPeindre\(nom, meme\)\) return;/.test(nu));
   t('index.html porte ovArrachage, #dp-arrach-row et les champs arr-*', ['id="ovArrachage"', 'id="dp-arrach-row"', 'id="arr-date"', 'id="arr-motif"', 'id="arr-note"', 'id="arr-hidden-nom"', 'onclick="saveArrachage()"'].every(x => HTML.includes(x)));
   console.log('\n  ' + ok + ' vertes, ' + ko + ' rouges\n');
   process.exit(ko ? 1 : 0);

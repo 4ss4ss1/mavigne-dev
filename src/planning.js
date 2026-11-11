@@ -6885,6 +6885,7 @@ window._planCadreOpen=_planCadreOpen;
 function _planRenderCadre(){
   var body=_planCadreHost();
   if(!body)return;
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovReglPlanning');   // ★ AJOUR-2 (§562) : la roue du Planning est peinte ici
 
   var all=Object.assign({},PLAN_DEF,_pTplStore());
   var ids=Object.keys(all);

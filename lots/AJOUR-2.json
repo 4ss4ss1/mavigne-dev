@@ -1,0 +1,42 @@
+{
+  "lot": "AJOUR-2",
+  "section": "§562",
+  "base": "933ca172262273b91b561cf158329f0b792a243f",
+  "inclut": [],
+  "date": "2026-11-11",
+  "tutos": {
+    "ok": true,
+    "empreinte": "aeca883c4d2890be3a61f8018806269209a55f9fdaeacaed1d5e563e7593bcdc",
+    "date": "2026-11-11T15:55:12.599Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "stade"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "89be7f1a56cbece7d6ef94de33b474e46cd4c5945bae4bf48a598295784f9b66",
+    "CLAUDE.md": "f6d514455e3064b4a1bfa1b7448eb76bebcd3ed1cb2806601ed06f078de4ceae",
+    "docs/claude/INDEX.md": "2c16597d280c987218da44e03e3c5f09e0560c1f66fba300f413edee3d8604c8",
+    "docs/claude/chantiers-530-579.md": "864bc19862742b689b36a30da58bf27beecd2bc9a8d212e35dc06b04783865e6",
+    "docs/claude/journal.md": "0f6ae71df782c344ee86772ee4f575ddfc4bfba334ab263bfae79d8b59837bc6",
+    "docs/claude/modules.md": "47d900b19a9db5f4b6b2229741006c6c29fa4728b6b8d3f2c4086a74e4409876",
+    "index.html": "e058bac024786c2c39c8a25ed4f33df5098e04a255051f7fcfe4808823a36914",
+    "public/sw.js": "f9e7a0d9af914ac3df077271cfe38512a8fd38d891df477b7add926360e45621",
+    "scripts/mv-harnais-ajour1.mjs": "ecea5e1fdd220eab937edce1d9da6a869d12cb1d9721f12690cd990bd32631a6",
+    "scripts/mv-harnais-arrachage.mjs": "34b26ce47668fd2211c2c42c8a5d7e1aad67076e2e7a4a0d8e6d7b2b6367953c",
+    "scripts/mv-harnais-fusion-docs.mjs": "0e30d30846f85b57cafdbc5af92da7ed579f820db9bff6ba55a18234e9115bed",
+    "scripts/mv-harnais-regl-module.mjs": "3402929540bfbb556eaa0947f627fd4f297ce8f6a0f671bfba813a9a772ed599",
+    "src/app.js": "73295c99f02e6f20917fc3ec0a3d1183a2de725843dab9ffb7516abd1a689f4a",
+    "src/cuvier.js": "221aee3a2df579460110592fe151f4f7235fd8366636a38250463630ea75e6e4",
+    "src/pilotage.js": "e217cca679d8ce117c671ae7ee6b7a1287835530a577c0da46dba6f7bfc3f443",
+    "src/planning.js": "c753847cf0f7133de019495dd523374c114d9efeca822b4849ee7a169048d311",
+    "src/reglages.js": "cfc68e44526f0cd294832c9d314aa7fc500b05678a2b73e6d45554c722faeabc",
+    "src/utils.js": "51e441f32e0c7572dab3f30f11efcd5bd48074622a2f45cc7f28a9447a5b1f3f",
+    "src/whats-new.js": "745d0c324b78c96658adb85c046d79cb2213c5117cedd791f02d0e1fdb28507e"
+  }
+}

@@ -139,7 +139,10 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
 
   /* 5. Le composant */
   T(/function _mvReglOpen\(mod\)/.test(app) && /window\._mvReglOpen\s*=\s*_mvReglOpen/.test(app), '_mvReglOpen existe et est expos\u00e9');
-  const open = extraire(app, '_mvReglOpen') || '';
+  // AJOUR-2 (§562) : la peinture de la roue est sortie de son ouverture (_mvReglPeindre, aussi appelée quand une petite
+  //   fenêtre posée sur elle se ferme) — l'ouverture la rappelle ; on lit les deux, comme un seul corps.
+  const _ouv = extraire(app, '_mvReglOpen') || '';
+  const open = _ouv + (/\b_mvReglPeindre\(mod\);/.test(_ouv) ? '\n' + (extraire(app, '_mvReglPeindre') || '') : '');
   T(/if\(!isAdmin\(\)\)/.test(open), 'la roue refuse un non-administrateur');
   T(/window\.renderReglages\(\)/.test(open), 'la roue rappelle renderReglages \u2014 elle ne recopie rien');
   T(/openOv\(R\.ov\)/.test(open), 'la roue ouvre la feuille par openOv');

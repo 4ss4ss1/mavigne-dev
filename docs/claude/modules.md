@@ -281,6 +281,8 @@ défilement et `<details>` gardés, jamais pendant une saisie ; sinon la page, s
 (`window._mvAjourPage('page-x')`, en tête des dix rendus de `_mvRendrePageActive`). Fiches vives : `ovParcelle` (`_dpPeindre`),
 `ovRecFiche` (`_recFichePeindre`), `ovMatFiche` (`_matFichePeindre`), `ovMaTrace` (`renderMaTrace`). Les mémos `_MV_RG` et des comptes
 repartent à chaque enregistrement et donnée reçue. Une fenêtre neuve se classe dans `mv-harnais-ajour1`.
+AJOUR-2 (§562) : les six feuilles de la roue des réglages sont vives (`_mvReglPeindre`) ; une fiche déjà ouverte ET au-dessus
+(`window._mvFicheDessus('ovX')`) que ses propres gestes rappellent se repeint sans repasser par `openOv` (`openDP`, `_recSel`, `_matSel`).
 
 ## 13. Parcelles, carte & KML
 

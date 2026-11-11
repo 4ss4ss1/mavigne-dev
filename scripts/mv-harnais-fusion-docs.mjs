@@ -489,8 +489,10 @@ if (CONTRE) {
   await mord('★★ la base prend un instantané en attente d’écriture', 
     'if (_MV_FUSION_EXCLUES[key] || value === undefined || (md && md.hasPendingWrites)) return false;',
     'if (_MV_FUSION_EXCLUES[key] || value === undefined) return false;', ESSAIS.baseEnAttente);
+  // AJOUR-2 (§562) : la ligne de garde porte depuis INTRANT-2 (§561) le passage d'une baisse annoncée — le motif d'avant
+  //   n'existait plus, la contre-épreuve ne mordait plus (rouge sur 933ca17 sans AJOUR-2). Recalée sur la ligne actuelle.
   await mord('★★ la garde anti-perte ne voit plus le résultat fusionné', 
-    'if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) return { bloque: true, curN: curN, newN: newN };', '', ESSAIS.gardeFusion);
+    "if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5 && !(typeof _mvBaisseAnnoncee === 'function' && _mvBaisseAnnoncee(key, newN))) return { bloque: true, curN: curN, newN: newN };", '', ESSAIS.gardeFusion);
   await mord('★ sans base, cet appareil l’emporte en bloc (au lieu de l’union)', 
     "  if (!champ) return L;\n  var cles", "  if (!champ || !B) return L;\n  var cles", ESSAIS.sansBase);
 }

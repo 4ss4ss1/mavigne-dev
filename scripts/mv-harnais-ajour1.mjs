@@ -91,11 +91,15 @@ const CLASSES = {
   ovPFiltres: ['LECTURE', 'filtres de l’écran'], ovCaveExport: ['LECTURE', 'export'], ovWhatsNew: ['LECTURE', 'nouveautés'], ovSync: ['LECTURE', 'état de la synchro'],
   ovChatParcelle: ['LECTURE', 'module de discussion retiré (CHAT-0)'], ovTracOutils: ['LECTURE', 'menu des outils d’entretien'],
   ovJivExport: ['LECTURE', 'export'], ovSyntheseCuivre: ['LECTURE', 'synthèse cuivre'],
-  ovReglVigne: ['A_REVOIR', 'réglages en ligne : les cartes calculées à côté des champs'], ovReglTracteur: ['A_REVOIR', 'réglages en ligne (_ecoCfgSet, setActHha) sans repeinte des cartes calculées'],
-  ovReglPlanning: ['A_REVOIR', 'réglages en ligne'], ovReglPilotage: ['A_REVOIR', 'réglages en ligne (_ecoCfgSet) sans repeinte des cartes calculées'],
-  ovReglPhyto: ['A_REVOIR', 'réglages en ligne'], ovReglReserve: ['A_REVOIR', 'réglages en ligne'],
-  ovLabo: ['A_REVOIR', 'fiche labo'], ovReport: ['A_REVOIR', 'report (Pilotage)'], ovReparateur: ['A_REVOIR', 'réparateur'], ovRepBlock: ['A_REVOIR', 'blocage réparation'],
-  ovPlanChaleur: ['A_REVOIR', 'chaleur (Planning)'], ovFerParc: ['A_REVOIR', 'fertilisation d’une parcelle'],
+  // AJOUR-2 (§562) : les douze « à revoir » tranchés un à un.
+  ovReglVigne: ['VIVE', 'roue des réglages — une petite fenêtre posée sur elle (renommer, ajouter) la laisse à jour (_mvReglPeindre)'],
+  ovReglTracteur: ['VIVE', 'roue des réglages — « Renommer » une activité redessinait la liste des tracteurs, pas celle des activités (_mvReglPeindre)'],
+  ovReglPlanning: ['VIVE', 'roue des réglages (_mvReglPeindre → _planRenderCadre)'], ovReglPilotage: ['VIVE', 'roue des réglages (_mvReglPeindre → _pilParamOpen ; le Paramétrage la repeint aussi)'],
+  ovReglPhyto: ['VIVE', 'roue des réglages (ses documents)'], ovReglReserve: ['VIVE', 'roue des réglages (ses documents)'],
+  ovLabo: ['FORMULAIRE', 'saisie des rapports du labo : chaque geste rappelle _laboRender, l’enregistrement la ferme'],
+  ovReport: ['FORMULAIRE', 'signaler un problème'], ovReparateur: ['FORMULAIRE', 'mise en réparation : l’enregistrement la ferme'],
+  ovRepBlock: ['FORMULAIRE', 'choix d’un autre tracteur (le défaut est en réparation) : rien n’est enregistré d’elle'],
+  ovPlanChaleur: ['FORMULAIRE', 'horaires de chaleur sur une période (_planChaleurRender)'], ovFerParc: ['FORMULAIRE', 'fertilisation d’une parcelle : l’enregistrement la ferme'],
 };
 const CATEGORIES = ['VIVE', 'MODULE', 'FERME', 'FORMULAIRE', 'LECTURE', 'A_REVOIR'];
 
@@ -159,7 +163,7 @@ function monde(utils) {
     _mvRendrePageActive: () => { if (ctx.__saisie) return 'saisie'; ctx.__rendus++; ctx._mvAjourPage(ctx.__page.id); return ctx.__page.id; },
   };
   ctx.window = ctx;
-  ctx.document = { querySelector: s => (s === '.page.active' ? ctx.__page : null), activeElement: null, body: {} };
+  ctx.document = { querySelector: s => (s === '.page.active' ? ctx.__page : null), activeElement: null, body: {}, getElementById: id => (ctx.__ids || {})[id] || null };
   vm.createContext(ctx);
   vm.runInContext(bloc(utils) + '\nthis.__verifier = _mvAjourVerifier;', ctx);
   const image = () => { let n = 0; while (imgs.length) { const f = imgs.shift(); f(); n++; if (n > 50) throw new Error('images sans fin'); } return n; };
@@ -266,6 +270,13 @@ function scenarios(utils) {
       T('une peinture en panne est avalée et notée', W.journal.some(x => x === 'avale:panne'));
       c.__top = null; c._mvAjourEcrit('parcelles'); c._mvAjourPlanifier(true); W.image();
       T('… et la mécanique continue (la page suit à la fermeture suivante)', c.__rendus === 1); }
+    // 13. AJOUR-2 — « au-dessus » : ouverte ET surface du dessus ; ouverte sous une autre, elle se rouvrira (ramenée devant).
+    { const W = monde(utils), c = W.ctx;
+      const fiche = new El('div', { id: 'ovParcelle', class: 'overlay open' }), feuille = new El('div', { id: 'ovCompte', class: 'overlay open' });
+      c.__ids = { ovParcelle: fiche, ovCompte: feuille };
+      c.__top = fiche; T('une fiche ouverte et au-dessus : repeinte sans se rouvrir', c._mvFicheDessus('ovParcelle') === true);
+      c.__top = feuille; T('une fiche ouverte SOUS une autre fenêtre : pas « au-dessus » (elle se rouvrira, ramenée devant)', c._mvFicheDessus('ovParcelle') === false);
+      fiche.classList.remove('open'); c.__top = null; T('une fiche fermée : pas « au-dessus »', c._mvFicheDessus('ovParcelle') === false); }
     // 12. La saisie sur la page pendant la fermeture : la page attend la fermeture suivante.
     { const W = monde(utils), c = W.ctx;
       c._mvAjourEcrit('x'); c.__saisie = true; c._mvAjourPlanifier(true); W.image();
@@ -330,18 +341,30 @@ function cablage(SRC) {
   const dp = corps(SRC.app, 'function _dpPeindre(nom,repeinte){');
   T('fiche parcelle : sa peinture est à part (_dpPeindre) et se note fraîche', dp.includes("window._mvFicheFraiche('ovParcelle')") && dp.includes('return true;'));
   T('fiche parcelle : la repeinte garde la météo affichée (pas d’appel réseau à chaque geste)', dp.includes("if(!repeinte){ try{ _dpFillParcMeteo(p); }"));
-  T('fiche parcelle : openDP peint puis ouvre', SRC.app.includes("function openDP(nom){\n  if(!_dpPeindre(nom)) return;\n  openOv('ovParcelle');\n}"));
+  T('fiche parcelle : openDP peint puis ouvre — déjà au-dessus, repeinte sans se rouvrir (AJOUR-2)', SRC.app.includes("function openDP(nom){\n")
+    && corps(SRC.app, 'function openDP(nom){').includes("var dessus=!!(window._mvFicheDessus && window._mvFicheDessus('ovParcelle')), meme=dessus && nom===_dpCurrentNom;\n  if(!_dpPeindre(nom, meme)) return;\n  if(dessus) return;\n  openOv('ovParcelle');"));
+  T('une fiche est « au-dessus » si elle est ouverte ET la surface du dessus (_mvFicheDessus)', SRC.utils.includes("  return !!(t && t.el === el);\n};") && SRC.utils.indexOf('window._mvFicheDessus = function(ov){') > SRC.utils.indexOf('// ── AJOUR-1 : début du bloc ──'));
+  const reg = corps(SRC.app, 'function _mvReglPeindre(mod){');
+  T('la roue des réglages : sa peinture est à part, se note fraîche, l’ouverture passe par elle (AJOUR-2)', reg.includes('window._mvFicheFraiche(R.ov)')
+    && corps(SRC.app, 'function _mvReglOpen(mod){').includes('  _mvReglPeindre(mod);\n  openOv(R.ov);'));
+  T('la roue des réglages : ses six feuilles déclarées vives', SRC.app.includes("Object.keys(_MV_REGL).forEach(function(mod){ if(window._mvFicheVive) window._mvFicheVive(_MV_REGL[mod].ov, function(){ _mvReglPeindre(mod); }); });"));
+  T('les peintres de la roue se notent frais (renderReglages, _planRenderCadre, _pilParamRender)',
+    corps(SRC.reglages, 'function renderReglages(){').includes("window._mvFicheFraiche('ovReglVigne'); window._mvFicheFraiche('ovReglTracteur');")
+    && corps(SRC.planning, 'function _planRenderCadre(){').includes("window._mvFicheFraiche('ovReglPlanning')")
+    && corps(SRC.pilotage, 'function _pilParamRender(d){').includes("window._mvFicheFraiche('ovReglPilotage')"));
   T('fiche parcelle : déclarée vive, repeinte sur la parcelle ouverte', SRC.app.includes("window._mvFicheVive('ovParcelle', function(){ if(_dpCurrentNom) _dpPeindre(_dpCurrentNom, true); });"));
   T('Ma trace : déclarée vive, sa peinture se note fraîche', SRC.app.includes("window._mvFicheVive('ovMaTrace', function(){ renderMaTrace(); });") && corps(SRC.app, 'function renderMaTrace(){').includes("window._mvFicheFraiche('ovMaTrace')"));
   const rec = corps(SRC.cuvier, 'function _recFichePeindre(){');
   const rs = corps(SRC.cuvier, 'function _recSel(nom){'), ms = corps(SRC.cuvier, 'function _matSel(nom){');
   // Déclarées dans leur ouverture, avant la peinture (cuvier.js n'exécute rien au chargement : mv-harnais-cuvier, règle F).
   T('fiche récolte : peinture à part, fraîche, déclarée vive à l’ouverture puis peinte', rec.includes("window._mvFicheFraiche('ovRecFiche')")
-    && rs.indexOf("window._mvFicheVive('ovRecFiche', _recFichePeindre);") > 0 && rs.indexOf("window._mvFicheVive('ovRecFiche', _recFichePeindre);") < rs.indexOf('if(!_recFichePeindre()) return;'));
+    && rs.indexOf("window._mvFicheVive('ovRecFiche', _recFichePeindre);") > 0 && rs.indexOf("window._mvFicheVive('ovRecFiche', _recFichePeindre);") < rs.indexOf('if(!_recFichePeindre()) return;')
+    && rs.includes("if(!dessus && typeof window.openOv === 'function') window.openOv('ovRecFiche');"));
   const mat = corps(SRC.cuvier, 'function _matFichePeindre(ouvrir){');
   T('fiche maturité : peinture à part, fraîche, ouverture dans l’ordre (corps, fenêtre, courbes), déclarée vive', mat.includes("window._mvFicheFraiche('ovMatFiche')")
     && mat.indexOf('corps.innerHTML') < mat.indexOf("openOv('ovMatFiche')") && mat.indexOf("openOv('ovMatFiche')") < mat.indexOf('_matPeindreFiche(')
-    && ms.indexOf("window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });") > 0 && ms.indexOf("window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });") < ms.indexOf('_matFichePeindre(true);'));
+    && ms.indexOf("window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });") > 0
+    && ms.indexOf("window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });") < ms.indexOf("_matFichePeindre(!(window._mvFicheDessus && window._mvFicheDessus('ovMatFiche')));"));
   return R;
 }
 
@@ -356,6 +379,10 @@ function classement(SRC) {
   T('chaque case est une catégorie connue, avec sa raison', Object.values(CLASSES).every(([c, p]) => CATEGORIES.includes(c) && p && p.length > 3));
   const tout = Object.values(SRC).join('\n');
   const declarees = new Set(); let m; const re = /window\._mvFicheVive\('([^']+)'/g; while ((m = re.exec(tout))) declarees.add(m[1]);
+  // AJOUR-2 : la roue des réglages se déclare d'une boucle sur sa table (_MV_REGL) — ses six feuilles, lues dans la table.
+  if (SRC.app.includes("Object.keys(_MV_REGL).forEach(function(mod){ if(window._mvFicheVive) window._mvFicheVive(_MV_REGL[mod].ov, function(){ _mvReglPeindre(mod); }); });")) {
+    const t = corps(SRC.app, 'var _MV_REGL = {'); const r2 = /ov:'(ov[A-Za-z]+)'/g; while ((m = r2.exec(t))) declarees.add(m[1]);
+  }
   const vives = Object.keys(CLASSES).filter(id => CLASSES[id][0] === 'VIVE');
   T('chaque fiche classée VIVE est déclarée dans le code', vives.every(id => declarees.has(id)));
   T('chaque fiche déclarée dans le code est classée VIVE', [...declarees].every(id => CLASSES[id] && CLASSES[id][0] === 'VIVE'));
@@ -402,6 +429,12 @@ const MUTANTS = [
   ['une fiche fraîche se repeint quand même', 'utils', 'if(f && f.n < _MV_AJ.n && el.classList.contains', 'if(f && true && el.classList.contains', 'pas une seconde fois'],
   ['les mémos ne repartent plus à l’enregistrement', 'utils', "window._mvAjourEcrit = function(key){ _MV_AJ.n++; _mvAjourOublier(); _mvAjourPlanifier(false); return _MV_AJ.n; };",
     "window._mvAjourEcrit = function(key){ _MV_AJ.n++; _mvAjourPlanifier(false); return _MV_AJ.n; };", 'fait repartir les mémos'],
+  ['openDP rouvre une fiche déjà au-dessus', 'app', "  if(!_dpPeindre(nom, meme)) return;\n  if(dessus) return;\n", "  if(!_dpPeindre(nom, meme)) return;\n", 'repeinte sans se rouvrir'],
+  ['« au-dessus » oublie la surface du dessus', 'utils', '  return !!(t && t.el === el);\n};', '  return true;\n};', 'SOUS une autre fenêtre'],
+  ['la roue des réglages n’est plus déclarée', 'app', "Object.keys(_MV_REGL).forEach(function(mod){ if(window._mvFicheVive) window._mvFicheVive(_MV_REGL[mod].ov, function(){ _mvReglPeindre(mod); }); });\n", '', 'six feuilles déclarées'],
+  ['l’ouverture de la roue ne passe plus par sa peinture', 'app', '  _mvReglPeindre(mod);\n  openOv(R.ov);', '  openOv(R.ov);', 'l’ouverture passe par elle'],
+  ['renderReglages ne note plus la roue fraîche', 'reglages', "  if(window._mvFicheFraiche){ window._mvFicheFraiche('ovReglVigne'); window._mvFicheFraiche('ovReglTracteur'); }", '', 'se notent frais'],
+  ['la fiche maturité se rouvre au-dessus', 'cuvier', "  _matFichePeindre(!(window._mvFicheDessus && window._mvFicheDessus('ovMatFiche')));", '  _matFichePeindre(true);', 'fiche maturité'],
   ['une fenêtre neuve sans case', 'html', '<div class="overlay" id="ovMur"', '<div class="overlay" id="ovNeuveAjour" onclick="closeOv(event,\'ovNeuveAjour\')"></div>\n<div class="overlay" id="ovMur"', 'a sa case'],
 ];
 console.log('\n── AJOUR-1 — contre-épreuves\n');

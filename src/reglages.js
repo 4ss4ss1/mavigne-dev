@@ -325,6 +325,7 @@ window._reglStashAbandonner = _reglStashAbandonner;
 function renderReglages(){
   if(!window._dataReady){ var _rml=document.getElementById('membres-list'); if(_rml)_rml.innerHTML=window._mvSk('reglages'); return; }
   if(window._mvAjourPage) window._mvAjourPage('page-reglages');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
+  if(window._mvFicheFraiche){ window._mvFicheFraiche('ovReglVigne'); window._mvFicheFraiche('ovReglTracteur'); }   // ★ AJOUR-2 (§562) : leurs blocs sont peints ici
   // Badge rôle dans l'en-tête
   const roleB=document.getElementById('regl-role-badge');
   if(roleB){

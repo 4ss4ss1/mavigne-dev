@@ -1474,8 +1474,9 @@ function _recSel(nom){
   if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovRecFiche'); return; }
   // Déclarée vive à l'ouverture, pas au chargement : cuvier.js n'exécute rien en se chargeant (mv-harnais-cuvier, règle F).
   if(window._mvFicheVive) window._mvFicheVive('ovRecFiche', _recFichePeindre);
+  var dessus = !!(window._mvFicheDessus && window._mvFicheDessus('ovRecFiche'));   // ★ AJOUR-2 (§562) : au-dessus, repeinte sans se rouvrir
   if(!_recFichePeindre()) return;
-  if(typeof window.openOv === 'function') window.openOv('ovRecFiche');
+  if(!dessus && typeof window.openOv === 'function') window.openOv('ovRecFiche');
 }
 /* D'un onglet à l'autre sur la même parcelle : « Voir sa maturité », « Voir sa récolte ». */
 function _vendVoir(tab, nom){
@@ -8843,7 +8844,8 @@ function _matSel(nom){
   if(_matLarge()){ renderVendAna(); return; }
   if(!nom){ if(typeof window.closeOv === 'function') window.closeOv(null, 'ovMatFiche'); renderVendAna(); return; }
   if(window._mvFicheVive) window._mvFicheVive('ovMatFiche', function(){ _matFichePeindre(false); });   // à l'ouverture (règle F)
-  _matFichePeindre(true);
+  // ★ AJOUR-2 (§562) : rappelée par « Supprimer » une mesure (_vendAnaDel) quand elle est au-dessus — repeinte sans se rouvrir.
+  _matFichePeindre(!(window._mvFicheDessus && window._mvFicheDessus('ovMatFiche')));
 }
 
 /* ─────────── La saisie en série ───────────

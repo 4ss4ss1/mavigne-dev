@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '10.92';
+export const APP_VERSION = '10.93';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -6793,6 +6793,14 @@ window._mvAjourPage = function(pid){ if(pid) _MV_AJ.page[pid] = _MV_AJ.n; };
 // Une fiche qui sait se repeindre : son overlay, et la fonction qui la peint d'après l'état de son module.
 window._mvFicheVive = function(ov, peindre){ if(ov && typeof peindre === 'function') _MV_AJ.fiches[ov] = { peindre: peindre, n: -1 }; };
 window._mvFicheFraiche = function(ov){ var f = _MV_AJ.fiches[ov]; if(f) f.n = _MV_AJ.n; };
+// ★ AJOUR-2 (§562) — une fiche déjà ouverte ET au-dessus : ses propres gestes la rappellent (openDP, _matSel, _recSel) ;
+//   elle se repeint sans se rouvrir (pas une entrée d'historique, ni une couche, ni la météo de plus). Ouverte SOUS une
+//   autre fenêtre, elle se rouvre comme avant : son ouverture la ramène devant.
+window._mvFicheDessus = function(ov){
+  var el = document.getElementById(ov); if(!el || !el.classList.contains('open')) return false;
+  var t = (typeof window._mvTopSurface === 'function') ? window._mvTopSurface() : null;
+  return !!(t && t.el === el);
+};
 function _mvAjourPlanifier(fermeture){
   if(fermeture) _MV_AJ.fermeture = true;
   if(_MV_AJ.image) return;

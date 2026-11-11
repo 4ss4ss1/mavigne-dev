@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.93', d: '2026-11-11', items: [   // AJOUR-2 (§562) : la roue des réglages vive ; une fiche au-dessus repeinte sans se rouvrir
+    { niv: 0, pour: ['admin'], emoji: 'rotation', titre: 'Les réglages se tiennent à jour',
+      desc: "Une activité renommée, un tracteur ajouté : la liste des réglages du module le montre dès que la petite fenêtre se ferme — même si l’on referme la fiche du dessous sans l’enregistrer." },
+    { niv: 0, pour: ['tous'], emoji: 'rotation', titre: 'La fiche d’une parcelle ne clignote plus',
+      desc: "Après « Démarrer », « Annuler » ou une tâche retirée, la fiche se met à jour sans recharger la météo ni ajouter un pas au bouton Retour." },
+  ] },
   { v: '10.92', d: '2026-11-10', items: [   // PREPAN-2 (§560) : l'année suivante au geste
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Préparer l’année suivante d’un geste',
       desc: "Menu « … » de la semaine : « Préparer 2027 » recopie vos modèles cochés, replacés sur les jours de 2027 — un modèle déjà là n’est remplacé que coché ; au choix, les semaines fermées rouvertes comme leur saison et les fériés travaillés chômés. Dans l’onglet Année, un modèle qui n’existe pas encore sur l’année le dit : « Partir de 2026 » ou « d’une année vide », puis « Enregistrer ». Un tuto montre le geste." },

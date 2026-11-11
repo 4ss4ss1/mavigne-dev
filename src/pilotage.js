@@ -12665,6 +12665,7 @@ function _pilFillContent(d){
 //   boutons « à compléter » (data-diag) — qui ferment la feuille avant d'aller.
 function _pilParamRender(d){
   var host=document.getElementById('pil-regl-host'); if(!host) return false;
+  if(window._mvFicheFraiche) window._mvFicheFraiche('ovReglPilotage');   // ★ AJOUR-2 (§562) : la roue du Pilotage est peinte ici
   if(typeof _pecCss==='function') _pecCss();   // PIL-RANGE-4b : les réglages des années portent le style d'Économie
   host.innerHTML=_pilParamBody(d)+_pilParamAnnees();
   _pilBindParam(d);

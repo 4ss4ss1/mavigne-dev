@@ -4611,10 +4611,12 @@ function _mvReglTousDocs(){
   goTo('reglages');
   setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('domaine'); if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: tous les documents'}); } },260);
 }
-function _mvReglOpen(mod){
-  var R=_MV_REGL[mod]; if(!R) return;
-  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
-  if(!window._dataReady){ showToast('Chargement en cours\u2026','#B85A1A'); return; }
+// ★★ AJOUR-2 (§562) — LA ROUE DES RÉGLAGES SE TIENT À JOUR. Sa peinture sort de l'ouverture et chaque feuille de la roue
+//   est déclarée vive (utils.js, _mvFicheVive) : une petite fenêtre posée sur elle (renommer une activité, ajouter un
+//   tracteur…) qui enregistre puis se ferme — même sans « Enregistrer » sur la fiche du dessous — la laisse à jour.
+//   Vu : « Renommer » une activité redessinait la liste des tracteurs (renderTracteurSet), pas celle des activités.
+function _mvReglPeindre(mod){
+  var R=_MV_REGL[mod]; if(!R) return false;
   // Les blocs sont remplis par les écrivains d'origine, exactement comme quand
   // on ouvrait l'onglet : on les rappelle, on ne les recopie pas.
   try{
@@ -4625,8 +4627,17 @@ function _mvReglOpen(mod){
   }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: rendu '+mod,detail:(e&&e.message)||''}); }
   var docs=document.getElementById(R.docs);
   if(docs) docs.innerHTML=_mvReglDocsHtml(mod, R.titre);
+  if(window._mvFicheFraiche) window._mvFicheFraiche(R.ov);
+  return true;
+}
+function _mvReglOpen(mod){
+  var R=_MV_REGL[mod]; if(!R) return;
+  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  if(!window._dataReady){ showToast('Chargement en cours\u2026','#B85A1A'); return; }
+  _mvReglPeindre(mod);
   openOv(R.ov);
 }
+Object.keys(_MV_REGL).forEach(function(mod){ if(window._mvFicheVive) window._mvFicheVive(_MV_REGL[mod].ov, function(){ _mvReglPeindre(mod); }); });
 // La roue n'apparaît qu'à l'administrateur ; rappelé par applyRoles.
 function _mvReglSync(){
   var adm=false; try{ adm=isAdmin(); }catch(e){ adm=false; }
@@ -8856,7 +8867,11 @@ _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, e
   return true;
 }
 function openDP(nom){
-  if(!_dpPeindre(nom)) return;
+  // ★ AJOUR-2 (§562) : rappelée par les gestes de la fiche (Démarrer, Annuler, Exclure, le cépage…) quand elle est déjà au-dessus —
+  //   repeinte sans se rouvrir : ni entrée d'historique, ni couche de plus, et la météo gardée si c'est la même parcelle.
+  var dessus=!!(window._mvFicheDessus && window._mvFicheDessus('ovParcelle')), meme=dessus && nom===_dpCurrentNom;
+  if(!_dpPeindre(nom, meme)) return;
+  if(dessus) return;
   openOv('ovParcelle');
 }
 if(window._mvFicheVive) window._mvFicheVive('ovParcelle', function(){ if(_dpCurrentNom) _dpPeindre(_dpCurrentNom, true); });
