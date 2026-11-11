@@ -120,8 +120,8 @@ const DEFAUTS = [
   ['pil', 'un mélange prend la rémanence la plus COURTE', 'if(cfg[ty.mode]>rem){', 'if(rem===0||cfg[ty.mode]<rem){'],
   ['pil', 'une substance inconnue devient systémique', "return {mode:'contact', deduit:true};", "return {mode:'systemique', deduit:true};"],
   ['pil', 'le réglage n’est plus lu', "o[k]=(isFinite(v)&&v>0)?v:_PIL_PROT_DEF[k];", 'o[k]=_PIL_PROT_DEF[k];'],
-  ['pil', 'les jours écoulés ne sont plus retirés', 'var reste=(j==null?null:e.rem-j), pluie=null', 'var reste=(j==null?null:e.rem), pluie=null'],
-  ['pil', 'les arrachées reviennent', "if(!p||p.statut==='Arrachee') return;\n    var e=der[p.nom];", "if(!p) return;\n    var e=der[p.nom];"],
+  ['pil', 'les jours écoulés ne sont plus retirés', 'var reste=(j==null?null:rem-j), pluie=null', 'var reste=(j==null?null:rem), pluie=null'],   // PHENO-2B (§564) : la rémanence lue par la pousse
+  ['pil', 'les arrachées reviennent', "if(!p||p.statut==='Arrachee') return;\n    var b=(typeof window._phenoStadeAu", "if(!p) return;\n    var b=(typeof window._phenoStadeAu"],   // PHENO-2B (§564) : le stade lu avant le dernier traitement
   ['pil', 'le seuil de lessivage n’est plus lu', "if(pluie!=null&&pluie>=cfg.lessivage){ lessive=true; reste=0; }", "if(false){ lessive=true; reste=0; }"],
   ['pil', 'le jour du traitement compte dans la pluie', "for(;;){ d.setDate(d.getDate()+1); var iso=_pilPhotoIso(d);", "for(var k0=0;;k0++){ if(k0) d.setDate(d.getDate()+1); var iso=_pilPhotoIso(d);"],
   ['pil', 'un jour manquant compte zéro', "if(v==null||!isFinite(Number(v))) return null; mm+=Number(v); }", "if(v==null||!isFinite(Number(v))) continue; mm+=Number(v); }"],

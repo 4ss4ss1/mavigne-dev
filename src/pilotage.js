@@ -4225,11 +4225,43 @@ var _PIL_PROT_RX=[
   ['contact',    /cuivre|copper|bouillie|oxychlorure|hydroxyde|soufre|sulfur|folpel|mancoz|m[eé]tirame|dithianon|fluazinam|amisulbrom|bacillus|cos-oga|cerevisane|huile/i]
 ];
 var _PIL_PROT_LESS_DEF=20;   // PLUIE-1 (§220) : mm de pluie cumulee qui lessivent un CONTACT
+// ★ PHENO-2B (§564) — la pousse raccourcit un CONTACT (maquette-niveau-au-dessus-v1, partie 3 : « stade entre 16 et 79 : un contact couvre
+//   7 jours, pas 10 ») : les feuilles neuves ne sont pas couvertes. Coefficient réglé par l'administrateur (Réglages › Économie et conformité).
+var _PIL_PROT_POUSSE_DEF=0.7;
+// ★ PHENO-2B (§564) — le coucher du soleil, formule NOAA (« General Solar Position Calculations ») : minutes depuis minuit, à l'heure de
+//   l'appareil. Le créneau du soir des parcelles en fleur en découle (l'arrêté abeilles : 2 h avant, 3 h après le coucher).
+function _pilCoucher(dateIso,lat,lng){
+  // L'algorithme du « Solar Calculator » de la NOAA (siècle julien, équation du temps, réfraction : 90,833°), itéré sur l'heure du
+  //   coucher — la formule courte, évaluée à midi, tombait deux minutes trop tôt en mai (vérifié : 21 h 22 à Gevrey le 26 mai 2026).
+  var p=String(dateIso||'').split('-').map(Number); lat=Number(lat); lng=Number(lng); if(p.length<3||!isFinite(lat)||!isFinite(lng)) return null;
+  var y=p[0], m=p[1], d=p[2]; if(m<=2){ y-=1; m+=12; }
+  var A=Math.floor(y/100), J=Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+2-A+Math.floor(A/4)-1524.5, R=Math.PI/180, t=720;
+  for(var it=0;it<3;it++){
+    var T=(J+t/1440-2451545)/36525, L0=(280.46646+T*(36000.76983+T*0.0003032))%360, M=357.52911+T*(35999.05029-0.0001537*T), e=0.016708634-T*(0.000042037+0.0000001267*T);
+    var C=Math.sin(M*R)*(1.914602-T*(0.004817+0.000014*T))+Math.sin(2*M*R)*(0.019993-0.000101*T)+Math.sin(3*M*R)*0.000289;
+    var om=125.04-1934.136*T, lam=L0+C-0.00569-0.00478*Math.sin(om*R);
+    var eps=23+(26+(21.448-T*(46.815+T*(0.00059-T*0.001813)))/60)/60+0.00256*Math.cos(om*R);
+    var dec=Math.asin(Math.sin(eps*R)*Math.sin(lam*R)), yv=Math.pow(Math.tan(eps/2*R),2);
+    var eq=4/R*(yv*Math.sin(2*L0*R)-2*e*Math.sin(M*R)+4*e*yv*Math.sin(M*R)*Math.cos(2*L0*R)-0.5*yv*yv*Math.sin(4*L0*R)-1.25*e*e*Math.sin(2*M*R));
+    var x=Math.cos(90.833*R)/(Math.cos(lat*R)*Math.cos(dec))-Math.tan(lat*R)*Math.tan(dec); if(x<-1||x>1) return null;
+    t=720-4*lng-eq+4*Math.acos(x)/R;
+  }
+  var dt=new Date(Date.UTC(p[0],p[1]-1,p[2])+Math.round(t)*60000);
+  return dt.getHours()*60+dt.getMinutes();   // à l'heure de l'appareil (l'heure d'été suit)
+}
+function _pilHm(min){ min=((Math.round(min)%1440)+1440)%1440; return Math.floor(min/60)+'\u00a0h\u00a0'+('0'+(min%60)).slice(-2); }
+function _pilSoirFleurs(aujIso){
+  var f=(window.PARCELLES||[]).filter(function(p){ if(!p||p.statut==='Arrachee'||typeof window._phenoStadeAu!=='function') return false; var b=window._phenoStadeAu(p,aujIso); return b!=null&&b>=61&&b<=69; });
+  if(!f.length) return null;
+  var g=(typeof getDomaineGeo==='function')?getDomaineGeo():null, c=g?_pilCoucher(aujIso,g.lat,g.lng):null;
+  return { n:f.length, noms:f.map(function(p){ return p.nom; }), coucher:c==null?null:_pilHm(c), debut:c==null?null:_pilHm(c-120), fin:c==null?null:_pilHm(c+180) };
+}
 function _pilProtCfg(){
   var c=(window.CONFIG&&window.CONFIG.conformite)||{}, o={}, k;
   for(k in _PIL_PROT_DEF){ if(!Object.prototype.hasOwnProperty.call(_PIL_PROT_DEF,k)) continue;
     var v=Number(c['prot_'+k+'_j']); o[k]=(isFinite(v)&&v>0)?v:_PIL_PROT_DEF[k]; }
   var L=Number(c.prot_lessivage_mm); o.lessivage=(isFinite(L)&&L>0)?L:_PIL_PROT_LESS_DEF;
+  var Pc=Number(c.prot_pousse_coef); o.pousse=(isFinite(Pc)&&Pc>=0.3&&Pc<=1)?Pc:_PIL_PROT_POUSSE_DEF;   // PHENO-2B (§564)
   return o;
 }
 // PLUIE-1 (§220) : la pluie tombee APRES le jour du traitement, jusqu'a aujourd'hui (heures passees).
@@ -4262,19 +4294,21 @@ function _pilProtData(){
   var pl=window.METEO_PLUIE||null, pluieOk=!!(pl&&pl.jours);
   (window.PARCELLES||[]).forEach(function(p){
     if(!p||p.statut==='Arrachee') return;
-    var e=der[p.nom]; if(!e){ rows.push({nom:p.nom, s:parseFloat(p.surface)||0, jamais:true}); return; }
+    var b=(typeof window._phenoStadeAu==='function')?window._phenoStadeAu(p,aujIso):null, fleur=(b!=null&&b>=61&&b<=69);   // PHENO-2B (§564)
+    var e=der[p.nom]; if(!e){ rows.push({nom:p.nom, s:parseFloat(p.surface)||0, jamais:true, fleur:fleur}); return; }
+    var pousse=(e.mode==='contact'&&b!=null&&b>=16&&b<=79), rem=pousse?Math.round(e.rem*cfg.pousse):e.rem;
     var t0=new Date(e.date+'T00:00:00').getTime(), j=isFinite(t0)?Math.max(0,Math.round((auj-t0)/86400000)):null;
-    var reste=(j==null?null:e.rem-j), pluie=null, lessive=false;
+    var reste=(j==null?null:rem-j), pluie=null, lessive=false;
     // PLUIE-1 : un CONTACT lessive par la pluie cumulee depuis le traitement est a nu, quels que soient les jours.
     if(e.mode==='contact'&&reste!=null&&reste>0){ pluie=_pilProtPluie(e.date,pl,aujIso); if(pluie!=null&&pluie>=cfg.lessivage){ lessive=true; reste=0; } }
     else if(e.mode==='contact'){ pluie=_pilProtPluie(e.date,pl,aujIso); }
-    rows.push({nom:p.nom, s:parseFloat(p.surface)||0, date:e.date, j:j, rem:e.rem, mode:e.mode, deduit:e.deduit, reste:reste, pluie:pluie, lessive:lessive});
+    rows.push({nom:p.nom, s:parseFloat(p.surface)||0, date:e.date, j:j, rem:rem, mode:e.mode, deduit:e.deduit, reste:reste, pluie:pluie, lessive:lessive, pousse:pousse, fleur:fleur});
   });
   rows.sort(function(a,b){ var ra=(a.jamais?-1e9:a.reste), rb=(b.jamais?-1e9:b.reste); return ra-rb; });
   var nu=rows.filter(function(r){ return r.jamais||r.reste<=0; }), bientot=rows.filter(function(r){ return !r.jamais&&r.reste>0&&r.reste<=2; });
   return {rows:rows, cfg:cfg, nu:nu, bientot:bientot, nDed:rows.filter(function(r){ return !r.jamais&&r.deduit; }).length,
           haNu:nu.reduce(function(a,r){ return a+r.s; },0), n:rows.length,
-          nLess:rows.filter(function(r){ return r.lessive; }).length, pluieOk:pluieOk, pluieAuj:(pl&&pl.auj&&pl.auj.mm!=null)?pl.auj.mm:null};
+          nLess:rows.filter(function(r){ return r.lessive; }).length, nPousse:rows.filter(function(r){ return r.pousse; }).length, pluieOk:pluieOk, pluieAuj:(pl&&pl.auj&&pl.auj.mm!=null)?pl.auj.mm:null};
 }
 function _pilProtLib(m){ return m==='systemique'?'systémique':(m==='penetrant'?'pénétrant':'contact'); }
 // Le bloc, posé dans la carte « Traiter ? ».
@@ -4306,12 +4340,13 @@ function _pilProtHtml(){
     +'<div class="pil-prot-big" style="color:'+col+'">'+big+'</div>'
     +'<div class="pil-t2s">'+(nNu?(_pilHa(P.haNu)+' ha sans protection'+(nB?(' · '+nB+' de plus d’ici 2 jours'):'')):(nB?'sur '+tot+' parcelles':tot+' parcelles'))
     +' · rémanences '+P.cfg.contact+' / '+P.cfg.penetrant+' / '+P.cfg.systemique+' j'+(P.nDed?(' · mode déduit pour '+P.nDed):'')
+    +(P.nPousse?(' · la pousse (stade 16 à 79) : un contact couvre '+Math.round(P.cfg.contact*P.cfg.pousse)+' j, pas '+P.cfg.contact):'')
     +(P.pluieOk?(' · lessivage à '+P.cfg.lessivage+' mm'+(P.nLess?(' : '+P.nLess+' lessivée'+(P.nLess>1?'s':'')):'')+(P.pluieAuj!=null?(' · aujourd’hui '+String(P.pluieAuj).replace('.',',')+' mm'):'')):' · pluie inconnue, les jours seuls')+'</div>';
   var lim=_PIL_PROT_TOUT?tot:5, urg=P.rows.slice(0,lim);
   h+='<div class="pil-prot-l">'+urg.map(function(r){
     var c=r.jamais||r.reste<=0?'b':(r.reste<=2?'o':'v');
     var txt=r.jamais?'jamais traitée':(r.lessive?('lessivée · '+String(r.pluie).replace('.',',')+' mm'):(r.reste<=0?('à nu depuis '+(-r.reste)+' j'):('encore '+r.reste+' j')));
-    var sub=r.jamais?'':(' · '+_pilDfr(r.date)+' · '+_pilProtLib(r.mode)+(r.deduit?' ?':'')+((!r.lessive&&r.pluie!=null)?(' · '+String(r.pluie).replace('.',',')+' mm de pluie'):''));
+    var sub=(r.jamais?'':(' · '+_pilDfr(r.date)+' · '+_pilProtLib(r.mode)+(r.deduit?' ?':'')+(r.pousse?' · lu par la pousse':'')+((!r.lessive&&r.pluie!=null)?(' · '+String(r.pluie).replace('.',',')+' mm de pluie'):'')))+(r.fleur?' · en fleur \u2192 le soir':'');
     return '<div class="pil-prot-r"><span class="pil-prot-pt '+c+'"></span><span class="n">'+_pilEsc(r.nom)+'</span><span class="v">'+txt+'<span>'+sub+'</span></span></div>';
   }).join('')+'</div>'+(tot>5?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="prot_tout">'+(_PIL_PROT_TOUT?'Ne garder que les 5 plus urgentes':('Et '+(tot-5)+' autre'+(tot-5>1?'s':'')+', mieux protégée'+(tot-5>1?'s':'')))+' \u203A</button></div>':'')+'</div>';
   return h;
@@ -4388,7 +4423,10 @@ function _pilTraiterCalc(){
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
   // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
   //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Ne pas renommer.
-  return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine };
+  // ★ PHENO-2B (§564) : les parcelles en fleur n'ont que le créneau du soir (l'arrêté abeilles : 2 h avant, 3 h après le coucher du soleil).
+  var soir=_pilSoirFleurs(_pilPhotoIso(new Date()));
+  if(soir&&soir.debut) ban+='<div class="pil-t2s">'+soir.n+' en fleur\u00a0: le soir seulement, '+soir.debut+' \u2013 '+soir.fin+'</div>';
+  return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine, soir:soir };
 }
 // ════════════════════════════════════════════════════════════════════════════
 // PRIO-1 (§235) — LA TÂCHE PRIORITAIRE SUIT LA RÈGLE COMMUNE (window._mvTacheDuMoment, app.js)

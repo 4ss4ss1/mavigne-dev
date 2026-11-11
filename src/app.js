@@ -11021,6 +11021,7 @@ function _phenoStadeRegistre(noms,d){
   return { stade:ks[0], divers:ks.length>1, sans:P.length-n, autres:ks.slice(1) };
 }
 window._phenoStadeRegistre=_phenoStadeRegistre;
+window._phenoStadeAu=function(p,d){ var e=p?_phenoAuJour(p,d):null; return e?Number(e.b):null; };   // ★ PHENO-2B (§564) : le stade d'une parcelle à une date (la protection, le créneau du soir)
 function _phenoDebourrees(auj){
   var an=String(auj).slice(0,4), notes=_phenoListe(an).length;
   var P=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }).filter(function(p){ var e=_phenoAuJour(p,auj); return !!(e&&Number(e.b)>=9); });

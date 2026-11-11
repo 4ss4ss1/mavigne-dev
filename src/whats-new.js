@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.95', d: '2026-11-11', items: [
+    { niv: 0, pour: ['admin'], emoji: 'pulve', titre: 'La protection et Traiter ? lisent les stades',
+      desc: "Pendant la pousse (stades 16 à 79), un produit de contact couvre moins longtemps\u00a0: 7 jours au lieu de 10 par défaut, un coefficient réglable dans Réglages. Et les parcelles en fleur n’ont que le créneau du soir, comme le veut l’arrêté abeilles\u00a0: de 2 h avant à 3 h après le coucher du soleil, calculé pour le domaine." },
+  ] },
   { v: '10.94', d: '2026-11-11', items: [
     { niv: 0, pour: ['admin'], emoji: 'feuille', titre: 'Le stade noté sert au registre et au gel',
       desc: "Dans un nouveau traitement, le stade phénologique se propose d’après le relevé des stades (celui des parcelles traitées, au jour du traitement). Et «\u00a0Gel annoncé\u00a0» ne parle plus que des parcelles débourrées\u00a0: rien d’octobre à février, quand la vigne dort." },

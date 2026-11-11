@@ -866,6 +866,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pheno1c.mjs --contre'],
   ['node scripts/mv-harnais-pheno2a.mjs'],             // PHENO-2A (§563) : le stade proposé au registre, « Gel annoncé » limité aux parcelles débourrées
   ['node scripts/mv-harnais-pheno2a.mjs --contre'],
+  ['node scripts/mv-harnais-pheno2b.mjs'],             // PHENO-2B (§564) : la pousse raccourcit un contact ; le créneau du soir des parcelles en fleur (coucher NOAA)
+  ['node scripts/mv-harnais-pheno2b.mjs --contre'],
   ['node scripts/mv-harnais-pheno1d.mjs'],             // PHENO-1D (§509) : la date en un appui, aucun retour en arrière, la question avant un grand saut, la commune, le smoke hermétique
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair

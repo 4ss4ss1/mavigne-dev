@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.85
+// MA VIGNE — Service Worker v11.86
+// v11.86 (11/11/2026) — PHENO-2B (§564) : la pousse raccourcit un contact (coefficient réglé), le créneau du soir des parcelles en fleur (coucher NOAA).
 // v11.85 (11/11/2026) — PHENO-2A (§563) : le stade proposé au registre d'après le relevé, « Gel annoncé » limité aux parcelles débourrées.
 // v11.84 (11/11/2026) — AJOUR-2 (§562) : la roue des réglages se tient à jour ; une fiche déjà au-dessus se repeint sans se rouvrir (ni historique, ni météo de plus)
 // v11.83 (10/11/2026) — PREPAN-2 (§560) : l’année suivante au geste — « n’existe pas encore » et « Partir de 2026 / d’une année vide » dans l’onglet Année, « Préparer 2027 » (menu « … », bandeau) ; un tuto
@@ -4717,7 +4718,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.85';
+const CACHE_NAME   = 'mavigne-v11.86';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4734,7 +4735,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.85 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.86 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4754,7 +4755,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.85 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.86 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

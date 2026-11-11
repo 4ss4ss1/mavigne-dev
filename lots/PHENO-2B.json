@@ -1,0 +1,32 @@
+{
+  "lot": "PHENO-2B",
+  "section": "§564",
+  "base": "148dfd24d86e96b725c81170927ed801f59e0791",
+  "inclut": [],
+  "date": "2026-11-11",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "8e96adbe7ce58b85f75bfa2f6b14088763a3992efd79a0feaf433af4e24015aa",
+    "CLAUDE.md": "77ec937da627b203a0ed397761db7725e8d2e8277d14363fac566e4092d9ff48",
+    "docs/claude/INDEX.md": "375b64d0b27bc21b9254f8d63aca7273138a8f1d30755ab18e148c05df162306",
+    "docs/claude/chantiers-530-579.md": "8c704dc4adbc03d724aa415fc433812ca8f8ecae6590c2e29f1114ff4ee356f5",
+    "docs/claude/journal.md": "059a87f94e3762f5d4aed46fa3c38240308c78dc9773e7843f0705a24b220961",
+    "guide/11-pilotage.html": "3481c0981c37aa177d8eed94d5e54eff79102384d21f0d360c095b796017ba2f",
+    "index.html": "d7a22e5c8f6e6e5079c4bb61154afe20a3521bd693cc83dc7a9dd902454ff1c9",
+    "public/sw.js": "79ec317b4efd35d53a4ed3c9856ab4e215a3eeb4ec2282de32353518e3816688",
+    "scripts/harnais-claude-md.mjs": "29b0ce77ad901ea02d08d0263dd75cca6e9a40a8ccc64615beb9c135e40a352a",
+    "scripts/mv-harnais-liste.mjs": "1b0b1b3bfead3af86d19910a975352b0c2c8db61bbda9382102aa58694392a39",
+    "scripts/mv-harnais-protection.mjs": "ec4562fa05a4c6cf3271177c4afa41255bcba2247305661314e5603dcf2ec339",
+    "scripts/mv-harnais-ref1.mjs": "89e8d8c09a95678e55ecfcadd3ba0c592ccd850f438951399709dde168b61473",
+    "src/app.js": "a1431dedef35bb3b7f06a4df3193ad69ee0627f029490ec7ff5998de0c89c98c",
+    "src/cockpit-vue.js": "f1e32e6e735575df49051b004da64747919c1746c83a1a7fb96af9fe7953b454",
+    "src/pilotage.js": "e00b9647afb6231ef6a56aefb39d517730b81f1af3192968a2509f4f409edbc6",
+    "src/reglages.js": "193ac3fa20b7446be8097c5dbb70b3edfa4c52e7b9360efb7bfe0d68b87a5dc7",
+    "src/utils.js": "786df212cb28f1c82202bdc5825e62e1c87fcd553aa873621ef5aa5ea68f4db2",
+    "src/whats-new.js": "ddf65bbdcd6db870f50bb024026574e7ac76b3da3c152c9debac724710215be3",
+    "scripts/mv-harnais-pheno2b.mjs": "0ec1f3bbc8d332294190c5eefddc56c312bed76f3cb17cd2a132ab2b0f86ea38"
+  }
+}

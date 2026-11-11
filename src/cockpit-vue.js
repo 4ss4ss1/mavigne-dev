@@ -576,6 +576,7 @@ function htmlDecision() {
     + '<span class="ck-dz-fen-ax" aria-hidden="true"><span>0 h</span><span>12 h</span><span>24 h</span></span>'
     + (tr.risque ? '<span class="ck-dz-alerte">Pluie ensuite : risque de lessivage</span>' : '') + '</span>';
   else if (tr.prochaine) bTr = '<span class="ck-dz-calme">' + ICO.ok + 'Prochaine fenêtre : ' + esc(tr.prochaine) + '</span>';
+  if (tr.soir && tr.soir.debut) bTr += '<span class="ck-dz-calme">' + esc(tr.soir.n + ' en fleur : le soir seulement, ' + tr.soir.debut + ' – ' + tr.soir.fin) + '</span>';   // ★ PHENO-2B (§564) : l’arrêté abeilles
   // PRO-1 : la barre ne suit que la tâche NOMMÉE ; « À choisir » montre les tâches qui se disputent la place.
   let bPr = '';
   if (V.prio && T[V.prio]) bPr = '<span class="ck-dz-barre"><span class="ck-barre"><i class="b-cours" id="ck-dz-prio-i" style="width:0%"></i></span><span class="ck-dz-pc" id="ck-dz-prio-t"></span></span>';
