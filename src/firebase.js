@@ -3534,6 +3534,42 @@ window.fbEcrireJalons = async function (v) {
   } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbEcrireJalons'); return false; }
 };
 
+// ★★ OBS-1A (§565) — LES SIGNALEMENTS : mavigne_{slug}/observations_<année>, une carte { <id>: {…} } écrite en setDoc merge —
+//   deux appareils qui signalent en même temps ne s'écrasent pas, clore ne touche qu'une entrée (règle 3 de firestore.rules : tout
+//   membre non lecture seule). Hors COLLECTIONS, comme les jalons : une écoute dédiée à l'année en cours. Jamais en démo ni en préparation.
+//   Hors réseau, setDoc part dans la file de Firestore (le signalement est gardé) ; la photo, elle, attend le réseau (app.js).
+function _mvObsPermis() { return !!TENANT_ID && TENANT_ID !== 'domaine-dupont' && !(window._mvPrepOn && window._mvPrepOn()); }
+var _mvObsStop = null, _mvObsAn = null;
+window.fbObsEcouter = function (an, cb) {
+  try {
+    if (!_mvObsPermis()) return false;
+    if (_mvObsStop && _mvObsAn === String(an)) return true;
+    if (_mvObsStop) { _mvObsStop(); _mvObsStop = null; }
+    _mvObsAn = String(an);
+    _mvObsStop = onSnapshot(fbDocRef('observations_' + _mvObsAn), function (s) { cb(s.exists() ? (s.data().value || {}) : {}); },
+      function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsEcouter'); });
+    return true;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsEcouter#2'); return false; }
+};
+window.fbObsEcrire = function (an, entrees) {
+  try {
+    if (!_mvObsPermis() || !entrees || typeof entrees !== 'object') return Promise.resolve(false);
+    return setDoc(fbDocRef('observations_' + String(an)), { value: entrees }, { merge: true }).then(function () { return true; },
+      function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsEcrire'); return false; });
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsEcrire#2'); return Promise.resolve(false); }
+};
+window.fbObsPhoto = function (id, blob) {
+  return new Promise(function (ok) {
+    try {
+      if (!_mvObsPermis() || !blob || !/^[A-Za-z0-9_-]{4,40}$/.test(String(id))) { ok(null); return; }
+      var r = _storageRef(_storage, 'tenants/' + TENANT_ID + '/photos/' + id + '.jpg');
+      var t = uploadBytesResumable(r, blob, { contentType: 'image/jpeg' });   // la porte des tutos (jamais l'appel brut)
+      t.on('state_changed', null, function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsPhoto'); ok(null); },
+        function () { getDownloadURL(t.snapshot.ref).then(ok, function () { ok(null); }); });
+    } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbObsPhoto#2'); ok(null); }
+  });
+};
+
 window.fbAppendError = async function(entry) {
   try {
     var ref = fbDocRef('error_log');

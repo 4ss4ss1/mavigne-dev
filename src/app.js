@@ -7634,7 +7634,8 @@ function _pFicheHtml(p){
   var act=(pTacheFilter!=='toutes')?_pvActions(p):'';
   var h='<div class="pfx-hd"><div class="pfx-id"><h2 class="pfx-t">'+_escHtml(p.nom)+'</h2><div class="pfx-tags">'+tags+'</div></div>'
     +'<div class="pfx-act">'+act+'<button type="button" class="pfx-btn" onclick="openDP(\''+_escAttr(p.nom)+'\')">Fiche compl\u00e8te</button></div></div>';
-  var _phH=(typeof _phenoFicheHtml==='function')?_phenoFicheHtml(p):''; if(_phH) h+='<div class="mvencadre dp-pheno pfx-pheno">'+_phH+'</div>';   // ★ PHENO-1C (§508) : le stade dans la fiche à droite, sur ordinateur
+  var _phH=(typeof _phenoFicheHtml==='function')?_phenoFicheHtml(p):''; if(_phH) h+='<div class="mvencadre dp-pheno pfx-pheno">'+_phH+'</div>';
+  var _obH=(typeof _obsFicheHtml==='function')?_obsFicheHtml(p):''; if(_obH){ if(typeof _obsDemarrer==='function') _obsDemarrer(); h+='<div class="mvencadre pfx-pheno">'+_obH+'</div>'; }   // ★ OBS-1A (§565)   // ★ PHENO-1C (§508) : le stade dans la fiche à droite, sur ordinateur
   // FORME-1 (§301) : la forme de la parcelle, tirée de son contour (utils.js) ; rien quand elle n'en a pas.
   var _fo=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,170,'pfxf'):'';
   if(_fo)h+='<div class="mv-forme pfx-forme">'+_fo+'</div>';
@@ -8718,6 +8719,7 @@ function _dpPeindre(nom,repeinte){
     }
     if(dpCepBtn){dpCepBtn.style.display=isAdmin()?'':'none';dpCepBtn.onclick=function(){openDPCepage(nom);};}
 _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, et « Noter le stade » pour l'administrateur
+_obsDemarrer(); _obsFiche(p);   // ★ OBS-1A (§565) : les signalements de la parcelle, « Signaler », « Clore » (admin)
   }
   try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
   try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
@@ -11180,6 +11182,123 @@ function _phenoAllerReleve(){ if(typeof goTo==='function') goTo('parcelles'); _p
 window._phenoNoter=_phenoNoter; window._phenoChoisir=_phenoChoisir; window._phenoEnregistrer=_phenoEnregistrer;
 window._phenoModeVue=_phenoModeVue; window._phenoFiltreBascule=_phenoFiltreBascule; window._phenoOuvrir=_phenoOuvrir; window._phenoNoterDirect=_phenoNoterDirect; window._phenoNoterCuvee=_phenoNoterCuvee; window._phenoAllerReleve=_phenoAllerReleve;
 window._phenoDate=_phenoDate; window._phenoCorriger=_phenoCorriger; window._phenoCuvCoche=_phenoCuvCoche; window._phenoReponse=_phenoReponse; window._phenoMenuDate=_phenoMenuDate;   // ★ PHENO-1D
+// ★★ OBS-1A (§565) — SIGNALER (maquette-niveau-au-dessus-v1, partie 2 ; plan : OBS-1). Décisions de Nico (11/11) : OBS-1 en deux —
+//   1A le geste (ce lot), 1B la carte, « À savoir » et la carte du jour de l'ouvrier ; « pieds manquants » relié à l'entreplantation plus
+//   tard. Un signalement : un type, une intensité, une photo compressée (~200 ko), le point GPS, une note. L'ouvrier signale (tout membre
+//   qui écrit), l'administrateur clôt. Rangé par année (observations_<année>, firebase.js) ; hors réseau, il part dans la file de
+//   Firestore et la photo attend sur l'appareil (« à reprendre »), renvoyée au retour du réseau.
+var _OBS_TYPES=[['oidium','O\u00efdium','maladie'],['mildiou','Mildiou','maladie'],['botrytis','Botrytis','maladie'],['ravageur','Ravageur','maladie'],['carence','Carence','maladie'],['gel','Gel, gr\u00eale','gel'],['manquants','Pieds manquants','manquants'],['palissage','Palissage','palissage']];
+var _OBS_INT=[['faible','Faible'],['moyen','Moyen'],['fort','Fort']];
+window.OBS=window.OBS||{};
+var _obsF=null, _obsEcoute=null;
+function _obsAn(){ return String(new Date().getFullYear()); }
+function _obsType(k){ return _OBS_TYPES.find(function(t){ return t[0]===k; })||null; }
+function _obsDemarrer(){ var an=_obsAn(); if(_obsEcoute===an) return; if(typeof window.fbObsEcouter==='function'&&window.fbObsEcouter(an,function(v){ window.OBS=v||{}; _obsRafraichir(); })) _obsEcoute=an; }
+function _obsListe(nom){
+  var O=window.OBS||{};
+  return Object.keys(O).map(function(k){ var e=O[k]; return (e&&typeof e==='object')?Object.assign({ id:k },e):null; })
+    .filter(function(e){ return e&&_obsType(e.type)&&e.statut!=='annule'&&(!nom||e.nom===nom); })
+    .sort(function(a,b){ return String(b.t||'').localeCompare(String(a.t||'')); });
+}
+function _obsPeutSignaler(){ return typeof canWrite==='function'?!!canWrite():false; }
+function _obsSignaler(nom){
+  if(!_obsPeutSignaler()) return;
+  var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
+  _obsDemarrer();
+  _obsF={ p:p, type:null, int:'moyen', note:'', photo:null, pos:null };
+  var t=document.getElementById('obs-titre'), s=document.getElementById('obs-sub'); if(!t||!s) return;
+  t.textContent='Signaler \u00b7 '+p.nom; s.textContent='position en cours\u2026';
+  _obsCorps(); openOv('ovObs');
+  var sans=function(){ var x=document.getElementById('obs-sub'); if(x) x.textContent='position non prise \u2014 le signalement garde la parcelle'; };
+  if(navigator.geolocation) navigator.geolocation.getCurrentPosition(function(g){
+      if(!_obsF) return; _obsF.pos={ lat:Math.round(g.coords.latitude*1e5)/1e5, lng:Math.round(g.coords.longitude*1e5)/1e5, prec:Math.round(g.coords.accuracy||0) };
+      var x=document.getElementById('obs-sub'); if(x) x.textContent='position prise \u00b7 '+_obsF.pos.lat+', '+_obsF.pos.lng+(_obsF.pos.prec?' (\u00b1 '+_obsF.pos.prec+' m)':'');
+    }, sans, { enableHighAccuracy:true, timeout:8000, maximumAge:60000 });
+  else sans();
+}
+function _obsCorps(){
+  var F=_obsF, c=document.getElementById('obs-corps'); if(!F||!c) return;
+  var choix=function(L,cle,fn,lib){ return '<div class="phn-st" role="radiogroup" aria-label="'+lib+'">'+L.map(function(t){ return '<button type="button" class="phn-b'+(F[cle]===t[0]?' on':'')+'" role="radio" aria-checked="'+(F[cle]===t[0])+'" data-k="'+t[0]+'" onclick="'+fn+'(this.dataset.k)"><span>'+_escHtml(t[1])+'</span></button>'; }).join('')+'</div>'; };
+  c.innerHTML=choix(_OBS_TYPES,'type','_obsChoisir','Type')
+    +'<div class="phr-k">Intensit\u00e9</div>'+choix(_OBS_INT,'int','_obsIntensite','Intensit\u00e9')
+    +'<label class="phn-date"><span>'+_escHtml(F.photo?('1 photo \u00b7 '+F.photo.ko+'\u00a0ko'):'Photo')+'</span><input type="file" accept="image/\u002a" capture="environment" onchange="_obsPhoto(this)"></label>'
+    +'<label class="phn-date"><span>Note</span><input type="text" id="obs-note" maxlength="200" placeholder="facultatif" value="'+_escAttr(F.note)+'"></label>'
+    +'<button type="button" class="mbtn verte" id="obs-ok" onclick="_obsEnregistrer()"'+(F.type?'':' disabled')+'>Enregistrer le signalement</button>'
+    +'<div class="phr-m">Hors r\u00e9seau\u00a0: le signalement part tout de suite, la photo se reprend au retour du r\u00e9seau.</div>';
+}
+function _obsNoteLue(){ var n=document.getElementById('obs-note'); if(n&&_obsF) _obsF.note=String(n.value||''); }
+function _obsChoisir(k){ if(!_obsF||!_obsType(k)) return; _obsNoteLue(); _obsF.type=k; _obsCorps(); }
+function _obsIntensite(k){ if(!_obsF) return; _obsNoteLue(); _obsF.int=(k==='faible'||k==='fort')?k:'moyen'; _obsCorps(); }
+function _obsPhoto(inp){
+  var f=inp&&inp.files&&inp.files[0]; if(!f||!_obsF) return; _obsNoteLue();
+  _obsCompresser(f,function(b){ if(!_obsF) return; if(!b){ if(window.showToast) showToast('Photo illisible ou trop lourde','#B23B1E'); return; } _obsF.photo={ blob:b, ko:Math.round(b.size/1024) }; _obsCorps(); });
+}
+// La photo réduite à 1 600 px de côté, en JPEG, la qualité baissée jusqu'à ~250 ko ; au-delà d'1 Mo (la règle Storage), refusée.
+function _obsCompresser(f,cb){
+  try{
+    var url=URL.createObjectURL(f), img=new Image();
+    img.onload=function(){
+      var r=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)), cv=document.createElement('canvas');
+      cv.width=Math.max(1,Math.round(img.naturalWidth*r)); cv.height=Math.max(1,Math.round(img.naturalHeight*r));
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); URL.revokeObjectURL(url);
+      var qs=[0.75,0.6,0.45,0.35], i=0;
+      (function essai(){ cv.toBlob(function(b){ if(!b){ cb(null); return; } if(b.size<=250*1024||i>=qs.length-1){ cb(b.size<=1024*1024?b:null); return; } i++; essai(); },'image/jpeg',qs[i]); })();
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); cb(null); };
+    img.src=url;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsCompresser'); cb(null); }
+}
+function _obsId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function _obsEnregistrer(){
+  var F=_obsF; if(!F||!F.type||!_obsPeutSignaler()) return; _obsNoteLue();
+  var id=_obsId(), an=_obsAn();
+  var e={ pid:F.p.pid||'', nom:F.p.nom, type:F.type, int:F.int, note:String(F.note||'').trim().slice(0,200), d:todayStr(), t:new Date().toISOString(), par:(window.currentUser&&window.currentUser.nom)||'', statut:'ouvert', photo:F.photo?'a-reprendre':null };
+  if(F.pos){ e.lat=F.pos.lat; e.lng=F.pos.lng; e.prec=F.pos.prec; }
+  window.OBS=window.OBS||{}; window.OBS[id]=e;
+  var x={}; x[id]=e; if(typeof window.fbObsEcrire==='function') window.fbObsEcrire(an,x);
+  if(F.photo) _obsPhotoEnvoyer(an,id,F.photo.blob);
+  _obsF=null; closeOv(null,'ovObs');
+  if(window.showToast) showToast('Signalement enregistr\u00e9 \u00b7 '+_obsType(e.type)[1]+', '+e.int,'#3D6B27');
+  _obsRafraichir();
+}
+function _obsPhotoEnvoyer(an,id,blob){
+  if(typeof window.fbObsPhoto!=='function') return;
+  window.fbObsPhoto(id,blob).then(function(url){
+    if(url){ var x={}; x[id]={ photo:url }; if(window.OBS&&window.OBS[id]) window.OBS[id].photo=url; if(typeof window.fbObsEcrire==='function') window.fbObsEcrire(an,x); _obsAttente(id,null); _obsRafraichir(); }
+    else _obsGarder(an,id,blob);
+  });
+}
+function _obsGarder(an,id,blob){ try{ var fr=new FileReader(); fr.onload=function(){ _obsAttente(id,{ an:an, d:String(fr.result||'') }); }; fr.readAsDataURL(blob); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsGarder'); } }
+function _obsAttente(id,v){ try{ var A=JSON.parse(localStorage.getItem('mvObsPhotos')||'{}'); if(v) A[id]=v; else delete A[id]; localStorage.setItem('mvObsPhotos',JSON.stringify(A)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsAttente'); } }
+function _obsBlob(du){ var p=String(du||'').split(','), b=atob(p[1]||''), u=new Uint8Array(b.length); for(var i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new Blob([u],{ type:'image/jpeg' }); }
+function _obsReprendre(){
+  var A; try{ A=JSON.parse(localStorage.getItem('mvObsPhotos')||'{}'); }catch(e){ A={}; }
+  Object.keys(A).forEach(function(id){ var v=A[id]; if(v&&v.d&&v.an) _obsPhotoEnvoyer(v.an,id,_obsBlob(v.d)); });
+}
+window.addEventListener('online',function(){ _obsReprendre(); });
+function _obsClore(id){
+  if(!(typeof isAdmin==='function'&&isAdmin())) return;
+  var e=window.OBS&&window.OBS[id]; if(!e||e.statut==='clos') return;
+  var x={}; x[id]={ statut:'clos', closPar:(window.currentUser&&window.currentUser.nom)||'', closLe:todayStr() };
+  Object.assign(e,x[id]); if(typeof window.fbObsEcrire==='function') window.fbObsEcrire(_obsAn(),x);
+  _obsRafraichir();
+}
+function _obsFicheHtml(p){
+  if(!p) return '';
+  var L=_obsListe(p.nom), peut=_obsPeutSignaler(), adm=(typeof isAdmin==='function'&&isAdmin()), ouv=L.filter(function(e){ return e.statut==='ouvert'; }).length;
+  if(!L.length&&!peut) return '';
+  var h='<div class="dp-pheno"><div class="dp-pheno-l"><div class="dp-pheno-k">Signalements</div><div class="dp-pheno-v">'+_escHtml(L.length?(ouv+' ouvert'+(ouv>1?'s':'')+' \u00b7 '+L.length+' cette ann\u00e9e'):'aucun cette ann\u00e9e')+'</div></div>'
+    +(peut?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-nom="'+_escAttr(p.nom)+'" onclick="_obsSignaler(this.dataset.nom)">Signaler</button>':'')+'</div>';
+  return h+L.slice(0,6).map(function(e){
+    var t=_obsType(e.type), ph=(e.photo&&(String(e.photo).indexOf('https:')===0))?' \u00b7 photo':(e.photo==='a-reprendre'?' \u00b7 photo \u00e0 reprendre':'');
+    return '<div class="phr-ps"><span>'+_escHtml(t[1]+' \u00b7 '+e.int+' \u2014 '+(e.par||'?')+', '+_phenoJour(e.d)+ph+(e.note?' \u00b7 '+e.note:''))
+      +((e.photo&&(String(e.photo).indexOf('https:')===0))?' <a href="'+_escAttr(e.photo)+'" target="_blank" rel="noopener">voir</a>':'')+'</span>'
+      +((e.statut==='ouvert'&&adm)?'<button type="button" class="phr-ca" data-id="'+_escAttr(e.id)+'" onclick="_obsClore(this.dataset.id)">Clore</button>':'<b>'+(e.statut==='clos'?'clos':'ouvert')+'</b>')+'</div>';
+  }).join('');
+}
+function _obsFiche(p){ var el=document.getElementById('dp-obs'); if(!el||!p) return; var h=_obsFicheHtml(p); el.style.display=h?'':'none'; el.innerHTML=h; }
+function _obsRafraichir(){ if(_phenoP) _obsFiche(_phenoP); if(typeof _pDesk==='function'&&_pDesk()&&typeof renderParcelles==='function'){ var pl=document.getElementById('pwrapliste'); if(pl&&pl.classList.contains('vis')) renderParcelles(); } }
+window._obsSignaler=_obsSignaler; window._obsChoisir=_obsChoisir; window._obsIntensite=_obsIntensite; window._obsPhoto=_obsPhoto; window._obsEnregistrer=_obsEnregistrer; window._obsClore=_obsClore;
 function switchPTab(tab){
   var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');

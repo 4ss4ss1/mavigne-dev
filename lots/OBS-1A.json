@@ -1,0 +1,39 @@
+{
+  "lot": "OBS-1A",
+  "section": "§565",
+  "base": "19f2cff15bcdec66718c3fb3e891fb6b8575806c",
+  "inclut": [],
+  "date": "2026-11-12",
+  "tutos": {
+    "ok": true,
+    "empreinte": "5c5f3acc9dcaa1a4ed6a356e316e6618762ebbbd7702fc6abe8fe9db057f2435",
+    "date": "2026-11-11T22:25:55.034Z",
+    "joues": {
+      "téléphone": 22,
+      "ordinateur": 22,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "87680effca3f89a8749c7b5d31eac9d7be522c36270bd4949812d6668e93d505",
+    "CLAUDE.md": "6aea41748e66196608463203a9daf8b89d6a62129e3dba80a927a8f8080ae36e",
+    "docs/claude/INDEX.md": "917d8f8c7a2aa0e5c5e9aea3501b4b8c623e4d30bbe5897502e9e31b3aa4d79e",
+    "docs/claude/chantiers-530-579.md": "b4d7ccb7544463e5c79ce3818883d73d4f6e3f0a758828a7fecb98743a22b998",
+    "docs/claude/journal.md": "552d8bcee579daec2d40b1ff1e8185674d6a00074b63391a4febf1b18f824e0c",
+    "guide/04-vigne.html": "565ada1a1ee9cca9f23b0a79c9125690450870150cf8a87eeec50c863aed4744",
+    "index.html": "e2a26bb7b9e7b561c5e8fe92ad557c89ecc4cb5f88e067fa8142916ef90f6a68",
+    "public/sw.js": "62d8af241aa794d116f530c8c44d55b97dac452fa145d4ca10328329364cf407",
+    "scripts/harnais-claude-md.mjs": "a8f3d2fa6ca1b1fb4f5d5aba8dc73432ee6457b688c363a6df07693125258ec8",
+    "scripts/mv-harnais-ajour1.mjs": "ec4be1d24c079f907305f9235e0a94ac2752a09c316c6665e8461d2b6939c449",
+    "scripts/mv-harnais-liste.mjs": "5b817ad49a345e071a1fe0107cf82b7bfd610793b098b6f4caf48d4fb9624d4d",
+    "scripts/tutos-couverture.json": "7d445f6d2d3b7e8832176a980598670dfc728f53941c407fd5eaecfb516474cd",
+    "src/app.js": "b3700e65850be82ff7c65dfc07c26312a171d772785838aa1ee2eb9310daec8e",
+    "src/firebase.js": "6598aa72e9e9790da33821832ebe5c8b8ae59c71918c61459ce6fe25d0de6a00",
+    "src/utils.js": "0e502ef0d461b0cf7a6ed60d54925d8136bcc9e7b1ade042bbee6b62f39c9ba0",
+    "src/whats-new.js": "c5e1645f230bae001500b349ff16b5d405891025b0b984c42e8111396881089c",
+    "storage.rules": "a190851e9e45c847c66c32b1afd8598e69b52bf275064d3a3c25bfe8dbdf3720",
+    "scripts/mv-harnais-obs1a.mjs": "16936fa878c55d89e2797d251503812e003d02616c099fc782c3b3a66298e22c"
+  }
+}

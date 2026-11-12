@@ -61,6 +61,18 @@ service firebase.storage {
     }
 
     // Analyses labo — par tenant : tenants/{slug}/analyses/{fichier}
+    // ★ OBS-1A (§565) — les photos des signalements : un membre du domaine (pas en lecture seule, pas la démo) dépose une image
+    //   d'1 Mo au plus (l'appli la compresse vers 200 ko) ; tout membre la lit ; jamais de remplacement ; l'administrateur supprime.
+    match /tenants/{tenant}/photos/{filename} {
+      allow read:   if !isDemoAccount() && (isTenantMember(tenant) || isGtAdmin());
+      allow create: if !isDemoAccount()
+                    && request.auth.token.ro != true
+                    && isTenantMember(tenant)
+                    && request.resource.size <= 1 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());
+    }
     match /tenants/{tenant}/analyses/{filename} {
       // Lecture : membre du tenant (ou GT admin), jamais le compte démo.
       allow read:   if !isDemoAccount() && (isTenantMember(tenant) || isGtAdmin());

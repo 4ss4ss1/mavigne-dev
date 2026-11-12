@@ -822,3 +822,25 @@ Le plan : PHENO-2, « protection restante raccourcie pendant la pousse (coeffici
 
 ### 564d. Ce qui reste ouvert
 - **PHENO-2 est terminé** (2A, 2B). La suite du plan : **OBS-1** (« Signaler » depuis la parcelle), puis FENETRE-2 (dont le créneau du soir dans la frise), RECOLTE-1, IFT-1, REG27-1.
+
+## 565. ★★★ OBS-1A — SIGNALER : LE TYPE, L’INTENSITÉ, LA PHOTO, LE POINT GPS ; L’OUVRIER SIGNALE, L’ADMIN CLÔT (11/11 — `src/app.js` (`_OBS_TYPES`, `_obsSignaler`, `_obsCorps`, `_obsCompresser`, `_obsEnregistrer`, `_obsPhotoEnvoyer`, `_obsGarder`, `_obsReprendre`, `_obsClore`, `_obsFicheHtml` et leurs aides ; `openDP`, `_pFicheHtml`) · `src/firebase.js` (`fbObsEcouter`, `fbObsEcrire`, `fbObsPhoto`) · `storage.rules` · `index.html` (`#dp-obs`, `#ovObs`) · `guide/04-vigne.html` · `src/utils.js` (APP 10.96) · `src/whats-new.js` · `public/sw.js` (SW 11.87) · `scripts/mv-harnais-obs1a.mjs` (neuf) · `scripts/mv-harnais-ajour1.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/OBS-1A.json` · base `19f2cff`)
+
+### 565a. D’où ça vient
+La partie 2 de `maquette-niveau-au-dessus-v1` (« Signaler — l’observation de terrain, avec photo ») et le plan (OBS-1, « gros ») : « un type, une intensité, une photo, le point GPS — trois taps et l’appareil photo. L’ouvrier peut signaler ; l’admin voit, trie, clôt. » ★ **Nico (11/11)** : en deux — **1A le geste** (ce lot), **1B la lecture** (la couche sur la carte, « À savoir », le bouton sur la carte du jour de l’ouvrier, la carte « Signalements de la semaine » du cockpit) ; « pieds manquants » qui met à jour l’entreplantation : **plus tard**, avec le comptage.
+
+### 565b. Ce qui change
+- **Le document** : `observations_<année>` (`mavigne_{slug}`), une carte `{ <id>: { pid, nom, type, int, note, d, t, par, statut, photo, lat?, lng?, prec? } }` écrite **par fusion** (`setDoc … { merge: true }`, `fbObsEcrire`) — deux téléphones qui signalent en même temps ne s’écrasent pas, « Clore » ne touche qu’une entrée ; une écoute dédiée à l’année (`fbObsEcouter`), hors COLLECTIONS, comme les jalons ; jamais en démo ni en préparation. **`firestore.rules` ne change pas** : la règle 3 (tout membre non lecture seule) couvre ce document ; le plan évoquait `countOk` — sans objet pour une carte écrite par fusion.
+- **Les photos** : `tenants/{tenant}/photos/<id>.jpg` (`fbObsPhoto`, par la porte des tutos) ; **`storage.rules`** : une image d’1 Mo au plus, déposée par un membre qui écrit (pas la démo), lue par tout membre, **jamais remplacée**, supprimée par l’administrateur. L’appli réduit la photo à 1 600 px, en JPEG, la qualité baissée jusqu’à ~250 ko (`_obsCompresser`) ; au-delà d’1 Mo, refusée.
+- **« Signaler »** (fiche de la parcelle — téléphone et fiche à droite sur ordinateur — pour tout membre qui écrit) : huit types, trois intensités, la photo de l’appareil (`capture="environment"`), une note (200 caractères), le point GPS pris d’office (sinon, le signalement garde la parcelle). **Hors réseau**, l’entrée part dans la file de Firestore ; la photo, gardée sur l’appareil (`mvObsPhotos`, « à reprendre »), repart au retour du réseau (`online`).
+- **L’historique** dans la fiche : les signalements de l’année (les plus récents d’abord), la photo à voir, « Clore » pour l’administrateur.
+- Six gestes neufs exemptés de tuto, motivés (la photo et le GPS ne se jouent pas dans le domaine d’entraînement ; le tuto viendra avec 1B).
+- ★ **Deux pièges du nettoyeur de commentaires du preflight** (`stripComments`, à base d’expressions régulières) : « image/* » dans une chaîne y ouvre un commentaire `/* … */` qui avale la suite du fichier (C23 croyait mes fonctions absentes) — écrit `image/\u002a` ; une expression régulière contenant `//` y coupe la ligne — remplacée par un test simple. Leçon : **ni `/*` ni `//` dans le code d’une chaîne ou d’une expression régulière.**
+
+### 565c. Mesuré
+- `mv-harnais-obs1a` : 11 assertions — l’enregistrement (une entrée écrite seule, à l’année, le point GPS), la note bornée, la photo « à reprendre » puis gardée sans réseau, la photo partie notée sur la même entrée, rien en lecture seule, la liste (récents d’abord, sans annulés), « Clore » réservé à l’administrateur et une seule fois, la fiche (« Signaler », « Clore »), firebase.js (fusion, chemin, JPEG, démo), `storage.rules`, l’écran ; **8/8 mutants**.
+- Les 22 tutos rejoués (la couche de données a changé) : verts au téléphone, sur ordinateur, côte à côte. `test:ux` : vert (18).
+- Chaîne (736 commandes) : un rouge à moi — **AJOUR-1** veut une case pour chaque fenêtre : `ovObs` y entre comme formulaire (« signalement »). Plus `build-guide --check`, attendu.
+
+### 565d. Ce qui reste ouvert
+- **OBS-1B** : la couche sur la carte, la ligne dans « À savoir », le bouton sur la carte du jour de l’ouvrier, « Signalements de la semaine » au cockpit, le tuto « Comment signaler ? ».
+- **Au déploiement (canal général)** : `firebase deploy --only storage` (la règle des photos).

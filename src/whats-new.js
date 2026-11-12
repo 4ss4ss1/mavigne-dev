@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.96', d: '2026-11-11', items: [
+    { niv: 0, pour: ['tous'], emoji: 'alerte', titre: 'Signaler ce qu’on voit dans les rangs',
+      desc: "Depuis la fiche d’une parcelle, «\u00a0Signaler\u00a0»\u00a0: le type (oïdium, mildiou, gel, pieds manquants…), l’intensité, une photo et une note\u00a0; le point GPS se prend tout seul. Toute l’équipe peut signaler, l’administrateur clôt. Sans réseau, le signalement part quand même, et la photo repart au retour du réseau." },
+  ] },
   { v: '10.95', d: '2026-11-11', items: [
     { niv: 0, pour: ['admin'], emoji: 'pulve', titre: 'La protection et Traiter ? lisent les stades',
       desc: "Pendant la pousse (stades 16 à 79), un produit de contact couvre moins longtemps\u00a0: 7 jours au lieu de 10 par défaut, un coefficient réglable dans Réglages. Et les parcelles en fleur n’ont que le créneau du soir, comme le veut l’arrêté abeilles\u00a0: de 2 h avant à 3 h après le coucher du soleil, calculé pour le domaine." },

@@ -79,7 +79,7 @@ const CLASSES = {
   ovSaison: ['FORMULAIRE', 'saison'], ovEditSaison: ['FORMULAIRE', 'saison'], ovTache: ['FORMULAIRE', 'tâche'], ovTacheCfg: ['FORMULAIRE', 'tâche'], ovMembre: ['FORMULAIRE', 'membre'],
   ovEmEvt: ['FORMULAIRE', 'événement d’un salarié'], ovEntretien: ['FORMULAIRE', 'entretien'], ovConfirmEntretien: ['FORMULAIRE', 'entretien'], ovPlein: ['FORMULAIRE', 'plein'],
   ovReleve: ['FORMULAIRE', 'relevé du compteur'], ovEditFiche: ['FORMULAIRE', 'fiche d’entretien'], ovTracAdd: ['FORMULAIRE', 'ajout'], ovReporter: ['FORMULAIRE', 'reporter'],
-  ovAddTracteur: ['FORMULAIRE', 'tracteur'], ovEditTracteur: ['FORMULAIRE', 'tracteur'], ovPheno: ['FORMULAIRE', 'stade'], ovPhenoDate: ['FORMULAIRE', 'date du stade'],
+  ovAddTracteur: ['FORMULAIRE', 'tracteur'], ovEditTracteur: ['FORMULAIRE', 'tracteur'], ovPheno: ['FORMULAIRE', 'stade'], ovObs: ['FORMULAIRE', 'signalement'],   /* OBS-1A (§565) */ ovPhenoDate: ['FORMULAIRE', 'date du stade'],
   ovChampValidation: ['FORMULAIRE', 'valider la parcelle'], ovMode: ['FORMULAIRE', 'mode du jour'], ovConfirmDel: ['FORMULAIRE', 'confirmation'], ovPrompt: ['FORMULAIRE', 'question'],
   ovRetraitFut: ['FORMULAIRE', 'retrait de fût'], ovPTeam: ['FORMULAIRE', 'équipe'], 'mv-email-ov': ['FORMULAIRE', 'e-mail'],
   ovCloture: ['FORMULAIRE', 'clôture de campagne'], ovFerti: ['FORMULAIRE', 'amendement'], ovRsvAchat: ['FORMULAIRE', 'achat'], ovRsvFut: ['FORMULAIRE', 'fût de la réserve'],

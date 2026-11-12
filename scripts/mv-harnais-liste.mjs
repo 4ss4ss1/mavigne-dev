@@ -868,6 +868,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-pheno2a.mjs --contre'],
   ['node scripts/mv-harnais-pheno2b.mjs'],             // PHENO-2B (§564) : la pousse raccourcit un contact ; le créneau du soir des parcelles en fleur (coucher NOAA)
   ['node scripts/mv-harnais-pheno2b.mjs --contre'],
+  ['node scripts/mv-harnais-obs1a.mjs'],               // OBS-1A (§565) : signaler (type, intensité, photo, GPS), la photo à reprendre, clore (admin), la règle Storage
+  ['node scripts/mv-harnais-obs1a.mjs --contre'],
   ['node scripts/mv-harnais-pheno1d.mjs'],             // PHENO-1D (§509) : la date en un appui, aucun retour en arrière, la question avant un grand saut, la commune, le smoke hermétique
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair
