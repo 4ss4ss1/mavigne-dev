@@ -93,6 +93,8 @@ function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, ni
 function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Object.keys(C).forEach(function (k) { n += Object.keys(C[k] || {}).length; }); return n; }
 // ★ PHENO-1C (§508), PHENO-1D (§509) : l'instant de la note la plus récente de l'année (PHENO), pour voir qu'une note vient d'être posée —
 //   le compte ne suffit plus : le même jour, une nouvelle note REMPLACE l'ancienne et le compte ne bouge pas.
+// ★ OBS-1B (§566) : le nombre de signalements connus de l'appareil (OBS), pour voir qu'un signalement vient d'être posé.
+function _obsN() { var O = window.OBS || {}; return Object.keys(O).length; }
 function _phenoT() { var P = window.PHENO || {}, L = P[String(new Date().getFullYear())], t = ''; (Array.isArray(L) ? L : []).forEach(function (e) { if (e && String(e.t || '') > t) t = String(e.t || ''); }); return t; }
 // ★ PHENO-1C (§508) : la semaine en cours a-t-elle un jour ouvré (lundi à vendredi) dans le mois en cours ?
 function _semaineOuvree(auj) {
@@ -811,6 +813,34 @@ var TU_TUTOS = [
       { type: 'regarder', cible: '[data-tuto="dp.stade.v"]',
         txt: function () { return 'La fiche dit maintenant le stade noté. En saison, l’onglet Stades de Parcelles fait la même chose en deux appuis.'; } },
     ] },
+  // ★ OBS-1B (§566) : signaler ce qu'on voit dans les rangs, depuis la fiche d'une parcelle (la photo et le GPS se sautent à l'entraînement).
+  { id: 'signaler', titre: 'Comment faire pour signaler ce qu’on voit dans une parcelle\u00a0?', fin: 'signaler une observation',
+    module: 'Vigne', pages: ['parcelles'], pour: 'tous', duree: '1 min', depart: 'parcelles',
+    couvre: ['_obsSignaler', '_obsChoisir', '_obsEnregistrer'],
+    retenir: ['Depuis la fiche de la parcelle : « Signaler », le type, l’intensité, une photo si besoin, « Enregistrer ».',
+              'Le point GPS se prend tout seul ; sans réseau, le signalement part quand même.',
+              'L’administrateur voit les signalements dans la fiche, sur la carte et dans « À savoir ».'],
+    avant: function (memo) { memo.n0 = _obsN(); },
+    etapes: [
+      { type: 'toucher', cible: '[data-tuto="parc.ligne"]',
+        txt: function () { return '{T} une parcelle de la liste.'; },
+        fait: function () { var b = _q('[data-tuto="dp.obs"]'); return !!(b && _vis(b)); },
+        ok: 'Sa fiche s’ouvre ; la ligne « Signalements » dit ceux de l’année.' },
+      { type: 'toucher', cible: '[data-tuto="dp.obs"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="dp.obs"]') || 'Signaler') + ' ».'; },
+        fait: function () { return _ouvert('ovObs') && !!_q('[data-tuto="obs.type"]'); },
+        ok: 'Le type, l’intensité, la photo, une note — et le point GPS, pris tout seul.' },
+      { type: 'toucher', cible: '[data-tuto="obs.type"][data-k="oidium"]',
+        txt: function () { return '{T} « Oïdium ».'; },
+        fait: function () { var b = _q('[data-tuto="obs.type"][data-k="oidium"]'); return !!(b && b.classList.contains('on')); },
+        ok: 'Le type est choisi ; l’intensité reste « Moyen » si on n’y touche pas.' },
+      { type: 'toucher', cible: '[data-tuto="obs.ok"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="obs.ok"]') || 'Enregistrer le signalement') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovObs') && _obsN() > (memo.n0 || 0); },
+        ok: 'C’est envoyé : l’administrateur le verra dans la fiche, sur la carte et dans « À savoir ».' },
+      { type: 'regarder', cible: '[data-tuto="dp.obs.v"]',
+        txt: function () { return 'La fiche compte maintenant ce signalement. Sur la carte du jour de l’Accueil, « Signaler » fait la même chose, la parcelle choisie d’abord.'; } },
+    ] }
 ];
 
 // ── 4. L'ALLURE : les jetons de l'appli, rien en dur sauf le voile ───────────────────────────────

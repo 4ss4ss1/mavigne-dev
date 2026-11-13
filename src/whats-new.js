@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.97', d: '2026-11-11', items: [
+    { niv: 0, pour: ['tous'], emoji: 'alerte', titre: 'Les signalements se voient partout',
+      desc: "Les signalements de la semaine apparaissent sur la carte des parcelles, dans «\u00a0À savoir\u00a0» (une maladie sur une parcelle sans protection passe en tête) et dans le Pilotage. «\u00a0Signaler\u00a0» est aussi sur la carte du jour de l’Accueil, et un tuto montre le geste." },
+  ] },
   { v: '10.96', d: '2026-11-11', items: [
     { niv: 0, pour: ['tous'], emoji: 'alerte', titre: 'Signaler ce qu’on voit dans les rangs',
       desc: "Depuis la fiche d’une parcelle, «\u00a0Signaler\u00a0»\u00a0: le type (oïdium, mildiou, gel, pieds manquants…), l’intensité, une photo et une note\u00a0; le point GPS se prend tout seul. Toute l’équipe peut signaler, l’administrateur clôt. Sans réseau, le signalement part quand même, et la photo repart au retour du réseau." },

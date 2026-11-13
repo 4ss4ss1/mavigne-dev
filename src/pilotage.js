@@ -4281,6 +4281,9 @@ function _pilProtType(prod){
   return {mode:'contact', deduit:true};
 }
 // Par parcelle active : le dernier traitement et ce qu'il lui reste de protection.
+// ★ OBS-1B (§566) — les parcelles sans protection en cours (jamais traitées, lessivées, rémanence épuisée), lues par « À savoir » :
+//   une maladie signalée sur l'une d'elles passe en tête.
+window._pilANu=function(){ try{ var P=_pilProtData(); return (P&&P.rows||[]).filter(function(r){ return r.jamais||r.lessive||(r.reste!=null&&r.reste<=0); }).map(function(r){ return r.nom; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilANu'); return null; } };
 function _pilProtData(){
   var cfg=_pilProtCfg(), der={};
   (window.TRAITEMENTS||[]).forEach(function(t){

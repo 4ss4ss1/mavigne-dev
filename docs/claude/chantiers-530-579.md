@@ -844,3 +844,24 @@ La partie 2 de `maquette-niveau-au-dessus-v1` (« Signaler — l’observation d
 ### 565d. Ce qui reste ouvert
 - **OBS-1B** : la couche sur la carte, la ligne dans « À savoir », le bouton sur la carte du jour de l’ouvrier, « Signalements de la semaine » au cockpit, le tuto « Comment signaler ? ».
 - **Au déploiement (canal général)** : `firebase deploy --only storage` (la règle des photos).
+
+## 566. ★★ OBS-1B — LIRE LES SIGNALEMENTS : LA CARTE, « À SAVOIR », LA CARTE DU JOUR, LE COCKPIT, LE TUTO (11/11 — `src/app.js` (`_obsFamille`, `_obsSemaine`, `_obsResumeTypes`, `_obsBulle`, `_obsChoixParcelle`, `_obsBtnJour`, `window._obsResumeCockpit`, `window._obsAllerCarte` ; la carte de Parcelles, `_accSavoirItems`, `_homePrioCarte`, les étiquettes du tuto) · `src/pilotage.js` (`window._pilANu`) · `src/cockpit-vue.js` (`#ck-obs`, `htmlObs`, `obscarte`) · `src/tutos.js` (le tuto `signaler`, `_obsN`) · `guide/04-vigne.html` · `src/utils.js` (APP 10.97) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.88) · `scripts/mv-harnais-obs1b.mjs` (neuf) · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/OBS-1B.json` · base `ee7c153`)
+
+### 566a. D’où ça vient
+La seconde moitié d’OBS-1 (décision de Nico, 11/11) : la couche sur la carte, « À savoir » (la maquette : « une maladie sur une parcelle à nu monte en tête »), le bouton sur la carte du jour de l’ouvrier, « Signalements de la semaine » au cockpit, et le tuto promis par OBS-1A.
+
+### 566b. Ce qui change
+- **La semaine** (`_obsSemaine`) : les signalements ouverts des sept derniers jours (aujourd’hui compris, rien d’après), les plus récents d’abord ; `_obsResumeTypes` : « 2 oïdium, 1 palissage ».
+- **La carte de Parcelles** : une épingle par signalement de la semaine qui a un point GPS, la couleur de sa famille (maladie, gel, pieds manquants, palissage — en jetons, dans l’icône même : `styles.css` est à sa taille maximale), la bulle (le type, l’intensité, la parcelle, qui, quand, la note **échappée**, la photo).
+- **« À savoir »** : une maladie signalée sur une parcelle **sans protection en cours** (jamais traitée, lessivée, rémanence épuisée — `window._pilANu`, exposée par pilotage.js) passe **en tête** (alerte rouge) ; les autres signalements ouverts de la semaine en une ligne.
+- **La carte du jour** (`_homePrioCarte`) : « Signaler » (pour qui écrit) ; sans parcelle donnée, la fenêtre propose d’abord la parcelle (`_obsChoixParcelle`). L’appel est protégé (`typeof _obsBtnJour`) : ACC-2 fait tourner la carte du jour sans les signalements.
+- **Le cockpit** (Terrain) : « Signalements de la semaine » — le nombre, les types, les trois derniers, « Carte » (Parcelles › Carte) ; cachée sans signalement.
+- **Le tuto « Comment faire pour signaler ce qu’on voit dans une parcelle ? »** (tous, 1 min) : la fiche, « Signaler », « Oïdium », « Enregistrer le signalement », la ligne de la fiche — la photo et le GPS se sautent à l’entraînement ; les étiquettes écrites en toutes lettres (le contrôle des tutos les cherche telles quelles). `_obsSignaler`, `_obsChoisir`, `_obsEnregistrer` sortent des dispenses.
+
+### 566c. Mesuré
+- `mv-harnais-obs1b` : 10 assertions — la semaine (sept jours, ouverts, rien d’après), le résumé par type, la bulle (échappée), les familles, le résumé du cockpit, la couche de la carte, « À savoir » et les parcelles à nu, la carte du jour, le cockpit, le tuto ; **6/6 mutants**.
+- Le tuto « signaler » joué au téléphone et sur ordinateur avant la chaîne : va au bout (un signalement posé).
+- Les 23 tutos rejoués (le moteur des tutos a changé) : verts au téléphone, sur ordinateur, côte à côte. `test:ux` : vert (18). Chaîne (738 commandes) : seul `build-guide --check`, attendu.
+
+### 566d. Ce qui reste ouvert
+- **OBS-1 est terminé.** « Pieds manquants » qui met à jour l’entreplantation : avec le comptage (décision de Nico). La suite du plan : **FENETRE-2** (dont le créneau du soir dans la frise), RECOLTE-1, IFT-1, REG27-1.

@@ -5720,7 +5720,7 @@ function _homePrioCarte(){
   }
   var pq=(t&&window._mvPqBtn)?window._mvPqBtn(t,'vigne'):'';
   var gestes='<div class="hpc-act">'+((vide&&adm)?'<button type="button" class="hpc-cta" onclick="openPriorityEdit()">'+ico('eclair',16)+'<span>Fixer la priorit\u00e9</span></button>'+eqBtn()
-      :'<button type="button" class="hpc-cta" onclick="switchVigneOng(\'parcelles\')"><span>Aller aux parcelles</span>'+ico('chevron',16)+'</button>'+pq)+'</div>';
+      :'<button type="button" class="hpc-cta" onclick="switchVigneOng(\'parcelles\')"><span>Aller aux parcelles</span>'+ico('chevron',16)+'</button>'+pq)+(typeof _obsBtnJour==='function'?_obsBtnJour():'')+'</div>';   // ★ OBS-1B (§566) : « Signaler » sur la carte du jour
   // Le bandeau rouge : jusqu'à quand, sur quelles parcelles (les noms, trois au plus), et combien de temps encore.
   var dreB='';
   if(dreL.length){
@@ -5774,6 +5774,14 @@ function _accSavoirItems(now){
     var ds=Object.keys(vu).sort().slice(0,4);
     for(var q=0;q<ds.length;q++){ if(vu[ds[q]].w>=25){ out.push({t:'att', i:'vent', ti:'Vent '+nomJ(ds[q])+(vu[ds[q]].h>=13?' apr\u00e8s-midi':' matin'), d:'jusqu\u2019\u00e0 '+Math.round(vu[ds[q]].w)+'\u00a0km/h en journ\u00e9e', v:Math.round(vu[ds[q]].w)+'\u00a0km/h'}); break; } }
   }
+  // ★ OBS-1B (§566) : les signalements ouverts de la semaine ; une maladie sur une parcelle sans protection en cours passe en tête.
+  try{ if(typeof _obsSemaine==='function'){ _obsDemarrer(); var _os=_obsSemaine(auj); if(_os.length){
+    var _nu=(typeof window._pilANu==='function')?window._pilANu():null;
+    var _mn=_nu?_os.filter(function(e){ return _obsFamille(e.type)==='maladie'&&_nu.indexOf(e.nom)>=0; }):[];
+    if(_mn.length){ var _e0=_mn[0]; out.unshift({t:'dan', i:'alerte', ti:_obsType(_e0.type)[1]+' signal\u00e9 \u2014 '+_e0.nom+' sans protection', d:_mn.length>1?(_mn.length+' parcelles sans protection avec une maladie signal\u00e9e'):('signal\u00e9 '+_phenoJour(_e0.d)+(_e0.par?' par '+_e0.par:'')), v:_e0.int}); }
+    var _au=_os.filter(function(e){ return _mn.indexOf(e)<0; });
+    if(_au.length) out.push({t:'att', i:'alerte', ti:_au.length+' signalement'+(_au.length>1?'s':'')+' ouvert'+(_au.length>1?'s':'')+' cette semaine', d:_obsResumeTypes(_au), v:''});
+  } } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_accSavoirItems#obs'); }
   return out;
 }
 function renderHomeSavoir(){
@@ -11201,8 +11209,40 @@ function _obsListe(nom){
     .sort(function(a,b){ return String(b.t||'').localeCompare(String(a.t||'')); });
 }
 function _obsPeutSignaler(){ return typeof canWrite==='function'?!!canWrite():false; }
+// ★ OBS-1B (§566) — LIRE LES SIGNALEMENTS (plan OBS-1, la lecture ; décision de Nico, 11/11) : la couche de la semaine sur la carte, la
+//   ligne d'« À savoir » (une maladie sur une parcelle sans protection en tête), « Signaler » sur la carte du jour, le cockpit.
+function _obsFamille(k){ var t=_obsType(k); return t?t[2]:'autre'; }
+function _obsSemaine(auj){
+  auj=auj||todayStr(); var d0=new Date(auj+'T12:00:00'); d0.setDate(d0.getDate()-6); var lim=d0.toISOString().slice(0,10);
+  return _obsListe().filter(function(e){ return e.statut==='ouvert'&&String(e.d||'')>=lim&&String(e.d||'')<=auj; });
+}
+function _obsResumeTypes(L){
+  var n={}; L.forEach(function(e){ var t=_obsType(e.type); if(t) n[t[1]]=(n[t[1]]||0)+1; });
+  return Object.keys(n).sort(function(a,b){ return n[b]-n[a]; }).map(function(k){ return n[k]+'\u00a0'+k.toLowerCase(); }).join(', ');
+}
+var _OBS_COUL={ maladie:'var(--danger,#B23B1E)', gel:'var(--info-texte,#1A4A7A)', manquants:'var(--attention-texte,#975600)', palissage:'var(--texte-doux,#686660)' };
+function _obsBulle(e){
+  var t=_obsType(e.type), ph=(e.photo&&String(e.photo).indexOf('https:')===0)?'<br><a href="'+_escAttr(e.photo)+'" target="_blank" rel="noopener">voir la photo</a>':'';
+  return '<b>'+_escHtml((t?t[1]:'')+' \u00b7 '+e.int)+'</b><br>'+_escHtml(e.nom+' \u2014 '+(e.par||'?')+', '+_phenoJour(e.d))+(e.note?'<br>'+_escHtml(e.note):'')+ph;
+}
+function _obsChoixParcelle(){
+  var c=document.getElementById('obs-corps'), t=document.getElementById('obs-titre'), s=document.getElementById('obs-sub'); if(!c||!t||!s) return;
+  var P=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }).slice().sort(function(a,b){ return String(a.nom).localeCompare(String(b.nom)); });
+  t.textContent='Signaler'; s.textContent='Sur quelle parcelle\u00a0?';
+  c.innerHTML='<div class="phn-st">'+P.map(function(p){ return '<button type="button" class="phn-b" data-tuto="obs.parcelle" data-nom="'+_escAttr(p.nom)+'" onclick="_obsSignaler(this.dataset.nom)"><span>'+_escHtml(p.nom)+'</span></button>'; }).join('')+'</div>';
+  openOv('ovObs');
+}
+function _obsBtnJour(){ return _obsPeutSignaler()?'<button type="button" class="hpc-lien" data-tuto="home.obs" onclick="_obsSignaler()"><span>Signaler</span></button>':''; }
+window._obsResumeCockpit=function(){
+  try{ _obsDemarrer(); var L=_obsSemaine(todayStr()); if(!L.length) return null;
+    return { n:L.length, types:_obsResumeTypes(L), derniers:L.slice(0,3).map(function(e){ var t=_obsType(e.type); return { lib:(t?t[1]:'')+' \u00b7 '+e.int, ou:e.nom+', '+_phenoJour(e.d) }; }) };
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsResumeCockpit'); return null; }
+};
+window._obsAllerCarte=function(){ if(typeof goTo==='function') goTo('parcelles'); setTimeout(function(){ switchPTab('carte'); },0); };
+window._obsChoixParcelle=_obsChoixParcelle;
 function _obsSignaler(nom){
   if(!_obsPeutSignaler()) return;
+  if(!nom){ _obsDemarrer(); _obsChoixParcelle(); return; }   // ★ OBS-1B : depuis la carte du jour, la parcelle d'abord
   var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
   _obsDemarrer();
   _obsF={ p:p, type:null, int:'moyen', note:'', photo:null, pos:null };
@@ -11218,12 +11258,12 @@ function _obsSignaler(nom){
 }
 function _obsCorps(){
   var F=_obsF, c=document.getElementById('obs-corps'); if(!F||!c) return;
-  var choix=function(L,cle,fn,lib){ return '<div class="phn-st" role="radiogroup" aria-label="'+lib+'">'+L.map(function(t){ return '<button type="button" class="phn-b'+(F[cle]===t[0]?' on':'')+'" role="radio" aria-checked="'+(F[cle]===t[0])+'" data-k="'+t[0]+'" onclick="'+fn+'(this.dataset.k)"><span>'+_escHtml(t[1])+'</span></button>'; }).join('')+'</div>'; };
-  c.innerHTML=choix(_OBS_TYPES,'type','_obsChoisir','Type')
-    +'<div class="phr-k">Intensit\u00e9</div>'+choix(_OBS_INT,'int','_obsIntensite','Intensit\u00e9')
+  var choix=function(L,cle,fn,lib,eti){ return '<div class="phn-st" role="radiogroup" aria-label="'+lib+'">'+L.map(function(t){ return '<button type="button" class="phn-b'+(F[cle]===t[0]?' on':'')+'" role="radio" aria-checked="'+(F[cle]===t[0])+'"'+eti+' data-k="'+t[0]+'" onclick="'+fn+'(this.dataset.k)"><span>'+_escHtml(t[1])+'</span></button>'; }).join('')+'</div>'; };
+  c.innerHTML=choix(_OBS_TYPES,'type','_obsChoisir','Type',' data-tuto="obs.type"')
+    +'<div class="phr-k">Intensit\u00e9</div>'+choix(_OBS_INT,'int','_obsIntensite','Intensit\u00e9',' data-tuto="obs.int"')
     +'<label class="phn-date"><span>'+_escHtml(F.photo?('1 photo \u00b7 '+F.photo.ko+'\u00a0ko'):'Photo')+'</span><input type="file" accept="image/\u002a" capture="environment" onchange="_obsPhoto(this)"></label>'
     +'<label class="phn-date"><span>Note</span><input type="text" id="obs-note" maxlength="200" placeholder="facultatif" value="'+_escAttr(F.note)+'"></label>'
-    +'<button type="button" class="mbtn verte" id="obs-ok" onclick="_obsEnregistrer()"'+(F.type?'':' disabled')+'>Enregistrer le signalement</button>'
+    +'<button type="button" class="mbtn verte" id="obs-ok" data-tuto="obs.ok" onclick="_obsEnregistrer()"'+(F.type?'':' disabled')+'>Enregistrer le signalement</button>'
     +'<div class="phr-m">Hors r\u00e9seau\u00a0: le signalement part tout de suite, la photo se reprend au retour du r\u00e9seau.</div>';
 }
 function _obsNoteLue(){ var n=document.getElementById('obs-note'); if(n&&_obsF) _obsF.note=String(n.value||''); }
@@ -11287,8 +11327,8 @@ function _obsFicheHtml(p){
   if(!p) return '';
   var L=_obsListe(p.nom), peut=_obsPeutSignaler(), adm=(typeof isAdmin==='function'&&isAdmin()), ouv=L.filter(function(e){ return e.statut==='ouvert'; }).length;
   if(!L.length&&!peut) return '';
-  var h='<div class="dp-pheno"><div class="dp-pheno-l"><div class="dp-pheno-k">Signalements</div><div class="dp-pheno-v">'+_escHtml(L.length?(ouv+' ouvert'+(ouv>1?'s':'')+' \u00b7 '+L.length+' cette ann\u00e9e'):'aucun cette ann\u00e9e')+'</div></div>'
-    +(peut?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-nom="'+_escAttr(p.nom)+'" onclick="_obsSignaler(this.dataset.nom)">Signaler</button>':'')+'</div>';
+  var h='<div class="dp-pheno"><div class="dp-pheno-l"><div class="dp-pheno-k">Signalements</div><div class="dp-pheno-v" data-tuto="dp.obs.v">'+_escHtml(L.length?(ouv+' ouvert'+(ouv>1?'s':'')+' \u00b7 '+L.length+' cette ann\u00e9e'):'aucun cette ann\u00e9e')+'</div></div>'
+    +(peut?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-tuto="dp.obs" data-nom="'+_escAttr(p.nom)+'" onclick="_obsSignaler(this.dataset.nom)">Signaler</button>':'')+'</div>';
   return h+L.slice(0,6).map(function(e){
     var t=_obsType(e.type), ph=(e.photo&&(String(e.photo).indexOf('https:')===0))?' \u00b7 photo':(e.photo==='a-reprendre'?' \u00b7 photo \u00e0 reprendre':'');
     return '<div class="phr-ps"><span>'+_escHtml(t[1]+' \u00b7 '+e.int+' \u2014 '+(e.par||'?')+', '+_phenoJour(e.d)+ph+(e.note?' \u00b7 '+e.note:''))
@@ -11382,6 +11422,12 @@ function initMap(){
       .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_escHtml(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:var(--pt-micro,12px);">'+n+' parcelle'+(n>1?'s':'')+' · commune (repère)</span><br>'+liste);
     _mvFitBnds.push([g.lat,g.lng]);
   });
+  // ★ OBS-1B (§566) — les signalements ouverts de la semaine qui ont un point GPS : une épingle chacun, la couleur de sa famille.
+  if(typeof _obsSemaine==='function'){ _obsDemarrer(); _obsSemaine(todayStr()).forEach(function(e){
+    var la=parseFloat(e.lat), ln=parseFloat(e.lng); if(!_geoPlausible(la,ln)) return;
+    var ic=L.divIcon({className:'',iconSize:[22,22],iconAnchor:[11,11],html:'<div style="width:22px;height:22px;border-radius:50%;background:'+(_OBS_COUL[_obsFamille(e.type)]||_OBS_COUL.palissage)+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>'});
+    L.marker([la,ln],{icon:ic,zIndexOffset:500,title:(_obsType(e.type)||[0,''])[1]}).addTo(leafMap).bindPopup(_obsBulle(e));
+  }); }
   // Recadrage : sur le vignoble si on a des points, sinon centre du domaine
   if(_mvFitBnds.length){
     try{ leafMap.fitBounds(L.latLngBounds(_mvFitBnds),{padding:[40,40],maxZoom:16}); }
