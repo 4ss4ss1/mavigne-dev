@@ -67,7 +67,7 @@ if (!CONTRE) {
     if (ko) { console.log('\x1b[31mROUGE\x1b[0m — la base n’est pas verte (' + ko + ' échec(s)) : contre-épreuves sans valeur'); process.exit(1); } }
   const m = (cle, a, b) => (S) => { if (!S[cle].includes(a)) throw new Error('ancre absente'); return Object.assign({}, S, { [cle]: S[cle].replace(a, b) }); };
   const mutants = [
-    ['le coucher sans l’équation du temps', m('pil', 't=720-4*lng-eq+4*Math.acos(x)/R;', 't=720-4*lng+4*Math.acos(x)/R;')],
+    ['le coucher sans l’équation du temps', m('pil', 't=720-4*lng-eq+(lever?-4:4)*Math.acos(x)/R;', 't=720-4*lng+(lever?-4:4)*Math.acos(x)/R;')],   // FENETRE-2 (§567) : le lever passe par la même ligne
     ['le coucher sans la réfraction (90° au lieu de 90,833°)', m('pil', 'var x=Math.cos(90.833*R)/', 'var x=Math.cos(90*R)/')],
     ['le créneau du soir décalé (3 h avant, 2 h après)', m('pil', 'debut:c==null?null:_pilHm(c-120), fin:c==null?null:_pilHm(c+180)', 'debut:c==null?null:_pilHm(c-180), fin:c==null?null:_pilHm(c+120)')],
     ['la nouaison comptée en fleur', m('pil', 'var b=window._phenoStadeAu(p,aujIso); return b!=null&&b>=61&&b<=69;', 'var b=window._phenoStadeAu(p,aujIso); return b!=null&&b>=61&&b<=71;')],

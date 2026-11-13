@@ -865,3 +865,24 @@ La seconde moitié d’OBS-1 (décision de Nico, 11/11) : la couche sur la carte
 
 ### 566d. Ce qui reste ouvert
 - **OBS-1 est terminé.** « Pieds manquants » qui met à jour l’entreplantation : avec le comptage (décision de Nico). La suite du plan : **FENETRE-2** (dont le créneau du soir dans la frise), RECOLTE-1, IFT-1, REG27-1.
+
+## 567. ★★ FENETRE-2 — LE CRÉNEAU DE TRAITEMENT : HYGROMÉTRIE, JOUR, SOIR DES PARCELLES EN FLEUR, PLUIE D’APRÈS, FRISE DES CINQ JOURS (13/11 — `src/pilotage.js` (`PIL_TREAT_HR_MIN`, `PIL_TREAT_APRES_H`, `_pilTreatDays`, `_pilCoucher(…, lever)`, `_pilFrise5`, `_PIL_FR_LEG` ; `_pilTraiterCalc` ; les règles du composant) · `src/app.js` (la requête horaire, `METEO_HOURLY.hum`, la démo) · `guide/11-pilotage.html` · `src/utils.js` (APP 10.98) · `index.html` · `src/whats-new.js` · `public/sw.js` (SW 11.89) · `scripts/mv-harnais-fenetre2.mjs` (neuf) · `scripts/mv-harnais-pheno2b.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/FENETRE-2.json` · base `3b5f550`)
+
+### 567a. D’où ça vient
+Le plan : FENETRE-2, « hygrométrie dans la règle du créneau (un champ à ajouter à la requête horaire) ; pluie prévue après le créneau face au seuil de lessivage ; lecture croisée parcelles à nu × créneau ; frise des cinq jours heure par heure ; créneau du soir si PHENO-2 est là ». La maquette, partie 3 : la légende de la frise (« bon créneau · créneau du soir, parcelles en fleur · pluie · vent ≥ 19 km/h · plus de 25 °C · hygrométrie sous 50 % ou nuit »), « Mardi 6 h – 11 h, 6 parcelles à nu · le soir pour les 3 en fleur », « Pluie 0 mm · 4 mm jeudi, sous les 20 mm ».
+
+### 567b. Ce qui change
+- **La règle** (`_pilTreatDays`) : sec, vent sous 19 km/h, sous 25 °C, **et l’hygrométrie à 50 % au moins** (`relative_humidity_2m`, demandée à Open-Meteo avec les autres champs horaires, gardée dans `METEO_HOURLY.hum` et son cache ; la démo en a), **et le jour** — du lever au coucher du soleil, calculés pour le domaine (`_pilCoucher` sait donner le lever : l’angle horaire retranché). Sans position du domaine, le jour n’est pas vérifié (comme avant). Sans hygrométrie (un vieux cache), elle n’exclut rien. Sans créneau, la raison peut être « hygrométrie sous 50 % ».
+- **Le créneau du soir** : les parcelles en fleur (PHENO-2B) ont, chaque jour, les heures de 2 h avant à 3 h après le coucher, sèches, calmes et fraîches — même la nuit tombée (l’arrêté abeilles).
+- **La pluie d’après** : les 72 h qui suivent le meilleur créneau du jour, le cumul et le jour où il en tombe le plus ; la tuile la lit face au seuil de lessivage réglé (« 4 mm jeu. 13, sous les 20 mm », en orange au-dessus : « le contact sera lessivé »).
+- **La lecture croisée** (`_pilTraiterCalc`) : le prochain créneau, le nombre de parcelles à nu (`window._pilANu`, OBS-1B) et le soir des parcelles en fleur, en une ligne.
+- **La frise des cinq jours** (`_pilFrise5`), en tête du dépliant : une ligne par jour, une case par heure (les heures passées vides), la couleur dit pourquoi, la légende ; le style rejoint les règles de composant de pilotage.js (`styles.css` est à sa taille maximale).
+- ★ GLOBAUX l’a vu : `pilotage.js` n’importe pas `_escHtml` — il échappe avec `_pilEsc` (sinon, ReferenceError en production).
+
+### 567c. Mesuré
+- `mv-harnais-fenetre2`, sur une prévision fabriquée à Gevrey (cinq jours depuis demain) : 9 assertions — le créneau dans le jour (lever et coucher NOAA), la nuit et midi dans la frise, l’hygrométrie à 35 % qui exclut le milieu du 2ᵉ jour, les 12 mm du 3ᵉ jour dans les 72 h, la pluie dans la frise, le soir des parcelles en fleur (suivant le coucher réel du jour testé), la frise (5 × 24 cases, la légende), la lecture croisée, la requête et la démo ; **7/7 mutants** (dont le lever pris pour le coucher).
+- `test:ux` : vert (18) ; aucun des 23 tutos concerné. Chaîne (740 commandes) : un rouge à moi — la contre-épreuve de **PHENO-2B** visait la ligne du coucher, devenue celle du lever et du coucher : l’ancre suit (8/8). Plus `build-guide --check`, attendu.
+
+### 567d. Ce qui reste ouvert
+- La suite du plan : **RECOLTE-1** (la récolte prévue : compter les grappes, prévoir les hectolitres), IFT-1, REG27-1.
+- **À vérifier chez Nico** : la frise avec la vraie prévision (le réseau d’ici n’atteint pas Open-Meteo).

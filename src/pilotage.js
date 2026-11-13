@@ -1913,16 +1913,27 @@ var PIL_TREAT_DAYS = 5;
 var PIL_TREAT_DRY_H=6;     // heures de séchage surveillées APRÈS la fenêtre
 var PIL_TREAT_LEACH_MM=1;  // pluie cumulée (mm) déclenchant l'alerte lessivage
 var PIL_TREAT_PP_ALERT=40; // proba de pluie (%) sur la plage déclenchant l'alerte
+// ★ FENETRE-2 (§567) — la règle du créneau (maquette-niveau-au-dessus-v1, partie 3) : sec, vent sous 19 km/h, sous 25 °C, ET
+//   l'hygrométrie à 50 % au moins, ET le jour (du lever au coucher du soleil, NOAA). Les parcelles en fleur ont le créneau du soir
+//   (2 h avant, 3 h après le coucher : l'arrêté abeilles). La pluie des 72 h qui suivent le créneau se lit face au seuil de lessivage.
+var PIL_TREAT_HR_MIN=50, PIL_TREAT_APRES_H=72;
 function _pilTreatDays(){
   var mh=window.METEO_HOURLY||null;
   if(!mh){ try{ mh=JSON.parse(localStorage.getItem('mavigne_meteohr_cache')||'null'); }catch(e){ mh=null; } }
   if(!mh||!mh.time||!mh.time.length) return undefined;
-  var T=mh.time, TE=mh.temp||[], PR=mh.precip||[], PP=mh.pp||[], WD=mh.wind||[], now=Date.now();
+  var T=mh.time, TE=mh.temp||[], PR=mh.precip||[], PP=mh.pp||[], WD=mh.wind||[], HU=mh.hum||[], now=Date.now();
+  var geo=(typeof getDomaineGeo==='function')?getDomaineGeo():null, soirF=(typeof _pilSoirFleurs==='function')?_pilSoirFleurs(_pilPhotoIso(new Date())):null, _sol={};
+  function soleil(i){ var k=String(T[i]).slice(0,10); if(!(k in _sol)){ _sol[k]=(geo&&geo.lat!=null)?{ l:_pilCoucher(k,geo.lat,geo.lng,true), c:_pilCoucher(k,geo.lat,geo.lng) }:null; } return _sol[k]; }
+  function minute(i){ var d=new Date(T[i]); return d.getHours()*60+d.getMinutes(); }
+  function humid(i){ return !HU.length||HU[i]==null||(Number(HU[i])>=PIL_TREAT_HR_MIN); }
+  function jour(i){ var S=soleil(i); if(!S||S.l==null||S.c==null) return true; var m=minute(i); return m>=S.l&&m+60<=S.c+59; }
+  function soir(i){ var S=soleil(i); if(!soirF||!S||S.c==null) return false; var m=minute(i); return m>=S.c-120&&m<S.c+180; }
   var JJ=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'], today=new Date().toDateString();
   function dry(i){ return (Number(PR[i])||0)<0.1; }
   function calm(i){ return (Number(WD[i])||0)<19; }
   function cool(i){ return (Number(TE[i])||99)<25; }
-  function ok(i){ return dry(i)&&calm(i)&&cool(i); }
+  function ok(i){ return dry(i)&&calm(i)&&cool(i)&&humid(i)&&jour(i); }
+  function classe(i){ return !dry(i)?'pluie':!calm(i)?'vent':!cool(i)?'chaud':soir(i)?'soir':!jour(i)?'nuit':!humid(i)?'sec':'ok'; }
   // Regroupe les heures futures par jour (ordre conservé)
   var order=[], map={};
   for(var i=0;i<T.length;i++){
@@ -1934,6 +1945,7 @@ function _pilTreatDays(){
   return order.slice(0,PIL_TREAT_DAYS).map(function(key){
     var day=map[key], idx=day.idx, dt=day.date;
     var lab=(dt.toDateString()===today)?'Aujourd\'hui':(JJ[dt.getDay()]+' '+dt.getDate());
+    var heures=idx.map(function(gi){ return { h:new Date(T[gi]).getHours(), cl:classe(gi) }; });   // FENETRE-2 : la frise
     // Meilleure (plus longue) plage continue >= 2 h
     var best=null, st=-1;
     for(var k=0;k<idx.length;k++){
@@ -1951,19 +1963,23 @@ function _pilTreatDays(){
       for(var lj=endG+1; lj<T.length && lj<=endG+PIL_TREAT_DRY_H; lj++){ leachMm+=Number(PR[lj])||0; leachH++; }
       leachMm=Math.round(leachMm*10)/10;
       var hasPP=PP.length>0;
-      return { label:lab, start:new Date(T[idx[best.s]]).getHours(), end:new Date(T[idx[best.e]]).getHours()+1,
+      // FENETRE-2 (§567) : la pluie des 72 h qui suivent, et le jour où il en tombe le plus.
+      var apMm=0, parJ={}; for(var aj=endG+1; aj<T.length && aj<=endG+PIL_TREAT_APRES_H; aj++){ var v=Number(PR[aj])||0; apMm+=v; var dk=new Date(T[aj]); var jl=JJ[dk.getDay()]+' '+dk.getDate(); parJ[jl]=(parJ[jl]||0)+v; }
+      var apJour=Object.keys(parJ).sort(function(a,b){ return parJ[b]-parJ[a]; })[0]||'';
+      return { label:lab, heures:heures, apresMm:Math.round(apMm*10)/10, apresJour:(apMm>=0.1?apJour:''), start:new Date(T[idx[best.s]]).getHours(), end:new Date(T[idx[best.e]]).getHours()+1,
                wMax:Math.round(wMax), tMax:Math.round(tMax),
                ppMax:hasPP?Math.round(ppMax):null,
                leach:(PIL_TREAT_DRY_H>0 && leachMm>=PIL_TREAT_LEACH_MM), leachMm:leachMm, leachH:leachH };
     }
     // Aucune fenêtre : motif dominant
-    var rRain=0,rWind=0,rHeat=0;
-    for(var p=0;p<idx.length;p++){ var g2=idx[p]; if(!dry(g2)) rRain++; else if(!calm(g2)) rWind++; else if(!cool(g2)) rHeat++; }
+    var rRain=0,rWind=0,rHeat=0,rHum=0;
+    for(var p=0;p<idx.length;p++){ var g2=idx[p]; if(!dry(g2)) rRain++; else if(!calm(g2)) rWind++; else if(!cool(g2)) rHeat++; else if(jour(g2)&&!humid(g2)) rHum++; }
     var reason='conditions';
-    if(rRain>=rWind && rRain>=rHeat && rRain>0) reason='pluie';
-    else if(rWind>=rHeat && rWind>0) reason='vent ≥ 19 km/h';
-    else if(rHeat>0) reason='≥ 25°';
-    return { label:lab, reason:reason };
+    if(rRain>=rWind && rRain>=rHeat && rRain>=rHum && rRain>0) reason='pluie';
+    else if(rWind>=rHeat && rWind>=rHum && rWind>0) reason='vent ≥ 19 km/h';
+    else if(rHeat>=rHum && rHeat>0) reason='≥ 25°';
+    else if(rHum>0) reason='hygrométrie sous 50 %';
+    return { label:lab, reason:reason, heures:heures };
   });
 }
 function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-micro,12px);font-weight:600;padding:3px 8px;border-radius:7px;line-height:1.2;background:'+bg+';color:'+col+'">'+txt+'</span>'; }
@@ -1978,6 +1994,20 @@ function _pilMm(v){ return (v%1===0?String(v):v.toFixed(1)).replace('.',',')+' m
 //   d'un parc de tracteurs, dont l'echelle est l'annee.
 //   \u26a0\ufe0f Le dessin des cinq jours n'est pas RECOPIE dans la carte survivante : il
 //     est EXTRAIT ici. Recopier, c'est garantir que les deux divergeront.
+// ★ FENETRE-2 (§567) — LA FRISE DES CINQ JOURS, HEURE PAR HEURE : une ligne par jour, une case par heure (les heures passées vides),
+//   la couleur dit pourquoi : bon créneau, créneau du soir (parcelles en fleur), pluie, vent, chaleur, hygrométrie sous 50 % ou nuit.
+var _PIL_FR_LEG=[['ok','bon cr\u00e9neau'],['soir','cr\u00e9neau du soir, parcelles en fleur'],['pluie','pluie'],['vent','vent \u2265 19 km/h'],['chaud','plus de 25 \u00b0C'],['sec','hygrom\u00e9trie sous 50 % ou nuit']];
+function _pilFrise5(days){
+  if(!days||!days.length) return '';
+  var tete='<div class="pil-fr-r pil-fr-ax"><span class="pil-fr-j"></span>'+[0,3,6,9,12,15,18,21].map(function(h){ return '<span style="grid-column:'+(h+2)+' / span 3">'+h+'</span>'; }).join('')+'</div>';
+  var lig=days.map(function(d){
+    var par={}; (d.heures||[]).forEach(function(x){ par[x.h]=x.cl; });
+    var c=''; for(var h=0;h<24;h++){ var cl=par[h]; c+='<i class="pil-fr-c'+(cl?' '+(cl==='nuit'?'sec':cl):'')+'"></i>'; }
+    return '<div class="pil-fr-r"><span class="pil-fr-j">'+_pilEsc(d.label)+'</span>'+c+'</div>';
+  }).join('');
+  var leg='<div class="pil-fr-leg">'+_PIL_FR_LEG.map(function(x){ return '<span><i class="pil-fr-c '+x[0]+'"></i>'+x[1]+'</span>'; }).join('')+'</div>';
+  return '<div class="pil-fr" role="img" aria-label="Les cinq prochains jours, heure par heure">'+tete+lig+leg+'</div>';
+}
 function _pilTreatRows(days){
   return (days||[]).map(function(x){
     if(x.start!=null){
@@ -4230,7 +4260,7 @@ var _PIL_PROT_LESS_DEF=20;   // PLUIE-1 (§220) : mm de pluie cumulee qui lessiv
 var _PIL_PROT_POUSSE_DEF=0.7;
 // ★ PHENO-2B (§564) — le coucher du soleil, formule NOAA (« General Solar Position Calculations ») : minutes depuis minuit, à l'heure de
 //   l'appareil. Le créneau du soir des parcelles en fleur en découle (l'arrêté abeilles : 2 h avant, 3 h après le coucher).
-function _pilCoucher(dateIso,lat,lng){
+function _pilCoucher(dateIso,lat,lng,lever){   // FENETRE-2 (§567) : lever=true donne le lever du soleil (le même calcul, l'angle horaire retranché)
   // L'algorithme du « Solar Calculator » de la NOAA (siècle julien, équation du temps, réfraction : 90,833°), itéré sur l'heure du
   //   coucher — la formule courte, évaluée à midi, tombait deux minutes trop tôt en mai (vérifié : 21 h 22 à Gevrey le 26 mai 2026).
   var p=String(dateIso||'').split('-').map(Number); lat=Number(lat); lng=Number(lng); if(p.length<3||!isFinite(lat)||!isFinite(lng)) return null;
@@ -4244,7 +4274,7 @@ function _pilCoucher(dateIso,lat,lng){
     var dec=Math.asin(Math.sin(eps*R)*Math.sin(lam*R)), yv=Math.pow(Math.tan(eps/2*R),2);
     var eq=4/R*(yv*Math.sin(2*L0*R)-2*e*Math.sin(M*R)+4*e*yv*Math.sin(M*R)*Math.cos(2*L0*R)-0.5*yv*yv*Math.sin(4*L0*R)-1.25*e*e*Math.sin(2*M*R));
     var x=Math.cos(90.833*R)/(Math.cos(lat*R)*Math.cos(dec))-Math.tan(lat*R)*Math.tan(dec); if(x<-1||x>1) return null;
-    t=720-4*lng-eq+4*Math.acos(x)/R;
+    t=720-4*lng-eq+(lever?-4:4)*Math.acos(x)/R;
   }
   var dt=new Date(Date.UTC(p[0],p[1]-1,p[2])+Math.round(t)*60000);
   return dt.getHours()*60+dt.getMinutes();   // à l'heure de l'appareil (l'heure d'été suit)
@@ -4418,7 +4448,7 @@ function _pilTraiterCalc(){
     //   \u26a0\ufe0f Ce n'est PAS \u00ab cacher un chiffre \u00bb : le verdict du jour reste en gros au-dessus.
     if(days && days.length){
       pied='<details class="pil-t5"><summary>les '+days.length+' prochains jours</summary>'
-        +'<div class="pil-t5b">'+_pilTreatRows(days)+'</div></details>';
+        +'<div class="pil-t5b">'+_pilFrise5(days)+_pilTreatRows(days)+'</div></details>';   // FENETRE-2 : la frise d'abord
     }
   }
   // La pastille suit la carte : la fiche `pil.traitement` etait posee sur celle
@@ -4429,6 +4459,10 @@ function _pilTraiterCalc(){
   // ★ PHENO-2B (§564) : les parcelles en fleur n'ont que le créneau du soir (l'arrêté abeilles : 2 h avant, 3 h après le coucher du soleil).
   var soir=_pilSoirFleurs(_pilPhotoIso(new Date()));
   if(soir&&soir.debut) ban+='<div class="pil-t2s">'+soir.n+' en fleur\u00a0: le soir seulement, '+soir.debut+' \u2013 '+soir.fin+'</div>';
+  // ★ FENETRE-2 (§567) — la lecture croisée : le prochain créneau face aux parcelles à nu, et la pluie qui le suivra face au lessivage.
+  var nu=(typeof window._pilANu==='function')?(window._pilANu()||[]):[], cr=(days||[]).filter(function(x){ return x&&x.start!=null; })[0]||null;
+  if(cr&&nu.length) ban+='<div class="pil-t2s"><b>'+_pilEsc(cr.label+' '+cr.start+' h \u2013 '+cr.end+' h')+'</b>, '+nu.length+' parcelle'+(nu.length>1?'s':'')+' \u00e0 nu'+(soir&&soir.n?' \u00b7 le soir pour les '+soir.n+' en fleur':'')+'</div>';
+  if(cr&&cr.apresMm!=null){ var lss=_pilProtCfg().lessivage; ban+='<div class="pil-t2s"'+(cr.apresMm>=lss?' style="color:var(--orange)"':'')+'>apr\u00e8s le cr\u00e9neau\u00a0: '+(cr.apresMm>=0.1?_pilMm(cr.apresMm)+(cr.apresJour?' '+_pilEsc(cr.apresJour):''):'pas de pluie')+(cr.apresMm>=lss?', au-dessus des '+lss+' mm\u00a0: le contact sera lessiv\u00e9':(cr.apresMm>=0.1?', sous les '+lss+' mm':''))+'</div>'; }
   return { big:big, bigCol:bigCol, rai:rai, ban:ban, pied:pied, _i:_i, fen:fen, risque:risque, prochaine:prochaine, soir:soir };
 }
 // ════════════════════════════════════════════════════════════════════════════
@@ -11479,6 +11513,16 @@ function _pilCssV2(){
   +'.pil-t5>summary::after{content:\" \u25b8\";display:inline-block;transition:transform .15s}'
   +'.pil-t5[open]>summary::after{transform:rotate(90deg)}'
   +'.pil-t5b{display:flex;flex-direction:column;gap:6px;margin-top:9px}'
+  // FENETRE-2 (§567) : la frise des cinq jours, heure par heure.
+  +'.pil-fr{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}'
+  +'.pil-fr-r{display:grid;grid-template-columns:64px repeat(24,minmax(0,1fr));gap:2px;align-items:center}'
+  +'.pil-fr-ax span{font-size:var(--pt-lbl,12px);color:var(--texte-doux);font-variant-numeric:tabular-nums}'
+  +'.pil-fr-j{font-size:var(--pt-lbl,12px);color:var(--texte-med);white-space:nowrap}'
+  +'.pil-fr-c{display:block;height:14px;border-radius:2px;background:var(--bg-app)}'
+  +'.pil-fr-c.ok{background:var(--vert-med)}.pil-fr-c.soir{background:var(--tag-purple-tx,#5A2D8E)}.pil-fr-c.pluie{background:var(--info,#2F6FB0)}'
+  +'.pil-fr-c.vent{background:var(--orange)}.pil-fr-c.chaud{background:var(--rouge)}.pil-fr-c.sec{background:var(--gris-clair)}'
+  +'.pil-fr-leg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:var(--pt-lbl,12px);color:var(--texte-doux)}'
+  +'.pil-fr-leg span{display:inline-flex;align-items:center;gap:4px}.pil-fr-leg .pil-fr-c{width:12px;height:12px}'
   // Le graphe du budget annuel : legende sur une ligne, comme celle d'\u00c9conomie.
   +'.pil-anc{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:12px 16px 16px;margin:0 0 16px;box-shadow:var(--shadow-sm,0 1px 2px rgba(40,30,15,0.05),0 2px 8px rgba(40,30,15,0.07))}'
   +'.pil-anc-l1{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}'

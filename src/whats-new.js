@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.98', d: '2026-11-13', items: [
+    { niv: 0, pour: ['admin'], emoji: 'pulve', titre: 'Traiter ? : un créneau plus juste, et les cinq jours heure par heure',
+      desc: "Le créneau demande maintenant aussi une hygrométrie d’au moins 50 % et le plein jour. La tuile dit combien de parcelles sont à nu pour le prochain créneau, et si la pluie des jours suivants dépassera le seuil de lessivage. Le dépliant montre les cinq jours heure par heure, la couleur de chaque heure dit pourquoi." },
+  ] },
   { v: '10.97', d: '2026-11-11', items: [
     { niv: 0, pour: ['tous'], emoji: 'alerte', titre: 'Les signalements se voient partout',
       desc: "Les signalements de la semaine apparaissent sur la carte des parcelles, dans «\u00a0À savoir\u00a0» (une maladie sur une parcelle sans protection passe en tête) et dans le Pilotage. «\u00a0Signaler\u00a0» est aussi sur la carte du jour de l’Accueil, et un tuto montre le geste." },

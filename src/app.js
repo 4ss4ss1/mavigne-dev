@@ -1819,7 +1819,7 @@ function _visiteScenario(){
   var _ap=function(k,v){ try{ if(window.applyFbData) window.applyFbData(k,v); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ap'); } };
 
   // 1) Météo scénarisée 5 jours : 0 auj favorable · 1 demain favorable · 2 pluie · 3 vent · 4 favorable
-  var time=[],temp=[],precip=[],wind=[],dT=[],dC=[],dmin=[],dmax=[],dpp=[];
+  var time=[],temp=[],precip=[],wind=[],hum=[],dT=[],dC=[],dmin=[],dmax=[],dpp=[];
   for(var d=0; d<5; d++){
     var base=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d);
     dT.push(_isoD(base));
@@ -1833,10 +1833,10 @@ function _visiteScenario(){
       if(d===2){ t=13; p=(h>=8&&h<=18)?0.9:0.1; w=11; }
       else if(d===3){ t=16; p=0; w=(h>=9&&h<=19)?27:13; }
       else { t=(h<7||h>20)?12:17; p=0; w=9; }
-      temp.push(t); precip.push(p); wind.push(w);
+      temp.push(t); precip.push(p); wind.push(w); hum.push((h<7||h>20)?88:(t>15?58:72));   // FENETRE-2 (§567) : l'hygrométrie de la démo
     }
   }
-  window.METEO_HOURLY={time:time,temp:temp,precip:precip,wind:wind};
+  window.METEO_HOURLY={time:time,temp:temp,precip:precip,wind:wind,hum:hum};
   window.METEO_DAILY={time:dT,code:dC,tmin:dmin,tmax:dmax,pp:dpp};
   // v5.58 : PAS d'écriture localStorage — window.METEO_* suffit au rendu de la visite,
   // et ces clés survivraient à la visite pour être relues sur le vrai domaine.
@@ -3728,7 +3728,7 @@ async function fetchMeteo(){
   if(window._visiteFakeWx) return; // Visite guidée : météo scénarisée → pas de re-fetch
   try{
     var _geo=getDomaineGeo(); var _ll='latitude='+(_geo.lat).toFixed(4)+'&longitude='+(_geo.lng).toFixed(4);
-    const r=await fetch('https://api.open-meteo.com/v1/forecast?'+_ll+'&current=temperature_2m,weathercode,windspeed_10m,precipitation&daily=temperature_2m_min,temperature_2m_max,weathercode,precipitation_probability_max&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m&timezone=Europe/Paris&forecast_days=5');
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?'+_ll+'&current=temperature_2m,weathercode,windspeed_10m,precipitation&daily=temperature_2m_min,temperature_2m_max,weathercode,precipitation_probability_max&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,relative_humidity_2m&timezone=Europe/Paris&forecast_days=5');   // FENETRE-2 (§567) : l'hygrométrie entre dans la règle du créneau
     const d=await r.json();
     // Conditions du moment en haute résolution (modèle Météo-France AROME ~1,5 km) — repli sur d.current si indispo
     let cur=d.current;
@@ -3752,7 +3752,7 @@ async function fetchMeteo(){
       window.METEO_DAILY={time:d.daily.time,code:d.daily.weathercode||[],tmin:d.daily.temperature_2m_min||[],tmax:d.daily.temperature_2m_max||[],pp:d.daily.precipitation_probability_max||[]};
       try{localStorage.setItem('mavigne_meteo5_cache',JSON.stringify(window.METEO_DAILY));}catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/fetchMeteo#2'); }
       if(typeof renderHomeMeteo5==='function')renderHomeMeteo5();
-      if(d.hourly&&d.hourly.time){ window.METEO_HOURLY={time:d.hourly.time,temp:d.hourly.temperature_2m||[],precip:d.hourly.precipitation||[],pp:d.hourly.precipitation_probability||[],wind:d.hourly.windspeed_10m||[]}; try{localStorage.setItem('mavigne_meteohr_cache',JSON.stringify(window.METEO_HOURLY));}catch(e3){ if(window._mvAvale) window._mvAvale(e3,'app.js/fetchMeteo#3'); } }
+      if(d.hourly&&d.hourly.time){ window.METEO_HOURLY={time:d.hourly.time,temp:d.hourly.temperature_2m||[],precip:d.hourly.precipitation||[],pp:d.hourly.precipitation_probability||[],wind:d.hourly.windspeed_10m||[],hum:d.hourly.relative_humidity_2m||[]}; try{localStorage.setItem('mavigne_meteohr_cache',JSON.stringify(window.METEO_HOURLY));}catch(e3){ if(window._mvAvale) window._mvAvale(e3,'app.js/fetchMeteo#3'); } }
     }
     if(d.daily&&d.daily.temperature_2m_min){
       _gelIdx=d.daily.temperature_2m_min.findIndex(t=>t<3);
