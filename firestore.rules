@@ -115,7 +115,9 @@ service cloud.firestore {
                    'planning_entries', 'planning_templates',
                    'planning_acomptes', 'planning_hsup',
                    'intrants', 'paie',
-                   'pheno'];   // ★ PHENO-1A (§505) : les stades par parcelle — notés par l'administrateur seul (décision de Nico, 31/10), lus par tous
+                   'pheno',    // ★ PHENO-1A (§505)
+                   'recolte'];   // ★ RECOLTE-1A (§568) : les comptages de grappes — l'administrateur seul (décision de Nico, 13/11), lus par tous
+                   // (le commentaire de PHENO-1A suit :) : les stades par parcelle — notés par l'administrateur seul (décision de Nico, 31/10), lus par tous
     }
 
     // ── MOTIFS-1 (§250) — documents LUS par l'administrateur seul ─────────────

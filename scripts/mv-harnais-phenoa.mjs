@@ -56,8 +56,8 @@ function jouer(S) {
   const v = F.ctx.vue('2026', '2026-06-08');
   t('⑤ la vue : les surfaces par groupe (boutons 2,8 ha, floraison 0,5) et sans note (1,3) ; la dernière note', Math.abs(v.parG[2] - 2.8) < 1e-9 && Math.abs(v.parG[3] - 0.5) < 1e-9 && Math.abs(v.sansS - 1.3) < 1e-9 && v.der === '2026-06-06');
   t('⑤ « à noter » en saison : Clos Prieur (11 jours), Les Evocelles et Champerrier (jamais) — pas les arrachées ; rien en novembre', v.aNoter.map((x) => x.p.nom).join() === 'Clos Prieur,Les Evocelles,Champerrier' && F.ctx.vue('2026', '2026-11-08').aNoter.length === 0);
-  t('⑥ le document `pheno` : déclaré, en temps réel, nommé, pesé, connu de saveData ; la règle le réserve à l’administrateur', /'intrants',[\s\S]{0,400}'pheno',\n  \/\/ `paie`/.test(S.fb) && S.fb.includes("'intrants','pheno'];") && S.fb.includes("pheno:'Les stades'") && S.fb.includes('pheno: 2,')
-    && S.app.includes("pheno:              window.PHENO || (window.PHENO={}),") && /'intrants', 'paie',\n\s*'pheno'\];/.test(S.rules));
+  t('⑥ le document `pheno` : déclaré, en temps réel, nommé, pesé, connu de saveData ; la règle le réserve à l’administrateur', /'intrants',[\s\S]{0,400}'pheno',\n[\s\S]{0,500}\/\/ `paie`/.test(S.fb) && S.fb.includes("'intrants','pheno','recolte'];") && S.fb.includes("pheno:'Les stades'") && S.fb.includes('pheno: 2,')
+    && S.app.includes("pheno:              window.PHENO || (window.PHENO={}),") && /'intrants', 'paie',\n\s*'pheno',\s*\/\/ ★ PHENO-1A/.test(S.rules));
   t('⑦ l’écran : l’onglet, la vue, la fiche, la fenêtre, la carte de l’Accueil ; le report par cépage retiré ; la bascule et « Filtres » connaissent les stades', S.html.includes('id="tbs" onclick="switchPTab(\'stades\')"') && S.html.includes('id="pwrapstades"') && S.html.includes('id="dp-pheno"') && S.html.includes('id="ovPheno"') && S.html.includes('id="home-pheno-note"')
     && !S.app.includes('function _phenoVoisines(') && !S.app.includes('phn-rep') && S.app.includes("if(tab==='stades'){ _phenoReleveRaz(); _phenoRendreVue(); }") && S.app.includes('data-v="stades" onclick="_pFxVue(this.dataset.v)"') && S.app.includes('  _phenoAccueil();    // ★ PHENO-1A2'));
   t('⑦ l’affichage sobre : le filet, la pastille du code en chiffres tabulaires, le titre de la charte ; Liste / Carte revient en haut au téléphone', S.css.includes('.phr-f{align-self:stretch;width:4px;background:var(--phc);}') && S.css.includes('font-variant-numeric:tabular-nums;text-align:center;}') && S.css.includes('.phr-t{font-family:var(--font-titre,Georgia,serif);') && S.css.includes('#page-parcelles.p-vue-stades .tabs2{display:flex!important;}'));
@@ -79,7 +79,7 @@ if (!CONTRE) {
     ['noter ouvert à tous', m('app', "  if(!_phenoAdm()||!cibles||!cibles.length||!_phenoStade(b)) return 0;", "  if(!cibles||!cibles.length||!_phenoStade(b)) return 0;")],
     ['Annuler ne retire rien', m('app', "Q[an]=Q[an].filter(function(e){ return !(e&&e.t===t); }).concat(retires);", "Q[an]=Q[an].concat(retires);")],
     ['« à noter » aussi en hiver', m('app', 'aNoter:_phenoEnSaison(auj)?L.filter(function(x){ return x.vieux; }):[]', 'aNoter:L.filter(function(x){ return x.vieux; })')],
-    ['la règle ne réserve plus `pheno` à l’administrateur', m('rules', "'intrants', 'paie',\n                   'pheno'];", "'intrants', 'paie'];")],
+    ['la règle ne réserve plus `pheno` à l’administrateur', m('rules', "'intrants', 'paie',\n                   'pheno',    // ★ PHENO-1A (§505)", "'intrants', 'paie',\n                   // ★ PHENO-1A (§505)")],   // RECOLTE-1A (§568) : 'recolte' suit 'pheno' dans la liste
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-phenoa.mjs'").join("mv-harnais-phenoZ.mjs'") })],
   ];
   let bons = 0;

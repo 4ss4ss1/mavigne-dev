@@ -886,3 +886,22 @@ Le plan : FENETRE-2, « hygrométrie dans la règle du créneau (un champ à ajo
 ### 567d. Ce qui reste ouvert
 - La suite du plan : **RECOLTE-1** (la récolte prévue : compter les grappes, prévoir les hectolitres), IFT-1, REG27-1.
 - **À vérifier chez Nico** : la frise avec la vraie prévision (le réseau d’ici n’atteint pas Open-Meteo).
+
+## 568. ★★★ RECOLTE-1A — COMPTER LES GRAPPES : DIX PIEDS, LES PIEDS PRÉSENTS, LE POIDS, LES HECTOLITRES PRÉVUS ; UN DOCUMENT NEUF, `recolte` (13/11 — `src/app.js` (`_RCT_POIDS_DEF`, `_RCT_BLANCS`, `_rctCfg`, `_rctPieds`, `_rctMoy`, `_rctHl`, `_rctCompter`, `_rctSaisie`, `_rctResume`, `_rctEnregistrer`, `_rctFicheHtml` ; `openDP`, `_pFicheHtml` ; la table de `saveData`) · `src/firebase.js` (`COLLECTIONS`, `FB_REALTIME`, nom, poids) · `firestore.rules` (`isAdminOnlyDoc`) · `src/reglages.js` (le nom de la sauvegarde) · `index.html` (`#dp-rct`) · `guide/04-vigne.html` · `src/utils.js` (APP 10.99) · `src/whats-new.js` · `public/sw.js` (SW 11.90) · `scripts/mv-harnais-rct1a.mjs` (neuf) · `scripts/mv-harnais-phenoa.mjs` · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/RECOLTE-1A.json` · base `5c91309`)
+
+### 568a. D’où ça vient
+La partie 4 de `maquette-niveau-au-dessus-v1` (« Récolte prévue — compter les grappes, prévoir les hectolitres ») et le plan (RECOLTE-1, moyen). ★ **Nico (13/11)** a répondu « 1 » aux trois questions — lu comme la première option des trois (dit dans la réponse, à corriger s’il le faut) : **en deux** (1A le comptage, ce lot ; 1B le volet « Prévu » des Récoltes, les réglages et le tuto) ; **l’administrateur seul compte** ; **0,75 L/kg en blanc** (réglable).
+
+### 568b. Ce qui change
+- **Le document `recolte`** : `{ "<année>": { "<pid>": { nom, g:[10 comptes ou vides], d, par, t } } }`, déclaré comme `pheno` (`COLLECTIONS`, `FB_REALTIME`, « La récolte prévue », poids 2, la table de `saveData`, le nom de la sauvegarde) ; **`firestore.rules`** : `recolte` rejoint `isAdminOnlyDoc` — ⚠️ au déploiement : `firebase deploy --only firestore:rules`.
+- **« Compter les grappes »** (la fiche de la parcelle, téléphone et ordinateur ; l’administrateur, de juin à septembre) : dix champs (un par pied) ; en direct — la moyenne des pieds comptés ; **les pieds présents** = pieds/ha des écartements du domaine (`_mvVigne`) × surface − **le reste à planter** (`_cptReste`, RESTE-1), sans écartements réglés : « à régler (Réglages › Vigne) » et pas d’hectolitres ; **le poids moyen** d’une grappe du cépage (Pinot noir 118 g, Chardonnay 142 g — la maquette —, 120 g sinon ; `CONFIG.recolte.poids` les remplace) ; **le rendement en jus** (0,70 L/kg en rouge, 0,75 en blanc ; `CONFIG.recolte.lkg_rouge`, `lkg_blanc`, entre 0 et 1) ; **la récolte prévue** en hL. La fenêtre reprend celle des stades (`ovPheno`) : aucune fenêtre de plus (AJOUR-1 n’a rien à classer).
+- **La fiche** dit la dernière estimation (« 23 hL · 5,2 grappes par pied, le 17 juillet »).
+- PHENO-1A suit la liste des documents (`recolte` déclaré après `pheno`) ; trois gestes neufs exemptés de tuto, motivés (le tuto viendra avec 1B).
+
+### 568c. Mesuré
+- `mv-harnais-rct1a` : 10 assertions — **l’exemple de la maquette au chiffre près** (Chazière haut : 1 × 1 m, 0,55 ha, 190 manquants → 5 310 pieds ; 9 pieds, 5,2 grappes ; 118 g, 0,70 L/kg → 3 258 kg, **22,8 hL**, 41,5 hL/ha), le blanc (142 g, 0,75), les réglages qui remplacent les défauts et un rendement hors bornes ignoré, rien sans écartements, l’enregistrement (par parcelle et par année, l’auteur, la date), le refus hors admin et sans compte, le document et sa règle, l’écran ; **7/7 mutants**.
+- Les 23 tutos rejoués (la couche de données a changé) : verts au téléphone, sur ordinateur, côte à côte. `test:ux` : vert (18). Chaîne (742 commandes) : seul `build-guide --check`, attendu. Le guide demandait une icône inconnue (« grappe ») : « raisin ».
+
+### 568d. Ce qui reste ouvert
+- **RECOLTE-1B** : le volet « Prévu » de Cave › Le Cuvier › Récoltes (par cuvée, l’AOC max, la cuve prévue, les parcelles non comptées à la moyenne de leur cépage, le total du domaine), les réglages (poids par cépage, rendements en jus), le recalage à la récolte, le tuto « Comment compter les grappes ? ».
+- **Au déploiement (canal général)** : `firebase deploy --only firestore:rules`.

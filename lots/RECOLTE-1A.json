@@ -1,0 +1,40 @@
+{
+  "lot": "RECOLTE-1A",
+  "section": "§568",
+  "base": "5c91309c74c3990278c6429943371f2abfc59220",
+  "inclut": [],
+  "date": "2026-11-13",
+  "tutos": {
+    "ok": true,
+    "empreinte": "8f3bba14f1c80ba245da66474bd7a2cd50e025c6c0bae6b6aa36e87cb526c4dc",
+    "date": "2026-11-13T14:21:12.666Z",
+    "joues": {
+      "téléphone": 23,
+      "ordinateur": 23,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "57dde386e626f4d746d81e9e26fc12fa17b1e91f6561a86dc3ef2378eb88cadd",
+    "CLAUDE.md": "5cd5f2c5b025802abd01742b79d78fe360564bbd21b0be9f117821c47e1a7431",
+    "docs/claude/INDEX.md": "d2b1f8835aa4309f07798938e89f33e57f017f011383913c6606e2609b42c627",
+    "docs/claude/chantiers-530-579.md": "355eb066182151226577d019a449ecec3c784d13c5851225894f370c8de5fdd8",
+    "docs/claude/journal.md": "0f9b87d8103501a5c4a12644fbfa9fc9b765cf52f8d8e1ac9b4bd4f8af6a2cef",
+    "firestore.rules": "3fdb926ee8ec2cae9f669191132ca13185c4d769d02e97d4d8f96714eefc177e",
+    "guide/04-vigne.html": "003dbb31541a900586c196c818e00e18903f5a097974f4d49071400dbe3cce84",
+    "index.html": "8aa0601a7e7c831c524db041f8f69abc074d6ffabbf0dae2d78cf4d9d5a2b2a0",
+    "public/sw.js": "4aa514e60b5ad4ef50700a55d6645da3982578d7f54dad2e24344428ad112aef",
+    "scripts/harnais-claude-md.mjs": "4fe479a991d581e57814960a543a80d7bb27a34bc034e57b69d8bd2486e7493c",
+    "scripts/mv-harnais-liste.mjs": "9201b7d271e1759e9a2755893101fce21fbc88b9abd2ce1673a235eccdad0f39",
+    "scripts/mv-harnais-phenoa.mjs": "90b2caa1fc34319fa7118a1106abde81090727da4490864c88064c8262be5461",
+    "scripts/tutos-couverture.json": "eafc3f0d53bd0cc33d8d93490e9053e1497465765faf3d5c76a1c6a9ffbcd29b",
+    "src/app.js": "c9d67fe56494aa7a1106092b31ce028d51de4b388b52ce3b13f930ed2e95bc89",
+    "src/firebase.js": "b18a3852779b4027fe2cc6fc92afad3cfac973d31493e3efda72f44ff153491a",
+    "src/reglages.js": "c8c34e7af35ce9062aa11858fcd3242f0a161a82112f605b721cc325c5b5dcf0",
+    "src/utils.js": "c7f8c40f6b0df7cd15c9fe80a2c782c09be05ca509cb75657e7f9ca1769daf2d",
+    "src/whats-new.js": "dee7842ffe1c511346c8fcfcf3e2b55dfd164285f9b66c3de55c32a604e9221c",
+    "scripts/mv-harnais-rct1a.mjs": "9c1d196ac7e16bc5465384e2405efe81461e7f14dfd7975c7303be465b41db45"
+  }
+}

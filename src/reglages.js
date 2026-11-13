@@ -4369,7 +4369,8 @@ var MV_SAUV_NOMS = {
   planning_entries:'Planning — saisies', planning_acomptes:'Acomptes',
   planning_hsup:'Heures supplémentaires', kml_polygons:'Contours des parcelles',
   intrants:'Réserve — intrants', paie:'Taux horaires et GNR',
-  pheno:'Stades de la vigne'   // ★ PHENO-1A (§505)
+  pheno:'Stades de la vigne',   // ★ PHENO-1A (§505)
+  recolte:'Récolte prévue (comptages de grappes)'   // ★ RECOLTE-1A (§568)
 };
 function _sauvNom(k){ return MV_SAUV_NOMS[k] || k; }
 

@@ -902,6 +902,7 @@ function _mvValeursMemoire(){
     planning_hsup:      window.PLANNING_HSUP,
     config:             window.CONFIG || CONFIG,
     pheno:              window.PHENO || (window.PHENO={}),   // ★ PHENO-1A (§505) : les stades notés (écrits par l'administrateur seul)
+    recolte:            window.RECOLTE || (window.RECOLTE={}),   // ★ RECOLTE-1A (§568) : les comptages de grappes (l'administrateur seul)
   };
   return W;
 }
@@ -7643,6 +7644,7 @@ function _pFicheHtml(p){
   var h='<div class="pfx-hd"><div class="pfx-id"><h2 class="pfx-t">'+_escHtml(p.nom)+'</h2><div class="pfx-tags">'+tags+'</div></div>'
     +'<div class="pfx-act">'+act+'<button type="button" class="pfx-btn" onclick="openDP(\''+_escAttr(p.nom)+'\')">Fiche compl\u00e8te</button></div></div>';
   var _phH=(typeof _phenoFicheHtml==='function')?_phenoFicheHtml(p):''; if(_phH) h+='<div class="mvencadre dp-pheno pfx-pheno">'+_phH+'</div>';
+  var _rcH=(typeof _rctFicheHtml==='function')?_rctFicheHtml(p):''; if(_rcH) h+='<div class="mvencadre pfx-pheno">'+_rcH+'</div>';   // ★ RECOLTE-1A (§568)
   var _obH=(typeof _obsFicheHtml==='function')?_obsFicheHtml(p):''; if(_obH){ if(typeof _obsDemarrer==='function') _obsDemarrer(); h+='<div class="mvencadre pfx-pheno">'+_obH+'</div>'; }   // ★ OBS-1A (§565)   // ★ PHENO-1C (§508) : le stade dans la fiche à droite, sur ordinateur
   // FORME-1 (§301) : la forme de la parcelle, tirée de son contour (utils.js) ; rien quand elle n'en a pas.
   var _fo=(typeof window._mvParcFormeHtml==='function')?window._mvParcFormeHtml(p.nom,520,170,'pfxf'):'';
@@ -8728,6 +8730,7 @@ function _dpPeindre(nom,repeinte){
     if(dpCepBtn){dpCepBtn.style.display=isAdmin()?'':'none';dpCepBtn.onclick=function(){openDPCepage(nom);};}
 _phenoP=p; _phenoFiche(p);   // ★ PHENO-1A (§505) : le dernier stade noté, et « Noter le stade » pour l'administrateur
 _obsDemarrer(); _obsFiche(p);   // ★ OBS-1A (§565) : les signalements de la parcelle, « Signaler », « Clore » (admin)
+_rctFiche(p);   // ★ RECOLTE-1A (§568) : la récolte prévue, « Compter les grappes » (admin, de juin à septembre)
   }
   try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
   try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
@@ -11339,6 +11342,72 @@ function _obsFicheHtml(p){
 function _obsFiche(p){ var el=document.getElementById('dp-obs'); if(!el||!p) return; var h=_obsFicheHtml(p); el.style.display=h?'':'none'; el.innerHTML=h; }
 function _obsRafraichir(){ if(_phenoP) _obsFiche(_phenoP); if(typeof _pDesk==='function'&&_pDesk()&&typeof renderParcelles==='function'){ var pl=document.getElementById('pwrapliste'); if(pl&&pl.classList.contains('vis')) renderParcelles(); } }
 window._obsSignaler=_obsSignaler; window._obsChoisir=_obsChoisir; window._obsIntensite=_obsIntensite; window._obsPhoto=_obsPhoto; window._obsEnregistrer=_obsEnregistrer; window._obsClore=_obsClore;
+// ★★ RECOLTE-1A (§568) — COMPTER LES GRAPPES (maquette-niveau-au-dessus-v1, partie 4 ; plan RECOLTE-1). Décisions de Nico (13/11) : en
+//   deux — 1A le comptage (ce lot), 1B le volet « Prévu » des Récoltes et les réglages ; l'administrateur seul compte ; 0,75 L/kg en blanc.
+//   Dix pieds pris au hasard (hors bout de rang) ; la moyenne des pieds comptés ; les pieds présents = pieds/ha des écartements du
+//   domaine (_mvVigne) × surface − le reste à planter (comptes.js, RESTE-1) ; le poids moyen d'une grappe par cépage (Pinot noir 118 g,
+//   Chardonnay 142 g, les autres 120 g, CONFIG.recolte.poids les remplace) ; le rendement en jus par couleur (0,70 L/kg en rouge, 0,75 en
+//   blanc). hL = pieds × grappes × kg × L/kg ÷ 100. La fenêtre reprend celle des stades (ovPheno) : aucune fenêtre de plus.
+var _RCT_POIDS_DEF={ 'pinot noir':118, 'chardonnay':142 }, _RCT_POIDS_AUTRE=120;
+var _RCT_BLANCS=['chardonnay','aligote','pinot blanc','pinot gris','pinot beurot','sauvignon','melon'];
+function _rctCfg(){ var c=(window.CONFIG&&window.CONFIG.recolte)||{}, r=Number(c.lkg_rouge), b=Number(c.lkg_blanc); return { poids:c.poids||{}, lkgR:(r>0&&r<=1)?r:0.70, lkgB:(b>0&&b<=1)?b:0.75 }; }
+function _rctCep(p){ return _phenoCepages(p)[0]||''; }
+function _rctBlanc(cep){ return _RCT_BLANCS.indexOf(_phenoNorm(cep))>=0; }
+function _rctPoids(cep){ var k=_phenoNorm(cep), v=Number(_rctCfg().poids[k]); return v>0?v:(_RCT_POIDS_DEF[k]||_RCT_POIDS_AUTRE); }
+function _rctPieds(p){
+  var v=(typeof window._mvVigne==='function')?window._mvVigne():null; if(!v||!v.pieds||!p) return null;
+  var s=parseFloat(p.surface)||0, m=(typeof window._cptReste==='function')?(Number(window._cptReste(p))||0):0;
+  return { ha:v.pieds, s:s, manq:m, n:Math.max(0,Math.round(v.pieds*s)-m), ec:String(v.ec_rang).replace('.',',')+' \u00d7 '+String(v.ec_pied).replace('.',',')+' m' };
+}
+function _rctMoy(g){ var L=(g||[]).filter(function(x){ return x!=null&&x!==''&&isFinite(Number(x))&&Number(x)>=0; }).map(Number); return L.length?{ n:L.length, m:Math.round(L.reduce(function(a,b){ return a+b; },0)/L.length*10)/10 }:null; }
+function _rctHl(p,g){
+  var P=_rctPieds(p), M=_rctMoy(g), cep=_rctCep(p); if(!P||!M) return null;
+  var kg=P.n*M.m*_rctPoids(cep)/1000, lkg=_rctBlanc(cep)?_rctCfg().lkgB:_rctCfg().lkgR;
+  return { kg:Math.round(kg), hl:Math.round(kg*lkg/100*10)/10, lkg:lkg, hlha:P.s>0?Math.round(kg*lkg/100/P.s*10)/10:null };
+}
+function _rctAn(){ return String(new Date().getFullYear()); }
+function _rctDernier(p,an){ var R=window.RECOLTE||{}, A=R[an||_rctAn()]; return (A&&typeof A==='object'&&p)?(A[p.pid||p.nom]||null):null; }
+function _rctFmt(n){ return String(n).replace('.',','); }
+var _rctP=null, _rctG=null;
+function _rctCompter(nom){
+  if(!_phenoAdm()) return;
+  var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
+  var der=_rctDernier(p); _rctP=p; _rctG=(der&&Array.isArray(der.g))?der.g.slice(0,10):[]; while(_rctG.length<10) _rctG.push(null);
+  var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
+  t.textContent=p.nom+' \u00b7 compter les grappes'; s.textContent='10 pieds pris au hasard, hors bout de rang \u00b7 tapez le nombre de grappes';
+  c.innerHTML='<div class="phn-st">'+_rctG.map(function(v,i){ return '<label class="phn-date"><span>Pied '+(i+1)+'</span><input type="number" inputmode="numeric" min="0" max="60" step="1" data-tuto="rct.pied" data-i="'+i+'" value="'+(v==null?'':Number(v))+'" oninput="_rctSaisie(+this.dataset.i,this.value)"></label>'; }).join('')+'</div>'
+    +'<div id="rct-res"></div><button type="button" class="mbtn verte" data-tuto="rct.ok" onclick="_rctEnregistrer()">Enregistrer le comptage</button>';
+  _rctResume(); openOv('ovPheno');
+}
+function _rctSaisie(i,v){ if(!_rctG||i<0||i>9) return; var n=parseInt(v,10); _rctG[i]=(isNaN(n)||n<0)?null:Math.min(60,n); _rctResume(); }
+function _rctResume(){
+  var el=document.getElementById('rct-res'); if(!el||!_rctP) return;
+  var M=_rctMoy(_rctG), P=_rctPieds(_rctP), cep=_rctCep(_rctP), H=_rctHl(_rctP,_rctG);
+  el.innerHTML='<div class="phr-ps"><span>Moyenne'+(M?' sur '+M.n+' pied'+(M.n>1?'s':''):'')+'</span><b>'+(M?_rctFmt(M.m)+' grappes':'\u2014')+'</b></div>'
+    +'<div class="phr-ps"><span>'+(P?_escHtml('Pieds pr\u00e9sents \u00b7 '+P.ec+' \u00b7 '+P.ha.toLocaleString('fr-FR')+'/ha \u00d7 '+_rctFmt(P.s)+' ha'+(P.manq?' \u2212 '+P.manq+' manquants':'')):'Pieds pr\u00e9sents \u2014 \u00e9cartements \u00e0 r\u00e9gler (R\u00e9glages \u203a Vigne)')+'</span><b>'+(P?P.n.toLocaleString('fr-FR'):'\u2014')+'</b></div>'
+    +'<div class="phr-ps"><span>'+_escHtml('Poids moyen, '+(cep||'c\u00e9page ?'))+'</span><b>'+_rctPoids(cep)+'\u00a0g</b></div>'
+    +'<div class="phr-ps"><span>R\u00e9colte pr\u00e9vue</span><b>'+(H?_rctFmt(H.hl)+'\u00a0hL':'\u2014')+'</b></div>';
+}
+function _rctEnregistrer(){
+  if(!_phenoAdm()||!_rctP||!_rctMoy(_rctG)) { if(window.showToast&&_rctP) showToast('Tapez au moins un compte','#B23B1E'); return; }
+  var an=_rctAn(), R=window.RECOLTE||(window.RECOLTE={}); if(!R[an]||typeof R[an]!=='object') R[an]={};
+  R[an][_rctP.pid||_rctP.nom]={ nom:_rctP.nom, g:_rctG.slice(0,10), d:todayStr(), par:(window.currentUser&&window.currentUser.nom)||'', t:new Date().toISOString() };
+  saveData('recolte'); closeOv(null,'ovPheno');
+  var M=_rctMoy(_rctG), H=_rctHl(_rctP,_rctG);
+  if(window.showToast) showToast('Comptage enregistr\u00e9 \u00b7 '+_rctFmt(M.m)+' grappes par pied'+(H?' \u00b7 '+_rctFmt(H.hl)+' hL pr\u00e9vus':''),'#3D6B27');
+  _rctRafraichir();
+}
+function _rctFicheHtml(p){
+  if(!p) return '';
+  var der=_rctDernier(p), adm=_phenoAdm(), m=new Date().getMonth()+1, saison=m>=6&&m<=9;
+  if(!der&&!(adm&&saison)) return '';
+  var H=der?_rctHl(p,der.g):null, M=der?_rctMoy(der.g):null;
+  return '<div class="dp-pheno"><div class="dp-pheno-l"><div class="dp-pheno-k">R\u00e9colte pr\u00e9vue</div><div class="dp-pheno-v" data-tuto="dp.rct.v">'+_escHtml(der?((H?_rctFmt(H.hl)+' hL \u00b7 ':'')+(M?_rctFmt(M.m)+' grappes par pied':'')+', '+_phenoJour(der.d)):'pas encore compt\u00e9e cette ann\u00e9e')+'</div></div>'
+    +((adm&&saison)?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-tuto="dp.rct" data-nom="'+_escAttr(p.nom)+'" onclick="_rctCompter(this.dataset.nom)">Compter les grappes</button>':'')+'</div>';
+}
+function _rctFiche(p){ var el=document.getElementById('dp-rct'); if(!el||!p) return; var h=_rctFicheHtml(p); el.style.display=h?'':'none'; el.innerHTML=h; }
+function _rctRafraichir(){ if(_phenoP) _rctFiche(_phenoP); if(typeof _pDesk==='function'&&_pDesk()&&typeof renderParcelles==='function'){ var pl=document.getElementById('pwrapliste'); if(pl&&pl.classList.contains('vis')) renderParcelles(); } }
+window._rctCompter=_rctCompter; window._rctSaisie=_rctSaisie; window._rctEnregistrer=_rctEnregistrer;
 function switchPTab(tab){
   var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');

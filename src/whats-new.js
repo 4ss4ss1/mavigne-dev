@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '10.99', d: '2026-11-13', items: [
+    { niv: 0, pour: ['admin'], emoji: 'grappe', titre: 'Compter les grappes, prévoir la récolte',
+      desc: "Depuis la fiche d’une parcelle (de juin à septembre), «\u00a0Compter les grappes\u00a0»\u00a0: le nombre de grappes de dix pieds, et l’appli donne en direct la moyenne, les pieds présents (écartements du domaine, surface, reste à planter), le poids moyen du cépage et la récolte prévue en hectolitres." },
+  ] },
   { v: '10.98', d: '2026-11-13', items: [
     { niv: 0, pour: ['admin'], emoji: 'pulve', titre: 'Traiter ? : un créneau plus juste, et les cinq jours heure par heure',
       desc: "Le créneau demande maintenant aussi une hygrométrie d’au moins 50 % et le plein jour. La tuile dit combien de parcelles sont à nu pour le prochain créneau, et si la pluie des jours suivants dépassera le seuil de lessivage. Le dépliant montre les cinq jours heure par heure, la couleur de chaque heure dit pourquoi." },

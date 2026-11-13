@@ -62,6 +62,9 @@
     "planPrepFermer": "PREPAN-2 (§560) : fermer la feuille « Préparer » (Annuler, ×, toucher à côté) — un geste de sortie, sans effet ; la feuille s’ouvre et s’enregistre avec le tuto « preparer »",
     "_obsIntensite": "OBS-1A (§565) : choisir l’intensité — trois boutons",
     "_obsPhoto": "OBS-1A (§565) : prendre la photo — l’appareil photo du téléphone",
-    "_obsClore": "OBS-1A (§565) : « Clore » un signalement (administrateur) — le bouton dit ce qu’il fait"
+    "_obsClore": "OBS-1A (§565) : « Clore » un signalement (administrateur) — le bouton dit ce qu’il fait",
+    "_rctCompter": "RECOLTE-1A (§568) : « Compter les grappes » (fiche de la parcelle, administrateur, juin à septembre) — un tuto viendra avec RECOLTE-1B, quand le volet « Prévu » dira à quoi sert le comptage",
+    "_rctSaisie": "RECOLTE-1A (§568) : taper le nombre de grappes d’un pied — un champ par pied",
+    "_rctEnregistrer": "RECOLTE-1A (§568) : « Enregistrer le comptage » — le bouton dit ce qu’il fait"
   }
 }
