@@ -1178,6 +1178,7 @@ function _vendResteToggle(){ _vendResteOuv=!_vendResteOuv; renderVendRec(); }
 // ══════════════════════════════════════════════════════════════════
 var _recVue    = 'parc';   // téléphone : 'parc' | 'jour'
 var _recSelNom = null;     // la parcelle dont la fiche est ouverte
+var _recMode = 'reel';     // ★ RECOLTE-1B (§569) : 'reel' | 'prevu' (le volet « Prévu », app.js)
 
 /* Les années que l'on peut relire : celles qui ont une mesure de maturité OU une
    pesée, et l'année en cours. Commune aux Maturités et aux Récoltes. */
@@ -1249,6 +1250,10 @@ function renderVendRec(){
   var an = _matAnCourant(), D = _recDonnees(an), canEdit = canWrite() && D.courante;
   if(_recSelNom && !_recConnue(_recSelNom, D)) _recSelNom = null;
   var h = _caveSaisBanner() + _recTeteHtml(D, canEdit);
+  // ★ RECOLTE-1B (§569) : « Réel · Prévu » — le volet « Prévu » vit dans app.js (les comptages de grappes, avant toute pesée).
+  var _rm = (typeof _recMode !== 'undefined') ? _recMode : 'reel';   // REC-1 fait tourner ce rendu sans la bascule
+  h += '<div class="mvbtn-choix rec-vues" role="group" aria-label="Réel ou prévu">' + [['reel', 'Réel'], ['prevu', 'Prévu']].map(function(v){ var on = _rm === v[0]; return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact' + (on ? ' on' : '') + '" aria-pressed="' + on + '" data-tuto="rec.' + v[0] + '" data-m="' + v[0] + '" onclick="_recSetMode(this.dataset.m)">' + v[1] + '</button>'; }).join('') + '</div>';
+  if(_rm === 'prevu'){ h += (typeof window._rctPrevuHtml === 'function') ? window._rctPrevuHtml(D.an) : ''; el.innerHTML = h; _vendRefreshCockpit(); return; }
   if(!D.recs.length){
     h += '<section class="mvcarte rec-vide"><div class="rec-vide-ic">' + _mvIcon('raisin', 24) + '</div>'
       + '<h2 class="mvcarte-titre">Pas encore de récolte pour la vendange ' + _escHtml(D.an) + '</h2>'
@@ -1458,6 +1463,7 @@ function _recFicheHtml(nom, D){
 
 /* ─────────── Les gestes ─────────── */
 function _recSetVue(v){ _recVue = v === 'jour' ? 'jour' : 'parc'; renderVendRec(); }
+function _recSetMode(m){ _recMode = m === 'prevu' ? 'prevu' : 'reel'; renderVendRec(); }   // ★ RECOLTE-1B (§569)
 /* La fiche : à droite sur ordinateur, dans une fenêtre au téléphone. */
 // ★★ AJOUR-1 (§552) — au téléphone, la fiche ne se peignait qu'à l'ouverture : « Modifier » ou « Ajouter une pesée »
 //   (une feuille posée sur elle) enregistraient et redessinaient la liste, la fiche gardait l'ancienne pesée (vu au §533).
@@ -9003,6 +9009,8 @@ window._vendRegOk           = _vendRegOk;
 window._vendRegChoix        = _vendRegChoix;
 // ★ REC-1 — les gestes des Récoltes rangées
 window._recSetVue           = _recSetVue;
+window._recSetMode          = _recSetMode;   // RECOLTE-1B (§569)
+window.renderVendRec        = renderVendRec;
 window._recSel              = _recSel;
 window._vendVoir            = _vendVoir;
 window._matSetFen           = _matSetFen;

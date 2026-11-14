@@ -11264,8 +11264,8 @@ function _obsCorps(){
   var choix=function(L,cle,fn,lib,eti){ return '<div class="phn-st" role="radiogroup" aria-label="'+lib+'">'+L.map(function(t){ return '<button type="button" class="phn-b'+(F[cle]===t[0]?' on':'')+'" role="radio" aria-checked="'+(F[cle]===t[0])+'"'+eti+' data-k="'+t[0]+'" onclick="'+fn+'(this.dataset.k)"><span>'+_escHtml(t[1])+'</span></button>'; }).join('')+'</div>'; };
   c.innerHTML=choix(_OBS_TYPES,'type','_obsChoisir','Type',' data-tuto="obs.type"')
     +'<div class="phr-k">Intensit\u00e9</div>'+choix(_OBS_INT,'int','_obsIntensite','Intensit\u00e9',' data-tuto="obs.int"')
-    +'<label class="phn-date"><span>'+_escHtml(F.photo?('1 photo \u00b7 '+F.photo.ko+'\u00a0ko'):'Photo')+'</span><input type="file" accept="image/\u002a" capture="environment" onchange="_obsPhoto(this)"></label>'
-    +'<label class="phn-date"><span>Note</span><input type="text" id="obs-note" maxlength="200" placeholder="facultatif" value="'+_escAttr(F.note)+'"></label>'
+    +'<div class="phn-sec"><p class="phn-etq">'+_escHtml(F.photo?('1 photo \u00b7 '+F.photo.ko+'\u00a0ko'):'Photo')+'</p><input type="file" class="mvchamp" aria-label="Photo" accept="image/\u002a" capture="environment" onchange="_obsPhoto(this)"></div>'
+    +'<div class="phn-sec"><p class="phn-etq">Note</p><input type="text" class="mvchamp" id="obs-note" aria-label="Note" maxlength="200" placeholder="facultatif" value="'+_escAttr(F.note)+'"></div>'
     +'<button type="button" class="mbtn verte" id="obs-ok" data-tuto="obs.ok" onclick="_obsEnregistrer()"'+(F.type?'':' disabled')+'>Enregistrer le signalement</button>'
     +'<div class="phr-m">Hors r\u00e9seau\u00a0: le signalement part tout de suite, la photo se reprend au retour du r\u00e9seau.</div>';
 }
@@ -11374,8 +11374,8 @@ function _rctCompter(nom){
   var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; }); if(!p) return;
   var der=_rctDernier(p); _rctP=p; _rctG=(der&&Array.isArray(der.g))?der.g.slice(0,10):[]; while(_rctG.length<10) _rctG.push(null);
   var t=document.getElementById('phn-titre'), s=document.getElementById('phn-sub'), c=document.getElementById('phn-corps'); if(!t||!s||!c) return;
-  t.textContent=p.nom+' \u00b7 compter les grappes'; s.textContent='10 pieds pris au hasard, hors bout de rang \u00b7 tapez le nombre de grappes';
-  c.innerHTML='<div class="phn-st">'+_rctG.map(function(v,i){ return '<label class="phn-date"><span>Pied '+(i+1)+'</span><input type="number" inputmode="numeric" min="0" max="60" step="1" data-tuto="rct.pied" data-i="'+i+'" value="'+(v==null?'':Number(v))+'" oninput="_rctSaisie(+this.dataset.i,this.value)"></label>'; }).join('')+'</div>'
+  t.textContent=p.nom+' \u00b7 compter les grappes'; s.textContent='10 pieds pris au hasard, hors bout de rang \u00b7 à faire entre la fermeture de la grappe et la véraison';
+  c.innerHTML='<div class="phn-st">'+_rctG.map(function(v,i){ return '<div><p class="phn-etq">Pied '+(i+1)+'</p><input type="number" class="mvchamp" aria-label="Pied '+(i+1)+'" inputmode="numeric" min="0" max="60" step="1" data-tuto="rct.pied" data-i="'+i+'" value="'+(v==null?'':Number(v))+'" oninput="_rctSaisie(+this.dataset.i,this.value)"></div>'; }).join('')+'</div>'
     +'<div id="rct-res"></div><button type="button" class="mbtn verte" data-tuto="rct.ok" onclick="_rctEnregistrer()">Enregistrer le comptage</button>';
   _rctResume(); openOv('ovPheno');
 }
@@ -11399,7 +11399,7 @@ function _rctEnregistrer(){
 }
 function _rctFicheHtml(p){
   if(!p) return '';
-  var der=_rctDernier(p), adm=_phenoAdm(), m=new Date().getMonth()+1, saison=m>=6&&m<=9;
+  var der=_rctDernier(p), adm=_phenoAdm(), saison=adm;   // ★ RECOLTE-1B (§569) : toute l'année pour l'administrateur (décision de Nico, 13/11)
   if(!der&&!(adm&&saison)) return '';
   var H=der?_rctHl(p,der.g):null, M=der?_rctMoy(der.g):null;
   return '<div class="dp-pheno"><div class="dp-pheno-l"><div class="dp-pheno-k">R\u00e9colte pr\u00e9vue</div><div class="dp-pheno-v" data-tuto="dp.rct.v">'+_escHtml(der?((H?_rctFmt(H.hl)+' hL \u00b7 ':'')+(M?_rctFmt(M.m)+' grappes par pied':'')+', '+_phenoJour(der.d)):'pas encore compt\u00e9e cette ann\u00e9e')+'</div></div>'
@@ -11408,6 +11408,66 @@ function _rctFicheHtml(p){
 function _rctFiche(p){ var el=document.getElementById('dp-rct'); if(!el||!p) return; var h=_rctFicheHtml(p); el.style.display=h?'':'none'; el.innerHTML=h; }
 function _rctRafraichir(){ if(_phenoP) _rctFiche(_phenoP); if(typeof _pDesk==='function'&&_pDesk()&&typeof renderParcelles==='function'){ var pl=document.getElementById('pwrapliste'); if(pl&&pl.classList.contains('vis')) renderParcelles(); } }
 window._rctCompter=_rctCompter; window._rctSaisie=_rctSaisie; window._rctEnregistrer=_rctEnregistrer;
+// ★★ RECOLTE-1B (§569) — LE VOLET « PRÉVU » DES RÉCOLTES (maquette-niveau-au-dessus-v1, partie 4 ; décisions de Nico, 13/11 : la cuve
+//   prévue attendra un plan cuvée → cuve ; « Compter les grappes » toute l'année pour l'administrateur). Rangé par cuvée (les cuvées de la
+//   Cave, comme le relevé des stades) ; chaque parcelle : pieds, grappes par pied (comptées, ou la moyenne de son cépage — en italique), kg,
+//   hL, hL/ha face au maximum de l'appellation (_vendRdtMax, le même que les Récoltes) ; une maladie signalée dit « poids à revoir » ; le
+//   total du domaine. Les réglages du calcul (poids par cépage, rendements en jus) et le recalage à la vendange : le réel (_mlRendements)
+//   face au prévu, par cépage, propose le poids qui l'aurait donné — l'administrateur confirme.
+function _rctPrevu(an){
+  an=String(an||_rctAn());
+  var act=(window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }), cuv=(typeof _phenoCuvees==='function')?_phenoCuvees():{};
+  var parCep={}; act.forEach(function(p){ var d=_rctDernier(p,an), M=d?_rctMoy(d.g):null; if(M){ var k=_phenoNorm(_rctCep(p)); (parCep[k]=parCep[k]||[]).push(M.m); } });
+  var moyCep=function(cep){ var L=parCep[_phenoNorm(cep)]; return (L&&L.length)?Math.round(L.reduce(function(a,b){ return a+b; },0)/L.length*10)/10:null; };
+  var mal=function(p){ try{ return (typeof _obsListe==='function')&&_obsListe(p.nom).some(function(e){ return e.statut==='ouvert'&&_obsFamille(e.type)==='maladie'&&String(e.d||'').slice(0,4)===an; }); }catch(e){ return false; } };
+  var L=act.map(function(p){
+    var d=_rctDernier(p,an), M=d?_rctMoy(d.g):null, cep=_rctCep(p), gp=M?M.m:moyCep(cep), P=_rctPieds(p);
+    var poids=_rctPoids(cep), lkg=_rctBlanc(cep)?_rctCfg().lkgB:_rctCfg().lkgR, kg=(P&&gp!=null)?Math.round(P.n*gp*poids/1000):null;
+    var hl=kg!=null?Math.round(kg*lkg/100*10)/10:null, s=parseFloat(p.surface)||0, hlha=(hl!=null&&s>0)?Math.round(hl/s*10)/10:null;
+    var mx=(typeof window._vendRdtMax==='function')?window._vendRdtMax(p,an):null, max=mx&&mx.max?Number(mx.max):null;
+    return { p:p, cep:cep, cuvee:cuv[p.nom]||'', compte:!!M, gp:gp, pieds:P?P.n:null, kg:kg, hl:hl, s:s, hlha:hlha, max:max, depasse:!!(max&&hlha&&hlha>max), maladie:mal(p) };
+  });
+  var tot=L.reduce(function(a,x){ return { hl:a.hl+(x.hl||0), s:a.s+(x.hl!=null?x.s:0) }; },{ hl:0, s:0 });
+  var reel={}; try{ ((typeof window._mlRendements==='function')?window._mlRendements(an):[]).forEach(function(o){ if(o&&o.parcelle) reel[o.parcelle.nom]=o.kg||0; }); }catch(e){ reel={}; }
+  var rec={}; L.forEach(function(x){ if(!x.compte||!(reel[x.p.nom]>0)||!(x.kg>0)) return; var k=_phenoNorm(x.cep); rec[k]=rec[k]||{ cep:x.cep, prevu:0, reel:0 }; rec[k].prevu+=x.kg; rec[k].reel+=reel[x.p.nom]; });
+  var recal=Object.keys(rec).map(function(k){ var r=rec[k], g=_rctPoids(r.cep), n=Math.round(g*r.reel/r.prevu); return { cep:r.cep, k:k, de:g, vers:n, ecart:Math.round((r.reel/r.prevu-1)*100) }; }).filter(function(r){ return r.vers!==r.de; });
+  return { an:an, L:L, hl:Math.round(tot.hl*10)/10, hlha:tot.s>0?Math.round(tot.hl/tot.s*10)/10:null, recal:recal };
+}
+function _rctPrevuHtml(an){
+  var V=_rctPrevu(an), adm=_phenoAdm(), f=_rctFmt;
+  if(!V.L.some(function(x){ return x.compte; })) return '<section class="mvcarte"><h2 class="mvcarte-titre">Récolte prévue '+_escHtml(V.an)+'</h2><p class="phr-m">Aucun comptage de grappes cette année : depuis la fiche d’une parcelle, « Compter les grappes » (entre la fermeture de la grappe et la véraison).</p></section>'+(adm?_rctReglagesHtml(V):'');
+  var G={}, ordre=[]; V.L.forEach(function(x){ var k=x.cuvee||''; if(!G[k]){ G[k]=[]; ordre.push(k); } G[k].push(x); });
+  ordre.sort(function(a,b){ return (a===''?1:0)-(b===''?1:0)||a.localeCompare(b); });
+  var lig=function(x){
+    var al=x.depasse?'au-dessus du maximum ('+f(x.max)+' hL/ha)':(x.maladie?'maladie signalée : poids à revoir':'');
+    return '<tr><td><b>'+_escHtml(x.p.nom)+'</b><div class="phr-m">'+_escHtml(x.cep||'')+'</div></td><td>'+(x.gp!=null?(x.compte?f(x.gp):'<i>'+f(x.gp)+'</i>'):'—')+'</td><td>'+(x.kg!=null?x.kg.toLocaleString('fr-FR'):'—')+'</td><td><b>'+(x.hl!=null?f(x.hl):'—')+'</b></td><td>'+(x.hlha!=null?f(x.hlha):'—')+(x.max?' <span class="phr-m">/ '+f(x.max)+'</span>':'')+'</td><td'+(al?' class="phr-vieux"':'')+'>'+_escHtml(al)+'</td></tr>';
+  };
+  var corps=ordre.map(function(k){ var xs=G[k], hl=xs.reduce(function(a,x){ return a+(x.hl||0); },0); return '<tr><td colspan="6" class="phr-ctd"><div class="phr-ct"><div class="phr-cn">'+_escHtml(k||'Sans cuvée')+'</div><div class="phr-m">'+f(Math.round(hl*10)/10)+' hL prévus</div></div></td></tr>'+xs.map(lig).join(''); }).join('');
+  return '<section class="mvcarte"><div class="phr-tete"><div><h2 class="mvcarte-titre">Récolte prévue '+_escHtml(V.an)+'</h2><div class="phr-m">les grappes en italique : la moyenne du cépage (parcelle non comptée)</div></div><div class="phr-cqv-n"><b>'+f(V.hl)+' hL</b><span>'+(V.hlha!=null?f(V.hlha)+' hL/ha en moyenne':'')+'</span></div></div>'
+    +'<div style="overflow-x:auto"><table class="phr-table"><thead><tr><th>Parcelle</th><th>Grappes/pied</th><th>kg</th><th>hL</th><th>hL/ha · max</th><th></th></tr></thead><tbody>'+corps+'</tbody></table></div></section>'
+    +(adm?_rctReglagesHtml(V):'');
+}
+function _rctReglagesHtml(V){
+  var C=_rctCfg(), ceps={}; (window.PARCELLES||[]).forEach(function(p){ var c=_rctCep(p); if(c) ceps[_phenoNorm(c)]=c; });
+  var champ=function(lib,attrs){ return '<div class="phn-sec"><p class="phn-etq">'+_escHtml(lib)+'</p><input type="number" class="mvchamp" aria-label="'+_escAttr(lib)+'" '+attrs+'></div>'; };
+  var h='<section class="mvcarte"><h2 class="mvcarte-titre">Réglages du calcul</h2>'
+    +Object.keys(ceps).sort().map(function(k){ return champ('Poids moyen d’une grappe, '+ceps[k]+' (g)','min="20" max="600" step="1" data-k="'+_escAttr(k)+'" value="'+_rctPoids(ceps[k])+'" onchange="_rctReglage(\'poids\',this.dataset.k,this.value)"'); }).join('')
+    +champ('Rendement en jus, rouge (L/kg)','min="0.5" max="0.9" step="0.01" value="'+C.lkgR+'" onchange="_rctReglage(\'lkg_rouge\',\'\',this.value)"')
+    +champ('Rendement en jus, blanc (L/kg)','min="0.5" max="0.9" step="0.01" value="'+C.lkgB+'" onchange="_rctReglage(\'lkg_blanc\',\'\',this.value)"');
+  if(V&&V.recal&&V.recal.length) h+='<div class="phr-k">Recaler sur la vendange '+_escHtml(V.an)+'</div>'+V.recal.map(function(r){ return '<div class="phr-ps"><span>'+_escHtml(r.cep+' : le réel '+(r.ecart>=0?'+':'')+r.ecart+' % face au prévu — '+r.de+' → '+r.vers+' g')+'</span><button type="button" class="phr-ca" data-k="'+_escAttr(r.k)+'" data-v="'+r.vers+'" onclick="_rctReglage(\'poids\',this.dataset.k,this.dataset.v)">Recaler</button></div>'; }).join('');
+  return h+'</section>';
+}
+function _rctReglage(cle,k,v){
+  if(!_phenoAdm()) return;
+  var n=parseFloat(String(v).replace(',','.')); if(!isFinite(n)) return;
+  var C=window.CONFIG||(window.CONFIG={}); if(!C.recolte||typeof C.recolte!=='object') C.recolte={};
+  if(cle==='poids'){ if(!(n>=20&&n<=600)) return; if(!C.recolte.poids||typeof C.recolte.poids!=='object') C.recolte.poids={}; C.recolte.poids[String(k)]=Math.round(n); }
+  else if(cle==='lkg_rouge'||cle==='lkg_blanc'){ if(!(n>=0.5&&n<=0.9)) return; C.recolte[cle]=Math.round(n*100)/100; }
+  else return;
+  saveData('config');
+  if(typeof renderVendRec==='function') renderVendRec(); else if(typeof window.renderVendRec==='function') window.renderVendRec();
+}
+window._rctPrevuHtml=_rctPrevuHtml; window._rctReglage=_rctReglage;
 function switchPTab(tab){
   var _pg=document.getElementById('page-parcelles'); if(_pg){ _pg.classList.toggle('p-vue-carte',tab==='carte'); _pg.classList.toggle('p-vue-stades',tab==='stades'); }   // ★ FILTRE-1B (§477) : au téléphone, Liste / Carte revient en haut sur la carte (et sur les stades, PHENO-1A)
   document.getElementById('tbl').classList.toggle('active',tab==='liste');

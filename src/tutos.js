@@ -94,6 +94,8 @@ function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Objec
 // ★ PHENO-1C (§508), PHENO-1D (§509) : l'instant de la note la plus récente de l'année (PHENO), pour voir qu'une note vient d'être posée —
 //   le compte ne suffit plus : le même jour, une nouvelle note REMPLACE l'ancienne et le compte ne bouge pas.
 // ★ OBS-1B (§566) : le nombre de signalements connus de l'appareil (OBS), pour voir qu'un signalement vient d'être posé.
+// ★ RECOLTE-1B (§569) : l'instant du dernier comptage de l'année (RECOLTE), pour voir qu'un comptage vient d'être posé (même parcelle comprise).
+function _rctT() { var R = window.RECOLTE || {}, A = R[String(new Date().getFullYear())] || {}, t = ''; Object.keys(A).forEach(function (k) { var e = A[k]; if (e && e.t && e.t > t) t = e.t; }); return t; }
 function _obsN() { var O = window.OBS || {}; return Object.keys(O).length; }
 function _phenoT() { var P = window.PHENO || {}, L = P[String(new Date().getFullYear())], t = ''; (Array.isArray(L) ? L : []).forEach(function (e) { if (e && String(e.t || '') > t) t = String(e.t || ''); }); return t; }
 // ★ PHENO-1C (§508) : la semaine en cours a-t-elle un jour ouvré (lundi à vendredi) dans le mois en cours ?
@@ -840,6 +842,34 @@ var TU_TUTOS = [
         ok: 'C’est envoyé : l’administrateur le verra dans la fiche, sur la carte et dans « À savoir ».' },
       { type: 'regarder', cible: '[data-tuto="dp.obs.v"]',
         txt: function () { return 'La fiche compte maintenant ce signalement. Sur la carte du jour de l’Accueil, « Signaler » fait la même chose, la parcelle choisie d’abord.'; } },
+    ] },
+  // ★ RECOLTE-1B (§569) : compter les grappes d'une parcelle (administrateur), depuis sa fiche — toute l'année (décision de Nico, 13/11).
+  { id: 'grappes', titre: 'Comment faire pour compter les grappes et prévoir la récolte\u00a0?', fin: 'compter les grappes d’une parcelle',
+    module: 'Vigne', pages: ['parcelles'], pour: 'admin', duree: '1 min', depart: 'parcelles',
+    couvre: ['_rctCompter', '_rctSaisie', '_rctEnregistrer'],
+    retenir: ['Entre la fermeture de la grappe et la véraison, depuis la fiche : « Compter les grappes », dix pieds pris au hasard.',
+              'L’appli calcule en direct les pieds présents, le poids et les hectolitres prévus.',
+              'Cave › Le Cuvier › Récoltes › « Prévu » range la récolte prévue par cuvée.'],
+    avant: function (memo) { memo.t0 = _rctT(); },
+    etapes: [
+      { type: 'toucher', cible: '[data-tuto="parc.ligne"]',
+        txt: function () { return '{T} une parcelle de la liste.'; },
+        fait: function () { var b = _q('[data-tuto="dp.rct"]'); return !!(b && _vis(b)); },
+        ok: 'Sa fiche s’ouvre ; la ligne « Récolte prévue » dit le dernier comptage.' },
+      { type: 'toucher', cible: '[data-tuto="dp.rct"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="dp.rct"]') || 'Compter les grappes') + ' ».'; },
+        fait: function () { return _ouvert('ovPheno') && !!_q('[data-tuto="rct.pied"]'); },
+        ok: 'Dix champs, un par pied : on tape le nombre de grappes de chacun.' },
+      { type: 'taper', cible: '[data-tuto="rct.pied"][data-i="0"]', exemple: '6',
+        txt: function () { return 'Tapez le nombre de grappes du premier pied, par exemple «\u00a06\u00a0».'; }, txtReel: 'le nombre de grappes du premier pied.',
+        valide: function (x) { return /^\d{1,2}$/.test(String(x || '').trim()); },
+        ok: 'La moyenne et les hectolitres prévus se calculent en direct.' },
+      { type: 'toucher', cible: '[data-tuto="rct.ok"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="rct.ok"]') || 'Enregistrer le comptage') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovPheno') && _rctT() > (memo.t0 || ''); },
+        ok: 'C’est noté : la récolte prévue entre dans le volet « Prévu » des Récoltes.' },
+      { type: 'regarder', cible: '[data-tuto="dp.rct.v"]',
+        txt: function () { return 'La fiche dit maintenant la récolte prévue. Dans Cave › Le Cuvier › Récoltes, « Prévu » la range par cuvée, face au maximum de l’appellation.'; } },
     ] }
 ];
 

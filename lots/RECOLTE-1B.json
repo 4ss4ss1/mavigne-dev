@@ -1,0 +1,38 @@
+{
+  "lot": "RECOLTE-1B",
+  "section": "§569",
+  "base": "7112a2553aa77f6bfeed4437b3c772f843c3ad76",
+  "inclut": [],
+  "date": "2026-11-14",
+  "tutos": {
+    "ok": true,
+    "empreinte": "55d4f5c9f94dc1434a2424ab57aa060e26ba069ff637dd98873f98af148ad04f",
+    "date": "2026-11-14T02:03:20.445Z",
+    "joues": {
+      "téléphone": 24,
+      "ordinateur": 24,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "b8d379435dcbf3cacb97fabbb08f17e518fe8bddf67d690feb62066aa8e8ab5e",
+    "CLAUDE.md": "929562a1f3d178f1a442d434ca92c489a8d0fb3e92d16734ab47d12bf47c91ca",
+    "docs/claude/INDEX.md": "41243fc7daa9a05a9c6052bd7f5fcf600bb73f64bc75647f9219a5edce34122e",
+    "docs/claude/chantiers-530-579.md": "2c6ada3f9b6155d54a07747cc663d38e14875a94c78ad9ccad576a2f398817d5",
+    "docs/claude/journal.md": "1544e4919e8a6c7ea286f1edbb2aea51096bb5e04038fa3c8db3e963e964bcc4",
+    "guide/04-vigne.html": "8ffef6d2f45e5c83552d8238dea8e8d370223809b70576b6e9459c3f3b09f0cb",
+    "index.html": "e8a37d89f23400d41188e850453112fe83c1e6448ab7ccc230c607827428f2a1",
+    "public/sw.js": "c2f10536ef7eabd54eb4ed13a37042f892fd8240b712bd00d2e5fe3aaddc2ff2",
+    "scripts/harnais-claude-md.mjs": "57fccf718baec7e0b09eb9cfbd15111a7df66167df4cecfc4ff0ee6dfb21834e",
+    "scripts/mv-harnais-liste.mjs": "dd41d0e417d148dc2d5185050c5a7d4d49d01ca8b8981ee1e8068473fbcf0d88",
+    "scripts/mv-harnais-rct1b.mjs": "2b4c7269e091d34ae220993932d0634c1ab258ca32dde810b3a07ecf17dfae33",
+    "scripts/tutos-couverture.json": "405ee8cd4e384e15433af884eec55645f7e5da12704df86dc39252c3cc5d2de1",
+    "src/app.js": "d9e68f079b9f7fdf8366ff03c692b2ab2dd8b0b071f8ed46ace17488292e5ea4",
+    "src/cuvier.js": "30ab5f43c19913af10151c79208f1c83c259ea610c4129bba4929cdd892c782c",
+    "src/tutos.js": "978e4083be1f545e3d2c82e3f9fac3c09b2a08885168144dc6401934140f3988",
+    "src/utils.js": "3216a9b7ad32de2b5a5a48a0c2e114244162e15708a7b6e8adab2a71402793db",
+    "src/whats-new.js": "a4803b56f63c745a7a8d1e6811841e07d5a438b33e98f0bbe9fac067ee5ab51f"
+  }
+}

@@ -876,6 +876,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-fenetre2.mjs --contre'],
   ['node scripts/mv-harnais-rct1a.mjs'],               // RECOLTE-1A (§568) : compter les grappes, les pieds présents, le poids, les hL prévus, le document `recolte`
   ['node scripts/mv-harnais-rct1a.mjs --contre'],
+  ['node scripts/mv-harnais-rct1b.mjs'],               // RECOLTE-1B (§569) : le volet « Prévu », les réglages, le recalage, le tuto, les champs stylés
+  ['node scripts/mv-harnais-rct1b.mjs --contre'],
   ['node scripts/mv-harnais-pheno1d.mjs'],             // PHENO-1D (§509) : la date en un appui, aucun retour en arrière, la question avant un grand saut, la commune, le smoke hermétique
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair

@@ -63,8 +63,7 @@
     "_obsIntensite": "OBS-1A (§565) : choisir l’intensité — trois boutons",
     "_obsPhoto": "OBS-1A (§565) : prendre la photo — l’appareil photo du téléphone",
     "_obsClore": "OBS-1A (§565) : « Clore » un signalement (administrateur) — le bouton dit ce qu’il fait",
-    "_rctCompter": "RECOLTE-1A (§568) : « Compter les grappes » (fiche de la parcelle, administrateur, juin à septembre) — un tuto viendra avec RECOLTE-1B, quand le volet « Prévu » dira à quoi sert le comptage",
-    "_rctSaisie": "RECOLTE-1A (§568) : taper le nombre de grappes d’un pied — un champ par pied",
-    "_rctEnregistrer": "RECOLTE-1A (§568) : « Enregistrer le comptage » — le bouton dit ce qu’il fait"
+    "_recSetMode": "RECOLTE-1B (§569) : la bascule « Réel · Prévu » des Récoltes — deux boutons, rien à apprendre",
+    "_rctReglage": "RECOLTE-1B (§569) : les réglages du calcul et « Recaler » (administrateur) — chaque champ et chaque bouton dit ce qu’il change"
   }
 }

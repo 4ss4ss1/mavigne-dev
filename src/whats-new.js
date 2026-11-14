@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.00', d: '2026-11-14', items: [
+    { niv: 0, pour: ['admin'], emoji: 'grappe', titre: 'La récolte prévue, par cuvée',
+      desc: "Dans Cave › Le Cuvier › Récoltes, «\u00a0Prévu\u00a0» range la récolte prévue par cuvée, face au maximum de l’appellation, avec le total du domaine. Les parcelles non comptées prennent la moyenne de leur cépage. Le poids moyen d’une grappe et les rendements en jus se règlent là, et l’appli propose de recaler le poids après la vendange. Un tuto montre le comptage." },
+  ] },
   { v: '10.99', d: '2026-11-13', items: [
     { niv: 0, pour: ['admin'], emoji: 'grappe', titre: 'Compter les grappes, prévoir la récolte',
       desc: "Depuis la fiche d’une parcelle (de juin à septembre), «\u00a0Compter les grappes\u00a0»\u00a0: le nombre de grappes de dix pieds, et l’appli donne en direct la moyenne, les pieds présents (écartements du domaine, surface, reste à planter), le poids moyen du cépage et la récolte prévue en hectolitres." },
