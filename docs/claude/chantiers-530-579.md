@@ -931,3 +931,25 @@ La seconde moitié de RECOLTE-1 (la maquette, partie 4 : « Le Cuvier › Récol
 
 ### 569e. Ce qui reste ouvert
 - **RECOLTE-1 est terminé.** La cuve prévue : avec un plan cuvée → cuve (à dessiner). La suite du plan : **IFT-1**, REG27-1.
+
+## 570. ★★ RULES-2 — LES RÈGLES DE LA VIGNE JOUÉES SUR L’ÉMULATEUR : STADES, RÉCOLTE PRÉVUE, SIGNALEMENTS (14/11 — `scripts/mv-harnais-rules.mjs` (section V, `op 'merge'`, 3 contre-épreuves) · `firestore.rules` (un commentaire) · `CLAUDE.md` (§6 BUILD-1, §6b, §8c) · `scripts/harnais-claude-md.mjs` · `docs/claude/journal.md` · `docs/claude/chantiers-530-579.md` · `docs/claude/INDEX.md` · `.mv-base` · `lots/RULES-2.json` · base `22326e1`)
+
+### 570a. D’où ça vient
+Nico (14/11) : « est-ce qu’un firebase deploy après le npm run build est suffisant pour tout déployer ? ». En vérifiant, constat : PHENO-1A (§505, `pheno`), OBS-1A (§565, `observations_<année>` et la règle Storage des photos) et RECOLTE-1A (§568, `recolte`) ont changé ce que les règles autorisent sans ajouter leur cas à `mv-harnais-rules` — RULES-1 (§8c) exige le cas et sa contre-épreuve. Rien n’avait prouvé, en l’exécutant, qu’un admin enregistre un stade et qu’un ouvrier ne le peut pas. Nico : « ok suite » — avant IFT-1.
+
+### 570b. Ce qui change
+- **12 cas (section V)** : `pheno` — l’admin écrit (V01), un ouvrier non (V02), un saisonnier lit (V03) ; `recolte` — l’admin écrit (V04), un ouvrier non (V05), `adm` + `ro` non (V06), un ouvrier lit (V07) ; `observations_2026` — un ouvrier écrit par fusion (V08) et lit (V09), un saisonnier non (V10), un champ hors `{ value }` non (V11), un membre de A chez B non (V12). Trois documents rejoignent les données de départ.
+- **Le moteur joue une écriture par fusion** (`op 'merge'` : `set(data, { merge: true })`, comme le `setDoc … { merge: true }` d’OBS-1A) : une fusion se juge sur le document qui en RÉSULTE (`shapeOk` voit le champ ajouté) ; toute écriture, fusion comprise, repart des données de départ.
+- **3 contre-épreuves** : `pheno` sort de la liste admin (V02 rougit), `recolte` aussi (V05), la règle 3 se ferme aux signalements (V08) ; V06 et V10 rejoignent « canWrite : on oublie ro », V11 « shapeOk : n’importe quelle forme passe ». ★ Une faute posée sur les règles doit les laisser COMPILABLES (le moteur les recharge) : `'pheno_x'`, `'recolte_x'` — jamais une liste à virgule finale.
+- `firestore.rules` : le commentaire laissé de travers par RECOLTE-1A (« le commentaire de PHENO-1A suit ») remis d’aplomb — aucun effet sur ce qui est autorisé.
+- **CLAUDE.md** : §6b et §8c disaient « 70 requêtes + 15 contre-épreuves » — il y en avait déjà 78 (JALONS-1, §340, avait ajouté 8 cas sans le compte) ; 90 et 18 désormais. §6 (BUILD-1) : l’ordre d’un `firebase deploy` complet, lu dans le code de l’outil (firebase-tools 15.36.0, `VALID_DEPLOY_TARGETS` puis `filterTargets`, qui garde cet ordre même avec `--only`) — règles Storage → règles Firestore → fonctions → appli —, et le piège de `dist/` quand le build s’arrête.
+
+### 570c. Mesuré
+- ⚠️ **Le contrôle n’a PAS tourné dans le bac à sable** : l’émulateur Firestore est un .jar que l’outil télécharge sur `storage.googleapis.com`, refusé par le proxy (403) — Java 21, lui, y est. La CI le joue à chaque envoi (job `rules`, `npm run test:rules`).
+- Vérifié hors émulateur, le texte du contrôle évalué : 90 cas bien formés (identité connue, opération `get` / `set` / `merge`, attendu booléen), aucun doublon, 27 documents de départ, **18 ancres de contre-épreuve trouvées chacune une fois** dans `firestore.rules` ; chaque attendu relu contre les règles d’écriture (`canWrite` ; `isAdmin` = `canWrite` + `adm` ; règles 1 à 6 du bloc `mavigne_*`).
+- Les autres contrôles touchés : voir la note de livraison.
+
+### 570d. Ce qui reste ouvert
+- **Regarder le job `rules` de la CI après l’envoi** : un rouge sur un cas V viendrait de ce lot (le moteur réel a le dernier mot).
+- **La règle Storage des photos** (`tenants/{tenant}/photos/`, OBS-1A) reste vérifiée par lecture seulement (`mv-harnais-obs1a` ⑦) : la jouer demande l’émulateur Storage (absent de `firebase.json`) et un second volet au contrôle — un lot à part, si Nico le veut.
+- La suite du plan : **IFT-1**, REG27-1.

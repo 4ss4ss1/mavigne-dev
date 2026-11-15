@@ -1,0 +1,18 @@
+{
+  "lot": "RULES-2",
+  "section": "§570",
+  "base": "22326e1a9c4e0f427aad5204f96ae00ac765c9db",
+  "inclut": [],
+  "date": "2026-11-14",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "609d4b3af0376d499f1050b44a12bbf8d23c6b49c8b067e8ab5f28a0661a4ccf",
+    "CLAUDE.md": "4fd6cf1e4e78c650417930d879ae54d989a4cf248e243a7e18be81106bc8b3bc",
+    "docs/claude/INDEX.md": "dc6c01fd4f71dc7008d3e0cb92b9eeed0e982e2831e51b10e6687cb8832ce325",
+    "docs/claude/chantiers-530-579.md": "b3c0fc092ff0f2dec67c1011ee108af5228cbe56a84de702145ec6d81756cc08",
+    "docs/claude/journal.md": "7124c4cb1e55708d85c923fddab562be6652e29c16f663cb0747c4016034763f",
+    "firestore.rules": "1aed74b5ef223178f9a1ea5fc917b88caa22d565b78a7a0cdf9e270761a2f6c0",
+    "scripts/harnais-claude-md.mjs": "bc7185c62d89dfc6a3b1af13c3689fcadef93e369d80968184cb7dd5cc2d5409",
+    "scripts/mv-harnais-rules.mjs": "0a7422ec155f5fef78f56063c440e8d2bf5e460194db5d8e567778d9aaeec444"
+  }
+}

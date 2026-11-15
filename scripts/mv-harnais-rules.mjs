@@ -27,6 +27,9 @@
      F. Constats : écarts connus, AFFICHÉS mais non bloquants (décision de Nico en attente).
      P. MOTIFS-1 (§250) : planning_entries, planning_hsup, planning_acomptes lus par l'admin seul ; la vue de
         l'équipe par tout membre, la vue personnelle par son seul titulaire ; aucune écriture client des vues.
+     V. RULES-2 (§570) — la vigne : `pheno` (PHENO-1A, §505) et `recolte` (RECOLTE-1A, §568) écrits par l'admin seul,
+        lus par tous ; `observations_<année>` (OBS-1A, §565) écrit PAR FUSION (setDoc … { merge: true }) par tout
+        membre non-ro, sous la forme { value } (règle 3). ⚠️ La règle Storage des photos n'est PAS jouée ici (Firestore seul).
 
    ⚠️ LA CONTRE-ÉPREUVE REJOUE LE MOTEUR SUR DES RÈGLES FAUTIVES. Chaque faute est
      posée sur une COPIE EN MÉMOIRE du fichier (ancre trouvée EXACTEMENT une fois, sinon
@@ -85,6 +88,10 @@ const ID = {
 
 /* ── Données de départ (écrites règles désactivées) ────────────────────── */
 const SEED = {
+  // RULES-2 (§570) : la vigne — stades, comptages de grappes, signalements de l'année
+  'mavigne_a/pheno':              { value: { '2026': [{ pid: 'p1', nom: 'X', b: 9, d: '2026-04-10' }] } },
+  'mavigne_a/recolte':            { value: { '2026': { p1: { nom: 'X', g: [5, 6], d: '2026-07-17' } } } },
+  'mavigne_a/observations_2026':  { value: { o1: { nom: 'X', type: 'oidium', int: 'fort', statut: 'ouvert' } } },
   'mavigne_a/journal':            { value: [{ id: 1 }] },
   'mavigne_a/paie':               { value: { taux: { X: 15 } } },
   'mavigne_a/membres':            { value: [{ nom: 'X' }] },
@@ -113,7 +120,7 @@ const SEED = {
 
 /* ── Les cas ───────────────────────────────────────────────────────────────
    [id, section, libellé, identité | null (anonyme), op, chemin, données?, attendu]
-   op : 'get' | 'set' ; attendu : true = autorisé, false = refusé. */
+   op : 'get' | 'set' | 'merge' (set avec fusion, comme setDoc … { merge: true } d'OBS-1A) ; attendu : true = autorisé, false = refusé. */
 const liste = n => Array.from({ length: n }, (_, i) => i);
 const CAS = [
   // A. Isolement
@@ -204,6 +211,19 @@ const CAS = [
   ['P15','P','★ un admin de B ne lit PAS la vue d\'équipe de A',           'adminB','get','mavigne_a/planning_equipe',null,false],
   ['P16','P','la démo lit le planning de domaine-dupont (jeu fictif)',     'demo','get','mavigne_domaine-dupont/planning_entries',null,true],
   ['P17','P','GUERETTECH en session lit planning_entries',                 'gtClaim','get','mavigne_a/planning_entries',null,true],
+  // V. RULES-2 (§570) — la vigne : stades (PHENO-1A), récolte prévue (RECOLTE-1A), signalements (OBS-1A)
+  ['V01','V','PHENO-1A : l\'admin note un stade (pheno)',                  'adminA','set','mavigne_a/pheno',{ value: { '2026': [{ pid: 'p1', b: 15 }] } },true],
+  ['V02','V','★ PHENO-1A : un ouvrier ne note PAS de stade',               'ouvrierA','set','mavigne_a/pheno',{ value: { '2026': [] } },false],
+  ['V03','V','PHENO-1A : un saisonnier (ro) lit les stades',               'roA','get','mavigne_a/pheno',null,true],
+  ['V04','V','RECOLTE-1A : l\'admin enregistre un comptage (recolte)',     'adminA','set','mavigne_a/recolte',{ value: { '2026': { p1: { g: [6, 7] } } } },true],
+  ['V05','V','★ RECOLTE-1A : un ouvrier n\'enregistre PAS de comptage',    'ouvrierA','set','mavigne_a/recolte',{ value: { '2026': {} } },false],
+  ['V06','V','★ RECOLTE-1A : adm + ro n\'enregistre PAS de comptage',      'roAdmA','set','mavigne_a/recolte',{ value: { '2026': {} } },false],
+  ['V07','V','RECOLTE-1A : un ouvrier lit la récolte prévue',              'ouvrierA','get','mavigne_a/recolte',null,true],
+  ['V08','V','OBS-1A : un ouvrier signale (écriture par fusion)',          'ouvrierA','merge','mavigne_a/observations_2026',{ value: { o2: { nom: 'X', type: 'gel', int: 'faible', statut: 'ouvert' } } },true],
+  ['V09','V','OBS-1A : un ouvrier lit les signalements',                   'ouvrierA','get','mavigne_a/observations_2026',null,true],
+  ['V10','V','★ OBS-1A : un saisonnier (ro) ne signale PAS',               'roA','merge','mavigne_a/observations_2026',{ value: { o3: { nom: 'X' } } },false],
+  ['V11','V','★ OBS-1A : un signalement hors { value } est refusé',        'ouvrierA','merge','mavigne_a/observations_2026',{ value: { o4: { nom: 'X' } }, x: 1 },false],
+  ['V12','V','★ OBS-1A : un membre de A ne signale PAS chez B',            'ouvrierA','merge','mavigne_b/observations_2026',{ value: { o5: { nom: 'X' } } },false],
 ];
 
 /* F. CONSTATS — écarts connus entre une intention documentée et la règle réelle.
@@ -242,7 +262,7 @@ function contexte(env, qui) {
 async function jouerUn(env, qui, op, chemin, data) {
   const db = contexte(env, qui).firestore();
   const ref = db.doc(chemin);
-  try { op === 'get' ? await ref.get() : await ref.set(data); return true; }
+  try { if (op === 'get') await ref.get(); else if (op === 'merge') await ref.set(data, { merge: true }); else await ref.set(data); return true; }
   catch (e) {
     if (e && (e.code === 'permission-denied' || /PERMISSION_DENIED|permission/i.test(String(e.message)))) return false;
     throw e;   // ⚠️ une autre erreur (émulateur tombé, chemin invalide) n'est PAS un refus : on ne la compte pas comme tel
@@ -255,10 +275,11 @@ async function jouer(env, silencieux) {
   let section = '';
   const TITRES = { A: 'A. Isolement entre domaines', B: 'B. Rôles', C: 'C. Démo',
                    D: 'D. GUERETTECH — identité + session', E: 'E. Collections fermées ou publiques',
-                   P: 'P. MOTIFS-1 — le planning de l’équipe : motifs, heures sup et acomptes chez l’admin' };
+                   P: 'P. MOTIFS-1 — le planning de l’équipe : motifs, heures sup et acomptes chez l’admin',
+                   V: 'V. La vigne — stades et récolte prévue chez l’admin, signalements par toute l’équipe (RULES-2, §570)' };
   for (const [id, sec, lib, qui, op, chemin, data, attendu] of CAS) {
     if (!silencieux && sec !== section) { section = sec; console.log('\n' + c.b(TITRES[sec])); }
-    if (op === 'set') await env.withSecurityRulesDisabled(async ctx => {
+    if (op !== 'get') await env.withSecurityRulesDisabled(async ctx => {   // RULES-2 : 'merge' repart aussi des données de départ
       const db = ctx.firestore();
       for (const [p, d] of Object.entries(SEED)) await db.doc(p).set(d);
     });
@@ -273,7 +294,7 @@ async function jouer(env, silencieux) {
 async function constats(env) {
   console.log('\n' + c.b('F. Constats (non bloquants)'));
   for (const [id, lib, qui, op, chemin, data, actuel] of CONSTATS) {
-    if (op === 'set') await env.withSecurityRulesDisabled(async ctx => {
+    if (op !== 'get') await env.withSecurityRulesDisabled(async ctx => {   // RULES-2 : 'merge' repart aussi des données de départ
       const db = ctx.firestore();
       for (const [p, d] of Object.entries(SEED)) await db.doc(p).set(d);
     });
@@ -291,7 +312,7 @@ const MUT = [
    "\n             && request.auth.token.get('off', false) != true       // ACCES-1 (§186) : fiche Inactive = plus d'accès", '', ['A07', 'A08']],
   ['canWrite : on oublie ro',
    "\n             && request.auth.token.get('ro', false) != true\n             && request.auth.token.get('demo', false) != true;",
-   "\n             && request.auth.token.get('demo', false) != true;", ['B02', 'B17']],
+   "\n             && request.auth.token.get('demo', false) != true;", ['B02', 'B17', 'V06', 'V10']],
   ['canWrite : on oublie la démo',
    "\n             && request.auth.token.get('ro', false) != true\n             && request.auth.token.get('demo', false) != true;",
    "\n             && request.auth.token.get('ro', false) != true;", ['C04']],
@@ -308,7 +329,7 @@ const MUT = [
   ['SEC-GT/2 : l\'identité suffit (gts oublié)',
    "\n             && request.auth.token.get('gts', 0) > request.time.toMillis();", ';', ['D01']],
   ['shapeOk : n\'importe quelle forme passe',
-   "return request.resource.data.keys().hasOnly(['value']);", 'return true;', ['B14']],
+   "return request.resource.data.keys().hasOnly(['value']);", 'return true;', ['B14', 'V11']],
   ['config : cp_mode rejoint les préférences non-admin',
    ".affectedKeys().hasOnly(['home_layout', 'gnr']);", ".affectedKeys().hasOnly(['home_layout', 'gnr', 'cp_mode']);", ['B12']],
   ['error_log : le plafond passe à 1 000',
@@ -318,6 +339,14 @@ const MUT = [
    "Meme raisonnement que `leads` et `_mv_signatures`.\n      allow read, write: if isGtAdmin();", ['E01']],
   ['countOk : plus de plafond de liste',
    "request.resource.data.value.size() <= (d == 'parcelles' ? 3000 : 500)", 'true', ['B15']],
+  // RULES-2 (§570) — la vigne
+  ['PHENO-1A : `pheno` sort de la liste admin',
+   "'pheno',    // ★ PHENO-1A (§505)", "'pheno_x',    // ★ PHENO-1A (§505)", ['V02']],
+  ['RECOLTE-1A : `recolte` sort de la liste admin',
+   "'recolte'];   // ★ RECOLTE-1A (§568)", "'recolte_x'];   // ★ RECOLTE-1A (§568)", ['V05']],
+  ['OBS-1A : la règle 3 se ferme aux signalements',
+   "\n                   && !docId.matches('jalons_.*')\n                   && canWrite()",
+   "\n                   && !docId.matches('jalons_.*') && !docId.matches('observations_.*')\n                   && canWrite()", ['V08']],
 ];
 
 /* ── Principal ─────────────────────────────────────────────────────────── */
