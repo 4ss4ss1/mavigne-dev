@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-11-15",
- "base": "812ef94",
+ "base": "10e9db3",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -348,6 +348,29 @@
     "home › ordinateur › t12 : 21 → 19",
     "pilotage › ordinateur › c44 : 42 → 41"
    ]
+  },
+  {
+   "date": "2026-11-15",
+   "base": "10e9db3",
+   "motif": "hausse acceptée : TETE-4B (§578) : sur ordinateur la ligne d’écran (44 px) colle sous l’en-tête — décision de Nico du 15/11 (point 3 de maquette-bandeau-commun-v1 : « collée sur PC », 155 px annoncés). Elle porte les sous-onglets de la Cave et « + Ajouter » du Journal ; les fiches à côté des listes se calent sous elle au lieu de passer sous l’en-tête. Téléphone et tablette inchangés.",
+   "hausses": [
+    "home › ordinateur › chrome : 120 → 164",
+    "home › ordinateur › chromeDefile : 111 → 155",
+    "parcelles › ordinateur › chrome : 120 → 164",
+    "journal › ordinateur › chrome : 120 → 164",
+    "journal › ordinateur › chromeDefile : 111 → 155",
+    "tracteur › ordinateur › chrome : 120 → 164",
+    "phyto › ordinateur › chrome : 120 → 164",
+    "phyto › ordinateur › chromeDefile : 111 → 155",
+    "cave › ordinateur › chrome : 120 → 164",
+    "cave › ordinateur › chromeDefile : 111 → 155",
+    "reserve › ordinateur › chrome : 120 → 164",
+    "reserve › ordinateur › chromeDefile : 111 → 155",
+    "planning › ordinateur › chrome : 120 → 164",
+    "planning › ordinateur › chromeDefile : 111 → 155",
+    "reglages › ordinateur › chrome : 120 → 164"
+   ],
+   "baisses": []
   }
  ],
  "mesures": {
@@ -481,8 +504,8 @@
     "textes": 173,
     "t11": 0,
     "t12": 19,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 1468
    },
@@ -493,10 +516,10 @@
     "textes": 101,
     "t11": 0,
     "t12": 7,
-    "chrome": 120,
+    "chrome": 164,
     "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1175
+    "hauteur": 1081
    },
    "journal": {
     "cibles": 62,
@@ -505,8 +528,8 @@
     "textes": 196,
     "t11": 0,
     "t12": 33,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 2359
    },
@@ -517,7 +540,7 @@
     "textes": 54,
     "t11": 0,
     "t12": 1,
-    "chrome": 120,
+    "chrome": 164,
     "chromeDefile": null,
     "pouce": null,
     "hauteur": 983
@@ -529,8 +552,8 @@
     "textes": 157,
     "t11": 0,
     "t12": 16,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 2382
    },
@@ -541,8 +564,8 @@
     "textes": 290,
     "t11": 0,
     "t12": 29,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 3646
    },
@@ -553,8 +576,8 @@
     "textes": 94,
     "t11": 0,
     "t12": 6,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 1271
    },
@@ -565,8 +588,8 @@
     "textes": 149,
     "t11": 0,
     "t12": 3,
-    "chrome": 120,
-    "chromeDefile": 111,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
     "hauteur": 1309
    },
@@ -589,7 +612,7 @@
     "textes": 55,
     "t11": 0,
     "t12": 17,
-    "chrome": 120,
+    "chrome": 164,
     "chromeDefile": null,
     "pouce": null,
     "hauteur": 1119

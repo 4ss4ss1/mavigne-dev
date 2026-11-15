@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.97
+// MA VIGNE — Service Worker v11.98
+// v11.98 (15/11/2026) — TETE-4B (§578) : les sous-onglets du Cuvier, du Chai et du Millésime sur la ligne d'écran de la Cave (un seul jeu à la fois, à la même place) ; le millésime regardé en une liste, à droite ; sur ordinateur la ligne d'écran colle sous l'en-tête et les panneaux collants (fiches à côté des listes) se calent sous elle — ils passaient sous l'en-tête ; Planning › Personnel : la ligne sur toute la largeur. bandeau.css, cave.js, utils.js, app.js, index.html.
 // v11.97 (15/11/2026) — TETE-4A (§577) : le bandeau commun — la campagne, la date et « ? Aide » dans la ligne du module ; sous l'en-tête, une ligne d'écran de 44 px (le compteur, le bouton d'ajout, le choix du millésime de la Cave) ; le Chai et le Millésime n'ont plus un en-tête plus haut que les autres.
 // v11.96 (15/11/2026) — REG27-2 (§575) : horaires et stade exigés au registre, cochés par l'admin sur la fiche d'un produit du catalogue E-Phy ; l'assistant et la vérification avant l'export les lisent.
 // v11.95 (15/11/2026) — OVPANEL-1 (§574) : le choix de la période du journal des interventions prend la feuille commune (il portait des classes sans aucun style) ; le code de l'ancienne fiche du catalogue local, que plus rien n'ouvrait, est retiré.
@@ -4729,7 +4730,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.97';
+const CACHE_NAME   = 'mavigne-v11.98';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4746,7 +4747,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.97 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.98 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4766,7 +4767,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.97 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.98 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

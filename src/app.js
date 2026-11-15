@@ -5951,7 +5951,8 @@ function _accZones(){
 var _accColleOk=false;
 function _accColle(){
   var dr=document.getElementById('home-droite'); if(!dr) return;
-  var hd=document.querySelector('#page-home .mod-header'), h=hd?hd.offsetHeight:0;
+  // ★ TETE-4B (§578) : sous l'en-tête ET la ligne d'écran quand elle colle (ordinateur) — _mvTeteBas, utils.js
+  var hd=document.querySelector('#page-home .mod-header'), h=window._mvTeteBas?window._mvTeteBas('page-home'):(hd?hd.offsetHeight:0);
   dr.style.setProperty('--acc-haut',h+'px');
   dr.classList.toggle('colle',window.innerWidth>=1024&&(dr.offsetHeight+h+40)<=window.innerHeight);
   if(!_accColleOk){ _accColleOk=true; window.addEventListener('resize',function(){ clearTimeout(window._accColleT); window._accColleT=setTimeout(_accColle,150); }); }

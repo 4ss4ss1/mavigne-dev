@@ -40,7 +40,7 @@ function monter(cave, mil) {
   };
   vm.createContext(ctx);
   for (const f of ['_caveDansFiltre', '_caveCuvsFiltrees', '_caveMilsDuChai',
-                   '_caveMillChipsHtml', '_rmMilCuvees'])
+                   '_caveMillChoix', '_caveMillNoteHtml', '_caveMillChipsHtml', '_rmMilCuvees'])   // TETE-4B (§578) : les années et la phrase ont leur fonction
     vm.runInContext(corps(f), ctx);
   return ctx;
 }

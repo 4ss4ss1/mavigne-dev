@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.07', d: '2026-11-15', items: [   // TETE-4B (§578) : les sous-onglets de la Cave sur la ligne d'écran ; la ligne collée sur ordinateur, les fiches calées sous elle
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'curseurs', titre: 'Cave\u00a0: les sous-onglets toujours au même endroit',
+      desc: "Les sous-onglets du Cuvier, du Chai et du Millésime étaient placés chaque fois plus bas\u00a0: après les quatre chiffres, après l’état des cuves, après tout l’en-tête du millésime. Ils sont maintenant sur la même ligne, juste sous les sections de la Cave\u00a0; au téléphone, ils défilent de côté. Le millésime regardé se choisit dans une liste, à droite de cette ligne." },
+    { niv: 0, pour: ['admin'], emoji: 'document', titre: 'Sur ordinateur, la fiche reste entière quand on descend',
+      desc: "En descendant dans une liste, le haut de la fiche ouverte à côté — le nom de la parcelle, de la cuvée, du traitement — passait sous l’en-tête. La fiche reste maintenant entière. La ligne sous les onglets («\u00a014 entrées\u00a0», «\u00a0+ Ajouter\u00a0», les sous-onglets de la Cave) reste elle aussi en haut. Au Planning, onglet Personnel, cette ligne prend toute la largeur." },
+  ] },
   { v: '11.06', d: '2026-11-15', items: [   // TETE-4A (§577) : le bandeau commun — le haut de l'écran à la même hauteur partout
     { niv: 0, pour: ['tous'], emoji: 'curseurs', titre: 'Le haut de l’écran a la même hauteur partout',
       desc: "D’un écran à l’autre, le haut changeait de hauteur — dans la Cave, il grandissait au Chai et au Millésime. Il tient maintenant en trois lignes, toujours les mêmes : le nom de la page, avec la campagne, la date et « ? Aide » ; les onglets ; puis une ligne qui dit l’essentiel de l’écran (« 15 traitements », « 14 entrées ») et porte son bouton d’ajout. Dans la Cave, le choix du millésime est à droite de cette ligne. Au téléphone, la campagne s’écrit sous le nom de la page. Le Pilotage garde son en-tête actuel pour l’instant." },

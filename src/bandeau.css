@@ -68,3 +68,53 @@ body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top{ disp
 body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top > .mod-meta-row{ display:none; }
 
 /* ★ FIN TETE-4A */
+
+/* ★ TETE-4B (§578) — LES SOUS-ONGLETS SUR LA LIGNE D'ÉCRAN : À LA MÊME PLACE DANS TOUTE LA CAVE.
+   Ils venaient après un bloc différent dans chaque section (280, 322 et 546 px ; 306, 399 et 761 au téléphone). La ligne qui en porte
+   (.a-sous, posée par _caveSousSync) leur donne la gauche — ils défilent de côté s'ils ne tiennent pas — et ne dit plus son compteur ;
+   à droite, le millésime regardé tient en un bouton (une liste du système). La ligne garde 44 px. */
+.mv-ecran:not(.a-sous) > .mv-ecran-g > .mv-ecran-sous{ display:none; }
+.mv-ecran.a-sous > .mv-ecran-g{ flex:1 1 auto; max-width:none; }
+.mv-ecran.a-sous > .mv-ecran-g > .mod-header-badge{ display:none; }
+.mv-ecran.a-sous > .mv-ecran-d{ flex:0 0 auto; overflow:visible; }
+.mv-ecran-g > .mv-ecran-sous{ display:flex; align-items:center; flex:0 1 auto; min-width:0; overflow-x:auto; overflow-y:hidden; text-overflow:clip; scrollbar-width:none; }
+.mv-ecran-sous::-webkit-scrollbar{ display:none; }
+.mv-ecran-sous-h{ display:flex; align-items:center; flex:none; }
+body .mv-ecran-sous .mvu-tabs.mvu-sub{ position:static; flex:none; margin:0; overflow:visible; }
+body .mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab{ flex:none; position:relative; height:var(--h-sm,28px); min-height:0; padding:0 var(--e-3,12px); }
+/* la zone d'appui (UX-1, §467) : toute la hauteur de la ligne */
+body .mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab::after{ content:''; position:absolute; left:0; right:0; top:calc(var(--e-2,8px) * -1); bottom:calc(var(--e-2,8px) * -1); }
+/* le millésime regardé, en bouton */
+.mv-ecran .mvcm-sel{ display:inline-flex; align-items:center; gap:var(--e-2,8px); margin:0; font-family:var(--font-ui,'Outfit',sans-serif); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); color:var(--texte-doux,#6B6964); white-space:nowrap; }
+.mv-ecran .mvcm-sel .mvcm-lab{ margin:0; font-size:var(--pt-micro,12px); color:var(--texte-doux,#6B6964); }
+.mv-ecran .mvcm-liste{ width:auto; min-width:0; height:var(--h-ctl,32px); margin:0; padding:0 var(--e-2,8px); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-sm,6px); background-color:var(--bg-card,#FFFFFF); color:var(--texte,#1B1A18); font-family:var(--font-ui,'Outfit',sans-serif); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre,1.15); cursor:pointer; }
+.mv-ecran .mvcm-liste:hover{ border-color:var(--texte-doux,#6B6964); }
+.mv-ecran .mvcm-liste:focus-visible{ outline:2px solid var(--focus,var(--accent,#7A2850)); outline-offset:2px; }
+@media (max-width:600px){
+  /* au téléphone, les sous-onglets sans leur icône : quatre ou cinq mots et le bouton du millésime sur une ligne */
+  .mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab-em,.mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab > svg,.mv-ecran-sous .mvu-tabs.mvu-sub .t-ico:empty{ display:none; }
+  body .mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab,body .mv-ecran-sous #ml-tabs-row .mvu-tab{ flex:none; padding:0 var(--e-2,8px); }
+  /* le jeu qui dépasse défile de côté : son bord droit s'estompe, pour dire qu'il continue (.defile, posée par _caveSousSync) */
+  .mv-ecran-sous.defile{ -webkit-mask-image:linear-gradient(to right,black calc(100% - var(--e-5,20px)),transparent); mask-image:linear-gradient(to right,black calc(100% - var(--e-5,20px)),transparent); }
+}
+
+/* — Sur ordinateur, la ligne d'écran reste en haut avec l'en-tête : les sous-onglets et « + Ajouter » se touchent sans remonter.
+     L'en-tête y fait 111 px (56 + 55 ; test:ux le mesure). Au téléphone et sur tablette, la ligne défile : le bandeau s'y replie. — */
+@media (min-width:1024px){
+  .mod-header + .mv-ecran{ position:sticky; top:var(--h-tete,111px); z-index:79; }
+  /* LES PANNEAUX QUI COLLENT SE CALENT SOUS ELLE. Ils collaient à 16 px du haut de la fenêtre, donc SOUS l'en-tête : en descendant,
+     le haut de la fiche (le nom de la cuvée, de la parcelle, du traitement) passait dessous — mesuré, 95 px cachés. Mêmes sélecteurs que
+     dans styles.css (lue avant) ; « body » devant ceux que le code pose aussi par une feuille à lui. */
+  #page-journal.active > #j-feuille,#page-journal.active > #j-fiche,#page-tracteur.active > #trac-droite,body .caj-fx,
+  #page-parcelles #pwrapliste > .content > #p-fiche,#page-tracteur #trac-panel-sessions > #trac-fiche,#page-tracteur #trac-panel-entretiens > #ent-gauche,
+  #page-phyto.ph-reg-on .content > #ph-fiche,#page-phyto #tab-cat-trac > #cat-fiche,body .mat-droite,body .rec-droite,body .creg-nav,
+  #page-cave #mvc-view-cuv > #chai-fiche,body .dgn-liste,body .caj-som{ top:calc(var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)); }
+  #page-journal.active > #j-fiche,#page-tracteur.active > #trac-droite,body .caj-fx,#page-parcelles #pwrapliste > .content > #p-fiche,
+  #page-tracteur #trac-panel-sessions > #trac-fiche,#page-phyto.ph-reg-on .content > #ph-fiche,#page-phyto #tab-cat-trac > #cat-fiche,
+  #page-cave #mvc-view-cuv > #chai-fiche{ max-height:calc(100vh - calc(var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)) - var(--e-6,24px)); }
+  /* Planning › Personnel : la ligne d'écran sur toute la largeur, la fiche de la personne en dessous d'elle */
+  body.pl-gens-dock #page-planning > .mv-ecran{ grid-column:1 / -1; }
+  body.pl-gens-dock #page-planning > #ovPlanFiche{ grid-row:3 / span 20; }
+}
+
+/* ★ FIN TETE-4B */

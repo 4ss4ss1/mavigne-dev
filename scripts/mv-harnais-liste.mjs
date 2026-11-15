@@ -838,6 +838,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-tete3c.mjs --contre'],
   ['node scripts/mv-harnais-tete4a.mjs'],              // TETE-4A (§577) : le bandeau commun — la bande dans la ligne du module, la ligne d'écran sous l'en-tête, le choix du millésime hors de l'en-tête
   ['node scripts/mv-harnais-tete4a.mjs --contre'],
+  ['node scripts/mv-harnais-tete4b.mjs'],              // TETE-4B (§578) : les sous-onglets de la Cave sur la ligne d'écran, le millésime regardé en bouton, la ligne collée sur ordinateur et les panneaux collants calés sous elle
+  ['node scripts/mv-harnais-tete4b.mjs --contre'],
   ['node scripts/mv-harnais-filtre1a.mjs'],            // FILTRE-1A (§476) : le Journal au téléphone — la feuille des filtres, la barre basse, les chips actifs, le bouton flottant
   ['node scripts/mv-harnais-filtre1a.mjs --contre'],
   ['node scripts/mv-harnais-filtre1b.mjs'],            // FILTRE-1B (§477) : Parcelles au téléphone — la feuille « Filtres » pour tous (tâche, Liste / Carte), la barre basse

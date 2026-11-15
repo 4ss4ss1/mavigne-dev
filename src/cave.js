@@ -1292,6 +1292,7 @@ function renderCave() {
   _caveHeaderRender();
   _caveKpisRender();
   _caveMilBarRender();   // CAVE-RANGE-2b (§451) : le millésime regardé, en haut, pour Le Chai et Le Millésime
+  _caveSousSync();       // TETE-4B (§578) : sur la ligne d'écran, les sous-onglets de la section — un seul jeu à la fois
   var _aujHost=document.getElementById('cave-view-auj'); if(_aujHost) _aujHost.style.display='none';
   var _regHost=document.getElementById('cave-view-reg'); if(_regHost) _regHost.style.display='none';
   if (caveSection === 'reglages') { _mvcHide(); _mlHideAutres(); renderCaveReglagesCave(); return; }
@@ -2480,6 +2481,9 @@ function renderCaveVendange() {
   var body=document.getElementById('cave-vend-body'); if(!body) return;
   body.style.padding='0';
   body.innerHTML='<div class="mvv-wrap">'+_vendCockpitHtml()+'<div class="mvv-body" id="mvv-body"></div></div>';
+  // ★ TETE-4B (§578) : les onglets du Cuvier montent sur la ligne d'écran (#cave-sous-vend). Sans elle, ils restent où ils sont écrits.
+  var _hs=document.getElementById('cave-sous-vend'), _bs=body.querySelector('.mvv-wrap > .mvu-tabs.mvu-sub');
+  if(_hs&&_bs){ _hs.innerHTML=''; _hs.appendChild(_bs); }
   _vendRenderTab();
 }
 
@@ -4151,15 +4155,26 @@ function _caveMilsDuChai(){
   ms.sort(function(a,b){return b-a;});
   return ms;
 }
-function _caveMillChipsHtml(){
-  // ★★ CAVE-RANGE-2b (§451) — LE MILLÉSIME REGARDÉ, UNE SEULE FOIS, EN HAUT DE LA CAVE. Il vivait à deux endroits : sous les
-  //   onglets du Chai (ici) et en tête du Millésime (_mlHead). Une seule barre, sous les sections, pour Le Chai et Le Millésime ;
-  //   Aujourd'hui (toute la cave) et Le Cuvier (la campagne) ne la montrent pas. Les années : celles du Chai et du Millésime.
+/* ★ TETE-4B (§578) — LES ANNÉES DU CHOIX, UNE SEULE FOIS : les puces (sous les sections, quand la page n'a pas de ligne d'écran) et le
+   bouton de la ligne d'écran lisent la même liste — celles du Chai et du Millésime, la plus récente d'abord. */
+function _caveMillChoix(){
   var cuvs=CAVE_ELEVAGE.cuvees||[];
   var act=cuvs.filter(function(c){return c.statut!=='embouteille';});
   var vus={}, ms=[];
   _caveMilsDuChai().concat((typeof _mlMillesimes==='function')?(_mlMillesimes()||[]):[]).forEach(function(m){ var k=String(m); if(m!=null && k!=='' && !vus[k]){ vus[k]=1; ms.push(m); } });
   ms.sort(function(a,b){ return Number(b)-Number(a); });
+  return {act:act, ms:ms};
+}
+// Le Millésime parle d'UN millésime : sur « Tous », il montre la campagne en cours, et la phrase le dit.
+function _caveMillNoteHtml(){
+  if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') return '<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:4px 0 0">Le Millésime montre celui de la campagne en cours (<b>'+_escHtml(String(_mlCampagne()))+'</b>). Choisir une année la choisit pour toute la Cave.</div>';
+  return '';
+}
+function _caveMillChipsHtml(){
+  // ★★ CAVE-RANGE-2b (§451) — LE MILLÉSIME REGARDÉ, UNE SEULE FOIS, EN HAUT DE LA CAVE. Il vivait à deux endroits : sous les
+  //   onglets du Chai (ici) et en tête du Millésime (_mlHead). Une seule barre, sous les sections, pour Le Chai et Le Millésime ;
+  //   Aujourd'hui (toute la cave) et Le Cuvier (la campagne) ne la montrent pas. Les années : celles du Chai et du Millésime.
+  var ch=_caveMillChoix(), act=ch.act, ms=ch.ms;
   if(ms.length<2) return '';   // un seul millésime → pas de choix utile (règle d'origine)
   var h='<div class="mvcm-chips" role="group" aria-label="Millésime regardé"><span class="mvcm-lab">Millésime regardé</span>';
   h+='<button type="button" class="mvcm-chip'+(_caveMillFilter==='tous'?' on':'')+'" aria-pressed="'+(_caveMillFilter==='tous')+'" onclick="_caveSetMill(\'tous\')">Tous<span class="mvcm-c">'+act.length+'</span></button>';
@@ -4169,9 +4184,18 @@ function _caveMillChipsHtml(){
       +(n?'<span class="mvcm-c">'+n+'</span>':'')+'</button>';
   });
   h+='</div>';
-  // Le Millésime parle d'UN millésime : sur « Tous », il montre la campagne en cours, et la barre le dit.
-  if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') h+='<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:4px 0 0">Le Millésime montre celui de la campagne en cours (<b>'+_escHtml(String(_mlCampagne()))+'</b>). Choisir une année la choisit pour toute la Cave.</div>';
-  return h;
+  return h+_caveMillNoteHtml();
+}
+/* ★ TETE-4B (§578) — SUR LA LIGNE D'ÉCRAN, LE CHOIX TIENT EN UN BOUTON : « Millésime 2025 ▾ ». Les puces prenaient toute la droite de la
+   ligne (et défilaient de côté au téléphone) ; les sous-onglets ont besoin de la place. Une liste du système : au téléphone, c'est
+   la roue du téléphone. Les compteurs par année ne sont plus dans le choix : la liste du Chai, dessous, les montre. */
+function _caveMillBoutonHtml(){
+  var ch=_caveMillChoix(), ms=ch.ms;
+  if(ms.length<2) return '';
+  var h='<label class="mvcm-sel"><span class="mvcm-lab">Millésime</span><select class="mvcm-liste" id="cave-mil-sel" aria-label="Millésime regardé" onchange="_caveSetMill(this.value)">'
+    +'<option value="tous"'+(_caveMillFilter==='tous'?' selected':'')+'>Tous</option>';
+  ms.forEach(function(m){ h+='<option value="'+_escAttr(String(m))+'"'+(String(_caveMillFilter)===String(m)?' selected':'')+'>'+_escHtml(String(m))+'</option>'; });
+  return h+'</select></label>';
 }
 /* L'hote du filtre — meme patron que _caveEnsureBtlTab : l'onglet Bouteilles
    est deja cree en JS a cote de #mvc-tabs-row, on ne touche donc pas au HTML
@@ -4195,10 +4219,27 @@ function _caveMilBarRender(){
   var h=document.getElementById('cave-milbar'); if(!h) return;
   var la=(caveSection==='elevage' || caveSection==='millesime');   // Aujourd'hui : toute la cave ; Le Cuvier : la campagne
   h.style.display=la?'':'none';
-  h.innerHTML=la?_caveMillChipsHtml():'';
+  // ★ TETE-4B (§578) : sur la ligne d'écran, un bouton (et la phrase du Millésime, qui en sort juste après) ; sous les sections, les puces.
+  var surLigne=!!(h.parentNode && h.parentNode.id==='cave-ecran-d');
+  h.innerHTML=la?(surLigne?_caveMillBoutonHtml()+_caveMillNoteHtml():_caveMillChipsHtml()):'';
   // ★ TETE-4A (§577) : la phrase d'explication du Millésime sort de la ligne d'écran (une ligne, 44 px) — elle se lit juste dessous.
   var hn=document.getElementById('cave-milnote');
   if(hn){ var nt=h.querySelector('.mlh-tous'); hn.innerHTML=''; if(nt) hn.appendChild(nt); hn.style.display=nt?'':'none'; }
+}
+/* ★★ TETE-4B (§578) — LES SOUS-ONGLETS VIVENT SUR LA LIGNE D'ÉCRAN, À LA MÊME PLACE DANS LES TROIS SECTIONS. Ils venaient après un bloc
+   différent chaque fois (mesuré : 280 px au Cuvier, 322 au Chai, 546 au Millésime ; 306, 399 et 761 au téléphone). Les trois jeux sont
+   dans #cave-ecran-sous (index.html ; celui du Cuvier y est posé par renderCaveVendange) : on n'en montre qu'UN, celui de la section.
+   Aujourd'hui et les réglages n'en ont pas : la ligne dit alors la campagne, comme avant. .a-sous range la ligne (bandeau.css).
+   ⚠️ Un jeu qui n'est pas dans l'hôte (une page d'avant) n'est pas touché : il reste visible là où il est. */
+var _CAVE_SOUS={vendange:'cave-sous-vend', elevage:'mvc-tabs-row', millesime:'ml-tabs-row'};
+function _caveSousSync(){
+  var h=document.getElementById('cave-ecran-sous'); if(!h) return;
+  var vu=_CAVE_SOUS[caveSection]||'';
+  Object.keys(_CAVE_SOUS).forEach(function(k){ var b=document.getElementById(_CAVE_SOUS[k]); if(b && b.parentNode===h) b.style.display=(_CAVE_SOUS[k]===vu)?'':'none'; });
+  var l=h.closest?h.closest('.mv-ecran'):null; if(l) l.classList.toggle('a-sous',!!vu);
+  // au téléphone le jeu défile de côté : l'onglet ouvert doit se voir en arrivant (Le Cuvier s'ouvre sur son troisième)
+  if(!vu) h.classList.remove('defile');
+  if(vu) setTimeout(function(){ try{ var a=h.querySelector('#'+vu+' .mvu-tab.active, #'+vu+' .mvu-tab.on'); h.classList.toggle('defile',h.scrollWidth>h.clientWidth+1); if(a && h.scrollWidth>h.clientWidth){ var ra=a.getBoundingClientRect(), rh=h.getBoundingClientRect(); if(ra.left<rh.left || ra.right>rh.right) h.scrollLeft+=ra.left-rh.left-8; } }catch(e){ if(window._mvAvale) window._mvAvale(e,'cave.js/_caveSousSync'); } },0);
 }
 function _caveSetMill(m){
   _caveMillFilter=m;
@@ -6383,12 +6424,13 @@ window._aujJourSel=function(d){
 var _aujColleOk=false;
 function _aujColle(){
   var dr=document.getElementById('caj-droite'); if(!dr) return;
-  var hd=document.querySelector('#page-cave .mod-header'), h=hd?hd.offsetHeight:0;
+  // ★ TETE-4B (§578) : sous l'en-tête ET la ligne d'écran quand elle colle (ordinateur) — _mvTeteBas, utils.js
+  var hd=document.querySelector('#page-cave .mod-header'), _bas=function(){ return window._mvTeteBas?window._mvTeteBas('page-cave'):(hd?hd.offsetHeight:0); }, h=_bas();
   dr.style.setProperty('--caj-haut',h+'px');
   dr.classList.toggle('colle',window.innerWidth>=1024&&(dr.offsetHeight+h+40)<=window.innerHeight);
   // ★ CAVE-UX-1 (§494) : le sommaire se colle sous l'en-tête — sa hauteur suit celle de l'en-tête (replié ou non, TETE-3A)
   var ab=document.getElementById('auj-body'); if(ab) ab.style.setProperty('--caj-som-haut',h+'px');
-  if(!_aujRO&&hd&&typeof window.ResizeObserver==='function'){ _aujRO=new ResizeObserver(function(){ var b2=document.getElementById('auj-body'); if(b2) b2.style.setProperty('--caj-som-haut',hd.offsetHeight+'px'); }); _aujRO.observe(hd); }
+  if(!_aujRO&&hd&&typeof window.ResizeObserver==='function'){ _aujRO=new ResizeObserver(function(){ var b2=document.getElementById('auj-body'); if(b2) b2.style.setProperty('--caj-som-haut',_bas()+'px'); }); _aujRO.observe(hd); }
   if(!_aujColleOk){ _aujColleOk=true; window.addEventListener('resize',function(){ clearTimeout(window._aujColleT); window._aujColleT=setTimeout(_aujColle,150); }); }
 }
 // ═══ ★★ CAVEAUJ-2 (§435) — LE CUVIER, LE CHAI ET LES DERNIERS GESTES, D'UN COUP D'ŒIL (maquette validée le 22/10) ═══
@@ -6675,7 +6717,7 @@ function _aujSommaireHtml(N){
 function _aujVers(id){
   var el=document.getElementById(id); if(!el) return false;
   var hd=document.querySelector('#page-cave .mod-header'), so=document.getElementById('caj-som');
-  var off=(hd?hd.offsetHeight:0)+((so&&!_aujDesk())?so.offsetHeight:0)+8;
+  var off=(window._mvTeteBas?window._mvTeteBas('page-cave'):(hd?hd.offsetHeight:0))+((so&&!_aujDesk())?so.offsetHeight:0)+8;   // TETE-4B (§578) : sous la ligne d'écran quand elle colle
   window.scrollTo({ top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-off), behavior:'smooth' });
   return false;
 }
