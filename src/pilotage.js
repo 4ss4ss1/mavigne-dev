@@ -226,7 +226,7 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Travaux — où en est-on, et quand aura-t-on fini',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Travaux — où en est-on, et quand aura-t-on fini',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, IFT et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
 var _PIL_VALID_TAB = {auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -804,14 +804,14 @@ function _pilTile(id,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
 //   phy  : jours depuis le dernier traitement du registre (TRAITEMENTS, toutes
 //          campagnes : la protection ne s'arrête pas au 1er novembre) ;
 //   cep  : le cépage de la fiche parcelle (p.cepage), une couleur par cépage ;
-//   pass : les passages phyto de la campagne (_cfmPassages, la règle de la
-//          Conformité) face à la référence (_cfmIftRef) — des passages, pas un IFT ;
+//   ift  : l'IFT de l'année, hors biocontrôle, par parcelle (_iftCalc, la règle de la
+//          Conformité) face à la référence (_cfmIftRef) — IFT-1 (§571) ; c'étaient des passages ;
 //   cout : le coût engagé à l'hectare (_pecData, la vue Parcelles de l'Économie).
-// Une parcelle sans donnée reste grise : un vide n'est pas un zéro. Zéro passage,
-// lui, est une mesure : il a sa couleur.
+// Une parcelle sans donnée reste grise : un vide n'est pas un zéro. Un IFT nul (aucun
+// traitement de l'année), lui, est une mesure : il a sa couleur.
 // ════════════════════════════════════════════════════════════════════════
 var _PIL_LENT='avc';
-var _PIL_LENTS=[['avc','Avancement'],['phy','Dernier traitement'],['cep','Cépage'],['pass','Passages phyto'],['cout','Coût / ha']];
+var _PIL_LENTS=[['avc','Avancement'],['phy','Dernier traitement'],['cep','Cépage'],['ift','IFT'],['cout','Coût / ha']];
 var _PIL_LENT_GRIS='#BDB6A8';
 var _PIL_CEP_COL={'pinot noir':'#7A1020','chardonnay':'#D8BC72','aligote':'#A8B86A','gamay':'#7B4DB8','pinot gris':'#B07A8A','pinot blanc':'#E3D9A6'};
 var _PIL_CEP_PAL=['#4A80C4','#C8853A','#3D8A8A','#8A5A38','#9C6BB0','#5B9B3A'];
@@ -830,9 +830,9 @@ function _pilLentPrep(){
     var n=new Date(), auj=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(), j={};
     Object.keys(der).forEach(function(nom){ var t0=new Date(der[nom]+'T00:00:00').getTime(); if(isFinite(t0)) j[nom]=Math.max(0,Math.round((auj-t0)/86400000)); });
     o.j=j;
-  } else if(L==='pass'){
-    var pass={}; _cfmPassages().forEach(function(r){ pass[r.nom]=r.pass; });
-    o.pass=pass; o.refIft=_cfmIftRef().v;
+  } else if(L==='ift'){
+    var R=_iftCalc(_iftAnnee()), ift={}; R.rows.forEach(function(q){ ift[q.nom]=q; });
+    o.ift=ift; o.refIft=R.ref.v; o.an=R.an; o.ok=R.ok;
   } else if(L==='cep'){
     var cep={}, k=0;
     (window.PARCELLES||[]).forEach(function(p){ if(!p||p.statut==='Arrachee') return; var c=_friseNorm(p.cepage); if(!c||cep[c]) return; cep[c]={col:_PIL_CEP_COL[c]||_PIL_CEP_PAL[(k++)%_PIL_CEP_PAL.length], nom:String(p.cepage).trim()}; });
@@ -848,10 +848,11 @@ function _pilLentPrep(){
 function _pilLentCol(p,o){
   if(!p) return null;
   if(o.lent==='phy'){ var j=o.j[p.nom]; if(j==null) return null; return {col:_pilLentRamp(j/14,['3D6B27','C2A14D','A0291E']), txt:(j===0?'traitée aujourd’hui':('dernier traitement il y a '+j+' j'))}; }
-  if(o.lent==='pass'){
-    var n=o.pass[p.nom]||0, r=o.refIft>0?n/o.refIft:0;
+  if(o.lent==='ift'){
+    var q=o.ok?o.ift[p.nom]:null; if(!q) return null;   // catalogue E-Phy absent, ou vigne arrachée : pas de donnée
+    var r=o.refIft>0?q.hb/o.refIft:0;
     var col=r>1.25?'#A0291E':(r>1?'#B85A1A':_pilLentRamp(r,['DDEBD2','3D6B27']));
-    return {col:col, txt:n+' passage'+(n>1?'s':'')+' · référence '+o.refIft};
+    return {col:col, txt:'IFT '+o.an+' : '+_iftF(q.hb)+' hors biocontrôle'+(q.bio>0?' (+ '+_iftF(q.bio)+' en biocontrôle)':'')+' · référence '+_iftF(o.refIft)};
   }
   if(o.lent==='cep'){ var c=o.cep[_friseNorm(p.cepage)]; return c?{col:c.col, txt:c.nom}:null; }
   if(o.lent==='cout'){
@@ -872,7 +873,7 @@ function _pilLentLeg(o){
   var gr=function(stops,a,b,c){ return '<span>'+a+'</span><span class="pil-map-bar" style="background:linear-gradient(90deg,'+stops.map(function(s){ return '#'+s; }).join(',')+')"></span><span>'+b+'</span>'+(c?('<span>'+c+'</span>'):''); };
   var H='';
   if(o.lent==='phy') H=gr(['3D6B27','C2A14D','A0291E'],'0 j','14 j et plus','· jours depuis le dernier traitement');
-  else if(o.lent==='pass') H=sw('#DDEBD2','0')+sw('#3D6B27','jusqu’à la référence ('+o.refIft+')')+sw('#B85A1A','au-dessus')+sw('#A0291E','plus de 25 % au-dessus');
+  else if(o.lent==='ift') H=o.ok?(sw('#DDEBD2','0')+sw('#3D6B27','jusqu’à la référence ('+_iftF(o.refIft)+')')+sw('#B85A1A','au-dessus')+sw('#A0291E','plus de 25 % au-dessus')+'<span>· IFT '+o.an+', hors biocontrôle</span>'):'<span>catalogue E-Phy pas chargé : l’IFT attend les doses homologuées</span>';
   else if(o.lent==='cep'){ var ks=Object.keys(o.cep); H=ks.length?ks.map(function(k){ return sw(o.cep[k].col,_pilEsc(o.cep[k].nom)); }).join(''):'<span>aucun cépage renseigné sur les fiches</span>'; }
   else if(o.lent==='cout') H=(o.mn!=null)?gr(['EAF3E2','C2A14D','8A5A38'],_ecoEur(o.mn),_ecoEur(o.mx),'· engagé à l’hectare'):('<span>'+(o.configured?'aucun coût engagé sur la période':'taux horaires à renseigner (Réglages › Équipe)')+'</span>');
   else H='<span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>';
@@ -10870,28 +10871,178 @@ function _cfmCuivre(){
            over:rows.filter(function(r){ return r.ratio>1; }).length,
            warn:rows.filter(function(r){ return r.ratio>=0.875 && r.ratio<=1; }).length };
 }
-// Passages phyto par parcelle (saison consultée). Un passage = une intervention
-// (sessionId distinct), quel que soit le nombre de produits mélangés.
-function _cfmPassages(){
-  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
-  var seasonNom=(s&&s.nom)?s.nom:'';
-  function _in(t){
-    var sn=(window._saisonForDate&&t.date)?window._saisonForDate(t.date):null; sn=sn||t.saison||'';
-    if(sn) return sn===seasonNom;
-    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
-  }
-  var per={};
-  (window.TRAITEMENTS||[]).forEach(function(t){
-    if(!t||!_in(t)) return;
-    var sid=t.sessionId||('__'+(t.date||''));
-    (t.parcelles||[]).forEach(function(nom){ if(!nom) return; if(!per[nom]) per[nom]={sids:{},prod:0}; per[nom].sids[sid]=1; per[nom].prod++; });
-  });
-  return (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; })
-    .map(function(p){ var e=per[p.nom]; return { nom:p.nom, pass:e?Object.keys(e.sids).length:0, prod:e?e.prod:0 }; })
-    .filter(function(r){ return r.pass>0; })
-    .sort(function(a,b){ return b.pass-a.pass; });
-}
 function _cfmIftRef(){ var c=(window.CONFIG&&window.CONFIG.conformite)||{}; var v=Number(c.ift_ref); return (isFinite(v)&&v>0)?{v:v,def:false}:{v:12,def:true}; }
+// ════════════════════════════════════════════════════════════════════════
+// ★★ IFT-1 (§571) — L'IFT RÉEL (plan IFT-1 ; maquette « niveau au-dessus », partie 5). Il remplace le compte des passages
+//   (_cfmPassages, retirée) dans Conformité et sur la carte du domaine. La méthode est celle du guide du ministère (IFT, 2016) :
+//   · un produit d'un traitement = dose appliquée ÷ dose de référence × part de la parcelle traitée — 1 tant que la surface
+//     partielle ne se saisit pas (REG27-1). Deux produits dans la même cuve comptent chacun (« un mélange de deux produits
+//     appliqués lors d'un même passage compte pour deux traitements »).
+//   · dose de référence « à la culture » : la plus petite des doses homologuées de la vigne pour ce produit (usages E-Phy ;
+//     la synchro en garde quatre au plus par produit — §571e). « À la cible » quand le traitement porte sa cible (`t.cible`,
+//     que REG27-1 saisira) : la plus grande des doses de cette cible. Une dose à l'hectolitre se ramène à l'hectare sur
+//     1 000 L de bouillie, comme le guide.
+//   · sans dose de référence (produit hors du catalogue, retiré, unités qui ne se comparent pas) ou sans dose appliquée
+//     lisible, le produit COMPTE 1 — la règle du guide — et l'écran dit combien.
+//   · les adjuvants et les matières fertilisantes ne sont pas des produits phytopharmaceutiques : ils ne comptent pas.
+//   · le biocontrôle se compte à part, reconnu à la SUBSTANCE (le type E-Phy range le soufre sous « Soufre », qui en est,
+//     et le spinosad sous « Biocontrôle », qui n'en est pas — fiche biocontrôle vigne de l'IFV). La référence régionale se
+//     compare à l'IFT HORS biocontrôle : c'est ainsi qu'elle est publiée.
+//   · une parcelle additionne ses traitements de l'année ; le domaine, la moyenne de ses parcelles pondérée par leur surface
+//     (vignes en place) — « surface traitée ÷ surface du domaine ».
+//   L'ANNÉE est l'année civile, celle de la récolte que les traitements protègent — ni la période de travail (une « saison »
+//   de printemps ferait un IFT de printemps), ni la campagne d'août à juillet (elle couperait les traitements d'août).
+//   Tant que l'année neuve n'a aucun traitement, l'écran montre la précédente : en janvier, on cherche l'IFT de l'an passé.
+// ════════════════════════════════════════════════════════════════════════
+var IFT_BIO_RE=/(soufre|paraffine|carbonate de potassium|bicarbonate|phosphonate|kaolin|silicate d.?aluminium|laminarine|cos.?oga|cerevisane|orange|eugenol|geraniol|thymol|bacillus|trichoderma|beauveria|metschnikowia|aureobasidium|pythium|ampelomyces|coniothyrium|pseudomonas|metarhizium|dodecadien|dodecenyl|pheromon|equisetum|prele|maltodextrine|huile essentielle)/;
+var IFT_PAS_BIO_RE=/(cuivr|bouillie bordelaise|spinosad|pyrethr|prohexadione)/;
+var IFT_REDUITE=0.95, IFT_DOUTE=2;   // « à dose réduite » : 5 % sous la référence au moins ; « à vérifier » : plus du double
+// Minuscules, sans accent, en ASCII : la décomposition NFD sépare l'accent de sa lettre, et tout ce qui n'est pas ASCII part
+// (accents, apostrophe typographique, µ ; les espaces restent) ; le tiret demi-cadratin d'une fourchette devient un trait d'union d'abord.
+function _iftNorm(s){ return String(s==null?'':s).toLowerCase().replace(/\u2013/g,'-').normalize('NFD').replace(/[^\s!-~]/g,''); }
+function _iftCle(s){ return _iftNorm(s).replace(/[^a-z0-9]+/g,' ').trim(); }
+// « 2,5 kg/ha », « 200 g/hL », « 0.16 L/ha » → { q: la quantité par hectare (kg, L, ou l'unité écrite), dim } ; null sinon.
+// `max` : d'une fourchette « 3–5 kg/ha », la borne haute (une dose de référence) ; sans lui, une fourchette ne se lit pas
+// (une dose appliquée est UNE dose).
+function _iftQte(txt,max){
+  var s=_iftNorm(txt).replace(/,/g,'.');
+  var m=/(\d+(?:\.\d+)?)(?:\s*(?:-|a)\s*(\d+(?:\.\d+)?))?\s*([a-z]+)\s*\/\s*(ha|hl)\b/.exec(s);
+  if(!m) return null;
+  var v=parseFloat(m[1]);
+  if(m[2]){ if(!max) return null; v=Math.max(v,parseFloat(m[2])); }
+  if(!(v>0)) return null;
+  var u=m[3], M={mg:1e-6,g:1e-3,kg:1,t:1000}, V={ml:1e-3,cl:1e-2,l:1,hl:100}, q, dim;
+  if(M[u]!=null){ q=v*M[u]; dim='m'; } else if(V[u]!=null){ q=v*V[u]; dim='v'; } else { q=v; dim='u:'+u; }
+  if(m[4]==='hl') q*=10;   // 1 000 L de bouillie à l'hectare
+  return { q:q, dim:dim };
+}
+// La dose appliquée : la dose/ha saisie (structurée), sinon la dose écrite du registre.
+function _iftDa(t){
+  if(t && typeof t.dose_val==='number' && isFinite(t.dose_val) && t.dose_val>0){ var a=_iftQte(t.dose_val+' '+(t.dose_unit||'')); if(a) return a; }
+  return _iftQte(t&&t.dose);
+}
+// La dose de référence, dans la dimension de la dose appliquée (une masse ne se compare pas à un volume).
+function _iftDr(t,e,da){
+  var us=(e&&e.usages)||[], cib=_iftCle(t&&t.cible), best=null;
+  if(cib){
+    us.forEach(function(u){ if(_iftCle(u&&u.cible).indexOf(cib)<0) return; var r=_iftQte(u.dose,true); if(r&&r.dim===da.dim&&(!best||r.q>best.q)) best=r; });
+    if(best) return { q:best.q, cible:true };
+  }
+  us.forEach(function(u){ var r=_iftQte(u&&u.dose,true); if(r&&r.dim===da.dim&&(!best||r.q<best.q)) best=r; });
+  return best?{ q:best.q, cible:false }:null;
+}
+// Le catalogue E-Phy indexé une fois par calcul : par AMM, puis par nom.
+function _iftIdx(){
+  var E=window.EPHY||[], a={}, n={};
+  E.forEach(function(e){ if(!e) return; var am=String(e.amm||'').trim(), k=_iftCle(e.nom); if(am&&!a[am]) a[am]=e; if(k&&!n[k]) n[k]=e; });
+  return { ok:E.length>0, amm:a, nom:n };
+}
+// Une ligne du registre (un produit d'un traitement) → { compte:false } (adjuvant, engrais) ou
+// { compte, r : dose appliquée ÷ dose de référence (1 si l'une manque), un : compté 1, bio, cible, doute }.
+function _iftLigne(t,X){
+  var am=String((t&&t.amm)||'').trim(), e=(am&&X.amm[am])||X.nom[_iftCle(t&&t.produit)]||null;
+  var type=_iftNorm((t&&t.type)||(e&&e.type)||'');
+  if(type==='adjuvant'||type==='mfsc') return { compte:false };
+  var c=(window.CATALOGUE||[]).find(function(x){ return x&&t&&x.nom===t.produit; })||null;
+  var sub=_iftNorm([(t&&t.sub)||'',(e&&e.sub)||'',(c&&c.usage)||''].join(' '));
+  var bio=IFT_PAS_BIO_RE.test(sub)?false:(IFT_BIO_RE.test(sub)||type==='soufre'||type==='biocontrole');
+  var da=_iftDa(t), dr=(da&&e)?_iftDr(t,e,da):null;
+  if(!da||!dr) return { compte:true, r:1, un:true, bio:bio, cible:false, doute:false };
+  var r=da.q/dr.q;
+  return { compte:true, r:r, un:false, bio:bio, cible:dr.cible, doute:r>IFT_DOUTE };
+}
+function _iftAnDe(t){ var s=String((t&&t.date)||'').slice(0,4); return /^\d{4}$/.test(s)?parseInt(s,10):null; }
+function _iftAnnee(){
+  var y=new Date().getFullYear(), a={};
+  (window.TRAITEMENTS||[]).forEach(function(t){ var k=_iftAnDe(t); if(k) a[k]=1; });
+  return (a[y]||!a[y-1])?y:y-1;
+}
+function _iftParcs(t){ var a=t&&t.parcelles; if(typeof a==='string') return a?[a]:[]; return Object.prototype.toString.call(a)==='[object Array]'?a:[]; }
+// L'IFT d'une année : le domaine (hors biocontrôle, biocontrôle, total), les passages, et chaque parcelle en place.
+function _iftCalc(an){
+  var X=_iftIdx(), par={}, surfTot=0;
+  (window.PARCELLES||[]).forEach(function(p){
+    if(!p||p.statut==='Arrachee'||par[p.nom]) return;
+    var s=parseFloat(p.surface)||0; if(s>0) surfTot+=s;
+    par[p.nom]={ nom:p.nom, surf:s, hb:0, bio:0, pass:{}, un:0, n:0 };
+  });
+  var R={ an:an, ok:X.ok, ref:_cfmIftRef(), lignes:0, un:0, doute:0, cible:0, horsParc:0, pass:{}, red:{}, surfTot:surfTot };
+  (window.TRAITEMENTS||[]).forEach(function(t){
+    if(!t||_iftAnDe(t)!==an) return;
+    var L=_iftLigne(t,X); if(!L.compte) return;
+    R.lignes++; if(L.un) R.un++; if(L.doute) R.doute++; if(L.cible) R.cible++;
+    var sid=t.sessionId||('__'+(t.date||'')), vu=false;
+    R.pass[sid]=1; if(!L.un&&L.r<IFT_REDUITE) R.red[sid]=1;
+    _iftParcs(t).forEach(function(nom){ var q=par[nom]; if(!q) return; vu=true; if(L.bio) q.bio+=L.r; else q.hb+=L.r; q.pass[sid]=1; if(L.un) q.un++; });
+    if(!vu) R.horsParc++;
+  });
+  var sHb=0, sBio=0;
+  R.rows=Object.keys(par).map(function(k){ var q=par[k]; q.n=Object.keys(q.pass).length; if(q.surf>0){ sHb+=q.hb*q.surf; sBio+=q.bio*q.surf; } return q; })
+    .sort(function(a,b){ return (b.hb-a.hb)||(b.bio-a.bio)||String(a.nom).localeCompare(String(b.nom)); });
+  R.hb=surfTot>0?sHb/surfTot:null; R.bio=surfTot>0?sBio/surfTot:null; R.tot=(R.hb!=null)?R.hb+R.bio:null;
+  R.nPass=Object.keys(R.pass).length; R.nRed=Object.keys(R.red).length;
+  return R;
+}
+function _iftF(v){ return (Math.round((Number(v)||0)*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function _iftCol(v,ref){ var r=ref>0?v/ref:0; return r>1.25?'--rouge':(r>1?'--orange':'--vert-med'); }
+// Une parcelle : son IFT hors biocontrôle face à la référence, ses passages, son biocontrôle, ses produits comptés 1, et les
+// maladies signalées cette année (OBS-1 : la maquette lit « les trois premières sont celles où l'oïdium a été signalé »).
+function _pilIftLigne(q,ref,mal){
+  var col=_iftCol(q.hb,ref), pct=ref>0?Math.min(q.hb/ref*100,100):0;
+  var s=q.n?(q.n+' passage'+(q.n>1?'s':'')):'aucun traitement';
+  if(q.bio>0) s+=' · + '+_iftF(q.bio)+' en biocontrôle';
+  if(q.un) s+=' · '+q.un+' produit'+(q.un>1?'s':'')+' compté'+(q.un>1?'s':'')+' 1';
+  if(mal&&mal.length) s+=' · '+mal.join(', ')+' signalé'+(mal.length>1?'s':'');
+  return '<div class="pil-li"><span class="pil-av" style="background:#1E3418;color:#8FD07A">🌿</span>'
+    +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(q.nom)+(q.surf>0?' <span style="color:var(--texte-doux);font-weight:500">· '+_pilHa(q.surf)+' ha</span>':'')+'</div>'
+    +'<div class="pil-gbar" style="margin-top:6px"><i style="width:'+pct.toFixed(0)+'%;background:var('+col+')"></i></div>'
+    +'<div class="pil-li-s" style="margin-top:3px;white-space:normal">'+_pilEsc(s)+'</div></div>'
+    +'<div class="pil-li-r" style="color:var('+col+')">'+_iftF(q.hb)+'</div></div>';
+}
+// La carte « IFT <année> » : le domaine (hors biocontrôle en tête, face à la référence), les passages, l'année d'avant,
+// ce qui est compté 1 ou à vérifier, puis les cinq parcelles les plus hautes (les autres derrière un dépliant).
+function _pilIftTuile(){
+  var an=_iftAnnee(), R=_iftCalc(an), ref=R.ref, rv=ref.v;
+  var methode='<div class="pil-li-s" style="margin-top:12px;white-space:normal;line-height:1.5">Dose appliquée ÷ dose homologuée × surface traitée ÷ surface du domaine · le biocontrôle à part</div>';
+  if(!R.lignes){
+    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('0',''), 'aucun traitement en '+an, null,
+      '<div class="pil-empty">Aucun traitement enregistré en '+an+'. L’IFT se calcule dès le premier, avec la dose du registre et la dose homologuée du catalogue E-Phy.</div>'+methode, 'pil.cfm.ift');
+  }
+  if(!R.ok){
+    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('—',''), R.nPass+' passage'+(R.nPass>1?'s':'')+' en '+an+' · catalogue E-Phy absent', null,
+      '<div class="pil-empty">Le catalogue E-Phy n’est pas chargé sur cet appareil\u00a0: sans les doses homologuées, l’IFT ne se calcule pas. Il se charge à la connexion — rouvrez cet onglet une fois en ligne.</div>'+methode, 'pil.cfm.ift');
+  }
+  // Le chiffre hors biocontrôle est celui de l'en-tête, toujours visible : le détail donne les trois autres.
+  //   ⚠️ La mise en page est écrite ici : styles.css est à quelques octets du plafond de 1 024 ko (mv-harnais-typo) ; seuls les
+  //   rôles du chiffre et de son étiquette (`.pil-ift-k .v`, `.pil-ift-k .l`) entrent au gabarit (GABARIT-1).
+  var hb=R.hb, k=function(v,l){ return '<div class="pil-ift-k"><div class="v">'+v+'</div><div class="l" style="color:var(--texte-doux);margin-top:2px">'+l+'</div></div>'; };
+  var B='<div style="display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;margin-bottom:12px">'+k(R.bio!=null?_iftF(R.bio):'—','biocontrôle')+k(R.tot!=null?_iftF(R.tot):'—','total')
+    +k(_iftF(rv),ref.def?'référence, à régler':'référence régionale')+'</div>';
+  var l1=[];
+  if(hb!=null){
+    B+='<div class="pil-gbar"><i style="width:'+Math.min(rv>0?hb/rv*100:0,100).toFixed(0)+'%;background:var('+_iftCol(hb,rv)+')"></i></div>';
+    var ec=Math.round((hb/rv-1)*100);
+    l1.push('hors biocontrôle\u00a0: '+(ec<0?((-ec)+' % sous la référence'):(ec>0?(ec+' % au-dessus de la référence'):'à la référence')));
+  } else l1.push('surfaces des parcelles à renseigner\u00a0: l’IFT du domaine se pondère par elles');
+  l1.push(R.nPass+' passage'+(R.nPass>1?'s':'')+(R.nRed?(', dont '+R.nRed+' à dose réduite'):''));
+  var Pv=_iftCalc(an-1); if(Pv.lignes&&Pv.hb!=null) l1.push((an-1)+'\u00a0: '+_iftF(Pv.hb));
+  B+='<div class="pil-li-s" style="margin-top:8px;white-space:normal;line-height:1.5">'+_pilEsc(l1.join(' · '))+'</div>';
+  var w=[];
+  if(R.un) w.push(R.un+' produit'+(R.un>1?'s':'')+' compté'+(R.un>1?'s':'')+' 1\u00a0: dose appliquée ou homologuée inconnue');
+  if(R.doute) w.push(R.doute+' dose'+(R.doute>1?'s':'')+' à vérifier\u00a0: plus du double de l’homologuée');
+  if(R.horsParc) w.push(R.horsParc+' ligne'+(R.horsParc>1?'s':'')+' sur une parcelle absente de la liste, hors du calcul');
+  if(w.length) B+='<div class="pil-li-s" style="margin-top:4px;white-space:normal;line-height:1.5;color:var(--orange)">'+_mvIcon('alerte',16)+' '+_pilEsc(w.join(' · '))+'</div>';
+  var mal=(typeof window._obsMaladies==='function'&&an===new Date().getFullYear())?window._obsMaladies:null;
+  var lig=function(q){ return _pilIftLigne(q,rv,mal?mal(q.nom):null); }, top=R.rows.slice(0,5), rest=R.rows.slice(5);
+  B+='<div class="pil-li-t" style="margin-top:16px">Par parcelle</div>'
+    +'<div class="pil-li-s" style="margin-bottom:8px;white-space:normal">hors biocontrôle'+(rest.length?' — les cinq IFT les plus hauts':'')+'</div>'
+    +'<div class="pil-ip-list">'+top.map(lig).join('')+'</div>';
+  if(rest.length) B+='<details class="pil-ift-plus" style="margin-top:4px"><summary style="cursor:pointer;padding:12px 0;font-size:var(--t-texte);font-weight:600;color:var(--texte)">'
+    +(rest.length>1?('Les '+rest.length+' autres parcelles'):'L’autre parcelle')+'</summary><div class="pil-ip-list">'+rest.map(lig).join('')+'</div></details>';
+  var warn=(hb!=null&&hb>rv)?('↑ '+Math.round((hb/rv-1)*100)+' %'):null;
+  return _pilTile('ift','#3D6B27','IFT '+an, _pilStat(hb!=null?_iftF(hb):'—',' hors biocontrôle',warn),
+    'biocontrôle '+(R.bio!=null?_iftF(R.bio):'—')+' · référence '+_iftF(rv)+(ref.def?' (par défaut)':''), null, B+methode, 'pil.cfm.ift');
+}
 // DRE actif : dernier traitement par parcelle + fenêtre de rentrée encore ouverte.
 function _cfmDre(){
   var traits=(window.TRAITEMENTS||[]).slice();
@@ -10955,32 +11106,12 @@ function _pilTabCfm(d){
       H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
     }
   }
-  // Passages / IFT
-  if(_pilShow('cfm_ift')){
-    any=true;
-    var ref=_cfmIftRef(), pass=_cfmPassages();
-    if(!pass.length){
-      H+=_pilTile('ift','#3D6B27','Passages phyto', _pilStat('0',' passage'), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9 cette saison.</div>');
-    } else {
-      var maxP=pass.reduce(function(a,b){return Math.max(a,b.pass);},0)||1;
-      var prows=pass.map(function(r){
-        var overRef=r.pass>ref.v, col=overRef?'--orange':'--vert-med';
-        return '<div class="pil-li"><span class="pil-av" style="background:#1E3418;color:#8FD07A">\uD83C\uDF3F</span>'
-          +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(r.nom)+'</div>'
-          +'<div class="pil-gbar" style="margin-top:6px"><i style="width:'+Math.min(r.pass/Math.max(ref.v,maxP)*100,100).toFixed(0)+'%;background:var('+col+')"></i></div>'
-          +'<div class="pil-li-s" style="margin-top:3px">'+r.prod+' application'+(r.prod>1?'s':'')+' de produit'+(overRef?' \u00b7 <b style="color:var(--orange)">au-dessus de la r\u00e9f.</b>':'')+'</div></div>'
-          +'<div class="pil-li-r" style="color:var('+col+')">'+r.pass+'<span style="font-size:var(--pt-lbl,12px);font-weight:500;color:var(--texte-doux)"> passages</span></div></div>';
-      }).join('');
-      var body2='<div class="pil-ip-list">'+prows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Un <b>passage</b> = une intervention, quel que soit le nombre de produits'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.ift')):'')+'</div>';
-      var nOver=pass.filter(function(r){return r.pass>ref.v;}).length;
-      H+=_pilTile('ift','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
-    }
-  }
+  // \u2605\u2605 IFT-1 (\u00a7571) : l'IFT r\u00e9el de l'ann\u00e9e remplace le compte des passages \u2014 m\u00eame case \u00e0 cocher (`cfm_ift`), m\u00eame pastille \u00ab i \u00bb.
+  if(_pilShow('cfm_ift')){ any=true; H+=_pilIftTuile(); }
   // \u2605\u2605 LE REGISTRE PHYTO EST UNE PIECE DE CONFORMITE, PAS DE MATERIEL.
   //   Il vivait sous \u00ab L'equipe & le materiel \u00bb, a cote du parc de tracteurs. Or
-  //   il lit LES MEMES traitements que \u00ab Passages phyto / parcelle \u00bb juste
-  //   au-dessus : l'un les agrege par parcelle, l'autre en montre les derniers.
+  //   il lit LES MEMES traitements que la carte de l'IFT juste
+  //   au-dessus : l'une les agrege par parcelle, l'autre en montre les derniers.
   //   Une source, deux onglets. Il se range ici, en detail de son propre agregat.
   //   \u26a0\ufe0f LA CLE `mat_phyto` NE CHANGE PAS. Elle est gravee dans le localStorage
   //     des clients : la renommer rallumerait la carte chez qui l'avait eteinte.
@@ -11022,7 +11153,7 @@ var _PIL_PERSO_DEFS={
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['auj_tension','La tension par personne'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
-  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
+  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';

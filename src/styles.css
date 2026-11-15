@@ -10503,7 +10503,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* 2. LES CHIFFRES */
 :is(#page-pilotage, #ovReglPilotage) .pec-verdict .t { font-size: var(--t-verdict) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-gauge-pct, .pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .prv-go .v, .pil-big, .pil-dz-hero .stop, .arc-kpi .v, .pec-fia-n) {
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .prv-go .v, .pil-big, .pil-dz-hero .stop, .arc-kpi .v, .pec-fia-n, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-prot-big, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-gauge-pct small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
@@ -10512,7 +10512,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) .pil-sec-h { font-size: var(--t-section) !important; font-weight: var(--fw-semi, 600) !important; }
 :is(#page-pilotage, #ovReglPilotage) .rf-t { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 4. LES ÉTIQUETTES (au-dessus d'un chiffre, d'un réglage) */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-th-t, .pil-photo .k, .pec-k .l, .pec-mini .l, .ck-ph-l span, .ck-dz-t, .ck-v-k, .pil-dz-lbl, .pil-dz-set .k, .arc-kpi .l, .pil-anf-c .l, .prv-fx .l, .pex-ctrl .l) { font-size: var(--t-texte) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-th-t, .pil-photo .k, .pec-k .l, .pec-mini .l, .ck-ph-l span, .ck-dz-t, .ck-v-k, .pil-dz-lbl, .pil-dz-set .k, .arc-kpi .l, .pil-anf-c .l, .prv-fx .l, .pex-ctrl .l, .pil-ift-k .l) { font-size: var(--t-texte) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 5. LES LIGNES (nom · valeur · détail) */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-li-t, .mvk-ligne .nom, .pil-tens-r .n, .pil-prot-r .n, .pil-cso-n, .ck-ch-nom, .ck-ta-n, .ck-po-h .n) { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-li-r, .pil-li-r b, .mvk-ligne .pct, .ck-ch-pct, .ck-ch-pct b, .pil-tens-r .v b, .ck-po-d, .ck-ap-h .v) { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; font-variant-numeric: tabular-nums; }

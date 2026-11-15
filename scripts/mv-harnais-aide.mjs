@@ -169,7 +169,7 @@ if (!CONTRE) {
     ['_mvAideTexte laisse tout passer', S => ({ ...S, uti: remp(S.uti, 'else if (m) out += _escHtml(m);', 'else if (m) out += m;') })],
     ['_mvAideTexte ne referme plus un gras ouvert', S => ({ ...S, uti: remp(S.uti, "return gras ? out + '</b>' : out;", 'return out;') })],
     ['_mvAideTexte imbrique les gras', S => ({ ...S, uti: remp(S.uti, "if (m === '<b>') { if (!gras) { out += '<b>'; gras = true; } }", "if (m === '<b>') { out += '<b>'; gras = true; }") })],
-    ['un « &amp; » revient dans l’aide du Pilotage', S => ({ ...S, uti: remp(S.uti, 'L’équipe & le matériel\u202f» alors', 'L’équipe &amp; le matériel\u202f» alors') })],
+    ['un « &amp; » revient dans l’aide du Pilotage', S => ({ ...S, uti: remp(S.uti, 'L’équipe & le matériel, la protection restante', 'L’équipe &amp; le matériel, la protection restante') })],   // IFT-1 (§571) : la phrase du registre « … le matériel » alors » est réécrite ; l’ancre passe sur l’autre « & » de la fiche
     ['un « <sub> » revient dans l’aide de la Cave', S => ({ ...S, uti: remp(S.uti, 'le SO2, les tanins', 'le SO<sub>2</sub>, les tanins') })],
     ['un gras dans une amorce', S => ({ ...S, uti: remp(S.uti, "['Le « i » est partout', ", "['Le <b>« i »</b> est partout', ") })],
     ['un gras jamais fermé dans une suite', S => ({ ...S, uti: remp(S.uti, 'Dans <b>Décider</b>, chaque étape a le sien', 'Dans <b>Décider, chaque étape a le sien') })],

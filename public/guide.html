@@ -1346,8 +1346,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     revente. Le délai avant récolte (DAR), le délai de rentrée (DRE), la zone non traitée (ZNT) et la
     dose homologuée sont pré-remplis.</li>
     <li><b>La dose et les parcelles</b>La dose se saisit en <b>valeur + unité</b> (l/ha, kg/ha, g/ha) :
-    c'est ce chiffre qui alimentera le bilan matière et le suivi du cuivre, il vaut donc mieux
-    l'entendre juste.</li>
+    c'est ce chiffre qui alimentera le bilan matière, le suivi du cuivre et l'<b>IFT</b> du Pilotage, il
+    vaut donc mieux l'entendre juste. Elle se pré-remplit avec la dose homologuée : à dose réduite,
+    corrigez-la — une demi-dose compte pour moitié dans l'IFT.</li>
     <li><b>Les conditions</b>Date, stade phénologique, heure de début et de fin, conducteur, délai de
     rentrée retenu, observations. Validation : une session est créée et le registre est complété.</li>
   </ol>
@@ -3256,7 +3257,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>doré</b> en cours, <b>orange</b> quand la fenêtre du travail est passée sans qu'il soit fini.</li>
     <li><b>La charge par tâche</b> (le donut) : quelle tâche pèse le plus dans ce qui reste, ce qui est fait ou ce qui est prévu. À ne pas confondre avec <b>le temps de l'équipe</b>, qui dit où passent les heures de présence (vigne, tracteur, le reste).</li>
     <li><b>Carte du domaine, en cinq vues</b> : l'avancement, les jours depuis le dernier traitement, le cépage,
-    les passages phyto de la campagne face à votre référence (des passages, pas un IFT), et le coût engagé à
+    l'IFT de l'année face à votre référence (hors biocontrôle, le calcul de Conformité), et le coût engagé à
     l'hectare. La légende suit la vue choisie ; une parcelle sans donnée reste grise. Touchez une parcelle pour
     lire sa valeur.</li>
     <li><b>Où va le temps de l'équipe</b> : la présence de la campagne partagée entre les travaux de
@@ -3443,7 +3444,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Conformité</h4><ul class="dot">
       <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha</li>
-      <li><b>Passages phyto / IFT</b> par parcelle</li>
+      <li><b>IFT de l'année</b> : le domaine hors biocontrôle face à votre référence, le biocontrôle à
+      part, l'année d'avant, puis les cinq parcelles les plus hautes — avec les maladies signalées</li>
       <li><b>Registre phyto</b> : les derniers passages, en détail de l'agrégat ci-dessus</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès</li>
     </ul></div>
@@ -3451,6 +3453,29 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></span><div>Les coûts s'appuient sur des données
   <b>réservées aux administrateurs</b>. Un profil Pilotage sans droits d'administration verra ces
   montants à zéro : ce n'est pas une panne, c'est la protection des salaires.</div></div>
+
+  <details><summary>Comment l'IFT est-il calculé&nbsp;?</summary>
+    <div class="dbody">Comme le prévoit le guide du ministère. Chaque produit d'un traitement compte
+    <b>sa dose appliquée divisée par sa dose de référence</b> : une dose pleine compte 1, une demi-dose
+    0,5, et deux produits dans la même cuve comptent chacun. Une parcelle additionne ses traitements de
+    l'année ; le domaine fait la moyenne de ses parcelles, <b>pondérée par leur surface</b> — un
+    traitement sur la moitié du domaine compte pour moitié.
+    <ul class="dot">
+      <li><b>La dose de référence</b> est la plus basse des doses homologuées du produit sur la vigne,
+      lue dans le catalogue E-Phy : c'est la règle quand la cible du traitement n'est pas notée. Une dose
+      à l'hectolitre se ramène à l'hectare sur 1&nbsp;000&nbsp;L de bouillie.</li>
+      <li><b>La dose appliquée</b> est la dose/ha saisie au traitement, sinon la dose écrite. Un produit
+      sans dose de référence (hors catalogue, retiré) ou sans dose lisible <b>compte 1</b>, comme le veut
+      le guide ; la carte dit combien. Les adjuvants et les engrais ne comptent pas.</li>
+      <li><b>Le biocontrôle</b> (soufre, huile de paraffine, bicarbonate, phosphonates, micro-organismes,
+      phéromones…) se compte à part ; le cuivre n'en est pas. La <b>référence régionale</b>, réglée dans
+      la roue crantée, se compare à l'IFT <b>hors biocontrôle</b>, herbicides compris.</li>
+      <li><b>L'année</b> va du 1<sup>er</sup> janvier au 31 décembre ; tant que la nouvelle n'a aucun
+      traitement, la carte montre la précédente. Toute la parcelle compte comme traitée : la surface
+      partielle (quelques rangs) ne se saisit pas encore.</li>
+    </ul>
+    Ce chiffre vous situe ; il ne remplace pas votre déclaration (HVE, MAEC), qui lit les doses de
+    référence publiées chaque année par le ministère.</div></details>
 
   <details><summary>D'où vient l'écart de cadence&nbsp;?</summary>
     <div class="dbody">Il compare deux grandeurs&nbsp;: les <b>heures passées dans les rangs au
@@ -3988,7 +4013,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><td><b>DRE</b></td><td>Délai de rentrée : durée pendant laquelle nul ne retourne dans la parcelle traitée.</td></tr>
     <tr><td><b>ZNT</b></td><td>Zone non traitée à préserver en bordure de point d'eau ou d'habitation.</td></tr>
     <tr><td><b>AMM</b></td><td>Numéro d'autorisation de mise sur le marché d'un produit phytosanitaire.</td></tr>
-    <tr><td><b>IFT</b></td><td>Indicateur de fréquence de traitement : combien de passages, ramenés à la dose homologuée.</td></tr>
+    <tr><td><b>IFT</b></td><td>Indicateur de fréquence de traitement : le nombre de doses homologuées appliquées sur l'année — chaque produit compte sa dose appliquée divisée par sa dose homologuée, ramené à la surface du domaine. Le biocontrôle se compte à part.</td></tr>
     <tr><td><b>E-Phy</b></td><td>Le catalogue officiel des produits, publié par l'ANSES. Source du module Phyto.</td></tr>
     <tr><td><b>GNR</b></td><td>Gazole non routier. Une seule cuve pour le domaine, pas une par tracteur.</td></tr>
     <tr><td><b>Le Cuvier</b></td><td>L'espace vendange et fermentations de la Cave.</td></tr>

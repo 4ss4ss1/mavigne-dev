@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.01', d: '2026-11-15', items: [   // IFT-1 (§571) : l'IFT réel remplace les passages
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'L’IFT réel remplace le compte des passages',
+      desc: "Pilotage › Conformité, carte «\u00a0IFT\u00a0»\u00a0: chaque produit d’un traitement compte pour sa dose appliquée face à sa dose homologuée (catalogue E-Phy) — une demi-dose compte pour moitié. Le domaine hors biocontrôle face à votre référence régionale, le biocontrôle à part, l’année d’avant, puis les cinq parcelles les plus hautes, avec les maladies signalées cette année. Un produit sans dose connue compte pour une dose pleine, et l’écran dit combien." },
+    { niv: 0, pour: ['admin'], emoji: 'carte', titre: 'La carte du domaine en IFT',
+      desc: "Dans Travaux, la vue «\u00a0Passages phyto\u00a0» de la carte devient «\u00a0IFT\u00a0»\u00a0: le même calcul, parcelle par parcelle, face à votre référence." },
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'pulve', titre: 'La dose/ha compte',
+      desc: "Dans un nouveau traitement, la dose/ha se préremplit avec la dose homologuée\u00a0: corrigez-la quand vous traitez à dose réduite. Elle fait le stock de La Réserve et, désormais, l’IFT." },
+  ] },
   { v: '11.00', d: '2026-11-14', items: [
     { niv: 0, pour: ['admin'], emoji: 'grappe', titre: 'La récolte prévue, par cuvée',
       desc: "Dans Cave › Le Cuvier › Récoltes, «\u00a0Prévu\u00a0» range la récolte prévue par cuvée, face au maximum de l’appellation, avec le total du domaine. Les parcelles non comptées prennent la moyenne de leur cépage. Le poids moyen d’une grappe et les rendements en jus se règlent là, et l’appli propose de recaler le poids après la vendange. Un tuto montre le comptage." },

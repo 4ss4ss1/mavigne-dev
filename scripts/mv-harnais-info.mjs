@@ -363,8 +363,9 @@ const RFLIM = (PILNU.match(/rf-lim">[\s\S]{0,1200}?<\/div>'/) || [''])[0];
 t('« ce que le modele suppose » ne garde que son fait utile',
   RFLIM.length > 0 && RFLIM.length < 400, RFLIM.length + ' caracteres (400 max)');
 
+// IFT-1 (§571) : la fiche de l'IFT passe dans l'en-tête de sa carte (le 8e argument de _pilTile) — elle reste portée.
 t('les trois cartes de Conformite portent leur fiche',
-  ['cuivre','ift','dre'].every(k => PILNU.includes("_mvInfoBtn('pil.cfm." + k + "')")));
+  ['cuivre','ift','dre'].every(k => PILNU.includes("_mvInfoBtn('pil.cfm." + k + "')") || PILNU.includes(", 'pil.cfm." + k + "');")));
 t('le fait qui protege reste a l\'ecran (delai de rentree)',
   /Ne pas p\\u00e9n\\u00e9trer la parcelle/.test(PILNU));
 t('le detail CLP est parti dans la fiche',

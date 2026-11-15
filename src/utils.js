@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.00';
+export const APP_VERSION = '11.01';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2767,6 +2767,7 @@ var MV_AIDE = {
       ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, parcelles, opérateur, délais de réentrée et avant récolte, ZNT. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
       ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
+      ['La dose/ha de chaque produit', "se préremplit avec la dose homologuée du catalogue : corrigez-la quand vous traitez à dose réduite. Elle fait le stock de La Réserve et l’IFT du Pilotage (Conformité) — une demi-dose y compte pour moitié."],   // ★ IFT-1 (§571)
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
       ['Le registre des traitements sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
@@ -2958,7 +2959,7 @@ var MV_AIDE = {
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux. Les travaux au temps passé (arrachage, désherbage manuel, effeuillage, vendange) n’y figurent pas : ils n’ont pas de barème, par nature. L’entreplantation y figure tant qu’aucun pied n’est compté, et son bouton ouvre la feuille des comptes. Une période sans traitement n’a rien à compléter côté phyto : zéro est alors le vrai chiffre."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
-      ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, les passages phyto face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
+      ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, l’IFT de l’année face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
       ['Travaux', "(l’ancien « La campagne ») montre l’avancement — la jauge de saison en tête d’« Avancement par tâche », puis « La charge par tâche » —, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; ce qui manquera en personnes d’ici la fin de l’année, lui, se lit dans « L’année »."],
       ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans pieds comptés ni trous percés — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
@@ -2977,7 +2978,7 @@ var MV_AIDE = {
       ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif. Une parcelle déclarée sans récolte cette année (Le Cuvier, «\u00a0Encore sur pied\u00a0») ne compte ni rendement ni bouteilles, et son coût se répartit sur les autres vignes."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
-      ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe & le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
+      ['Conformité', "suit le cuivre sur sept ans, l’<b>IFT</b> de l’année, le <b>registre phyto</b> et les délais de rentrée en cours. L’IFT compte chaque produit d’un traitement pour sa dose appliquée face à sa dose homologuée (catalogue E-Phy) : le domaine hors biocontrôle face à votre référence, le biocontrôle à part, puis les cinq parcelles les plus hautes — avec les maladies signalées cette année. Un produit sans dose connue compte pour une dose pleine, et l’écran dit combien. Le registre lit les mêmes traitements, juste en dessous."],
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
       ['Cave', "n’est plus un onglet : une carte dans Aujourd’hui dit combien de gestes pressent et ouvre la Cave. Le millésime, ses courbes et le parc à fûts vivent chez eux — Cave › Le millésime, La Réserve › Fûts."],
@@ -3277,10 +3278,14 @@ export const MV_INFO = {
     '\u26a0\ufe0f <b>Indicatif.</b> Votre organisme certificateur peut appliquer une règle plus stricte, ou compter autrement. Ce chiffre vous alerte ; c\u2019est lui qui fait foi.'
   ] },
 
-  'pil.cfm.ift': { t: 'Passages et IFT', p: [
-    'Un <b>passage</b> compte pour une intervention, quel que soit le nombre de produits mélangés dans la cuve.',
-    'L\u2019<b>IFT réel</b> — dose appliquée divisée par dose homologuée — demande une <b>dose structurée</b> à la saisie du traitement. Sans elle, le compteur reste sur les passages seuls.',
-    'La <b>référence régionale</b> à laquelle vos passages sont comparés est réglable : ce n\u2019est pas une norme, c\u2019est un repère de comparaison entre domaines voisins.'
+  // ★ IFT-1 (§571) : l'IFT réel remplace les passages. La méthode est celle du guide du ministère ; mv-harnais-ift1 joue le calcul.
+  'pil.cfm.ift': { t: 'L\u2019IFT, l\u2019indicateur de fréquence de traitement', p: [
+    'Chaque produit d\u2019un traitement compte <b>dose appliquée ÷ dose de référence</b> : une dose pleine compte 1, une demi-dose 0,5, et deux produits dans la même cuve comptent chacun. Une parcelle additionne ses traitements de l\u2019année ; le domaine fait la moyenne de ses parcelles, <b>pondérée par leur surface</b> — un traitement sur la moitié du domaine compte pour moitié.',
+    'La <b>dose de référence</b> est la plus basse des doses homologuées du produit sur la vigne, lue dans le catalogue E-Phy (qui garde jusqu\u2019à quatre usages par produit) : la règle du ministère quand la cible n\u2019est pas notée. Une dose à l\u2019hectolitre se ramène à l\u2019hectare sur 1 000 L de bouillie.',
+    'La <b>dose appliquée</b> est la dose/ha saisie au traitement, sinon la dose écrite. Un produit sans dose de référence (hors catalogue, retiré) ou sans dose lisible <b>compte 1</b>, comme le veut le guide : l\u2019écran dit combien. Les adjuvants et les engrais ne comptent pas — ce ne sont pas des produits phytopharmaceutiques.',
+    'Le <b>biocontrôle</b> se compte à part : soufre, huile de paraffine, bicarbonate, phosphonates, laminarine, micro-organismes, phéromones… reconnus à leur substance ; le cuivre n\u2019en est pas. La <b>référence régionale</b>, réglable dans la roue crantée du Pilotage, se compare à l\u2019IFT <b>hors biocontrôle</b>, herbicides compris.',
+    'Une année d\u2019IFT, ce sont les traitements du 1er janvier au 31 décembre ; tant que la nouvelle n\u2019en a aucun, l\u2019écran montre la précédente. Toute la parcelle compte comme traitée : la surface partielle (quelques rangs) ne se saisit pas encore.',
+    '<b>Indicatif.</b> Le calcul officiel (HVE, MAEC) lit les doses de référence publiées chaque année par le ministère : ce chiffre vous situe, il ne remplace pas votre déclaration.'
   ] },
 
   'pil.cfm.dre': { t: 'Le délai de rentrée', p: [
@@ -3521,9 +3526,9 @@ export const MV_INFO = {
   'pil.carte': { t: 'Carte du domaine', p: [
     'Le chiffre est l’avancement de la campagne. La carte, elle, se lit de cinq façons : choisissez la vue au-dessus, la légende suit.',
     '<b>Avancement</b> : la couleur habituelle des parcelles. <b>Dernier traitement</b> : les jours depuis la dernière intervention du registre phyto sur la parcelle, toutes campagnes confondues — vert le jour même, rouge à partir de 14 jours.',
-    '<b>Cépage</b> : celui de la fiche parcelle. <b>Passages phyto</b> : les passages de la campagne, comptés comme dans Conformité, face à votre référence. Ce sont des passages, pas un IFT : le registre ne porte pas de dose de référence par produit.',
+    '<b>Cépage</b> : celui de la fiche parcelle. <b>IFT</b> : l\u2019IFT de l\u2019année de chaque parcelle, hors biocontrôle, calculé comme dans Conformité, face à votre référence — vert jusqu\u2019à elle, orange au-dessus, rouge au-delà de 25 %.',
     '<b>Coût / ha</b> : ce que la parcelle a coûté jusqu’ici à l’hectare, comme dans Économie › Parcelles. L’échelle va de la parcelle la moins chère à la plus chère.',
-    'Une parcelle sans donnée reste grise : un vide n’est pas un zéro. Zéro passage, lui, est une mesure et garde sa couleur.'
+    'Une parcelle sans donnée reste grise : un vide n’est pas un zéro. Un IFT nul (aucun traitement de l\u2019année), lui, est une mesure et garde sa couleur ; sans le catalogue E-Phy, la vue IFT reste grise.'
   ] },
 
   'pil.prot': { t: 'Protection restante', p: [
@@ -3568,7 +3573,7 @@ export const MV_INFO = {
   'pil.phyto': { t: 'Registre phyto', p: [
     'Un <b>passage</b> compte pour une intervention, quel que soit le nombre de produits mélangés dans la cuve.',
     'Les produits sont rattachés au <b>catalogue officiel E-Phy</b> (ANSES). C\u2019est lui qui porte les usages autorisés, les doses homologuées et les délais.',
-    'L\u2019<b>IFT réel</b> — dose appliquée divisée par dose homologuée — demande une dose structurée à la saisie. Sans elle, ni l\u2019IFT ni le coût des produits ne peuvent être calculés.',
+    'La <b>dose/ha</b> de chaque produit fait le coût des produits et l\u2019IFT (carte « IFT », juste au-dessus). Sans elle, le coût ne se chiffre pas, et l\u2019IFT lit la dose écrite — ou compte le produit pour une dose pleine.',
     'Ce compte est celui de la <b>campagne consultée</b>. Le cuivre, lui, se suit sur sept ans glissants : il a son propre écran, dans Conformité.'
   ] },
 

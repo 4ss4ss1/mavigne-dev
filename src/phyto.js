@@ -276,7 +276,7 @@ function _tratSelectedHtml(){
     +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
     +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" class="mvchamp" style="flex:1;min-width:0">'
     +'<select id="trat-doseunit-input" class="mvchamp">'+uOpts+'</select></div>'
-    +'<div style="font-size:10px;color:var(--texte-doux);margin-bottom:9px;line-height:1.4">&#x1F4E6; Quantit&#xe9; r&#xe9;elle appliqu&#xe9;e &#8212; alimente le bilan mati&#xe8;re de La R&#xe9;serve.</div>'
+    +'<div style="font-size:10px;color:var(--texte-doux);margin-bottom:9px;line-height:1.4">&#x1F4E6; Quantit&#xe9; r&#xe9;elle appliqu&#xe9;e &#8212; alimente La R&#xe9;serve et l&#8217;IFT (Pilotage &#8250; Conformit&#xe9;) : &#xe0; dose r&#xe9;duite, corrigez-la.</div>'
     +'<button onclick="window._tratAddSel()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--acier);color:#fff;font-size:var(--pt-txt,13px);font-weight:700;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px"><span>+ Ajouter ce produit</span></button>'
     +'</div>';
 }

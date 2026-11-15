@@ -4,8 +4,8 @@
    Lancer :  node scripts/mv-harnais-carte-vues.mjs            (scénarios)
              node scripts/mv-harnais-carte-vues.mjs --contre   (contre-épreuves)
    Le bloc CARTE-1 est extrait de src/pilotage.js AVEC les sources qu'il lit
-   (_cfmPassages, _cfmIftRef, _pilEsc, _ecoEur — les vraies) ; seuls _pecData
-   (signature : aucun argument → {configured, rows}) et getPCls sont doublés.
+   (le calcul de l'IFT — IFT-1, §571 —, _cfmIftRef, _pilEsc, _ecoEur — les vraies) ; seuls _pecData
+   (signature : aucun argument → {configured, rows}) et getPCls sont doublés, et un catalogue E-Phy d'un produit.
    Horloge figée au mardi 16 juin 2026.
    ───────────────────────────────────────────────────────────────────────── */
 import { readFileSync } from 'node:fs';
@@ -20,6 +20,8 @@ function corps(src, debut) {
   throw new Error('accolades : ' + debut);
 }
 function bloc(src) { const a = src.indexOf("var _PIL_LENT='avc';"), b = src.indexOf('var _PIL_LENT_PREP=null;'); if (a < 0 || b < a) throw new Error('bloc CARTE-1 introuvable'); return src.slice(a, b); }
+// IFT-1 (§571) : le calcul de l'IFT, d'un bloc (des constantes à _iftCol).
+function blocIft(src) { const a = src.indexOf('var IFT_BIO_RE='), b = src.indexOf('// Une parcelle : son IFT hors biocontrôle'); if (a < 0 || b < a) throw new Error('bloc IFT introuvable'); return src.slice(a, b); }
 const RealDate = Date, FIXED = new RealDate('2026-06-16T10:00:00').getTime();
 function FakeDate(...a) { return a.length ? new RealDate(...a) : new RealDate(FIXED); }
 FakeDate.prototype = RealDate.prototype; FakeDate.now = () => FIXED; FakeDate.parse = RealDate.parse;
@@ -32,9 +34,11 @@ function charger(src, o = {}) {
     { date: '2026-06-09', parcelles: ['C'], sessionId: 's3' }, { date: '2025-07-01', parcelles: ['D'], sessionId: 'old' }];
   for (let i = 0; i < 8; i++) TR.push({ date: '2026-05-0' + (i + 1), parcelles: ['B'], sessionId: 'b' + i });
   for (let i = 0; i < 11; i++) TR.push({ date: '2026-04-' + String(i + 10), parcelles: ['C'], sessionId: 'c' + i });
-  TR.push({ date: '2026-05-20', parcelles: ['C'], sessionId: 'c0' });   // meme session : un seul passage
+  TR.push({ date: '2026-05-20', parcelles: ['C'], sessionId: 'c0' });   // IFT-1 : un second produit de la même session compte aussi
+  TR.forEach((x) => Object.assign(x, { produit: 'P', amm: '1', dose_val: 1, dose_unit: 'kg/ha' }));   // chaque ligne : une dose pleine (1)
   const ctx = { Math, Object, Array, String, Number, isFinite, parseInt, console, Date: FakeDate,
     PARCELLES: PARC, TRAITEMENTS: TR, CONFIG: { conformite: { ift_ref: 8 } },
+    EPHY: o.sansEphy ? [] : [{ amm: '1', nom: 'P', type: 'Fongicide', sub: 'folpel', usages: [{ cible: 'Vigne · Mildiou(s)', dose: '1 kg/ha' }] }],
     _pilSaison: () => ({ nom: '2026' }), _saisonForDate: iso => (iso >= '2025-11-01' && iso <= '2026-10-31') ? '2026' : '2025',
     getSaisonActive: () => ({ nom: '2026' }),
     getPCls: p => ({ col: '#5B9B3A', pct: 40 }),
@@ -42,7 +46,7 @@ function charger(src, o = {}) {
       { nom: 'A', surf: 1, engHa: 1000 }, { nom: 'B', surf: 0.5, engHa: 4000 }, { nom: 'C', surf: 0.8, engHa: 2500 },
       { nom: 'E', surf: 0.3, engHa: 0 }, { nom: 'Z', surf: 0.4, engHa: 99999, arr: true }] }) };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext([corps(src, 'function _pilEsc('), corps(src, 'function _ecoEur('), corps(src, 'function _cfmPassages('), corps(src, 'function _cfmIftRef('), corps(src, 'function _friseNorm('), bloc(src)].join('\n'), ctx, { filename: 'carte-extrait.js' });
+  vm.runInContext([corps(src, 'function _pilEsc('), corps(src, 'function _ecoEur('), corps(src, 'function _cfmIftRef('), blocIft(src), corps(src, 'function _friseNorm('), bloc(src)].join('\n'), ctx, { filename: 'carte-extrait.js' });
   return ctx;
 }
 
@@ -58,12 +62,15 @@ function scenarios(src, journal) {
     t('14 jours = rouge, 7 jours = or', o.j.B === 14 && X._pilLentCol(P('B'), o).col === '#A0291E' && X._pilLentCol(P('C'), o).col === '#C2A14D');
     t('toutes campagnes : un traitement de l’an dernier compte (D, 350 j)', o.j.D === 350, o.j.D);
     t('jamais traitée : pas de couleur (gris), pas « 0 j »', X._pilLentCol(P('E'), o) === null);
-    o = vue('pass');
-    t('passages : la règle de la Conformité (une session = un passage)', o.pass.C === 12 && o.pass.B === 9 && o.pass.A === 2, JSON.stringify(o.pass));
+    o = vue('ift');
+    t('IFT : la règle de la Conformité (chaque produit, sa dose ÷ la dose de référence ; l’année 2026)', o.ift.C.hb === 13 && o.ift.B.hb === 9 && o.ift.A.hb === 2 && o.ift.D.hb === 0 && o.an === 2026, JSON.stringify([o.ift.A.hb, o.ift.B.hb, o.ift.C.hb, o.ift.D.hb, o.an]));
     t('la référence vient des réglages (8)', o.refIft === 8);
-    t('zéro passage est une MESURE : couleur claire, pas gris', X._pilLentCol(P('E'), o) && X._pilLentCol(P('E'), o).col === '#DDEBD2');
-    t('au-dessus de la référence : orange (9/8) ; au-delà de +25 % : rouge (12/8)', X._pilLentCol(P('B'), o).col === '#B85A1A' && X._pilLentCol(P('C'), o).col === '#A0291E');
+    t('un IFT nul est une MESURE : couleur claire, pas gris', X._pilLentCol(P('E'), o) && X._pilLentCol(P('E'), o).col === '#DDEBD2');
+    t('au-dessus de la référence : orange (9/8) ; au-delà de +25 % : rouge (13/8)', X._pilLentCol(P('B'), o).col === '#B85A1A' && X._pilLentCol(P('C'), o).col === '#A0291E');
     t('à la référence ou dessous : du vert clair au vert (2/8)', /^#[0-9A-F]{6}$/.test(X._pilLentCol(P('A'), o).col) && X._pilLentCol(P('A'), o).col !== '#DDEBD2');
+    t('la bulle d’une parcelle : son IFT, l’année, la référence', X._pilLentCol(P('B'), o).txt === 'IFT 2026 : 9,0 hors biocontrôle · référence 8,0', X._pilLentCol(P('B'), o).txt);
+    const Xs = charger(src, { sansEphy: true }); vm.runInContext("_PIL_LENT='ift';", Xs); const os = Xs._pilLentPrep();
+    t('sans le catalogue E-Phy : la vue IFT reste grise, la légende dit pourquoi', Xs._pilLentCol(P('B'), os) === null && Xs._pilLentLeg(os).includes('catalogue E-Phy pas chargé'));
     o = vue('cep');
     t('cépage : « Aligoté » et « aligote » sont le même cépage, même couleur', X._pilLentCol(P('B'), o).col === X._pilLentCol(P('C'), o).col && X._pilLentCol(P('B'), o).col === '#A8B86A');
     t('cépage connu : sa couleur ; inconnus : la palette, dans l’ordre d’apparition', X._pilLentCol(P('A'), o).col === '#7A1020' && X._pilLentCol(P('D'), o).col === '#4A80C4' && X._pilLentCol(P('F'), o).col === '#C8853A');
@@ -78,12 +85,12 @@ function scenarios(src, journal) {
     o = vue('avc');
     t('avancement : la couleur d’avant (getPCls)', X._pilLentCol(P('A'), o).col === '#5B9B3A' && X._pilLentCol(P('A'), o).txt === '40 %');
     // legendes et boutons
-    vm.runInContext("_PIL_LENT='pass';", X);
+    vm.runInContext("_PIL_LENT='ift';", X);
     const Lg = X._pilLentLeg(X._pilLentPrep());
-    t('légende des passages : la référence écrite, et « sans donnée »', Lg.includes('jusqu’à la référence (8)') && Lg.includes('sans donnée'));
+    t('légende de l’IFT : la référence écrite, l’année, et « sans donnée »', Lg.includes('jusqu’à la référence (8,0)') && Lg.includes('IFT 2026, hors biocontrôle') && Lg.includes('sans donnée'));
     const Bt = X._pilLentBtns();
-    t('cinq boutons, un seul appuyé, le bon', (Bt.match(/class="pil-lent-b/g) || []).length === 5 && (Bt.match(/aria-pressed="true"/g) || []).length === 1 && /data-lent="pass" aria-pressed="true"/.test(Bt));
-    t('aucun undefined / NaN dans les légendes', ['phy', 'pass', 'cep', 'cout', 'avc'].every(l => { vm.runInContext("_PIL_LENT='" + l + "';", X); return !/undefined|NaN/.test(X._pilLentLeg(X._pilLentPrep())); }));
+    t('cinq boutons, un seul appuyé, le bon', (Bt.match(/class="pil-lent-b/g) || []).length === 5 && (Bt.match(/aria-pressed="true"/g) || []).length === 1 && /data-lent="ift" aria-pressed="true"/.test(Bt));
+    t('aucun undefined / NaN dans les légendes', ['phy', 'ift', 'cep', 'cout', 'avc'].every(l => { vm.runInContext("_PIL_LENT='" + l + "';", X); return !/undefined|NaN/.test(X._pilLentLeg(X._pilLentPrep())); }));
     // branchements
     t('la carte peint chaque parcelle avec la vue courante (contours ET épingles)', (src.match(/_pilLentCol\(p,_lo\)/g) || []).length === 2 && /_pilLentCol\(pp,_lo\)/.test(src));
     t('le clic sur une vue redessine', /closest\('\.pil-lent-b'\)/.test(src) && /_PIL_LENT=_lv; _PIL_LENT_PREP=null; renderPilotage\(\)/.test(src));
@@ -95,8 +102,9 @@ console.log('\n\x1b[1mMA VIGNE — Harnais CARTE-1 · ' + (CONTRE ? 'contre-épr
 if (!CONTRE) { const r = scenarios(PIL, true); console.log('\n  ' + r.ok + ' vertes, ' + r.ko + ' rouges\n'); process.exit(r.ko ? 1 : 0); }
 const DEFAUTS = [
   ['la date la plus ANCIENNE l’emporte', 'if(nom&&(!der[nom]||dd>der[nom]))', 'if(nom&&(!der[nom]||dd<der[nom]))'],
-  ['la référence est ignorée', 'r=o.refIft>0?n/o.refIft:0;', 'r=n/12;'],
-  ['zéro passage devient gris', "var n=o.pass[p.nom]||0, r=", "if(!o.pass[p.nom]) return null; var n=o.pass[p.nom], r="],
+  ['la référence est ignorée', 'var r=o.refIft>0?q.hb/o.refIft:0;', 'var r=q.hb/12;'],
+  ['un IFT nul devient gris', 'var q=o.ok?o.ift[p.nom]:null; if(!q) return null;', 'var q=o.ok?o.ift[p.nom]:null; if(!q||!q.hb) return null;'],
+  ['sans le catalogue, la vue colore quand même', 'var q=o.ok?o.ift[p.nom]:null;', 'var q=o.ift[p.nom];'],
   ['le cépage redevient sensible aux accents', 'var c=o.cep[_friseNorm(p.cepage)];', 'var c=o.cep[String(p.cepage)];'],
   ['l’échelle du coût est inversée', '(v-o.mn)/(o.mx-o.mn)', '(o.mx-v)/(o.mx-o.mn)'],
   ['une vigne arrachée ajoute son cépage', "if(!p||p.statut==='Arrachee') return; var c=_friseNorm(p.cepage);", "if(!p) return; var c=_friseNorm(p.cepage);"],

@@ -1,0 +1,47 @@
+{
+  "lot": "IFT-1",
+  "section": "§571",
+  "base": "5cadff9631979252e5560f3f75b94f929c3b022d",
+  "inclut": [],
+  "date": "2026-11-15",
+  "tutos": {
+    "ok": true,
+    "empreinte": "06359614b635df87333b65ffe4957cd3a2b15336eb9883835f36d3ac966c511e",
+    "date": "2026-11-15T08:03:05.696Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "1e38eb7322200a87c71f39ba6087201b238e51a611e0a295205266f9f1c40e1f",
+    "CLAUDE.md": "4568507620a717ccbb2c5f9d6aa788f6548f12cc7a2423eaa972e9ced771b9f8",
+    "docs/claude/INDEX.md": "dd77ec3a9ab8a41ef9e44982aefe26fe97f4ff4d5782c61c485de39496959e15",
+    "docs/claude/chantiers-530-579.md": "d264c3a412636df2762b817f3718cc94cbb5e8f9f64bdcd8965279261a0b6e46",
+    "docs/claude/journal.md": "a1ecffe6373dbb33b0f85b7bdebc937f323bdf1aaf6601881c5efa48ce24afa0",
+    "guide/07-phyto.html": "6990cb1c98860886eb6333b6272a70801cb501d27be0aa807c05cc1643c91b8b",
+    "guide/11-pilotage.html": "8f0d51ba3467fa9468d71fff5fa1f359c6d86ba37cd826192d7b3c3d4f465fc1",
+    "guide/15-glossaire.html": "980de061ed35f568972ad82ce6cf69ae06c79efd1ceb254f8603ea827fed238e",
+    "index.html": "bafe16f6a6471eb4d34d7ac3050969999cfe37068770c387c3054d3380f392c8",
+    "public/demo.html": "a66990deabc9652af5f570e48040923ea28e924d463cf53745b6aeb087937e53",
+    "public/demo/r-ger-conformite.webp": "8268c9470fe89adda286bd0f2d6055d5d9fe234e3f19eb9b5ea2815cb281d033",
+    "public/demo/t-r-ger-conformite.webp": "826f33510bf8ac29a09575631a2da8b472a5a9b88e8c75d4eea7bbe7657e3f31",
+    "public/sw.js": "f089e3f29fce63917840ba0037851ad9afecdc2d60b935303f7a0155877fa8d2",
+    "scripts/harnais-claude-md.mjs": "501f20885bbcbc89a1a04128379c93a6616bdeef6d687a81152c1d1ad0ded817",
+    "scripts/mv-harnais-aide.mjs": "65cc2b0e4401b9ace1edc92dbee022046fe59fe8ac3135a6ca250fb24f35d8ef",
+    "scripts/mv-harnais-carte-vues.mjs": "4161eed55855cca7add94b8810d9028539e1a8a04181272a22a550574c40c168",
+    "scripts/mv-harnais-info.mjs": "971bd70fcc82aa92e86fa155e868269234a24e85c683cf57135537c3ba43bd87",
+    "scripts/mv-harnais-liste.mjs": "7e92c4a0b3f9d897203a7bfc5d9e2770a2163be6c74716ee67ca827e85534958",
+    "src/app.js": "a4433df2ace962de96494bacc29b69bdcdd7551d44a25ca1b8ee6026b3c4e237",
+    "src/phyto.js": "6ab11c4637a5976ba43f3d8efb8414472fdc9fbea3f26d5d64c67c115a2651ff",
+    "src/pilotage.js": "ba8b952b8a3ef6baba4b84305f97fff47848563ae0412224e934a72dfeafdda9",
+    "src/reglages.js": "30c0e95437b6cea7b2af0aabc91250589cd999f2447951d5bba74866fddb4389",
+    "src/styles.css": "6f46bedac36b4bc5de9e388c5f462c86ee969bdab0b5264f9c4b132e998c3261",
+    "src/utils.js": "546254f40e2e48b16b9d24642c3ad60c970563f40d96e5953ee6915e92d4b493",
+    "src/whats-new.js": "ee454ebbe51df2ef7d7fbf530cd1dd0d254bb648d7298f064e5423f71a15279b",
+    "scripts/mv-harnais-ift1.mjs": "fe000786c508ea768aca20f45b1a4b8e0f18365cabfd14669dd9e4dba910e8cc"
+  }
+}

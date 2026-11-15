@@ -2288,8 +2288,8 @@ function _visiteScenario(){
     //    parcelles passent en « Vigilance », aucune en depassement. Un domaine
     //    ou les trois quarts des parcelles seraient en alerte ne serait pas une
     //    demonstration, ce serait un contre-argument.
-    //    Les annees anterieures ne polluent pas le compteur de passages :
-    //    _cfmPassages() filtre sur la saison consultee.
+    //    Les annees anterieures ne polluent pas l'IFT de Conformite :
+    //    _iftCalc() ne lit que l'annee affichee (IFT-1, §571).
     var _cuY=now.getFullYear(), _cuT=[];
     for(var _k=6;_k>=1;_k--){
       var _yy=_cuY-_k;
@@ -11242,6 +11242,14 @@ window._obsResumeCockpit=function(){
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsResumeCockpit'); return null; }
 };
 window._obsAllerCarte=function(){ if(typeof goTo==='function') goTo('parcelles'); setTimeout(function(){ switchPTab('carte'); },0); };
+// ★ IFT-1 (§571) : les maladies et ravageurs signalés cette année sur une parcelle — la lecture croisée de l'IFT par parcelle
+//   (Pilotage › Conformité). Un signalement annulé n'y est pas ; clos, il y reste : la maladie a été vue.
+window._obsMaladies=function(nom){
+  try{ _obsDemarrer(); var n={};
+    _obsListe(nom).forEach(function(e){ if(_obsFamille(e.type)!=='maladie'||e.type==='carence') return; var t=_obsType(e.type); if(t) n[t[1].toLowerCase()]=1; });
+    return Object.keys(n);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsMaladies'); return []; }
+};
 window._obsChoixParcelle=_obsChoixParcelle;
 function _obsSignaler(nom){
   if(!_obsPeutSignaler()) return;
