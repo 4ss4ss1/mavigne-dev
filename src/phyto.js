@@ -138,7 +138,7 @@ function openCatDetail(nom){
   ov.classList.add('open');
 }
 
-var _trat={step:1,produits:[],date:'',conducteur:'',parcelles:[],stade:'',heureDebut:'',heureFin:'',dreAnticipe:'',modeAb:false,note:''};
+var _trat={step:1,produits:[],date:'',conducteur:'',parcelles:[],stade:'',heureDebut:'',heureFin:'',mode:'',surfT:{},surfOuvert:false,modeAb:false,note:''};
 
 // ════ Phyto : référentiel E-Phy + récents (catalogue local = repli invisible) ════
 function _phyNorm(s){
@@ -321,6 +321,34 @@ function _doseParse(str){
   if(!m||m[3]!=='ha') return {val:null,unit:null};
   return {val:parseFloat(m[1]),unit:m[2]+'/ha'};
 }
+// ★ REG27-1A (§572) — LA CIBLE ET LE MODE D'APPLICATION, saisis au traitement (le registre 2027 les prévoit, annexe II).
+//   La cible d'un produit se PROPOSE : la dernière notée pour ce produit au registre, sinon l'usage E-Phy quand le produit
+//   n'en a qu'un. Plusieurs usages et aucun historique : rien. Choisir à la place du vigneron reviendrait à déclarer une cible
+//   qu'il n'a peut-être pas visée — et l'IFT la lirait « à la cible » (Pilotage, _iftDr). La liste offre les deux sources.
+//   Le mode : le dernier noté au registre, sinon « Pulvérisation ».
+var MV_PHY_MODES=['Pulvérisation','Pulvérisation localisée','Poudrage','Pose de diffuseurs','Badigeon','Autre'];
+// « Vigne · Trt Part.Aer. · Mildiou(s) » (l'usage E-Phy) → « Mildiou(s) » : l'organisme visé, le dernier morceau.
+function _phyCibleCourte(c){ var a=String(c==null?'':c).split('·').map(function(x){ return x.trim(); }).filter(Boolean); return a.length>1?a[a.length-1]:''; }
+function _phyCiblesEphy(nom,amm){
+  var E=_phyEphy(), n=_phyNorm(nom), e=null;
+  for(var i=0;i<E.length;i++){ var x=E[i]; if(!x) continue; if(amm&&x.amm===amm){ e=x; break; } if(!e&&_phyNorm(x.nom)===n) e=x; }
+  var out=[]; ((e&&e.usages)||[]).forEach(function(u){ var c=_phyCibleCourte(u&&u.cible); if(c&&out.indexOf(c)<0) out.push(c); });
+  return out;
+}
+function _phyParDate(L){ return L.slice().sort(function(a,b){ return String((b&&b.date)||'').localeCompare(String((a&&a.date)||'')); }); }
+function _phyCiblesVues(nom){ var n=_phyNorm(nom), out=[]; _phyParDate(window.TRAITEMENTS||[]).forEach(function(t){ var c=t&&String(t.cible||'').trim(); if(c&&_phyNorm(t.produit)===n&&out.indexOf(c)<0) out.push(c); }); return out; }
+function _phyCibleDefaut(nom,amm){ var v=_phyCiblesVues(nom); if(v.length) return v[0]; var e=_phyCiblesEphy(nom,amm); return e.length===1?e[0]:''; }
+function _phyCiblesListe(nom,amm){ var o=_phyCiblesVues(nom); _phyCiblesEphy(nom,amm).forEach(function(c){ if(o.indexOf(c)<0) o.push(c); }); return o; }
+function _phyModeDefaut(){ var L=_phyParDate((window.TRAITEMENTS||[]).filter(function(t){ return t&&t.mode; })); return L.length?L[0].mode:MV_PHY_MODES[0]; }
+function _phyModeOpts(cur){ var L=MV_PHY_MODES.slice(); if(cur&&L.indexOf(cur)<0) L.unshift(cur); return L.map(function(m){ return '<option value="'+_escHtml(m)+'"'+(m===cur?' selected':'')+'>'+_escHtml(m)+'</option>'; }).join(''); }
+function _phyCibleDatalist(id,nom,amm){ return '<datalist id="'+id+'">'+_phyCiblesListe(nom,amm).map(function(c){ return '<option value="'+_escHtml(c)+'"></option>'; }).join('')+'</datalist>'; }
+function _tratCibleFieldHtml(p,i){
+  return '<div style="display:flex;align-items:center;gap:8px;margin-top:7px">'
+    +'<span style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux);white-space:nowrap">Cible</span>'
+    +'<input id="trat-cible-'+i+'" list="trat-cibles-'+i+'" type="text" autocomplete="off" placeholder="ex. Mildiou" value="'+_escHtml(p.cible||'')+'" class="mvchamp mvchamp-compact" style="flex:1;min-width:0">'
+    +_phyCibleDatalist('trat-cibles-'+i,p.nom,p.amm)
+    +'</div>';
+}
 function _tratCuFieldHtml(p,i){
   var v=(p.cuMetal!=null?p.cuMetal:'');
   var pct=_cuPct(p.nom,p.sub);
@@ -337,10 +365,12 @@ function _tratSaveInputs(){
   var d=document.getElementById('trat-date');if(d)_trat.date=d.value;
   var hd=document.getElementById('trat-hd');if(hd)_trat.heureDebut=hd.value;
   var hf=document.getElementById('trat-hf');if(hf)_trat.heureFin=hf.value;
-  var dr=document.getElementById('trat-dre');if(dr)_trat.dreAnticipe=dr.value;
+  var mo=document.getElementById('trat-mode');if(mo)_trat.mode=mo.value;
   var nt=document.getElementById('trat-note');if(nt)_trat.note=nt.value;
   var st=document.getElementById('trat-stade');if(st)_trat.stade=st.value;
   _trat.produits.forEach(function(p,i){ var el=document.getElementById('trat-cu-'+i); if(el){ var raw=el.value; p.cuMetal=(raw==='')?null:(parseFloat(String(raw).replace(',','.'))||0); } });
+  _trat.produits.forEach(function(p,i){ var el=document.getElementById('trat-cible-'+i); if(el) p.cible=String(el.value||'').trim(); });
+  _tratSaveSurf();
 }
 
 function _conducteursDispo(){
@@ -367,7 +397,43 @@ window._conducteursDispo=_conducteursDispo;
 
 // --- Traitement phytosanitaire : sélection parcelles (maj ciblée, préserve le scroll) ---
 function _tratParcAll(){return PARCELLES.filter(function(p){return p.statut!=='Arrachee';});}
-function _tratSurfSel(){return _trat.parcelles.reduce(function(s,nom){var p=PARCELLES.find(function(x){return x.nom===nom;});return s+(p?parseFloat(p.surface)||0:0);},0);}
+function _tratSurfSel(){return _trat.parcelles.reduce(function(s,nom){return s+_tratSurfT(nom);},0);}
+// ★ REG27-1A (§572) — LA SURFACE TRAITÉE, PARCELLE PAR PARCELLE : la parcelle entière par défaut, corrigée en hectares quand
+//   le traitement n'en a couvert qu'une partie (des rangs, un bout de parcelle). Seules les parcelles corrigées sont retenues
+//   (_trat.surfT) ; la valeur se lit par window._mvSurfT (utils.js), la même pour le registre, l'IFT, La Réserve et le coût.
+//   Les champs sont indexés sur la liste des parcelles cochées : ils se relisent AVANT chaque coche (_tratSaveSurf), sinon
+//   une valeur tapée glisserait sur la parcelle voisine quand la liste se redessine.
+// Les deux saisies (l'assistant, la modification) partagent la lecture et la zone : une seule règle d'arrondi, un seul plafond.
+function _phParcHa(nom){ var p=(window.PARCELLES||[]).find(function(x){return x&&x.nom===nom;}); return p?(parseFloat(String(p.surface==null?'':p.surface).replace(',','.'))||0):0; }
+function _phSurfLire(pre,noms,o){
+  noms.forEach(function(nom,i){
+    var el=document.getElementById(pre+i); if(!el) return;
+    var raw=String(el.value==null?'':el.value).replace(',','.').trim(), ha=_phParcHa(nom);
+    if(raw===''){ delete o[nom]; return; }
+    var v=parseFloat(raw); if(!isFinite(v)) return;
+    if(ha>0&&v>=ha-0.00005) delete o[nom]; else o[nom]=Math.round(v*10000)/10000;
+  });
+}
+function _phSurfDe(o,nom){ var ha=_phParcHa(nom); return window._mvSurfT?window._mvSurfT({surfTraitee:o},nom,ha):ha; }
+function _phSurfZero(noms,o){ return noms.filter(function(nom){ return Object.prototype.hasOwnProperty.call(o,nom)&&!(o[nom]>0); }); }
+function _phSurfZoneHtml(pre,detId,noms,o,ouvert){
+  if(!noms.length) return '';
+  var nPart=noms.filter(function(nom){ return Object.prototype.hasOwnProperty.call(o,nom); }).length;
+  var rows=noms.map(function(nom,i){
+    var ha=_phParcHa(nom), v=_phSurfDe(o,nom);
+    return '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'
+      +'<span style="flex:1;min-width:0;font-size:var(--pt-txt,13px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(nom)+'</span>'
+      +'<input id="'+pre+i+'" type="number" step="0.01" min="0"'+(ha>0?' max="'+ha+'"':'')+' inputmode="decimal" value="'+(Math.round(v*10000)/10000)+'" class="mvchamp mvchamp-compact" style="width:92px;text-align:right" aria-label="'+_escHtml('Hectares traités — '+nom)+'">'
+      +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">/ '+window._mvHaP(ha)+'&#xa0;ha</span></div>';
+  }).join('');
+  return '<details class="mvencadre" id="'+detId+'" style="margin-top:6px"'+((nPart||ouvert)?' open':'')+'>'
+    +'<summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">Une parcelle trait&#xe9;e en partie&#xa0;?'+(nPart?' <span style="font-weight:500;color:var(--texte-doux)">('+nPart+')</span>':'')+'</summary>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:6px">Par d&#xe9;faut, la parcelle enti&#xe8;re. Corrigez les hectares r&#xe9;ellement trait&#xe9;s&#xa0;: ils vont au registre, &#xe0; l&#x2019;IFT, &#xe0; La R&#xe9;serve et au co&#xfb;t.</div>'
+    +rows+'</details>';
+}
+function _tratSurfT(nom){ return _phSurfDe(_trat.surfT,nom); }
+function _tratSaveSurf(){ var det=document.getElementById('trat-surf-det'); if(det) _trat.surfOuvert=!!det.open; _phSurfLire('trat-st-',_trat.parcelles,_trat.surfT); }
+function _tratSurfZoneHtml(){ return _phSurfZoneHtml('trat-st-','trat-surf-det',_trat.parcelles,_trat.surfT,_trat.surfOuvert); }
 function _tratParcCountTxt(){return _trat.parcelles.length+' / '+_tratParcAll().length+' &#x2014; '+window._mvHaT(_tratSurfSel())+' ha';}
 function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(function(p){
         var sel=_trat.parcelles.includes(p.nom);
@@ -383,6 +449,7 @@ function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(funct
 function _tratRenderParcList(){
   var listEl=document.getElementById('trat-parc-list'); if(!listEl){_tratRender();return;}
   listEl.innerHTML=_tratParcRowsHtml();
+  var zEl=document.getElementById('trat-surf-zone'); if(zEl) zEl.innerHTML=_tratSurfZoneHtml();
   var cntEl=document.getElementById('trat-parc-count'); if(cntEl) cntEl.innerHTML=_tratParcCountTxt();
   var btn=document.getElementById('trat-next-btn');
   if(btn){var canNext2=_trat.parcelles.length>0;var surfSel=_tratSurfSel();
@@ -432,7 +499,7 @@ function _tratRender(){
   var needsStade=_trat.produits.some(function(p){return !!_pMeta(p).stadeOblig;});
   var needsHeure=_trat.produits.some(function(p){var m=_pMeta(p);return !!m.heureOblig||m.type==='Insecticide';});
   var maxDrae=_trat.produits.reduce(function(mx,p){return Math.max(mx,_pMeta(p).drae||0);},0);
-  var surfSel=_trat.parcelles.reduce(function(s,nom){var p=PARCELLES.find(function(x){return x.nom===nom;});return s+(p?parseFloat(p.surface)||0:0);},0);
+  var surfSel=_tratSurfSel();
 
   // ── Barre progression ──
   var sLabels=['Produits','Parcelles','Valider'];
@@ -462,7 +529,7 @@ function _tratRender(){
             +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+'</div>'
             +(p.dose?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(p.dose)+'</div>':'')
             +(p.dose_val!=null?'<div style="font-size:var(--pt-micro,11px);color:#A56B3A;font-weight:600">&#x1F4E6; '+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</div>':'')
-            +(warns?'<div style="margin-top:3px">'+warns+'</div>':'')+(c.type==='Cuivre'?_tratCuFieldHtml(p,i):'')+'</div>'
+            +(warns?'<div style="margin-top:3px">'+warns+'</div>':'')+_tratCibleFieldHtml(p,i)+(c.type==='Cuivre'?_tratCuFieldHtml(p,i):'')+'</div>'
             +'<button onclick="window._tratRemoveProd(\''+p.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" style="min-width:44px;min-height:44px;border-radius:8px;border:none;background:rgba(192,57,43,0.2);color:var(--rouge);font-size:var(--pt-base,14px);cursor:pointer"><span>&#x2715;</span></button>'
             +'</div>';
         }).join('');
@@ -520,8 +587,9 @@ function _tratRender(){
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Fin</div>'
       +'<input id="trat-hf" type="time" class="mvchamp" style="width:100%"></div>'
       +'</div></div>'
-      +'<div style="margin-bottom:12px"><div class="mvchamp-l" style="margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
-      +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" class="mvchamp" style="width:100%"></div>'
+      +'<div style="margin-bottom:12px"><div class="mvchamp-l" style="margin-bottom:6px">Mode d&#x2019;application</div>'
+      +'<select id="trat-mode" class="mvchamp" style="width:100%">'+_phyModeOpts(_trat.mode||_phyModeDefaut())+'</select>'
+      +'<div style="font-size:var(--pt-nano,10px);color:var(--texte-doux);margin-top:5px;line-height:1.4">Une rentr&#xe9;e dans les parcelles avant la fin du d&#xe9;lai se d&#xe9;clare apr&#xe8;s coup, sur la fiche du traitement.</div></div>'
       +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
       +'<div onclick="window._tratSetModeAb(false)" class="mvpas-filtre'+(!_trat.modeAb?' on':'')+'" aria-pressed="'+(!_trat.modeAb?'true':'false')+'" style="flex:1;justify-content:center">&#x1F33E; Conventionnel</div>'
@@ -542,21 +610,24 @@ function _tratRender(){
       +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="window._tratAllParc()"><span>Tout</span></button>'
       +'<button type="button" class="mvbtn mvbtn-secondaire" onclick="window._tratNoneParc()"><span>Aucune</span></button>'
       +'</div></div>'
-      +'<div id="trat-parc-list">'+_tratParcRowsHtml()+'</div>';
+      +'<div id="trat-parc-list">'+_tratParcRowsHtml()+'</div>'
+      +'<div id="trat-surf-zone">'+_tratSurfZoneHtml()+'</div>';
 
   // ══ STEP 3 ══
   } else {
+    var nPart=_trat.parcelles.filter(function(nom){return Object.prototype.hasOwnProperty.call(_trat.surfT,nom);}).length;
     var rcells=[
       {l:'Conducteur',v:_trat.conducteur||'—'},
-      {l:'Surface traitée',v:window._mvHaT(surfSel)+' ha'},
-      {l:'Mode',v:_trat.modeAb?'Agriculture Biologique (AB)':'Conventionnel'},
+      {l:'Surface traitée',v:window._mvHaT(surfSel)+' ha'+(nPart?' (dont '+nPart+' en partie)':'')},
+      {l:'Application',v:_trat.mode||'—'},
+      {l:'Conduite',v:_trat.modeAb?'Agriculture Biologique (AB)':'Conventionnel'},
       {l:'DRAE max',v:maxDrae>0?maxDrae+'h':'Aucun'}
     ];
     if(_trat.stade)rcells.push({l:'Stade',v:_trat.stade.split('(')[0].trim()});
     if(_trat.heureDebut)rcells.push({l:'Horaires',v:_trat.heureDebut+'–'+(_trat.heureFin||'?')});
-    if(_trat.dreAnticipe)rcells.push({l:'DRE anticipé',v:_trat.dreAnticipe});
     var parcListHtml=_trat.parcelles.map(function(nom){
-      return '<span class="mvpas mvpas-etiquette">'+_escHtml(nom)+'</span>';
+      var part=Object.prototype.hasOwnProperty.call(_trat.surfT,nom);
+      return '<span class="mvpas mvpas-etiquette">'+_escHtml(nom)+(part?' &#x00B7; '+window._mvHaT(_tratSurfT(nom))+'&#xa0;ha':'')+'</span>';
     }).join(' ');
     var recapHtml='<div class="mvencadre mvencadre-ok" style="margin-bottom:14px">'
       +'<div style="font-size:var(--pt-txt,13px);font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
@@ -588,6 +659,7 @@ function _tratRender(){
           +'<div style="flex:1"><div style="font-size:var(--pt-txt,13px);font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
           +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+window._mvHaT(surfSel)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
+          +(p.cible?'<div style="font-size:var(--pt-micro,11px);color:var(--texte);margin-top:2px">Cible&#xa0;: '+_escHtml(p.cible)+'</div>':'')
           +stRow+hRow+'</div>'
           +'<div style="font-size:var(--pt-micro,12px);font-weight:700;color:'+(c.dar>0?'var(--or)':'var(--vert)')+'">DAR '+(c.dar>0?c.dar+'j':'libre')+'</div>'
           +'</div></div>';
@@ -629,7 +701,6 @@ function _tratRender(){
   var dateEl=document.getElementById('trat-date');if(dateEl)dateEl.value=_trat.date||'';
   var hdEl=document.getElementById('trat-hd');if(hdEl)hdEl.value=_trat.heureDebut||'';
   var hfEl=document.getElementById('trat-hf');if(hfEl)hfEl.value=_trat.heureFin||'';
-  var dreEl=document.getElementById('trat-dre');if(dreEl)dreEl.value=_trat.dreAnticipe||'';
   var noteEl=document.getElementById('trat-note');if(noteEl)noteEl.value=_trat.note||'';
 }
 
@@ -644,7 +715,7 @@ function openOvTraitement(){
   var todayStr=_mvToday();
   var _cd=_conducteursDispo();var defCond=(_cd.find(function(c){return c.statut==='Formé';})||_cd[0]||{nom:''}).nom;
   _trat={step:1,produits:[],date:todayStr,conducteur:defCond,parcelles:[],
-         stade:'',heureDebut:'',heureFin:'',dreAnticipe:'',modeAb:false,note:'',q:'',selMeta:null};
+         stade:'',heureDebut:'',heureFin:'',mode:_phyModeDefaut(),surfT:{},surfOuvert:false,modeAb:false,note:'',q:'',selMeta:null};
   _tratRender();
   ov.classList.add('open');
 }
@@ -679,24 +750,29 @@ window._tratAddSel=function(){
   var du=(duEl&&duEl.value)?duEl.value:_doseUnitDefault(m.type);
   var cuBasis=(dv!=null?dv:dose);
   _tratSaveInputs();
-  _trat.produits.push({nom:m.nom,dose:dose,dose_val:dv,dose_unit:du,cuMetal:_cuSuggest(m.nom,m.sub,cuBasis),source:m.source||'mine',type:m.type,amm:m.amm||'',dar:(m.dar!=null?m.dar:0),drae:m.drae||0,znt:(m.znt!=null?m.znt:null),sub:m.sub||'',stadeOblig:!!m.stadeOblig,heureOblig:!!m.heureOblig});
+  _trat.produits.push({nom:m.nom,cible:_phyCibleDefaut(m.nom,m.amm),dose:dose,dose_val:dv,dose_unit:du,cuMetal:_cuSuggest(m.nom,m.sub,cuBasis),source:m.source||'mine',type:m.type,amm:m.amm||'',dar:(m.dar!=null?m.dar:0),drae:m.drae||0,znt:(m.znt!=null?m.znt:null),sub:m.sub||'',stadeOblig:!!m.stadeOblig,heureOblig:!!m.heureOblig});
   _trat.q=''; _trat.selMeta=null;
   _tratRender();
 };
 window._tratRemoveProd=function(nom){_tratSaveInputs();_trat.produits=_trat.produits.filter(function(p){return p.nom!==nom;});_tratRender();};
 window._tratToggleParc=function(nom){
-  if(_trat.parcelles.includes(nom)){_trat.parcelles=_trat.parcelles.filter(function(x){return x!==nom;});}
+  _tratSaveSurf();
+  if(_trat.parcelles.includes(nom)){_trat.parcelles=_trat.parcelles.filter(function(x){return x!==nom;});delete _trat.surfT[nom];}
   else{_trat.parcelles.push(nom);}
   _tratRenderParcList();
 };
-window._tratAllParc=function(){_trat.parcelles=PARCELLES.filter(function(p){return p.statut!=='Arrachee';}).map(function(p){return p.nom;});_tratRenderParcList();};
-window._tratNoneParc=function(){_trat.parcelles=[];_tratRenderParcList();};
+window._tratAllParc=function(){_tratSaveSurf();_trat.parcelles=PARCELLES.filter(function(p){return p.statut!=='Arrachee';}).map(function(p){return p.nom;});_tratRenderParcList();};
+window._tratNoneParc=function(){_tratSaveSurf();_trat.parcelles=[];_trat.surfT={};_tratRenderParcList();};
 window._tratSetConducteur=function(nom){_tratSaveInputs();_trat.conducteur=nom;_tratRender();};
 window._tratSetModeAb=function(val){_tratSaveInputs();_trat.modeAb=val;_tratRender();};
 window._tratNext=function(){
   _tratSaveInputs();
   if(_trat.step===1&&(!_trat.produits.length||!_trat.date||!_trat.conducteur))return;
   if(_trat.step===2&&!_trat.parcelles.length)return;
+  if(_trat.step===2){
+    var _zero=_phSurfZero(_trat.parcelles,_trat.surfT);
+    if(_zero.length){ showToast('Surface trait\u00e9e de '+_zero[0]+'\u00a0: au moins 0,01\u00a0ha \u2014 sinon d\u00e9cochez la parcelle','#B85A1A'); return; }
+  }
   if(_trat.step<3){_trat.step++;_tratRender();}
 };
 window._tratPrev=function(){_tratSaveInputs();if(_trat.step>1){_trat.step--;_tratRender();}};
@@ -704,20 +780,29 @@ window._tratSave=function(){
   if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
   _tratSaveInputs();
   var sid='trat_'+Date.now();
-  var surf=_trat.parcelles.reduce(function(s,nom){var p=PARCELLES.find(function(x){return x.nom===nom;});return s+(p?parseFloat(p.surface)||0:0);},0);
-  SESSIONS.push({id:sid,saison:(window._saisonForDate?window._saisonForDate(_trat.date):''),type:'traitement',activite:'Traitement',date:_trat.date,
+  var surf=_tratSurfSel();
+  // ★ REG27-1A (§572) : seules les parcelles traitées EN PARTIE portent leurs hectares (surfTraitee) ; les autres restent
+  //   « parcelle entière ». La session porte la surface TRAITÉE (ses heures au barème, Ma semaine). Plus de « DRE anticipé »
+  //   saisi d'avance : une rentrée anticipée se déclare après coup, sur la fiche (_phRentreeOuvrir).
+  var sT={}; _trat.parcelles.forEach(function(nom){ if(Object.prototype.hasOwnProperty.call(_trat.surfT,nom)) sT[nom]=_trat.surfT[nom]; });
+  var hasT=Object.keys(sT).length>0;
+  var ses={id:sid,saison:(window._saisonForDate?window._saisonForDate(_trat.date):''),type:'traitement',activite:'Traitement',date:_trat.date,
     conducteur:_trat.conducteur,parcelles:_trat.parcelles.slice(),
     produits:_trat.produits.map(function(p){return p.nom;}),
     stade:_trat.stade,heureDebut:_trat.heureDebut,heureFin:_trat.heureFin,
-    dreAnticipe:_trat.dreAnticipe,modeAb:_trat.modeAb,note:_trat.note,
-    statut:'Terminé',avancement:100,surface:Math.round(surf*100)/100});
+    mode:_trat.mode||'',modeAb:_trat.modeAb,note:_trat.note,
+    statut:'Terminé',avancement:100,surface:Math.round(surf*100)/100};
+  if(hasT) ses.surfTraitee=Object.assign({},sT);
+  SESSIONS.push(ses);
   _trat.produits.forEach(function(p){
     var c=_pMeta(p);
-    TRAITEMENTS.push({produit:p.nom,type:c.type,amm:c.amm||'',dar:(c.dar!=null?c.dar:0),drae:c.drae||0,znt:(c.znt!=null?c.znt:null),sub:c.sub||'',source:p.source||'mine',cuMetal:(c.type==='Cuivre'&&p.cuMetal!=null?p.cuMetal:null),date:_trat.date,
-      conducteur:_trat.conducteur,operateur:_trat.conducteur,
+    var rec={produit:p.nom,type:c.type,amm:c.amm||'',dar:(c.dar!=null?c.dar:0),drae:c.drae||0,znt:(c.znt!=null?c.znt:null),sub:c.sub||'',source:p.source||'mine',cuMetal:(c.type==='Cuivre'&&p.cuMetal!=null?p.cuMetal:null),date:_trat.date,
+      conducteur:_trat.conducteur,operateur:_trat.conducteur,cible:String(p.cible||'').trim(),
       dose:p.dose||c.dose||'',dose_val:(typeof p.dose_val==='number'&&!isNaN(p.dose_val)?p.dose_val:null),dose_unit:p.dose_unit||'',parcelles:_trat.parcelles.slice(),
       stade:_trat.stade,heureDebut:_trat.heureDebut,heureFin:_trat.heureFin,
-      dreAnticipe:_trat.dreAnticipe,modeAb:_trat.modeAb,note:_trat.note,sessionId:sid});
+      mode:_trat.mode||'',modeAb:_trat.modeAb,note:_trat.note,sessionId:sid};
+    if(hasT) rec.surfTraitee=Object.assign({},sT);
+    TRAITEMENTS.push(rec);
     if(window._phyPushRecent) window._phyPushRecent({nom:p.nom,type:c.type,amm:c.amm,dar:c.dar,drae:c.drae,znt:c.znt,sub:c.sub,dose:p.dose||c.dose,source:p.source||'mine'});
   });
   saveData('sessions');saveData('traitements');
@@ -741,7 +826,10 @@ function openTraitDetail(idx){
   const darR=darBase>0?Math.max(0,darBase-Math.floor((today-new Date(t.date))/86400000)):null;
   const _dre=dreEffectif(m.drae,m.type,m.dreH,m.dreHc);
   const draeH=_dre.h;
-  const draeR=draeH>0?Math.max(0,draeH-Math.floor((today-new Date(t.date))/3600000)):0;
+  // ★ REG27-1A (§572) : le délai court depuis la FIN du traitement (sinon son début, sinon midi), comme la liste du registre
+  //   et l'Accueil — il se comptait depuis minuit (UTC) : « 15 h restantes » ici, 32 h dans la liste, pour le même traitement.
+  const _fin=_phFinApp(t);
+  const draeR=(draeH>0&&_fin)?Math.max(0,Math.ceil((_fin.getTime()+draeH*3600000-today.getTime())/3600000)):0;
   const _canEd=isAdmin()||isTractoriste();
   document.getElementById('otd-title').textContent=t.produit;
   document.getElementById('otd-sub').textContent=fmtDate(t.date)+((t.conducteur||t.operateur)?' · '+(t.conducteur||t.operateur):'');
@@ -756,6 +844,7 @@ function openTraitDetail(idx){
         <div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px;font-family:monospace">${m.amm||'—'}</div>
       </div>
     </div>
+    ${_phDetCibleHtml(t)}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div class="mvencadre mvencadre-${darR>0?'danger':'ok'}">
         <div style="font-size:10px;color:var(--texte-doux)">DAR récolte</div>
@@ -778,11 +867,12 @@ function openTraitDetail(idx){
       </div>
     </div>
     ${t.note?`<div class="mvencadre">${_escHtml(t.note)}</div>`:''}
-    ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span class="mvpas mvpas-etiquette">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
+    ${_phDetParcHtml(t)}
     ${t.stade?`<div class="mvencadre mvencadre-info" style="margin-top:8px">Stade : ${_escHtml(t.stade)}</div>`:''}
     ${t.heureDebut?`<div class="mvencadre" style="margin-top:8px">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
-    ${t.dreAnticipe?`<div class="mvencadre mvencadre-attention" style="margin-top:8px">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
-    ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Mode : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
+    ${t.dreAnticipe?`<div class="mvencadre mvencadre-attention" style="margin-top:8px">Rentrée anticipée (saisie d’avant) : ${_escHtml(t.dreAnticipe)}</div>`:''}
+    ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Conduite : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
+    ${_phDetRentHtml(idx,t,_canEd)}
     ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:var(--font-ui,'Outfit',sans-serif);min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
   `;
   openOv('ovTraitDetail');
@@ -800,8 +890,209 @@ function confirmDeleteTraitement(){
     renderPhyto();
   },'🌿', 'Supprimer ce traitement',null);
 }
+// ★ REG27-1A (§572) — LA FICHE D'UN TRAITEMENT dit aussi la cible et le mode, la surface traitée (parcelle par parcelle quand
+//   une ne l'a été qu'en partie) et les rentrées anticipées déclarées — chacune se touche pour la corriger ou la retirer.
+function _phDetCibleHtml(t){
+  if(!t||(!t.cible&&!t.mode)) return '';
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+    +'<div class="mvencadre"><div style="font-size:var(--pt-nano,10px);color:var(--texte-doux)">Cible</div><div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px">'+_escHtml(t.cible||'—')+'</div></div>'
+    +'<div class="mvencadre"><div style="font-size:var(--pt-nano,10px);color:var(--texte-doux)">Mode d’application</div><div style="font-size:var(--pt-txt,13px);font-weight:600;margin-top:4px">'+_escHtml(t.mode||'—')+'</div></div>'
+    +'</div>';
+}
+function _phDetParcHtml(t){
+  var P=_phCsvParcs(t).filter(Boolean); if(!P.length) return '';
+  var o=(t&&t.surfTraitee)||{}, nPart=P.filter(n=>Object.prototype.hasOwnProperty.call(o,n)).length;   // une flèche : le preflight (C24c) lit chaque « return » du corps
+  var tot=window._mvSurfTTot?window._mvSurfTTot(t):0;
+  return '<div style="margin-top:10px"><div style="font-size:var(--pt-nano,10px);color:var(--texte-doux);font-weight:600;margin-bottom:5px">Parcelles traitées'+(tot>0?' · '+_escHtml(window._mvHaT(tot))+'&#xa0;ha'+(nPart?' (dont '+Number(nPart)+' en partie)':''):'')+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:5px">'+P.map(n=>_phDetParcPuce(t,o,n)).join('')+'</div></div>';
+}
+// Une parcelle de la fiche : son nom, et ses hectares quand elle n'a été traitée qu'en partie.
+function _phDetParcPuce(t,o,n){
+  if(!Object.prototype.hasOwnProperty.call(o,n)||!window._mvSurfT) return '<span class="mvpas mvpas-etiquette">'+_escHtml(n)+'</span>';
+  return '<span class="mvpas mvpas-etiquette">'+_escHtml(n)+' · '+_escHtml(window._mvHaT(window._mvSurfT(t,n)))+'&#xa0;ha</span>';
+}
+// « sam. 14 nov. à 7 h 30 » : le moment d'une rentrée, comme on le dit.
+function _phRentQuandFr(q){ var d=new Date(String(q||'')); if(isNaN(d)) return String(q||''); return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' à '+d.getHours()+'\u00a0h\u00a0'+('0'+d.getMinutes()).slice(-2); }
+function _phDetRentCorps(t,r){
+  var dl=_phRentreeDelai(t,r);
+  return '<div style="font-size:var(--pt-txt,13px);font-weight:600">'+_escHtml(_phRentQuandFr(r.quand))+(dl?' · '+_escHtml(dl)+' après la fin du traitement':'')+'</div>'
+    +((r.parcelles&&r.parcelles.length)?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+_escHtml(r.parcelles.join(', '))+'</div>':'')
+    +'<div style="font-size:var(--pt-micro,11px);margin-top:2px">'+_escHtml(r.motif||'')+(r.mesures?' — '+_escHtml(r.mesures):'')+'</div>';
+}
+function _phDetRentLigne(idx,t,r,canEd){
+  return canEd
+    ?'<button type="button" onclick="window._phRentreeOuvrir('+Number(idx)+',\''+_escAttr(r.id||'')+'\')" style="display:block;width:100%;text-align:left;background:none;border:none;border-top:1px solid var(--gris-clair);margin-top:8px;padding:8px 0 0;cursor:pointer;font-family:inherit;color:inherit;min-height:44px">'+_phDetRentCorps(t,r)+'</button>'
+    :'<div style="border-top:1px solid var(--gris-clair);margin-top:8px;padding-top:8px">'+_phDetRentCorps(t,r)+'</div>';
+}
+function _phDetRentHtml(idx,t,canEd){
+  var RT=_phRentrees(t), dre=_phDreSession(t);
+  if(!RT.length&&!(canEd&&dre>0)) return '';
+  return '<div class="mvencadre'+(RT.length?' mvencadre-attention':'')+'" style="margin-top:10px" data-tuto="phy.rentrees">'
+    +'<div style="font-size:var(--pt-nano,10px);color:var(--texte-doux);font-weight:600">Rentrées anticipées</div>'
+    +(RT.length?'':'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:4px">Aucune. Quelqu’un est revenu dans une parcelle avant la fin du délai de rentrée ('+Number(dre)+'&#xa0;h)&#xa0;? Le registre le demande&#xa0;: déclarez-le.</div>')
+    +RT.map(r=>_phDetRentLigne(idx,t,r,canEd)).join('')
+    +'</div>'
+    +((canEd&&dre>0)?'<button type="button" data-tuto="phy.rentree" onclick="window._phRentreeOuvrir('+Number(idx)+')" class="mvbtn mvbtn-secondaire" style="width:100%;margin-top:8px"><span>Déclarer une rentrée anticipée</span></button>':'');
+}
+
+// ════ LA RENTRÉE ANTICIPÉE — déclarée après coup, sur la fiche du traitement (REG27-1A, §572) ════
+// L'arrêté du 24 décembre 2025 (annexe I) : une rentrée sur les parcelles traitées AVANT la fin du délai de rentrée
+// s'inscrit au registre — le moment, le lieu, le motif, les mesures de protection —, et l'annexe II en tire une colonne,
+// « Délai de rentrée anticipé », au format HH:MM. Ce délai se COMPTE (moment − fin du traitement) : tapé à la main, il
+// finirait par contredire les deux heures qu'il relie. Sans heure de fin, la fenêtre la demande — elle fait partie du
+// traitement, et sert aussi l'état de la rentrée affiché partout. La déclaration va sur TOUTES les lignes de la session
+// (les produits d'une même cuve) : c'est la parcelle qu'on rejoint, pas un produit ; le délai qui borne est le plus long
+// des produits de la cuve. Un moment au-delà de ce délai n'est pas une rentrée anticipée : la fenêtre le dit, n'enregistre
+// rien. Le moment n'est jamais prérempli : c'est celui de la rentrée, pas celui de la saisie.
+function _phSessionLignes(t){ if(!t) return []; if(!t.sessionId) return [t]; var L=(window.TRAITEMENTS||[]).filter(function(o){ return o&&o.sessionId===t.sessionId; }); return L.length?L:[t]; }
+function _phDreSession(t){ var mx=0; _phSessionLignes(t).forEach(function(o){ var m=_phResolve(o), d=dreEffectif(m.drae,m.type,m.dreH,m.dreHc); if(!d.na&&d.h>mx) mx=d.h; }); return mx; }
+// La fin de l'application : l'heure de fin, sinon de début, sinon midi — la règle de la liste (tracteur.js, _phEtatRentree)
+// et de l'Accueil (_homeDreLignes). C'est d'elle que court le délai de rentrée.
+function _phFinApp(t){ var j=String((t&&t.date)||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(j)) return null; var hm=String((t&&(t.heureFin||t.heureDebut))||'12:00').split(':'); var d=new Date(j+'T'+('0'+(hm[0]||'12')).slice(-2)+':'+('0'+(hm[1]||'00')).slice(-2)+':00'); return isNaN(d)?null:d; }
+window._phFinApp=_phFinApp;
+function _phJourIso(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function _phFinTrait(t){
+  var j=String((t&&t.date)||'').slice(0,10), h=String((t&&t.heureFin)||'').slice(0,5);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(j)||!/^\d{1,2}:\d{2}$/.test(h)) return null;
+  var d=new Date(j+'T'+('0'+h).slice(-5)+':00'); return isNaN(d)?null:d;
+}
+// minutes → « HH:MM » : les heures passent 24 (un délai de 48 h se compte en heures, comme le veut le format).
+function _phHhMm(min){ min=Math.max(0,Math.round(min)); var h=Math.floor(min/60), m=min%60; return (h<10?'0':'')+h+':'+(m<10?'0':'')+m; }
+function _phHFr(min){ min=Math.round(min); var h=Math.floor(min/60), m=min%60; return h+'\u00a0h'+(m?'\u00a0'+('0'+m).slice(-2):''); }
+function _phRentreeDelaiMin(t,quand){ var f=_phFinTrait(t); if(!f) return null; var q=new Date(String(quand||'')); if(isNaN(q)) return null; return (q-f)/60000; }
+// Les rentrées d'un traitement, de la plus ancienne à la plus récente : la première donne le plus court délai.
+function _phRentrees(t){ var R=t&&t.rentrees; if(Object.prototype.toString.call(R)!=='[object Array]') return []; return R.filter(function(r){ return r&&r.quand; }).slice().sort(function(a,b){ return String(a.quand).localeCompare(String(b.quand)); }); }
+// Le délai d'une rentrée : recompté sur l'heure de fin du traitement (corrigée depuis ?), sinon celui noté à la déclaration.
+function _phRentreeDelai(t,r){ var m=_phRentreeDelaiMin(t,r&&r.quand); return (m!=null&&m>0)?_phHhMm(m):String((r&&r.delai)||''); }
+window._phRentrees=_phRentrees; window._phRentreeDelai=_phRentreeDelai;
+var _phRent={idx:null,id:'',parcs:[],detail:false};
+function _phRentreeOv(){
+  var ov=document.getElementById('ovPhRentree'); if(ov) return ov;
+  ov=document.createElement('div'); ov.id='ovPhRentree'; ov.className='overlay';
+  ov.setAttribute('onclick',"closeOv(event,'ovPhRentree')");
+  ov.innerHTML='<div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>'
+    +'<div class="modal-hd"><div class="modal-title" id="prt-title">Rentrée anticipée</div><div class="modal-sub" id="prt-sub"></div></div>'
+    +'<div class="modal-body"><div id="prt-body"></div>'
+    +'<button type="button" class="mbtn verte" data-tuto="rent.ok" style="margin-top:18px" onclick="window._phRentreeValider()">'+_mvIcon('check',16)+' Enregistrer la rentrée</button>'
+    +'<button type="button" class="mbtn-del" id="prt-suppr" style="margin-top:10px;display:none" onclick="window._phRentreeSuppr()">'+_mvIcon('corbeille',16)+' Retirer cette rentrée</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  return ov;
+}
+function _phRentreeParcsHtml(P){
+  return P.map(function(n){ var on=_phRent.parcs.indexOf(n)>=0; return '<div onclick="window._phRentreeParc(\''+_escAttr(n)+'\')" class="mvpas-filtre'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" data-tuto="rent.parc" data-parc="'+_escHtml(n)+'">'+_escHtml(n)+'</div>'; }).join('');
+}
+function _phRentreeCorps(t){
+  var dre=_phDreSession(t), P=_phCsvParcs(t).filter(Boolean);
+  var h='<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-bottom:14px">Quelqu’un est revenu dans une parcelle avant la fin du délai de rentrée ('+dre+'&#xa0;h)&#xa0;? Le registre doit dire quand, où, pourquoi et avec quelles protections.</div>';
+  if(!_phFinTrait(t)) h+='<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Fin du traitement (le '+_escHtml(fmtDate(t.date))+')</span><input type="time" id="prt-fin" class="fi" oninput="window._phRentreeMaj()">'
+    +'<div style="font-size:var(--pt-nano,10px);color:var(--texte-doux);margin-top:4px;line-height:1.4">Le délai se compte depuis elle&#xa0;; elle sera notée sur le traitement.</div></div>';
+  h+='<div style="display:flex;gap:10px;margin-bottom:8px"><div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">Le jour</span><input type="date" id="prt-date" class="fi" oninput="window._phRentreeMaj()"></div>'
+    +'<div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">L’heure</span><input type="time" id="prt-heure" class="fi" data-tuto="rent.heure" oninput="window._phRentreeMaj()"></div></div>'
+    +'<div id="prt-delai" style="font-size:var(--pt-micro,12px);line-height:1.5;margin-bottom:14px;min-height:18px"></div>';
+  if(P.length>1) h+='<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Les parcelles où l’on est entré</span><div id="prt-parcs" style="display:flex;flex-wrap:wrap;gap:6px">'+_phRentreeParcsHtml(P)+'</div></div>';
+  h+='<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Le motif</span><input type="text" id="prt-motif" class="fi" data-tuto="rent.motif" placeholder="ex. Relevage urgent avant l’orage"></div>'
+    +'<div style="margin-bottom:4px"><span class="mvchamp-l" style="margin-bottom:6px">Les protections portées</span><input type="text" id="prt-mesures" class="fi" data-tuto="rent.mesures" placeholder="ex. Gants, combinaison et bottes"></div>';
+  return h;
+}
+window._phRentreeOuvrir=function(idx,id){
+  if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
+  var t=TRAITEMENTS[idx]; if(!t) return;
+  var r=null; if(id){ _phRentrees(t).forEach(function(x){ if(String(x.id)===String(id)) r=x; }); }
+  var P=_phCsvParcs(t).filter(Boolean);
+  var choix=(r&&r.parcelles&&r.parcelles.length)?r.parcelles.filter(function(n){ return P.indexOf(n)>=0; }):[];
+  _phRent={idx:idx,id:r?String(r.id):'',parcs:choix.length?choix:P.slice(),detail:false};
+  var ov=_phRentreeOv();
+  var ti=ov.querySelector('#prt-title'); if(ti) ti.textContent=r?'Corriger une rentrée anticipée':'Déclarer une rentrée anticipée';
+  var su=ov.querySelector('#prt-sub'); if(su) su.textContent=(t.produit||'')+' · '+fmtDate(t.date)+(t.heureFin?' · fini à '+t.heureFin:'');
+  var bd=ov.querySelector('#prt-body'); if(bd) bd.innerHTML=_phRentreeCorps(t);
+  var sp=ov.querySelector('#prt-suppr'); if(sp) sp.style.display=r?'':'none';
+  var q=r?String(r.quand):'', dj=q.slice(0,10), hj=q.slice(11,16);
+  if(!dj){ var now=new Date(), d0=new Date(String(t.date||'').slice(0,10)+'T12:00:00'); dj=(!isNaN(d0)&&(now-d0)>3*864e5)?String(t.date).slice(0,10):_phJourIso(now); }
+  var e1=document.getElementById('prt-date'); if(e1) e1.value=dj;
+  var e2=document.getElementById('prt-heure'); if(e2) e2.value=hj;
+  var e3=document.getElementById('prt-motif'); if(e3) e3.value=r?(r.motif||''):'';
+  var e4=document.getElementById('prt-mesures'); if(e4) e4.value=r?(r.mesures||''):'';
+  window._phRentreeMaj();
+  openOv('ovPhRentree');
+  // Comme la modification (openTraitEdit) : la fiche dessous se ferme, et se rouvre à jour après l'enregistrement.
+  var od=document.getElementById('ovTraitDetail'); if(od&&od.classList.contains('open')){ _phRent.detail=true; od.classList.remove('open'); }
+};
+window._phRentreeParc=function(nom){
+  var i=_phRent.parcs.indexOf(nom); if(i>=0) _phRent.parcs.splice(i,1); else _phRent.parcs.push(nom);
+  var t=TRAITEMENTS[_phRent.idx], el=document.getElementById('prt-parcs');
+  if(t&&el) el.innerHTML=_phRentreeParcsHtml(_phCsvParcs(t).filter(Boolean));
+};
+// Le moment tapé, « AAAA-MM-JJTHH:MM » — vide tant que le jour ou l'heure manque.
+function _phRentreeQuand(){
+  var d=String((document.getElementById('prt-date')||{}).value||''), h=String((document.getElementById('prt-heure')||{}).value||'').slice(0,5);
+  return (/^\d{4}-\d{2}-\d{2}$/.test(d)&&/^\d{1,2}:\d{2}$/.test(h))?d+'T'+('0'+h).slice(-5):'';
+}
+// Le traitement tel qu'il sera : avec l'heure de fin tapée dans la fenêtre quand il n'en avait pas.
+function _phRentreeT(t){ var f=document.getElementById('prt-fin'); return (f&&f.value)?Object.assign({},t,{heureFin:String(f.value).slice(0,5)}):t; }
+// Ce que la fenêtre dit du moment tapé, et s'il s'enregistre : { ok, txt, min, q, tt }.
+function _phRentreeVerdict(t){
+  var tt=_phRentreeT(t), q=_phRentreeQuand(), dre=_phDreSession(t);
+  if(!_phFinTrait(tt)) return { ok:false, txt:'Notez l’heure de fin du traitement\u00a0: le délai se compte depuis elle.' };
+  if(!q) return { ok:false, txt:'' };
+  var min=_phRentreeDelaiMin(tt,q);
+  if(min==null) return { ok:false, txt:'' };
+  if(min<=0) return { ok:false, txt:'Ce moment est avant la fin du traitement.' };
+  if(dre>0&&min>=dre*60) return { ok:false, txt:'Le délai de rentrée ('+dre+'\u00a0h) était écoulé\u00a0: ce n’est pas une rentrée anticipée, rien à déclarer.' };
+  return { ok:true, min:min, q:q, tt:tt, txt:_phHFr(min)+' après la fin du traitement, sur un délai de '+dre+'\u00a0h \u2014 au registre\u00a0: '+_phHhMm(min)+'.' };
+}
+window._phRentreeMaj=function(){
+  var el=document.getElementById('prt-delai'), t=TRAITEMENTS[_phRent.idx]; if(!el||!t) return;
+  var v=_phRentreeVerdict(t);
+  el.textContent=v.txt; el.style.color=v.ok?'var(--texte)':'var(--orange)'; el.style.fontWeight=v.ok?'600':'400';
+};
+window._phRentreeValider=function(){
+  if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
+  var t=TRAITEMENTS[_phRent.idx]; if(!t){ closeOv(null,'ovPhRentree'); return; }
+  var v=_phRentreeVerdict(t);
+  if(!v.ok){ showToast(v.txt||'Le jour et l’heure de la rentrée','#B85A1A'); return; }
+  if(!_phRent.parcs.length){ showToast('Au moins une parcelle','#B85A1A'); return; }
+  var e3=document.getElementById('prt-motif'), e4=document.getElementById('prt-mesures');
+  var motif=String((e3&&e3.value)||'').trim(), mes=String((e4&&e4.value)||'').trim();
+  if(!motif){ showToast('Le motif de la rentrée est à noter','#B85A1A'); if(e3&&e3.focus) e3.focus(); return; }
+  if(!mes){ showToast('Les protections portées sont à noter','#B85A1A'); if(e4&&e4.focus) e4.focus(); return; }
+  var hf=(v.tt!==t)?String(v.tt.heureFin||''):'';
+  var id=_phRent.id||('r'+Date.now().toString(36));
+  var u=window.currentUser||{};
+  var rec={id:id,quand:v.q,parcelles:_phRent.parcs.slice(),motif:motif,mesures:mes,delai:_phHhMm(v.min),par:String(u.nom||''),le:new Date().toISOString()};
+  _phSessionLignes(t).forEach(function(o){
+    if(hf) o.heureFin=hf;
+    var L=(Object.prototype.toString.call(o.rentrees)==='[object Array]')?o.rentrees.filter(function(x){ return x&&String(x.id)!==id; }):[];
+    L.push(Object.assign({},rec,{parcelles:rec.parcelles.slice()}));
+    o.rentrees=L;
+  });
+  if(hf&&t.sessionId){ (window.SESSIONS||[]).forEach(function(se){ if(se&&se.id===t.sessionId) se.heureFin=hf; }); saveData('sessions'); }
+  saveData('traitements');
+  var idx=_phRent.idx, det=_phRent.detail;
+  closeOv(null,'ovPhRentree');
+  showToast('Rentrée anticipée notée au registre','#2C6E29');
+  if(typeof renderPhyto==='function') renderPhyto();
+  if(det) openTraitDetail(idx);
+};
+window._phRentreeSuppr=function(){
+  if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
+  var t=TRAITEMENTS[_phRent.idx], id=_phRent.id; if(!t||!id) return;
+  var idx=_phRent.idx, det=_phRent.detail;
+  openConfirmDel('Retirer cette rentrée anticipée\u00a0?', 'Elle sort du registre de '+(t.produit||'ce traitement')+'.', function(){
+    _phSessionLignes(t).forEach(function(o){ if(Object.prototype.toString.call(o.rentrees)==='[object Array]') o.rentrees=o.rentrees.filter(function(x){ return x&&String(x.id)!==id; }); });
+    saveData('traitements');
+    closeOv(null,'ovPhRentree');
+    showToast('Rentrée retirée','#2C6E29');
+    if(typeof renderPhyto==='function') renderPhyto();
+    if(det) openTraitDetail(idx);
+  }, 'corbeille', 'Retirer', null);
+};
+
 // ════ MODIFICATION D'UN TRAITEMENT (correction date/dose/parcelles/conducteur/stade…) ════
-let _phEdit={idx:null,parc:[]};
+let _phEdit={idx:null,parc:[],surfT:{},surfOuvert:false};
+// ★ REG27-1A (§572) : la surface traitée se corrige ici aussi (même zone que l'assistant, _phSurfZoneHtml) ; les champs se
+//   relisent avant chaque coche, puisqu'ils suivent l'ordre des parcelles cochées.
+function _teSaveSurf(){ var det=document.getElementById('te-surf-det'); if(det) _phEdit.surfOuvert=!!det.open; _phSurfLire('te-st-',_phEdit.parc,_phEdit.surfT); }
 function _teRenderParc(){
   var grid=document.getElementById('te-parc-grid'); if(!grid) return;
   var act=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';});
@@ -811,15 +1102,18 @@ function _teRenderParc(){
   }).join('');
   var c=document.getElementById('te-parc-count');
   if(c){ var tot=act.length; c.textContent = _phEdit.parc.length===0 ? 'Aucune parcelle sélectionnée' : (_phEdit.parc.length+' / '+tot+' parcelle'+(_phEdit.parc.length>1?'s':'')); }
+  var z=document.getElementById('te-surf-zone'); if(z) z.innerHTML=_phSurfZoneHtml('te-st-','te-surf-det',_phEdit.parc,_phEdit.surfT,_phEdit.surfOuvert);
 }
-window._teToggleParc=function(nom){ var i=_phEdit.parc.indexOf(nom); if(i>=0)_phEdit.parc.splice(i,1); else _phEdit.parc.push(nom); _teRenderParc(); };
-window._teAllParc=function(){ _phEdit.parc=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';}).map(function(p){return p.nom;}); _teRenderParc(); };
-window._teNoneParc=function(){ _phEdit.parc=[]; _teRenderParc(); };
+window._teToggleParc=function(nom){ _teSaveSurf(); var i=_phEdit.parc.indexOf(nom); if(i>=0){ _phEdit.parc.splice(i,1); delete _phEdit.surfT[nom]; } else _phEdit.parc.push(nom); _teRenderParc(); };
+window._teAllParc=function(){ _teSaveSurf(); _phEdit.parc=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';}).map(function(p){return p.nom;}); _teRenderParc(); };
+window._teNoneParc=function(){ _teSaveSurf(); _phEdit.parc=[]; _phEdit.surfT={}; _teRenderParc(); };
 function openTraitEdit(idx){
   if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
   var t=TRAITEMENTS[idx]; if(!t) return;
   _phEdit.idx=idx;
   _phEdit.parc = Array.isArray(t.parcelles) ? t.parcelles.slice() : [];
+  _phEdit.surfT = {}; _phEdit.surfOuvert=false;
+  if(t.surfTraitee&&typeof t.surfTraitee==='object') Object.keys(t.surfTraitee).forEach(function(n){ if(_phEdit.parc.indexOf(n)>=0) _phEdit.surfT[n]=t.surfTraitee[n]; });
   var curCond=t.conducteur||t.operateur||'';
   var conds=(typeof _conducteursDispo==='function'?_conducteursDispo():(window.CONDUCTEURS||[])).filter(function(c){return c&&c.statut!=='Archivé';});
   if(curCond&&!conds.some(function(c){return c&&c.nom===curCond;})) conds=[{nom:curCond}].concat(conds);
@@ -844,15 +1138,18 @@ function openTraitEdit(idx){
      '<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">📅 Date du traitement</span><input type="date" id="te-date" class="fi"></div>'
     +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Conducteur</span><select id="te-cond" class="fsel">'+condOpts+'</select></div>'
     +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Dose</span><input type="text" id="te-dose" class="fi" placeholder="ex. 750 g/hL"></div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Cible</span><input type="text" id="te-cible" list="te-cibles" autocomplete="off" class="fi" placeholder="ex. Mildiou">'+_phyCibleDatalist('te-cibles',t.produit,t.amm)+'</div>'
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Mode d’application</span><select id="te-mode" class="fsel"><option value="">— Non renseigné —</option>'+_phyModeOpts(t.mode||'')+'</select></div>'
     +cuHtml
     +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Stade phénologique</span><select id="te-stade" class="fsel">'+stadeOpts+'</select></div>'
     +'<div style="display:flex;gap:10px;margin-bottom:14px"><div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">Heure début</span><input type="time" id="te-hd" class="fi"></div><div style="flex:1"><span class="mvchamp-l" style="margin-bottom:6px">Heure fin</span><input type="time" id="te-hf" class="fi"></div></div>'
-    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">DRE anticipé</span><input type="text" id="te-dre" class="fi" placeholder="ex. Soirée hors butinage"></div>'
-    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Mode</span><select id="te-ab" class="fsel"><option value="">— Non renseigné —</option><option value="0"'+(abVal==='0'?' selected':'')+'>🌾 Conventionnel</option><option value="1"'+(abVal==='1'?' selected':'')+'>🌿 Agriculture Biologique (AB)</option></select></div>'
+    +(t.dreAnticipe?'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Rentrée anticipée (saisie d’avant)</span><input type="text" id="te-dre" class="fi"><div style="font-size:var(--pt-nano,10px);color:var(--texte-doux);margin-top:4px;line-height:1.4">Une rentrée se déclare désormais sur la fiche du traitement, avec son moment, ses parcelles, son motif et ses protections.</div></div>':'')
+    +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Conduite</span><select id="te-ab" class="fsel"><option value="">— Non renseigné —</option><option value="0"'+(abVal==='0'?' selected':'')+'>🌾 Conventionnel</option><option value="1"'+(abVal==='1'?' selected':'')+'>🌿 Agriculture Biologique (AB)</option></select></div>'
     +'<div style="margin-bottom:14px"><span class="mvchamp-l" style="margin-bottom:6px">Note / observations</span><input type="text" id="te-note" class="fi" placeholder="Conditions, cible…"></div>'
-    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="mvchamp-l">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>';
+    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="mvchamp-l">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div><div id="te-surf-zone"></div></div>';
   var de=document.getElementById('te-date'); if(de) de.value=t.date||'';
   var dse=document.getElementById('te-dose'); if(dse) dse.value=t.dose||'';
+  var tci=document.getElementById('te-cible'); if(tci) tci.value=t.cible||'';
   var hd=document.getElementById('te-hd'); if(hd) hd.value=t.heureDebut||'';
   var hf=document.getElementById('te-hf'); if(hf) hf.value=t.heureFin||'';
   var dr=document.getElementById('te-dre'); if(dr) dr.value=t.dreAnticipe||'';
@@ -873,22 +1170,33 @@ window.saveTraitEdit=function(){
   var stade=(document.getElementById('te-stade')||{}).value||'';
   var hd=(document.getElementById('te-hd')||{}).value||'';
   var hf=(document.getElementById('te-hf')||{}).value||'';
-  var dre=(document.getElementById('te-dre')||{}).value||'';
+  var dreEl=document.getElementById('te-dre'), dre=dreEl?(dreEl.value||''):'';
+  var mode=(document.getElementById('te-mode')||{}).value||'';
+  var cible=String((document.getElementById('te-cible')||{}).value||'').trim();
   var abv=(document.getElementById('te-ab')||{}).value;
   var note=(document.getElementById('te-note')||{}).value||'';
   var cuEl=document.getElementById('te-cu');
   var cuVal=cuEl?((cuEl.value===''||cuEl.value==null)?null:(parseFloat(String(cuEl.value).replace(',','.'))||0)):undefined;
+  _teSaveSurf();
   var parc=_phEdit.parc.slice();
-  var surf=parc.reduce(function(s,nom){var p=(window.PARCELLES||[]).find(function(x){return x.nom===nom;});return s+(p?parseFloat(p.surface)||0:0);},0);
+  var _zero=_phSurfZero(parc,_phEdit.surfT);
+  if(_zero.length){ showToast('Surface traitée de '+_zero[0]+'\u00a0: au moins 0,01\u00a0ha \u2014 sinon décochez la parcelle','#B85A1A'); return; }
+  // ★ REG27-1A (§572) : la surface traitée (les parcelles en partie seulement), le mode et la cible. La cible est celle de
+  //   CE produit ; le mode et la surface valent pour toute la cuve (la session), comme les parcelles.
+  var sT={}; parc.forEach(function(n){ if(Object.prototype.hasOwnProperty.call(_phEdit.surfT,n)) sT[n]=_phEdit.surfT[n]; });
+  var hasT=Object.keys(sT).length>0;
+  var surf=parc.reduce(function(s,nom){ return s+_phSurfDe(sT,nom); },0);
   surf=Math.round(surf*100)/100;
-  var sf={date:date,conducteur:cond,operateur:cond,stade:stade,heureDebut:hd,heureFin:hf,dreAnticipe:dre,note:note};
+  var _surfPose=function(o){ if(hasT) o.surfTraitee=Object.assign({},sT); else delete o.surfTraitee; };
+  var sf={date:date,conducteur:cond,operateur:cond,stade:stade,heureDebut:hd,heureFin:hf,mode:mode,note:note};
+  if(dreEl) sf.dreAnticipe=dre;
   if(abv==='1')sf.modeAb=true; else if(abv==='0')sf.modeAb=false;
-  Object.assign(t,sf,{dose:dose,parcelles:parc.slice()});
+  Object.assign(t,sf,{dose:dose,cible:cible,parcelles:parc.slice()}); _surfPose(t);
   if(cuEl){ t.cuMetal=cuVal; }
   var sid=t.sessionId;
   if(sid){
-    TRAITEMENTS.forEach(function(o){ if(o!==t&&o.sessionId===sid){ Object.assign(o,sf,{parcelles:parc.slice()}); } });
-    (window.SESSIONS||[]).forEach(function(s){ if(s.id===sid){ s.date=date; s.conducteur=cond; s.parcelles=parc.slice(); s.stade=stade; s.heureDebut=hd; s.heureFin=hf; s.dreAnticipe=dre; s.note=note; if(abv==='1')s.modeAb=true; else if(abv==='0')s.modeAb=false; s.surface=surf; } });
+    TRAITEMENTS.forEach(function(o){ if(o!==t&&o.sessionId===sid){ Object.assign(o,sf,{parcelles:parc.slice()}); _surfPose(o); } });
+    (window.SESSIONS||[]).forEach(function(s){ if(s.id===sid){ s.date=date; s.conducteur=cond; s.parcelles=parc.slice(); s.stade=stade; s.heureDebut=hd; s.heureFin=hf; if(dreEl) s.dreAnticipe=dre; s.mode=mode; s.note=note; if(abv==='1')s.modeAb=true; else if(abv==='0')s.modeAb=false; s.surface=surf; _surfPose(s); } });
     saveData('sessions');
   }
   saveData('traitements');
@@ -916,16 +1224,17 @@ window.saveTraitEdit=function(){
 // ⚠️ Localisation par COORDONNÉES GPS (option prévue par le texte pour une parcelle sans
 //    référence au registre parcellaire graphique). L'app ne connaît pas les numéros d'îlot
 //    RPG : plutôt que des colonnes vides, on fournit le point GPS, qui est exigible seul.
-// ⚠️ « Cible » et « Mode d'application » sont facultatifs au texte et ne sont pas saisis
-//    dans l'app : les colonnes existent, vides, pour être complétées si besoin. Les
-//    remplir depuis le catalogue reviendrait à déclarer une cible qui n'est pas forcément
-//    celle visée ce jour-là.
-// ⚠️ « Surface de la parcelle (ha) » — et NON « surface traitée ». L'app ne connaît
-//    pas de surface PARTIELLE : elle n'enregistre qu'une parcelle entière. Écrire
-//    cette surface sous l'étiquette « traitée » alors que seul un rang l'a été serait
-//    une sur-déclaration, dans un registre opposable en contrôle. La colonne dit donc
-//    exactement ce qu'elle contient, et le panneau d'export le rappelle avant le
-//    téléchargement. Mieux vaut une colonne exacte qu'une colonne réglementaire fausse.
+// ★ REG27-1A (§572) — « Cible » et « Mode d'application » (facultatifs au texte) sont SAISIS au traitement depuis ce lot :
+//    la cible par produit (proposée : la dernière du produit, ou l'usage E-Phy unique — jamais choisie à la place du
+//    vigneron), le mode pour la cuve. Un traitement d'avant les laisse vides : rien n'est inventé.
+// ★ REG27-1A — « Surface traitée (ha) » : les hectares saisis quand une parcelle ne l'a été qu'en partie, sinon la parcelle
+//    entière (window._mvSurfT). Avant ce lot, la colonne s'appelait « Surface de la parcelle (ha) » : l'app ne savait pas
+//    la surface partielle, et écrire la parcelle entière sous l'étiquette « traitée » aurait été une sur-déclaration. La
+//    surface de la parcelle reste en colonne supplémentaire : on voit d'un coup d'œil ce qui ne l'a été qu'en partie.
+// ★ REG27-1A — « Délai de rentrée anticipée » (HH:MM) : le délai entre la fin du traitement et la rentrée DÉCLARÉE sur la
+//    fiche (_phRentreeOuvrir), pour la parcelle de la ligne ; plusieurs rentrées : la plus précoce, les autres dans les
+//    colonnes supplémentaires (moment, motif, mesures — ce que l'annexe I demande). Une ancienne saisie libre (« DRE
+//    anticipé ») sort telle qu'elle a été tapée.
 // ⚠️ FENÊTRE DE DATES : le bouton ouvre un choix (exercice en cours / campagne
 //    consultée / tout le registre). Remettre l'historique entier pour un contrôle qui
 //    porte sur un exercice, c'est remettre une pièce illisible. Le nom du fichier
@@ -992,9 +1301,10 @@ function _phCsvParcs(t){
 var MV_PHY_CSV_COLS = ['SIRET d\u00e9tenteur','SIRET b\u00e9n\u00e9ficiaire','Produit','Num\u00e9ro d\u2019autorisation (AMM)',
   'Date d\u2019utilisation','Horaire de d\u00e9but','Horaire de fin','D\u00e9lai de rentr\u00e9e anticip\u00e9e',
   'Dose de produit utilis\u00e9e','Unit\u00e9 de dose','Cible','Mode d\u2019application',
-  'Latitude (WGS84)','Longitude (WGS84)','Surface de la parcelle (ha)',
+  'Latitude (WGS84)','Longitude (WGS84)','Surface trait\u00e9e (ha)',
   'D\u00e9nomination de la culture (OEPP)','Stade ph\u00e9nologique (BBCH)','Conduite biologique',
-  'Parcelle','Substance active','Applicateur','Observations'];
+  'Parcelle','Substance active','Applicateur','Observations',
+  'Surface de la parcelle (ha)','Rentr\u00e9e anticip\u00e9e \u2014 moment','Rentr\u00e9e anticip\u00e9e \u2014 motif','Rentr\u00e9e anticip\u00e9e \u2014 mesures de protection'];
 
 // Jour d'un traitement, normalise en 'AAAA-MM-JJ' ou '' si la date ne parle pas.
 // ⚠️ Une chaine vide comparee a des bornes ISO passerait pour une date anterieure a
@@ -1094,6 +1404,7 @@ window._phytoCsvRows = function(fen){
     var d = _phCsvDose(t);
     var bbch = _phCsvBbch(t.stade);
     var bio = (bioDom || t.modeAb) ? 'oui' : 'non';
+    var RT = _phRentrees(t);
     _phCsvParcs(t).forEach(function(nom){
       var p = null;
       if(nom){
@@ -1102,13 +1413,22 @@ window._phytoCsvRows = function(fen){
       }
       var g = (p && typeof window._mvParcGeo==='function') ? window._mvParcGeo(p) : null;
       if(!g) sansGeo++;
+      // La surface traitée : les hectares saisis, sinon la parcelle entière ; vide si rien ne la dit (jamais « 0 »).
+      var sp = p ? _phParcHa(nom) : 0;
+      var st = (nom && typeof window._mvSurfT==='function') ? window._mvSurfT(t, nom, sp) : sp;
+      // Les rentrées déclarées sur CETTE parcelle (sans liste : toutes), la plus précoce en tête.
+      var rs = RT.filter(function(r){ return !nom || !r.parcelles || !r.parcelles.length || r.parcelles.indexOf(nom)>=0; });
+      var jn = function(f){ return rs.map(f).join(' | '); };
       out.push([
         siret, '', (t.produit||''), (m.amm||t.amm||''),
-        _phCsvDate(t.date), _phCsvHeure(t.heureDebut), _phCsvHeure(t.heureFin), (t.dreAnticipe||''),
-        (d.val==null?'':_phCsvNum(d.val,3)), (d.unit||''), '', '',
-        (g?_phCsvNum(g.lat,5):''), (g?_phCsvNum(g.lng,5):''), (p?_phCsvNum(p.surface,4):''),
+        _phCsvDate(t.date), _phCsvHeure(t.heureDebut), _phCsvHeure(t.heureFin), (rs.length ? _phRentreeDelai(t, rs[0]) : (t.dreAnticipe||'')),
+        (d.val==null?'':_phCsvNum(d.val,3)), (d.unit||''), (t.cible||''), (t.mode||''),
+        (g?_phCsvNum(g.lat,5):''), (g?_phCsvNum(g.lng,5):''), (st>0?_phCsvNum(st,4):''),
         MV_OEPP_VIGNE, bbch, bio,
-        (nom||''), (m.sub||t.sub||''), (t.conducteur||t.operateur||''), (t.note||'')
+        (nom||''), (m.sub||t.sub||''), (t.conducteur||t.operateur||''), (t.note||''),
+        (sp>0?_phCsvNum(sp,4):''),
+        jn(function(r){ return _phCsvDate(String(r.quand).slice(0,10))+' '+String(r.quand).slice(11,16); }),
+        jn(function(r){ return r.motif||''; }), jn(function(r){ return r.mesures||''; })
       ]);
     });
   });
@@ -1154,7 +1474,7 @@ function _phytoExportChoix(cible){
   });
   h += `<div class="mvencadre" style="margin-top:4px">
       <div style="font-size:9px;color:var(--texte-doux);font-weight:600;margin-bottom:6px">\u00c0 savoir</div>
-      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface de la parcelle (ha)\u00a0\u00bb donne la surface TOTALE de la parcelle. Ma Vigne n\u2019enregistre pas de surface partielle : si un traitement n\u2019a couvert qu\u2019une partie du rang, corrigez la valeur dans le tableur avant de remettre le fichier.</div>
+      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface trait\u00e9e (ha)\u00a0\u00bb reprend les hectares saisis au traitement\u00a0: la parcelle enti\u00e8re, sauf si vous l\u2019avez corrig\u00e9e. Un traitement qui n\u2019a couvert qu\u2019une partie d\u2019une parcelle se corrige dans sa fiche (Modifier) avant l\u2019export. Les rentr\u00e9es anticip\u00e9es d\u00e9clar\u00e9es sur la fiche donnent le d\u00e9lai, le moment, le motif et les protections.</div>
     </div>`;
   var body = ov.querySelector('#phx-body');
   if(body) body.innerHTML = h;

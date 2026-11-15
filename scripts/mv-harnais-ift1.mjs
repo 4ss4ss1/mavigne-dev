@@ -134,7 +134,7 @@ if (!CONTRE) {
     ['l’hectolitre n’est plus ramené à l’hectare', m('pil', "  if(m[4]==='hl') q*=10;", '')],
     ['un produit sans dose compte 0 au lieu de 1', m('pil', 'if(!da||!dr) return { compte:true, r:1, un:true,', 'if(!da||!dr) return { compte:true, r:0, un:true,')],
     ['les adjuvants comptent', m('pil', "  if(type==='adjuvant'||type==='mfsc') return { compte:false };\n", '')],
-    ['le biocontrôle n’est plus à part', m('pil', 'if(L.bio) q.bio+=L.r; else q.hb+=L.r;', 'q.hb+=L.r;')],
+    ['le biocontrôle n’est plus à part', m('pil', 'if(L.bio) q.bio+=L.r*w; else q.hb+=L.r*w;', 'q.hb+=L.r*w;')],
     ['le spinosad redevient du biocontrôle (le type E-Phy fait foi)', m('pil', 'var IFT_PAS_BIO_RE=/(cuivr|bouillie bordelaise|spinosad|pyrethr|prohexadione)/;', 'var IFT_PAS_BIO_RE=/(cuivr|bouillie bordelaise|pyrethr|prohexadione)/;')],
     ['le domaine en moyenne simple, sans les surfaces', m('pil', 'if(q.surf>0){ sHb+=q.hb*q.surf; sBio+=q.bio*q.surf; }', 'if(q.surf>0){ sHb+=q.hb; sBio+=q.bio; }')],
     ['toutes les années se mélangent', m('pil', 'if(!t||_iftAnDe(t)!==an) return;', 'if(!t) return;')],

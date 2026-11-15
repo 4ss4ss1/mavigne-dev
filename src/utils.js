@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.01';
+export const APP_VERSION = '11.02';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -1031,6 +1031,24 @@ function _mvkRetards(cd){
 function _mvHaNum(x){ var v=parseFloat(String(x==null?'':x).replace(',','.')); return isFinite(v)?v:null; }
 window._mvHaP=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(4).replace('.',','); };
 window._mvHaT=function(x){ var v=_mvHaNum(x); return v==null?'':v.toFixed(2).replace('.',','); };
+// ★ REG27-1A (§572) — LA SURFACE TRAITÉE d'une parcelle par un traitement : les hectares saisis quand elle ne l'a été qu'en
+//   partie (t.surfTraitee[nom]), sinon la parcelle entière — un traitement d'avant ce lot reste « parcelle entière ». Plafonnée
+//   à la parcelle. UNE définition pour le registre (fichier, PDF, fiches), l'IFT, La Réserve et le coût phyto : deux copies
+//   divergeraient au premier correctif. `ha` : la surface de la parcelle si l'appelant l'a déjà (sinon lue dans PARCELLES).
+window._mvSurfT=function(t,nom,ha){
+  if(ha==null){ ha=0; var P=window.PARCELLES||[]; for(var i=0;i<P.length;i++){ if(P[i]&&P[i].nom===nom){ ha=P[i].surface; break; } } }
+  var s=_mvHaNum(ha); s=(s!=null&&s>0)?s:0;
+  var o=t&&t.surfTraitee, v=(o&&typeof o==='object'&&Object.prototype.hasOwnProperty.call(o,nom))?_mvHaNum(o[nom]):null;
+  if(v==null||v<0) return s;
+  return s>0?Math.min(v,s):v;
+};
+// La surface traitée d'un traitement entier : la somme de ses parcelles (une ancienne saisie peut porter une chaîne, ou rien).
+window._mvSurfTTot=function(t){
+  var a=t&&t.parcelles; if(typeof a==='string') a=a?[a]:[];
+  if(Object.prototype.toString.call(a)!=='[object Array]'||!a.length) return (t&&typeof t.surface==='number')?t.surface:0;
+  var s=0; for(var i=0;i<a.length;i++) s+=window._mvSurfT(t,a[i]);
+  return s;
+};
 window._mvkEtat=_mvkEtat; window._mvkDet=_mvkDet; window._mvkLigne=_mvkLigne;
 window._mvkAvancement=_mvkAvancement; window._mvkRetards=_mvkRetards; window._mvOrdreChantiers=_mvOrdreChantiers;
 
@@ -2764,12 +2782,13 @@ var MV_AIDE = {
   phyto: {
     ico: 'eprouvette', titre: 'Phyto', ancre: 'phyto',
     points: [
-      ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, parcelles, opérateur, délais de réentrée et avant récolte, ZNT. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
+      ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, cible, parcelles et surface traitée, opérateur, délais de réentrée et avant récolte, ZNT, rentrées anticipées. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
-      ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
+      ['Un traitement', "= des produits (chacun avec sa cible, préremplie quand elle est connue), les parcelles cochées, le mode d’application et un conducteur. La surface traitée est celle des parcelles entières : une parcelle traitée en partie se corrige en hectares, à l’étape des parcelles (« Une parcelle traitée en partie ? »)."],   // ★ REG27-1A (§572)
       ['La dose/ha de chaque produit', "se préremplit avec la dose homologuée du catalogue : corrigez-la quand vous traitez à dose réduite. Elle fait le stock de La Réserve et l’IFT du Pilotage (Conformité) — une demi-dose y compte pour moitié."],   // ★ IFT-1 (§571)
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
+      ['Une rentrée anticipée', "— revenir dans une parcelle avant la fin du délai, équipé — se déclare après coup, sur la fiche du traitement : « Déclarer une rentrée anticipée », le moment, les parcelles, le motif et les protections portées. Le délai écoulé depuis la fin du traitement se calcule seul et part au registre."],   // ★ REG27-1A (§572)
       ['Le registre des traitements sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
       ['L\u2019onglet Fertilisation', "tient le registre des amendements et engrais. Le bouton rond (administrateur) ouvre un amendement en cinq \u00e9tapes conseill\u00e9es\u00a0: le produit et sa composition (la recherche trouve d\u2019abord vos produits d\u00e9j\u00e0 saisis, avec les teneurs de chaque campagne, puis E-Phy, qui dit ce que l\u2019autorisation permet\u00a0: Vigne, Toutes cultures, Culture non pr\u00e9cis\u00e9e ou Pas la vigne\u00a0; normes en un geste\u00a0; la formule \u00ab\u00a04-10-1\u00a0\u00bb remplit azote, phosphore et potasse\u00a0; \u00ab\u00a0Ce que c\u2019est\u00a0\u00bb pose le type nitrates), les parcelles (une r\u00e8gle coche celles dont le rendement de la vendange est sous un seuil, sauf des appellations), le passage tracteur, la semaine pr\u00e9vue, puis ce qui s\u2019ajoute. Les sacs de chaque parcelle (entiers\u00a0: le semoir se charge au sac), la commande (leur somme), l\u2019azote par hectare et le temps tracteur se calculent seuls. L\u2019enregistrement pr\u00e9pare aussi la session tracteur\u00a0: une carte \u00ab\u00a0\u00c0 d\u00e9marrer\u00a0\u00bb attend en t\u00eate du Tracteur, avec les parcelles et leurs sacs, et le tractoriste la d\u00e9marre le jour venu. Sur chaque apport, l\u2019administrateur la propose (\u00ab\u00a0Pr\u00e9parer la session tracteur\u00a0\u00bb, pour un amendement saisi avant) ou la retire (\u00ab\u00a0Ne plus la proposer\u00a0\u00bb)."],
       ['Le temps utile', "est la part du temps o\u00f9 le semoir s\u00e8me vraiment dans le rang. Le reste : demi-tours, recharges de sacs, traverses. 75 % = 3 heures de semis sur 4 heures dans la parcelle. Avec la vitesse et l\u2019\u00e9cartement, il donne le bar\u00e8me en heures par hectare."],
@@ -3284,14 +3303,15 @@ export const MV_INFO = {
     'La <b>dose de référence</b> est la plus basse des doses homologuées du produit sur la vigne, lue dans le catalogue E-Phy (qui garde jusqu\u2019à quatre usages par produit) : la règle du ministère quand la cible n\u2019est pas notée. Une dose à l\u2019hectolitre se ramène à l\u2019hectare sur 1 000 L de bouillie.',
     'La <b>dose appliquée</b> est la dose/ha saisie au traitement, sinon la dose écrite. Un produit sans dose de référence (hors catalogue, retiré) ou sans dose lisible <b>compte 1</b>, comme le veut le guide : l\u2019écran dit combien. Les adjuvants et les engrais ne comptent pas — ce ne sont pas des produits phytopharmaceutiques.',
     'Le <b>biocontrôle</b> se compte à part : soufre, huile de paraffine, bicarbonate, phosphonates, laminarine, micro-organismes, phéromones… reconnus à leur substance ; le cuivre n\u2019en est pas. La <b>référence régionale</b>, réglable dans la roue crantée du Pilotage, se compare à l\u2019IFT <b>hors biocontrôle</b>, herbicides compris.',
-    'Une année d\u2019IFT, ce sont les traitements du 1er janvier au 31 décembre ; tant que la nouvelle n\u2019en a aucun, l\u2019écran montre la précédente. Toute la parcelle compte comme traitée : la surface partielle (quelques rangs) ne se saisit pas encore.',
+    'Une année d\u2019IFT, ce sont les traitements du 1er janvier au 31 décembre ; tant que la nouvelle n\u2019en a aucun, l\u2019écran montre la précédente. Une parcelle traitée <b>en partie</b> compte pour sa part : 0,4 ha traité sur 1,2 ha compte pour un tiers (la surface traitée se saisit au traitement).',
     '<b>Indicatif.</b> Le calcul officiel (HVE, MAEC) lit les doses de référence publiées chaque année par le ministère : ce chiffre vous situe, il ne remplace pas votre déclaration.'
   ] },
 
   'pil.cfm.dre': { t: 'Le délai de rentrée', p: [
     'Le délai est <b>dérivé des phrases de risque CLP</b> du produit : <b>6 h</b> par défaut, <b>24 h</b> ou <b>48 h</b> selon la mention portée par l\u2019étiquette.',
     'Il court à partir de la <b>fin de l\u2019application</b>, pas du début du traitement.',
-    'L\u2019heure affichée est celle à partir de laquelle on peut revenir <b>sans équipement de protection</b>. Avant elle, l\u2019accès reste possible équipé — c\u2019est la réglementation qui le dit, pas le logiciel.'
+    'L\u2019heure affichée est celle à partir de laquelle on peut revenir <b>sans équipement de protection</b>. Avant elle, l\u2019accès reste possible équipé — c\u2019est la réglementation qui le dit, pas le logiciel.',
+    'Une rentrée <b>avant</b> la fin du délai se <b>déclare</b> après coup, sur la fiche du traitement (Phyto) : le moment, les parcelles, le motif et les protections portées. Le délai écoulé depuis la fin du traitement se calcule seul et part au registre.'
   ] },
 
   // ══ CAVE ══

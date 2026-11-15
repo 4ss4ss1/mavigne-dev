@@ -1344,26 +1344,33 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ol class="steps">
     <li><b>Le produit</b>Recherche dans E-Phy par nom commercial, par substance active ou par nom de
     revente. Le délai avant récolte (DAR), le délai de rentrée (DRE), la zone non traitée (ZNT) et la
-    dose homologuée sont pré-remplis.</li>
+    dose homologuée sont pré-remplis. La <b>cible</b> de chaque produit se propose : la dernière notée
+    pour ce produit, ou l'usage E-Phy quand le produit n'en a qu'un ; sinon, choisissez-la dans la liste.
+    Notée, elle sert aussi l'IFT, qui compte alors la dose de référence de cette cible.</li>
     <li><b>La dose et les parcelles</b>La dose se saisit en <b>valeur + unité</b> (l/ha, kg/ha, g/ha) :
     c'est ce chiffre qui alimentera le bilan matière, le suivi du cuivre et l'<b>IFT</b> du Pilotage, il
     vaut donc mieux l'entendre juste. Elle se pré-remplit avec la dose homologuée : à dose réduite,
-    corrigez-la — une demi-dose compte pour moitié dans l'IFT.</li>
-    <li><b>Les conditions</b>Date, stade phénologique, heure de début et de fin, conducteur, délai de
-    rentrée retenu, observations. Validation : une session est créée et le registre est complété.</li>
+    corrigez-la — une demi-dose compte pour moitié dans l'IFT. Une parcelle traitée <b>en partie</b>
+    (quelques rangs, un bout) : « Une parcelle traitée en partie ? », sous la liste des parcelles,
+    corrige ses hectares — la parcelle entière par défaut. Ce sont ces hectares qui vont au registre, à
+    l'IFT, à La Réserve et au coût phyto.</li>
+    <li><b>Les conditions</b>Date, stade phénologique, heure de début et de fin, conducteur, <b>mode
+    d'application</b> (pulvérisation, poudrage, pose de diffuseurs…), observations. Validation : une
+    session est créée et le registre est complété.</li>
   </ol>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le registre</h3>
   <ul class="dot">
-    <li>Pour chaque traitement : produit, <b>substance</b>, <b>numéro AMM</b>, dose, parcelles, surface,
-    stade, conducteur, DAR et DRE.</li>
+    <li>Pour chaque traitement : produit, <b>substance</b>, <b>numéro AMM</b>, dose, <b>cible</b>,
+    <b>mode d'application</b>, parcelles, <b>surface traitée</b>, stade, conducteur, DAR et DRE.</li>
     <li>Les traitements sont <b>regroupés par date</b>, une ligne par passage.</li>
     <li>Un traitement reste <b>modifiable</b>, et la correction se répercute sur la session liée.</li>
     <li>Le <b>délai de rentrée</b> affiché est celui du produit, déduit de ses mentions de danger
     (6&nbsp;h par défaut, 24&nbsp;h ou 48&nbsp;h selon les phrases de risque).</li>
     <li>Les parcelles encore sous délai de rentrée sont signalées sur l'Accueil.</li>
     <li>Le registre s'exporte sous <b>deux formes</b> : le <b>PDF</b> à présenter, et un
-    <b>fichier tableur</b> avec une ligne par produit et par parcelle, coordonnées GPS comprises.</li>
+    <b>fichier tableur</b> avec une ligne par produit et par parcelle, coordonnées GPS comprises — la
+    surface <b>traitée</b> de la parcelle, et sa surface entière en colonne à part.</li>
     <li>Les <b>deux</b> vous demandent d'abord <b>sur quelle période</b> : la campagne, l'exercice
     comptable, ou une période de travail. Le document porte ensuite ses dates réelles sur sa
     couverture, dans sa mention réglementaire et dans l'attestation à signer — et il compte les
@@ -1374,6 +1381,23 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   2027</b> (règlement d'exécution UE 2023/564). Un registre imprimé n'en est pas un. Le fichier porte
   le <b>SIRET de l'exploitation</b> sur chaque ligne : renseignez-le dans
   <span class="path">Réglages › Domaine</span>, sinon le fichier sort incomplet.</div></div>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Une rentrée anticipée</h3>
+  <p>Revenir dans une parcelle <b>avant la fin du délai de rentrée</b> — équipé, pour un travail qui ne
+  peut pas attendre — se note au registre à partir de 2027 : le moment, le lieu, le motif et les
+  mesures de protection. Elle se déclare <b>après coup</b>, sur la fiche du traitement : « Déclarer une
+  rentrée anticipée », puis le jour et l'heure, les parcelles où l'on est entré, le motif et les
+  protections portées.</p>
+  <ul class="dot">
+    <li>Le <b>délai</b> écoulé depuis la fin du traitement se calcule seul et part au registre, colonne
+    « Délai de rentrée anticipée », en heures et minutes. Il faut l'heure de fin du traitement : la
+    fenêtre la demande si elle manque, et la note sur le traitement.</li>
+    <li>Un moment <b>après</b> la fin du délai n'est pas une rentrée anticipée : rien à déclarer, la
+    fenêtre le dit.</li>
+    <li>Toucher une rentrée notée la <b>corrige</b> ou la <b>retire</b>. Elle vaut pour toute la cuve :
+    chaque produit du traitement la porte.</li>
+    <li>Un tuto montre le geste : « Comment faire pour déclarer une rentrée anticipée ? ».</li>
+  </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Le catalogue E-Phy</h3>
   <ul class="dot">
@@ -3471,8 +3495,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       phéromones…) se compte à part ; le cuivre n'en est pas. La <b>référence régionale</b>, réglée dans
       la roue crantée, se compare à l'IFT <b>hors biocontrôle</b>, herbicides compris.</li>
       <li><b>L'année</b> va du 1<sup>er</sup> janvier au 31 décembre ; tant que la nouvelle n'a aucun
-      traitement, la carte montre la précédente. Toute la parcelle compte comme traitée : la surface
-      partielle (quelques rangs) ne se saisit pas encore.</li>
+      traitement, la carte montre la précédente. Une parcelle traitée <b>en partie</b> compte pour sa
+      part : 0,4&nbsp;ha traité sur 1,2&nbsp;ha compte pour un tiers (la surface traitée se saisit au
+      traitement).</li>
     </ul>
     Ce chiffre vous situe ; il ne remplace pas votre déclaration (HVE, MAEC), qui lit les doses de
     référence publiées chaque année par le ministère.</div></details>

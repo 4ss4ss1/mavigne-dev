@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.02', d: '2026-11-15', items: [   // REG27-1A (§572) : le registre 2027 se saisit
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'eprouvette', titre: 'Le registre 2027 se remplit à la saisie',
+      desc: "Dans un nouveau traitement\u00a0: la cible de chaque produit (proposée\u00a0: la dernière notée pour ce produit, ou l’usage E-Phy quand il n’y en a qu’un) et le mode d’application. À l’étape des parcelles, «\u00a0Une parcelle traitée en partie\u00a0?\u00a0» corrige les hectares réellement traités. Le registre exporté les écrit, au format attendu en contrôle le 1er janvier 2027." },
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'chrono', titre: 'La rentrée anticipée se déclare',
+      desc: "Sur la fiche d’un traitement, «\u00a0Déclarer une rentrée anticipée\u00a0»\u00a0: le moment, les parcelles, le motif et les protections portées. Le délai depuis la fin du traitement se compte seul et part au registre. Un tuto montre le geste." },
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'L’IFT compte la part traitée',
+      desc: "Une parcelle traitée en partie compte pour sa part dans l’IFT (Pilotage › Conformité), dans le stock de La Réserve et dans le coût phyto." },
+  ] },
   { v: '11.01', d: '2026-11-15', items: [   // IFT-1 (§571) : l'IFT réel remplace les passages
     { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'L’IFT réel remplace le compte des passages',
       desc: "Pilotage › Conformité, carte «\u00a0IFT\u00a0»\u00a0: chaque produit d’un traitement compte pour sa dose appliquée face à sa dose homologuée (catalogue E-Phy) — une demi-dose compte pour moitié. Le domaine hors biocontrôle face à votre référence régionale, le biocontrôle à part, l’année d’avant, puis les cinq parcelles les plus hautes, avec les maladies signalées cette année. Un produit sans dose connue compte pour une dose pleine, et l’écran dit combien." },

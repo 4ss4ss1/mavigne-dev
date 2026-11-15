@@ -1,0 +1,46 @@
+{
+  "lot": "REG27-1A",
+  "section": "§572",
+  "base": "9464af402486912a4f793b12ea8820cf372b4751",
+  "inclut": [],
+  "date": "2026-11-15",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f5695c9d27b94f62a39ce83b9e7dbde2b3af386c14b39a0f2088aa82b2714238",
+    "date": "2026-11-15T11:14:37.388Z",
+    "joues": {
+      "téléphone": 25,
+      "ordinateur": 25,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "ab0d0558c0a4c464d9a80ca99b0e3ae14aefe3e9f045125ccb5953f047e725fe",
+    "CLAUDE.md": "8b25f0de9bd9d72879859501b94c5cc83b1221d309cf4bce9d30dee22074ec41",
+    "docs/claude/INDEX.md": "98d92d78ecdfe341f2d2f6b1fb70f2c2f79953dcc550530293923949392a3f3c",
+    "docs/claude/chantiers-530-579.md": "c8f899a441d0640949478217ab995637f9be284a06ba0ab4804db341758d1988",
+    "docs/claude/journal.md": "65202d895c4054b0e6f5e7fdec2d8d158672366e4cbe3bf29ad02914d4c795e7",
+    "guide/07-phyto.html": "dd83840f7bba28e8e3bd719600c5081bfab95452d6babdb04cf4f590703db0a0",
+    "guide/11-pilotage.html": "aa227a9617e139906ff0d61d666310803fca75c13befe4f206c0bfc185c40a28",
+    "index.html": "9b22d2789f7d63cf8706f2a81e36d329af754c8d7856ac3e27d2fecff30f667b",
+    "public/sw.js": "228d1d42b092a7486f364e5d9602e243ad1f6d38ccd54ddb4f9218a4c4a61146",
+    "scripts/harnais-claude-md.mjs": "173f2b957de70a4ef95bf4533d052f1b3aa6b0e2b386039e2440f5303926cb22",
+    "scripts/mv-harnais-ajour1.mjs": "96adef13e1f31952eab25cc19441754e4a6c71ca8f7dc2d28b6fef938304de7b",
+    "scripts/mv-harnais-ift1.mjs": "2b0d54f31636b4ccec943e19e83afdb8e27b2c94bb22f7502f7a24ebf7904fab",
+    "scripts/mv-harnais-kit4.mjs": "dc89de36d0add6ee9da50ef6ffc76c9b8944dbb49d555d9814ae270973d9e0df",
+    "scripts/mv-harnais-liste.mjs": "6407c6e15428e8da2dee6c3ded638e4bc5b16b72264eadc166730a63e906207e",
+    "scripts/tutos-couverture.json": "c609f868d926b7f57ae2795246aac1e8a41ed69edd09c1387a513c36be0411fa",
+    "scripts/typo-baseline.json": "dc1fff42adf7ff0356a520954fcd34da170a9c5b55989f0ad69129e999d40103",
+    "src/phyto.js": "8e8137ab735e34447bcc3622bb6dd51ee21d96719cef32fbbdf609126a6903c6",
+    "src/pilotage.js": "8700f69b90a412e4d55a53cbc680adca825481cc7002c123ae480f534e5409c2",
+    "src/reglages.js": "10a72fa5fa2dda614e869acffe024a25059844e6e2956cc7efb470de18740d99",
+    "src/reserve.js": "65afe59d8f82fbed6b2919d2ecbd7ffad904421ee769554f0b4dc9cb29f77bbb",
+    "src/tracteur.js": "85047370803b4ee00ec0324dc5540a16181c40aa7ac44c6366535ec4bf1da172",
+    "src/tutos.js": "b2cdddb92ab3d238afa2d0ac10808f339ec4277deb977fd549fdecbb9ad30482",
+    "src/utils.js": "e318ffae9a21a891f3156111fb4490ca0550ae3fad2c08c9b6828619a19b29c3",
+    "src/whats-new.js": "be3eee9d84a09dc6273a870eed0e8c8de2a9e7187aab975226b4924311cebb43",
+    "scripts/mv-harnais-reg27a.mjs": "c70407f0c1ef83967dc07209480806d310d76788dbeb80b65641c507e713d8a5"
+  }
+}

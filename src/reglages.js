@@ -5752,7 +5752,14 @@ function exportPDFPhyto(mode){
     if(m.drae>0)bits.push(`DRE ${m.drae}h`);
     if(m.znt!=null)bits.push(`ZNT ${m.znt}m`);
     if(t.modeAb===true)bits.push(_mvIconInline('feuille',16)+' AB');
-    if(t.dreAnticipe)bits.push(`<b>${esc(t.dreAnticipe)}</b>`);
+    if(t.mode)bits.push(esc(t.mode));
+    // ★ REG27-1A (§572) : les rentrées anticipées déclarées sur la fiche — le délai depuis la fin du traitement et le motif ;
+    //   une ancienne saisie libre (« DRE anticipé ») reste écrite telle quelle.
+    const _rt=(typeof window._phRentrees==='function')?window._phRentrees(t):[];
+    if(_rt.length) _rt.forEach(r=>bits.push(`<b>Rentrée anticipée ${_escHtml(typeof window._phRentreeDelai==='function'?window._phRentreeDelai(t,r):(r.delai||''))}</b> — ${_escHtml(r.motif||'')}${r.mesures?` (${_escHtml(r.mesures)})`:''}`));
+    else if(t.dreAnticipe)bits.push(`<b>${esc(t.dreAnticipe)}</b>`);
+    const _st=(typeof window._mvSurfTTot==='function')?window._mvSurfTTot(t):0;
+    const _part=!!(t.surfTraitee&&typeof t.surfTraitee==='object'&&Object.keys(t.surfTraitee).length);
     const subLine=bits.length?`<div class="sub-line">${bits.join(' · ')}</div>`:'';
     return `<tr>
       <td class="c-num">${i+1}</td>
@@ -5761,8 +5768,8 @@ function exportPDFPhyto(mode){
       <td>${m.sub?esc(m.sub):'<span class="muted">—</span>'}</td>
       <td><span class="badge" style="background:${tb};color:${tc}">${esc(m.type)}</span></td>
       <td>${m.dose?esc(m.dose):'<span class="muted">—</span>'}</td>
-      <td>${esc(parcTxt(t))}</td>
-      <td>${t.stade?esc(t.stade):'<span class="muted">—</span>'}</td>
+      <td>${esc(parcTxt(t))}${_st>0?`<div class="sub-line">${_escHtml(window._mvHaT(_st))} ha traités${_part?' (en partie)':''}</div>`:''}</td>
+      <td>${t.stade?esc(t.stade):'<span class="muted">—</span>'}${t.cible?`<div class="sub-line">${_escHtml(t.cible)}</div>`:''}</td>
       <td style="text-align:center">${m.dar!=null?m.dar:'<span class="muted">—</span>'}</td>
       <td>${darCell}</td>
       <td>${esc(t.conducteur||t.operateur||'—')}</td>

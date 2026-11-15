@@ -82,6 +82,10 @@ function _tuIntrants() {
 }
 function _tuPiquets() { var I = window.INTRANTS || {}; return (I.produits || []).find(function (p) { return p && p.id === 'tu-piq'; }) || null; }
 function _tuFerNouveau() { return _vis(_q('[data-tuto="phy.nouveau.pc"]')) ? '[data-tuto="phy.nouveau.pc"]' : '[data-tuto="phy.nouveau"]'; }
+// ★ REG27-1A (§572) : au téléphone, toucher le traitement ouvre sa fiche ; sur ordinateur, elle est déjà à droite — « Ouvrir le traitement ».
+function _tuTraitOuvrir() { return _vis(_q('[data-tuto="phy.ouvrir.pc"]')) ? '[data-tuto="phy.ouvrir.pc"]' : '[data-tuto="phy.trait"]'; }
+// Les rentrées déclarées du domaine (une par ligne du registre : une cuve de deux produits en porte deux) — lecture seule.
+function _tuNbRentrees() { return (window.TRAITEMENTS || []).reduce(function (s, t) { return s + ((t && Object.prototype.toString.call(t.rentrees) === '[object Array]') ? t.rentrees.length : 0); }, 0); }
 // ★ COEQ-3 (§524) : une session d'ensemencement à deux, en cours depuis hier (Paul conduit, Jean coéquipier), pour les tutos du coéquipier.
 function _tuSessions() { return [{ id: 'tu-coeq', activite: 'Ensemencement', conducteur: 'Paul', coequipier: 'Jean', statut: 'En cours', date: _tuJour(-1), avancement: 30, parcellesSkip: [],
   parcellesFaites: [{ nom: 'Clos du Moulin', co: 'Jean' }, { nom: 'Les Charmes', co: 'Jean' }, { nom: 'Vieilles Vignes', co: 'Jean', d: _tuJour(0) }] }]; }
@@ -721,6 +725,51 @@ var TU_TUTOS = [
         ok: 'Les teneurs de cette campagne-là sont reprises.' },
       { type: 'regarder', cible: '[data-tuto="fer.src"]',
         txt: function () { return 'La date des teneurs est rappelée. Comparez-les avec le sac ou l’analyse de cette année\u00a0: retouchées, elles partent avec ce nouvel apport. Sur votre domaine, rien n’a bougé.'; } }
+    ] },
+  // ★ REG27-1A (§572) — la rentrée anticipée, déclarée après coup sur la fiche du traitement (arrêté du 24 décembre 2025,
+  //   annexe I : le moment, le lieu, le motif, les protections ; le délai depuis la fin du traitement se compte seul). Le
+  //   domaine d'entraînement reçoit, pour ce tuto seul (_charger), un traitement d'hier soir sur deux parcelles, rentrée 48 h.
+  //   Au téléphone, toucher le traitement ouvre sa fiche ; sur ordinateur, sa fiche est déjà à droite : « Ouvrir le
+  //   traitement » (_tuTraitOuvrir vise celui qui se voit). « Retirer » une rentrée demande confirmation (exempté motivé).
+  { id: 'rentree', titre: 'Comment faire pour déclarer une rentrée anticipée\u00a0?', fin: 'déclarer une rentrée anticipée',
+    module: 'Phyto', pages: ['phyto'], pour: 'tractoriste', duree: '1 min', depart: 'home',
+    couvre: ['_phRentreeOuvrir', '_phRentreeMaj', '_phRentreeParc', '_phRentreeValider'],
+    retenir: ['Phyto › le traitement › « Déclarer une rentrée anticipée ».',
+              'Le jour et l’heure de la rentrée, les parcelles, le motif et les protections portées : le délai depuis la fin du traitement se compte seul.',
+              'Elle part au registre, colonne « Délai de rentrée anticipée ». Toucher une rentrée notée la corrige ou la retire.'],
+    avant: function (memo) { memo.r0 = _tuNbRentrees(); },
+    etapes: [
+      { type: 'aller', page: 'phyto', pourquoi: 'Le registre des traitements est dans le module Phyto.' },
+      { type: 'toucher', get cible() { return _tuTraitOuvrir(); },
+        txt: function () { return /\.pc/.test(_tuTraitOuvrir()) ? 'Paul a traité hier soir : sa fiche est à droite. {T} « ' + L(_tuTraitOuvrir()) + ' ».' : 'Paul a traité hier soir. {T} ce traitement.'; },
+        fait: function () { return _ouvert('ovTraitDetail') || _ouvert('ovPhRentree'); },
+        ok: 'Voici le traitement : ses parcelles, ses délais.' },
+      { type: 'toucher', cible: '[data-tuto="phy.rentree"]',
+        txt: function () { return 'Jean est retourné ce matin dans le Clos du Moulin, avant la fin du délai de rentrée. {T} « ' + L('[data-tuto="phy.rentree"]') + ' ».'; },
+        fait: function () { return _ouvert('ovPhRentree'); },
+        ok: 'La déclaration s’ouvre sur aujourd’hui.' },
+      { type: 'taper', cible: '[data-tuto="rent.heure"]', exemple: '07:30',
+        txt: function () { return 'Il y est entré à 7 h 30. Tapez l’heure : 07:30.'; }, txtReel: 'l’heure à laquelle la rentrée a eu lieu.',
+        valide: function (x) { return /^\d{1,2}:\d{2}/.test(String(x || '')); },
+        ok: function () { return _txt(_q('#prt-delai')) || 'Le délai depuis la fin du traitement se compte.'; } },
+      { type: 'toucher', cible: '[data-tuto="rent.parc"][data-parc="Les Charmes"]',
+        txt: function () { return 'Il n’est allé que dans le Clos du Moulin. {T} « Les Charmes » pour la retirer.'; },
+        fait: function () { var b = _q('[data-tuto="rent.parc"][data-parc="Les Charmes"]'); return !!(b && !b.classList.contains('on')); },
+        ok: 'Seul le Clos du Moulin reste : c’est le lieu de la rentrée.' },
+      { type: 'taper', cible: '[data-tuto="rent.motif"]', exemple: 'Relevage urgent avant l’orage',
+        txt: function () { return 'Pourquoi si tôt ? Tapez le motif, par exemple «\u00a0Relevage urgent avant l’orage\u00a0».'; }, txtReel: 'la raison de la rentrée.',
+        valide: function (x) { return String(x || '').trim().length >= 3; },
+        ok: 'Le motif est noté.' },
+      { type: 'taper', cible: '[data-tuto="rent.mesures"]', exemple: 'Gants, combinaison et bottes',
+        txt: function () { return 'Avec quelles protections ? Celles que l’étiquette demande, par exemple «\u00a0Gants, combinaison et bottes\u00a0».'; }, txtReel: 'les protections portées.',
+        valide: function (x) { return String(x || '').trim().length >= 3; },
+        ok: 'Les protections sont notées.' },
+      { type: 'toucher', cible: '[data-tuto="rent.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="rent.ok"]') + ' ».'; },
+        fait: function (memo) { return !_ouvert('ovPhRentree') && _tuNbRentrees() > (memo.r0 || 0); },
+        ok: 'La rentrée est au registre.' },
+      { type: 'regarder', cible: '[data-tuto="phy.rentrees"]',
+        txt: function () { return 'La rentrée s’affiche sur le traitement, avec son délai depuis la fin du traitement. Elle part au registre, colonne « Délai de rentrée anticipée ». Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] },
   // ★ INTRANT-1 (§553) — corriger une fiche d'intrant : des piquets saisis en kg, repassés en pièces (le cas remonté du terrain).
   //   Il couvre l'onglet Intrants, « Modifier », le choix de l'unité et « Enregistrer » ; « Retirer » un achat et
@@ -1667,6 +1716,13 @@ function _jeqCorrigee(memo) {
   if (!t0) return false;
   return (window.JOURNAL || []).some(function (x) { return !!(x && x.eqCorr && String(x.eqCorr.le || '') >= t0); });
 }
+// ★ REG27-1A (§572) : pour le tuto « rentrée anticipée » seul, un traitement d'hier soir (fini à 18 h, rentrée 48 h) sur deux
+//   parcelles — chargé pour lui seul : sous délai, il poserait le bandeau de la rentrée sur l'Accueil de tous les autres.
+function _tuTraitements() {
+  return [{ produit: 'Bouillie bordelaise', type: 'Cuivre', amm: '', dar: 21, drae: 48, znt: 5, sub: 'sulfate de cuivre', source: 'mine', cuMetal: null,
+    date: _tuJour(-1), conducteur: 'Paul', operateur: 'Paul', dose: '2 kg/ha', dose_val: 2, dose_unit: 'kg/ha', parcelles: ['Les Charmes', 'Clos du Moulin'],
+    stade: '', heureDebut: '16:30', heureFin: '18:00', cible: 'Mildiou', mode: 'Pulvérisation', modeAb: false, note: '', sessionId: 'tu-trait' }];
+}
 // ★ YALLER-1 (§527) : un contour inventé pour le Clos du Moulin — sans contour, pas de position, donc pas de « Y aller ».
 function _tuKml() { return [{ name: 'Clos du Moulin', pts: [[47.2291, 4.9655], [47.2294, 4.9671], [47.2284, 4.9674], [47.2281, 4.9658], [47.2291, 4.9655]] }]; }
 function _charger() {
@@ -1681,6 +1737,7 @@ function _charger() {
     if (typeof window.applyFbData === 'function') { try { window.applyFbData('intrants', _tuIntrants()); } catch (e) { _avale(e, '_charger#intrants'); } }   // FERTI-8 (§466)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('sessions', _tuSessions()); } catch (e) { _avale(e, '_charger#sessions'); } }   // COEQ-3 (§524)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('kml_polygons', _tuKml()); } catch (e) { _avale(e, '_charger#kml'); } }   // YALLER-1 (§527)
+  if (String(window.__MV_TUTO || '') === 'rentree' && typeof window.applyFbData === 'function') { try { window.applyFbData('traitements', _tuTraitements()); } catch (e) { _avale(e, '_charger#traitements'); } }   // REG27-1A (§572)
 }
 function _demarrer() {
   var t = _tuto(String(window.__MV_TUTO || ''));

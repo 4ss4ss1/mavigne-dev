@@ -207,18 +207,26 @@ function _phFicheHtml(i){
   var t=TRAITEMENTS[i]; if(!t)return '<div class="trf-vide"><b>Choisissez un traitement</b><span>Sa fiche s\u2019ouvre ici.</span></div>';
   var m=window._phResolve?window._phResolve(t):{type:t.type||'',amm:t.amm,dar:t.dar,drae:t.drae||0,dose:t.dose,znt:t.znt,sub:t.sub};
   var now=new Date(), d0=new Date(t.date), dar=Number(m.dar)||0, dre=dreEffectif(m.drae,m.type,m.dreH,m.dreHc), dh=dre.h||0;
-  var finDar=(dar>0&&!isNaN(d0))?new Date(d0.getTime()+dar*864e5):null, finDre=(dh>0&&!isNaN(d0))?new Date(d0.getTime()+dh*36e5):null;
+  // ★ REG27-1A (§572) : la réentrée court depuis la FIN du traitement (window._phFinApp, phyto.js — la règle de la liste), plus depuis minuit.
+  var dApp=(typeof window._phFinApp==='function')?window._phFinApp(t):d0;
+  var finDar=(dar>0&&!isNaN(d0))?new Date(d0.getTime()+dar*864e5):null, finDre=(dh>0&&dApp&&!isNaN(dApp))?new Date(dApp.getTime()+dh*36e5):null;
   var jour=function(x){ return x.toLocaleDateString('fr-FR',{day:'numeric',month:'long'}); };
   var parcs=Array.isArray(t.parcelles)?t.parcelles:(t.parcelles?[t.parcelles]:[]), op=t.conducteur||t.operateur||'';
   var tags=[m.type,m.amm?'AMM '+m.amm:'',_fmtDate(t.date),op].filter(Boolean).map(function(x){ return '<span class="trf-tag">'+_escHtml(String(x))+'</span>'; }).join('');
   var h='<div class="trf-hd"><div class="trf-id"><h2 class="trf-t">'+_escHtml(t.produit||'\u2014')+'</h2><div class="trf-tags">'+tags+'</div></div>'
-    +'<div class="trf-act"><button type="button" class="trf-btn" onclick="openTraitDetail('+i+')">Ouvrir le traitement</button></div></div>';
+    +'<div class="trf-act"><button type="button" class="trf-btn" data-tuto="phy.ouvrir.pc" onclick="openTraitDetail('+i+')">Ouvrir le traitement</button></div></div>';
   if(finDre&&finDre>now)h+='<div class="trf-alerte">R\u00e9entr\u00e9e interdite jusqu\u2019au '+_escHtml(jour(finDre))+' \u00e0 '+String(finDre.getHours()).padStart(2,'0')+'\u00a0h\u00a0'+String(finDre.getMinutes()).padStart(2,'0')+(dre.motif?' \u2014 '+_escHtml(dre.motif):'')+'.</div>';
   h+='<div class="trf-kpis"><div class="trf-kpi"><span class="l">Dose</span><span class="v phf-v">'+_escHtml(m.dose?String(m.dose):'\u2014')+'</span></div>'
     +'<div class="trf-kpi"><span class="l">R\u00e9entr\u00e9e</span><span class="v">'+(dh?dh+'<small>\u00a0h</small>':'\u2014')+'</span><span class="trf-s">'+(finDre?(finDre>now?'en cours':'pass\u00e9e'):'')+'</span></div>'
     +'<div class="trf-kpi"><span class="l">Avant r\u00e9colte</span><span class="v">'+(dar?dar+'<small>\u00a0j</small>':'\u2014')+'</span><span class="trf-s">'+(finDar?(finDar>now?'jusqu\u2019au '+_escHtml(jour(finDar)):'pass\u00e9'):'')+'</span></div></div>';
-  h+='<section class="trf-sec"><div class="trf-sec-t">Parcelles</div><div class="trf-parcs">'+(parcs.length?parcs.map(function(n){ return '<span class="trf-p fait">'+_escHtml(String(n))+'</span>'; }).join(''):'<span class="trf-rien">Non renseign\u00e9es.</span>')+'</div></section>';
+  // ★ REG27-1A (§572) : une parcelle traitée en partie dit ses hectares ; « Pour le registre » ajoute le mode, la surface traitée
+  //   et les rentrées anticipées déclarées (elles se déclarent et se corrigent dans « Ouvrir le traitement »).
+  var sT=(t.surfTraitee&&typeof t.surfTraitee==='object')?t.surfTraitee:{};
+  h+='<section class="trf-sec"><div class="trf-sec-t">Parcelles</div><div class="trf-parcs">'+(parcs.length?parcs.map(function(n){ var pt=Object.prototype.hasOwnProperty.call(sT,n)&&typeof window._mvSurfT==='function'; return '<span class="trf-p fait">'+_escHtml(String(n))+(pt?' \u00b7 '+window._mvHaT(window._mvSurfT(t,n))+'\u00a0ha':'')+'</span>'; }).join(''):'<span class="trf-rien">Non renseign\u00e9es.</span>')+'</div></section>';
   var reg=[]; if(m.znt)reg.push(['ZNT',String(m.znt)+(/m$/.test(String(m.znt))?'':'\u00a0m')]); if(m.sub)reg.push(['Substance',Array.isArray(m.sub)?m.sub.join(', '):m.sub]); if(t.cible)reg.push(['Cible',t.cible]);
+  if(t.mode)reg.push(['Application',t.mode]);
+  if(parcs.length&&typeof window._mvSurfTTot==='function'){ var st=window._mvSurfTTot(t); if(st>0) reg.push(['Surface trait\u00e9e',window._mvHaT(st)+'\u00a0ha']); }
+  (typeof window._phRentrees==='function'?window._phRentrees(t):[]).forEach(function(r){ reg.push(['Rentr\u00e9e anticip\u00e9e',(typeof window._phRentreeDelai==='function'?window._phRentreeDelai(t,r):(r.delai||''))+' \u2014 '+(r.motif||'')]); });
   if(reg.length)h+='<section class="trf-sec"><div class="trf-sec-t">Pour le registre</div><div class="phf-reg">'+reg.map(function(r){ return '<span>'+_escHtml(r[0])+'</span><b>'+_escHtml(String(r[1]))+'</b>'; }).join('')+'</div></section>';
   return h;
 }
@@ -293,7 +301,7 @@ function renderPhytoTrac(){
     const cond=t.conducteur||t.operateur||'';
     const meta3=(parc||cond);
     // PHYTO-1 (§285) : sur ordinateur, toucher un traitement le CHOISIT (sa fiche s'ouvre à droite) ; au téléphone, le détail.
-    return `<div class="phyto-row mvcarte-fond mvcarte-clic" onclick="_phSel(${idx})" data-pidx="${Number(idx)}" style="padding:12px 14px;margin-bottom:8px;cursor:pointer">
+    return `<div class="phyto-row mvcarte-fond mvcarte-clic" onclick="_phSel(${idx})" data-pidx="${Number(idx)}" data-tuto="phy.trait" style="padding:12px 14px;margin-bottom:8px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
         <span style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(t.produit)}</span>
         <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(_phDateFr(t,now))}</span>

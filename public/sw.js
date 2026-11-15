@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.92
+// MA VIGNE — Service Worker v11.93
+// v11.93 (15/11/2026) — REG27-1A (§572) : le registre 2027 se saisit — la cible et le mode d'application, la surface traitée parcelle par parcelle, la rentrée anticipée déclarée sur la fiche ; l'export, l'IFT, La Réserve et le coût les lisent.
 // v11.92 (15/11/2026) — IFT-1 (§571) : l'IFT réel (dose appliquée ÷ dose homologuée, biocontrôle à part, face à la référence) remplace les passages, dans Conformité et sur la carte.
 // v11.91 (14/11/2026) — RECOLTE-1B (§569) : le volet « Prévu » des Récoltes, les réglages du calcul, le recalage, le tuto « grappes » ; les champs du comptage et de « Signaler » stylés.
 // v11.90 (13/11/2026) — RECOLTE-1A (§568) : compter les grappes (l'admin), les pieds présents, le poids, les hL prévus ; le document recolte.
@@ -4724,7 +4725,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.92';
+const CACHE_NAME   = 'mavigne-v11.93';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4741,7 +4742,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.92 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.93 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4761,7 +4762,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.92 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.93 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

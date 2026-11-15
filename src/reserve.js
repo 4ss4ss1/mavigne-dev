@@ -205,7 +205,10 @@ function _conso(p){
   });
   return {q:tot, known:got}; // known=false tant qu'aucune entrée n'a de dose_val
 }
+// ★ REG27-1A (§572) : la surface TRAITÉE (window._mvSurfT, utils.js) — une parcelle traitée en partie ne consomme que ses
+//   hectares. Repli : l'ancien calcul (la parcelle entière), si utils.js est d'avant ce lot.
 function _treatSurface(e){
+  if(typeof window._mvSurfTTot==='function') return window._mvSurfTTot(e);
   var P=window.PARCELLES||[];
   if(typeof e.surface==='number') return e.surface;
   if(!Array.isArray(e.parcelles)) return 0;

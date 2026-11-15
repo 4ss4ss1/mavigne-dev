@@ -6978,7 +6978,9 @@ function _ecoPhytoByParc(win){
     if(pu==null){ unpriced[e.produit||'?']=1; return; }
     (e.parcelles||[]).forEach(function(nom){
       var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; });
-      var surf=p?(parseFloat(p.surface)||0):0; if(surf<=0) return;
+      var surf=p?(parseFloat(String(p.surface==null?'':p.surface).replace(',','.'))||0):0;
+      if(surf>0&&typeof window._mvSurfT==='function') surf=window._mvSurfT(e,nom,surf);   // ★ REG27-1A (§572) : la surface traitée
+      if(surf<=0) return;
       var qty=e.dose_val*surf*(base==='g'?0.001:1), eur=qty*pu;
       cost[nom]=(cost[nom]||0)+eur;
       if(e.date) byDate[e.date]=(byDate[e.date]||0)+eur;
@@ -10875,8 +10877,8 @@ function _cfmIftRef(){ var c=(window.CONFIG&&window.CONFIG.conformite)||{}; var 
 // ════════════════════════════════════════════════════════════════════════
 // ★★ IFT-1 (§571) — L'IFT RÉEL (plan IFT-1 ; maquette « niveau au-dessus », partie 5). Il remplace le compte des passages
 //   (_cfmPassages, retirée) dans Conformité et sur la carte du domaine. La méthode est celle du guide du ministère (IFT, 2016) :
-//   · un produit d'un traitement = dose appliquée ÷ dose de référence × part de la parcelle traitée — 1 tant que la surface
-//     partielle ne se saisit pas (REG27-1). Deux produits dans la même cuve comptent chacun (« un mélange de deux produits
+//   · un produit d'un traitement = dose appliquée ÷ dose de référence × part de la parcelle traitée — la surface traitée
+//     saisie au traitement sur la surface de la parcelle (REG27-1A, §572, _iftPart). Deux produits dans la même cuve comptent chacun (« un mélange de deux produits
 //     appliqués lors d'un même passage compte pour deux traitements »).
 //   · dose de référence « à la culture » : la plus petite des doses homologuées de la vigne pour ce produit (usages E-Phy ;
 //     la synchro en garde quatre au plus par produit — §571e). « À la cible » quand le traitement porte sa cible (`t.cible`,
@@ -10958,12 +10960,15 @@ function _iftAnnee(){
   return (a[y]||!a[y-1])?y:y-1;
 }
 function _iftParcs(t){ var a=t&&t.parcelles; if(typeof a==='string') return a?[a]:[]; return Object.prototype.toString.call(a)==='[object Array]'?a:[]; }
+// La part traitée d'une parcelle (REG27-1A, §572) : la surface traitée (window._mvSurfT, utils.js) sur sa surface ; 1 sans
+// surface connue, ou sans utils.js de ce lot — la parcelle entière, comme avant.
+function _iftPart(t,q){ if(!(q.surf>0)||typeof window._mvSurfT!=='function') return 1; var v=window._mvSurfT(t,q.nom,q.surf); return (v>=0&&v<q.surf)?v/q.surf:1; }
 // L'IFT d'une année : le domaine (hors biocontrôle, biocontrôle, total), les passages, et chaque parcelle en place.
 function _iftCalc(an){
   var X=_iftIdx(), par={}, surfTot=0;
   (window.PARCELLES||[]).forEach(function(p){
     if(!p||p.statut==='Arrachee'||par[p.nom]) return;
-    var s=parseFloat(p.surface)||0; if(s>0) surfTot+=s;
+    var s=parseFloat(String(p.surface==null?'':p.surface).replace(',','.'))||0; if(s>0) surfTot+=s;
     par[p.nom]={ nom:p.nom, surf:s, hb:0, bio:0, pass:{}, un:0, n:0 };
   });
   var R={ an:an, ok:X.ok, ref:_cfmIftRef(), lignes:0, un:0, doute:0, cible:0, horsParc:0, pass:{}, red:{}, surfTot:surfTot };
@@ -10973,7 +10978,8 @@ function _iftCalc(an){
     R.lignes++; if(L.un) R.un++; if(L.doute) R.doute++; if(L.cible) R.cible++;
     var sid=t.sessionId||('__'+(t.date||'')), vu=false;
     R.pass[sid]=1; if(!L.un&&L.r<IFT_REDUITE) R.red[sid]=1;
-    _iftParcs(t).forEach(function(nom){ var q=par[nom]; if(!q) return; vu=true; if(L.bio) q.bio+=L.r; else q.hb+=L.r; q.pass[sid]=1; if(L.un) q.un++; });
+    // ★ REG27-1A (§572) : une parcelle traitée en partie compte pour sa part (surface traitée ÷ surface de la parcelle).
+    _iftParcs(t).forEach(function(nom){ var q=par[nom]; if(!q) return; vu=true; var w=_iftPart(t,q); if(L.bio) q.bio+=L.r*w; else q.hb+=L.r*w; q.pass[sid]=1; if(L.un) q.un++; });
     if(!vu) R.horsParc++;
   });
   var sHb=0, sBio=0;
