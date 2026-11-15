@@ -90,7 +90,7 @@ const DEFAUTS = '#page-journal #tache-chips-row button,#page-journal #tache-chip
   + '#page-planning #plan-stats-band{padding-bottom:200px!important}'
   + '#page-pilotage .ck-i::after{content:none!important}'   // UX-1 : les « i » perdent leur zone d’appui → ils retombent sous 24 px
   + '#page-tracteur #trac-fab{top:470px!important;bottom:auto!important;left:20px!important;right:auto!important;width:330px!important;height:240px!important}'
-  + '#page-journal .mod-header + .mod-meta-row .hv2-date{font-weight:300!important;white-space:normal!important;text-overflow:clip!important}'   // TETE-3D : la date d’avant le correctif
+  + '#page-journal .mod-header-top > .mv-help-btn{width:auto!important;font-size:12px!important;padding:0 8px!important}'   // TETE-4A (§577) : la bande du Journal est dans la ligne du module — « Aide » en toutes lettres au téléphone
   + '#page-pilotage .mod-header + .mod-meta-row .mv-help-btn{width:auto!important;font-size:12px!important;padding:0 8px!important}';   // TETE-3D : « Aide » en toutes lettres au téléphone
 const attendus = ['pilotage › téléphone › c24', 'journal › téléphone › c24', 'journal › téléphone › t11', 'journal › téléphone › chrome', 'planning.grille_y', 'tracteur.fab_recouvre', 'phyto.dates_machine', 'cave.gestes_44', 'journal › téléphone › bande', 'pilotage › téléphone › bande'];
 
@@ -150,7 +150,11 @@ const MESURE = ([tel, liste]) => {
 // ── TETE-3D (§482) — la bande campagne/date, lue dans la page active. Rend la liste de ses défauts (vide au mieux). ──
 const BANDE = (tel) => {
   const pg = document.querySelector('.page.active'); if (!pg) return ['aucune page active'];
-  const b = pg.querySelector('.mod-header + .mod-meta-row'); if (!b) return ['pas de bande campagne/date juste sous l’en-tête'];
+  // ★ TETE-4A (§577) : la bande vit dans la ligne du module (neuf pages) ; sous l'en-tête au Pilotage, pas encore passé. Dans la ligne du
+  //   module : « ? Aide » la suit (un bouton de la ligne), la campagne est du texte au téléphone, la date peut être sur la ligne d'écran —
+  //   et cette ligne d'écran se mesure : elle suit l'en-tête, 44 px.
+  const sous = pg.querySelector('.mod-header + .mod-meta-row'); const ligne = sous ? null : pg.querySelector('.mod-header-top > .mod-meta-row'); const b = sous || ligne;
+  if (!b) return ['pas de bande campagne/date (ni dans la ligne du module, ni sous l’en-tête)'];
   const vis = (e) => { const r = e.getBoundingClientRect(); return r.width >= 1 && r.height >= 1 && getComputedStyle(e).visibility !== 'hidden'; };
   const nom = (e) => (e.id ? '#' + e.id : '.' + String(e.className).trim().split(/\s+/)[0]);
   const d = []; const pieces = Array.from(b.children).filter(vis); const cb = getComputedStyle(b), rb = b.getBoundingClientRect();
@@ -158,15 +162,16 @@ const BANDE = (tel) => {
   const rs = pieces.map((e) => e.getBoundingClientRect());
   if (rs.length && Math.max(...rs.map((r) => r.bottom)) - Math.min(...rs.map((r) => r.top)) > 30) d.push('sur deux lignes');
   rs.forEach((r, i) => { if (r.left < g || r.right > dr) d.push(nom(pieces[i]) + ' sort de la bande'); });
-  ['.hv2-saison-pill', '.hv2-meteo-mini', '.mv-help-btn'].forEach((s) => { const e = b.querySelector(':scope > ' + s);
+  if (ligne) { const e = pg.querySelector('.mod-header + .mv-ecran'); if (!e) d.push('pas de ligne d’écran sous l’en-tête'); else if (Math.abs(e.getBoundingClientRect().height - 44) > 1.5) d.push('la ligne d’écran à ' + Math.round(e.getBoundingClientRect().height) + ' px'); }
+  ['.hv2-saison-pill', '.hv2-meteo-mini', '.mv-help-btn'].forEach((s) => { if (ligne && tel && s === '.hv2-saison-pill') return; const e = (ligne && s === '.mv-help-btn' ? b.parentElement : b).querySelector(':scope > ' + s);
     if (e && vis(e) && Math.abs(e.getBoundingClientRect().height - 28) > 1.5) d.push(s + ' à ' + Math.round(e.getBoundingClientRect().height) + ' px'); });
-  const aide = b.querySelector(':scope > .mv-help-btn');
+  const aide = (ligne ? b.parentElement : b).querySelector(':scope > .mv-help-btn');
   if (!aide || !vis(aide)) d.push('« ? Aide » absent');
   else { const fz = parseFloat(getComputedStyle(aide).fontSize), w = aide.getBoundingClientRect().width;
     if (tel && (fz > 0 || w > 30)) d.push('« Aide » en toutes lettres au téléphone'); if (!tel && fz === 0) d.push('« Aide » caché sur ordinateur'); }
   const date = b.querySelector(':scope > .hv2-date'), met = b.querySelector(':scope > .hv2-meteo-mini');
   const dv = !!(date && vis(date)), mv = !!(met && vis(met));
-  if (dv && mv) d.push('la date longue à côté de la météo'); if (!dv && !mv) d.push('ni date ni météo');
+  if (dv && mv) d.push('la date longue à côté de la météo'); if (!dv && !mv && !(ligne && (tel || pg.querySelector('.mv-ecran .mv-ecran-date')))) d.push('ni date ni météo');
   if (dv) { const c = getComputedStyle(date); if (c.fontWeight !== '400') d.push('la date en graisse ' + c.fontWeight); if (c.whiteSpace !== 'nowrap' || c.textOverflow !== 'ellipsis') d.push('la date sans « … »'); }
   if (mv) { const t = met.querySelector('.hv2-meteo-mini-temp'); const c = t && getComputedStyle(t); if (c && (!/tabular-nums/.test(c.fontVariantNumeric) || /Cormorant/.test(c.fontFamily))) d.push('la température sans ses chiffres droits'); }
   return d;
@@ -311,7 +316,7 @@ if (ref) {
 const bandeKO = [];
 for (const [eid, pages] of Object.entries(releve.mesures)) for (const [p, m] of Object.entries(pages)) if (m.bande && m.bande.length) {
   bandeKO.push(p + ' › ' + eid + ' : ' + m.bande.join(', ')); ecarts.push({ cle: p + ' › ' + eid + ' › bande', base: 0, now: m.bande.length + ' défaut(s)', hausse: true }); }
-t('la bande campagne/date sous l’en-tête garde sa forme sur les ' + nbReleve + ' pages — une ligne, les pastilles à 28 px, « ? Aide » (« ? » seul au téléphone), la date en 400 ou cachée par la météo',
+t('la bande campagne/date garde sa forme sur les ' + nbReleve + ' pages (dans la ligne du module, la ligne d’écran de 44 px dessous ; sous l’en-tête au Pilotage) — une ligne, les pastilles à 28 px, « ? Aide » (« ? » seul au téléphone), la date en 400 ou cachée par la météo',
   bandeKO.length === 0, bandeKO.slice(0, 6).join(' · '));
 // un résumé par mesure, avec l’objectif du plan
 for (const [k, def] of Object.entries(MESURES)) {

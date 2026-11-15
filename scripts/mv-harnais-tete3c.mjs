@@ -28,8 +28,9 @@ function jouer(S) {
   const h = ctx.f({ domaine: 'Domaine', nActives: 12, surfTot: 11.76, saison: 'Après-vendange 2026-2027', meteo: true });
   const i = h.indexOf('<div class="mod-header h-pilotage">'), f = finBloc(h, i);
   t('② le Pilotage : l’en-tête se ferme avant la bande campagne/date, qui le suit aussitôt', i === 0 && f > 0 && !h.slice(i, f).includes('mod-meta-row') && h.slice(f).startsWith('<div class="mod-meta-row mvu-meta'));
-  t('③ la Réserve : sa bande après son en-tête, ses onglets restés dedans', /\+'<\/div>'\n    \+'<\/div>'\n    \/\/ ★ TETE-3C \(§475\)[^\n]*\n    \+'<div class="mod-meta-row mvu-meta">'/.test(S.rsv) && /\+'<div class="mvu-tabs mvr-tabs">'/.test(S.rsv)
-    && (S.rsv.match(/mod-meta-row mvu-meta/g) || []).length === 1 && S.rsv.indexOf("+'<div class=\"mvu-tabs mvr-tabs\">'") < S.rsv.indexOf('mod-meta-row mvu-meta'));
+  // ★ TETE-4A (§577) : la bande de la Réserve est montée dans la ligne du module, comme les huit autres ; sa ligne d'écran suit l'en-tête.
+  { const iB = S.rsv.indexOf("+'<div class=\"mod-meta-row mvu-meta\">'"), iT = S.rsv.indexOf("+'<div class=\"mvu-tabs mvr-tabs\">'"), iE = S.rsv.indexOf('<div class=\"mv-ecran\">');
+    t('③ la Réserve : une seule bande, dans la ligne du module (TETE-4A) ; ses onglets restés dans l’en-tête, la ligne d’écran après', (S.rsv.match(/mod-meta-row mvu-meta/g) || []).length === 1 && iB > 0 && iT > iB && iE > iT); }
   t('④ les règles communes trouvent la bande où qu’elle soit (« .mod-header + … »), plus seulement sous .page', S.css.includes('.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;') && S.css.includes('.mod-header > .mod-header-top{padding-top:') && !S.css.includes('.page > .mod-meta-row.mvu-meta'));
   t('⑤ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-tete3c.mjs'") > 0 && S.liste.indexOf("mv-harnais-tete3c.mjs --contre'") > 0);
 }
@@ -44,7 +45,7 @@ if (!CONTRE) {
   const mutants = [
     ['« ? Aide » ne cherche plus que dans l’en-tête', m('uti', "'.mod-header .mod-meta-row, .mod-header + .mod-meta-row'", "'.mod-header .mod-meta-row'")],
     ['le Pilotage remet sa bande dans l’en-tête', m('pil', "+'</div></div>'   // ★ TETE-3C (§475)", "+'</div>'   // ★ TETE-3C (§475)")],
-    ['la bande de la Réserve repasse avant les onglets', m('rsv', "      +'<div class=\"mvu-tabs mvr-tabs\">'", "      +'<div class=\"mod-meta-row mvu-meta\"></div>'\n      +'<div class=\"mvu-tabs mvr-tabs\">'")],
+    ['une seconde bande dans la Réserve', m('rsv', "      +'<div class=\"mvu-tabs mvr-tabs\">'", "      +'<div class=\"mod-meta-row mvu-meta\"></div>'\n      +'<div class=\"mvu-tabs mvr-tabs\">'")],
     ['les règles reviennent à « .page > … »', m('css', '.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;', '.page > .mod-meta-row.mvu-meta{position:relative;z-index:5;')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-tete3c.mjs'").join("mv-harnais-tete3Z.mjs'") })],
   ];

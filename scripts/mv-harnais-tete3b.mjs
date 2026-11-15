@@ -22,11 +22,15 @@ let ok = 0, ko = 0;
 const t = (nom, cond) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom); } };
 function jouer(S) {
   const r = MODS.map((c) => { const i = S.html.indexOf('<div class="mod-header ' + c + '">'); if (i < 0) return { c, ok: false }; const f = bloc(S.html, i);
-    const dedans = S.html.slice(i, f).includes('mod-meta-row'); const apres = S.html.slice(f, f + 260).includes('<div class="mod-meta-row mvu-meta">');
-    const onglets = /<div class="mvu-tabs"/.test(S.html.slice(i, f)); return { c, ok: !dedans && apres && onglets }; });
-  t('① les huit en-têtes : aucune bande campagne/date dedans, chacune juste après le sien ; les onglets restent dans l’en-tête', r.every((x) => x.ok));
+    // ★ TETE-4A (§577) : la bande n'est plus SOUS l'en-tête (le choix du 28/10, §474a) — elle est montée dans la ligne du module, la ligne
+    //   d'écran a pris sa place. Gardé ici : une seule bande par en-tête, avant les onglets, plus aucune dessous (le détail : mv-harnais-tete4a).
+    const H = S.html.slice(i, f); const k = H.indexOf('<div class="mod-meta-row mvu-meta">'); const une = (H.match(/class="mod-meta-row/g) || []).length === 1;
+    const apres = S.html.slice(f, f + 260).includes('<div class="mod-meta-row');
+    const onglets = /<div class="mvu-tabs"/.test(H); return { c, ok: une && k > 0 && k < H.indexOf('<div class="mvu-tabs"') && !apres && onglets }; });
+  t('① les huit en-têtes : une seule bande campagne/date, dans la ligne du module (TETE-4A), aucune dessous ; les onglets restent dans l’en-tête', r.every((x) => x.ok));
   t('② la Vigne : le titre dit la page — Accueil, Parcelles, Journal', ['Accueil', 'Parcelles', 'Journal'].every((n, k) => { const c = ['h-home', 'h-parcelles', 'h-journal'][k]; const i = S.html.indexOf('<div class="mod-header ' + c + '">'); return new RegExp('<div class="mod-header-title"[^>]*>' + n + '</div>').test(S.html.slice(i, bloc(S.html, i))); }));
-  t('② le sous-titre dit « Vigne », puis ce que la page ajoute (les identifiants que le code écrit restent)', ['hv2-header-sub', 'p-saison-sub', 'j-sub'].every((id) => S.html.includes('<div class="mod-header-sub"><span class="mod-header-mod">Vigne</span><span id="' + id + '">'))
+  t('② le sous-titre dit « Vigne », puis ce que la page ajoute (les identifiants que le code écrit restent)', ['hv2-header-sub', 'p-saison-sub'].every((id) => S.html.includes('<div class="mod-header-sub"><span class="mod-header-mod">Vigne</span><span id="' + id + '">'))
+    && S.html.includes('<div class="mod-header-sub"><span class="mod-header-mod">Vigne</span></div>') && S.html.includes('<span class="mv-ecran-etat" id="j-sub">')   /* TETE-4A (§577) : le compte du Journal sur la ligne d'écran */
     && S.css.includes(".mod-header-mod + span:not(:empty)::before{content:'\\00a0\\00b7\\00a0';}") && S.app.includes("document.getElementById('p-saison-sub').textContent='';"));
   t('③ les onglets de l’en-tête : un segment arrondi, des options de 36 px, texte seul', S.css.includes('.mod-header > .mvu-tabs{gap:4px;padding:3px;margin:6px 0 6px;') && S.css.includes('.mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}') && S.css.includes('border-radius:var(--r-full,999px);}\n.mod-header > .mvu-tabs .mvu-tab{min-height:36px;padding:7px 12px;border-radius:var(--r-full,999px);}') && S.css.includes('.mod-header > .mvu-tabs .mvu-tab-em{display:none;}'));
   t('④ la bande sur le fond de la page : au-dessus des cartes (menu des campagnes), pastille, date et mini-météo lisibles', S.css.includes('.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;') && S.css.includes('.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}')
@@ -41,10 +45,9 @@ if (!CONTRE) {
   { const log = console.log; console.log = () => {}; ok = 0; ko = 0; try { jouer(S0); } catch (e) { ko++; } console.log = log;
     if (ko) { console.log('\x1b[31mROUGE\x1b[0m — la base n’est pas verte (' + ko + ' échec(s)) : contre-épreuves sans valeur'); process.exit(1); } }
   const m = (cle, a, b) => (S) => { if (!S[cle].includes(a)) throw new Error('ancre absente'); return Object.assign({}, S, { [cle]: S[cle].replace(a, b) }); };
-  const remet = (S) => { const i = S.html.indexOf('<div class="mod-header h-cave">'); const f = bloc(S.html, i); const k = S.html.indexOf('<div class="mod-meta-row mvu-meta">', f); const g = bloc(S.html, k);
-    const row = S.html.slice(k, g); const sans = S.html.slice(0, k) + S.html.slice(g); const top = sans.indexOf('<div class="mvu-tabs"', i); return Object.assign({}, S, { html: sans.slice(0, top) + row + sans.slice(top) }); };
   const mutants = [
-    ['la bande de la Cave revient dans l’en-tête', remet],
+    ['une seconde bande entre dans l’en-tête de la Cave', (S) => { const i = S.html.indexOf('<div class="mod-header h-cave">'); const top = S.html.indexOf('<div class="mvu-tabs"', i); return Object.assign({}, S, { html: S.html.slice(0, top) + '<div class="mod-meta-row mvu-meta"></div>' + S.html.slice(top) }); }],
+    ['une bande revient sous l’en-tête du Phyto', (S) => { const i = S.html.indexOf('<div class="mod-header h-phyto">'); const f = bloc(S.html, i); return Object.assign({}, S, { html: S.html.slice(0, f) + '\n<div class="mod-meta-row mvu-meta"></div>' + S.html.slice(f) }); }],
     ['le Journal reprend « Vigne » pour titre', (S) => Object.assign({}, S, { html: S.html.replace(/(<div class="mod-header h-journal">[\s\S]*?<div class="mod-header-title"[^>]*>)Journal(<\/div>)/, '$1Vigne$2') })],
     ['Parcelles se redit dans son sous-titre', m('app', "document.getElementById('p-saison-sub').textContent='';", "document.getElementById('p-saison-sub').textContent='Parcelles';")],
     ['les icônes reviennent dans les onglets', m('css', '.mod-header > .mvu-tabs .mvu-tab-em{display:none;}', '')],

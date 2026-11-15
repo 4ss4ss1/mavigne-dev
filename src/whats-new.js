@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.06', d: '2026-11-15', items: [   // TETE-4A (§577) : le bandeau commun — le haut de l'écran à la même hauteur partout
+    { niv: 0, pour: ['tous'], emoji: 'curseurs', titre: 'Le haut de l’écran a la même hauteur partout',
+      desc: "D’un écran à l’autre, le haut changeait de hauteur — dans la Cave, il grandissait au Chai et au Millésime. Il tient maintenant en trois lignes, toujours les mêmes : le nom de la page, avec la campagne, la date et « ? Aide » ; les onglets ; puis une ligne qui dit l’essentiel de l’écran (« 15 traitements », « 14 entrées ») et porte son bouton d’ajout. Dans la Cave, le choix du millésime est à droite de cette ligne. Au téléphone, la campagne s’écrit sous le nom de la page. Le Pilotage garde son en-tête actuel pour l’instant." },
+  ] },
   { v: '11.05', d: '2026-11-15', items: [   // REG27-2 (§575) : horaires et stade exigés, marqués par produit
     { niv: 0, pour: ['admin'], emoji: 'chrono', titre: 'Horaires ou stade exigés\u00a0: à cocher sur la fiche du produit',
       desc: "Phyto › Catalogue, la fiche d’un produit, bloc «\u00a0Au registre, à chaque traitement\u00a0»\u00a0: cochez «\u00a0horaires\u00a0» quand l’étiquette les impose, «\u00a0stade\u00a0» quand l’emploi du produit y est limité. L’assistant de traitement les demande, et la vérification du registre (Pilotage › Conformité) signale les lignes où ils manquent, traitements déjà saisis compris. Pour un insecticide, les horaires restent toujours exigés." },

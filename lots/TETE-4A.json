@@ -1,0 +1,48 @@
+{
+  "lot": "TETE-4A",
+  "section": "§577",
+  "base": "812ef94f2924eed7ee2baf78afc1a8f4f8c26709",
+  "inclut": [],
+  "date": "2026-11-15",
+  "tutos": {
+    "ok": true,
+    "empreinte": "93d68164b289862a818825d8d14eebf9745628d96414fa95ae6508d06f91e143",
+    "date": "2026-11-15T18:21:54.991Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "intrant"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    "CLAUDE.md": "95180eeccf11457e427115861eb141c0ab2b64bc2285d41d1d9a74da210fe895",
+    "docs/claude/INDEX.md": "8aa94dc5322f063b1fb2e87ea02d61c709a0cdeb4014c881bc7f7064ddff80c5",
+    "docs/claude/chantiers-530-579.md": "981d5718c7174b52d32f89928168c9c92b7480b025b48955472a42c1015ce46f",
+    "docs/claude/journal.md": "a9069490002b4dea7620395148c40f63d8e2b782a712b54bf503a734e8bdf24c",
+    "docs/maquettes/LISEZMOI.md": "f616bd31431b46a243c5d561f2fc692b812d8db4c2f5b5168b14ed130be216d6",
+    "guide/01-demarrer.html": "db074fd138ecdd08ad1a3fb4d1e9f397a264767e5c40bdd112dc70826769025b",
+    "index.html": "7f0c675de0d1d4613d8c36a7a3cd4949d19e276367067baabec429f32ca8fe00",
+    "public/sw.js": "8e08426bde8a29047446bbc79d3d475f920fdacffbd595b8a0c02afd30edf062",
+    "scripts/harnais-claude-md.mjs": "08c8401735fc234464819fedaccfbfb08b8acb54a18866fdb972772e8b8a5779",
+    "scripts/mv-app-node.mjs": "40b959606a0b8fe3702c1b5aa2d1296c2b8a7e40b1e274cc35d005a3fc4fe1a9",
+    "scripts/mv-harnais-liste.mjs": "6d61c917a1cbb41a6eda62b2f4d3aff921895874c0e4611338bacd815dcef67b",
+    "scripts/mv-harnais-tete3b.mjs": "fa547450f50a091a9fe87248c27889160aefa75bd1b7dad8198f29b5640c8a7d",
+    "scripts/mv-harnais-tete3c.mjs": "2db03c8a06d3de3f7e4ea41d194a4beb98d30bd23435579961a065cda3270bed",
+    "scripts/mv-harnais-tete3d.mjs": "35db1003ea1331e8f2206812b618a7f2f0a3f2888f581f976f6bbac7443efdb2",
+    "scripts/mv-ux-baseline.json": "7316f0c37ac3ba63bd4c85b6e9963bf4205f43eb10a96630c5d566a63a3e9d97",
+    "scripts/mv-ux-rendu.mjs": "385bdbf166d4962c3b5f97e9a1e6e2cdd5d45ecfc2f02fd9ed775835922d94ed",
+    "src/app.js": "50b0f90faa2f5f90dc6bd637d12299212467bdf0db39a64e46faa92047ab4036",
+    "src/cave.js": "34fa32a17569a4723cb0832728ab69ea0bc5328ce3ce752a4485963b6bd78ce3",
+    "src/reserve.js": "cfa52f87c38819400bd24230af179814f99be3abf11b8d48780e23d5d1d0f1fa",
+    "src/utils.js": "0cff47fcdc9834ae09842ae5da0e2cf1523b7bfa4fba5cf10369c029764e65ff",
+    "src/whats-new.js": "8e9fa2f9171fb17fd6b8467012368a9654b96c069ba65b2060c807103d3a2f4f",
+    "docs/maquettes/maquette-bandeau-commun-v1.html": "c91a362b89240ac43a6e11818e5cd0ab07cfea7de87edb5bc70c77d88de699dc",
+    "docs/maquettes/maquette-rangement-admin-v2.html": "d2ebe704606494994df9aebfa704f83937d7efa76bb2dba21d9bbdae75193904",
+    "scripts/mv-harnais-tete4a.mjs": "5959e7b8a32d3c4860dcac7295a48fb1e12ec7348518ea3867e721d8916abc43",
+    "src/bandeau.css": "0b3a09e985f2fc428c1440b84ccdb9b02bfce7d08c6a6367f9c91a41dfa556ed"
+  }
+}

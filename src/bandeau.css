@@ -1,0 +1,70 @@
+/* ★ TETE-4A (§577) — LE BANDEAU COMMUN : LE HAUT DE L'ÉCRAN A LA MÊME HAUTEUR PARTOUT.
+   Trois lignes, toujours les mêmes : (1) le module — icône, nom, sous-titre, et à droite la campagne, la date ou la météo, « ? Aide »,
+   la roue, le voyant ; (2) les onglets ; (3) la ligne d'écran (.mv-ecran), sous l'en-tête : ce que l'écran dit en un mot à gauche,
+   son bouton ou son choix à droite — 44 px, jamais plus. La bande campagne/date (.mod-meta-row) n'est plus une ligne à elle sous
+   l'en-tête (TETE-3B, §474) : elle vit dans la ligne du module (index.html, reserve.js). Le Pilotage garde l'ancien dessin jusqu'à
+   son lot : ses règles (« .mod-header + .mod-meta-row », styles.css) ne sont pas touchées.
+   Fichier à part : styles.css est à son plafond (rien n'y entre). Importé par app.js juste après la feuille — il passe donc après elle.
+   Tout se lit dans la charte, avec un repli (règle n°21 du §24). */
+
+/* — Ligne 1 : la bande dans la ligne du module — */
+.mod-header-top > .mod-meta-row{ flex:none; min-width:0; margin:0!important; padding:0!important; }
+.mod-header-top > .mv-help-btn{ flex:none; margin:0; }
+body .mod-header-top > .mod-meta-row .hv2-saison-pill{ padding:0 var(--e-2,8px)!important; border-radius:var(--r-full,999px)!important; box-shadow:none!important; }
+body .mod-header-top > .mod-meta-row .hv2-saison-pill:not(.consult){ background:var(--bg-card,#FFFFFF)!important; border:var(--bw,1px) solid var(--ligne,#E7E6E2)!important; color:var(--texte-med,#55534E)!important; }
+body .mod-header-top > .mod-meta-row .hv2-dot{ background:var(--ok,#237A47)!important; box-shadow:none!important; }
+body .mod-header-top > .mod-meta-row .hv2-meteo-mini{ padding:0 var(--e-2,8px)!important; border-radius:var(--r-full,999px)!important; background:var(--bg-card,#FFFFFF)!important; border:var(--bw,1px) solid var(--ligne,#E7E6E2)!important; box-shadow:none!important; }
+/* l'Accueil et la Réserve disent la date sur la ligne d'écran : pas deux fois */
+.h-home > .mod-header-top > .mod-meta-row > .hv2-sep,.h-home > .mod-header-top > .mod-meta-row > .hv2-date,.h-reserve > .mod-header-top > .mod-meta-row > .hv2-sep,.h-reserve > .mod-header-top > .mod-meta-row > .hv2-date{ display:none!important; }
+
+/* — Ligne 3 : la ligne d'écran, sous l'en-tête — */
+.mod-header + .mv-ecran{ display:flex; align-items:center; gap:var(--e-2,8px); height:var(--h-ecran,44px); box-sizing:border-box; padding:0 var(--e-4,16px); background:var(--bg-doux,#F7F5F1); border-top:var(--bw,1px) solid var(--ligne,#E7E6E2); border-bottom:var(--bw,1px) solid var(--ligne,#E7E6E2); white-space:nowrap; overflow:hidden; }
+.mv-ecran-g{ display:flex; align-items:center; gap:var(--e-2,8px); flex:0 0 auto; max-width:62%; min-width:0; overflow:hidden; font-family:var(--font-ui,'Outfit',sans-serif); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte,#1B1A18); }
+.mv-ecran-g > *{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mv-ecran-d{ display:flex; align-items:center; gap:var(--e-2,8px); flex:1 1 0; min-width:0; overflow-x:auto; scrollbar-width:none; }
+.mv-ecran-d > :first-child{ margin-left:auto; }
+.mv-ecran-d::-webkit-scrollbar{ display:none; }
+.mv-ecran-d:empty{ display:none; }
+/* dans une page en colonnes (Journal, Tracteur sur ordinateur), la ligne prend toute la largeur, comme l'en-tête */
+.page > .mv-ecran,#page-journal.active > .mv-ecran,#page-tracteur.active > .mv-ecran{ grid-column:1 / -1; }
+/* le compteur de l'en-tête (« 15 traitements ») : du texte, plus une pastille */
+body .mv-ecran .mod-header-badge{ display:inline; margin:0; padding:0!important; border:0!important; border-radius:0; background:transparent!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte,#1B1A18)!important; }
+body .mv-ecran #regl-role-badge.mod-header-badge{ color:var(--texte,#1B1A18)!important; background:transparent!important; border:0!important; }
+/* le bouton d'ajout de l'écran (« + Ajouter ») */
+body .mv-ecran .mod-header-action{ display:inline-flex; align-items:center; justify-content:center; height:var(--h-ctl,32px); min-height:0; padding:0 var(--e-3,12px); border:0; border-radius:var(--r-sm,6px); background:var(--accent,#7A2850); color:var(--sur-accent,#FFFFFF); font-family:var(--font-ui,'Outfit',sans-serif); font-size:var(--pt-txt,13px); font-weight:var(--fw-med,500); line-height:var(--lh-serre,1.15); white-space:nowrap; cursor:pointer; position:relative; }
+body .mv-ecran .mod-header-action::after{ content:''; position:absolute; inset:calc(var(--e-1,4px) * -1.5) 0; }
+body .mv-ecran .mod-header-action:hover{ background:var(--accent-survol,#8C3160); }
+/* la Cave : le choix du millésime sur la ligne (une rangée, elle défile de côté au téléphone) ; sa phrase juste dessous */
+.mv-ecran #cave-milbar{ flex:none; margin:0; }
+.mv-ecran #cave-milbar .mvcm-chips{ flex-wrap:nowrap; margin:0; }
+.cave-milnote{ padding:var(--e-2,8px) var(--e-4,16px) 0; }
+.cave-milnote .mlh-tous{ margin:0!important; }
+
+/* — Au téléphone : la campagne prend la place du sous-titre, sous le nom ; la date et la météo sortent du bandeau — */
+@media (max-width:600px){
+  .mod-header:not(.h-pilotage) > .mod-header-top{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-auto-columns:auto; grid-template-rows:auto auto; align-items:center; align-content:center; column-gap:var(--e-1,4px); row-gap:0; box-sizing:border-box; height:calc(env(safe-area-inset-top,0px) + 56px); }
+  .mod-header:not(.h-pilotage) > .mod-header-top > *{ grid-row:1 / span 2; }
+  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-header-icon{ grid-column:1; }
+  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-header-titles{ grid-column:2; grid-row:1; align-self:end; min-width:0; }
+  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-meta-row{ grid-column:2; grid-row:2; align-self:start; min-height:0!important; height:auto; line-height:1; }
+  .mod-header:not(.h-pilotage):not(.h-reglages) > .mod-header-top .mod-header-sub{ display:none; }
+  /* Réglages garde son sous-titre : c'est là qu'on lit le numéro de version */
+  .mod-header.h-reglages > .mod-header-top > .mod-meta-row{ display:none; }
+  .mod-header.h-reglages > .mod-header-top > .mod-header-titles{ grid-row:1 / span 2; align-self:center; }
+  .mod-header-top > .mod-meta-row > .hv2-sep,.mod-header-top > .mod-meta-row > .hv2-date,.mod-header-top > .mod-meta-row > .hv2-meteo-mini{ display:none!important; }
+  body .mod-header-top > .mod-meta-row .hv2-saison-pill{ height:auto!important; min-height:0; max-width:100%; min-width:0; padding:0!important; border:0!important; background:transparent!important; font-size:var(--pt-micro,12px); line-height:1.4; }
+  /* les zones d'appui (UX-1, §467) : « ? » garde 44 px en largeur, comme sous l'en-tête (TETE-3D) ; la campagne qui ouvre le menu (Accueil) en prend 45 en hauteur */
+  .mod-header-top > .mv-help-btn::after{ left:calc(var(--e-2,8px) * -1); right:calc(var(--e-2,8px) * -1); }
+  .mod-header-top > .mod-meta-row .hv2-saison-pill[onclick]{ position:relative; }
+  .mod-header-top > .mod-meta-row .hv2-saison-pill[onclick]::after{ content:''; position:absolute; top:calc(var(--e-3,12px) * -1 - 1px); bottom:calc(var(--e-3,12px) * -1 - 1px); left:0; right:0; }
+  body .mod-header-top > .mod-meta-row .hv2-saison-pill > span:not(.hv2-dot):not(.hv2-sc-chev){ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mv-ecran .mvcm-lab{ display:none; }
+  /* l'Accueil porte quatre boutons de plus : son icône cède la place à la campagne */
+  .mod-header.h-home > .mod-header-top > .mod-header-icon{ width:0; min-width:0; margin:0; overflow:hidden; visibility:hidden; }
+}
+/* — En descendant, au téléphone (TETE-3A, §473) : le bandeau se range sur une ligne — le nom, « ? », la roue, le voyant ; la campagne
+     revient en remontant. La ligne d'écran, sous l'en-tête, défile avec la page. — */
+body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top{ display:flex; height:auto; }
+body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top > .mod-meta-row{ display:none; }
+
+/* ★ FIN TETE-4A */

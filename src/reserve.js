@@ -282,6 +282,11 @@ function renderReserve(){
           +'<div class="mod-header-title">Réserve</div>'
           +'<div class="mod-header-sub">Intrants, stock &amp; fûts</div>'
         +'</div>'
+        +'<div class="mod-meta-row mvu-meta">'
+          +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
+          +'<div class="hv2-sep"></div>'
+          +'<div class="hv2-date" data-mv-date></div>'
+        +'</div>'
         // La roue crantée (lot NAV-4) : les deux inventaires. L'en-tête est rendu en JS : admin seulement, ici.
         +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen(\'reserve\')" style="margin-left:auto" aria-label="Documents de la R\u00e9serve" title="R\u00e9glages">'+_mvIcon('engrenage',18)+'</button>':'')
       +'</div>'
@@ -291,12 +296,8 @@ function renderReserve(){
         +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">'+_mvIcon('liste',18)+'</span>Bilan matière</button>'
       +'</div>'
     +'</div>'
-    // ★ TETE-3C (§475) : la bande campagne/date sous l'en-tête, comme partout (§474) ; « ? Aide » la trouve (utils.js).
-    +'<div class="mod-meta-row mvu-meta">'
-      +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
-      +'<div class="hv2-sep"></div>'
-      +'<div class="hv2-date" data-mv-date></div>'
-    +'</div>';
+    // ★ TETE-4A (§577) : la ligne d'écran sous l'en-tête, comme partout ; la bande campagne/date est montée dans la ligne du module.
+    +'<div class="mv-ecran"><div class="mv-ecran-g"><span class="mv-ecran-date" data-mv-date></span></div><div class="mv-ecran-d"></div></div>';
   // ★ RSV-UX-1 (§495) — maquette-ux-v2, Réserve : une action principale. Le « + » (admin, au téléphone) ouvre « Nouveau mouvement » :
   //   une entrée (livraison d'intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté), un ouillage — chaque
   //   ligne ouvre le formulaire qui existe déjà. Rangées de 48 px ; un voile ferme la feuille.

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.05';
+export const APP_VERSION = '11.06';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3098,7 +3098,9 @@ function _mvInjectHelpBtn() {
   //   l'en-tête, et « ? Aide » avait disparu des huit modules sans qu'aucun contrôle le voie. Les deux places sont lues.
   var rows = document.querySelectorAll('.mod-header .mod-meta-row, .mod-header + .mod-meta-row');
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i].querySelector('.mv-help-btn')) continue;
+    // ★ TETE-4A (§577) — dans la ligne du module, « ? Aide » se pose APRÈS la bande : un bouton de la ligne, comme la roue.
+    var ligne = (rows[i].parentNode && rows[i].parentNode.classList && rows[i].parentNode.classList.contains('mod-header-top')) ? rows[i].parentNode : null;
+    if ((ligne || rows[i]).querySelector('.mv-help-btn')) continue;
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'mv-help-btn';
@@ -3114,7 +3116,7 @@ function _mvInjectHelpBtn() {
     b.appendChild(q);
     b.appendChild(document.createTextNode('Aide'));
     b.onclick = openAide;
-    rows[i].appendChild(b);
+    if (ligne) ligne.insertBefore(b, rows[i].nextSibling); else rows[i].appendChild(b);
   }
 }
 if (typeof document !== 'undefined') {

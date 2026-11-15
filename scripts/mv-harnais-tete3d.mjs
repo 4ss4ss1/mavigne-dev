@@ -56,9 +56,9 @@ function jouer(S) {
     && B.includes(N + '.mvu-avec-meteo > .hv2-saison-pill > span:not(.hv2-dot):not(.hv2-sc-chev){ min-width:0; overflow:hidden; text-overflow:ellipsis; }'));
   t('⑦ test:ux, joué sur le build en CI, porte la règle de la bande sur les vingt vues et sa contre-épreuve (deux défauts posés)',
     S.ux.includes('const BANDE = (tel) => {') && S.ux.includes('if (!m.connexion && !m.absente) m.bande = await page.evaluate(BANDE, ecran.tel);')
-    && S.ux.includes("t('la bande campagne/date sous l’en-tête garde sa forme sur les ' + nbReleve + ' pages")
+    && S.ux.includes("t('la bande campagne/date garde sa forme sur les ' + nbReleve + ' pages")
     && S.ux.includes("'journal › téléphone › bande', 'pilotage › téléphone › bande'];")
-    && S.ux.includes("+ '#page-journal .mod-header + .mod-meta-row .hv2-date{font-weight:300!important;")
+    && S.ux.includes("+ '#page-journal .mod-header-top > .mv-help-btn{width:auto!important;font-size:12px!important;")
     && S.ux.includes("+ '#page-pilotage .mod-header + .mod-meta-row .mv-help-btn{width:auto!important;font-size:12px!important;")
     && /run: npm run test:ux\b/.test(S.ci));
   t('⑧ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-tete3d.mjs'") > 0 && S.liste.indexOf("mv-harnais-tete3d.mjs --contre'") > 0);

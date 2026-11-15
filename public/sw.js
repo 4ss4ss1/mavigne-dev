@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v11.96
+// MA VIGNE — Service Worker v11.97
+// v11.97 (15/11/2026) — TETE-4A (§577) : le bandeau commun — la campagne, la date et « ? Aide » dans la ligne du module ; sous l'en-tête, une ligne d'écran de 44 px (le compteur, le bouton d'ajout, le choix du millésime de la Cave) ; le Chai et le Millésime n'ont plus un en-tête plus haut que les autres.
 // v11.96 (15/11/2026) — REG27-2 (§575) : horaires et stade exigés au registre, cochés par l'admin sur la fiche d'un produit du catalogue E-Phy ; l'assistant et la vérification avant l'export les lisent.
 // v11.95 (15/11/2026) — OVPANEL-1 (§574) : le choix de la période du journal des interventions prend la feuille commune (il portait des classes sans aucun style) ; le code de l'ancienne fiche du catalogue local, que plus rien n'ouvrait, est retiré.
 // v11.94 (15/11/2026) — REG27-1B (§573) : le registre relu ligne par ligne avant l'export — la carte « Le registre » de Conformité, la fenêtre « avant l'export », l'année civile en tête des périodes.
@@ -4728,7 +4729,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v11.96';
+const CACHE_NAME   = 'mavigne-v11.97';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4745,7 +4746,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.96 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.97 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4765,7 +4766,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v11.96 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v11.97 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

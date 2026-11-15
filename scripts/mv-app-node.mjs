@@ -70,7 +70,8 @@ async function charger() {
   for (const [nom, f] of Object.entries(REMPLACE)) fs.copyFileSync(f, path.join(T, nom));
   const app = fs.readFileSync(path.join(T, 'app.js'), 'utf8');
   if (app.indexOf("import './styles.css';") < 0 || app.indexOf("import './firebase.js';") < 0) { console.log('   ROUGE  app.js : imports CSS / firebase introuvables'); process.exit(1); }
-  fs.writeFileSync(path.join(T, 'app.js'), app.replace("import './styles.css';", '').replace("import './firebase.js';", ''));
+  // ★ TETE-4A (§577) : toute feuille importée par app.js s'en va (styles.css, puis bandeau.css — la ligne entière, son commentaire avec)
+  fs.writeFileSync(path.join(T, 'app.js'), app.replace(/^import '\.\/[\w-]+\.css';[^\n]*$/gm, '').replace("import './firebase.js';", ''));
   const logAvant = console.log; const errAvant = console.error; const warnAvant = console.warn;
   console.log = () => {}; console.error = () => {}; console.warn = () => {};
   try { await import(pathToFileURL(path.join(T, 'app.js')).href); }

@@ -4182,8 +4182,12 @@ function _caveEnsureMilBar(){
   var ref=document.getElementById('cave-sec-tabs');
   if(ref && !document.getElementById('cave-milbar')){
     var d=document.createElement('div');
-    d.id='cave-milbar'; d.style.margin='8px 0 4px';
-    if(ref.nextSibling) ref.parentNode.insertBefore(d,ref.nextSibling); else ref.parentNode.appendChild(d);
+    d.id='cave-milbar';
+    // ★ TETE-4A (§577) — le choix vivait DANS l'en-tête, sous les sections : le Chai et le Millésime avaient un en-tête plus haut que
+    //   les autres écrans (153 et 174 px contre 111 ; 204 et 243 au téléphone). Il se pose à droite de la ligne d'écran.
+    var ecr=document.getElementById('cave-ecran-d');
+    if(ecr) ecr.appendChild(d);
+    else { d.style.margin='8px 0 4px'; if(ref.nextSibling) ref.parentNode.insertBefore(d,ref.nextSibling); else ref.parentNode.appendChild(d); }
   }
 }
 function _caveMilBarRender(){
@@ -4192,6 +4196,9 @@ function _caveMilBarRender(){
   var la=(caveSection==='elevage' || caveSection==='millesime');   // Aujourd'hui : toute la cave ; Le Cuvier : la campagne
   h.style.display=la?'':'none';
   h.innerHTML=la?_caveMillChipsHtml():'';
+  // ★ TETE-4A (§577) : la phrase d'explication du Millésime sort de la ligne d'écran (une ligne, 44 px) — elle se lit juste dessous.
+  var hn=document.getElementById('cave-milnote');
+  if(hn){ var nt=h.querySelector('.mlh-tous'); hn.innerHTML=''; if(nt) hn.appendChild(nt); hn.style.display=nt?'':'none'; }
 }
 function _caveSetMill(m){
   _caveMillFilter=m;
