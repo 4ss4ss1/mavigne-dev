@@ -1,0 +1,32 @@
+{
+  "lot": "OVPANEL-1",
+  "section": "§574",
+  "base": "0ed33650dcfccc6a5ec6f57d572ac662c7b47402",
+  "inclut": [],
+  "date": "2026-11-15",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "f3a23cffe1885600754e9e9d418381f524e405327e5a10c9b9bb02373ab4aa01",
+    "CLAUDE.md": "6e71ce0073e3ff274ff88d97a98ad1a0fbb43a05d9c2f11d03cf6bf6d751bb1f",
+    "docs/claude/INDEX.md": "47d51e60c3cad81fd48c4e393d68ff959cc596821847ed7296eb25f64c81e260",
+    "docs/claude/chantiers-530-579.md": "d5455443dc331db28dc75dbfc92db340ea177892f5fe6c5218cdb366a1f39b7c",
+    "docs/claude/journal.md": "73791b77358a89c73bbf2775c967860058b138a7005d4ef632fcf68202eb0c80",
+    "index.html": "a1018bb2772c19b5de5dce9c9ca45818e1e62c1310ff2817c214bdee40354bc1",
+    "public/sw.js": "7d8b77840199e36d51882a0cd791c9722453a7b5754aec6382b51ce60e00cafc",
+    "scripts/harnais-claude-md.mjs": "f0e7b63244fec5c295c571a0c9dd55dac3ff28839177e16e4cf58b31fbd3f5ec",
+    "scripts/mv-harnais-liste.mjs": "9f553a03f925b79ec25d196385b83a741fc9d65e002aeb89154043aa08cdc2a5",
+    "scripts/preflight-baseline.json": "2e8dd6ac01b35cf211fb53837dd35cba7dca4c34054c6de24e61544a6e69d3b7",
+    "scripts/tutos-couverture.json": "ed7c52bb08323782a6ab90f813730e36144b254b5f6ad6e3d371ba614dfebacc",
+    "src/app.js": "1aefd364a727325e2f3f70437a1817558f3c835228ad49190ac0dd88b5dfc0e1",
+    "src/phyto.js": "33b03ec4d0c43d6a4e53144f25079a347ddbc1057ff994fb58f92fcf38644fbe",
+    "src/registre.js": "5b98866f147b1624df72b305b91b2f5c09c43fd97a2a80b3b60e6267ac9f11db",
+    "src/reglages.js": "c786b32f0d819b7332ba50e67d1162758f1a7b4f21988eee178a06ce49da7e85",
+    "src/tracteur.js": "c4405ac99d8727d62dbe926a9948a4b2f0fe208aba38e16ef335d1f6740e3f76",
+    "src/utils.js": "cb6e1f318882a2598b86809474c80f25f51153f4ffb757fdc1fdeb4e175fb5e1",
+    "src/whats-new.js": "0794d34950c7421c23ad1bcb7c54d23480952ffbfc0925360cf4d0f803db8013",
+    "scripts/mv-harnais-ovpanel1.mjs": "6188837d16a5af23818ffe48f9e2cdfd83feb0706419bb1550e61cd826842a49"
+  }
+}

@@ -15,7 +15,7 @@ const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.
 // Données partagées (PARCELLES, CATALOGUE, SESSIONS, TRAITEMENTS, CONDUCTEURS, MEMBRES, CONFIG,
 // EPHY…), helpers app.js (saveData, openOv, closeOv, openConfirmDel, fmtDate, getPCls,
 // _saisonForDate, _cuParcRollSum…) et fonctions cross-module Tracteur (renderPhytoTrac,
-// renderCatalogueTrac, applyEphy, openOvPhyto) sont résolus via le scope global (window.*),
+// applyEphy, openOvPhyto) sont résolus via le scope global (window.*),
 // exposés par app.js/tracteur.js/reglages.js — même mécanisme que les autres modules extraits.
 
 // ════ PHYTO ════
@@ -67,78 +67,13 @@ function switchPhytoTab(tab){
 function renderPhyto(){
   if(window._mvAjourPage) window._mvAjourPage('page-phyto');   // ★★ AJOUR-1 (§552) : la page est à jour de ce qui précède (utils.js)
   // Phyto est un module autonome du dock (page-phyto). Les ids du registre et du catalogue
-  // sont inchangés : renderPhytoTrac / renderCatalogueTrac / ephyRender fonctionnent tels quels.
+  // sont inchangés : renderPhytoTrac / ephyRender fonctionnent tels quels.
   if(window.renderPhytoTrac) window.renderPhytoTrac();
-  if(window.renderCatalogueTrac) window.renderCatalogueTrac();
   if(window.applyEphy) window.applyEphy();
   var _b=document.getElementById('phyto-header-badge');
   if(_b){ var _n=(window.TRAITEMENTS||[]).length; _b.textContent=_n+' traitement'+(_n>1?'s':''); }
   _phytoSyncTabs();
 }
-function openCatDetail(nom){
-  const p=CATALOGUE.find(x=>x.nom===nom);
-  if(!p)return;
-  // Overlay catalogue detail
-  const ovId='ovCatDetail';
-  let ov=document.getElementById(ovId);
-  if(!ov){
-    ov=document.createElement('div');ov.id=ovId;ov.className='overlay';
-    ov.innerHTML=`<div class="ov-panel"><div class="ov-drag"></div>
-      <div class="ov-hd"><div class="ov-title" id="ocd-title"></div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
-      <div id="ocd-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
-      <div style="padding:16px 20px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;cursor:pointer">Fermer</button>
-      </div>
-    </div>`;
-    document.body.appendChild(ov);
-  }
-  const title=document.getElementById('ocd-title');
-  title.textContent=p.nom;
-  title.dataset.nom=p.nom;
-  document.getElementById('ocd-body').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
-        <div style="font-size:9px;color:var(--texte-doux);font-weight:600">Type</div>
-        <div style="margin-top:6px"><span class="cat-db ${TCLS[p.type]||'tfc'}" style="font-size:var(--pt-micro,12px)">${p.type}</span></div>
-      </div>
-      <div class="mvencadre">
-        <div style="font-size:9px;color:var(--texte-doux);font-weight:600">N° AMM</div>
-        <div style="font-size:var(--pt-txt,13px);font-weight:700;margin-top:4px;font-family:monospace">${p.amm}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="mvencadre mvencadre-${p.dar>0?'attention':'ok'}" style="text-align:center">
-        <div style="font-size:9px;color:var(--texte-doux);font-weight:600">DAR</div>
-        <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.dar>0?'#856404':'var(--vert)'}">${p.dar>0?p.dar+'j':'Libre'}</div>
-        <div style="font-size:9px;color:var(--texte-doux)">avant récolte</div>
-      </div>
-      <div class="mvencadre mvencadre-${p.drae>0?'attention':'ok'}" style="text-align:center">
-        <div style="font-size:9px;color:var(--texte-doux);font-weight:600">DRAE</div>
-        <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.drae>0?'#B85A1A':'var(--vert)'}">${p.drae>0?p.drae+'h':'0h'}</div>
-        <div style="font-size:9px;color:var(--texte-doux)">délai rentrée</div>
-      </div>
-      <div class="mvencadre${p.znt>5?' mvencadre-danger':''}" style="text-align:center">
-        <div style="font-size:9px;color:var(--texte-doux);font-weight:600">ZNT</div>
-        <div style="font-size:22px;font-weight:700;font-family:var(--font-titre,Cormorant Garamond,serif);color:${p.znt>5?'var(--rouge)':'var(--texte)'}">${p.znt||5}m</div>
-        <div style="font-size:9px;color:var(--texte-doux)">zone tampon</div>
-      </div>
-    </div>
-    <div class="mvencadre" style="margin-bottom:12px">
-      <div style="font-size:9px;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Dose indicative</div>
-      <div style="font-size:var(--pt-sm,16px);font-weight:700">${p.dose}</div>
-    </div>
-    ${p.cible?`<div class="mvencadre mvencadre-ok" style="margin-bottom:12px">
-      <div style="font-size:9px;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Cibles</div>
-      <div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--vert)">${p.cible}</div>
-    </div>`:''}
-    ${p.usage?`<div class="mvencadre mvencadre-attention">
-      <div style="font-size:9px;color:var(--tag-amber-tx,#7A5C10);font-weight:600;margin-bottom:6px">Conditions d'emploi</div>
-      <div style="font-size:var(--pt-micro,12px);color:var(--tag-amber-tx,#4A3A08);line-height:1.5">${p.usage}</div>
-    </div>`:''}
-  `;
-  ov.classList.add('open');
-}
-
 var _trat={step:1,produits:[],date:'',conducteur:'',parcelles:[],stade:'',heureDebut:'',heureFin:'',mode:'',surfT:{},surfOuvert:false,modeAb:false,note:''};
 
 // ════ Phyto : référentiel E-Phy + récents (catalogue local = repli invisible) ════
@@ -1551,7 +1486,7 @@ window._phytoExportCsv = function(mode, sansVerif){
   var _exp = { renderPhyto: renderPhyto, switchPhytoTab: switchPhytoTab, _phytoSyncTabs: _phytoSyncTabs,
                openOvTraitement: openOvTraitement, _tratRender: _tratRender,
     openTraitDetail: openTraitDetail, confirmDeleteTraitement: confirmDeleteTraitement,
-    openCatDetail: openCatDetail, _pMeta: _pMeta, _phResolve: _phResolve,
+    _pMeta: _pMeta, _phResolve: _phResolve,
     _phyLookup: _phyLookup, _cuPct: _cuPct, _cuSuggest: _cuSuggest };
   for (var k in _exp) { if (typeof _exp[k] === 'function') window[k] = _exp[k]; }
 })();

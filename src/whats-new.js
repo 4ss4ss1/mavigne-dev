@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.04', d: '2026-11-15', items: [   // OVPANEL-1 (§574) : le choix de la période du journal des interventions, dans une vraie fenêtre
+    { niv: 0, pour: ['admin'], emoji: 'document', titre: 'Le journal des interventions\u00a0: le choix de la période s’affiche correctement',
+      desc: "Documents & impressions › Journal des interventions\u00a0: la question «\u00a0Sur quelle période\u00a0?\u00a0» s’ouvrait sans fond, les périodes posées par-dessus l’écran. Elle s’ouvre maintenant dans une fenêtre comme les autres, qui se ferme en la tirant vers le bas." },
+  ] },
   { v: '11.03', d: '2026-11-15', items: [   // REG27-1B (§573) : le registre vérifié avant l'export
     { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'Le registre se vérifie avant l’export',
       desc: "Pilotage › Conformité, carte «\u00a0Le registre\u00a0»\u00a0: l’année relue ligne par ligne — SIRET, numéro d’AMM, dose, coordonnées, surface traitée, horaires d’un insecticide, rentrée anticipée — et ce qui manque avant d’exporter. À l’export du fichier (Phyto, roue crantée), les traitements à reprendre s’affichent d’abord\u00a0: touchez-en un pour ouvrir sa fiche. «\u00a0Exporter quand même\u00a0» reste possible." },

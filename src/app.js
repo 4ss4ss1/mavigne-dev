@@ -12605,8 +12605,9 @@ function lancerExportEntretienPDF(){
 }
 
 // ════ SWIPE TO CLOSE — bottom sheets / modals ════
-// Délégation unique sur document — couvre .modal, .ov-panel et .sd-trac-sheet
-// Déclenchement uniquement depuis la handle (.modal-handle / .ov-drag / .sd-trac-sheet-bar)
+// Délégation unique sur document — couvre .modal et .sd-trac-sheet
+// Déclenchement uniquement depuis la handle (.modal-handle / .sd-trac-sheet-bar)
+// ★ OVPANEL-1 (§574) : l'ancienne coque sans style (panneau, poignée) n'existe plus ; elle n'est plus écoutée.
 // + bloc pull-to-refresh Chrome Android pendant le drag
 (function() {
   var CLOSE_THRESHOLD = 50;  // px vers le bas pour valider la fermeture
@@ -12620,10 +12621,10 @@ function lancerExportEntretienPDF(){
   var _refused = false;  // mouvement horizontal → ignorer
 
   // La zone de déclenchement : uniquement les handles visuelles
-  var HANDLE_SEL = '.modal-handle, .ov-drag, .sd-trac-sheet-bar, .sd-trac-sheet-handle';
+  var HANDLE_SEL = '.modal-handle, .sd-trac-sheet-bar, .sd-trac-sheet-handle';
 
   function _findPanel(target) {
-    return target.closest('.modal, .ov-panel, .sd-trac-sheet');
+    return target.closest('.modal, .sd-trac-sheet');
   }
 
   function _findOverlayId(panel) {
@@ -13643,7 +13644,6 @@ async function refreshApp(){
   if (typeof deleteFiche !== "undefined") window.deleteFiche = deleteFiche;
   if (typeof toggleAnomalieTraitee !== "undefined") window.toggleAnomalieTraitee = toggleAnomalieTraitee;
   if (typeof openTraitDetail !== "undefined") window.openTraitDetail = openTraitDetail;
-  if (typeof openCatDetail !== "undefined") window.openCatDetail = openCatDetail;
   if (typeof selFromCatAndClose !== "undefined") window.selFromCatAndClose = selFromCatAndClose;
   if (typeof openOvTraitement !== "undefined") window.openOvTraitement = openOvTraitement;
   if (typeof deleteTache !== "undefined") window.deleteTache = deleteTache;

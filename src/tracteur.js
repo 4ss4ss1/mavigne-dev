@@ -33,10 +33,6 @@ function _fmtDate(d){ return window.fmtDate ? window.fmtDate(d) : d; }
 // ── Onglet actif ──
 var _tracOnglet = 'sessions'; // 'sessions' | 'entretiens'
 
-function renderCatalogueTrac(){
-  const el=document.getElementById('catalogue-list-trac');if(!el)return;
-  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escAttr(p.nom)}')"><div class="cat-l"><div class="cat-nom">${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
-}
 // ════ Catalogue E-Phy (ANSES) — référentiel officiel vigne, lecture seule ════
 var _catSub = 'ephy';
 var _ephyQ = '', _ephyType = 'Tous', _ephyHideKo = true, _ephyChipsBuilt = false;
@@ -48,7 +44,6 @@ function catSub(which){
   _catSub = which;
   var ev = document.getElementById('cat-ephy-view');
   if(ev) ev.style.display = (which==='ephy'?'':'none');
-  if(which==='mine'){ renderCatalogueTrac(); return; }
   if(!_ephyChipsBuilt) _ephyBuildChips();
   ephyRender();
 }
@@ -3519,7 +3514,6 @@ window.ephySetType = ephySetType;
 window.ephyClear = ephyClear;
 window.ephyToggleKo = ephyToggleKo;
 window.openEphyDetail = openEphyDetail;
-window.renderCatalogueTrac = renderCatalogueTrac;
 window.renderPhytoTrac = renderPhytoTrac;
 window.switchTracOnglet = switchTracOnglet;
 window.renderEntTracFilter = renderEntTracFilter;

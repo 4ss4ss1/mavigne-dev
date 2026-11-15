@@ -162,9 +162,9 @@ function _regGroupeHtml(g) {
   var t = (window.TRAITEMENTS || [])[g.i] || {}, m = _regMots(g.M), c = _regMots(g.C);
   var quand = (typeof window._mvFenFr === 'function') ? window._mvFenFr(String(t.date || '').slice(0, 10)) : String(t.date || '');
   return '<button type="button" data-reg="ligne" onclick="window._regAller(' + Number(g.i) + ')" style="display:block;width:100%;text-align:left;background:none;border:none;border-top:1px solid var(--gris-clair);padding:12px 0;cursor:pointer;font-family:inherit;color:inherit;min-height:44px">'
-    + '<div style="font-size:var(--pt-txt,13px);font-weight:600">' + _escHtml(quand) + ' · ' + _escHtml(t.produit || 'Traitement') + '</div>'
-    + (m ? '<div style="font-size:var(--pt-micro,12px);color:var(--orange);font-weight:600;line-height:1.5;margin-top:2px">À compléter\u00a0: ' + _escHtml(m) + '</div>' : '')
-    + (c ? '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:2px">Facultatif\u00a0: ' + _escHtml(c) + '</div>' : '')
+    + '<span style="display:block;font-size:var(--pt-txt,13px);font-weight:600">' + _escHtml(quand) + ' · ' + _escHtml(t.produit || 'Traitement') + '</span>'
+    + (m ? '<span style="display:block;font-size:var(--pt-micro,12px);color:var(--orange);font-weight:600;line-height:1.5;margin-top:2px">À compléter\u00a0: ' + _escHtml(m) + '</span>' : '')
+    + (c ? '<span style="display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:2px">Facultatif\u00a0: ' + _escHtml(c) + '</span>' : '')
     + '</button>';
 }
 var RG_MAX = 40;   // au-delà, la fenêtre dit combien restent : une liste de 300 lignes ne se lit pas

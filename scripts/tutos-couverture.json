@@ -1,5 +1,5 @@
 {
-  "plafond": 794,
+  "plafond": 793,
   "exempts": {
     "planAnneeDma": "HOR-1 (§550) : écrit en heures les codes D, M et A d’un modèle importé — n’apparaît que si le modèle en porte, et le domaine d’entraînement n’en a aucun",
     "planAnneeModele": "ANNEE-TAB (§548) : choisit le modèle en haut de l’onglet L’année — le domaine d’entraînement n’a qu’un modèle, il n’y a rien à choisir ; le tuto « voir l’année d’un modèle » montre le choix",

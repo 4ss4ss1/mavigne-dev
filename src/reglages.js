@@ -4975,13 +4975,15 @@ function _jivChoix(F){
   if(!ov){
     ov=document.createElement('div'); ov.id=id; ov.className='overlay';
     ov.setAttribute('onclick',"closeOv(event,'"+id+"')");
-    ov.innerHTML='<div class="ov-panel"><div class="ov-drag"></div>'
-      +'<div class="ov-hd"><div class="ov-title">Journal des interventions</div>'
-      +(typeof window._mvInfoBtn==='function'?('<div style="display:flex;align-items:center;padding:0 6px">'+window._mvInfoBtn('doc.journal')+'</div>'):'')
-      +'<div class="ov-close" onclick="closeOv(null,\'ovJivExport\')">'+_mvIcon('croix',18)+'</div></div>'
-      +'<div id="jiv-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>'
-      +'<div style="padding:0 20px 16px"><button class="mbtn" onclick="closeOv(null,\'ovJivExport\')" '
-      +'style="width:100%">Annuler</button></div></div>';
+    // ★ OVPANEL-1 (§574) : la feuille commune (.modal), comme le panneau des périodes du registre (§573). Elle portait des
+    //   classes qu'aucune feuille ne connaît (.ov-panel, .ov-hd, .ov-title…) : ni fond ni en-tête, le titre posé sur la page,
+    //   les périodes flottant sur l'écran des Réglages, la poignée sans effet. La pastille « i » reste, à côté du titre.
+    ov.innerHTML='<div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>'
+      +'<div class="modal-hd"><div class="modal-title" style="display:flex;align-items:center;gap:8px"><span>Journal des interventions</span>'
+      +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('doc.journal'):'')+'</div></div>'
+      +'<div class="modal-body"><div id="jiv-body"></div>'
+      +'<button type="button" class="mbtn" onclick="closeOv(null,\'ovJivExport\')" style="width:100%;margin-top:8px;cursor:pointer">Annuler</button>'
+      +'</div></div>';
     document.body.appendChild(ov);
   }
   var _ib=(typeof window._mvInfoBtn==='function')?window._mvInfoBtn:function(){ return ''; };
