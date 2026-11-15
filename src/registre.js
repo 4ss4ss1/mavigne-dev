@@ -31,9 +31,60 @@ var RG_LBL = {
   rtexte: ['rentrée anticipée en texte libre : à redéclarer sur la fiche', 0]
 };
 function _regCat(t) { var C = window.CATALOGUE || []; for (var i = 0; i < C.length; i++) { if (C[i] && t && C[i].nom === t.produit) return C[i]; } return null; }
-// Les horaires sont dus pour un insecticide (la règle de l'assistant de traitement) ou un produit du catalogue marqué « horaires ».
-function _regHeureRequise(t) { var m = (typeof window._phResolve === 'function') ? window._phResolve(t) : { type: t && t.type }, c = _regCat(t); return String(m.type || '') === 'Insecticide' || !!(c && c.heureOblig); }
-function _regStadeRequis(t) { var c = _regCat(t); return !!(c && c.stadeOblig); }
+// ── ★ REG27-2 (§575) : LES PRODUITS QUE LE DOMAINE A MARQUÉS ──
+// Le texte veut les horaires « lorsque la réglementation ou l'AMM le prévoit », le stade quand l'emploi du produit y est
+// limité. E-Phy ne le dit pas ; l'étiquette, si. L'administrateur le coche sur la fiche du produit (Phyto › Catalogue), et la
+// marque vit dans la configuration du domaine, par numéro d'AMM :
+//   CONFIG.phyto_oblig = { '2000006': { h: 1, s: 1, nom: 'KARATE ZEON' } }     (h : horaires · s : stade)
+// Trois lecteurs : l'assistant de traitement (_pMeta, phyto.js : « *requis »), les deux règles ci-dessous (la vérification
+// avant l'export), et le bloc de la fiche du produit. Avant ce lot, la marque n'existait que sur la liste de départ écrite
+// dans app.js, cherchée par NOM exact : un produit choisi dans E-Phy ne la portait jamais.
+window._regOblig = function (amm) {
+  var M = (window.CONFIG && window.CONFIG.phyto_oblig) || {}, o = M[String(amm == null ? '' : amm).trim()];
+  return { h: !!(o && o.h), s: !!(o && o.s) };
+};
+function _regAmm(t) { var m = (typeof window._phResolve === 'function') ? window._phResolve(t) : (t || {}); return String((m && m.amm) || (t && t.amm) || '').trim(); }
+// Les horaires sont dus pour un insecticide (la règle de l'assistant de traitement), un produit que le domaine a marqué, ou un
+// produit de la liste de départ marqué « horaires ».
+function _regHeureRequise(t) { var m = (typeof window._phResolve === 'function') ? window._phResolve(t) : { type: t && t.type }, c = _regCat(t); return String(m.type || '') === 'Insecticide' || !!(c && c.heureOblig) || window._regOblig(_regAmm(t)).h; }
+function _regStadeRequis(t) { var c = _regCat(t); return !!(c && c.stadeOblig) || window._regOblig(_regAmm(t)).s; }
+function _regObligLigne(amm, cle, on, fige, adm, txt, note) {
+  var corps = '<span style="flex:1;min-width:0"><span style="display:block;font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte)">' + _escHtml(txt) + '</span>'
+    + '<span style="display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.4;margin-top:1px">' + _escHtml(note) + '</span></span>';
+  if (!adm || fige) return '<div data-reg-oblig-ligne="' + _escAttr(cle) + '" style="display:flex;align-items:center;gap:10px;padding:8px 0">'
+    + '<span style="flex-shrink:0;color:var(--vert);display:inline-flex">' + _mvIcon('check', 18) + '</span>' + corps + '</div>';
+  return '<label data-reg-oblig-ligne="' + _escAttr(cle) + '" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 0;cursor:pointer">'
+    + '<input type="checkbox"' + (on ? ' checked' : '') + ' onchange="window._regObligBasculer(\'' + _escAttr(amm) + '\',\'' + _escAttr(cle) + '\')" style="flex-shrink:0;width:20px;height:20px;accent-color:var(--vert,#3D6B27)">'
+    + corps + '</label>';
+}
+// Le bloc de la fiche du produit. L'administrateur coche ; les autres ne lisent que ce qui est exigé (rien, s'il n'y a rien).
+window._regObligHtml = function (p) {
+  if (!p || !/^\d{7}$/.test(String(p.amm || ''))) return '';
+  var o = window._regOblig(p.amm), ins = String(p.type || '') === 'Insecticide', adm = isAdmin(), h = '';
+  if (ins) h += _regObligLigne(p.amm, 'h', true, true, adm, 'Horaires de début et de fin', 'Toujours exigés pour un insecticide.');
+  else if (adm || o.h) h += _regObligLigne(p.amm, 'h', o.h, false, adm, 'Horaires de début et de fin', adm ? 'À cocher quand l’étiquette du produit impose des horaires.' : 'Exigés par le domaine pour ce produit.');
+  if (adm || o.s) h += _regObligLigne(p.amm, 's', o.s, false, adm, 'Stade de la vigne', adm ? 'À cocher quand l’emploi du produit est limité à un stade.' : 'Exigé par le domaine pour ce produit.');
+  if (!h) return '';
+  return '<div class="mvencadre" data-reg-oblig="' + _escAttr(p.amm) + '" style="margin:0 0 12px"><div class="oed-l">Au registre, à chaque traitement</div>' + h
+    + (adm ? '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:6px">Coché, l’assistant de traitement le demande et la vérification du registre signale une ligne où il manque — pour les traitements déjà saisis aussi.</div>' : '')
+    + '</div>';
+};
+// Le geste : cocher ou décocher. La marque vide sort de la configuration ; chaque fiche ouverte de ce produit est repeinte.
+window._regObligBasculer = function (amm, cle) {
+  amm = String(amm == null ? '' : amm).trim();
+  if (!isAdmin()) { showToast('Réservé aux administrateurs', '#C0392B'); return; }
+  if (!/^\d{7}$/.test(amm) || (cle !== 'h' && cle !== 's')) return;
+  var C = window.CONFIG = window.CONFIG || {}, M = Object.assign({}, C.phyto_oblig || {}), o = Object.assign({}, M[amm] || {});
+  var p = null, E = window.EPHY || []; for (var i = 0; i < E.length; i++) { if (E[i] && E[i].amm === amm) { p = E[i]; break; } }
+  if (o[cle]) delete o[cle]; else o[cle] = 1;
+  if (o.h || o.s) { if (p && p.nom) o.nom = p.nom; M[amm] = o; } else delete M[amm];
+  C.phyto_oblig = M;
+  if (window.saveData) window.saveData('config', (o[cle] ? (cle === 'h' ? 'Horaires exigés' : 'Stade exigé') : (cle === 'h' ? 'Horaires non exigés' : 'Stade non exigé')) + (p && p.nom ? ' — ' + p.nom : ''));
+  if (p && typeof document !== 'undefined' && document.querySelectorAll) {
+    var B = document.querySelectorAll('[data-reg-oblig="' + amm + '"]');
+    for (var k = 0; k < B.length; k++) B[k].outerHTML = window._regObligHtml(p);
+  }
+};
 // Les rentrées anticipées d'UNE parcelle d'un traitement, et ce qui cloche dans chacune.
 function _regRentrees(t, nom, delaiCellule, M) {
   var RT = (typeof window._phRentrees === 'function') ? window._phRentrees(t) : [];
@@ -227,4 +278,330 @@ window._regCarte = function () {
     + ((V.nLignes && isAdmin()) ? '<button type="button" data-reg="ouvrir" class="mvbtn mvbtn-secondaire" style="margin-top:12px" onclick="window._regOuvrir(\'' + _escAttr(fen.k) + '\')"><span>' + (vd.ok ? 'Exporter le registre ' : 'Voir les lignes et exporter ') + Number(an) + '</span></button>' : '')
     + '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:12px">Le registre d’une année se met au format électronique avant le 31 janvier de l’année suivante (sous 30 jours dès 2030)\u00a0; un contrôleur peut le demander sous dix jours ouvrables.</div>';
   return { an: an, k: fen.k, V: V, verdict: vd, corps: corps };
+};
+
+// ════ ★ REGDEC-1 (§576) : CE QUI SORT — le fichier du registre, ses périodes, son panneau ════
+// Déplacé de phyto.js sans en réécrire une ligne (la preuve est dans le §576) : les cinq fonctions restées là-bas — la saisie,
+// la fiche, la rentrée anticipée — sont lues par window, parce qu'un nom d'un autre module n'existe pas après le build (§24).
+// ══════════════════════════════════════════════════════════════════════
+// REGISTRE PHYTOSANITAIRE — EXPORT AU FORMAT ÉLECTRONIQUE (CSV, ouvrable dans Excel)
+// ──────────────────────────────────────────────────────────────────────
+// Base : règlement d'exécution (UE) 2023/564, arrêté du 24 décembre 2025 (annexe I
+// pour le contenu, annexe II cas A pour le format d'un traitement de surfaces).
+// Le PDF ne suffit pas : le texte exige un fichier STRUCTURÉ, dont un logiciel peut
+// extraire chaque donnée. Un PDF imprimé n'en est pas un.
+//
+// ⚠️ UNE LIGNE PAR PRODUIT ET PAR PARCELLE : la localisation est demandée pour chaque
+//    surface traitée, donc un traitement portant quatre parcelles produit quatre lignes.
+// ⚠️ Localisation par COORDONNÉES GPS (option prévue par le texte pour une parcelle sans
+//    référence au registre parcellaire graphique). L'app ne connaît pas les numéros d'îlot
+//    RPG : plutôt que des colonnes vides, on fournit le point GPS, qui est exigible seul.
+// ★ REG27-1A (§572) — « Cible » et « Mode d'application » (facultatifs au texte) sont SAISIS au traitement depuis ce lot :
+//    la cible par produit (proposée : la dernière du produit, ou l'usage E-Phy unique — jamais choisie à la place du
+//    vigneron), le mode pour la cuve. Un traitement d'avant les laisse vides : rien n'est inventé.
+// ★ REG27-1A — « Surface traitée (ha) » : les hectares saisis quand une parcelle ne l'a été qu'en partie, sinon la parcelle
+//    entière (window._mvSurfT). Avant ce lot, la colonne s'appelait « Surface de la parcelle (ha) » : l'app ne savait pas
+//    la surface partielle, et écrire la parcelle entière sous l'étiquette « traitée » aurait été une sur-déclaration. La
+//    surface de la parcelle reste en colonne supplémentaire : on voit d'un coup d'œil ce qui ne l'a été qu'en partie.
+// ★ REG27-1A — « Délai de rentrée anticipée » (HH:MM) : le délai entre la fin du traitement et la rentrée DÉCLARÉE sur la
+//    fiche (_phRentreeOuvrir), pour la parcelle de la ligne ; plusieurs rentrées : la plus précoce, les autres dans les
+//    colonnes supplémentaires (moment, motif, mesures — ce que l'annexe I demande). Une ancienne saisie libre (« DRE
+//    anticipé ») sort telle qu'elle a été tapée.
+// ⚠️ FENÊTRE DE DATES : le bouton ouvre un choix (exercice en cours / campagne
+//    consultée / tout le registre). Remettre l'historique entier pour un contrôle qui
+//    porte sur un exercice, c'est remettre une pièce illisible. Le nom du fichier
+//    porte la fenêtre, sinon deux exports différents se ressemblent sur le disque.
+// ⚠️ Séparateur POINT-VIRGULE + BOM UTF-8 + décimale à la virgule : c'est ce qui fait
+//    qu'Excel en français ouvre le fichier en colonnes, et non en une seule.
+// ══════════════════════════════════════════════════════════════════════
+// Code OEPP de la vigne (Vitis vinifera) — dénomination de culture exigée par l'annexe II.
+var MV_OEPP_VIGNE = 'VITVI';
+
+function _phCsvCell(v){
+  var s = (v==null) ? '' : String(v);
+  return '"' + s.replace(/"/g,'""').replace(/\r?\n/g,' ') + '"';
+}
+function _phCsvNum(n, dec){
+  // ⚠️ Number(null) vaut 0 : sans ce garde, une surface non renseignée sortirait
+  // « 0,0000 ha » au registre, c'est-à-dire une déclaration fausse. Vide est honnête.
+  if(n===null || n===undefined || n==='') return '';
+  var x = Number(n);
+  if(!isFinite(x)) return '';
+  return x.toFixed(dec==null?2:dec).replace('.', ',');
+}
+// AAAA-MM-JJ -> JJ/MM/AAAA (format prescrit).
+function _phCsvDate(iso){
+  var a = String(iso||'').split('-');
+  if(a.length!==3) return String(iso||'');
+  return a[2]+'/'+a[1]+'/'+a[0];
+}
+// « 6h », « 6:30 », « 06h30 » -> HH:MM. Le texte libre est rendu tel quel s'il ne parle pas.
+function _phCsvHeure(h){
+  var s = String(h==null?'':h).trim();
+  if(!s) return '';
+  var m = /(\d{1,2})\s*[:hH]\s*(\d{2})/.exec(s);
+  if(m) return (m[1].length<2?'0':'')+m[1]+':'+m[2];
+  var m2 = /^(\d{1,2})\s*[hH]?$/.exec(s);
+  if(m2) return (m2[1].length<2?'0':'')+m2[1]+':00';
+  return s;
+}
+// Le stade est saisi « Floraison (BBCH 60–69) » : l'annexe demande les deux chiffres.
+function _phCsvBbch(stade){
+  var m = /BBCH\s*(\d{1,2})/.exec(String(stade||''));
+  if(!m) return '';
+  return (m[1].length<2?'0':'')+m[1];
+}
+// Dose : dose_val/dose_unit quand ils existent, sinon lecture du texte « 8 L/ha ».
+function _phCsvDose(t){
+  if(t && typeof t.dose_val === 'number' && isFinite(t.dose_val)) return { val:t.dose_val, unit:(t.dose_unit||'') };
+  var txt = String((t&&t.dose)||'').trim();
+  if(!txt) return { val:null, unit:'' };
+  var m = /^(-?\d+(?:[.,]\d+)?)\s*(.*)$/.exec(txt);
+  if(!m) return { val:null, unit:txt };
+  return { val: parseFloat(m[1].replace(',','.')), unit: (m[2]||'').trim() };
+}
+// Colonnes, dans l'ordre de l'annexe II. Les quatre dernières sortent du texte : il les
+// autorise expressément, « à condition de ne pas porter atteinte à la lisibilité ».
+var MV_PHY_CSV_COLS = ['SIRET d\u00e9tenteur','SIRET b\u00e9n\u00e9ficiaire','Produit','Num\u00e9ro d\u2019autorisation (AMM)',
+  'Date d\u2019utilisation','Horaire de d\u00e9but','Horaire de fin','D\u00e9lai de rentr\u00e9e anticip\u00e9e',
+  'Dose de produit utilis\u00e9e','Unit\u00e9 de dose','Cible','Mode d\u2019application',
+  'Latitude (WGS84)','Longitude (WGS84)','Surface trait\u00e9e (ha)',
+  'D\u00e9nomination de la culture (OEPP)','Stade ph\u00e9nologique (BBCH)','Conduite biologique',
+  'Parcelle','Substance active','Applicateur','Observations',
+  'Surface de la parcelle (ha)','Rentr\u00e9e anticip\u00e9e \u2014 moment','Rentr\u00e9e anticip\u00e9e \u2014 motif','Rentr\u00e9e anticip\u00e9e \u2014 mesures de protection'];
+
+// Jour d'un traitement, normalise en 'AAAA-MM-JJ' ou '' si la date ne parle pas.
+// ⚠️ Une chaine vide comparee a des bornes ISO passerait pour une date anterieure a
+//    tout : le registre perdrait des lignes en silence. On la traite a part.
+function _phCsvJour(t){
+  var s = String((t&&t.date)||'').slice(0,10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
+}
+
+// ── Fenetres de dates proposees avant le telechargement ───────────────────
+// Une fenetre = { k, lbl, sub, d0, d1 } ; d0/d1 absents = aucune borne.
+// ⚠️ Une option n'est proposee QUE si sa source existe ET porte deux dates : une
+//    periode sans debut/fin est invisible pour toute la chaine (bug d'onboarding
+//    deja vecu), et un export vide sans explication est pire que pas d'option.
+// ⚠️ Repli complet : si utils.js ne fournit pas _mvExercice, l'option disparait et
+//    « tout le registre » reste toujours la — le bouton ne peut jamais rester muet.
+// \u2605\u2605\u2605 AXE-1 \u2014 LES FENETRES VIENNENT DE utils.js, ELLES NE SONT PLUS DEFINIES ICI.
+// Deux defauts corriges d'un coup :
+//   \u2460 la ligne « Campagne consultee » nommait CAMPAGNE une PERIODE de travail.
+//     Trois sens pour un mot, dans une app ou le bilan et les Archives en ont un
+//     quatrieme. Un vigneron qui sortait « la campagne » ici et « la campagne »
+//     la-bas obtenait deux perimetres, sans qu'aucun ecran ne le dise.
+//   \u2461 la vraie campagne (l'axe des Archives) n'etait pas proposee du tout.
+// \u26a0\ufe0f Repli local conserve, comportement de l'ancienne version, si utils.js est
+//   anterieur a ce lot : un phyto.js neuf sur un utils.js ancien ne plante pas.
+// ★ REG27-1B (§573) — L'ANNÉE CIVILE EN TÊTE DE LISTE : c'est l'année du registre (l'arrêté du 24 décembre 2025 compte « l'année
+//   suivant celle de l'utilisation » pour la mise au format électronique), et celle de la carte « Le registre » de Conformité.
+//   Deux : la courante et la précédente (en janvier, c'est l'année passée qu'on remet). Une fenêtre aux mêmes dates qu'une de
+//   la liste — un exercice comptable du 1er janvier — n'est pas redite.
+function _phytoFenAnnees(L){
+  var y=new Date().getFullYear(), out=[];
+  [y,y-1].forEach(function(a,i){
+    var d0=a+'-01-01', d1=a+'-12-31';
+    if(L.some(function(f){ return f&&f.d0===d0&&f.d1===d1; })) return;
+    out.push({ k:'civ'+a, axe:'annee', lbl:'Ann\u00e9e '+a+(i===0?' (en cours)':''), sub:'du 01/01/'+a+' au 31/12/'+a+' \u2014 l\u2019ann\u00e9e du registre', d0:d0, d1:d1 });
+  });
+  return out.concat(L);
+}
+function _phytoFenetres(){
+  if(typeof window._mvFenetresAnnee === 'function'){
+    try{
+      var L = window._mvFenetresAnnee({campagnes:3, exercices:2});
+      if(L && L.length) return _phytoFenAnnees(L);
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'phyto',msg:'liste des fenetres illisible \u2014 repli local'}); }
+  }
+  var out = [];
+  if(typeof window._mvExercice === 'function'){
+    var ex = null;
+    try{ ex = window._mvExercice(); }catch(e2){ ex = null; }
+    if(ex && ex.d0 && ex.d1){
+      out.push({ k:'ex', axe:'exercice', lbl:'Exercice en cours',
+                 sub:(ex.lbl || (_phCsvDate(ex.d0)+' \u2192 '+_phCsvDate(ex.d1))),
+                 d0:ex.d0, d1:ex.d1 });
+    }
+  }
+  var nom = (typeof window._visuSaison === 'function') ? window._visuSaison() : '';
+  var s   = (nom && typeof window._saisonObj === 'function') ? window._saisonObj(nom) : null;
+  if(s && s.debut && s.fin){
+    out.push({ k:'per', axe:'periode', lbl:'P\u00e9riode de travail \u2014 '+nom,
+               sub:'du '+_phCsvDate(s.debut)+' au '+_phCsvDate(s.fin),
+               d0:s.debut, d1:s.fin });
+  }
+  out.push({ k:'tout', axe:'tout', lbl:'Tout le registre', sub:'depuis la mise en service', d0:'', d1:'' });
+  return _phytoFenAnnees(out);
+}
+window._phytoFenetres = _phytoFenetres;
+// Nombre de TRAITEMENTS dans une fenetre (pas de lignes : on ne construit rien ici).
+// ⚠️ Volontairement leger — un comptage complet a chaque ouverture du panneau
+//    ressemblerait a « le bouton ne marche pas ».
+function _phytoFenCompte(f){
+  var d0=(f&&f.d0)||'', d1=(f&&f.d1)||'', n=0;
+  (window.TRAITEMENTS||[]).forEach(function(t){
+    if(!d0 || !d1){ n++; return; }
+    var j = _phCsvJour(t);
+    if(j && j>=d0 && j<=d1) n++;
+  });
+  return n;
+}
+// Gardes communes aux DEUX portes d'entree (panneau de choix et telechargement).
+// ⚠️ Une seule definition : deux copies divergeraient au premier correctif.
+function _phytoExportGarde(){
+  var adm=false;
+  try{ adm=(typeof window.isAdmin==='function')&&window.isAdmin(); }catch(e){ adm=false; }
+  if(!adm){ showToast('R\u00e9serv\u00e9 aux administrateurs','#C0392B'); return false; }
+  if(!(window.TRAITEMENTS||[]).length){ showToast('Aucun traitement \u00e0 exporter','#B85A1A'); return false; }
+  if(typeof window.dlFile!=='function'){ showToast('T\u00e9l\u00e9chargement indisponible sur cet appareil','#C0392B'); return false; }
+  return true;
+}
+
+// Construction du tableau de lignes. Séparée du téléchargement pour être exécutable seule.
+// ⚠️ `fen` est OPTIONNEL : sans argument, comportement strictement identique a
+//    l'origine (tout le registre, aucun filtre). Zero regression sur l'existant.
+window._phytoCsvRows = function(fen){
+  var fd0=(fen&&fen.d0)||'', fd1=(fen&&fen.d1)||'', borne=!!(fd0&&fd1);
+  var sansDate = 0;
+  var T = (window.TRAITEMENTS||[]).slice().sort(function(a,b){ return String(a.date||'').localeCompare(String(b.date||'')); });
+  if(borne){
+    T = T.filter(function(t){
+      var j = _phCsvJour(t);
+      if(!j){ sansDate++; return false; }
+      return (j>=fd0 && j<=fd1);
+    });
+  }
+  var C = window.CONFIG || {};
+  var siret = String(C.siret||'').replace(/[^0-9]/g,'');
+  var bioDom = !!C.bio;
+  // ★ REG27-1B (§573) : `src` dit, pour chaque ligne, de quel traitement elle vient (son rang dans TRAITEMENTS) et sa
+  //   parcelle — la vérification avant l'export (registre.js) relit CES lignes et renvoie à la fiche du traitement.
+  var out = [], src = [], sansGeo = 0, TOUS = window.TRAITEMENTS||[];
+  T.forEach(function(t){
+    var rang = TOUS.indexOf(t);
+    var m = (typeof window._phResolve==='function') ? window._phResolve(t) : {};
+    var d = _phCsvDose(t);
+    var bbch = _phCsvBbch(t.stade);
+    var bio = (bioDom || t.modeAb) ? 'oui' : 'non';
+    var RT = window._phRentrees(t);
+    window._phCsvParcs(t).forEach(function(nom){
+      var p = null;
+      if(nom){
+        var L = window.PARCELLES||[];
+        for(var i=0;i<L.length;i++){ if(L[i] && L[i].nom===nom){ p=L[i]; break; } }
+      }
+      var g = (p && typeof window._mvParcGeo==='function') ? window._mvParcGeo(p) : null;
+      if(!g) sansGeo++;
+      // La surface traitée : les hectares saisis, sinon la parcelle entière ; vide si rien ne la dit (jamais « 0 »).
+      var sp = p ? window._phParcHa(nom) : 0;
+      var st = (nom && typeof window._mvSurfT==='function') ? window._mvSurfT(t, nom, sp) : sp;
+      // Les rentrées déclarées sur CETTE parcelle (sans liste : toutes), la plus précoce en tête.
+      var rs = RT.filter(function(r){ return !nom || !r.parcelles || !r.parcelles.length || r.parcelles.indexOf(nom)>=0; });
+      var jn = function(f){ return rs.map(f).join(' | '); };
+      out.push([
+        siret, '', (t.produit||''), (m.amm||t.amm||''),
+        _phCsvDate(t.date), _phCsvHeure(t.heureDebut), _phCsvHeure(t.heureFin), (rs.length ? window._phRentreeDelai(t, rs[0]) : (t.dreAnticipe||'')),
+        (d.val==null?'':_phCsvNum(d.val,3)), (d.unit||''), (t.cible||''), (t.mode||''),
+        (g?_phCsvNum(g.lat,5):''), (g?_phCsvNum(g.lng,5):''), (st>0?_phCsvNum(st,4):''),
+        MV_OEPP_VIGNE, bbch, bio,
+        (nom||''), (m.sub||t.sub||''), (t.conducteur||t.operateur||''), (t.note||''),
+        (sp>0?_phCsvNum(sp,4):''),
+        jn(function(r){ return _phCsvDate(String(r.quand).slice(0,10))+' '+String(r.quand).slice(11,16); }),
+        jn(function(r){ return r.motif||''; }), jn(function(r){ return r.mesures||''; })
+      ]);
+      src.push({ i: rang, nom: (nom||'') });
+    });
+  });
+  return { rows: out, src: src, sansGeo: sansGeo, siret: siret, sansDate: sansDate, d0: fd0, d1: fd1 };
+};
+
+// Panneau de choix de la fenetre. Ouvert par le bouton d'export (appel sans argument),
+// donc index.html n'a pas a etre touche. Porte aussi l'AIDE : ce que contient la
+// colonne de surface, dit au seul moment ou la question se pose.
+// \u2605 AXE-1 : `cible` vaut 'csv' (defaut, comportement d'origine) ou 'pdf'.
+// Le PDF sortait SANS AUCUNE BORNE en se titrant « Campagne <nom de la periode
+// active> » \u2014 un registre reglementaire de cinq ans presente comme une annee.
+// Les deux documents passent desormais par la meme question et la meme liste.
+function _phytoExportChoix(cible){
+  if(!_phytoExportGarde()) return;
+  var pdf = (cible === 'pdf');
+  var ovId = 'ovPhytoExport';
+  var ov = document.getElementById(ovId);
+  if(!ov){
+    ov = document.createElement('div'); ov.id = ovId; ov.className = 'overlay';
+    ov.setAttribute('onclick', "closeOv(event,'"+ovId+"')");
+    // ★ REG27-1B (§573) : la feuille prend la forme commune (.modal). Elle portait des classes sans aucun style (.ov-panel,
+    //   .ov-hd…) : pas de fond, le titre posé en haut à gauche de l'écran, les périodes flottant sur la page.
+    ov.innerHTML = '<div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>'
+      + '<div class="modal-hd"><div class="modal-title" id="phx-title">Exporter le registre</div></div>'
+      + '<div class="modal-body"><div id="phx-body"></div>'
+      + '<button type="button" class="mbtn" onclick="closeOv(null,\'ovPhytoExport\')" style="width:100%;margin-top:8px;cursor:pointer">Annuler</button>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+  }
+  var F = _phytoFenetres();
+  var h = '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-bottom:14px">Sur quelle p\u00e9riode ?</div>';
+  F.forEach(function(f, i){
+    var n = _phytoFenCompte(f);
+    var acc = (i===0);
+    var _k = (typeof _escAttr==='function') ? _escAttr(f.k) : String(f.k);
+    var appel = pdf ? ("exportPDFPhyto('"+_k+"')") : ("_phytoExportCsv('"+_k+"')");
+    h += `<button onclick="${appel}" style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid ${acc?'#5A2D8E':'var(--gris)'};border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:var(--font-ui,Outfit,sans-serif);min-height:44px">
+      <span style="display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(f.lbl)}</span>
+      <span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">${_escHtml(f.sub)}</span>
+      <span style="display:block;font-size:var(--pt-micro,11px);color:${n?'#5A2D8E':'var(--texte-doux)'};font-weight:600;margin-top:5px">${n} traitement${n>1?'s':''}</span>
+    </button>`;
+  });
+  h += `<div class="mvencadre" style="margin-top:4px">
+      <div style="font-size:9px;color:var(--texte-doux);font-weight:600;margin-bottom:6px">\u00c0 savoir</div>
+      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface trait\u00e9e (ha)\u00a0\u00bb reprend les hectares saisis au traitement\u00a0: la parcelle enti\u00e8re, sauf si vous l\u2019avez corrig\u00e9e. Un traitement qui n\u2019a couvert qu\u2019une partie d\u2019une parcelle se corrige dans sa fiche (Modifier) avant l\u2019export. Les rentr\u00e9es anticip\u00e9es d\u00e9clar\u00e9es sur la fiche donnent le d\u00e9lai, le moment, le motif et les protections. Avant le t\u00e9l\u00e9chargement, chaque ligne est relue\u00a0: s\u2019il en manque, la liste s\u2019ouvre d\u2019abord.</div>
+    </div>`;
+  var body = ov.querySelector('#phx-body');
+  if(body) body.innerHTML = h;
+  /* \u26a0\ufe0f L'overlay est cree UNE fois puis reutilise : son titre doit etre reecrit
+     a chaque ouverture, sinon le second document herite du libelle du premier. */
+  var ttl = ov.querySelector('#phx-title');
+  if(ttl) ttl.textContent = pdf ? 'Imprimer le registre' : 'Exporter le registre';
+  openOv(ovId);
+}
+window._phytoExportChoix = _phytoExportChoix;
+
+// Sans argument : ouvre le choix de fenetre (c'est le clic sur le bouton d'export).
+// Avec une cle de fenetre : construit et telecharge.
+// ★ REG27-1B (§573) : avant de télécharger, le registre se relit ligne par ligne (registre.js). Une ligne à compléter, le
+//   SIRET ou une date qui manquent : la fenêtre « avant l'export » s'ouvre à la place du téléchargement, dit quoi et où, et
+//   garde « Exporter quand même » (`sansVerif`) — le registre reflète ce qui a été fait. Complet : il part comme avant.
+window._phytoExportCsv = function(mode, sansVerif){
+  if(!_phytoExportGarde()) return;
+
+  var F = _phytoFenetres(), fen = null;
+  for(var i=0;i<F.length;i++){ if(F[i].k===mode){ fen = F[i]; break; } }
+  if(!fen){ _phytoExportChoix(); return; }
+  closeOv(null, 'ovPhytoExport');
+  if(!sansVerif && typeof window._regBloque==='function' && typeof window._regOuvrir==='function' && window._regBloque(fen)){ window._regOuvrir(fen.k); return; }
+  closeOv(null, 'ovRegVerif');
+
+  var R = window._phytoCsvRows(fen);
+  if(!R.rows.length){ showToast('Aucun traitement sur cette p\u00e9riode','#B85A1A'); return; }
+
+  var lines = [MV_PHY_CSV_COLS.map(_phCsvCell).join(';')];
+  R.rows.forEach(function(r){ lines.push(r.map(_phCsvCell).join(';')); });
+  var csv = '\uFEFF' + lines.join('\r\n') + '\r\n';
+
+  var slug = String(window.DOMAINE_NOM||'domaine').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  var jour = _mvToday();
+  // ⚠️ La fenetre est DANS le nom : deux exports du meme registre sur deux periodes
+  //    differentes ne doivent pas se ressembler une fois poses sur un bureau.
+  var fenNom = (R.d0 && R.d1) ? ('du-'+R.d0+'_au-'+R.d1) : 'complet';
+  window.dlFile(csv, 'registre-phyto_'+(slug||'domaine')+'_'+fenNom+'_'+jour+'.csv', 'text/csv;charset=utf-8');
+
+  // Un seul toast, du plus grave au plus anodin. Une ligne ABSENTE du fichier
+  // (traitement sans date) passe avant une colonne vide (parcelle hors KML).
+  if(!R.siret) showToast('Registre export\u00e9 \u2014 SIRET du domaine manquant (R\u00e9glages \u203a Domaine)','#B85A1A');
+  else if(R.sansDate) showToast('Registre export\u00e9 \u2014 '+R.sansDate+' traitement(s) sans date, non inclus','#B85A1A');
+  else if(R.sansGeo) showToast('Registre export\u00e9 \u2014 '+R.sansGeo+' ligne(s) sans coordonn\u00e9es (parcelle absente du KML)','#B85A1A');
+  else showToast(R.rows.length+' ligne(s) export\u00e9es \u2014 '+String(fen.lbl).toLowerCase(),'#3D6B27');
 };

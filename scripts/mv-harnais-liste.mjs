@@ -886,6 +886,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-reg27b.mjs --contre'],
   ['node scripts/mv-harnais-ovpanel1.mjs'],            // OVPANEL-1 (§574) : une fenêtre porte une coque que la feuille connaît — le journal des interventions joué, l'ancienne coque sans style, la fiche morte du catalogue local
   ['node scripts/mv-harnais-ovpanel1.mjs --contre'],
+  ['node scripts/mv-harnais-reg272.mjs'],              // REG27-2 (§575) : horaires et stade exigés au registre, marqués par produit — la marque, les deux règles, le bloc de la fiche, le geste, l'assistant
+  ['node scripts/mv-harnais-reg272.mjs --contre'],
+  ['node scripts/mv-harnais-regdec1.mjs'],             // REGDEC-1 (§576) : l'export du registre vit dans registre.js et lit phyto.js par window — la frontière entre les deux modules
+  ['node scripts/mv-harnais-regdec1.mjs --contre'],
   ['node scripts/mv-harnais-pheno1d.mjs'],             // PHENO-1D (§509) : la date en un appui, aucun retour en arrière, la question avant un grand saut, la commune, le smoke hermétique
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair

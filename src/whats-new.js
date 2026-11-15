@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.05', d: '2026-11-15', items: [   // REG27-2 (§575) : horaires et stade exigés, marqués par produit
+    { niv: 0, pour: ['admin'], emoji: 'chrono', titre: 'Horaires ou stade exigés\u00a0: à cocher sur la fiche du produit',
+      desc: "Phyto › Catalogue, la fiche d’un produit, bloc «\u00a0Au registre, à chaque traitement\u00a0»\u00a0: cochez «\u00a0horaires\u00a0» quand l’étiquette les impose, «\u00a0stade\u00a0» quand l’emploi du produit y est limité. L’assistant de traitement les demande, et la vérification du registre (Pilotage › Conformité) signale les lignes où ils manquent, traitements déjà saisis compris. Pour un insecticide, les horaires restent toujours exigés." },
+  ] },
   { v: '11.04', d: '2026-11-15', items: [   // OVPANEL-1 (§574) : le choix de la période du journal des interventions, dans une vraie fenêtre
     { niv: 0, pour: ['admin'], emoji: 'document', titre: 'Le journal des interventions\u00a0: le choix de la période s’affiche correctement',
       desc: "Documents & impressions › Journal des interventions\u00a0: la question «\u00a0Sur quelle période\u00a0?\u00a0» s’ouvrait sans fond, les périodes posées par-dessus l’écran. Elle s’ouvre maintenant dans une fenêtre comme les autres, qui se ferme en la tirant vers le bas." },

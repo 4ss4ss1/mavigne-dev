@@ -552,7 +552,7 @@ l'assistant d'installation **refuse d'écrire** une période incomplète (§18b)
 Contenu obligatoire depuis le **01/01/2026** ; **format électronique lisible par machine exigé au
 01/01/2027** — un PDF imprimé n'en est pas un. Le PDF existant reste, le CSV s'y ajoute.
 
-- **`window._phytoCsvRows()`** + **`window._phytoExportCsv()`** (`phyto.js`). Boutons : bas du
+- **`window._phytoCsvRows()`** + **`window._phytoExportCsv()`** (`registre.js` depuis REGDEC-1, §576 ; `phyto.js` avant). Boutons : bas du
   registre (`#phyto-export-row`, **admin**) + ★ le hub **Documents & impressions**, famille
   « Obligatoire », où il est **mis en avant** (`urgent:true`).
 - ⚠️ **Une ligne par produit ET par parcelle** : la localisation est exigée pour chaque surface

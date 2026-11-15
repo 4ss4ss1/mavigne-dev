@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.04';
+export const APP_VERSION = '11.05';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2784,6 +2784,7 @@ var MV_AIDE = {
     points: [
       ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, cible, parcelles et surface traitée, opérateur, délais de réentrée et avant récolte, ZNT, rentrées anticipées. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
+      ['Horaires ou stade exigés pour un produit', "sur sa fiche du Catalogue, bloc « Au registre, à chaque traitement » (administrateur) : cochez « horaires » quand l’étiquette les impose, « stade » quand l’emploi du produit y est limité. L’assistant de traitement les demande, et la vérification du registre signale les lignes où ils manquent. Pour un insecticide, les horaires sont toujours exigés."],
       ['Un traitement', "= des produits (chacun avec sa cible, préremplie quand elle est connue), les parcelles cochées, le mode d’application et un conducteur. La surface traitée est celle des parcelles entières : une parcelle traitée en partie se corrige en hectares, à l’étape des parcelles (« Une parcelle traitée en partie ? »)."],   // ★ REG27-1A (§572)
       ['La dose/ha de chaque produit', "se préremplit avec la dose homologuée du catalogue : corrigez-la quand vous traitez à dose réduite. Elle fait le stock de La Réserve et l’IFT du Pilotage (Conformité) — une demi-dose y compte pour moitié."],   // ★ IFT-1 (§571)
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
@@ -3593,7 +3594,8 @@ export const MV_INFO = {
   // ★ REG27-1B (§573) : la carte relit le registre de l'année ligne par ligne (registre.js) ; mv-harnais-reg27b joue la vérification.
   'pil.phyto': { t: 'Le registre, vérifié avant l\u2019export', p: [
     'La carte relit le registre de l\u2019<b>année civile</b>, <b>ligne par ligne</b> — une ligne par produit et par parcelle, celles que le fichier d\u2019export écrira — et dit ce qui manque avant de l\u2019exporter.',
-    '<b>Ce que le texte exige</b> sur chaque ligne : le SIRET (14 chiffres), le produit et son numéro d\u2019AMM (7 chiffres), la date, la dose et son unité, la localisation, la surface traitée. Les <b>horaires</b> quand l\u2019étiquette ou la réglementation les prévoit (ici : un insecticide), le <b>stade</b> quand l\u2019emploi du produit y est limité, et une <b>rentrée anticipée</b> complète quand il y en a une.',
+    '<b>Ce que le texte exige</b> sur chaque ligne : le SIRET (14 chiffres), le produit et son numéro d\u2019AMM (7 chiffres), la date, la dose et son unité, la localisation, la surface traitée. Les <b>horaires</b> quand l\u2019étiquette ou la réglementation les prévoit (ici : un insecticide, ou un produit que vous avez marqué), le <b>stade</b> quand l\u2019emploi du produit y est limité, et une <b>rentrée anticipée</b> complète quand il y en a une.',
+    '<b>Marquer un produit</b> : Phyto › Catalogue, la fiche du produit, bloc « Au registre, à chaque traitement ». Cochez « horaires » quand son étiquette les impose, « stade » quand son emploi est limité à un stade. La carte signale alors les lignes où ils manquent, traitements déjà saisis compris.',
     '<b>Facultatif</b> : la cible, le mode d\u2019application, le stade hors de ce cas. La carte les compte sans les reprocher.',
     '« Voir les lignes et exporter » ouvre les traitements à reprendre : touchez-en un pour ouvrir sa fiche. L\u2019export reste toujours possible — le registre reflète ce qui a été fait.',
     'Le registre d\u2019une année se met au format électronique <b>avant le 31 janvier</b> de l\u2019année suivante (sous 30 jours à partir de 2030) ; un contrôleur peut le demander sous dix jours ouvrables. Il se garde cinq ans.',

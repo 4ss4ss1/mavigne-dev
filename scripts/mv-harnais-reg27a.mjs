@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { ut: lire('src/utils.js'), phy: lire('src/phyto.js'), pil: lire('src/pilotage.js'), rsv: lire('src/reserve.js'), reg: lire('src/reglages.js'),
+const S0 = { ut: lire('src/utils.js'), phy: lire('src/phyto.js'), rg: lire('src/registre.js'), pil: lire('src/pilotage.js'), rsv: lire('src/reserve.js'), reg: lire('src/reglages.js'),
   trc: lire('src/tracteur.js'), tu: lire('src/tutos.js'), wn: lire('src/whats-new.js'), cov: lire('scripts/tutos-couverture.json'),
   g07: lire('guide/07-phyto.html'), g11: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
@@ -68,9 +68,9 @@ function monde(S, o = {}) {
     fonction(S.phy, 'function _phSessionLignes('), fonction(S.phy, 'function _phDreSession('), fonction(S.phy, 'function _phFinApp('), fonction(S.phy, 'function _phFinTrait('),
     fonction(S.phy, 'function _phHhMm('), fonction(S.phy, 'function _phHFr('), fonction(S.phy, 'function _phRentreeDelaiMin('), fonction(S.phy, 'function _phRentrees('),
     fonction(S.phy, 'function _phRentreeDelai('), fonction(S.phy, 'function _phRentreeQuand('), fonction(S.phy, 'function _phRentreeT('), fonction(S.phy, 'function _phRentreeVerdict('),
-    "var MV_OEPP_VIGNE = 'VITVI';", fonction(S.phy, 'function _phCsvCell('), fonction(S.phy, 'function _phCsvNum('), fonction(S.phy, 'function _phCsvDate('),
-    fonction(S.phy, 'function _phCsvHeure('), fonction(S.phy, 'function _phCsvBbch('), fonction(S.phy, 'function _phCsvDose('), fonction(S.phy, 'function _phCsvParcs('),
-    tranche(S.phy, 'var MV_PHY_CSV_COLS = [', '];'), fonction(S.phy, 'function _phCsvJour('), fonction(S.phy, 'window._phytoCsvRows = function(fen){'),
+    "var MV_OEPP_VIGNE = 'VITVI';", fonction(S.rg, 'function _phCsvCell('), fonction(S.rg, 'function _phCsvNum('), fonction(S.rg, 'function _phCsvDate('),
+    fonction(S.rg, 'function _phCsvHeure('), fonction(S.rg, 'function _phCsvBbch('), fonction(S.rg, 'function _phCsvDose('), fonction(S.phy, 'function _phCsvParcs('),
+    tranche(S.rg, 'var MV_PHY_CSV_COLS = [', '];'), fonction(S.rg, 'function _phCsvJour('), fonction(S.rg, 'window._phytoCsvRows = function(fen){'),
     'var dreEffectif = window.dreEffectif || dreEffectif;'].join('\n');
   vm.runInContext(phy, ctx, { filename: 'phyto-extrait.js' });
   vm.runInContext([fonction(S.pil, 'function _cfmIftRef('), blocIft(S.pil), fonction(S.pil, 'function _ecoPhNorm('), fonction(S.pil, 'function _ecoPhytoByParc(')].join('\n'), ctx, { filename: 'pilotage-extrait.js' });
@@ -170,7 +170,7 @@ function jouer(S) {
     P0.includes('<input type="text" id="te-cible" list="te-cibles"') && P0.includes('<select id="te-mode" class="fsel">') && P0.includes("(t.dreAnticipe?'<div style=\"margin-bottom:14px\"><span class=\"mvchamp-l\" style=\"margin-bottom:6px\">Rentrée anticipée (saisie d’avant)</span>")
     && P0.includes("<div id=\"te-parc-grid\" style=\"display:flex;flex-wrap:wrap;gap:6px\"></div><div id=\"te-surf-zone\"></div>"));
   t('⑨ le panneau d’export dit ce que contient la colonne de surface ; le PDF écrit les rentrées, la cible et les hectares traités',
-    P0.includes('Surface trait\\u00e9e (ha)\\u00a0\\u00bb reprend les hectares saisis') && S.reg.includes('_rt.forEach(r=>bits.push(`<b>Rentrée anticipée ') && S.reg.includes('ha traités${_part?') && S.reg.includes("${t.cible?`<div class=\"sub-line\">${_escHtml(t.cible)}</div>`:''}"));
+    S.rg.includes('Surface trait\\u00e9e (ha)\\u00a0\\u00bb reprend les hectares saisis') && S.reg.includes('_rt.forEach(r=>bits.push(`<b>Rentrée anticipée ') && S.reg.includes('ha traités${_part?') && S.reg.includes("${t.cible?`<div class=\"sub-line\">${_escHtml(t.cible)}</div>`:''}"));
   t('⑨ sur ordinateur : la fiche dit la surface en partie, le mode, les rentrées ; « Ouvrir le traitement » porte l’étiquette du tuto ; la réentrée depuis la fin',
     S.trc.includes("reg.push(['Application',t.mode]);") && S.trc.includes("window._phRentrees(t):[]).forEach(function(r){ reg.push(['Rentr") && S.trc.includes('data-tuto="phy.ouvrir.pc"') && S.trc.includes('var dApp=(typeof window._phFinApp===\'function\')?window._phFinApp(t):d0;'));
   t('⑩ le tuto « rentrée anticipée » : ses gestes, son traitement d’entraînement chargé pour lui seul ; « Retirer » exempté, motivé',
@@ -200,10 +200,10 @@ if (!CONTRE) {
     ['le délai sans zéro devant les heures', m('phy', "return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;", "return h+':'+(m<10?'0':'')+m;")],
     ['le délai qui borne ne lit que le produit de la fiche', m('phy', 'function _phDreSession(t){ var mx=0; _phSessionLignes(t).forEach(', 'function _phDreSession(t){ var mx=0; [t].forEach(')],
     ['une rentrée au-delà du délai s’enregistre', m('phy', 'if(dre>0&&min>=dre*60) return', 'if(dre>0&&min>=dre*6000) return')],
-    ['le fichier écrit la parcelle entière sous « Surface traitée »', m('phy', "(st>0?_phCsvNum(st,4):''),", "(sp>0?_phCsvNum(sp,4):''),")],
-    ['le délai du fichier redevient le texte tapé d’avance', m('phy', "(rs.length ? _phRentreeDelai(t, rs[0]) : (t.dreAnticipe||'')),", "(t.dreAnticipe||''),")],
-    ['une rentrée sort sur toutes les parcelles du traitement', m('phy', 'r.parcelles.indexOf(nom)>=0; });', 'true; });')],
-    ['la cible et le mode ne sortent plus au fichier', m('phy', "(t.cible||''), (t.mode||''),", "'', '',")],
+    ['le fichier écrit la parcelle entière sous « Surface traitée »', m('rg', "(st>0?_phCsvNum(st,4):''),", "(sp>0?_phCsvNum(sp,4):''),")],
+    ['le délai du fichier redevient le texte tapé d’avance', m('rg', "(rs.length ? window._phRentreeDelai(t, rs[0]) : (t.dreAnticipe||'')),", "(t.dreAnticipe||''),")],
+    ['une rentrée sort sur toutes les parcelles du traitement', m('rg', 'r.parcelles.indexOf(nom)>=0; });', 'true; });')],
+    ['la cible et le mode ne sortent plus au fichier', m('rg', "(t.cible||''), (t.mode||''),", "'', '',")],
     ['l’IFT compte la parcelle entière', m('pil', 'var w=_iftPart(t,q);', 'var w=1;')],
     ['La Réserve consomme la parcelle entière', m('rsv', "  if(typeof window._mvSurfTTot==='function') return window._mvSurfTTot(e);\n", '')],
     ['le coût phyto paie la parcelle entière', m('pil', "      if(surf>0&&typeof window._mvSurfT==='function') surf=window._mvSurfT(e,nom,surf);", '')],

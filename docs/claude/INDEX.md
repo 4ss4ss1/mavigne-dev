@@ -628,3 +628,5 @@
 | 572 | 572. ★★ REG27-1A — LE REGISTRE 2027 SE SAISIT : LA CIBLE ET LE MODE, LA SURFACE TRAITÉE, LA RENTRÉE ANTICIP… | `docs/claude/chantiers-530-579.md` |
 | 573 | 573. ★★ REG27-1B — LE REGISTRE RELU LIGNE PAR LIGNE AVANT L’EXPORT : LA CARTE DE CONFORMITÉ, LA FENÊTRE « A… | `docs/claude/chantiers-530-579.md` |
 | 574 | 574. ★ OVPANEL-1 — UNE FENÊTRE PORTE UNE COQUE QUE LA FEUILLE CONNAÎT : LE JOURNAL DES INTERVENTIONS, LA FI… | `docs/claude/chantiers-530-579.md` |
+| 575 | 575. ★★ REG27-2 — HORAIRES ET STADE EXIGÉS AU REGISTRE : L’ADMIN LES COCHE SUR LA FICHE DU PRODUIT (15/11 —… | `docs/claude/chantiers-530-579.md` |
+| 576 | 576. REGDEC-1 — L’EXPORT DU REGISTRE SORT DE `phyto.js` (15/11 — `src/registre.js` (l’export, 322 lignes re… | `docs/claude/chantiers-530-579.md` |

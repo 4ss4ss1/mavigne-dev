@@ -72,11 +72,8 @@ function monde(S, o = {}) {
   const phy = [fonction(S.phy, 'function _phyNorm('), fonction(S.phy, 'function _phResolve('),
     fonction(S.phy, 'function _phParcHa('), fonction(S.phy, 'function _phSessionLignes('), fonction(S.phy, 'function _phDreSession('), fonction(S.phy, 'function _phFinTrait('),
     fonction(S.phy, 'function _phHhMm('), fonction(S.phy, 'function _phRentreeDelaiMin('), fonction(S.phy, 'function _phRentrees('), fonction(S.phy, 'function _phRentreeDelai('),
-    "var MV_OEPP_VIGNE = 'VITVI';", fonction(S.phy, 'function _phCsvNum('), fonction(S.phy, 'function _phCsvDate('),
-    fonction(S.phy, 'function _phCsvHeure('), fonction(S.phy, 'function _phCsvBbch('), fonction(S.phy, 'function _phCsvDose('), fonction(S.phy, 'function _phCsvParcs('),
-    tranche(S.phy, 'var MV_PHY_CSV_COLS = [', '];'), fonction(S.phy, 'function _phCsvJour('), fonction(S.phy, 'window._phytoCsvRows = function(fen){'),
-    fonction(S.phy, 'function _phytoFenAnnees('), fonction(S.phy, 'function _phytoFenetres('),
-    'window._phResolve=_phResolve; window._phRentrees=_phRentrees; window._phRentreeDelaiMin=_phRentreeDelaiMin; window._phDreSession=_phDreSession; window._phytoFenetres=_phytoFenetres;'].join('\n');
+    fonction(S.phy, 'function _phCsvParcs('),   // ★ REGDEC-1 (§576) : l'export (les lignes, les périodes) vit dans registre.js, joué en entier juste après
+    'window._phResolve=_phResolve; window._phRentrees=_phRentrees; window._phRentreeDelaiMin=_phRentreeDelaiMin; window._phDreSession=_phDreSession;'].join('\n');
   vm.runInContext(phy, ctx, { filename: 'phyto-extrait.js' });
   vm.runInContext(S.rg.replace(/^import [^\n]*\n/m, ''), ctx, { filename: 'registre.js' });
   ctx.__dom = dom;
@@ -147,8 +144,8 @@ function jouer(S) {
   t('⑩ un exercice aux mêmes dates n’est pas redit : la carte s’y accroche', Fe._phytoFenetres().map((f) => f.k).join() === 'civ2025,exo2026,tout' && Fe._regCarte().k === 'exo2026');
   // les fils
   t('⑪ l’export s’arrête sur la vérification, sauf « quand même » ; il ferme la fenêtre en partant ; chaque ligne dit son traitement',
-    S.phy.includes("if(!sansVerif && typeof window._regBloque==='function' && typeof window._regOuvrir==='function' && window._regBloque(fen)){ window._regOuvrir(fen.k); return; }")
-    && S.phy.includes("closeOv(null, 'ovRegVerif');") && S.phy.includes("src.push({ i: rang, nom: (nom||'') });") && S.phy.includes("import './registre.js';"));
+    S.rg.includes("if(!sansVerif && typeof window._regBloque==='function' && typeof window._regOuvrir==='function' && window._regBloque(fen)){ window._regOuvrir(fen.k); return; }")
+    && S.rg.includes("closeOv(null, 'ovRegVerif');") && S.rg.includes("src.push({ i: rang, nom: (nom||'') });") && S.phy.includes("import './registre.js';"));
   t('⑪ Pilotage › Conformité : la carte « Le registre <année> » lit registre.js, garde sa case et sa fiche, les derniers passages derrière un dépliant',
     S.pil.includes("var G=(typeof window._regCarte==='function')?window._regCarte():null;") && S.pil.includes("return _pilTile('phyto','#5A9FD4','Le registre '+G.an,") && S.pil.includes("G.corps+_liste, 'pil.phyto');")
     && S.pil.includes("['mat_phyto','Le registre de l’année (vérifié avant l’export)']"));
@@ -171,7 +168,7 @@ if (!CONTRE) {
   const mutants = [
     ['le numéro d’AMM n’est plus exigé', m('rg', "    if (!/^\\d{7}$/.test(String(r[RG.AMM] || '').trim())) M.push('amm');\n", '')],
     ['la dose n’est plus exigée', m('rg', "    if (r[RG.DOSE] === '' || !String(r[RG.UNITE] || '').trim()) M.push('dose');\n", '')],
-    ['les horaires ne sont plus dus pour un insecticide', m('rg', "return String(m.type || '') === 'Insecticide' || !!(c && c.heureOblig); }", 'return !!(c && c.heureOblig); }')],
+    ['les horaires ne sont plus dus pour un insecticide', m('rg', "return String(m.type || '') === 'Insecticide' || !!(c && c.heureOblig) || ", 'return !!(c && c.heureOblig) || ')],
     ['le stade est reproché partout', m('rg', "if (_regStadeRequis(t)) M.push('stade'); else C.push('stade');", "M.push('stade');")],
     ['la cible facultative devient un manque', m('rg', "if (!String(r[RG.CIBLE] || '').trim()) C.push('cible');", "if (!String(r[RG.CIBLE] || '').trim()) M.push('cible');")],
     ['une rentrée au-delà du délai passe', m('rg', 'else if (dre > 0 && min >= dre * 60) M.push', 'else if (dre > 0 && min >= dre * 6000) M.push')],
@@ -181,11 +178,11 @@ if (!CONTRE) {
     ['le verdict est bon malgré les lignes à compléter', m('rg', "  if (!V.nManque) return { ok: true, txt: 'Prêt pour le contrôle' };", "  if (V.nLignes) return { ok: true, txt: 'Prêt pour le contrôle' };")],
     ['le SIRET manquant ne se dit plus', m('rg', "  if (!V.siretOk) return { ok: false, txt: 'Le SIRET du domaine manque : chaque ligne doit le porter' };\n", '')],
     ['l’export ne s’arrête plus jamais', m('rg', 'return !!(V.nLignes && (V.nManque || !V.siretOk || V.sansDate)); };', 'return false; };')],
-    ['l’export ne consulte plus la vérification', m('phy', "if(!sansVerif && typeof window._regBloque==='function'", "if(false && typeof window._regBloque==='function'")],
-    ['les lignes ne savent plus de quel traitement elles viennent', m('phy', "src.push({ i: rang, nom: (nom||'') });", "src.push({ i: 0, nom: (nom||'') });")],
-    ['l’année civile n’est plus proposée', m('phy', '      if(L && L.length) return _phytoFenAnnees(L);', '      if(L && L.length) return L;')],
+    ['l’export ne consulte plus la vérification', m('rg', "if(!sansVerif && typeof window._regBloque==='function'", "if(false && typeof window._regBloque==='function'")],
+    ['les lignes ne savent plus de quel traitement elles viennent', m('rg', "src.push({ i: rang, nom: (nom||'') });", "src.push({ i: 0, nom: (nom||'') });")],
+    ['l’année civile n’est plus proposée', m('rg', '      if(L && L.length) return _phytoFenAnnees(L);', '      if(L && L.length) return L;')],
     ['la carte reste sur l’année vide en janvier', m('rg', 'return (a[y] || !a[y - 1]) ? y : y - 1;', 'return y;')],
-    ['un non-administrateur ouvre la fenêtre', m('rg', "  if (!isAdmin()) { showToast('Réservé aux administrateurs', '#C0392B'); return; }\n", '')],
+    ['un non-administrateur ouvre la fenêtre', m('rg', "  if (!isAdmin()) { showToast('Réservé aux administrateurs', '#C0392B'); return; }\n  var fen = _regFen(k); if (!fen) return;", '  var fen = _regFen(k); if (!fen) return;')],
     ['une ligne touchée n’ouvre plus la fiche', m('rg', 'window.openTraitDetail(i);', '')],
     ['Pilotage ne lit plus la vérification', m('pil', "var G=(typeof window._regCarte==='function')?window._regCarte():null;", 'var G=null;')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-reg27b.mjs'").join("mv-harnais-reg27Z.mjs'") })]];

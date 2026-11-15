@@ -46,7 +46,7 @@ const DEFAUTS = [
 function sources(injection) {
   const f = injection || (x => x);
   return { U: f(R('src/utils.js')), CAVE: nu(f(R('src/cave.js'))), PIL: nu(f(R('src/pilotage.js'))),
-           REG: nu(f(R('src/reglages.js'))), PHY: nu(f(R('src/phyto.js'))) };
+           REG: nu(f(R('src/reglages.js'))), PHY: nu(f(R('src/phyto.js')) + '\n' + f(R('src/registre.js'))) };   // ★ REGDEC-1 (§576) : l'export du registre vit dans registre.js
 }
 
 /* Les assertions, dans une fonction REJOUABLE : la contre-epreuve la relance

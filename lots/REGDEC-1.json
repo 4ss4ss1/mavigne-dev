@@ -1,0 +1,38 @@
+{
+  "lot": "REGDEC-1",
+  "section": "§576",
+  "base": "948db72b149c3da7a0fcd68b85a13e2ba8c70dca",
+  "inclut": [
+    "REG27-2"
+  ],
+  "date": "2026-11-15",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "e22725fbfdd9f9a9cda53ed0799adb11c76eb3ed039c7adaaac40c8d21fad68b",
+    "CLAUDE.md": "848a3a7457f7a79edbc2828c2bb848da3d1722ee0ce47279f8b386702cd0f36b",
+    "docs/claude/INDEX.md": "3a0cde15a6eb97078c5cd5f6288662b999c69eb2a5fa9eac0002c9a4d073ffb4",
+    "docs/claude/chantiers-530-579.md": "7999ac7906b334aaf9a3cf7fc4527285392baaf32e978f49859095dd25d005f4",
+    "docs/claude/journal.md": "0318da6086af496e57bc3eb05c6b50ccc981ec8afce52582e1abb72b3f59bb2b",
+    "docs/claude/modules.md": "6d1f25199604c29f30f449504b2d15eba23a022ea1f3bc973be3595d6ddc37c7",
+    "guide/07-phyto.html": "9cb25a6efe9848dae830e4b58f0692cba509e51405d9d6a1614d0cf5b56295ae",
+    "index.html": "7840c9d65299e2177c75fa13494b6ed60ee45514cd9a3c021958d08a80c567f0",
+    "public/sw.js": "602a69ec0f50e9f6ccf126c6dd9769d5a20505aed8790c7728a8b2ef4a8999bc",
+    "scripts/harnais-claude-md.mjs": "de058118cd727a3c356da1e2f56ed5d593b327d9cc7c79ccd0d3cf92b441dd69",
+    "scripts/mv-harnais-axe.mjs": "ddd32958bfb5a130bdae2cee52f4fb92b431ad47a8946a965c3b25f1d762de11",
+    "scripts/mv-harnais-liste.mjs": "ce558e84199a1cd663f923f2238eaad21109821e312b856e27635f3d3d42a45d",
+    "scripts/mv-harnais-reg27a.mjs": "1238a831e6ef89cdc91fc1ade16c1e0c0e9cd2e80632957d0699d222ec48517d",
+    "scripts/mv-harnais-reg27b.mjs": "ddd1ca32745a0a46c8532033f7800f80e57a3cac9df79f1d7ef0c7a56163c81a",
+    "scripts/preflight-baseline.json": "fe091836f513d485400bc7a4cd105b3184d040bbf4bf255d36e7842902677269",
+    "scripts/tutos-couverture.json": "636dc8c302331209d51b30e513e23c7fa3e52ae6cdb3ad04e1e406877dbe64a4",
+    "src/phyto.js": "9820227505740cfa29f1a78937cd7663c4218937f086f0478710b4f10e4affd8",
+    "src/registre.js": "15de869587e696b62b1b61d7d5540442ccdb050f590f4551868de1047c71be8f",
+    "src/tracteur.js": "751ab77917e7b7df29abd5780b23184c660cd0e0810d0bb2ecdf61bcb3ca9eaf",
+    "src/utils.js": "1e3d52fa7bd95001ec1e070f09f5fdbf7a480778a3739b3834a05b850eaf2b94",
+    "src/whats-new.js": "5787f6a2789c99ed8486ea2af4a6b3d4b2ea553e11e5b9b774145c172ddac962",
+    "scripts/mv-harnais-reg272.mjs": "e9fbf590ba91795d982809b3fe44796330abb343d3c9c23b89a3ecb25330e0f2",
+    "scripts/mv-harnais-regdec1.mjs": "96206a5ec0f7c8ecba46dbbd93e9dbecfad1cb27fd4a4c81192ff568a7faaa92"
+  }
+}

@@ -161,6 +161,7 @@ function openEphyDetail(amm,dans){
   var _corps =
       '<div class="oed-grid">'+statBox+dreBox+'<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Substance active</div><div class="oed-v">'+_escHtml(p.sub||'—')+'</div></div>'+noms2Html+'</div>'
     + (ments?'<div class="ephy-minis" style="margin:0 0 12px">'+ments+'</div>':'')
+    + (typeof window._regObligHtml==='function'?window._regObligHtml(p):'')   // ★ REG27-2 (§575) : horaires et stade exigés au registre, cochés par l'admin
     + '<div class="oed-sec">Usages homologués · Vigne</div>'+usages
     + '<div class="oed-disc"><b>'+_mvIcon('alerte',16)+' Donnée indicative.</b> Les informations E-Phy ne sont pas opposables : seul le registre officiel fait foi. Vérifiez avant tout traitement sur <a href="https://ephy.anses.fr" target="_blank" rel="noopener">ephy.anses.fr</a>.</div>';
   if(dans){ var _el=document.getElementById(dans); if(_el)_el.innerHTML='<div class="trf-hd"><div class="trf-id"><h2 class="trf-t">'+_escHtml(p.nom)+'</h2><div class="trf-tags"><span class="trf-tag">AMM '+_escHtml(p.amm)+'</span><span class="trf-tag">'+_escHtml(p.type||'')+'</span></div></div></div><div class="catf-bd">'+_corps+'</div>'; return; }
