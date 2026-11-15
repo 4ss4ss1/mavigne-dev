@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.08', d: '2026-11-15', items: [   // TETE-4C (§579) : le Pilotage prend le bandeau commun — la bande et les onglets dans l'en-tête, « Vous regardez » en ligne d'écran
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage\u00a0: le haut de l’écran tient en trois lignes',
+      desc: "Le haut du Pilotage empilait quatre bandes\u00a0: le nom, la campagne et la météo, «\u00a0Vous regardez\u00a0», les onglets. Il a maintenant les trois lignes des autres pages\u00a0: le nom avec la campagne, la météo et «\u00a0? Aide\u00a0»\u00a0; les onglets\u00a0; puis «\u00a0Vous regardez\u00a0» et «\u00a0à compléter\u00a0». Le contenu commence plus haut. Au téléphone, «\u00a0Vous regardez\u00a0» tient en un bouton qui dit ce que vous regardez\u00a0: touchez-le pour déplier le choix. La date et la météo n’y sont plus dans le bandeau, comme sur les autres pages." },
+    { niv: 0, pour: ['admin'], emoji: 'curseurs', titre: 'Pilotage\u00a0: les onglets restent en haut partout',
+      desc: "En descendant dans Travaux, L’équipe & le matériel, Décider, Économie, Conformité ou Archives, le haut de l’écran partait avec la page\u00a0: il fallait remonter pour changer d’onglet. Il reste maintenant en haut, comme sur Aujourd’hui. Au téléphone, il se range sur une ligne en descendant et revient en remontant." },
+  ] },
   { v: '11.07', d: '2026-11-15', items: [   // TETE-4B (§578) : les sous-onglets de la Cave sur la ligne d'écran ; la ligne collée sur ordinateur, les fiches calées sous elle
     { niv: 0, pour: ['admin', 'cave'], emoji: 'curseurs', titre: 'Cave\u00a0: les sous-onglets toujours au même endroit',
       desc: "Les sous-onglets du Cuvier, du Chai et du Millésime étaient placés chaque fois plus bas\u00a0: après les quatre chiffres, après l’état des cuves, après tout l’en-tête du millésime. Ils sont maintenant sur la même ligne, juste sous les sections de la Cave\u00a0; au téléphone, ils défilent de côté. Le millésime regardé se choisit dans une liste, à droite de cette ligne." },

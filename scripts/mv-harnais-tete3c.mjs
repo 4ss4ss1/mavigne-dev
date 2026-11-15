@@ -23,11 +23,13 @@ let ok = 0, ko = 0;
 const t = (nom, cond) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom); } };
 function jouer(S) {
   t('① « ? Aide » cherche la bande dans l’en-tête ET juste après lui', S.uti.includes("var rows = document.querySelectorAll('.mod-header .mod-meta-row, .mod-header + .mod-meta-row');"));
-  const ctx = { _mvIcon: () => '<svg></svg>', _pilEsc: (x) => String(x), _pilHa: (x) => String(x), window: { isAdmin: () => true } };
+  const ctx = { _mvIcon: () => '<svg></svg>', _pilEsc: (x) => String(x), _pilHa: (x) => String(x), _pilTabsHtml: () => '<div class="mvu-tabs mvu-pil" id="pil-tabs"></div>', window: { isAdmin: () => true } };
   vm.createContext(ctx); vm.runInContext(fonction(S.pil, 'function _pilHdrHtml(') + '\nthis.f = _pilHdrHtml;', ctx);
   const h = ctx.f({ domaine: 'Domaine', nActives: 12, surfTot: 11.76, saison: 'Après-vendange 2026-2027', meteo: true });
   const i = h.indexOf('<div class="mod-header h-pilotage">'), f = finBloc(h, i);
-  t('② le Pilotage : l’en-tête se ferme avant la bande campagne/date, qui le suit aussitôt', i === 0 && f > 0 && !h.slice(i, f).includes('mod-meta-row') && h.slice(f).startsWith('<div class="mod-meta-row mvu-meta'));
+  // ★ TETE-4C (§579) : le Pilotage a pris le bandeau commun — sa bande est DANS la ligne du module, comme les neuf autres (TETE-4A) ; plus rien ne suit l'en-tête ici.
+  const iTop = h.indexOf('<div class="mod-header-top">'), fTop = iTop < 0 ? -1 : finBloc(h, iTop);
+  t('② le Pilotage : une seule bande campagne/date, dans la ligne du module ; l’en-tête se ferme après ses onglets', i === 0 && f === h.length && fTop > 0 && h.slice(iTop, fTop).includes('<div class="mod-meta-row mvu-meta') && (h.match(/class="mod-meta-row/g) || []).length === 1 && h.slice(fTop).startsWith('<div class="mvu-tabs mvu-pil" id="pil-tabs">'));
   // ★ TETE-4A (§577) : la bande de la Réserve est montée dans la ligne du module, comme les huit autres ; sa ligne d'écran suit l'en-tête.
   { const iB = S.rsv.indexOf("+'<div class=\"mod-meta-row mvu-meta\">'"), iT = S.rsv.indexOf("+'<div class=\"mvu-tabs mvr-tabs\">'"), iE = S.rsv.indexOf('<div class=\"mv-ecran\">');
     t('③ la Réserve : une seule bande, dans la ligne du module (TETE-4A) ; ses onglets restés dans l’en-tête, la ligne d’écran après', (S.rsv.match(/mod-meta-row mvu-meta/g) || []).length === 1 && iB > 0 && iT > iB && iE > iT); }
@@ -44,7 +46,8 @@ if (!CONTRE) {
   const m = (cle, a, b) => (S) => { if (!S[cle].includes(a)) throw new Error('ancre absente'); return Object.assign({}, S, { [cle]: S[cle].replace(a, b) }); };
   const mutants = [
     ['« ? Aide » ne cherche plus que dans l’en-tête', m('uti', "'.mod-header .mod-meta-row, .mod-header + .mod-meta-row'", "'.mod-header .mod-meta-row'")],
-    ['le Pilotage remet sa bande dans l’en-tête', m('pil', "+'</div></div>'   // ★ TETE-3C (§475)", "+'</div>'   // ★ TETE-3C (§475)")],
+    ['le Pilotage perd sa bande', m('pil', "    +'<div class=\"mod-meta-row mvu-meta'+(d.meteo?' mvu-avec-meteo':'')+'\">'", "    +'<div class=\"mod-meta-rox mvu-meta'+(d.meteo?' mvu-avec-meteo':'')+'\">'")],
+    ['les onglets du Pilotage sortent de l’en-tête', m('pil', "    +'</div>'\n    +_pilTabsHtml(tab)\n    +'</div>';", "    +'</div>'\n    +'</div>'\n    +_pilTabsHtml(tab);")],
     ['une seconde bande dans la Réserve', m('rsv', "      +'<div class=\"mvu-tabs mvr-tabs\">'", "      +'<div class=\"mod-meta-row mvu-meta\"></div>'\n      +'<div class=\"mvu-tabs mvr-tabs\">'")],
     ['les règles reviennent à « .page > … »', m('css', '.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;', '.page > .mod-meta-row.mvu-meta{position:relative;z-index:5;')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-tete3c.mjs'").join("mv-harnais-tete3Z.mjs'") })],

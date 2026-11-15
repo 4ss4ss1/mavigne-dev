@@ -42,12 +42,12 @@ body .mv-ecran .mod-header-action:hover{ background:var(--accent-survol,#8C3160)
 
 /* — Au téléphone : la campagne prend la place du sous-titre, sous le nom ; la date et la météo sortent du bandeau — */
 @media (max-width:600px){
-  .mod-header:not(.h-pilotage) > .mod-header-top{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-auto-columns:auto; grid-template-rows:auto auto; align-items:center; align-content:center; column-gap:var(--e-1,4px); row-gap:0; box-sizing:border-box; height:calc(env(safe-area-inset-top,0px) + 56px); }
-  .mod-header:not(.h-pilotage) > .mod-header-top > *{ grid-row:1 / span 2; }
-  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-header-icon{ grid-column:1; }
-  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-header-titles{ grid-column:2; grid-row:1; align-self:end; min-width:0; }
-  .mod-header:not(.h-pilotage) > .mod-header-top > .mod-meta-row{ grid-column:2; grid-row:2; align-self:start; min-height:0!important; height:auto; line-height:1; }
-  .mod-header:not(.h-pilotage):not(.h-reglages) > .mod-header-top .mod-header-sub{ display:none; }
+  .mod-header > .mod-header-top{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-auto-columns:auto; grid-template-rows:auto auto; align-items:center; align-content:center; column-gap:var(--e-1,4px); row-gap:0; box-sizing:border-box; height:calc(env(safe-area-inset-top,0px) + 56px); }
+  .mod-header > .mod-header-top > *{ grid-row:1 / span 2; }
+  .mod-header > .mod-header-top > .mod-header-icon{ grid-column:1; }
+  .mod-header > .mod-header-top > .mod-header-titles{ grid-column:2; grid-row:1; align-self:end; min-width:0; }
+  .mod-header > .mod-header-top > .mod-meta-row{ grid-column:2; grid-row:2; align-self:start; min-height:0!important; height:auto; line-height:1; }
+  .mod-header:not(.h-reglages) > .mod-header-top .mod-header-sub{ display:none; }
   /* Réglages garde son sous-titre : c'est là qu'on lit le numéro de version */
   .mod-header.h-reglages > .mod-header-top > .mod-meta-row{ display:none; }
   .mod-header.h-reglages > .mod-header-top > .mod-header-titles{ grid-row:1 / span 2; align-self:center; }
@@ -64,8 +64,8 @@ body .mv-ecran .mod-header-action:hover{ background:var(--accent-survol,#8C3160)
 }
 /* — En descendant, au téléphone (TETE-3A, §473) : le bandeau se range sur une ligne — le nom, « ? », la roue, le voyant ; la campagne
      revient en remontant. La ligne d'écran, sous l'en-tête, défile avec la page. — */
-body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top{ display:flex; height:auto; }
-body.mv-replie .page.active .mod-header:not(.h-pilotage) > .mod-header-top > .mod-meta-row{ display:none; }
+body.mv-replie .page.active .mod-header > .mod-header-top{ display:flex; height:auto; }
+body.mv-replie .page.active .mod-header > .mod-header-top > .mod-meta-row{ display:none; }
 
 /* ★ FIN TETE-4A */
 
@@ -101,20 +101,58 @@ body .mv-ecran-sous .mvu-tabs.mvu-sub .mvu-tab::after{ content:''; position:abso
 /* — Sur ordinateur, la ligne d'écran reste en haut avec l'en-tête : les sous-onglets et « + Ajouter » se touchent sans remonter.
      L'en-tête y fait 111 px (56 + 55 ; test:ux le mesure). Au téléphone et sur tablette, la ligne défile : le bandeau s'y replie. — */
 @media (min-width:1024px){
-  .mod-header + .mv-ecran{ position:sticky; top:var(--h-tete,111px); z-index:79; }
+  .mod-header + .mv-ecran{ position:sticky; top:calc(var(--mv-demo-h,0px) + var(--h-tete,111px)); z-index:79; }
   /* LES PANNEAUX QUI COLLENT SE CALENT SOUS ELLE. Ils collaient à 16 px du haut de la fenêtre, donc SOUS l'en-tête : en descendant,
      le haut de la fiche (le nom de la cuvée, de la parcelle, du traitement) passait dessous — mesuré, 95 px cachés. Mêmes sélecteurs que
      dans styles.css (lue avant) ; « body » devant ceux que le code pose aussi par une feuille à lui. */
   #page-journal.active > #j-feuille,#page-journal.active > #j-fiche,#page-tracteur.active > #trac-droite,body .caj-fx,
   #page-parcelles #pwrapliste > .content > #p-fiche,#page-tracteur #trac-panel-sessions > #trac-fiche,#page-tracteur #trac-panel-entretiens > #ent-gauche,
   #page-phyto.ph-reg-on .content > #ph-fiche,#page-phyto #tab-cat-trac > #cat-fiche,body .mat-droite,body .rec-droite,body .creg-nav,
-  #page-cave #mvc-view-cuv > #chai-fiche,body .dgn-liste,body .caj-som{ top:calc(var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)); }
+  #page-cave #mvc-view-cuv > #chai-fiche,body .dgn-liste,body .caj-som{ top:calc(var(--mv-demo-h,0px) + var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)); }
   #page-journal.active > #j-fiche,#page-tracteur.active > #trac-droite,body .caj-fx,#page-parcelles #pwrapliste > .content > #p-fiche,
   #page-tracteur #trac-panel-sessions > #trac-fiche,#page-phyto.ph-reg-on .content > #ph-fiche,#page-phyto #tab-cat-trac > #cat-fiche,
-  #page-cave #mvc-view-cuv > #chai-fiche{ max-height:calc(100vh - calc(var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)) - var(--e-6,24px)); }
+  #page-cave #mvc-view-cuv > #chai-fiche{ max-height:calc(100vh - calc(var(--mv-demo-h,0px) + var(--h-tete,111px) + var(--h-ecran,44px) + var(--e-4,16px)) - var(--e-6,24px)); }
   /* Planning › Personnel : la ligne d'écran sur toute la largeur, la fiche de la personne en dessous d'elle */
   body.pl-gens-dock #page-planning > .mv-ecran{ grid-column:1 / -1; }
   body.pl-gens-dock #page-planning > #ovPlanFiche{ grid-row:3 / span 20; }
 }
 
 /* ★ FIN TETE-4B */
+
+/* ★ TETE-4C (§579) — LE PILOTAGE PREND LE BANDEAU COMMUN.
+   Il empilait quatre bandes (218 px ; 286 au téléphone) : l'en-tête, la campagne et la météo, « Vous regardez », les onglets. Il a
+   maintenant les trois lignes de tout le monde : la campagne et la météo dans la ligne du module, les onglets dans l'en-tête
+   (pilotage.js, _pilHdrHtml), « Vous regardez » en ligne d'écran. Au téléphone et sur tablette (767 px et moins), « Vous regardez »
+   tient en un bouton : le toucher déplie le choix sous la ligne (.pt-ouvert, posée par _pilPtOuvrir).
+   La page ne défile plus dans elle-même (styles.css : overflow-y:auto) : son en-tête ne collait que sur « Aujourd'hui ». */
+body #page-pilotage{ overflow-x:clip; overflow-y:visible; }
+/* la pastille météo, dans la ligne du module : ses deux lignes à 12 px, comme sous l'en-tête (LISIBLE-1, §470 — dans l'en-tête elles tombaient à 11) */
+body .mod-header-top > .mod-meta-row .hv2-meteo-mini{ height:var(--h-sm,28px); gap:var(--e-1,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; }
+body .mod-header-top > .mod-meta-row .hv2-meteo-mini-desc,body .mod-header-top > .mod-meta-row .hv2-meteo-mini-jour{ font-size:var(--pt-micro,12px)!important; }
+/* « Vous regardez » : la ligne d'écran. Son menu des campagnes et son choix déplié s'ouvrent dessous : rien n'y est rogné. */
+body #page-pilotage .mod-header + .mv-ecran.pil-portee{ position:relative; top:auto; z-index:62; overflow:visible; }
+body #page-pilotage .mv-ecran.pil-portee > .mv-ecran-g.pil-crumb{ flex:1 1 auto; min-width:0; max-width:none; flex-wrap:nowrap; overflow:visible; font-weight:var(--fw-reg,400); }
+.mv-ecran.pil-portee > .mv-ecran-g > *{ overflow:visible; }
+.mv-ecran.pil-portee > .mv-ecran-d{ flex:0 0 auto; overflow:visible; }
+.pil-ptchoix{ display:flex; align-items:center; gap:var(--e-2,8px); flex:1 1 auto; min-width:0; }
+.pil-ptchoix > *{ flex:none; }
+.pil-ptchoix > .pil-ptbornes{ flex:0 1000 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+/* quand la place manque : les dates se coupent d'abord, puis le choix du cadre défile de côté ; sous 1 100 px, « Vous regardez » ne s'écrit plus */
+.pil-ptchoix > .pil-ptseg{ flex:0 1 auto; min-width:0; }
+@media (max-width:1099px){ .mv-ecran.pil-portee .pil-ptlab{ display:none; } }
+.pil-ptres{ display:none; }
+@media (min-width:1024px){
+  body #page-pilotage .mod-header + .mv-ecran.pil-portee{ position:sticky; top:calc(var(--mv-demo-h,0px) + var(--h-tete,111px)); z-index:79; }
+}
+@media (max-width:767px){
+  .pil-ptres{ display:inline-flex; align-items:center; gap:var(--e-1,4px); position:relative; max-width:100%; min-width:0; height:var(--h-ctl,32px); padding:0 var(--e-3,12px); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-sm,6px); background:var(--bg-card,#FFFFFF); color:var(--texte,#1B1A18); font-family:var(--font-ui,'Outfit',sans-serif); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); line-height:var(--lh-serre,1.15); cursor:pointer; }
+  .pil-ptres::after{ content:''; position:absolute; left:0; right:0; top:calc(var(--e-2,8px) * -1); bottom:calc(var(--e-2,8px) * -1); }
+  .pil-ptres-t{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* le chevron du bouton : dessiné, pas un caractère (le jeu d'icônes compte les caractères-images, §mv-harnais-icones) */
+  .pil-ptres-c{ flex:none; width:var(--e-2,8px); height:var(--e-2,8px); margin:calc(var(--e-1,4px) * -1) var(--e-0,2px) 0 var(--e-1,4px); border-right:var(--bw-2,2px) solid currentColor; border-bottom:var(--bw-2,2px) solid currentColor; transform:rotate(45deg); color:var(--texte-doux,#6B6964); box-sizing:border-box; }
+  .pil-ptchoix{ display:none; }
+  .pil-portee.pt-ouvert .pil-ptchoix{ display:flex; flex-wrap:wrap; position:absolute; top:100%; left:0; right:0; padding:var(--e-3,12px) var(--e-4,16px); background:var(--bg-card,#FFFFFF); border-bottom:var(--bw,1px) solid var(--ligne,#E7E6E2); box-shadow:var(--shadow-md,0 6px 16px rgba(20,18,14,.12)); white-space:normal; }
+  .pil-portee.pt-ouvert .pil-ptchoix > .pil-ptbornes{ display:block; flex:1 1 100%; white-space:normal; }
+}
+
+/* ★ FIN TETE-4C */

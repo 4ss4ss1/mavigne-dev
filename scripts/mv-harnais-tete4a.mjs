@@ -104,7 +104,8 @@ function jouer(S) {
     const sansRepli = (css.match(/var\(--[\w-]+\)/g) || []); const sansVar = css.replace(/var\(--[\w-]+,[^()]*(\([^()]*\))?[^()]*\)/g, ''); const brutes = (sansVar.match(/#[0-9a-fA-F]{3,8}\b|rgba?\(/g) || []);
     t('⑥ter chaque réglage se lit dans la charte AVEC un repli ; aucune couleur écrite en dur (' + sansRepli.length + ' sans repli, ' + brutes.length + ' en dur)', sansRepli.length === 0 && brutes.length === 0);
     const petites = (css.match(/font-size:\s*(\d+(?:\.\d+)?)px/g) || []).filter((x) => parseFloat(x.replace(/[^\d.]/g, '')) < 12);
-    t('⑥quater aucun texte sous 12 px ; au téléphone, la grille ne touche pas le Pilotage', petites.length === 0 && (css.match(/\.mod-header:not\(\.h-pilotage\)/g) || []).length >= 6 && !/\.h-pilotage(?!\))/.test(css));
+    // TETE-4C (§579) : le Pilotage a pris le bandeau commun — la grille du téléphone vaut pour TOUS les en-têtes, plus aucune exception
+    t('⑥quater aucun texte sous 12 px ; au téléphone, la grille vaut pour tous les en-têtes, le Pilotage compris', petites.length === 0 && (css.match(/\.mod-header > \.mod-header-top/g) || []).length >= 6 && !/:not\(\.h-pilotage\)/.test(css));
   }
   t('⑦ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-tete4a.mjs'") > 0 && S.liste.indexOf("mv-harnais-tete4a.mjs --contre'") > 0);
 }

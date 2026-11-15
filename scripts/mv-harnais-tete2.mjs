@@ -40,8 +40,8 @@ function pilEsc(S) { const m = S.pil.match(/^function _pilEsc\(s\)\{[^\n]*\}$/m)
   if (!m) return echapStub; const c = { }; vm.createContext(c); vm.runInContext(m[0] + ';this.__f=_pilEsc;', c); return c.__f; }
 const icone = (n, s) => '<svg class="mv-ic" data-ic="' + n + '" width="' + s + '"></svg>';
 function pilHdr(S, d, admin) {
-  const f = corps(S.pil, 'function _pilHdrHtml(d){'); if (!f) throw new Error('_pilHdrHtml introuvable');
-  const c = { window: { isAdmin: () => admin }, _mvIcon: icone, _pilEsc: pilEsc(S), _pilHa: v => Number(v).toFixed(2).replace('.', ',') };
+  const f = corps(S.pil, 'function _pilHdrHtml(d,tab){');   // TETE-4C (§579) : l'en-tête porte ses onglets if (!f) throw new Error('_pilHdrHtml introuvable');
+  const c = { window: { isAdmin: () => admin }, _pilTabsHtml: () => '<div class="mvu-tabs mvu-pil" id="pil-tabs"></div>', _mvIcon: icone, _pilEsc: pilEsc(S), _pilHa: v => Number(v).toFixed(2).replace('.', ',') };
   vm.createContext(c); vm.runInContext(f + ';this.__f=_pilHdrHtml;', c); return c.__f(d);
 }
 function elem(id) { return { id, style: {}, innerHTML: '', textContent: '' }; }

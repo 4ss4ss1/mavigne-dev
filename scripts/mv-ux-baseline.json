@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-11-15",
- "base": "10e9db3",
+ "base": "fe09743",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -371,6 +371,20 @@
     "reglages › ordinateur › chrome : 120 → 164"
    ],
    "baisses": []
+  },
+  {
+   "date": "2026-11-15",
+   "base": "fe09743",
+   "motif": "hausse acceptée : TETE-4C (§579) : le Pilotage a pris le bandeau des autres pages (111 px au téléphone, 164 sur ordinateur, comme les neuf autres). La mesure ne comptait jusque-là que son en-tête (57 et 66 px) : ses onglets et « Vous regardez », posés hors de l’en-tête, lui échappaient. Mesuré à l’écran, le contenu commence plus haut : 164 px au lieu de 218 sur ordinateur, 155 au lieu de 286 au téléphone ; en descendant, 155 px au lieu de 171 et 57 au lieu de 191.",
+   "hausses": [
+    "pilotage › téléphone › chrome : 57 → 111",
+    "pilotage › ordinateur › chrome : 66 → 164"
+   ],
+   "baisses": [
+    "pilotage › téléphone › c44 : 46 → 41",
+    "pilotage › téléphone › chromeDefile : 191 → 57",
+    "pilotage › ordinateur › chromeDefile : 171 → 155"
+   ]
   }
  ],
  "mesures": {
@@ -472,16 +486,16 @@
     "hauteur": 1335
    },
    "pilotage": {
-    "cibles": 68,
+    "cibles": 63,
     "c24": 0,
-    "c44": 46,
-    "textes": 244,
+    "c44": 41,
+    "textes": 233,
     "t11": 0,
     "t12": 0,
-    "chrome": 57,
-    "chromeDefile": 191,
+    "chrome": 111,
+    "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 4740
+    "hauteur": 4609
    },
    "reglages": {
     "cibles": 16,
@@ -600,10 +614,10 @@
     "textes": 250,
     "t11": 0,
     "t12": 56,
-    "chrome": 66,
-    "chromeDefile": 171,
+    "chrome": 164,
+    "chromeDefile": 155,
     "pouce": null,
-    "hauteur": 2219
+    "hauteur": 2165
    },
    "reglages": {
     "cibles": 16,

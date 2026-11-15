@@ -37,7 +37,7 @@ const PERS = [{ nom: 'Hiver 2025-26', debut: '2025-11-16', fin: '2026-03-15' }, 
   { nom: 'Automne 2026', debut: '2026-09-15', fin: '2026-11-15' }, { nom: 'Hiver 2026-27', debut: '2026-11-16', fin: '2027-03-15' }, { nom: 'Sans dates' }];
 function monter(S, o) {
   const scope = Object.assign({ camp: null, cadre: 'exo', recul: 0 }, o.scope || {}); const ecrit = [];
-  const ctx = { _PIL_SCOPE: scope, window: { _cmpVisibles: () => o.pers || PERS, _pilSaison: () => (o.active ? { nom: o.active } : null), logError: () => {} },
+  const ctx = { _PIL_SCOPE: scope, _pilPtOuvert: false /* TETE-4C (§579) : le choix replié, l'état que lit la barre */, window: { _cmpVisibles: () => o.pers || PERS, _pilSaison: () => (o.active ? { nom: o.active } : null), logError: () => {} },
     _pilAnCadre: () => (o.ca === null ? null : Object.assign({ court: '2026-27', titre: 'Exercice 2026-27', d0: '2026-08-01', d1: '2027-07-31', recul: 0, prevOk: true }, o.ca || {})),
     _pilAnAuj: () => o.auj || '2026-10-23', _pilEsc: (x) => String(x).replace(/</g, '&lt;'), _mvInfoBtn: (k) => '<i data-k="' + k + '"></i>',
     _pilScopeSet: (c) => { scope.camp = c || null; ecrit.push('camp:' + scope.camp); }, _pilCadreSet: (c) => { scope.cadre = (c === 'vig') ? 'vig' : 'exo'; ecrit.push('cadre:' + scope.cadre); } };

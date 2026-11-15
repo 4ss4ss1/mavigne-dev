@@ -632,3 +632,4 @@
 | 576 | 576. REGDEC-1 — L’EXPORT DU REGISTRE SORT DE `phyto.js` (15/11 — `src/registre.js` (l’export, 322 lignes re… | `docs/claude/chantiers-530-579.md` |
 | 577 | 577. ★★★ TETE-4A — LE BANDEAU COMMUN : LE HAUT DE L’ÉCRAN A LA MÊME HAUTEUR SUR NEUF PAGES ; LE CHANTIER « … | `docs/claude/chantiers-530-579.md` |
 | 578 | 578. ★★★ TETE-4B — LES SOUS-ONGLETS DE LA CAVE SUR LA LIGNE D’ÉCRAN ; SUR ORDINATEUR LA LIGNE COLLE, ET LES… | `docs/claude/chantiers-530-579.md` |
+| 579 | 579. ★★★ TETE-4C — LE PILOTAGE PREND LE BANDEAU COMMUN : TROIS LIGNES AU LIEU DE QUATRE BANDES, « VOUS REGA… | `docs/claude/chantiers-530-579.md` |

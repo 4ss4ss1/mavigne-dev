@@ -11471,7 +11471,7 @@ function _pilTabsHtml(tab){
   }).join('')+'</div>';
   return h;
 }
-function _pilHdrHtml(d){
+function _pilHdrHtml(d,tab){
   // ★ TETE-2 (§329) — LE PILOTAGE PREND LE MODÈLE COMMUN DES EN-TÊTES. Le bandeau brun (« .pil-mast », texte crème) avait
   //   été repeint en clair par TETE-1 sans sa météo ni son aide : crème sur blanc. Il devient un vrai .mod-header — icône,
   //   « Pilotage », le domaine en sous-titre (le vignoble à côté, caché au téléphone), la roue — puis la ligne du jour des
@@ -11483,12 +11483,18 @@ function _pilHdrHtml(d){
     +'<div class="mod-header-titles"><div class="mod-header-title">Pilotage</div>'
     +'<div class="mod-header-sub" id="pil-dom-nom">'+_pilEsc(d.domaine)+'<span class="pil-vgn"> \u00b7 '+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</span></div></div>'
     // La roue crantée du module (lot NAV-3) : ce qui se règle, et le bilan de campagne.
-    +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
-    +'</div></div>'   // ★ TETE-3C (§475) : l'en-tête se ferme ici — la bande campagne/date passe dessous, comme partout (§474)
+    // ★★ TETE-4C (§579) — LE PILOTAGE PREND LE BANDEAU COMMUN (TETE-4A, §577). Il empilait quatre bandes : l'en-tête, la campagne et
+    //   la météo, « Vous regardez », les onglets (218 px ; 286 au téléphone). Trois lignes, comme partout : la campagne, la date ou la
+    //   météo montent dans la ligne du module (« ? Aide » se pose après elles, _mvInjectHelpBtn) ; les onglets entrent DANS l'en-tête ;
+    //   « Vous regardez » devient la ligne d'écran (_pilSkeleton). La barre .pil-tabsbar n'existe plus.
     +'<div class="mod-meta-row mvu-meta'+(d.meteo?' mvu-avec-meteo':'')+'">'
     +'<div class="hv2-saison-pill"><span class="hv2-dot"></span>&nbsp;<span id="pil-saison">'+_pilEsc(d.saison)+'</span></div>'
     +'<div class="hv2-sep"></div><div class="hv2-date" data-mv-date></div>'
     +'<div class="hv2-meteo-mini" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
+    +'</div>'
+    +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
+    +'</div>'
+    +_pilTabsHtml(tab)
     +'</div>';
 }
 function _pilSkeleton(d,tab){
@@ -11510,13 +11516,13 @@ function _pilSkeleton(d,tab){
   // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
   // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
   // contenu, quel que soit l'onglet — on voit l'ensemble avant le detail.
-  return _pilHdrHtml(d)
-    +'<div class="pil-portee" id="pil-portee"><div class="pil-portee-in">'
-    +'<div class="pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
-    +'<span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span>'
-    +'</div></div>'
+  // ★ TETE-4C (§579) : la ligne d'écran suit l'en-tête — à gauche « Vous regardez » (au téléphone : un bouton, qui déplie le choix
+  //   dessous), à droite « N choses à compléter ». Un rendu neuf la rend repliée.
+  _pilPtOuvert=false;
+  return _pilHdrHtml(d,tab)
+    +'<div class="mv-ecran pil-portee" id="pil-portee"><div class="mv-ecran-g pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
+    +'<div class="mv-ecran-d"><span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span></div></div>'
     +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
-    +'<div class="pil-tabsbar">'+_pilTabsHtml(tab)+'</div>'
     +'<div class="pil-souslig"><span>'+_pilEsc(_pilTabLabel(tab))+'</span>'
     +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
@@ -11557,7 +11563,9 @@ function _pilCssV2(){
   //   est en retard chez un client. Une variable inconnue rend la declaration
   //   invalide et fait retomber TOUT le texte a la taille heritee, en silence.
   var css=''
-  +'.pil-portee{position:sticky;top:0;z-index:34;background:var(--bg-card);border-bottom:1px solid var(--gris);}'
+  // ★ TETE-4C (§579) : « Vous regardez » est la ligne d'écran (.mv-ecran, bandeau.css) — plus une bande collante à elle, et les
+  //   onglets sont dans l'en-tête : les trois règles qui les empilaient (.pil-portee collante, .pil-tabsbar calée sous elle,
+  //   .pil-portee-in) sont parties d'ici. Le récit qui suit reste : c'est pourquoi la hauteur de la barre se mesurait.
   // ⚠️⚠️ DEUX BARRES COLLANTES AU MEME `top` SE RECOUVRENT.
   //   .pil-tabsbar est sticky top:0 z-index:60 (styles.css) et .pil-portee sticky
   //   top:0 z-index:34 : des le premier scroll, la barre d'onglets passait
@@ -11568,8 +11576,6 @@ function _pilCssV2(){
   //   quand une campagne est epinglee) et devient le `top` des onglets.
   //   ★ `body .pil-tabsbar` : une classe de plus que styles.css, donc il gagne
   //   SANS !important, meme si l'ordre des feuilles change un jour.
-  +'body .pil-tabsbar{top:var(--pil-portee-h,0px);}'
-  +'.pil-portee-in{max-width:1180px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}'
   +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
   // PIL-RANGE-2a (§442) : la barre « Vous regardez ».
   +'.pil-crumb{gap:8px}'
@@ -11651,7 +11657,6 @@ function _pilCssV2(){
   +'.pil-photo .go{display:none}'
   +'.pil-souslig{padding:6px 16px 0}'
   +'.pil-ptlab,.pil-ptbornes{display:none}'
-  +'.pil-portee-in{padding:7px 16px;gap:7px}'
   +'}'
   +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
   // Le depliant des cinq jours dans \u00ab Traiter ? \u00bb. Il vit ici et non dans
@@ -11731,7 +11736,6 @@ function _pilCssV2(){
   +'.pil-anb-leg{display:flex;gap:15px;flex-wrap:wrap;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:9px}'
   +'.pil-anb-leg span{display:inline-flex;align-items:center;gap:6px}'
   +'.pil-anb-leg em{width:15px;height:10px;border-radius:3px;display:inline-block;font-style:normal}'
-  +'@media(max-width:430px){.pil-portee-in{padding:7px 12px}}'
   // ══ LE MASTHEAD ══
   //   200 px sur telephone : le nom du domaine passait a la ligne en 26 px, et
   //   Periode / Vignoble s'empilaient dessous. On sait chez qui on est — ce nom
@@ -11805,6 +11809,9 @@ function _pilCrumbHtml(){
   var CA=null; try{ CA=_pilAnCadre(); }catch(eA){ CA=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'portee: cadre illisible'}); }
   var mode=_pilPorteeMode();
   function B(m,lib){ return '<button type="button" data-portee="'+m+'" class="'+(mode===m?'on':'')+'" aria-pressed="'+(mode===m)+'">'+lib+'</button>'; }
+  // ★ TETE-4C (§579) : au téléphone la barre tenait sur trois rangées (132 px). Elle tient en UN bouton qui dit ce qu'on regarde ;
+  //   le toucher déplie le choix (.pil-ptchoix) sous la ligne. Sur ordinateur le bouton est caché, le choix est sur la ligne.
+  var resume=(mode==='camp')?String(_PIL_SCOPE.camp):((mode==='vig'?'Ann\u00e9e vigne':'Exercice')+(CA?' '+CA.court:''));
   var h='<span class="pil-ptlab">Vous regardez</span>'
     +'<div class="pil-seg pil-ptseg" role="group" aria-label="Ce que regarde le Pilotage">'
     +B('camp','La campagne')+B('vig','L\u2019ann\u00e9e vigne')+B('exo','L\u2019exercice')+'</div>';
@@ -11822,7 +11829,17 @@ function _pilCrumbHtml(){
   } else {
     h+='<button type="button" class="pil-diag-go ghost" data-diag="exercice">R\u00e9gler l\u2019exercice \u203a</button>';
   }
-  return h+_mvInfoBtn('pil.cadres');
+  return '<button type="button" class="pil-ptres" data-ptres="1" aria-expanded="'+(_pilPtOuvert?'true':'false')+'" aria-controls="pil-ptchoix" aria-label="Vous regardez\u00a0: '+_pilEsc(resume)+'. Changer">'
+    +'<span class="pil-ptres-t">'+_pilEsc(resume)+'</span><span class="pil-ptres-c" aria-hidden="true"></span></button>'
+    +'<div class="pil-ptchoix" id="pil-ptchoix">'+h+_mvInfoBtn('pil.cadres')+'</div>';
+}
+// ★ TETE-4C (§579) : le choix de « Vous regardez », déplié ou non au téléphone. Il reste ouvert pendant qu'on choisit (la barre se
+//   repeint sans toucher à la ligne) ; un toucher ailleurs dans la page, ou un rendu neuf, le referme.
+var _pilPtOuvert=false;
+function _pilPtOuvrir(on){
+  _pilPtOuvert=!!on;
+  var p=document.getElementById('pil-portee'); if(p) p.classList.toggle('pt-ouvert',_pilPtOuvert);
+  var b=document.querySelector('#pil-portee [data-ptres]'); if(b) b.setAttribute('aria-expanded',String(_pilPtOuvert));
 }
 // Ce que regarde le Pilotage : une campagne choisie, sinon le cadre de l'année.
 function _pilPorteeMode(){ return _PIL_SCOPE.camp ? 'camp' : ((_PIL_SCOPE.cadre==='vig')?'vig':'exo'); }
@@ -12958,6 +12975,10 @@ function _pilBindContent(content){
     // ANNEE-1 (§234) : le cadre et l'annee consultes. Meme chemin que le zoom sur une
     // campagne : la portee change, le fil d'Ariane et les photos suivent.
     // PIL-RANGE-2a (§442) : la barre « Vous regardez ». Un toucher hors de la liste des campagnes la referme.
+    // TETE-4C (§579) : au téléphone, le bouton de la ligne d'écran déplie le choix ; un toucher hors de la ligne le referme.
+    var _pr=e.target.closest('[data-ptres]');
+    if(_pr){ e.stopPropagation(); _pilPtOuvrir(!_pilPtOuvert); return; }
+    if(_pilPtOuvert && !e.target.closest('#pil-portee')) _pilPtOuvrir(false);
     var _pop=document.getElementById('pil-ptpop');
     if(_pop && !_pop.hidden && !e.target.closest('.pil-ptcamp')){ _pop.hidden=true; var _pb0=document.querySelector('[data-ptpop]'); if(_pb0) _pb0.setAttribute('aria-expanded','false'); }
     var _ptV=e.target.closest('[data-portee]');
