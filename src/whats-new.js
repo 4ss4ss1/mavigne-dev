@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.03', d: '2026-11-15', items: [   // REG27-1B (§573) : le registre vérifié avant l'export
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'Le registre se vérifie avant l’export',
+      desc: "Pilotage › Conformité, carte «\u00a0Le registre\u00a0»\u00a0: l’année relue ligne par ligne — SIRET, numéro d’AMM, dose, coordonnées, surface traitée, horaires d’un insecticide, rentrée anticipée — et ce qui manque avant d’exporter. À l’export du fichier (Phyto, roue crantée), les traitements à reprendre s’affichent d’abord\u00a0: touchez-en un pour ouvrir sa fiche. «\u00a0Exporter quand même\u00a0» reste possible." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'L’année civile en tête des exports du registre',
+      desc: "Le registre se compte par année civile\u00a0: elle est proposée en premier, pour le fichier comme pour le PDF, avant les campagnes et les exercices." },
+  ] },
   { v: '11.02', d: '2026-11-15', items: [   // REG27-1A (§572) : le registre 2027 se saisit
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'eprouvette', titre: 'Le registre 2027 se remplit à la saisie',
       desc: "Dans un nouveau traitement\u00a0: la cible de chaque produit (proposée\u00a0: la dernière notée pour ce produit, ou l’usage E-Phy quand il n’y en a qu’un) et le mode d’application. À l’étape des parcelles, «\u00a0Une parcelle traitée en partie\u00a0?\u00a0» corrige les hectares réellement traités. Le registre exporté les écrit, au format attendu en contrôle le 1er janvier 2027." },

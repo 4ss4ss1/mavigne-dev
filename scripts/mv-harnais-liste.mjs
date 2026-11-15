@@ -882,6 +882,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ift1.mjs --contre'],
   ['node scripts/mv-harnais-reg27a.mjs'],              // REG27-1A (§572) : le registre 2027 se saisit — la cible et le mode, la surface traitée, la rentrée anticipée, l'export, l'IFT
   ['node scripts/mv-harnais-reg27a.mjs --contre'],
+  ['node scripts/mv-harnais-reg27b.mjs'],              // REG27-1B (§573) : le registre relu ligne par ligne avant l'export — la vérification, le verdict, la carte de Conformité, la fenêtre, l'année civile
+  ['node scripts/mv-harnais-reg27b.mjs --contre'],
   ['node scripts/mv-harnais-pheno1d.mjs'],             // PHENO-1D (§509) : la date en un appui, aucun retour en arrière, la question avant un grand saut, la commune, le smoke hermétique
   ['node scripts/mv-harnais-pheno1d.mjs --contre'],
   ['node scripts/mv-harnais-cfg1.mjs'],                // CFG-1 (§496) : la configuration revient avec la copie du téléphone (et sert de base) ; la garde parle en clair

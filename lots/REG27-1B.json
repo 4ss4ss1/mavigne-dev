@@ -1,0 +1,32 @@
+{
+  "lot": "REG27-1B",
+  "section": "§573",
+  "base": "5bebc3f401f741470ffb2c7b7fb25dafa2dc95f6",
+  "inclut": [],
+  "date": "2026-11-15",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "654236689585d3699ca862582377b22b43ca5dea77771d952b44ab5a884e5802",
+    "CLAUDE.md": "7a047e689f420d58e63e4ca88677c0f95372979c683b1005b19a96b6c2f3e1d2",
+    "docs/claude/INDEX.md": "a5e957961a198c22aa863bc3b5237e2b6c512a49bb12cde41c1a9bba6a195915",
+    "docs/claude/chantiers-530-579.md": "c28e6fa72382d0a8ba6e55cab6d45f7268f8d7fb1b09c1e4791d1a0f16340ad3",
+    "docs/claude/journal.md": "225bccd00d781d288e731031f6b5daa7aca680c54e14ed52cbba8ee30b49d459",
+    "guide/07-phyto.html": "76f66fc570b9781f172ba1025c693351b186c23277dde975b24a89efc68f3a16",
+    "guide/11-pilotage.html": "f3b3beca3b9cd933fc8c7e0782080d22b0691cfbcb3acbd55d992594fbe57881",
+    "index.html": "ea99b6609d4dc7acebfcff7db23be54c1afde32edbc6ef270db8ddc5c9ddc287",
+    "public/sw.js": "8272170fa6cd51756b3e06d0492f79801f4d473f64605677e579d45225a6f01e",
+    "scripts/harnais-claude-md.mjs": "fd0cfff36a2d3c9d3ee2d5ab04c177b52ab9d31b437a9506c3e1124745d103a4",
+    "scripts/mv-harnais-ajour1.mjs": "03a78e71db5de9bdde217b2f73366b1893027c8f1308a2be1c4c773a9f55373c",
+    "scripts/mv-harnais-liste.mjs": "75a988538091cc105b7d5ab8a292616257aed2fb0478723ae4c71020b43c4887",
+    "scripts/tutos-couverture.json": "6fd00535c29379192961228c9196e633681ba76a85fa9f2eff5ca1cbe90312b5",
+    "src/phyto.js": "73cfa72ba9e03f6c5cf76b51fddc05ddc03231d46178fc6d425228d90d34afe0",
+    "src/pilotage.js": "de8116108af51610efb3e8321957b9bf1da823a77b171c523f4c52e19c21dc6e",
+    "src/utils.js": "0ef0566b4aef43be0079396596b8363f4be570a33b4ed12008768d37301e5080",
+    "src/whats-new.js": "66f369f1fbc08fca7aefffe380bf68a86444dd5a1e93ef3894723da3b57d6f73",
+    "scripts/mv-harnais-reg27b.mjs": "d21b63051ac751dc923eea8b15372f8eec9515b5c9c73f3a0310bf5cfb281fe8",
+    "src/registre.js": "a45215cfee174966cc75e2ad12c7039ff3829fd48ba4590cdd812b4b0a2afab9"
+  }
+}

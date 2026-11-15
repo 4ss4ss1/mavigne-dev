@@ -65,6 +65,8 @@
     "_obsClore": "OBS-1A (§565) : « Clore » un signalement (administrateur) — le bouton dit ce qu’il fait",
     "_recSetMode": "RECOLTE-1B (§569) : la bascule « Réel · Prévu » des Récoltes — deux boutons, rien à apprendre",
     "_rctReglage": "RECOLTE-1B (§569) : les réglages du calcul et « Recaler » (administrateur) — chaque champ et chaque bouton dit ce qu’il change",
-    "_phRentreeSuppr": "REG27-1A (§572) : retire une rentrée anticipée notée par erreur — elle demande confirmation, et se rattrape en la redéclarant ; le tuto « déclarer une rentrée anticipée » montre la fiche où elle se touche"
+    "_phRentreeSuppr": "REG27-1A (§572) : retire une rentrée anticipée notée par erreur — elle demande confirmation, et se rattrape en la redéclarant ; le tuto « déclarer une rentrée anticipée » montre la fiche où elle se touche",
+    "_regOuvrir": "REG27-1B (§573) : ouvre la vérification du registre avant l’export (carte de Conformité) — le bouton dit ce qu’il fait, la fenêtre ne modifie rien",
+    "_regAller": "REG27-1B (§573) : une ligne du registre à reprendre ouvre la fiche de son traitement — rien à apprendre, la liste le dit"
   }
 }

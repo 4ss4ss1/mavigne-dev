@@ -7,6 +7,7 @@
 
 // Fonctions pures importées d'utils.js (mêmes exports que tracteur.js)
 import { isAdmin, isTractoriste, showToast, _escHtml, _escAttr, dreEffectif, _mvIcon } from './utils.js';
+import './registre.js';   // ★ REG27-1B (§573) : la vérification du registre avant l'export (la carte de Conformité, la fenêtre « avant l'export »)
 
 // Flag debug (console.log silencieux en prod) — const par module (cf. tracteur.js)
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -965,6 +966,7 @@ function _phRentrees(t){ var R=t&&t.rentrees; if(Object.prototype.toString.call(
 // Le délai d'une rentrée : recompté sur l'heure de fin du traitement (corrigée depuis ?), sinon celui noté à la déclaration.
 function _phRentreeDelai(t,r){ var m=_phRentreeDelaiMin(t,r&&r.quand); return (m!=null&&m>0)?_phHhMm(m):String((r&&r.delai)||''); }
 window._phRentrees=_phRentrees; window._phRentreeDelai=_phRentreeDelai;
+window._phRentreeDelaiMin=_phRentreeDelaiMin; window._phDreSession=_phDreSession;   // REG27-1B (§573) : la vérification du registre les relit (registre.js)
 var _phRent={idx:null,id:'',parcs:[],detail:false};
 function _phRentreeOv(){
   var ov=document.getElementById('ovPhRentree'); if(ov) return ov;
@@ -1330,11 +1332,24 @@ function _phCsvJour(t){
 //   \u2461 la vraie campagne (l'axe des Archives) n'etait pas proposee du tout.
 // \u26a0\ufe0f Repli local conserve, comportement de l'ancienne version, si utils.js est
 //   anterieur a ce lot : un phyto.js neuf sur un utils.js ancien ne plante pas.
+// ★ REG27-1B (§573) — L'ANNÉE CIVILE EN TÊTE DE LISTE : c'est l'année du registre (l'arrêté du 24 décembre 2025 compte « l'année
+//   suivant celle de l'utilisation » pour la mise au format électronique), et celle de la carte « Le registre » de Conformité.
+//   Deux : la courante et la précédente (en janvier, c'est l'année passée qu'on remet). Une fenêtre aux mêmes dates qu'une de
+//   la liste — un exercice comptable du 1er janvier — n'est pas redite.
+function _phytoFenAnnees(L){
+  var y=new Date().getFullYear(), out=[];
+  [y,y-1].forEach(function(a,i){
+    var d0=a+'-01-01', d1=a+'-12-31';
+    if(L.some(function(f){ return f&&f.d0===d0&&f.d1===d1; })) return;
+    out.push({ k:'civ'+a, axe:'annee', lbl:'Ann\u00e9e '+a+(i===0?' (en cours)':''), sub:'du 01/01/'+a+' au 31/12/'+a+' \u2014 l\u2019ann\u00e9e du registre', d0:d0, d1:d1 });
+  });
+  return out.concat(L);
+}
 function _phytoFenetres(){
   if(typeof window._mvFenetresAnnee === 'function'){
     try{
       var L = window._mvFenetresAnnee({campagnes:3, exercices:2});
-      if(L && L.length) return L;
+      if(L && L.length) return _phytoFenAnnees(L);
     }catch(e){ if(window.logError) window.logError({level:'info',cat:'phyto',msg:'liste des fenetres illisible \u2014 repli local'}); }
   }
   var out = [];
@@ -1355,7 +1370,7 @@ function _phytoFenetres(){
                d0:s.debut, d1:s.fin });
   }
   out.push({ k:'tout', axe:'tout', lbl:'Tout le registre', sub:'depuis la mise en service', d0:'', d1:'' });
-  return out;
+  return _phytoFenAnnees(out);
 }
 window._phytoFenetres = _phytoFenetres;
 // Nombre de TRAITEMENTS dans une fenetre (pas de lignes : on ne construit rien ici).
@@ -1398,8 +1413,11 @@ window._phytoCsvRows = function(fen){
   var C = window.CONFIG || {};
   var siret = String(C.siret||'').replace(/[^0-9]/g,'');
   var bioDom = !!C.bio;
-  var out = [], sansGeo = 0;
+  // ★ REG27-1B (§573) : `src` dit, pour chaque ligne, de quel traitement elle vient (son rang dans TRAITEMENTS) et sa
+  //   parcelle — la vérification avant l'export (registre.js) relit CES lignes et renvoie à la fiche du traitement.
+  var out = [], src = [], sansGeo = 0, TOUS = window.TRAITEMENTS||[];
   T.forEach(function(t){
+    var rang = TOUS.indexOf(t);
     var m = (typeof _phResolve==='function') ? _phResolve(t) : {};
     var d = _phCsvDose(t);
     var bbch = _phCsvBbch(t.stade);
@@ -1430,9 +1448,10 @@ window._phytoCsvRows = function(fen){
         jn(function(r){ return _phCsvDate(String(r.quand).slice(0,10))+' '+String(r.quand).slice(11,16); }),
         jn(function(r){ return r.motif||''; }), jn(function(r){ return r.mesures||''; })
       ]);
+      src.push({ i: rang, nom: (nom||'') });
     });
   });
-  return { rows: out, sansGeo: sansGeo, siret: siret, sansDate: sansDate, d0: fd0, d1: fd1 };
+  return { rows: out, src: src, sansGeo: sansGeo, siret: siret, sansDate: sansDate, d0: fd0, d1: fd1 };
 };
 
 // Panneau de choix de la fenetre. Ouvert par le bouton d'export (appel sans argument),
@@ -1450,13 +1469,13 @@ function _phytoExportChoix(cible){
   if(!ov){
     ov = document.createElement('div'); ov.id = ovId; ov.className = 'overlay';
     ov.setAttribute('onclick', "closeOv(event,'"+ovId+"')");
-    ov.innerHTML = `<div class="ov-panel"><div class="ov-drag"></div>
-      <div class="ov-hd"><div class="ov-title" id="phx-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
-      <div id="phx-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
-      <div style="padding:0 20px 16px">
-        <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;cursor:pointer">Annuler</button>
-      </div>
-    </div>`;
+    // ★ REG27-1B (§573) : la feuille prend la forme commune (.modal). Elle portait des classes sans aucun style (.ov-panel,
+    //   .ov-hd…) : pas de fond, le titre posé en haut à gauche de l'écran, les périodes flottant sur la page.
+    ov.innerHTML = '<div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>'
+      + '<div class="modal-hd"><div class="modal-title" id="phx-title">Exporter le registre</div></div>'
+      + '<div class="modal-body"><div id="phx-body"></div>'
+      + '<button type="button" class="mbtn" onclick="closeOv(null,\'ovPhytoExport\')" style="width:100%;margin-top:8px;cursor:pointer">Annuler</button>'
+      + '</div></div>';
     document.body.appendChild(ov);
   }
   var F = _phytoFenetres();
@@ -1474,7 +1493,7 @@ function _phytoExportChoix(cible){
   });
   h += `<div class="mvencadre" style="margin-top:4px">
       <div style="font-size:9px;color:var(--texte-doux);font-weight:600;margin-bottom:6px">\u00c0 savoir</div>
-      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface trait\u00e9e (ha)\u00a0\u00bb reprend les hectares saisis au traitement\u00a0: la parcelle enti\u00e8re, sauf si vous l\u2019avez corrig\u00e9e. Un traitement qui n\u2019a couvert qu\u2019une partie d\u2019une parcelle se corrige dans sa fiche (Modifier) avant l\u2019export. Les rentr\u00e9es anticip\u00e9es d\u00e9clar\u00e9es sur la fiche donnent le d\u00e9lai, le moment, le motif et les protections.</div>
+      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface trait\u00e9e (ha)\u00a0\u00bb reprend les hectares saisis au traitement\u00a0: la parcelle enti\u00e8re, sauf si vous l\u2019avez corrig\u00e9e. Un traitement qui n\u2019a couvert qu\u2019une partie d\u2019une parcelle se corrige dans sa fiche (Modifier) avant l\u2019export. Les rentr\u00e9es anticip\u00e9es d\u00e9clar\u00e9es sur la fiche donnent le d\u00e9lai, le moment, le motif et les protections. Avant le t\u00e9l\u00e9chargement, chaque ligne est relue\u00a0: s\u2019il en manque, la liste s\u2019ouvre d\u2019abord.</div>
     </div>`;
   var body = ov.querySelector('#phx-body');
   if(body) body.innerHTML = h;
@@ -1488,13 +1507,18 @@ window._phytoExportChoix = _phytoExportChoix;
 
 // Sans argument : ouvre le choix de fenetre (c'est le clic sur le bouton d'export).
 // Avec une cle de fenetre : construit et telecharge.
-window._phytoExportCsv = function(mode){
+// ★ REG27-1B (§573) : avant de télécharger, le registre se relit ligne par ligne (registre.js). Une ligne à compléter, le
+//   SIRET ou une date qui manquent : la fenêtre « avant l'export » s'ouvre à la place du téléchargement, dit quoi et où, et
+//   garde « Exporter quand même » (`sansVerif`) — le registre reflète ce qui a été fait. Complet : il part comme avant.
+window._phytoExportCsv = function(mode, sansVerif){
   if(!_phytoExportGarde()) return;
 
   var F = _phytoFenetres(), fen = null;
   for(var i=0;i<F.length;i++){ if(F[i].k===mode){ fen = F[i]; break; } }
   if(!fen){ _phytoExportChoix(); return; }
   closeOv(null, 'ovPhytoExport');
+  if(!sansVerif && typeof window._regBloque==='function' && typeof window._regOuvrir==='function' && window._regBloque(fen)){ window._regOuvrir(fen.k); return; }
+  closeOv(null, 'ovRegVerif');
 
   var R = window._phytoCsvRows(fen);
   if(!R.rows.length){ showToast('Aucun traitement sur cette p\u00e9riode','#B85A1A'); return; }

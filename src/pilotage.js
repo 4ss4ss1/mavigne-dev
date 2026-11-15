@@ -1074,6 +1074,18 @@ function _pilPanelPhyto(d){
   //   rien ; « Catalogue E-Phy a jour » n'est pas une donnee de cette carte.
   //   Elles disparaissent, le cadre prend le relais.
   var _der=(d.traits[0]&&d.traits[0].date)||null;
+  // ★★ REG27-1B (§573) — « LE REGISTRE <ANNÉE> » : LE CONTRÔLE AVANT LE CONTRÔLEUR (maquette « niveau au-dessus », partie 5).
+  //   La carte ne liste plus seulement les derniers passages : elle relit le registre de l'année civile ligne par ligne
+  //   (registre.js, window._regCarte — les lignes mêmes du fichier d'export) et dit ce qui manque avant d'exporter. Les
+  //   derniers passages restent, derrière un dépliant. Même case (`mat_phyto`), même fiche « i ». Sans registre.js : l'ancienne.
+  var G=(typeof window._regCarte==='function')?window._regCarte():null;
+  if(G){
+    var V=G.V, _av=!V.nLignes?null:(!V.siretOk?'SIRET manquant':(V.nManque?(V.nManque+' \u00e0 compl\u00e9ter'):null));
+    var _liste=d.traits.length?('<details style="margin-top:12px"><summary style="cursor:pointer;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Les derni\u00e8res interventions</summary><div class="pil-ip-list" style="margin-top:8px">'+rows+'</div></details>'):'';
+    return _pilTile('phyto','#5A9FD4','Le registre '+G.an, _pilStat(V.nLignes,' ligne'+(V.nLignes>1?'s':''),_av),
+      V.nLignes?(V.nTrait+' traitement'+(V.nTrait>1?'s':'')+' \u00b7 au format du registre \u00e9lectronique'):('aucun traitement en '+G.an),
+      null, G.corps+_liste, 'pil.phyto');
+  }
   return _pilTile('phyto','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
     _der?('dernière le '+_pilDfr(_der)+' \u00b7 catalogue E-Phy'):'aucune intervention enregistrée',
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.phyto');
@@ -11159,7 +11171,7 @@ var _PIL_PERSO_DEFS={
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['auj_tension','La tension par personne'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
-  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
+  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Le registre de l’année (vérifié avant l’export)'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
