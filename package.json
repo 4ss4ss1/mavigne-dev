@@ -17,6 +17,7 @@
     "test:tutos": "node scripts/mv-tutos-jeu.mjs",
     "test:gabarit": "node scripts/mv-gabarit-rendu.mjs",
     "test:ux": "node scripts/mv-ux-rendu.mjs",
+    "test:mots": "node scripts/mv-mots-rendu.mjs",
     "test:sec7": "node scripts/harnais-sec7-contre.mjs",
     "test:rules": "npx -y firebase-tools@14.27.0 emulators:exec --only firestore --project demo-mv-rules \"node scripts/mv-harnais-rules.mjs && node scripts/mv-harnais-rules.mjs --contre\"",
     "emu": "firebase emulators:start --only auth,firestore",

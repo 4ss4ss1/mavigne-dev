@@ -99,7 +99,7 @@ async function jouer(S) {
   const ou = (cmd) => ids.filter((id) => J[id].includes(cmd));
   const fois = (cmd) => (ci.match(new RegExp(cmd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g')) || []).length;
   t('la CI se découpe en jobs : contrôles, tutos, mesures', !!J.controles && !!J.tutos && !!J.mesures, ids.join(', '));
-  t('le job des contrôles ne joue ni les tutos, ni le gabarit, ni l’expérience d’usage', !!J.controles && !/test:tutos|test:gabarit|test:ux/.test(J.controles));
+  t('le job des contrôles ne joue ni les tutos, ni le gabarit, ni l’expérience d’usage, ni les mots', !!J.controles && !/test:tutos|test:gabarit|test:ux|test:mots/.test(J.controles));
   t('le smoke reste dans le job des contrôles', ou('run: npm run test:smoke').join() === 'controles', ou('run: npm run test:smoke').join());
   t('les tutos : une seule étape, dans le job « tutos »', fois('run: npm run test:tutos') === 1 && ou('run: npm run test:tutos').join() === 'tutos', ou('run: npm run test:tutos').join());
   const tut = J.tutos || '';
@@ -114,7 +114,7 @@ async function jouer(S) {
     fois('run: npm run test:gabarit') === 1 && fois('run: npm run test:ux') === 1 && ou('run: npm run test:gabarit').join() === 'mesures'
     && ou('run: npm run test:ux').join() === 'mesures' && J.mesures.indexOf('run: npm run test:gabarit') < J.mesures.indexOf('run: npm run test:ux'));
   const manques = [];
-  for (const cmd of ['test:smoke', 'test:tutos', 'test:gabarit', 'test:ux']) for (const id of ou('run: npm run ' + cmd)) {
+  for (const cmd of ['test:smoke', 'test:tutos', 'test:gabarit', 'test:ux', 'test:mots']) for (const id of ou('run: npm run ' + cmd)) {   // MOTS-0 (§580) : les mots aussi veulent leur build et leur navigateur
     const b = J[id], iT = b.indexOf('run: npm run ' + cmd);
     for (const avant of ['run: npm ci', 'run: npm run build --ignore-scripts', 'run: npx playwright install --with-deps chromium']) {
       const i = b.indexOf(avant);

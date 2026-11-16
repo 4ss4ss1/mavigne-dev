@@ -1,0 +1,24 @@
+{
+  "lot": "MOTS-0",
+  "section": "§580",
+  "base": "ebd5f0941cbe6ba7fc7e93f93255ad0dc0d4a639",
+  "inclut": [],
+  "date": "2026-11-16",
+  "tutos": null,
+  "fichiers": {
+    ".github/workflows/ci.yml": "49966c4712d79f81e5da810905cc73a73cce18d03e79131ec1ebe986514d8580",
+    "CLAUDE.md": "aa030b0a191e49d302da03cff974a10cc931c45369e9c1f6a45b96e69a9654fc",
+    "docs/claude/INDEX.md": "99d5a23369e0397abca0d30fc92568fbd13111296c5a533e09c34e9e5f60c806",
+    "docs/claude/journal.md": "4ae7d0108d0fdaedfb64156f1cc6cdf2b6eac811ad33a70efb24e95207693746",
+    "docs/maquettes/LISEZMOI.md": "b31415194b91e2159d2182f92586fadb29ad1b2d69e77db19f22653084701790",
+    "package.json": "6806b799b4879aa3d0e642671c7707cb319951040c7b9b3687dbb548da294a08",
+    "scripts/harnais-claude-md.mjs": "77ac2808b87616f21118aca0b4ad9cc66588341de5dd042866882260e2e26f32",
+    "scripts/mv-harnais-ci1.mjs": "140d797261cab8a61f150abecc6b97e3b5b565edfeedae79814482f0b9797739",
+    "scripts/mv-harnais-liste.mjs": "4902f62a8d05419da60b37b2244628039ee56a518cfbd028cd8465a1d33201ec",
+    "docs/claude/chantiers-580-629.md": "c82d0194cee1eb8c6787c5ccc15a294d7d60c0d29aa45ec29740e39314a62fc3",
+    "docs/maquettes/maquette-moins-de-texte-v3.html": "bea5070b060988164364cd6ec87fdb6957180e8956419363f168ed14d11f0bd9",
+    "scripts/mv-harnais-mots0.mjs": "e28d0e625e7966aacfaef220a9c36623b07b4d9aa1939e712c1ae107ee7b3e8c",
+    "scripts/mv-mots-baseline.json": "a40b27ffd531f7445d45ee54001b95f1be616dad2925654c7b616fbe62f79fc6",
+    "scripts/mv-mots-rendu.mjs": "342796ccd5208355096b6a2ed86f18eda8a3fa13da6d13a9dcbf8899a037919c"
+  }
+}

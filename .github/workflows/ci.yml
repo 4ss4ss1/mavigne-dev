@@ -18,7 +18,8 @@
 #    reparti sur six machines qui demarrent ensemble :
 #    · controles   : la liste unique -> build -> smoke  (LISTE-1, §190)  ~7 min
 #    · tutos 1 et 2 : un tuto sur deux chacun, un par un (TUTO-1, §358)   ~8 min
-#    · mesures     : build -> gabarit du Pilotage -> experience d'usage   ~6 min
+#    · mesures     : build -> gabarit du Pilotage -> experience d'usage
+#                    -> les mots (MOTS-0, §580)                           ~9 min
 #    · e2e         : les 10 pages, login DOM reel                         ~2 min
 #    · rules       : firestore.rules sur l'emulateur (RULES-1, §189)     ~2 min
 #    Le rouge dit tout de suite lequel a casse. Aucun job n'attend un autre.
@@ -203,6 +204,13 @@ jobs:
       # qu'à la référence fait rougir la mise en ligne ; une baisse se regrave (npm run test:ux -- --baseline).
       - name: Expérience d'usage — le cliquet mesuré sur le build
         run: npm run test:ux
+
+      # MOTS-0 (§580) : le cliquet des mots — les 46 écrans de l'admin au téléphone et sur ordinateur : les mots à l'écran,
+      # les phrases de 15 mots et plus, les mots avant le premier grand chiffre et, au Pilotage, les mots hors lexique,
+      # comparés à scripts/mv-mots-baseline.json. Une phrase de plus fait rougir la mise en ligne ; une baisse se regrave
+      # (npm run test:mots -- --baseline). Trois minutes : le job reste loin de sa limite (CI-1, §514).
+      - name: Les mots — le cliquet mesuré sur le build
+        run: npm run test:mots
 
   # ==========================================================================
   e2e:

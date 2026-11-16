@@ -1,0 +1,570 @@
+{
+ "_": "MOTS-0 (§580) — la référence du cliquet des mots. Écrite par npm run test:mots -- --baseline : ne pas la retoucher à la main.",
+ "horloge": "2026-10-27T08:00:00Z",
+ "chromium": "153.0.8010.12",
+ "regravures": [
+  {
+   "date": "2026-11-16",
+   "motif": "référence posée (MOTS-0, §580) : les 46 écrans de l’admin, sur tete4c",
+   "hausses": []
+  }
+ ],
+ "mesures": {
+  "téléphone": {
+   "Vigne › Accueil": {
+    "mots": 284,
+    "p15": 1,
+    "avant": 21,
+    "lex": null
+   },
+   "Vigne › Parcelles › Liste": {
+    "mots": 61,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Vigne › Parcelles › Stades": {
+    "mots": 106,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Vigne › Journal": {
+    "mots": 136,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Tracteur › Sessions": {
+    "mots": 30,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Tracteur › Entretien": {
+    "mots": 103,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Phyto › Registre": {
+    "mots": 316,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Phyto › Catalogue": {
+    "mots": 29,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Phyto › Fertilisation": {
+    "mots": 206,
+    "p15": 4,
+    "avant": null,
+    "lex": null
+   },
+   "Cave › Aujourd’hui": {
+    "mots": 445,
+    "p15": 2,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Maturités": {
+    "mots": 67,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Récoltes": {
+    "mots": 148,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Cuves": {
+    "mots": 128,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Tournée": {
+    "mots": 53,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Cuvées": {
+    "mots": 134,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Bouteilles": {
+    "mots": 120,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Labo": {
+    "mots": 74,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Diagnostic": {
+    "mots": 105,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Journal": {
+    "mots": 60,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Millésime › Ensemble": {
+    "mots": 199,
+    "p15": 2,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Parcelles": {
+    "mots": 506,
+    "p15": 9,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Cuvées": {
+    "mots": 184,
+    "p15": 1,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Courbes": {
+    "mots": 327,
+    "p15": 3,
+    "avant": 18,
+    "lex": null
+   },
+   "Réserve › Fûts": {
+    "mots": 137,
+    "p15": 1,
+    "avant": 75,
+    "lex": null
+   },
+   "Réserve › Intrants": {
+    "mots": 92,
+    "p15": 2,
+    "avant": 76,
+    "lex": null
+   },
+   "Réserve › Bilan matière": {
+    "mots": 60,
+    "p15": 1,
+    "avant": null,
+    "lex": null
+   },
+   "Planning › Mois": {
+    "mots": 45,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Année": {
+    "mots": 308,
+    "p15": 3,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel": {
+    "mots": 71,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Pilotage › Aujourd’hui › Terrain": {
+    "mots": 318,
+    "p15": 0,
+    "avant": 13,
+    "lex": 13
+   },
+   "Pilotage › Aujourd’hui › Cave": {
+    "mots": 504,
+    "p15": 5,
+    "avant": 13,
+    "lex": 6
+   },
+   "Pilotage › Aujourd’hui › Économie": {
+    "mots": 262,
+    "p15": 0,
+    "avant": 13,
+    "lex": 14
+   },
+   "Pilotage › Travaux": {
+    "mots": 104,
+    "p15": 1,
+    "avant": 11,
+    "lex": 16
+   },
+   "Pilotage › L’équipe & le matériel": {
+    "mots": 254,
+    "p15": 3,
+    "avant": 5,
+    "lex": 6
+   },
+   "Pilotage › Décider": {
+    "mots": 377,
+    "p15": 2,
+    "avant": 16,
+    "lex": 5
+   },
+   "Pilotage › Économie › Synthèse": {
+    "mots": 445,
+    "p15": 5,
+    "avant": 85,
+    "lex": 14
+   },
+   "Pilotage › Économie › Postes & travaux": {
+    "mots": 229,
+    "p15": 3,
+    "avant": null,
+    "lex": 7
+   },
+   "Pilotage › Économie › Parcelles": {
+    "mots": 211,
+    "p15": 2,
+    "avant": null,
+    "lex": 5
+   },
+   "Pilotage › Économie › Revient": {
+    "mots": 186,
+    "p15": 1,
+    "avant": 23,
+    "lex": 3
+   },
+   "Pilotage › Économie › Achats": {
+    "mots": 279,
+    "p15": 5,
+    "avant": 67,
+    "lex": 2
+   },
+   "Pilotage › Économie › Le détail de l’exercice": {
+    "mots": 649,
+    "p15": 10,
+    "avant": 38,
+    "lex": 3
+   },
+   "Pilotage › Conformité": {
+    "mots": 90,
+    "p15": 0,
+    "avant": 9,
+    "lex": 1
+   },
+   "Pilotage › Archives": {
+    "mots": 110,
+    "p15": 2,
+    "avant": 48,
+    "lex": 5
+   },
+   "Réglages › Domaine": {
+    "mots": 103,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Réglages › Équipe": {
+    "mots": 39,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Réglages › Moi": {
+    "mots": 124,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   }
+  },
+  "ordinateur": {
+   "Vigne › Accueil": {
+    "mots": 284,
+    "p15": 1,
+    "avant": 40,
+    "lex": null
+   },
+   "Vigne › Parcelles › Liste": {
+    "mots": 140,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Vigne › Parcelles › Stades": {
+    "mots": 132,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Vigne › Journal": {
+    "mots": 190,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Tracteur › Sessions": {
+    "mots": 67,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Tracteur › Entretien": {
+    "mots": 177,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Phyto › Registre": {
+    "mots": 351,
+    "p15": 0,
+    "avant": 33,
+    "lex": null
+   },
+   "Phyto › Catalogue": {
+    "mots": 29,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Phyto › Fertilisation": {
+    "mots": 209,
+    "p15": 4,
+    "avant": null,
+    "lex": null
+   },
+   "Cave › Aujourd’hui": {
+    "mots": 469,
+    "p15": 2,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Maturités": {
+    "mots": 98,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Récoltes": {
+    "mots": 246,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Cuves": {
+    "mots": 160,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Cuvier › Tournée": {
+    "mots": 59,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Cuvées": {
+    "mots": 171,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Bouteilles": {
+    "mots": 116,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Labo": {
+    "mots": 74,
+    "p15": 1,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Diagnostic": {
+    "mots": 296,
+    "p15": 2,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Chai › Journal": {
+    "mots": 60,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Cave › Le Millésime › Ensemble": {
+    "mots": 199,
+    "p15": 2,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Parcelles": {
+    "mots": 522,
+    "p15": 9,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Cuvées": {
+    "mots": 181,
+    "p15": 1,
+    "avant": 18,
+    "lex": null
+   },
+   "Cave › Le Millésime › Courbes": {
+    "mots": 769,
+    "p15": 9,
+    "avant": 18,
+    "lex": null
+   },
+   "Réserve › Fûts": {
+    "mots": 137,
+    "p15": 1,
+    "avant": 75,
+    "lex": null
+   },
+   "Réserve › Intrants": {
+    "mots": 92,
+    "p15": 2,
+    "avant": 76,
+    "lex": null
+   },
+   "Réserve › Bilan matière": {
+    "mots": 60,
+    "p15": 1,
+    "avant": null,
+    "lex": null
+   },
+   "Planning › Mois": {
+    "mots": 45,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Année": {
+    "mots": 308,
+    "p15": 3,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel": {
+    "mots": 276,
+    "p15": 4,
+    "avant": 0,
+    "lex": null
+   },
+   "Pilotage › Aujourd’hui › Terrain": {
+    "mots": 323,
+    "p15": 0,
+    "avant": 14,
+    "lex": 13
+   },
+   "Pilotage › Aujourd’hui › Cave": {
+    "mots": 547,
+    "p15": 5,
+    "avant": 14,
+    "lex": 6
+   },
+   "Pilotage › Aujourd’hui › Économie": {
+    "mots": 263,
+    "p15": 0,
+    "avant": 14,
+    "lex": 14
+   },
+   "Pilotage › Travaux": {
+    "mots": 113,
+    "p15": 1,
+    "avant": 11,
+    "lex": 16
+   },
+   "Pilotage › L’équipe & le matériel": {
+    "mots": 259,
+    "p15": 3,
+    "avant": 11,
+    "lex": 6
+   },
+   "Pilotage › Décider": {
+    "mots": 377,
+    "p15": 2,
+    "avant": 16,
+    "lex": 5
+   },
+   "Pilotage › Économie › Synthèse": {
+    "mots": 448,
+    "p15": 5,
+    "avant": 85,
+    "lex": 14
+   },
+   "Pilotage › Économie › Postes & travaux": {
+    "mots": 229,
+    "p15": 3,
+    "avant": null,
+    "lex": 7
+   },
+   "Pilotage › Économie › Parcelles": {
+    "mots": 212,
+    "p15": 2,
+    "avant": null,
+    "lex": 5
+   },
+   "Pilotage › Économie › Revient": {
+    "mots": 194,
+    "p15": 1,
+    "avant": 23,
+    "lex": 3
+   },
+   "Pilotage › Économie › Achats": {
+    "mots": 279,
+    "p15": 5,
+    "avant": 69,
+    "lex": 2
+   },
+   "Pilotage › Économie › Le détail de l’exercice": {
+    "mots": 657,
+    "p15": 10,
+    "avant": 50,
+    "lex": 3
+   },
+   "Pilotage › Conformité": {
+    "mots": 90,
+    "p15": 0,
+    "avant": 15,
+    "lex": 1
+   },
+   "Pilotage › Archives": {
+    "mots": 116,
+    "p15": 2,
+    "avant": 54,
+    "lex": 5
+   },
+   "Réglages › Domaine": {
+    "mots": 109,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Réglages › Équipe": {
+    "mots": 39,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   },
+   "Réglages › Moi": {
+    "mots": 124,
+    "p15": 0,
+    "avant": null,
+    "lex": null
+   }
+  }
+ }
+}
