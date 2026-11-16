@@ -27,11 +27,12 @@ function jouer(S) {
   const gb = m ? { h: +m[1], h2: +m[2], r: +m[3], rv: +m[4] } : {};
   t('① et colle à la charte : h = --barre-graph-h, h2 = --jauge-h, r = --r-xs', m && gb.h === px(S.charte, '--barre-graph-h') && gb.h2 === px(S.charte, '--jauge-h') && gb.r === px(S.charte, '--r-xs'),
     JSON.stringify(gb) + ' contre ' + [px(S.charte, '--barre-graph-h'), px(S.charte, '--jauge-h'), px(S.charte, '--r-xs')].join('/'));
-  const fr = corps(S.pil, '_pilFriseSvg'), ta = corps(S.pil, '_pecTaskSvg'), ec = corps(S.pil, '_pecEcartSvg');
+  const fr = corps(S.pil, '_pilFriseSvg'), ec = corps(S.pil, '_pecEcartSvg');
   t('② la frise prévu / réel lit la mesure commune (prévu h, réel h2)', /hP=_PIL_GB\.h,/.test(fr) && /hR=_PIL_GB\.h2;/.test(fr));
-  t('② « Postes & travaux » aussi, dans ses deux dispositions', /bh=_PIL_GB\.h;/.test(ta) && /bh2=_PIL_GB\.h;/.test(ta));
+  // MOTS-3 (§584) : le graphique en barres de Postes & travaux est parti avec ses tableaux — ses lignes de liste portent une jauge fine (.pec-bar, 6 px).
+  t('② « Postes & travaux » n’a plus de graphique : la jauge de ses lignes est la barre fine de la charte (6 px, rayon 3)', !/_pecTaskSvg/.test(S.pil) && /'\.pec-rg \.l2 \.pec-bar\{flex:1;min-width:36px;height:6px;border-radius:3px\}'/.test(S.pil));
   t('② « Parcelles » (écart) aussi', /bh=_PIL_GB\.h;/.test(ec));
-  const fns = ['_pilFriseSvg', '_pecTaskSvg', '_pecEcartSvg', '_rfCalSvg', '_pilAnRenfortSvg', '_pilAnBudgetSvg', '_pilDemandSvg', '_pexGraph'];
+  const fns = ['_pilFriseSvg', '_pecEcartSvg', '_rfCalSvg', '_pilAnRenfortSvg', '_pilAnBudgetSvg', '_pilDemandSvg', '_pexGraph'];
   const apart = fns.filter((f) => /rx="(1\.5|3|5)"/.test(corps(S.pil, f)));
   t('③ plus aucun arrondi de barre « à part » (1,5 · 3 · 5) dans les ' + fns.length + ' graphiques', fns.every((f) => corps(S.pil, f).length > 0) && apart.length === 0, apart.join(', '));
   t('④ plus aucune police Cormorant écrite dans pilotage.js', !/--font-titre/.test(S.pil));
@@ -52,7 +53,7 @@ if (!CONTRE) {
     ['la mesure commune ne colle plus à la charte', (S) => Object.assign({}, S, { pil: S.pil.replace('var _PIL_GB = { h:16,', 'var _PIL_GB = { h:17,') })],
     ['la charte change sans la mesure commune', (S) => Object.assign({}, S, { charte: S.charte.replace(/--barre-graph-h:16px/, '--barre-graph-h:18px') })],
     ['la frise reprend un réel à 11 px', (S) => Object.assign({}, S, { pil: S.pil.replace('hR=_PIL_GB.h2;', 'hR=11;') })],
-    ['« Postes & travaux » reprend 17 px', (S) => Object.assign({}, S, { pil: S.pil.replace('var by2=y+5, bh2=_PIL_GB.h;', 'var by2=y+5, bh2=17;') })],
+    ['la jauge des listes de Postes & travaux s’épaissit', (S) => Object.assign({}, S, { pil: S.pil.replace("'.pec-rg .l2 .pec-bar{flex:1;min-width:36px;height:6px;border-radius:3px}'", "'.pec-rg .l2 .pec-bar{flex:1;min-width:36px;height:11px;border-radius:3px}'") })],
     ['« Parcelles » reprend 15 px', (S) => Object.assign({}, S, { pil: S.pil.replace('bh=_PIL_GB.h;\n', 'bh=et?16:15;\n').replace(/(function _pecEcartSvg[\s\S]*?)bh=_PIL_GB\.h;/, '$1bh=et?16:15;') })],
     ['un graphique reprend un arrondi à 1,5', (S) => Object.assign({}, S, { pil: S.pil.replace(/(function _rfCalSvg[\s\S]*?)rx="'\+_PIL_GB\.rv\+'"/, '$1rx="1.5"') })],
     ['une police Cormorant revient', (S) => Object.assign({}, S, { pil: S.pil + "\n  +'.pec-ct{font-family:var(--font-titre,serif)}'\n" })],

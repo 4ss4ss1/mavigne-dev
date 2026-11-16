@@ -64,7 +64,7 @@ function suite(S) {
   const a0 = M.A('TEXTE', '<button>GESTE</button>');
   T('① la bande : orange, annoncée (role=status), son icône, son texte, son bouton à droite', /^<div class="pec-al or" role="status"><span class="ic">\[ico:alerte\]<\/span><span class="tx">TEXTE<\/span><button>GESTE<\/button><\/div>$/.test(a0), a0);
   const t1 = plat(M.T({ reOk: true, reAttE: 959, reAttH: 74 }));
-  T('① des heures payées sans validation : « 74 h payées sans validation · 959 € »', /<b>74 h payées sans validation<\/b> · 959 €/.test(t1), t1);
+  T('① des heures payées sans validation : « 74 h payées sans validation · 959 € »', /<b>74 h payées sans validation<\/b> <span style="white-space:nowrap">· 959 €<\/span>/.test(t1), t1);
   T('① … rien à signaler : pas de bande (moins d’un euro, ou planning pas ouvert)', M.T({ reOk: true, reAttE: 0.4, reAttH: 0.1 }) === '' && M.T({ reOk: false, reAttE: 959, reAttH: 74 }) === '' && M.T(null) === '');
   T('① les dates courtes du millésime : « 24 oct. 2025 », un tiret si la date manque', M.D('2025-10-24') === '24 oct. 2025' && M.D('') === '—' && M.D(null) === '—');
 
@@ -77,8 +77,8 @@ function suite(S) {
   /* ── ③ CHAQUE VUE OUVRE SUR SON EN-TÊTE ── */
   const pos = sansCom(fnDe(S.pil, 'function _pecViewPostes(E){'));
   T('③ Postes & travaux : la campagne, « X € engagés sur Y € », la bande des heures en attente', /var H=_pecEnteteVue\(_pecPerLigne\(''\), '<b>'\+_pilEsc\(_ecoEur\(E\.engage\)\)\+'<\/b> engagés sur <b>'\+_pilEsc\(_ecoEur\(E\.budget\)\)\+'<\/b>\.'\)\+_pecBandeAttente\(E\)/.test(pos));
-  T('③ … ses deux tableaux sont là, et la porte vers le détail de l’exercice', (pos.match(/<table class="pec-tbl"/g) || []).length >= 2 && /data-pec="sub" data-v="exe"/.test(pos) && /_pecDetailLib\(\)/.test(pos));
-  T('③ … plus de note de cadre sous ses cartes, sauf la ligne du temps quand elle a quelque chose à dire', (pos.match(/pec-vcadre/g) || []).length === 1 && /\(tNote\?\('<div class="pec-vcadre"><span>'\+tNote\+'<\/span><\/div>'\):''\)|pec-vcadre"><span>'\+tNote\+'<\/span><\/div>'\):''\)/.test(pos) && !/ne peuvent pas y \\u00eatre|ne porte aucune date/.test(pos));
+  T('③ … la porte vers le détail de l’exercice est là (ses tableaux sont devenus des listes : MOTS-3, §584)', /data-pec="sub" data-v="exe"/.test(pos) && /_pecDetailLib\(\)/.test(pos));
+  T('③ … plus de note de cadre sous ses cartes, sauf la ligne du temps quand elle a quelque chose à dire', (pos.match(/pec-vcadre/g) || []).length === 1 && /\(tNote\?\('<div class="pec-cb"><div class="pec-vcadre"><span>'\+tNote\+'<\/span><\/div><\/div>'\):''\)/.test(pos) && !/ne peuvent pas y \\u00eatre|ne porte aucune date/.test(pos));
   const par = sansCom(fnDe(S.pil, 'function _pecViewParcelles(E){'));
   T('③ Parcelles : la campagne, « X € réalisés sur N parcelles » — le total de la colonne Réalisé, pas un second « engagé »', /var H=_pecEnteteVue\(_pecPerLigne\(''\), '<b>'\+_pilEsc\(_ecoEur\(E\.engRe\)\)\+'<\/b> réalisés sur <b>'\+E\.rows\.length\+' parcelle'\+\(E\.rows\.length>1\?'s':''\)\+'<\/b>\.'\)\+_pecBandeAttente\(E\)/.test(par) && !/engagés sur/.test(par));
   T('③ … son tableau garde ses treize colonnes et ses deux exports', /<table class="pec-tbl" style="min-width:1040px">/.test(par) && /colspan="13"/.test(par) && /data-pec="csv">[^\n]*Tableau \(CSV\)<\/button>/.test(par) && /data-pec="copy">[^\n]*Copier<\/button>/.test(par));
@@ -118,10 +118,10 @@ function suite(S) {
   const orph = cles.filter((k) => !fiche(k));
   T('④ aucune pastille « i » de ces cinq vues sans fiche (' + cles.length + ' clés)', cles.length >= 10 && orph.length === 0, orph.join(', '));
   T('④ le style : la bande orange, la pastille à droite, le sous-titre réduit à sa pastille ; plus de .pex-bar orpheline', /'\.pec-al\.or\{border-color:/.test(S.pil) && /\.pec-phi\{flex:none\}/.test(S.pil) && /'\.pec-cs\.pec-ci\{flex:none;min-width:0\}'/.test(S.pil) && !/pex-bar/.test(P));
-  T('④ un sous-titre réduit à sa pastille porte la classe pec-ci ; un sous-titre qui garde du texte, non', (P.match(/'<div class="pec-cs pec-ci">'/g) || []).length >= 8 && !/'<div class="pec-cs pec-ci">'\+\(admin/.test(P));
+  T('④ un sous-titre réduit à sa pastille porte la classe pec-ci ; un sous-titre qui garde du texte, non', (P.match(/'<div class="pec-cs pec-ci">'/g) || []).length >= 7 && !/'<div class="pec-cs pec-ci">'\+\(admin/.test(P));
 
   /* ── ⑤ CE QUI SUIT ── */
-  T('⑤ le guide : les cinq vues, leur petite ligne, leur phrase, la bande orange, les tableaux inchangés', /Les cinq autres vues d'Économie, sur le même modèle/.test(S.guide) && /« 982 € réalisés sur 8 parcelles »/.test(S.guide) && /<b>bande orange<\/b>/.test(S.guide) && /Les <b>tableaux ne changent pas<\/b>/.test(S.guide) && !/≥/.test(S.guide));
+  T('⑤ le guide : les cinq vues, leur petite ligne, leur phrase, la bande orange (les tableaux de trois d’entre elles inchangés)', /Les cinq autres vues d'Économie, sur le même modèle/.test(S.guide) && /« 982 € réalisés sur 8 parcelles »/.test(S.guide) && /<b>bande orange<\/b>/.test(S.guide) && /Les tableaux de Revient,\s+d'Achats et du Détail de l'exercice ne changent pas/.test(S.guide) && !/≥/.test(S.guide));
   T('⑤ l’aide de l’onglet le dit en une phrase', /Les cinq autres vues s’ouvrent de la même façon/.test(S.uti));
   const bi = S.wn.indexOf("  { v: '11.11',"), bloc = bi < 0 ? '' : S.wn.slice(bi, S.wn.indexOf('\n  ] },', bi));
   T('⑤ l’annonce de la 11.11, pour l’admin', /^  \{ v: '11\.11', d: '2026-11-16'/m.test(S.wn) && /les cinq autres vues, comme la Synthèse/.test(bloc) && /Les tableaux ne changent pas, aucun calcul ne change/.test(bloc) && /pour: \['admin'\]/.test(bloc));

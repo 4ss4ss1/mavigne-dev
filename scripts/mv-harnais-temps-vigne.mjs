@@ -327,10 +327,11 @@ function scenarios(M) {
 
 function branchements(src) {
   const R = [], L = nu(src.pil);
-  R.push(['G1 · la carte lit _ecoTempsVigne', /_ecoTempsVigne\(\)/.test(extraire(L, '_pecCarteTemps') || '')]);
-  R.push(['G2 · la carte est posée dans Postes & travaux', /H\+=_pecCarteTemps\(\);/.test(extraire(L, '_pecViewPostes') || '')]);
+  // MOTS-3 (§584) : la carte est une tuile repliée (_pecTuileTemps), sous la liste « Par travail ».
+  R.push(['G1 · la tuile lit _ecoTempsVigne', /_ecoTempsVigne\(\)/.test(extraire(L, '_pecTuileTemps') || '')]);
+  R.push(['G2 · la tuile est posée dans Postes & travaux', /\+_pecTuileTemps\(\)\+/.test(extraire(L, '_pecViewPostes') || '')]);
   R.push(['G3 · la fiche pil.eco.temps existe', /'pil\.eco\.temps':\s*\{/.test(src.utl)]);
-  R.push(['G4 · … et elle est posée sur la carte', /_mvInfoBtn\('pil\.eco\.temps'\)/.test(L)]);
+  R.push(['G4 · … et elle est posée sur la tuile', /_pilTile\('ecotemps','#8A5A38','Temps réel contre barème', stat, sub, null, body, 'pil\.eco\.temps'\)/.test(L)]);
   R.push(['G5 · le cache est oublié à la repeinte', /_ECO_TV=null;/.test(extraire(L, '_pilExoOublier') || '')]);
   R.push(['G6 · _ecoTracHByParc expose la conduite par conducteur et par jour', /out\.condH\[se\.conducteur\]\[_j\]/.test(extraire(L, '_ecoTracHByParc') || '') && /out\.condH\[_co\]\[_j\]/.test(extraire(L, '_ecoTracHByParc') || '')   /* COEQ-4 (§525) : au jour de la parcelle, et le coéquipier aussi */]);
   R.push(['G7 · le moteur lit les heures DANS LES RANGS, pas le travail effectif',
@@ -349,11 +350,11 @@ function branchements(src) {
   R.push(['J7 · le réalisé d\'une parcelle vient des euros versés à la parcelle', /r\.moRe  = tvOk \? \(q \? q\.eur : 0\) : r\.moF;/.test(pd)
     && /r\.engRe = r\.moRe \+ r\.tracF \+ r\.gnrF \+ r\.phyF;/.test(pd)]);
   const vp = extraire(L, '_pecViewPostes') || '', vpa = extraire(L, '_pecViewParcelles') || '';
-  R.push(['J8 · le tableau Coût par travail affiche le réalisé et l\'écart', /_ecoEur\(t\.reE\)/.test(vp) && /_pecEcTd\(t\.ecE, t\.fE\)/.test(vp) && !/_ecoEur\(t\.fE\)/.test(vp)]);
+  R.push(['J8 · la liste « Par travail » affiche le réalisé payé et l\'écart (MOTS-3 : une ligne, plus un tableau)', /_ecoEur\(t\.reE\)/.test(vp) && /_pecEcPst\(t\.ecE\)/.test(vp) && !/_ecoEur\(t\.fE\)/.test(vp)]);
   R.push(['J9 · le tableau Parcelles affiche le réalisé et l\'écart', /_ecoEur\(r\.engRe\)/.test(vpa) && /_pecEcTd\(r\.ecE, r\.moF\)/.test(vpa) && !/_ecoEur\(r\.engage\)/.test(vpa)]);
   // MOTS-2 (§583) : dites EN TÊTE, dans une bande orange (_pecBandeAttente).
   R.push(['J10 · les heures en attente sont dites en tête de Postes & travaux et de Parcelles', /_pecBandeAttente\(E\)/.test(vp) && /_pecBandeAttente\(E\)/.test(vpa) && /E\.reAttE>=1/.test(extraire(L, '_pecBandeAttente') || '')]);
-  R.push(['J11 · le graphe des travaux dessine le réalisé payé', /var re=\(t\.reE!=null\)\?t\.reE:t\.fE/.test(extraire(L, '_pecTaskSvg') || '')]);
+  R.push(['J11 · la jauge d\'un travail dit ce qui est fait ; le graphe en barres est parti avec le tableau (MOTS-3)', /_pilEsc\(_ecoEur\(t\.reE\)\), t\.pct, 'var\(--vert-med\)'/.test(vp) && !/_pecTaskSvg/.test(L)]);
   R.push(['J6 · la fiche pil.eco.engage existe et est posée', /'pil\.eco\.engage':\s*\{/.test(src.utl) && /_mvInfoBtn\('pil\.eco\.engage'\)/.test(L)]);
 
   // TV-2 — la saisie

@@ -96,8 +96,19 @@
   <b>Sorti</b>, <b>Prévu</b> et <b>À la clôture</b> — sur les quatre chiffres comme dans le tableau des postes.</p>
   <p>Ce qui demande un geste est dans une <b>bande orange</b> : des heures payées que personne n'a
   validées au journal (elles sont payées, mais aucune parcelle ne les porte), ou des achats sans prix —
-  le total est alors un plancher, et le bouton <b>Chiffrer</b> les montre. Rien à signaler : pas de bande.</p>
-  <p>Les <b>tableaux ne changent pas</b>. Ce qui expliquait la méthode sous chaque titre — ce que la
+  le total est alors un plancher, et le bouton <b>Chiffrer</b> les montre. La bande des heures sans validation
+  porte un bouton <b>Journal</b>, qui y mène. Rien à signaler : pas de bande.</p>
+  <p><b>Postes &amp; travaux</b> et <b>Parcelles</b> sont des <b>listes</b>. Une ligne par poste, par
+  travail, par parcelle : son nom, son montant, une <b>jauge</b> (l'engagé sur le budget du poste, le
+  réalisé sur le budget de la parcelle, ce qui est fait pour un travail) et, s'il y en a un, l'<b>écart</b>
+  dans une pastille — orange quand c'est plus cher que le barème, grise quand c'est moins cher.
+  <b>Touchez une ligne</b> : elle s'ouvre sur le reste (la base de calcul, le coût à l'hectare, la part
+  du budget, la main-d'œuvre, le GNR…). Trois tuiles sont <b>repliées</b>, leur chiffre sur le titre :
+  <b>Temps réel contre barème</b>, <b>Écart au coût moyen à l'hectare</b>, et <b>Le tableau complet</b> —
+  les treize colonnes des parcelles, que l'on trie d'un toucher sur un en-tête. Les boutons
+  <b>Tableau (CSV)</b> et <b>Copier</b> exportent ce tableau, sans l'ouvrir. Les tableaux de Revient,
+  d'Achats et du Détail de l'exercice ne changent pas.</p>
+  <p>Ce qui expliquait la méthode sous chaque titre — ce que la
   carte compte, ce qu'elle ne compte pas, comment lire une colonne — est derrière le petit <b>« i »</b>
   de la carte. L'avis gris « Cet écran chiffre la campagne… » a disparu : la petite ligne du haut le dit.</p>
 
@@ -506,9 +517,9 @@
       <li>Synthèse des coûts de la campagne, avec la tuile <b>L'exercice</b> : ce qui est <b>réellement sorti</b> du compte depuis l'ouverture de l'exercice —
       salaires, carburant, achats, réparations, fûts. Elle lit le même moteur que l'onglet
       Le détail de l'exercice : un seul total, montré à deux endroits</li>
-      <li><b>Le coût de la campagne</b> : les coûts de <b>culture</b> — main-d'œuvre, tracteur,
+      <li><b>Postes &amp; travaux</b>, la liste <b>Par poste</b> : les coûts de <b>culture</b> — main-d'œuvre, tracteur,
       carburant, produits. Les <b>achats</b>, les <b>réparations</b> et les <b>fûts</b> n'y sont
-      pas et ne peuvent pas y être : cette carte est un <b>barème</b> et ne porte aucune date,
+      pas et ne peuvent pas y être : cette liste est un <b>barème</b> et ne porte aucune date,
       alors qu'un achat en porte une. Ils se comptent dans <b>Le détail de l'exercice</b>, et un bouton y mène</li>
       <li><b>Engagé à ce jour</b> : la main-d'œuvre vient des <b>heures payées</b> du planning — celles de
       chaque salarié vigne dans les rangs depuis le début de la période, validées ou non, à son taux chargé
@@ -518,10 +529,10 @@
       travail fait », c'est du retard</li>
       <li><b>Revient</b> : le rendement, les bouteilles et le coût vigne d'une bouteille du millésime, par
       appellation, sur le cycle d'une vendange à la suivante — « probable » tant que tout n'est pas rentré</li>
-      <li><b>Coût par travail</b> et <b>parcelle par parcelle</b> : le <b>réalisé</b> est ce que le travail a
-      coûté — les heures du planning versées aux parcelles validées, au taux chargé du jour — et la colonne
-      <b>Écart</b> le compare au barème du travail fait : en plus, c'est plus cher que prévu. Les heures payées
-      qui attendent une validation sont dites sous le tableau</li>
+      <li><b>Par travail</b> et <b>parcelle par parcelle</b> : le <b>réalisé</b> est ce que le travail a
+      coûté — les heures du planning versées aux parcelles validées, au taux chargé du jour — et la pastille
+      d'<b>écart</b> le compare au barème du travail fait : en plus, c'est plus cher que prévu. Les heures payées
+      qui attendent une validation sont dans la bande orange, en tête d'écran</li>
       <li><b>Temps réel contre barème</b> : les heures « dans les rangs » du planning de chaque
       salarié — congés, absences, formation, conduite du tracteur et journées de cave retirés — sont versées aux
       parcelles validées ce jour-là : la validation vaut pour le groupe coché, et quelqu'un qui n'est

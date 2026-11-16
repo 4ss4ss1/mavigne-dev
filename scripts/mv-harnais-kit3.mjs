@@ -37,7 +37,8 @@ function suite(S) {
   T('sessions tracteur : vert fini, doré en cours (plus orange, réservé au retard)',
     apres('.sc-bfill', 'border-radius:3px;background:var(--vert-med);') && css.includes('.sc-bfill-enc{background:var(--or)!important;}'));
   T('la fiche rapide de la carte : la couleur d\u2019état de la parcelle', S.app.includes("bar.style.background=cl.fill;") && S.app.includes("pe.style.color=(cl.pct===100?'var(--vert-med)':'var(--texte)');"));
-  T('un seul cercle : 168 px (donut de La campagne, anneau d\u2019Économie)', css.includes('.pil-donut-s{width:168px;height:168px;}') && S.pil.includes('width="168" height="168" style="max-width:168px;margin:0 auto"'));
+  // MOTS-3 (§584) : l'anneau d'Économie est parti avec les tableaux de Postes & travaux ; il reste le donut de La campagne.
+  T('un seul cercle : 168 px (donut de La campagne ; l\u2019anneau d\u2019Économie n\u2019existe plus)', css.includes('.pil-donut-s{width:168px;height:168px;}') && !S.pil.includes('_pecDonutSvg') && !S.pil.includes('width="168" height="168"'));
   return out;
 }
 let ok = 0, ko = 0;

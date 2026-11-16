@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.12', d: '2026-11-16', items: [   // MOTS-3 (§584) : Postes & travaux et Parcelles en listes
+    { niv: 0, pour: ['admin'], emoji: 'liste', titre: 'Économie\u00a0: deux écrans passent en listes',
+      desc: "Postes & travaux et Parcelles montraient des tableaux, larges et longs au téléphone. Ils montrent maintenant des listes\u00a0: une ligne par poste, par travail, par parcelle, avec son montant, une jauge et, s’il y en a un, l’écart dans une pastille. Touchez une ligne pour voir le reste. «\u00a0Temps réel contre barème\u00a0», le graphique des écarts et «\u00a0Le tableau complet\u00a0» (les treize colonnes, à trier) sont repliés, juste dessous\u00a0; les exports ne changent pas. La bande orange des heures payées sans validation a un bouton vers le Journal. Aucun calcul ne change." },
+  ] },
   { v: '11.11', d: '2026-11-16', items: [   // MOTS-2 (§583) : les cinq autres vues d'Économie, moins à lire
     { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Économie\u00a0: les cinq autres vues, comme la Synthèse',
       desc: "Postes & travaux, Parcelles, Revient, Achats et Le détail de l’exercice s’ouvrent maintenant sur une petite ligne (la campagne, le millésime ou l’exercice, avec ses dates) puis sur une phrase\u00a0: «\u00a01\u00a0940\u00a0€ engagés sur 15\u00a0784\u00a0€\u00a0», «\u00a01,56\u00a0€ la bouteille, à la vigne\u00a0». L’avis gris du haut a disparu. Des heures payées sans validation ou des achats sans prix s’affichent dans une bande orange, avec leur bouton. Les tableaux ne changent pas, aucun calcul ne change\u00a0; les explications sont derrière les «\u00a0i\u00a0»." },

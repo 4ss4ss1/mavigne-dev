@@ -37,6 +37,11 @@
    "date": "2026-11-16",
    "motif": "MOTS-2 (§583) : les cinq autres vues d'Économie ouvrent sur une ligne et une phrase",
    "hausses": []
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "MOTS-3 (§584) : Postes & travaux et Parcelles en listes, comme la maquette",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -258,13 +263,13 @@
     "lex": 0
    },
    "Pilotage › Économie › Postes & travaux": {
-    "mots": 120,
+    "mots": 63,
     "p15": 0,
     "avant": 14,
-    "lex": 1
+    "lex": 0
    },
    "Pilotage › Économie › Parcelles": {
-    "mots": 106,
+    "mots": 91,
     "p15": 0,
     "avant": 14,
     "lex": 2
@@ -536,13 +541,13 @@
     "lex": 0
    },
    "Pilotage › Économie › Postes & travaux": {
-    "mots": 120,
+    "mots": 63,
     "p15": 0,
     "avant": 14,
-    "lex": 1
+    "lex": 0
    },
    "Pilotage › Économie › Parcelles": {
-    "mots": 107,
+    "mots": 91,
     "p15": 0,
     "avant": 14,
     "lex": 2

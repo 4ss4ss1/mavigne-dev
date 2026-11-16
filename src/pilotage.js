@@ -102,7 +102,7 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  collapsed:{echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -276,7 +276,7 @@ var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equip
   tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
   etp:'balance',capacite:'balance',simulateur:'equipe',ordrepassage:'cible',gnr:'carburant',
   traitement:'pulverisateur',meteo:'nuage',conso:'carburant',vinif:'fiole',cout:'balance',cuivre:'fiole',
-  ift:'pulverisateur',dre:'goutte',anbudget:'euro',anrenfort:'equipe',ecofin:'graphique',ecorev:'bouteille'};
+  ift:'pulverisateur',dre:'goutte',anbudget:'euro',anrenfort:'equipe',ecofin:'graphique',ecorev:'bouteille',ecotemps:'balance',ecoecart:'graphique',ecotab:'liste'};
 function _pilIco(n){ return _mvIcon(n,16); }
 function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'graphique'); }
 function _pilHa(v){ return (Number(v)||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).replace(/\u202f/g,' '); }
@@ -7197,7 +7197,24 @@ function _pecCss(){
   +'.pec-verdict.pec-ph>div:first-child:not(.em){flex:1;min-width:0}.pec-phi{flex:none}'   // MOTS-2 (§583) : l'en-tête des sous-vues, sa pastille « i » à droite
   //   (la taille et la graisse de la phrase sont celles du verdict de tout le Pilotage : styles.css, l'échelle unique)
   +'.pec-verdict.pec-ph .t b{font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}'
-  +'.pec-cs.pec-ci{flex:none;min-width:0}'   // MOTS-2 (§583) : un sous-titre réduit à sa pastille « i » reste sur la ligne du titre
+  +'.pec-cs.pec-ci{flex:none;min-width:0}'   // MOTS-2 (§583) : un sous-titre réduit à sa pastille « i » (MOTS-3 : ou à un mot et sa pastille) reste sur la ligne du titre
+  // MOTS-3 (§584) : les listes de Postes & travaux et de Parcelles — deux colonnes sur ordinateur, une au téléphone
+  +'.pec-g2{display:grid;gap:16px;align-items:start}.pec-g2>*{min-width:0}'
+  +'@media(min-width:881px){.pec-g2{grid-template-columns:1fr 1fr}.pec-g2.pec-g21{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}'
+  +'.pil-panels.pec-p1{grid-template-columns:1fr}'
+  +'.pec-kpis.pec-k2{grid-template-columns:1fr 1fr}'
+  +'.pec-rg{border-top:1px solid var(--gris-clair)}'
+  +'.pec-rg>summary{list-style:none;cursor:pointer;display:block;padding:11px 18px}'
+  +'.pec-rg>summary::-webkit-details-marker{display:none}'
+  +'.pec-rg[open],.pec-rg>summary:hover{background:var(--bg-app)}'
+  +'.pec-rg .l1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}'
+  +'.pec-rg .nm{font-size:var(--pt-base,14px);font-weight:500;color:var(--texte);min-width:0}'
+  +'.pec-rg .nm small{font-size:var(--pt-micro,12px);font-weight:normal;color:var(--texte-doux);margin-left:7px;white-space:nowrap}'
+  +'.pec-rg .vl{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-rg .l2{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}'
+  +'.pec-rg .l2 .pec-bar{flex:1;min-width:36px;height:6px;border-radius:3px}'
+  +'.pec-rg .rp{white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-rg .dt{padding:0 18px 12px;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5}'
   +'.pec-per{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:6px;line-height:1.4}'
   +'.pec-per b{color:var(--texte-med);font-weight:600}'
   +'.pec-ok{display:inline-flex;align-items:center;gap:5px;color:var(--vert-med);font-weight:600}'
@@ -7236,8 +7253,6 @@ function _pecCss(){
   +'.pec-mini .v small{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-weight:600}'
   +'.pec-mini .s{font-size:var(--pt-lbl,12px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
   +'.pec-empty{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-style:italic;padding:14px 2px}'
-  +'.pec-grid2{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center}'
-  +'@media(max-width:880px){.pec-grid2{grid-template-columns:1fr;gap:14px}}'
   +'.pex-win{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-weight:600}'
   +'.pex-win b{color:var(--texte)}'
   +'.pex-set{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}'
@@ -8343,94 +8358,8 @@ function _pecBurnSvg(E,TL,w){
   return window._mvGraphSvg(c, aria, g);
 }
 
-// ── 2. Donut des postes ──────────────────────────────────────────────
-function _pecDonutSvg(items,c1,c2){
-  var tot=items.reduce(function(a,b){ return a+(b.v||0); },0);
-  if(!(tot>0)) return window._mvGraphVide('Aucun co\u00fbt chiffr\u00e9 sur la p\u00e9riode',
-    'Les co\u00fbts arrivent d\u00e8s qu\u2019un taux horaire est saisi dans R\u00e9glages \u203A \u00c9quipe.');
-  var cx=100,cy=100,r=88,ri=61,ang=-Math.PI/2,paths='';
-  var vis=items.filter(function(x){ return x.v>0; });
-  if(vis.length===1){
-    paths='<circle cx="'+cx+'" cy="'+cy+'" r="'+((r+ri)/2)+'" fill="none" stroke="'+vis[0].c+'" stroke-width="'+(r-ri)+'"/>';
-  } else {
-    vis.forEach(function(it){
-      var f=it.v/tot, a2=ang+f*Math.PI*2, lg=f>0.5?1:0;
-      var x1=cx+r*Math.cos(ang), y1=cy+r*Math.sin(ang);
-      var x2=cx+r*Math.cos(a2),  y2=cy+r*Math.sin(a2);
-      var xi2=cx+ri*Math.cos(a2),yi2=cy+ri*Math.sin(a2);
-      var xi1=cx+ri*Math.cos(ang),yi1=cy+ri*Math.sin(ang);
-      paths+='<path d="M'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+lg+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)
-           +' L'+xi2.toFixed(2)+' '+yi2.toFixed(2)+' A'+ri+' '+ri+' 0 '+lg+' 0 '+xi1.toFixed(2)+' '+yi1.toFixed(2)+' Z" fill="'+it.c+'"/>';
-      ang=a2;
-    });
-  }
-  // Seul graphe de l'ecran a garder une taille fixe : un anneau ne gagne rien a
-  // s'elargir. width et height en dur, plafonnes par max-width — jamais etire.
-  return '<svg class="pec-svg" viewBox="0 0 200 200" width="168" height="168" style="max-width:168px;margin:0 auto" role="img" aria-label="R\u00e9partition du budget par poste, total '+_pilEsc(c1)+'">'
-    +paths
-    +'<text x="100" y="97" text-anchor="middle" font-size="24" font-weight="600" font-family="var(--font-ui,Outfit)" fill="var(--texte)">'+_pilEsc(c1)+'</text>'
-    +'<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--texte-doux)">'+_pilEsc(c2)+'</text></svg>';
-}
-
-// ── 3. Coût par travail ──────────────────────────────────────────────
-// La vue qui manquait : ce n'est pas « quelle parcelle coûte cher », c'est « quel
-// TRAVAIL coûte cher ». C'est celle-là qui se traduit en décision — mécaniser,
-// prendre un renfort, changer la conduite.
-function _pecTaskSvg(E,w){
-  var ts=(E.tasks||[]).filter(function(t){ return t.bE>0; });
-  if(!ts.length) return window._mvGraphVide('Aucun travail chiffr\u00e9 sur la p\u00e9riode',
-    'Un travail est chiffr\u00e9 d\u00e8s qu\u2019il a des heures au bar\u00e8me et un taux horaire.');
-  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
-  // Etroit : le nom passe AU-DESSUS de la barre, la gouttiere de 200 px
-  // disparait. Large : les trois colonnes habituelles.
-  var pL=et?0:200, pR=et?0:132, rowH=et?48:34, pT=et?24:26, pB=12;
-  var c=window._mvGraphCadre(w, pT+ts.length*rowH+pB, { padL:pL, padR:pR, padT:pT, padB:pB });
-  var W=c.w, iw=c.iw;
-  // RÉAL-1 : la barre pleine est le RÉALISÉ (payé) ; au-delà du budget du travail, la part qui
-  //   déborde est rouge. Le trait vertical marque le barème du fait : barre pleine qui le
-  //   dépasse = plus cher que prévu, qui s'arrête avant = moins cher.
-  var mxV=0; ts.forEach(function(t){ mxV=Math.max(mxV, t.bE, t.reE||0); });
-  var mx=_pecNiceMax(mxV);
-  var lx=et?0:pL;
-  var g='<rect x="'+lx+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'"/>'
-       +'<text x="'+(lx+16)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">R\u00e9alis\u00e9</text>'
-       +'<rect x="'+(lx+78)+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'" opacity=".28"/>'
-       +'<text x="'+(lx+94)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Budget</text>'
-       +(E.reOk?('<rect x="'+(lx+148)+'" y="5" width="2" height="13" fill="var(--texte)"/>'
-       +'<text x="'+(lx+156)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Bar\u00e8me du fait</text>'):'');
-  function _tsBar(x0, by, bh, t, wTot){
-    var re=(t.reE!=null)?t.reE:t.fE, wRe=re/mx*iw, wIn=Math.min(wRe,wTot), o='';
-    o+='<rect x="'+x0+'" y="'+by+'" width="'+Math.max(0,wIn).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'"/>';
-    if(wRe>wTot+0.5) o+='<rect x="'+(x0+wTot).toFixed(1)+'" y="'+by+'" width="'+(wRe-wTot).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="var(--rouge)"/>';
-    if(E.reOk && t.fE>0){ var xf=x0+t.fE/mx*iw; o+='<rect x="'+(xf-1).toFixed(1)+'" y="'+(by-3)+'" width="2" height="'+(bh+6)+'" fill="var(--texte)"/>'; }
-    return o;
-  }
-  function _tsDroite(t){
-    if(t.ecE!==null && t.ecE!==undefined) return _pecEcEur(t.ecE)+' \u00b7 '+Math.round(t.pct)+' %';
-    return _ecoEur(t.euHa)+'/ha \u00b7 '+Math.round(t.pct)+' %';
-  }
-  function _tsCol(t){ return (t.ecE!==null && t.ecE!==undefined) ? _pecEcCol(_pecEcPct(t.ecE,t.fE)) : c.col.texte; }
-  ts.forEach(function(t,i){
-    var y=pT+i*rowH;
-    var wTot=t.bE/mx*iw;
-    if(et){
-      var by=y+17, bh=_PIL_GB.h;
-      g+='<text x="0" y="'+(y+11)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),22))+'</text>'
-        +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
-        +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
-        +_tsBar(0, by, bh, t, wTot)
-        +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
-    } else {
-      var by2=y+5, bh2=_PIL_GB.h;
-      g+='<text x="'+(pL-12)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),24))+'</text>'
-        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="'+_PIL_GB.r+'" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
-        +_tsBar(pL, by2, bh2, t, wTot)
-        +'<text x="'+(pL+Math.max(wTot,(t.reE||0)/mx*iw)+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
-        +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+_tsCol(t)+'">'+_pilEsc(_tsDroite(t))+'</text>';
-    }
-  });
-  return window._mvGraphSvg(c, 'Co\u00fbt par travail : '+ts.length+' travaux chiffr\u00e9s, du plus cher au moins cher.', g);
-}
+// MOTS-3 (§584) : l'anneau des postes et les barres des travaux (deux graphiques) sont partis avec les deux tableaux de
+//   Postes & travaux : chaque ligne de liste porte sa jauge.
 
 // ── 4. Écart au coût moyen à l'hectare ───────────────────────────────
 // Le total d'une parcelle dépend surtout de sa taille : il ne dit rien. L'écart au
@@ -8577,7 +8506,7 @@ function _pecBandeAvis(txt, bouton){
 //   de Postes & travaux et de Parcelles — c'était la dernière phrase d'une note de quarante mots, sous chaque tableau.
 function _pecBandeAttente(E){
   if(!(E && E.reOk && E.reAttE>=1)) return '';
-  return _pecBandeAvis('<b>'+_ecoH1(E.reAttH)+' h payées sans validation</b> · '+_pilEsc(_ecoEur(E.reAttE)));
+  return _pecBandeAvis('<b>'+_ecoH1(E.reAttH)+' h payées sans validation</b> <span style="white-space:nowrap">· '+_pilEsc(_ecoEur(E.reAttE))+'</span>', '<button class="pil-diag-go ghost" data-diag="journal">Journal ›</button>');   // MOTS-3 (§584) : la porte, comme sur la maquette
 }
 function _pecDfrIso(iso){ var m=_pecIsoToMs(String(iso||'').slice(0,10)); return (m===null)?'—':_pecDfrMs(m); }
 function _pecVerdict(E,TL,Z){
@@ -8810,132 +8739,112 @@ function _pecViewSynthese(E,TL){
 }
 
 // ── Vue 2 : Postes & travaux ─────────────────────────────────────────
+// MOTS-3 (§584) : deux LISTES à la place des deux tableaux, comme sur la maquette validée (Nico, 16/11 : « comme la maquette »).
+//   Une ligne = un nom, un montant, une jauge et son repère, une pastille quand il y a quelque chose à dire ; les autres
+//   colonnes du tableau s'ouvrent d'un toucher sur la ligne (<details> : rien à écouter, rien à mémoriser).
+function _pecLigne(nom, val, pct, col, rep, pst, det){
+  var p=Math.max(0,Math.min(100,Number(pct)||0));
+  return '<details class="pec-rg"><summary><span class="l1"><span class="nm">'+nom+'</span><span class="vl">'+val+'</span></span>'
+    +'<span class="l2"><span class="pec-bar"><i style="width:'+p.toFixed(1)+'%;background:'+col+'"></i></span>'
+    +(rep?('<span class="rp">'+rep+'</span>'):'')+(pst||'')+'</span></summary>'
+    +'<div class="dt">'+det+'</div></details>';
+}
+// L'écart en pastille : orange quand le réalisé dépasse le barème du travail fait, gris quand il est en dessous. Rien sous un euro.
+//   Le texte est sombre sur les deux fonds : l'orange sur orange pâle et le gris doux sur gris clair passent sous 4,5 de contraste (mv-harnais-contraste).
+function _pecEcPst(ec){
+  if(ec===null || ec===undefined || Math.abs(ec)<0.5) return '';
+  return '<span class="pec-pill" style="'+(ec>0?'background:var(--orange-pale);color:var(--texte)':'background:var(--gris-clair);color:var(--texte-med)')+'">'+_pilEsc(_pecEcEur(ec))+'</span>';
+}
 function _pecViewPostes(E){
-  var items=E.postes.filter(function(p){ return p.budget>0; }).map(function(p){ return { n:p.lab, v:p.budget, c:p.col }; });
-  var legs=E.postes.map(function(p){
+  var PROJ='<span class="pec-pill" style="background:var(--or-pale);color:var(--or-tx,#7A5E12)">projeté</span>';
+  // Par poste : l'engagé, sa jauge sur le budget du poste. La base de calcul, l'euro à l'hectare et la part du budget : dans la ligne ouverte.
+  var lp=E.postes.map(function(p){
     var pc=E.budget>0?(p.budget/E.budget*100):0;
-    return '<tr><td class="n"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+p.col+';margin-right:8px;vertical-align:-1px"></span>'+_pilEsc(p.lab)
-      +(p.proj?' <span class="pec-pill" style="background:var(--or-pale);color:var(--or-tx,#7A5E12)">projet\u00e9</span>':'')+'</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(p.fait))+'</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(p.budget))+'</td>'
-      +'<td class="r">'+_pilEsc(_pecPct(pc))+'</td>'
-      +'<td class="r">'+(E.tot.surf>0?_pilEsc(_ecoEur(p.budget/E.tot.surf)):'\u2014')+'</td>'
-      +'<td style="color:var(--texte-doux)">'+_pilEsc(p.det)+'</td></tr>';
+    var det=[_pilEsc(p.det), (E.tot.surf>0?(_pilEsc(_ecoEur(p.budget/E.tot.surf))+'/ha'):''), _pilEsc(_pecPct(pc))+' du budget'].filter(function(x){ return !!x; }).join(' · ');
+    return _pecLigne(_pilEsc(p.lab), _pilEsc(_ecoEur(p.fait)), (p.budget>0?p.fait/p.budget*100:0), p.col, 'sur '+_pilEsc(_ecoEur(p.budget)), (p.proj?PROJ:''), det);
   }).join('');
-  var retRow = E.tot.retE>0
-    ? '<tr><td class="n" style="color:'+_PEC_COL.ret+'"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+_PEC_COL.ret+';opacity:.5;margin-right:8px;vertical-align:-1px"></span>Surco\u00fbt de retard <span class="pec-pill" style="background:var(--orange-pale);color:var(--orange)">hors total</span></td>'
-      +'<td class="r">\u2014</td><td class="r" style="color:'+_PEC_COL.ret+'">+'+_pilEsc(_ecoEur(E.tot.retE))+'</td><td class="r">\u2014</td><td class="r">\u2014</td>'
-      +'<td style="color:var(--texte-doux)">'+_ecoH1(E.tot.retH)+' h mod\u00e9lis\u00e9es, jamais pay\u00e9es</td></tr>'
-    : '';
-  // ① Ce qui reste : la maille, et l'etat de la projection — deux choses qui
-  //   changent la lecture des montants. Le POURQUOI (bareme complet contre
-  //   realise) part dans la fiche.
-  // \u2605\u2605\u2605 DEUX CARTES S'APPELAIENT PRESQUE PAREIL. « Ou part l'argent » (ici, la
-  //   CAMPAGNE) et « Ou est parti l'argent » (l'EXERCICE, _pexPostes). Un mot d'ecart
-  //   pour deux perimetres qui n'ont ni la meme maille ni la meme source : celui-ci
-  //   est un BAREME sans date (surface x h/ha x taux), l'autre une fenetre de DATES
-  //   qui compte les achats, les reparations et les futs. On venait donc chercher ici
-  //   des achats qui, par construction, n'y seront jamais.
-  //   La carte de la campagne dit desormais ce qu'elle EST — un cout de culture — et
-  //   la ligne de cadre en bas dit ce qu'elle N'EST PAS, avec la porte vers l'exercice.
-  //   \u26a0 Le titre de l'exercice ne bouge PAS : « est parti » est un passe, et c'est
-  //     exactement ce qu'il mesure. La collision se leve d'un seul cote.
-  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engagés sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b>.')+_pecBandeAttente(E)
-    +'<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le co\u00fbt de la campagne</div>'
+  if(E.tot.retE>0) lp+=_pecLigne('Surcoût de retard', '+'+_pilEsc(_ecoEur(E.tot.retE)), 0, _PEC_COL.ret, '',
+    '<span class="pec-pill" style="background:var(--orange-pale);color:var(--orange)">hors total</span>', _ecoH1(E.tot.retH)+' h modélisées, jamais payées');
+  // ★★★ DEUX CARTES S'APPELAIENT PRESQUE PAREIL. « Ou part l'argent » (ici, la CAMPAGNE) et « Ou est parti l'argent »
+  //   (l'EXERCICE, _pexPostes) : un BAREME sans date (surface x h/ha x taux) contre une fenetre de DATES qui compte les achats,
+  //   les reparations et les futs. La fiche pil.eco.postes dit ce que cette liste n'est pas ; le bouton du bas mene a l'exercice.
+  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engagés sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b>.')+_pecBandeAttente(E);
+  var cP='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Par poste</div>'
     +'<div class="pec-cs pec-ci">'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'
-    +'<div class="pec-cb"><div class="pec-grid2">'
-    +'<div>'+_pecDonutSvg(items,_pecEurK(E.budget),'budget')+'</div>'
-    +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:520px"><thead><tr><th>Poste</th><th class="r">Engag\u00e9</th><th class="r">Budget</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th>Base de calcul</th></tr></thead>'
-    +'<tbody>'+legs+retRow+'</tbody>'
-    +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td><td></td></tr></tfoot>'
-    +'</table></div></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> '+_pilEsc(_pecDetailLib())+'</button></div>'
-    +'</div></div>';
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'+lp+'</div>';
 
   // RÉAL-1 : Réalisé = ce que les heures versées au travail ont coûté (planning × taux du jour) ;
-  //   Écart = réalisé − barème du travail fait. Repli sans planning : réalisé = barème, écart —.
-  var tS={bH:0,fH:0,reE:0,fE:0,rE:0,bE:0,surf:0};
-  var trows=(E.tasks||[]).map(function(t){
-    tS.bH+=t.bH; tS.fH+=t.fH; tS.reE+=t.reE; tS.fE+=t.fE; tS.rE+=t.rE; tS.bE+=t.bE; tS.surf+=t.surf;
-    return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
-      +'<td class="r">'+_ecoH1(t.bH)+' h</td>'
-      +'<td class="r">'+Math.round(t.pct)+' %</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(t.reE))+(E.reOk&&t.reH>0?('<div style="color:var(--texte-doux);font-size:var(--pt-micro,12px)">'+_ecoH1(t.reH)+' h</div>'):'')+'</td>'
-      +_pecEcTd(t.ecE, t.fE)
-      +'<td class="r">'+_pilEsc(_ecoEur(t.rE))+'</td>'
-      +'<td class="r n">'+_pilEsc(_ecoEur(t.bE))+'</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(t.euHa))+'</td>'
-      +'<td class="r">'+_pilEsc(_pecPct(t.part))+'</td></tr>';
-  }).join('');
-  var tEc = E.reOk ? (tS.reE - tS.fE) : null;
-  var tfoot = (E.tasks||[]).length>1
-    ? '<tfoot><tr><td>Total</td><td class="r">'+_ecoH1(tS.bH)+' h</td><td class="r">'+Math.round(tS.bH>0?tS.fH/tS.bH*100:0)+' %</td>'
-      +'<td class="r">'+_pilEsc(_ecoEur(tS.reE))+'</td>'+_pecEcTd(tEc, tS.fE)
-      +'<td class="r">'+_pilEsc(_ecoEur(tS.rE))+'</td><td class="r">'+_pilEsc(_ecoEur(tS.bE))+'</td>'
-      +'<td class="r">'+(tS.surf>0?_pilEsc(_ecoEur(tS.bE/tS.surf)):'\u2014')+'</td><td class="r">'+_pilEsc(_pecPct(E.budget>0?tS.bE/E.budget*100:0))+'</td></tr></tfoot>'
-    : '';
+  //   Écart = réalisé − barème du travail fait. Repli sans planning : réalisé = barème, pas d'écart.
+  var lt=(E.tasks||[]).map(function(t){
+    var det=[_ecoH1(t.bH)+' h au barème', ((E.reOk&&t.reH>0)?(_ecoH1(t.reH)+' h passées'):''), 'reste '+_ecoEur(t.rE), _ecoEur(t.euHa)+'/ha', _pecPct(t.part)+' du budget']
+      .filter(function(x){ return !!x; }).map(function(x){ return _pilEsc(x); }).join(' · ');
+    return _pecLigne(_pilEsc(_pilTnom(t.nom)), _pilEsc(_ecoEur(t.reE)), t.pct, 'var(--vert-med)',
+      'fait '+Math.round(t.pct)+' % · budget '+_pilEsc(_ecoEur(t.bE)), _pecEcPst(t.ecE), det);
+  }).join('') || '<div class="pec-empty" style="padding:14px 18px">Aucun travail chiffré.</div>';
   // MOTS-2 (§583) : « Réalisé = …, Écart = … » est dans la fiche pil.eco.travaux ; les heures sans validation, en tête (_pecBandeAttente).
   var tNote='';
   if(E.reOk){ if(E.reHorsE>=1) tNote='<b>'+_pilEsc(_ecoEur(E.reHorsE))+'</b> versés à des travaux hors de la liste de la campagne.'; }
   else tNote='Planning pas encore ouvert : le réalisé est au barème.';
-  window._mvGraphSuivre('#pec-g-task', function(w){ return _pecTaskSvg(E,w); });
-  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt par travail</div>'
-    +'<div class="pec-cs">Main-d\u2019\u0153uvre vigne uniquement'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.travaux')):'')+'</div></div>'
-    +'<div class="pec-cb"><div id="pec-g-task"></div>'
-    +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl" style="min-width:640px"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">R\u00e9alis\u00e9</th><th class="r">\u00c9cart</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
-    +'<tbody>'+(trows||'<tr><td colspan="9" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody>'+tfoot+'</table></div>'
-    +(tNote?('<div class="pec-vcadre"><span>'+tNote+'</span></div>'):'')
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Parcelle par parcelle</button></div>'
-    +'</div></div>';
-  H+=_pecCarteTemps();
+  var cT='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Par travail</div>'
+    +'<div class="pec-cs pec-ci">main-d’œuvre'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.travaux')):'')+'</div></div>'+lt
+    +(tNote?('<div class="pec-cb"><div class="pec-vcadre"><span>'+tNote+'</span></div></div>'):'')+'</div>';
+  H+='<div class="pec-g2">'+cP+'<div>'+cT+'<div class="pil-panels pec-p1">'+_pecTuileTemps()+'</div></div></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> '+_pilEsc(_pecDetailLib())+'</button>'
+    +'<button class="pec-btn" data-pec="sub" data-v="par"><span>'+_mvIcon('raisin',16)+'</span> Parcelle par parcelle</button></div>';
   return H;
 }
 
 // ── TV-1 : le temps réel contre le barème, travail par travail ───────
 // Lit _ecoTempsVigne, ne calcule rien. Le chiffre qui compte est le h/ha RÉEL à
 // côté du h/ha du BARÈME : « plus vite ou plus lent que la convention ».
-function _pecCarteTemps(){
+// MOTS-3 (§584) : une tuile REPLIÉE, son chiffre sur le titre (règle 5) — un seul travail mesuré : son h/ha réel et son barème ;
+//   plusieurs : l'écart de toutes les heures validées au barème des mêmes surfaces.
+function _pecTuileTemps(){
   var V=null; try{ V=_ecoTempsVigne(); }catch(e){ V=null; if(window.logError) window.logError({level:'info',cat:'eco',msg:'temps vigne illisible'}); }
-  var info=(typeof _mvInfoBtn==='function')?(' '+_mvInfoBtn('pil.eco.temps')):'';
-  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Temps r\u00e9el contre bar\u00e8me</div>'
-    +'<div class="pec-cs pec-ci">'+info+'</div></div><div class="pec-cb">';
+  var stat=_pilStat('—',''), sub='', body='';
   if(!V || !V.ok){
-    return H+'<div class="pec-empty">P\u00e9riode sans dates, pas encore commenc\u00e9e, ou planning pas encore ouvert\u00a0: rien \u00e0 verser.</div></div></div>';
+    body='<div class="pec-empty">Période sans dates, pas encore commencée, ou planning pas encore ouvert : rien à verser.</div>';
+  } else if(!V.taches.length){
+    body='<div class="pec-empty">Aucune validation sur la période pour l’instant. Les heures du planning attendent la première : <b>'
+      +_ecoH1(V.hAtt)+' h</b> en attente.</div>';
+  } else {
+    var mes=V.taches.filter(function(t){ return t.h>0 && t.surf>0; });
+    if(mes.length===1){ stat=_pilStat(_ecoH1(mes[0].hhaR),' h/ha · barème '+_ecoH1(mes[0].hhaB)); sub=_pilTnom(mes[0].nom); }
+    else if(mes.length>1){
+      var hR=0, hB=0; mes.forEach(function(t){ hR+=t.h; hB+=(Number(t.bar)||0); });
+      var g=hB>0?((hR-hB)/hB*100):null;
+      if(g!==null) stat=_pilStat((g>0?'+':(g<0?'−':''))+Math.round(Math.abs(g))+' %',' contre barème');
+      sub=mes.length+' travaux mesurés';
+    }
+    var rows=V.taches.map(function(t){
+      var ec=t.ecart, col=(ec===null)?'var(--texte-doux)':(ec>15?'var(--rouge)':(ec>5?'var(--orange)':(ec<-8?'var(--vert-med)':'var(--texte)')));
+      return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
+        +'<td class="r">'+_pilHa(Math.round(t.surf*100)/100)+'</td>'
+        +'<td class="r">'+_ecoH1(t.h)+'</td>'
+        +'<td class="r"><b>'+(t.h>0?_ecoH1(t.hhaR):'—')+'</b></td>'
+        +'<td class="r">'+_ecoH1(t.hhaB)+'</td>'
+        +'<td class="r" style="color:'+col+'">'+(ec===null?'—':((ec>0?'+':'')+Math.round(ec)+' %'))+'</td></tr>'
+        // ARRACH-3 : sous la ligne Arrachage, une ligne par étape faite par l'équipe (pas les prestataires).
+        +((t.nom==='Arrachage')?(V.etapes||[]).map(function(x){
+          return '<tr><td class="n" style="padding-left:16px">· '+_pilEsc(x.lbl)+'</td>'
+            +'<td class="r">'+_pilHa(Math.round(x.surf*100)/100)+'</td>'
+            +'<td class="r">'+_ecoH1(x.h)+'</td>'
+            +'<td class="r"><b>'+(x.h>0?_ecoH1(x.hhaR):'—')+'</b></td>'
+            +'<td class="r">—</td><td class="r">—</td></tr>';
+        }).join(''):'');
+    }).join('');
+    var att=V.gens.filter(function(g2){ return g2.hAtt>=0.5; });
+    var attTxt=att.length
+      ? (' · <b>'+_ecoH1(V.hAtt)+' h en attente</b> ('+_pilEsc(att.slice(0,3).map(function(g2){ return g2.nom+' '+_ecoH1(g2.hAtt)+' h'; }).join(', '))+(att.length>3?'…':'')+')')
+      : '';
+    body='<div class="pec-scroll"><table class="pec-tbl" style="min-width:480px"><thead><tr><th>Travail</th><th class="r">ha</th><th class="r">Heures</th><th class="r">h/ha réel</th><th class="r">h/ha barème</th><th class="r">Écart</th></tr></thead>'
+      +'<tbody>'+rows+'</tbody></table></div>'
+      +'<div class="pec-vcadre"><span><b>'+_ecoH1(V.hAff)+' h</b> sur '+V.nEv+' validation'+(V.nEv>1?'s':'')
+      +(V.hTrac>0?(' · '+_ecoH1(V.hTrac)+' h de conduite tracteur retirées'):'')
+      +(V.hCave>0?(' · '+_ecoH1(V.hCave)+' h de journées de cave retirées'):'')+attTxt+'.</span></div>';
   }
-  if(!V.taches.length){
-    return H+'<div class="pec-empty">Aucune validation sur la p\u00e9riode pour l\u2019instant. Les heures du planning attendent la premi\u00e8re\u00a0: <b>'
-      +_ecoH1(V.hAtt)+' h</b> en attente.</div></div></div>';
-  }
-  var rows=V.taches.map(function(t){
-    var ec=t.ecart, col=(ec===null)?'var(--texte-doux)':(ec>15?'var(--rouge)':(ec>5?'var(--orange)':(ec<-8?'var(--vert-med)':'var(--texte)')));
-    return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
-      +'<td class="r">'+_pilHa(Math.round(t.surf*100)/100)+'</td>'
-      +'<td class="r">'+_ecoH1(t.h)+'</td>'
-      +'<td class="r"><b>'+(t.h>0?_ecoH1(t.hhaR):'\u2014')+'</b></td>'
-      +'<td class="r">'+_ecoH1(t.hhaB)+'</td>'
-      +'<td class="r" style="color:'+col+'">'+(ec===null?'\u2014':((ec>0?'+':'')+Math.round(ec)+' %'))+'</td></tr>'
-      // ARRACH-3 : sous la ligne Arrachage, une ligne par étape faite par l'équipe (pas les prestataires).
-      +((t.nom==='Arrachage')?(V.etapes||[]).map(function(x){
-        return '<tr><td class="n" style="padding-left:16px">\u00b7 '+_pilEsc(x.lbl)+'</td>'
-          +'<td class="r">'+_pilHa(Math.round(x.surf*100)/100)+'</td>'
-          +'<td class="r">'+_ecoH1(x.h)+'</td>'
-          +'<td class="r"><b>'+(x.h>0?_ecoH1(x.hhaR):'\u2014')+'</b></td>'
-          +'<td class="r">\u2014</td><td class="r">\u2014</td></tr>';
-      }).join(''):'');
-  }).join('');
-  var att=V.gens.filter(function(g){ return g.hAtt>=0.5; });
-  var attTxt=att.length
-    ? (' \u00b7 <b>'+_ecoH1(V.hAtt)+' h en attente</b> ('+_pilEsc(att.slice(0,3).map(function(g){ return g.nom+' '+_ecoH1(g.hAtt)+' h'; }).join(', '))+(att.length>3?'\u2026':'')+')')
-    : '';
-  H+='<div class="pec-scroll"><table class="pec-tbl" style="min-width:480px"><thead><tr><th>Travail</th><th class="r">ha</th><th class="r">Heures</th><th class="r">h/ha r\u00e9el</th><th class="r">h/ha bar\u00e8me</th><th class="r">\u00c9cart</th></tr></thead>'
-    +'<tbody>'+rows+'</tbody></table></div>'
-    +'<div class="pec-vcadre"><span><b>'+_ecoH1(V.hAff)+' h</b> sur '+V.nEv+' validation'+(V.nEv>1?'s':'')
-    +(V.hTrac>0?(' \u00b7 '+_ecoH1(V.hTrac)+' h de conduite tracteur retir\u00e9es'):'')
-    +(V.hCave>0?(' \u00b7 '+_ecoH1(V.hCave)+' h de journ\u00e9es de cave retir\u00e9es'):'')+attTxt+'.</span></div>'
-    +'</div></div>';
-  return H;
+  return _pilTile('ecotemps','#8A5A38','Temps réel contre barème', stat, sub, null, body, 'pil.eco.temps');
 }
 
 // ── Vue 3 : Parcelles ────────────────────────────────────────────────
@@ -8998,22 +8907,40 @@ function _pecViewParcelles(E){
     +'<td class="r">'+_pilEsc(_ecoEur(E.tot.prestF||0))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.engRe))+'</td>'+_pecEcTd(E.ecRe, E.tot.moF)+'<td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
-  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engRe))+'</b> réalisés sur <b>'+E.rows.length+' parcelle'+(E.rows.length>1?'s':'')+'</b>.')+_pecBandeAttente(E)
-    +'<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
-    // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi du
-    //   tableau. On le lit une fois, puis on connait ses colonnes. Il part dans
-    //   la fiche, avec « cliquez pour trier ».
-    +'<div class="pec-cs pec-ci">'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
-    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:1040px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> Tableau (CSV)</button>'
-    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier</button></div>'
+  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engRe))+'</b> réalisés sur <b>'+E.rows.length+' parcelle'+(E.rows.length>1?'s':'')+'</b>.')+_pecBandeAttente(E);
+  // MOTS-3 (§584) : la LISTE d'abord — une ligne par parcelle, dans l'ordre du tri mémorisé : le réalisé, sa jauge sur le budget
+  //   de la parcelle, l'écart en pastille ; le reste des treize colonnes dans la ligne ouverte. Le tableau complet reste, replié.
+  var lst=rows.map(function(r){
+    var src=r.arr?'arrachée':(r.src==='reel'?'équipe réelle':'taux moyen');
+    var det=[(r.arr?'':('fait '+Math.round(r.pct)+' %')), ((r.moRe>0||r.src==='reel')?('main-d’œuvre '+_ecoEur(r.moRe)):''),
+      (r.tracF>0?('tracteur '+_ecoEur(r.tracF)):''), (r.gnrF>0?('GNR '+_ecoEur(r.gnrF)):''), (r.phyF>0?('phyto '+_ecoEur(r.phyF)):''),
+      (r.prestF>0?('prestations '+_ecoEur(r.prestF)):''), 'reste '+_ecoEur(r.reste), _ecoEur(r.coutHa)+'/ha',
+      (r.trous>0?(_pilNum(r.trous)+' plants'):''), (r.retE>0?('+'+_ecoEur(r.retE)+' de retard, hors total'):''), src]
+      .filter(function(x){ return !!x; }).map(function(x){ return _pilEsc(x); }).join(' · ');
+    return _pecLigne(_pilEsc(r.nom)+'<small>'+_pilHa(r.surf)+' ha</small>', _pilEsc(_ecoEur(r.engRe)), (r.budget>0?r.engRe/r.budget*100:0), _PEC_COL.mo,
+      'sur '+_pilEsc(_ecoEur(r.budget)), _pecEcPst(r.ecE), det);
+  }).join('') || '<div class="pec-empty" style="padding:14px 18px">Aucune parcelle active.</div>';
+  var cL='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Parcelle par parcelle</div>'
+    // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi. Il est dans la fiche.
+    +'<div class="pec-cs pec-ci">réalisé'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'+lst+'</div>';
+  // Quatre chiffres, chacun son repère (règle 2). « Reste » est ici la main-d'œuvre qui reste à faire, au barème — le total de la
+  //   colonne du tableau —, pas le « Reste » de la Synthèse (budget moins engagé) : le repère le dit.
+  var kp='<div class="pec-card"><div class="pec-kpis pec-k2">'
+    +'<div class="pec-k"><div class="l">Budget</div><div class="v">'+_pilEsc(_ecoEur(E.budget))+'</div><div class="s">'+_pilHa(E.tot.surf)+' ha</div></div>'
+    +'<div class="pec-k"><div class="l">Reste</div><div class="v">'+_pilEsc(_ecoEur(E.tot.moR))+'</div><div class="s">de main-d’œuvre</div></div>'
+    +'<div class="pec-k"><div class="l">Écart</div><div class="v">'+_pilEsc(_pecEcEur(E.ecRe))+'</div><div class="s">contre le barème</div></div>'
+    +'<div class="pec-k"><div class="l">À l’hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHaB))+'</div><div class="s">de budget</div></div>'
     +'</div></div>';
   window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
-  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare</div>'
-    +'<div class="pec-cs">\u00c0 surface \u00e9gale'
-    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
-    +'<div class="pec-cb"><div id="pec-g-ecart"></div></div></div>';
+  var tE=_pilTile('ecoecart','#8A5A38','Écart au coût moyen à l’hectare', _pilStat(_pilEsc(_ecoEur(E.coutHaB)),' par ha'), 'à surface égale', null,
+    '<div id="pec-g-ecart"></div>', 'pil.eco.parcelles');
+  var tT=_pilTile('ecotab','#8A5A38','Le tableau complet', _pilStat(String(rows.length),' parcelle'+(rows.length>1?'s':'')), 'treize colonnes, à trier', null,
+    '<div class="pec-scroll"><table class="pec-tbl" style="min-width:1040px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>');
+  H+='<div class="pec-g2 pec-g21">'+cL+'<div>'+kp+'<div class="pil-panels pec-p1">'+tE+'</div></div></div>'
+    +'<div class="pil-panels pec-p1">'+tT+'</div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> Tableau (CSV)</button>'
+    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier</button></div>';
   return H;
 }
 
@@ -12068,6 +11995,7 @@ var _PIL_DIAG_CIBLES = {
   planning:  ['planning', null, null],   // TENS-1 (§215) : la carte « Tension de l’équipe »
   tracteurs: ['tracteur','tracteur','set-sec-tracteurs','_mvReglOpen'],
   parcelles: ['parcelles',null,null],
+  journal:   ['journal',null,null],     // MOTS-3 (§584) : les heures payées sans validation se valident au Journal
   // ★ PREMIERE CIBLE HORS DES REGLAGES. « Cuve GNR a renseigner (Tracteur ›
   //   Entretien) » etait du TEXTE MORT : il fallait lire, retenir, sortir du
   //   module, retrouver l'onglet. Le 4e element nomme le commutateur du module
