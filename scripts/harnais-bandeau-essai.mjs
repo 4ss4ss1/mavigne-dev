@@ -75,7 +75,7 @@ if(vSW){
     porteurs.every(re=>re.test(S)) && logs>=2);
   // Un numero ANTERIEUR hors du journal = un porteur oublie au bump precedent.
   const [maj,min]=vSW.split('.').map(Number);
-  const prec='v'+maj+'.'+(min-1);
+  const prec='v'+maj+'.'+String(min-1).padStart(2,'0');   // MOTS-1 (§582) : « v12.0 » est aussi le début de « v12.01 » — le numéro précédent s’écrit sur deux chiffres, comme le SW
   t('aucun '+prec+' résiduel hors journal',
     !S.split('\n').some(l=>l.includes(prec)&&!l.trim().startsWith('//')));
 }

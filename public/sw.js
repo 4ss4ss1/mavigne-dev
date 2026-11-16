@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.00
+// MA VIGNE — Service Worker v12.01
+// v12.01 (16/11/2026) — MOTS-1 (§582) : Économie › Synthèse se lit d'un coup d'œil — la campagne et ses dates, une phrase, la bande de ce qui manque au chiffrage, quatre chiffres (budget, engagé, reste, écart de cadence), trois tuiles repliées avec leur chiffre sur le titre (Coût à la fin, L'exercice, Prix de revient) ; la méthode passe derrière les « i », aucun calcul ne change
 // v12.00 (16/11/2026) — COHER-1 (§581) : trois désaccords entre écrans du Pilotage — la tuile Conformité d'Aujourd'hui compte ce que l'onglet signale (elle ne pouvait dire que 0), le graphique d'Économie rejoint le même coût à la fin qu'Aujourd'hui (il prolongeait trois jours de rythme sur toute la période), une ligne d'Archives est une année vigne et ses barres des campagnes
 // v11.99 (15/11/2026) — TETE-4C (§579) : le Pilotage prend le bandeau commun — la campagne, la date et la météo dans la ligne du module, les onglets dans l'en-tête, « Vous regardez » en ligne d'écran (au téléphone : un bouton qui déplie le choix) ; la page du Pilotage ne défile plus dans elle-même (son en-tête ne collait que sur Aujourd'hui) ; la ligne d'écran et les panneaux collants comptent le bandeau de la démo. pilotage.js, bandeau.css, utils.js, index.html.
 // v11.98 (15/11/2026) — TETE-4B (§578) : les sous-onglets du Cuvier, du Chai et du Millésime sur la ligne d'écran de la Cave (un seul jeu à la fois, à la même place) ; le millésime regardé en une liste, à droite ; sur ordinateur la ligne d'écran colle sous l'en-tête et les panneaux collants (fiches à côté des listes) se calent sous elle — ils passaient sous l'en-tête ; Planning › Personnel : la ligne sur toute la largeur. bandeau.css, cave.js, utils.js, app.js, index.html.
@@ -4732,7 +4733,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.00';
+const CACHE_NAME   = 'mavigne-v12.01';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4749,7 +4750,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.00 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.01 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4769,7 +4770,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.00 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.01 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

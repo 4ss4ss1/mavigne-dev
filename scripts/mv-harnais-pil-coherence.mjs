@@ -225,8 +225,8 @@ export {_pecZeros};`;
   const Z=M._pecZeros({});
   t('⑬ _pecZeros = les constats budget marqués zero (2), N des M = 3', Z.length===2 && Z.nBudget===3 && Z[0].nom==='Aucun taux horaire' && Z[1].cible==='entretien');
   t('⑬ _pecZeros ne recalcule rien (aucun E.hasRate / E.hasGnr)', !/E\.hasRate|E\.hasGnr|E\.phy/.test(fn(SRC.pil,'_pecZeros').replace(/^\s*\/\/.*$/gm,'')));
-  const fc=fn(SRC.pil,'_pecFiabCard').replace(/^\s*\/\/.*$/gm,'');
-  t('⑬ la carte dit « N des M choses à compléter »', /Z\.nBudget/.test(fc) && /choses \\u00e0 compl\\u00e9ter qui touchent ce budget/.test(fc));
+  const fc=fn(SRC.pil,'_pecFiabBande').replace(/^\s*\/\/.*$/gm,'');   // MOTS-1 (§582) : la carte est devenue une bande ; elle garde « N des M »
+  t('⑬ la bande dit « N des M à compléter »', /var nB=Z\.nBudget\|\|Z\.length;/.test(fc) && /\(nB>Z\.length\?\(' . '\+Z\.length\+' des '\+nB\+' à compléter'\):''\)/.test(fc));
 }
 
 

@@ -1,0 +1,52 @@
+{
+  "lot": "MOTS-1",
+  "section": "§582",
+  "base": "1eded9823bda9d2913d1eecb997b951b6d276943",
+  "inclut": [],
+  "date": "2026-11-16",
+  "tutos": {
+    "ok": true,
+    "empreinte": "4116acf16666e08e2bdaf8e22b0062cfb77f69ae49b513a08945f18101300294",
+    "date": "2026-11-16T13:27:39.378Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "00b58fe57818456bd84cac30ab4bf5b77e32716914f87715889e8522460aa744",
+    "docs/claude/INDEX.md": "d1174e78bfecc59001cdeeee6405deeb4093502f32b46ebd8a41152d408ded77",
+    "docs/claude/chantiers-580-629.md": "e4ff5817d97122090e16791278dc12c8ec89785d6a72e0fc878718ec9b479bc4",
+    "docs/claude/journal.md": "3fc9abe7fa1fa44638e5e1774dbb0c0fc9e0408911344f3d18a5f4dbbfddc8b1",
+    "guide/11-pilotage.html": "bb0e3b0b4273ac5933c4c11aa1e9e57eee59711b5a2c818b0f272426304e21b4",
+    "index.html": "d5f13155ffaa5e6bd45a72f37f8f988f47a50485bec151ac6649a6cafb772058",
+    "public/demo/cout-pc.webp": "8f8bd16f52e2f46b1a4e340b6964ea99832e2c962af7195d19f88027ae944830",
+    "public/demo/r-ger-cout.webp": "144eace50f9b78d37cf58069ea9343cc842fc4c9591ed25575ca38c8178a5990",
+    "public/demo/t-cout-pc.webp": "45a889a57f2c8d05b2475163e02767493ab81ab27daf504a371f0583e2233746",
+    "public/demo/t-r-ger-cout.webp": "79bbce312b27ea356c8a15d3d336586b203746bc11ee4169bd2004d71f3e408f",
+    "public/guide.html": "891ba68f0b6360b922e4563acd3fb55e8a5851917afe2cd9d718a7df0927fd2f",
+    "public/sw.js": "312be5a2e55b39f076c76b5837dd62d3b38e8064b084b12ac1ac263f52ac2879",
+    "scripts/harnais-bandeau-essai.mjs": "ff3a2ee3017d5692c852052c75dfb9ce78900ecee81d639e746621c396fb4ea1",
+    "scripts/harnais-cadence-escalier.mjs": "f57478bb5871ba39be8a3a3e71425839f78bae3f6fd1029045043bdbfcc57705",
+    "scripts/harnais-claude-md.mjs": "4cb59379905eb816b1b34924c770b839f0173a04003b3e18c01cbea8b64bc6f0",
+    "scripts/mv-harnais-annee.mjs": "2f64f662b6ffda3cee4362ee61232ad3a0452b87a1c0b33437642de47b12cee5",
+    "scripts/mv-harnais-coeq5.mjs": "5b99135315dae13b4ee576c76dd845ca8ad4b0ab2d0252dcd418c1034795afed",
+    "scripts/mv-harnais-coher1.mjs": "4e2a438449bb43503465cff5d96a1fc68ef6b88be6f72ebb217da289a1081272",
+    "scripts/mv-harnais-icones-contre.mjs": "25f2d149b94b9c61ba8c990f94f8edb45d2e395b72fa6e5132ef2e97d13e20a4",
+    "scripts/mv-harnais-info.mjs": "57ca0e47b87cf7f5202d28319aee4f638c0570f40affed5235801091d4906203",
+    "scripts/mv-harnais-liste.mjs": "2061baaaf0b0c1d32091730d4bf812751c7c430b05f612cf99b9fdd437ba1310",
+    "scripts/mv-harnais-pil-coherence.mjs": "02c17d0e542cea247a6c86e4e9f09e278f375991f6ddf5e30426f6621a829c04",
+    "scripts/mv-harnais-pilrange2a.mjs": "20d5101b576c2f782e6c72a57a39bd3c858fa3ff991c40f2eebb43821d032fdd",
+    "scripts/mv-harnais-pilrange2b.mjs": "41245c7022de21b4c47f3c7ee5532af8859769229f25a1c07f01e88971e2cd32",
+    "scripts/mv-harnais-revient.mjs": "fa50c417e9e6ae5d701fca6adf05910c09335c3cefc8a57cef18fccbb6b35bcc",
+    "scripts/mv-mots-baseline.json": "c13fd9360976dd5df37b215cbb07c3f2b2d7f0d94fff35b9fdeb88031cb253ea",
+    "src/pilotage.js": "cd21bedadeb15bbb498d7771558eaacaeffc9c2e55023a01aab182a1cf645742",
+    "src/styles.css": "406adcf664987be81d834ee9ab25bab0fbd8e31938df2de05d9e7d414b909fb7",
+    "src/utils.js": "bace140bb9370d6f97948751c9fb8052a8f53f575f0b48e26610746883ecbe38",
+    "src/whats-new.js": "a40c38440a68312249bb80662a608b354879ece4911565f49ea603f7a99bb6de",
+    "scripts/mv-harnais-mots1.mjs": "75ae0a7110e3573a1e78e56e973c82170193017eabcb53d4f6c1750fd6ea5a6a"
+  }
+}

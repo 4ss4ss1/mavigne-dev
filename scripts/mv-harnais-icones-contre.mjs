@@ -265,7 +265,7 @@ epreuve('_mvIcon dans un document imprime, via un helper',
       pas par relecture. */
 epreuve('une tuile d\u2019un ton inexistant',
   () => ecrire('src/pilotage.js', lire('src/pilotage.js')
-        .replace('_mvIconTuile(em[0],em[1])', "_mvIconTuile('alerte','orange')")),
+        .replace('_mvIconTuile(M.ic[0],M.ic[1])', "_mvIconTuile('alerte','orange')")   /* MOTS-1 (§582) : le verdict d'Économie lit son icône dans _pecVerdictM */),
   /tuile ne demande un ton inexistant[\s\S]*orange/);
 
 /* 11. UN EMOJI REPOSE DANS UNE SOURCE DU GUIDE PUBLIC. Le cliquet couvrait

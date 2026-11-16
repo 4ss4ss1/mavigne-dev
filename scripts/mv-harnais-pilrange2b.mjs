@@ -7,7 +7,7 @@
    Maquette du rangement validée par Nico (23/10) : la barre « Vous regardez » choisit le cadre (PIL-RANGE-2a), donc
    l'onglet L'année n'a plus lieu d'être. Ses avis et son budget s'ouvrent en tête de la Synthèse d'Économie, son
    renfort dans Équipe & matériel › Personnel, et un onglet « an » mémorisé migre vers Économie. Ce harnais EXÉCUTE
-   _pilAnEcoHtml, _pilPhotosIci et _pilLoadTab (le vrai chargeur de l'onglet mémorisé), et lit sur le texte le menu,
+   _pilPhotosIci et _pilLoadTab (le vrai chargeur de l'onglet mémorisé), et lit sur le texte le menu,
    les cases d'affichage, les cibles des photos, la cible « an_cadres », les liens de la coquille, du cockpit et des
    tutos, l'aide et le guide, et la liste des harnais.
    ─────────────────────────────────────────────────────── */
@@ -25,13 +25,12 @@ let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };
 function jouer(S) {
   const P = S.pil;
-  // ① avis et budget, en tête de la Synthèse
-  const ctx = { show: { an_budget: true }, _pilShow: (k) => !!ctx.show[k], _pilAnAvisHtml: () => '<div id="pil-an-cadres">AVIS</div>', _pilPanelAnBudget: () => '<i>BUDGET</i>' };
-  vm.createContext(ctx); vm.runInContext(corps(P, '_pilAnEcoHtml'), ctx);
-  t('① les avis du cadre puis le budget de l’année', /AVIS[\s\S]*<div class="pil-panels"><i>BUDGET<\/i><\/div>/.test(ctx._pilAnEcoHtml()));
-  ctx.show.an_budget = false;
-  t('① case « Le budget de l’année » décochée : les avis seuls', ctx._pilAnEcoHtml().indexOf('BUDGET') < 0 && /AVIS/.test(ctx._pilAnEcoHtml()));
-  t('① posés en tête de la Synthèse, pas des autres sous-vues', /else body=_pilAnEcoHtml\(\)\+_pecViewSynthese\(E,TL\);/.test(corps(P, '_pilTabEco')));
+  // ① avis et budget, dans la Synthèse — MOTS-1 (§582) : plus en tête, dans une des trois tuiles repliées (la règle 5 du §580c).
+  //    _pilAnEcoHtml n'existe plus ; la vue pose la tuile si sa case est cochée, et garde les avis seuls sinon.
+  const vueS = corps(P, '_pecViewSynthese');
+  t('① les avis du cadre s’ouvrent avec le budget de l’année, dans sa tuile', /avis=_pilAnAvisHtml\(\);/.test(vueS) && /\(an\?_pilPanelAnBudget\(avis\):''\)/.test(vueS) && /body=\(avis\|\|''\)\+body\+/.test(corps(P, '_pilPanelAnBudget')));
+  t('① case « Le budget de l’année » décochée : les avis seuls', /var an=_pilShow\('an_budget'\);/.test(vueS) && /if\(!an && avis\) H\+=avis;/.test(vueS));
+  t('① posés dans la Synthèse, pas dans les autres sous-vues', /else body=_pecViewSynthese\(E,TL\);/.test(corps(P, '_pilTabEco')) && !/_pilAnAvisHtml|_pilPanelAnBudget/.test(corps(P, '_pilTabEco')));
   // ② le renfort dans Personnel
   t('② le renfort dans Équipe & matériel › Personnel, sous sa case an_frise', /_pilAnyShow\(\['prs_equipe','prs_presences','prs_capacite','an_frise'(,'auj_tension')?\]\)/.test(P)   /* PIL-RANGE-4a : la tension réveille aussi Personnel */ && /\(_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)\+'<\/div>':''\)/.test(P));
   // ③ l'onglet mémorisé
@@ -61,8 +60,9 @@ if (!CONTRE) {
   const R = (S, k, a, b) => { if (S[k].split(a).length !== 2) throw new Error('ancre : ' + a.slice(0, 50)); return Object.assign({}, S, { [k]: S[k].split(a).join(b) }); };
   const mutants = [
     ['la migration oublie « an »', (S) => R(S, 'pil', ",an:'eco'};", '};')],
-    ['le budget s’affiche même décoché', (S) => R(S, 'pil', "  if(_pilShow('an_budget')) H+='<div class=\"pil-panels\">'", "  H+='<div class=\"pil-panels\">'")],
-    ['les avis et le budget sur toutes les sous-vues', (S) => R(S, 'pil', "else body=_pilAnEcoHtml()+_pecViewSynthese(E,TL);", "else body=_pecViewSynthese(E,TL);\n  body=_pilAnEcoHtml()+body;")],
+    ['le budget s’affiche même décoché', (S) => R(S, 'pil', "  var an=_pilShow('an_budget');", "  var an=true;")],
+    ['les avis se perdent quand le budget est décoché', (S) => R(S, 'pil', "  if(!an && avis) H+=avis;\n", "")],
+    ['les avis et le budget sur toutes les sous-vues', (S) => R(S, 'pil', "else body=_pecViewSynthese(E,TL);", "else body=_pecViewSynthese(E,TL);\n  body=_pilAnAvisHtml()+body;")],
     ['le renfort quitte Personnel', (S) => R(S, 'pil', "+(_pilShow('an_frise')?'<div class=\"pil-panels\">'+_pilPanelAnRenfort()+'</div>':'')", "")],
     ['les photos reviennent sur « an »', (S) => R(S, 'pil', "function _pilPhotosIci(tab){ return tab==='avc'; }", "function _pilPhotosIci(tab){ return tab==='an' || tab==='avc' || tab==='eco'; }")],
     ['la photo Budget mène encore à « an »', (S) => R(S, 'pil', "K(B.dep),' k\\u20ac', s,'eco',", "K(B.dep),' k\\u20ac', s,'an',")],

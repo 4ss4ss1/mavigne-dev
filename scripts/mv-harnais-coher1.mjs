@@ -136,9 +136,11 @@ function suite(S) {
   const svg = sansCom(fnDe(S.pil, 'function _pecBurnSvg(E,TL,w){'));
   T('② le graphique trace jusqu’au coût à la fin, à la fin prévue, en partant d’aujourd’hui', /L'\+X\(TL\.projT0\)\.toFixed\(1\)\+' '\+Y\(lastP\.v\)\.toFixed\(1\)\+' L'\+X\(TL\.finMs\)\.toFixed\(1\)\+' '\+Y\(TL\.finV\)\.toFixed\(1\)/.test(svg)
     && /var tMax=Math\.max\(TL\.tEnd, TL\.tToday\|\|0, TL\.finMs\|\|0, TL\.tLast\|\|0\);/.test(svg) && /Math\.max\(TL\.budget, TL\.cum, TL\.finV\|\|0, pFin\)/.test(svg));
-  T('② la ligne sous le titre écrit « coût à la fin » à l’euro, « fin prévue » au jour, comme Aujourd’hui', /'co\\u00fbt \\u00e0 la fin <b>'\+_pilEsc\(_ecoEur\(TL\.finV\)\)\+'<\/b>'\+\(TL\.finPrevue\?\(', fin pr\\u00e9vue <b>'\+_pilEsc\(_pecJourCourt\(TL\.finMs\)\)/.test(S.pil));
-  T('② « budget épuisé le » ne s’écrit que si la projection a une date, sous la ligne et au verdict', /\(TL\.projMs\?\(' \\u00b7 budget \\u00e9puis\\u00e9 le <b>'\+_pilEsc\(_pecJourCourt\(TL\.projMs\)\)/.test(S.pil)
-    && /if\(TL && TL\.ok && TL\.projMs\)\{\n\s+d\+=' \\u23F1 Le budget serait \\u00e9puis\\u00e9 le/.test(S.pil) && !/Au rythme actuel, le budget serait/.test(S.pil));
+  // MOTS-1 (§582) : la ligne sous « Rythme de dépense » est devenue le TITRE de la tuile « Coût à la fin » (_pecTuileFin) — le même chiffre, la même date.
+  const fin = sansCom(fnDe(S.pil, 'function _pecTuileFin(E,TL){'));
+  T('② le titre de la tuile écrit le coût à la fin à l’euro, la fin prévue au jour, comme Aujourd’hui', /_pilStat\(_pilEsc\(_ecoEur\(TL\.finV\)\), TL\.finPrevue\?\(' \\u00b7 '\+_pilEsc\(_pecJourCourt\(TL\.finMs\)\)\):''/.test(fin) && /_pilTile\('ecofin','#8A5A38','Coût à la fin'/.test(fin));
+  T('② « budget épuisé le » ne s’écrit que si la projection a une date, et plus sous un verdict', /TL\.projMs\?\('budget épuisé le '\+_pilEsc\(_pecJourCourt\(TL\.projMs\)\)\):null\)/.test(fin)
+    && !/Le budget serait \\u00e9puis\\u00e9 le|Le budget serait épuisé le|Au rythme actuel, le budget serait/.test(sansCom(S.pil)));
   T('② la légende ne dit plus « au rythme constaté »', />Projection<\/span>'/.test(S.pil) && !/Projection au rythme constat/.test(S.pil));
   T('② une date courte s’écrit « 25 nov. »', /function _pecJourCourt\(ms\)\{ var d=new Date\(ms\); return d\.getDate\(\)\+' '\+_pecMoisCourt\(d\.getMonth\(\)\); \}/.test(S.pil));
 
@@ -156,8 +158,8 @@ function suite(S) {
 
   /* ── ④ CE QUI SUIT ── */
   T('④ l’aide d’Archives dit « années vigne »', /\['Archives', "empile les années vigne sur un même axe/.test(S.uti));
-  T('④ la fiche de l’engagé dit où va la projection', /Sous le graphique <b>Rythme de dépense<\/b>, le pointillé part d\\u2019aujourd\\u2019hui et rejoint le <b>coût à la fin<\/b>/.test(S.uti));
-  T('④ le guide : la projection, la tuile Conformité, les années vigne', /rejoint le <b>coût à la fin<\/b> à la <b>fin prévue<\/b> des travaux/.test(S.guide) && /La tuile Conformité compte ce que l'onglet Conformité signale/.test(S.guide)
+  T('④ la fiche de l’engagé dit où va la projection', /Dans la tuile <b>Coût à la fin<\/b>, le pointillé part d\\u2019aujourd\\u2019hui et rejoint le <b>coût à la fin<\/b>/.test(S.uti));
+  T('④ le guide : la projection, la tuile Conformité, les années vigne', /rejoint ce coût à la <b>fin prévue<\/b> des travaux/.test(S.guide) && /La tuile Conformité compte ce que l'onglet Conformité signale/.test(S.guide)
     && /Toutes les <b>années vigne<\/b> sur un <b>même axe<\/b>/.test(S.guide) && /une campagne jamais clôturée apparaît sur la frise/.test(S.guide));
   const app = (S.uti.match(/export const APP_VERSION = '([\d.]+)'/) || [])[1];
   const bloc = S.wn.slice(S.wn.indexOf("{ v: '11.09'"), S.wn.indexOf("{ v: '11.08'"));
@@ -198,15 +200,15 @@ if (!CONTRE) {
     ['Économie ne passe plus la fin prévue', sur('pil', 'var TL=_pecTimeline(E, _finIso);', 'var TL=_pecTimeline(E);')],
     ['Aujourd’hui lit un autre coût à la fin', sur('pil', 'var att=num(E.projFin);', 'var att=num(E.budget);')],
     ['le graphique trace jusqu’à la fin de la période', sur('pil', "' L'+X(TL.finMs).toFixed(1)+' '+Y(TL.finV).toFixed(1)", "' L'+X(TL.tEnd).toFixed(1)+' '+Y(TL.finV).toFixed(1)")],
-    ['la ligne sous le titre reparle de fin de période projetée', sur('pil', "('co\\u00fbt \\u00e0 la fin <b>'+_pilEsc(_ecoEur(TL.finV))", "('fin de p\\u00e9riode projet\\u00e9e \\u00e0 <b>'+_pilEsc(_pecEurK(TL.finV))")],
-    ['le verdict reparle du rythme actuel', sur('pil', "d+=' \\u23F1 Le budget serait", "d+=' \\u23F1 Au rythme actuel, le budget serait")],
+    ['le titre de la tuile perd le coût à la fin', sur('pil', "? _pilStat(_pilEsc(_ecoEur(TL.finV)), TL.finPrevue?", "? _pilStat(_pilEsc(_pecEurK(TL.pace)), TL.finPrevue?")],
+    ['« budget épuisé le » s’écrit sans date de projection', sur('pil', "TL.projMs?('budget épuisé le '+_pilEsc(_pecJourCourt(TL.projMs))):null)", "('budget épuisé le '+_pilEsc(_pecJourCourt(TL.projMs))))")],
     ['la légende redit « au rythme constaté »', sur('pil', '>Projection</span>', '>Projection au rythme constat\\u00e9</span>')],
     ['une ligne d’Archives recompte des périodes', sur('pil', "var meta=list.length+' campagne'+(list.length>1?'s':'');", "var meta=list.length+' période'+(list.length>1?'s':'');")],
     ['une ligne d’Archives s’appelle de nouveau « Campagne »', sur('pil', "<span class=\"y\">'+_pilEsc(_b.court", "<span class=\"y\">Campagne '+_pilEsc(_b.court")],
     ['le compteur d’Archives reparle de périodes', sur('pil', "<div class=\"l\">campagne'+(S.length>1?'s':'')+'</div>", '<div class="l">périodes</div>')],
     ['la phrase du haut d’Archives reparle de campagnes', sur('pil', 'Toutes les années vigne sur le même axe', 'Toutes les campagnes sur le même axe')],
     ['l’aide d’Archives garde « campagnes »', sur('uti', '"empile les années vigne sur un même axe', '"empile les campagnes sur un même axe')],
-    ['la fiche de l’engagé ne dit pas la projection', sur('uti', 'Sous le graphique <b>Rythme de dépense</b>, le pointillé', 'Sous le graphique, le pointillé')],
+    ['la fiche de l’engagé ne dit pas la projection', sur('uti', 'Dans la tuile <b>Coût à la fin</b>, le pointillé', 'Dans la tuile, le pointillé')],
     ['le guide ne dit pas la tuile Conformité', sur('guide', "La tuile Conformité compte ce que l'onglet Conformité signale", 'La tuile Conformité')],
     ['l’annonce manque', sur('wn', "{ v: '11.09', d: '2026-11-16'", "{ v: '11.085', d: '2026-11-16'")],
     ['un affichage de version oublié', (S) => { const app = (S.uti.match(/export const APP_VERSION = '([\d.]+)'/) || [])[1]; if (S.idx.indexOf('boot.js?v=' + app) < 0) throw new Error('motif absent'); return { ...S, idx: S.idx.replace('boot.js?v=' + app, 'boot.js?v=11.08') }; }],

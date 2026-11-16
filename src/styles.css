@@ -10503,7 +10503,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* 2. LES CHIFFRES */
 :is(#page-pilotage, #ovReglPilotage) .pec-verdict .t { font-size: var(--t-verdict) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-gauge-pct, .pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .prv-go .v, .pil-big, .pil-dz-hero .stop, .arc-kpi .v, .pec-fia-n, .pil-ift-k .v) {
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .arc-kpi .v, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-prot-big, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-gauge-pct small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
@@ -10548,7 +10548,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* 11. LES CARTES — un seul habillage, celui d'Aujourd'hui (arrondi 12, filet, sans ombre) ; les blocs intérieurs arrondis à 8 */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-panel, .pil-tile, .pil-tile2, .pec-card, .pil-anc, .arc-kpi) { border-radius: var(--r-lg, 12px) !important; box-shadow: none !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-panel { padding: var(--carte-pad) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.pec-mini, .pec-fia, .pex-ctrl, .pec-a, .pil-dz-row, .pil-dz-set, .pil-dz-hero, .pil-dz-rt, .pil-dz-rdt, .arcan-y) { border-radius: var(--r-md, 8px) !important; box-shadow: none !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pec-mini, .pex-ctrl, .pec-a, .pil-dz-row, .pil-dz-set, .pil-dz-hero, .pil-dz-rt, .pil-dz-rdt, .arcan-y) { border-radius: var(--r-md, 8px) !important; box-shadow: none !important; }
 /* Les trois photos de Travaux : la bande d'Aujourd'hui (une carte, des cases séparées d'un filet) */
 #page-pilotage .pil-photos { gap: 0 !important; border: var(--bw, 1px) solid var(--ligne, #E7E6E2) !important; border-radius: var(--r-lg, 12px) !important; background: var(--bg-card) !important; overflow: hidden !important; }
 #page-pilotage .pil-photos > .pil-photo { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; padding: 16px var(--carte-pad) !important; }

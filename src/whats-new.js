@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.10', d: '2026-11-16', items: [   // MOTS-1 (§582) : Économie › Synthèse, moins à lire
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Économie\u00a0: la Synthèse se lit d’un coup d’œil',
+      desc: "La Synthèse tenait sur plus de quatre écrans de téléphone, avec 85 mots à lire avant le premier chiffre. Elle tient maintenant en une phrase («\u00a0Le budget tient\u00a0: 12\u00a0% engagé pour 16\u00a0% du travail fait\u00a0»), quatre chiffres (budget, engagé, reste, écart de cadence) et trois tuiles repliées, leur chiffre sur le titre\u00a0: Coût à la fin, L’exercice, Prix de revient. Un poste compté pour zéro s’affiche en rouge sous la phrase, avec son bouton. Aucun calcul ne change\u00a0; les explications sont derrière les «\u00a0i\u00a0»." },
+  ] },
   { v: '11.09', d: '2026-11-16', items: [   // COHER-1 (§581) : trois désaccords entre écrans du Pilotage — la tuile Conformité, le coût à la fin, « campagne » dans Archives
     { niv: 0, pour: ['admin'], emoji: 'bouclier', titre: 'Aujourd’hui\u00a0: la tuile Conformité compte ce que l’onglet signale',
       desc: "Sur Aujourd’hui, la tuile «\u00a0Conformité\u00a0» affichait toujours «\u00a00 point à régler\u00a0», même quand l’onglet Conformité signalait un SIRET manquant. Elle compte maintenant ce que l’onglet écrit sur ses tuiles\u00a0: un plafond de cuivre dépassé, un registre phyto qui n’est pas prêt, un IFT sans catalogue. Sa dernière ligne nomme le premier point\u00a0; touchez la tuile pour voir les autres." },

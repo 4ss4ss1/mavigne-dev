@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.09';
+export const APP_VERSION = '11.10';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2994,7 +2994,7 @@ var MV_AIDE = {
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
-      ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème."],
+      ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème. La <b>Synthèse</b> tient en une phrase, quatre chiffres et trois tuiles repliées : le coût à la fin, l’exercice, le prix de revient."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce, et les amendements chiffrés pas encore facturés) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif. Une parcelle déclarée sans récolte cette année (Le Cuvier, «\u00a0Encore sur pied\u00a0») ne compte ni rendement ni bouteilles, et son coût se répartit sur les autres vignes."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
@@ -3217,7 +3217,7 @@ export const MV_INFO = {
     'Le tracteur, le carburant et le phyto sont comptés comme avant. Le <b>budget</b>, lui, reste le barème : surface \u00d7 heures par hectare \u00d7 taux.',
     'Un jour d\u2019atelier ou de bureau d\u2019un salarié vigne n\u2019est écrit nulle part : il reste compté dans la vigne. Un salarié sans taux sur sa fiche est compté au taux moyen du domaine.',
     // COHER-1 (§581) : la projection du graphique, dite là où l'engagé s'explique
-    'Sous le graphique <b>Rythme de dépense</b>, le pointillé part d\u2019aujourd\u2019hui et rejoint le <b>coût à la fin</b> — l\u2019engagé, plus le travail qui reste compté au barème — à la <b>fin prévue</b> des travaux : les deux chiffres d\u2019Aujourd\u2019hui. « Budget épuisé le… » ne s\u2019affiche que si ce coût dépasse le budget. Le rythme des derniers jours est une mesure : il ne prévoit rien.'
+    'Dans la tuile <b>Coût à la fin</b>, le pointillé part d\u2019aujourd\u2019hui et rejoint le <b>coût à la fin</b> — l\u2019engagé, plus le travail qui reste compté au barème — à la <b>fin prévue</b> des travaux : les deux chiffres d\u2019Aujourd\u2019hui. « Budget épuisé le… » ne s\u2019affiche que si ce coût dépasse le budget. Le rythme des derniers jours est une mesure : il ne prévoit rien.'
   ] },
 
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).
@@ -3233,6 +3233,14 @@ export const MV_INFO = {
     '<b>Celui qui valide compte dans le groupe</b>, sauf s\u2019il s\u2019est décoché : un administrateur qui valide pour l\u2019équipe sans être dans les rangs retire sa puce « Moi », et ses heures du jour restent en attente — elles ne rejoignent pas non plus la journée des autres. Les validations d\u2019avant ce réglage comptent leur auteur.'
   ] },
 
+  // MOTS-1 (§582) : ce que la Synthèse écrivait sous son graphique (93 mots à demeure). La tuile « Coût à la fin » y ajoute,
+  //   au rendu, les heures du moment (_mvInfoSet dans _pecTuileFin).
+  'pil.eco.fin': { t: 'Le coût à la fin, et son graphique', p: [
+    'Le <b>coût à la fin</b>, c\u2019est l\u2019<b>engagé</b>, plus le travail qui <b>reste</b> compté au barème — corrigé de l\u2019écart de cadence quand il s\u2019applique. C\u2019est le chiffre d\u2019<b>Aujourd\u2019hui</b>, à la même <b>fin prévue</b>. Sur le graphique, le pointillé part d\u2019aujourd\u2019hui et y mène. « Budget épuisé le… » ne s\u2019écrit que si ce coût dépasse le budget.',
+    'Chaque euro est posé à <b>sa</b> date : la main-d\u2019œuvre sur les validations du journal, le tracteur et le GNR sur la date de session, le phyto sur la date de traitement. Une personne présente sur plusieurs parcelles le même jour est répartie à parts égales — le journal dit qui et quand, jamais combien d\u2019heures.',
+    'Le <b>rythme</b> est une mesure des derniers jours travaillés : il ne prévoit rien.',
+    'L\u2019<b>écart de cadence</b> vient de là : les heures <b>réellement travaillées au planning</b> sur la campagne, moins les heures de sessions tracteur, comparées aux heures de barème du travail fait.'
+  ] },
   'pil.eco.remarques': { t: 'Les remarques du moment', p: [
     'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie pour que cette fiche se remplisse.'
   ] },
@@ -3386,7 +3394,9 @@ export const MV_INFO = {
     'Ce sont les <b>coûts de culture</b> : ce qu’il a fallu pour amener le raisin jusqu’au bout du rang. <b>Ni vinification, ni fûts, ni mise, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne. Le chiffre est un <b>plancher</b>.',
     'Tout se lit sur le <b>cycle du millésime</b> : du lendemain de la dernière récolte de l’an passé à la fin de la vendange. Pas sur la période consultée — un coût de dix jours divisé par une récolte entière ne veut rien dire. Sans récolte saisie l’an passé, le cycle part <b>un an avant sa fin</b>, et l’écran le dit.',
     'Le coût reprend ce que la campagne appelle l’<b>engagé</b> : les heures payées dans les rangs au planning (bureau, tracteur et journées de cave retirés), la conduite du tracteur et son coéquipier, le carburant et les produits phyto. Tant que la vendange est à venir, s’y ajoute la <b>main-d’œuvre prévue</b> au planning jusqu’à sa fin prévue — le chiffre est alors marqué <b>projeté</b>.',
-    '<b>Probable</b> tant qu’une parcelle n’est pas récoltée, <b>constaté</b> quand tout est rentré. Les millésimes précédents qui ont une récolte se choisissent en tête : en janvier, c’est l’an passé qu’on veut lire.'
+    '<b>Probable</b> tant qu’une parcelle n’est pas récoltée, <b>constaté</b> quand tout est rentré. Les millésimes précédents qui ont une récolte se choisissent en tête : en janvier, c’est l’an passé qu’on veut lire.',
+    // MOTS-1 (§582) : le sous-titre de la carte, passé ici
+    'Sur la Synthèse, seule la <b>bouteille</b> se lit sur le cycle du millésime ; l’engagé à l’hectare, le coût du plant et le coût de l’heure se lisent sur la <b>campagne</b>.'
   ] },
 
   'pil.eco.revrdt': { t: 'Le rendement probable, parcelle par parcelle', p: [
@@ -3624,8 +3634,10 @@ export const MV_INFO = {
     'Sur l’année vigne et l’exercice, les flèches remontent aux années passées ; au rechargement, l’écran revient toujours à l’année en cours. La liste des campagnes montre celles de l’année regardée, sur leur frise.'
   ] },
 
-  'pil.an.budget': { t: 'Le budget de l’année', p: [
-    'Un seul moteur : celui d’<b>Économie › Exercice</b>, joué sur les dates du cadre. <b>Dépensé</b> = ce qui est daté jusqu’à aujourd’hui : salaires payés au planning, pleins de GNR, achats, réparations, fûts, prestations. <b>Reste prévu</b> = les salaires que le planning annonce jusqu’à la fin, et les amendements chiffrés pas encore facturés.',
+  'pil.an.budget': { t: 'L’exercice, ou l’année vigne', p: [
+    // MOTS-1 (§582) : la tuile s'appelle par son cadre (« L'exercice 2026–2027 ») ; « Dépensé » devient « Sorti » (le lexique, §580c)
+    'Ce sont les euros <b>sortis</b>, chacun à sa date, <b>salaires chargés compris</b>, pour <b>tout le domaine</b> : d’un bilan à l’autre (ou d’une vendange à l’autre, selon la barre « Vous regardez »). Le <b>budget</b> de la campagne, au-dessus, est un barème et ne porte aucune date. Deux questions, jamais deux totaux d’une même chose.',
+    'Un seul moteur : celui d’<b>Économie › Exercice</b>, joué sur les dates du cadre. <b>Sorti</b> = ce qui est daté jusqu’à aujourd’hui : salaires payés au planning, pleins de GNR, achats, réparations, fûts, prestations. <b>Reste prévu</b> = les salaires que le planning annonce jusqu’à la fin, et les amendements chiffrés pas encore facturés.',
     'Le prévu ne connaît que ce qui est saisi : une embauche ou un achat à venir n’y entre pas tant qu’il n’est pas dans l’appli. Le carburant n’a pas de prévu : il compte au plein.',
     'Le graphe règle son échelle sur les mois <b>à venir</b>. Un mois passé qui la dépasse — celui des vendanges, souvent — est coupé net, son montant écrit au-dessus.',
     'Le « prévu au barème » (heures/ha × surface) ne se compare plus ici à la dépense de tout le domaine : les deux ne comptent pas les mêmes choses.',

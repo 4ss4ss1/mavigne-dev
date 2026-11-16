@@ -125,7 +125,7 @@ ok('la note du graphe distingue la source histo',
 // ★★ ASSERTION REBASÉE (COEQ-5, §526). Le KPI ne cite plus la fin de projet pour un écart d'histoire (la règle de l'alerte
 //    plus bas) : il dit « campagne précédente · lu, non appliqué au budget ». Le comportement protégé reste : il annonce la source.
 ok('le KPI ecart de cadence annonce la source histo',
-   /campagne pr\\u00e9c\\u00e9dente \\u00b7 lu, <b>non appliqu\\u00e9 au budget<\/b>/.test(SRC));
+   /campagne précédente \\u00b7 <b>non appliqué<\/b>/.test(SRC));   // MOTS-1 (§582) : le repère d'un chiffre tient en quatre mots
 // ★★ ASSERTION REBASEE (§44c). Elle cherchait « push('warn' » — une FORME de code
 //    supposee, jamais ecrite. Le comportement, lui, est bien la : quand l'ecart vient
 //    de l'historique, le conseil dit que c'est un REPERE et ne cite pas la projection

@@ -227,7 +227,11 @@ const vivantes = [...PILNU.matchAll(/_mvInfoSet\('([^']+)'/g)].map(m => m[1]);
 t('toute fiche remplie a l\'execution est declaree', vivantes.every(k => cles.includes(k)),
   vivantes.filter(k => !cles.includes(k)).join(', '));
 t('… et son repli dit honnetement qu\'elle est vide',
-  vivantes.every(k => /Aucune remarque|pas encore/.test(MV_INFO[k].p.join(' '))));
+  vivantes.filter(k => k !== 'pil.eco.fin').every(k => /Aucune remarque|pas encore/.test(MV_INFO[k].p.join(' '))));
+// MOTS-1 (§582) : pil.eco.fin n'est pas une fiche « vide en attendant » — son texte fixe est la méthode elle-même, et le
+//   rendu y AJOUTE les heures du moment (base.concat). Elle doit donc être pleine, et le rendu ne doit pas l'écraser.
+t('… sauf pil.eco.fin : sa methode est ecrite, le rendu y ajoute les heures du moment',
+  MV_INFO['pil.eco.fin'] && MV_INFO['pil.eco.fin'].p.length >= 4 && /_mvInfoSet\('pil\.eco\.fin', \{ p: base\.concat\(/.test(PILNU));
 
 /* ══ 5 sexies. LE MUR D'ALERTES D'ECONOMIE ══
    Douze paragraphes empiles, tous au meme poids : ce qui met un chiffre a ZERO
@@ -237,26 +241,27 @@ t('_pecAlertes ne produit plus de paves .pec-a', !/pec-a [^"]*'\+em\+/.test(PILN
 t('les postes a zero sont separes des remarques',
   /function _pecZeros\(E\)/.test(PILNU) && /function _pecRemarques\(E,TL\)/.test(PILNU));
 t('… et les deux alimentent le rendu partage',
-  /_pecFiabCard\(_pecZeros\(E\), _pecRemarques\(E,TL\),/.test(PILNU));
+  /var Z=_pecZeros\(E\);/.test(PILNU) && /_pecFiabBande\(Z,'pil\.eco\.fiabilite'\)/.test(PILNU) && /_pecFiabRemq\(_pecRemarques\(E,TL\),'pil\.eco\.remarques'\)/.test(PILNU));   // MOTS-1 (§582) : la bande sous la phrase, les remarques en bas
 /* ⚠️ UN SEUL RENDU POUR LES DEUX ECRANS. Deux implementations de la meme carte,
    c'est la garantie qu'elles divergeront — la faute que ce chantier corrige. */
 t('la carte de fiabilite n\'a qu\'un seul rendu',
-  (PILNU.match(/class="pec-fia bad"/g)||[]).length === 1
-  && (PILNU.match(/class="pec-fia ok"/g)||[]).length === 1);
+  (PILNU.match(/class="pec-al" role="status"/g)||[]).length === 1
+  && (PILNU.match(/<span class="pec-ok">/g)||[]).length === 1
+  && (PILNU.match(/class="pec-remq" data-mvi=/g)||[]).length === 1);   // MOTS-1 (§582) : une bande, une coche, un bouton — chacun écrit une fois
 t('_pecFiabCard prend ses cles en argument',
-  /function _pecFiabCard\(Z, R, cleFia, cleRem, okTxt, okSous\)/.test(PILNU));
+  /function _pecFiabCard\(Z, R, cleFia, cleRem\)/.test(PILNU) && /function _pecFiabBande\(Z, cleFia\)/.test(PILNU) && /function _pecFiabRemq\(R, cleRem\)/.test(PILNU));
 t('le rendu partage pose la pastille dans SES DEUX etats',
   (PILNU.match(/_mvInfoBtn\(cleFia\)/g)||[]).length === 2,
   'trouvee ' + (PILNU.match(/_mvInfoBtn\(cleFia\)/g)||[]).length + ' fois au lieu de 2');
 t('la Synthese lui passe ses deux cles',
-  /'pil\.eco\.fiabilite', 'pil\.eco\.remarques'/.test(PILNU));
+  /_pecFiabOk\('pil\.eco\.fiabilite'\)/.test(PILNU) && /_pecFiabBande\(Z,'pil\.eco\.fiabilite'\)/.test(PILNU) && /'pil\.eco\.remarques'\)/.test(PILNU));
 t('chaque poste a zero propose son bouton quand une porte existe',
   /data-diag="'\+_pilEsc\(z\.cible\)/.test(PILNU));
-t('un poste sans porte ne promet pas de bouton', /pec-fia-x/.test(PILNU));
+t('un poste sans porte ne promet pas de bouton', /return z\.cible \? '<button class="pil-diag-go ghost"/.test(PILNU) && !/renseigner/.test(PILNU.slice(PILNU.indexOf('function _pecFiabBande('), PILNU.indexOf('function _pecFiabRemq('))));   // MOTS-1 (§582) : la bande nomme le poste ; sans porte, pas de bouton, pas de promesse
 t('les remarques sont repliees derriere une puce',
   /class="pec-remq" data-mvi="'\+_pilEsc\(cleRem\)\+'"/.test(PILNU));
-t('le cas « tout est en place » a son etat vert', /pec-fia ok/.test(PILNU));
-t('la carte de fiabilite est stylee', /\.pec-fia\{/.test(PILNU) && /\.pec-remq\{/.test(PILNU));
+t('le cas « tout est en place » a son etat vert', /function _pecFiabOk\(cleFia\)\{\s+return '<span class="pec-ok">'\+_mvIcon\('check',16\)\+' complet'/.test(PILNU));   // MOTS-1 (§582) : une coche, sans phrase
+t('la carte de fiabilite est stylee', /\.pec-al\{/.test(PILNU) && /\.pec-ok\{/.test(PILNU) && /\.pec-remq\{/.test(PILNU));
 t('l\'ecart de cadence garde sa fiche a cote de son chiffre',
   /cart de cadence'\+\(typeof _mvInfoBtn[\s\S]{0,60}?_mvInfoBtn\('pil\.cadence'\)/.test(PILNU));
 

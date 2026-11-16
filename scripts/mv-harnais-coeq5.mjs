@@ -35,7 +35,7 @@ function controles(S) {
   r.push(['le modèle en fait « Marc et Léo », deux initiales', (S.P.match(/var n=x\.qui\?\[x\.qui\]\.concat\(Array\.isArray\(x\.avec\)\?x\.avec:\[\]\):\[\];/g) || []).length === 2 && (S.P.match(/noms:\(n\.length>1\?n\.slice\(0,-1\)\.join\(', '\)\+' et '\+n\[n\.length-1\]/g) || []).length === 2]);
   r.push(['le verbe s’accorde : « ont fini »', /EQ\[e\.eq\]\.ini\.length > 1\) \? ' ont ' : ' a '/.test(S.V) && /qui \+ v \+ 'fini '/.test(S.V)]);
   r.push(['la fiche de session montre « Par personne », le pont prête le barème', /window\._trParPersonneHtml\(s\)/.test(S.T) && /sessBaremeMin:_sessBaremeMin/.test(S.T)]);
-  r.push(['le contrôle de cadence est recalé et joué par la chaîne', /non appliqu\\\\u00e9 au budget/.test(S.H) && /harnais-cadence-escalier\.mjs/.test(S.L)]);
+  r.push(['le contrôle de cadence est recalé et joué par la chaîne', /<b>non appliqué</.test(S.H)   /* MOTS-1 (§582) : le repère du chiffre est raccourci */ && /harnais-cadence-escalier\.mjs/.test(S.L)]);
   return r;
 }
 let ko = 0;
