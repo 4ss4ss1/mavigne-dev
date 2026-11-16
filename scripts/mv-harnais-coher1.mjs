@@ -63,6 +63,7 @@ function ligneArchives(S) {
   ctx.window = ctx; ctx._mvToday = () => '2026-10-27';
   vm.createContext(ctx);
   vm.runInContext(ligne(S.pil, 'function _arcN(s){') + ligne(S.pil, 'function _arcISO(n){')
+    + ['function _pecIsoToMs(iso){', 'function _pecJourCourt(ms){', 'function _pecMoisCourt(m){', 'function _arcJour(iso){'].map((n) => ligne(S.pil, n)).join('')   // MOTS-4 (§585) : la ligne écrit les dates de ses barres
     + 'function _arcBornes(an){ return { an:an, d0:an+"-08-01", d1:(an+1)+"-07-31", court:an+"–"+(an+1) }; }\nfunction _arcHeures(){ return 0; }\nfunction _pilHa(x){ return String(x); }\nfunction _pilEsc(x){ return String(x); }\n'
     + fnDe(S.pil, 'function _arcLigne(an,list,cur){')
     + '\nthis.__h = [_arcLigne(2026,[{nom:"Après-vendange 2026-2027",debut:"2026-10-24",fin:"2027-02-28"},{nom:"Printemps 2027",debut:"2027-03-01",fin:"2027-06-30"}],true), _arcLigne(2025,[{nom:"Printemps 2026",debut:"2026-03-01",fin:"2026-06-30"}],false)];', ctx);
@@ -147,13 +148,14 @@ function suite(S) {
   /* ── ③ ARCHIVES ── */
   essai('③ une ligne d’Archives', () => {
     const [h1, h2] = ligneArchives(S);
-    T('③ une ligne porte ses années, « en cours » sur la bonne, et compte des campagnes', /<span class="y">2026–2027 <em>en cours<\/em><\/span><span class="m">2 campagnes · pas d’instantané<\/span>/.test(h1) && /<span class="y">2025–2026<\/span><span class="m">1 campagne · /.test(h2), h1.slice(0, 160));
+    // MOTS-4 (§585) : la ligne ne porte plus que ses années et ses barres ; « en cours » est sur la barre de la campagne, pas sur l'année.
+    T('③ une ligne porte ses années ; ses barres sont des campagnes, « en cours » sur la bonne', /^<div class="arc-row cur"><span class="y">2026–2027<\/span>/.test(h1) && /data-n="Après-vendange 2026-2027" data-d="[^"]* · en cours"/.test(h1) && /^<div class="arc-row old"><span class="y">2025–2026<\/span>/.test(h2) && !/en cours/.test(h2), h1.slice(0, 200));
     T('③ … plus de « période », plus de « Campagne 2026–2027 »', !/p[ée]riode/i.test(h1 + h2) && !/Campagne \d/.test(h1 + h2));
   });
   const arc = sansCom(fnDe(S.pil, 'function _pilTabArc(d){'));
-  T('③ la phrase du haut parle d’années vigne', /Toutes les années vigne sur le même axe/.test(arc));
-  T('③ le compteur : des années vigne et des campagnes, accordées', /<div class="l">année'\+\(keys\.length>1\?'s':''\)\+' vigne<\/div>/.test(arc) && /<div class="l">campagne'\+\(S\.length>1\?'s':''\)\+'<\/div>/.test(arc));
-  T('③ l’écran vide parle de campagnes', /Aucune campagne datée\. Elles apparaissent ici /.test(arc));
+  T('③ la phrase du haut parle d’années vigne et de campagnes', /keys\.length\+' année'\+\(keys\.length>1\?'s':''\)\+' vigne<\/b>, '\+S\.length\+' campagne'\+\(S\.length>1\?'s':''\)/.test(arc));
+  T('③ le compteur : des années vigne et des campagnes', /<div class="l">Années vigne<\/div><div class="v">'\+keys\.length\+'<\/div>/.test(arc) && /<div class="l">Campagnes<\/div><div class="v">'\+S\.length\+'<\/div>/.test(arc));
+  T('③ l’écran vide parle de campagnes', /Aucune campagne datée\. '/.test(arc));
   T('③ plus un « période » écrit à l’écran dans Archives', !/p[ée]riode/i.test(arc) && !/p\\u00e9riode/.test(arc));
 
   /* ── ④ CE QUI SUIT ── */
@@ -203,10 +205,10 @@ if (!CONTRE) {
     ['le titre de la tuile perd le coût à la fin', sur('pil', "? _pilStat(_pilEsc(_ecoEur(TL.finV)), TL.finPrevue?", "? _pilStat(_pilEsc(_pecEurK(TL.pace)), TL.finPrevue?")],
     ['« budget épuisé le » s’écrit sans date de projection', sur('pil', "TL.projMs?('budget épuisé le '+_pilEsc(_pecJourCourt(TL.projMs))):null)", "('budget épuisé le '+_pilEsc(_pecJourCourt(TL.projMs))))")],
     ['la légende redit « au rythme constaté »', sur('pil', '>Projection</span>', '>Projection au rythme constat\\u00e9</span>')],
-    ['une ligne d’Archives recompte des périodes', sur('pil', "var meta=list.length+' campagne'+(list.length>1?'s':'');", "var meta=list.length+' période'+(list.length>1?'s':'');")],
+    ['une barre d’Archives se dit « période en cours »', sur('pil', "(enc?' · en cours':(hh>0?", "(enc?' · période en cours':(hh>0?")],
     ['une ligne d’Archives s’appelle de nouveau « Campagne »', sur('pil', "<span class=\"y\">'+_pilEsc(_b.court", "<span class=\"y\">Campagne '+_pilEsc(_b.court")],
-    ['le compteur d’Archives reparle de périodes', sur('pil', "<div class=\"l\">campagne'+(S.length>1?'s':'')+'</div>", '<div class="l">périodes</div>')],
-    ['la phrase du haut d’Archives reparle de campagnes', sur('pil', 'Toutes les années vigne sur le même axe', 'Toutes les campagnes sur le même axe')],
+    ['le compteur d’Archives reparle de périodes', sur('pil', '<div class="pec-k"><div class="l">Campagnes</div>', '<div class="pec-k"><div class="l">Périodes</div>')],
+    ['la phrase du haut d’Archives perd les années vigne', sur('pil', "+' année'+(keys.length>1?'s':'')+' vigne</b>, '", "+' campagne'+(keys.length>1?'s':'')+'</b>, '")],
     ['l’aide d’Archives garde « campagnes »', sur('uti', '"empile les années vigne sur un même axe', '"empile les campagnes sur un même axe')],
     ['la fiche de l’engagé ne dit pas la projection', sur('uti', 'Dans la tuile <b>Coût à la fin</b>, le pointillé', 'Dans la tuile, le pointillé')],
     ['le guide ne dit pas la tuile Conformité', sur('guide', "La tuile Conformité compte ce que l'onglet Conformité signale", 'La tuile Conformité')],

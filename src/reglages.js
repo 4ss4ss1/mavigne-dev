@@ -3848,41 +3848,40 @@ function renderHistorique(){
   let html = '';
 
   // ── En-tête ──
-  html += `<div class="histo-header" style="margin:16px 16px 12px">
-    <div class="histo-header-title">${_mvIcon('graphique',16)} Comparaison multi-saisons</div>
-    <div class="histo-header-sub">${allSaisons.length} saison${allSaisons.length>1?'s':''} disponible${allSaisons.length>1?'s':''}</div>
-  </div>`;
+  // MOTS-4 (§585) : le titre est celui de la fenêtre (« Comparer deux campagnes ») — il n'est plus redit ici ; « saison » devient
+  //   « campagne », le mot de tout le Pilotage. Le sous-titre de la fenêtre porte le compte.
+  { const sub=document.getElementById('histo-modal-sub'); if(sub) sub.textContent=allSaisons.length+' campagne'+(allSaisons.length>1?'s':''); }
 
   // ── Bouton archiver saison active ──
   html += `<div class="histo-archive-btn" onclick="archiveSaisonActive()">
     <div class="hab-ico">${_mvIcon('carton',18)}</div>
     <div class="hab-txt">
       <div class="hab-lbl">Archiver ${_escHtml(cur.saisonNom)}</div>
-      <div class="hab-sub">Créer un snapshot de l'état actuel</div>
+      <div class="hab-sub">Garder l’état d’aujourd’hui</div>
     </div>
     <div style="font-size:var(--pt-md,20px);color:var(--texte-doux)">›</div>
   </div>
   <div id="histo-archive-feedback" class="mvencadre mvencadre-ok" style="display:none;margin:0 16px 12px"></div>`;
 
   if(allSaisons.length < 2){
-    html += `<div class="empty-state"><div class="ei">${_mvIcon('dossier',40)}</div><div class="et">Aucune saison archivée</div><div class="ed">L'historique s'enrichira au fil des saisons clôturées. La saison active n'apparaît pas ici.</div></div>`;
+    html += `<div class="empty-state"><div class="ei">${_mvIcon('dossier',40)}</div><div class="et">Aucune campagne archivée</div><div class="ed">La comparaison s’ouvre à la première clôture.</div></div>`;
     body.innerHTML = html;
     return;
   }
 
   // ── Sélecteurs de saisons ──
-  html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Saison A — référence</div>
+  html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Campagne A, la référence</div>
     <div class="histo-sel-row" style="padding:0;margin-bottom:12px">
       ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelA?'actif':''}" onclick="histoSelectA('${_escAttr(s.saisonKey)}')">${_escHtml(s.saisonNom.replace(' (actuelle)',''))}</button>`).join('')}
     </div>
-    <div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Saison B — comparaison</div>
+    <div style="font-size:10px;font-weight:700;color:var(--texte-doux);margin-bottom:8px">Campagne B</div>
     <div class="histo-sel-row" style="padding:0;margin-bottom:4px">
       ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelB?'actif2':''}" onclick="histoSelectB('${_escAttr(s.saisonKey)}')">${_escHtml(s.saisonNom.replace(' (actuelle)',''))}</button>`).join('')}
     </div>
   </div>`;
 
   if(!sA || !sB){
-    html += `<div style="padding:20px;text-align:center;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Sélectionnez 2 saisons pour comparer</div>`;
+    html += `<div style="padding:20px;text-align:center;color:var(--texte-doux);font-size:var(--pt-txt,13px)">Choisissez deux campagnes.</div>`;
     body.innerHTML = html;
     return;
   }
@@ -3974,10 +3973,10 @@ function renderHistorique(){
 
   // ── Dernier snapshot ──
   if(!sA.isCurrent){
-    html += `<div style="padding:0 16px;margin-bottom:8px;font-size:10px;color:var(--texte-doux)">Snapshot A : ${fmtDate(sA.archivedAt)}</div>`;
+    html += `<div style="padding:0 16px;margin-bottom:8px;font-size:10px;color:var(--texte-doux)">A archivée le ${fmtDate(sA.archivedAt)}</div>`;
   }
   if(!sB.isCurrent){
-    html += `<div style="padding:0 16px;margin-bottom:16px;font-size:10px;color:var(--texte-doux)">Snapshot B : ${fmtDate(sB.archivedAt)}</div>`;
+    html += `<div style="padding:0 16px;margin-bottom:16px;font-size:10px;color:var(--texte-doux)">B archivée le ${fmtDate(sB.archivedAt)}</div>`;
   }
 
   // ── Supprimer snapshot ──
@@ -3985,7 +3984,7 @@ function renderHistorique(){
   if(archivesDeleteables.length>0){
     html += `<div style="padding:0 16px">`;
     archivesDeleteables.forEach(h=>{
-      html += `<button onclick="deleteHistoSnapshot('${_escAttr(h.saisonNom)}')" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;margin-bottom:8px">${_mvIcon('corbeille',16)} Supprimer le snapshot « ${_escHtml(h.saisonNom)} »</button>`;
+      html += `<button onclick="deleteHistoSnapshot('${_escAttr(h.saisonNom)}')" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:var(--pt-micro,12px);font-weight:600;font-family:var(--font-ui,'Outfit',sans-serif);cursor:pointer;margin-bottom:8px">${_mvIcon('corbeille',16)} Supprimer l’archive « ${_escHtml(h.saisonNom)} »</button>`;
     });
     html += `</div>`;
   }

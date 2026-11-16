@@ -42,6 +42,11 @@
    "date": "2026-11-16",
    "motif": "MOTS-3 (§584) : Postes & travaux et Parcelles en listes, comme la maquette",
    "hausses": []
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "MOTS-4 (§585) : Archives allégé — une phrase, trois chiffres, la frise sans les noms, le bilan par année",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -299,10 +304,10 @@
     "lex": 1
    },
    "Pilotage › Archives": {
-    "mots": 110,
-    "p15": 2,
-    "avant": 47,
-    "lex": 5
+    "mots": 37,
+    "p15": 0,
+    "avant": 1,
+    "lex": 0
    },
    "Réglages › Domaine": {
     "mots": 103,
@@ -577,10 +582,10 @@
     "lex": 1
    },
    "Pilotage › Archives": {
-    "mots": 116,
-    "p15": 2,
-    "avant": 53,
-    "lex": 5
+    "mots": 37,
+    "p15": 0,
+    "avant": 1,
+    "lex": 0
    },
    "Réglages › Domaine": {
     "mots": 109,

@@ -8616,7 +8616,7 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 #page-pilotage .pil-photo *{ letter-spacing:0!important; text-transform:none!important; }
 #page-pilotage .pil-photo .go{ color:var(--accent-texte); }
 #page-pilotage .pil-photo :is(b,strong){ font-family:var(--font-ui); font-weight:var(--fw-semi,600); }
-#page-pilotage .pil-gauge-lab,#page-pilotage .pil-dz-lbl,#page-pilotage .arc-kpi .l,#page-pilotage .arcan-yh em{ letter-spacing:0; text-transform:none; }
+#page-pilotage .pil-gauge-lab,#page-pilotage .pil-dz-lbl{ letter-spacing:0; text-transform:none; }
 #page-pilotage .pil-gauge-pct{ font-family:var(--font-ui); font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-pilotage .pil-dz-wrap{ border-color:var(--ligne,#E7E6E2); }
 #page-pilotage .pil-dz-day{ border-color:var(--ligne,#E7E6E2); background:var(--bg-doux); }
@@ -10503,16 +10503,16 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* 2. LES CHIFFRES */
 :is(#page-pilotage, #ovReglPilotage) .pec-verdict .t { font-size: var(--t-verdict) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-gauge-pct, .pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .arc-kpi .v, .pil-ift-k .v) {
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-prot-big, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-gauge-pct small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
 /* 3. LES TITRES */
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct, .pil-t2h .t, .arcan-t) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct, .pil-t2h .t) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-sec-h { font-size: var(--t-section) !important; font-weight: var(--fw-semi, 600) !important; }
 :is(#page-pilotage, #ovReglPilotage) .rf-t { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 4. LES ÉTIQUETTES (au-dessus d'un chiffre, d'un réglage) */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-th-t, .pil-photo .k, .pec-k .l, .pec-mini .l, .ck-ph-l span, .ck-dz-t, .ck-v-k, .pil-dz-lbl, .pil-dz-set .k, .arc-kpi .l, .pil-anf-c .l, .prv-fx .l, .pex-ctrl .l, .pil-ift-k .l) { font-size: var(--t-texte) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-th-t, .pil-photo .k, .pec-k .l, .pec-mini .l, .ck-ph-l span, .ck-dz-t, .ck-v-k, .pil-dz-lbl, .pil-dz-set .k, .pil-anf-c .l, .prv-fx .l, .pex-ctrl .l, .pil-ift-k .l) { font-size: var(--t-texte) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 5. LES LIGNES (nom · valeur · détail) */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-li-t, .mvk-ligne .nom, .pil-tens-r .n, .pil-prot-r .n, .pil-cso-n, .ck-ch-nom, .ck-ta-n, .ck-po-h .n) { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-li-r, .pil-li-r b, .mvk-ligne .pct, .ck-ch-pct, .ck-ch-pct b, .pil-tens-r .v b, .ck-po-d, .ck-ap-h .v) { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; font-variant-numeric: tabular-nums; }
@@ -10524,11 +10524,11 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) table td { font-size: var(--t-texte) !important; font-weight: var(--fw-reg, 400) !important; }
 :is(#page-pilotage, #ovReglPilotage) table td.r { font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) table :is(td.n, tfoot td, tr.prv-tot td) { font-weight: var(--fw-semi, 600) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.cmp-scale span, .cmp-scale em, .arc-seg b, .pil-trx-ax span, .pil-trx-leg span, .pil-donut-c2) { font-size: var(--t-axe) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.cmp-scale span, .cmp-scale em, .pil-trx-ax span, .pil-trx-leg span, .pil-donut-c2) { font-size: var(--t-axe) !important; }
 :is(#page-pilotage, #ovReglPilotage) svg :is(text, tspan):not(.ck2 *):not(.pil-donut-c1) { font-size: var(--t-axe) !important; }
 :is(#page-pilotage, #ovReglPilotage) svg :is(text, tspan):not(.ck2 *)[font-size="24"] { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; }
 /* 8. LES REPÈRES DU PILOTAGE (numéros d'onglet, année, « choses à compléter ») et les boutons d'aller */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-lvn, .pil-annav-l, #pil-diagbtn, .pil-diag-go, .pil-av, .pec-pill, .pec-remq-n, .pil-flag, .pil-photo .go, .arc-lab .y, .arc-lab .y em, .arcan-yh em) { font-weight: var(--fw-semi, 600) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-lvn, .pil-annav-l, #pil-diagbtn, .pil-diag-go, .pil-av, .pec-pill, .pec-remq-n, .pil-flag, .pil-photo .go) { font-weight: var(--fw-semi, 600) !important; }
 /* 9. LES CHOIX (sous-onglets d'Économie, bascules dans les cartes) : la pièce .ck-seg d'Aujourd'hui */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-seg, .pec-sub) { display: inline-flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; max-width: 100% !important; scrollbar-width: none; gap: 0 !important; padding: 2px !important; border: 0 !important; border-radius: var(--r-full, 999px) !important; background: var(--gris-clair) !important; box-shadow: none !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-seg, .pec-sub) > button { flex: none !important; min-height: 32px !important; padding: 0 14px !important; border: 0 !important; border-radius: var(--r-full, 999px) !important; background: none !important; box-shadow: none !important; color: var(--texte-med) !important; font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; white-space: nowrap; }
@@ -10544,9 +10544,9 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-fr-piste, .ck-dz-fen-piste, .ck-barre.fine) { height: var(--jauge-fine-h) !important; border-radius: var(--r-full, 999px) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-fen-piste, .ck-barre.fine) > i { height: 100% !important; border-radius: var(--r-full, 999px) !important; }
 :is(#page-pilotage, #ovReglPilotage) .ck-puce > i { height: var(--jauge-h) !important; border-radius: var(--r-full, 999px) !important; }
-:is(#page-pilotage, #ovReglPilotage) .arc-seg { height: var(--barre-graph-h) !important; border-radius: var(--r-xs, 4px) !important; }
+:is(#page-pilotage, #ovReglPilotage) .arc-seg i { height: var(--barre-graph-h) !important; border-radius: var(--r-xs, 4px) !important; }   /* MOTS-4 (§585) : la barre est le trait coloré DANS le bouton */
 /* 11. LES CARTES — un seul habillage, celui d'Aujourd'hui (arrondi 12, filet, sans ombre) ; les blocs intérieurs arrondis à 8 */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-panel, .pil-tile, .pil-tile2, .pec-card, .pil-anc, .arc-kpi) { border-radius: var(--r-lg, 12px) !important; box-shadow: none !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-panel, .pil-tile, .pil-tile2, .pec-card, .pil-anc) { border-radius: var(--r-lg, 12px) !important; box-shadow: none !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-panel { padding: var(--carte-pad) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pec-mini, .pex-ctrl, .pec-a, .pil-dz-row, .pil-dz-set, .pil-dz-hero, .pil-dz-rt, .pil-dz-rdt, .arcan-y) { border-radius: var(--r-md, 8px) !important; box-shadow: none !important; }
 /* Les trois photos de Travaux : la bande d'Aujourd'hui (une carte, des cases séparées d'un filet) */

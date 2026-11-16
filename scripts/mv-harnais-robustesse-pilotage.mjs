@@ -54,8 +54,8 @@ if (CONTRE) {
       [["function _arcHeures(nom){\n  var h=(window.HISTORIQUE||[]).find(function(x){ return x&&x.saisonNom===nom; });\n  return (h&&h.stats&&h.stats.hFaites)||0;",
         "function _arcHeures(nom){\n  var h=(window.HISTORIQUE||[]).find(function(x){ return x&&x.saisonNom===nom; });\n  return h.stats.hFaites||0;"]]],
     ['un « NaN » dans l\u2019onglet Archives',
-      [["+'<div><div class=\"v\">'+S.length+'</div><div class=\"l\">campagne'+(S.length>1?'s':'')+'</div></div>'",   // COHER-1 (§581) : le compteur dit « campagnes »
-        "+'<div><div class=\"v\">'+(S.length/0*0)+'</div><div class=\"l\">campagne'+(S.length>1?'s':'')+'</div></div>'"]]],
+      [["+'<div class=\"pec-k\"><div class=\"l\">Campagnes</div><div class=\"v\">'+S.length+'</div></div>'",   // MOTS-4 (§585) : le chiffre des campagnes, dans les trois chiffres du haut
+        "+'<div class=\"pec-k\"><div class=\"l\">Campagnes</div><div class=\"v\">'+(S.length/0*0)+'</div></div>'"]]],
     ['un tracteur sans compteur affiché en « undefined »',
       [["return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly,", "return { id:t.id, nom:t.nom+' '+t.compteur_absent, traitementOnly:t.traitementOnly,"]]],
     ['une erreur avalée et journalisée dans le rendu',

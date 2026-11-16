@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.12';
+export const APP_VERSION = '11.13';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3003,7 +3003,7 @@ var MV_AIDE = {
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
       ['Cave', "n’est plus un onglet : une carte dans Aujourd’hui dit combien de gestes pressent et ouvre la Cave. Le millésime, ses courbes et le parc à fûts vivent chez eux — Cave › Le millésime, La Réserve › Fûts."],
-      ['Archives', "empile les années vigne sur un même axe, du 1er août au 31 juillet, chacune avec ses campagnes : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
+      ['Archives', "empile les années vigne sur un même axe, du 1er août au 31 juillet, chacune avec ses campagnes en barres : le décalage d’une année sur l’autre se lit d’un coup d’œil. Passez la souris sur une barre, ou touchez-la : son nom et ses dates s’affichent."],
       ['Le « i » est partout', ": chaque onglet suit la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
       ['Il se lit aussi sur téléphone', ": les chiffres du haut se rangent en une ligne qui défile, et le titre de l’onglet ne prend plus de place — la barre d’onglets le dit déjà. Le grand écran reste plus confortable pour les tableaux et les graphiques, mais vous n’avez plus à faire défiler un écran entier avant d’atteindre un chiffre."]
     ]
@@ -3240,6 +3240,18 @@ export const MV_INFO = {
     'Chaque euro est posé à <b>sa</b> date : la main-d\u2019œuvre sur les validations du journal, le tracteur et le GNR sur la date de session, le phyto sur la date de traitement. Une personne présente sur plusieurs parcelles le même jour est répartie à parts égales — le journal dit qui et quand, jamais combien d\u2019heures.',
     'Le <b>rythme</b> est une mesure des derniers jours travaillés : il ne prévoit rien.',
     'L\u2019<b>écart de cadence</b> vient de là : les heures <b>réellement travaillées au planning</b> sur la campagne, moins les heures de sessions tracteur, comparées aux heures de barème du travail fait.'
+  ] },
+  // MOTS-4 (§585) : ce que l'écran des Archives écrivait à demeure (le paragraphe du haut, la note du bas, la ligne sous « Bilan par année »)
+  'pil.arc.frise': { t: 'La frise des années vigne', p: [
+    'Toutes les <b>années vigne</b> sur le même axe : de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le décalage des travaux.',
+    'Une barre est une <b>campagne</b>. Passez la souris dessus, ou touchez-la : son nom, ses dates et, si elle est close, ses heures s’affichent. Touchez ailleurs pour refermer. Le trait vertical, c’est aujourd’hui ; la ligne du bas nomme la campagne en cours.',
+    'L’axe commence au mois réglé dans la roue crantée du Pilotage (« Le cadre de votre campagne ») — le 1er août par défaut.'
+  ] },
+  'pil.arc.bilan': { t: 'Le bilan par année', p: [
+    'Il est <b>calculé</b> à partir des archives de campagne, jamais recopié — sur l’<b>année vigne</b> ou sur l’<b>exercice</b> comptable. Le cadre se choisit ici même ; il est réservé à l’administrateur.',
+    'Les heures viennent des <b>instantanés</b> pris à la clôture de chaque campagne : parcelles, journal, sessions et avancement y sont figés. Une campagne jamais clôturée se voit sur la frise, elle ne compte pas d’heures.',
+    'Une année sans campagne close n’affiche que son nom : le bilan se remplit à chaque clôture.',
+    '« Dont X h réparties » : une campagne à cheval sur deux années est partagée au prorata de ses interventions datées.'
   ] },
   // MOTS-2 (§583) : les trois paragraphes de conception et la carte « Ce que cet écran ne fait pas », retirés de l’écran (§580e)
   'pil.eco.achats': { t: 'Achats : le seul endroit où l’on met les prix', p: [

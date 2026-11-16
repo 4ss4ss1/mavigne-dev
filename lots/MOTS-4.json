@@ -1,0 +1,43 @@
+{
+  "lot": "MOTS-4",
+  "section": "§585",
+  "base": "39875326790a4d8131ec87432fb2fdf8ede38830",
+  "inclut": [],
+  "date": "2026-11-16",
+  "tutos": {
+    "ok": true,
+    "empreinte": "871656d112d311ed00b4f230999b0b051f95e54c54b72d699fd7fa36cf76e94a",
+    "date": "2026-11-16T18:05:59.872Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "85b9cf238384dd6de2bd677dd8fbf5f3689ffcd9e6f85f96c479950c2e7ce398",
+    "docs/claude/INDEX.md": "9318f3d5405b7e5611764504ad2a7d340a994cc6d5ec900b2d8f8e342a7b9e86",
+    "docs/claude/chantiers-580-629.md": "370599e21722feb0c0877fb08478927ec99aeba16fa61d53c0717724d7f4f3e6",
+    "docs/claude/journal.md": "81e50969bcdc46739b1d05b31e541bcda09e8724f4803a5b5bf9494071f5aede",
+    "docs/maquettes/LISEZMOI.md": "d14aacaa21f42e4669c6a8137b994f053a8e9188fcbd26818610b94c91b11fc0",
+    "guide/11-pilotage.html": "c61d3fe9d72547acfa40fbd7adbd8e00d028a238dac3dc78f185e50c66ea12cd",
+    "index.html": "165401acc231c07f9260488614be9157a6859b1bf35ed6199121b18b7307e6f1",
+    "public/guide.html": "f2afbeff07e76ce296ec4a6969e1407281a7d7a92d3f3f164b8aac2083a25985",
+    "public/sw.js": "cc377f9d6ca5a50bb8a2af96070c3c53ec43f96ffa9648a9da7f7c81fbba4fbb",
+    "scripts/harnais-claude-md.mjs": "858cc75f98e9eef26bfb74980ffdf754ea624e61c89d8d3e90de7d8703d89c57",
+    "scripts/mv-harnais-arch.mjs": "6b00bad354e9f481792bd1478a4041deaf43b4642ad9607b6e9528ac1d9c11c2",
+    "scripts/mv-harnais-coher1.mjs": "68aac3bee2a9fa48d5a66e7de7c08409f321b1f5edc54c7ae260b5d89fea0426",
+    "scripts/mv-harnais-liste.mjs": "28b6b34c86ae5f74e5d69ec0482b21faa77fb262e2873853e630fda9d5173d3a",
+    "scripts/mv-harnais-robustesse-pilotage.mjs": "c4abbaa2fc4a6e86de32db4465cceeb6467be194ed4ca7089b1955d380c2b56a",
+    "scripts/mv-mots-baseline.json": "0f81446cab200ee78ee08d12606a1020e799d1e32e5538f189355833679a5635",
+    "src/pilotage.js": "accb3d7bb96289dc49cd56b95d7ee8df39aa8acd37c146f41ad44a64e87441e0",
+    "src/reglages.js": "147e5689b11662c62368d791b581b852f1f347adeef5b218e3dffee72f4c60be",
+    "src/styles.css": "d9caaea1dc7e89d932408603bef77b79ac7774df32492ab2a80cb3ff64b13073",
+    "src/utils.js": "72eb54b7388dd04cc3f8136f5633257d5700f4a1f7f4bbb73cb4f80765d40335",
+    "src/whats-new.js": "84beea63b05a9c031f23cb0a497dc4a5084bab767729d1d4a0ad811fae7fc59d",
+    "docs/maquettes/maquette-archives-frise-v2.html": "c71ff91d5fd45c28920a66a80918c12d5cc8eface587e48107b3ff1145f9d864",
+    "scripts/mv-harnais-mots4.mjs": "c611f326d501fee46cbd185eac3e13baffe69bb960c16806ab9a628ddf3bfc29"
+  }
+}

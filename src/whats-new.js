@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.13', d: '2026-11-16', items: [   // MOTS-4 (§585) : Archives, moins à lire ; la frise dit le nom d'une campagne au survol ou au toucher
+    { niv: 0, pour: ['admin'], emoji: 'dossier', titre: 'Archives\u00a0: la frise dit le nom quand on la touche',
+      desc: "L’écran des Archives s’ouvre sur une phrase («\u00a02 années vigne, 2 campagnes. Aucune clôture cette année.\u00a0»), trois chiffres, la frise et le bilan par année. Sur la frise, les barres n’ont plus leur nom écrit dedans\u00a0: passez la souris sur une barre, ou touchez-la au téléphone, et une bulle donne le nom de la campagne, ses dates et ses heures. Les explications sont derrière les «\u00a0i\u00a0». Le bouton s’appelle «\u00a0Comparer deux campagnes\u00a0». Aucun calcul ne change." },
+  ] },
   { v: '11.12', d: '2026-11-16', items: [   // MOTS-3 (§584) : Postes & travaux et Parcelles en listes
     { niv: 0, pour: ['admin'], emoji: 'liste', titre: 'Économie\u00a0: deux écrans passent en listes',
       desc: "Postes & travaux et Parcelles montraient des tableaux, larges et longs au téléphone. Ils montrent maintenant des listes\u00a0: une ligne par poste, par travail, par parcelle, avec son montant, une jauge et, s’il y en a un, l’écart dans une pastille. Touchez une ligne pour voir le reste. «\u00a0Temps réel contre barème\u00a0», le graphique des écarts et «\u00a0Le tableau complet\u00a0» (les treize colonnes, à trier) sont repliés, juste dessous\u00a0; les exports ne changent pas. La bande orange des heures payées sans validation a un bouton vers le Journal. Aucun calcul ne change." },

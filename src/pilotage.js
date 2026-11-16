@@ -226,7 +226,7 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Travaux — où en est-on, et quand aura-t-on fini',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie',cfm:'Conformité — cuivre, IFT et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Travaux — où en est-on, et quand aura-t-on fini',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie',cfm:'Conformité — cuivre, IFT et délai de rentrée',arc:'Archives',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
 var _PIL_VALID_TAB = {auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -7203,6 +7203,7 @@ function _pecCss(){
   +'@media(min-width:881px){.pec-g2{grid-template-columns:1fr 1fr}.pec-g2.pec-g21{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}'
   +'.pil-panels.pec-p1{grid-template-columns:1fr}'
   +'.pec-kpis.pec-k2{grid-template-columns:1fr 1fr}'
+  +'.pec-kpis.pec-k3{grid-template-columns:repeat(3,1fr)}'   // MOTS-4 (§585) : Archives
   +'.pec-rg{border-top:1px solid var(--gris-clair)}'
   +'.pec-rg>summary{list-style:none;cursor:pointer;display:block;padding:11px 18px}'
   +'.pec-rg>summary::-webkit-details-marker{display:none}'
@@ -11057,24 +11058,41 @@ function _arcHeures(nom){
   var h=(window.HISTORIQUE||[]).find(function(x){ return x&&x.saisonNom===nom; });
   return (h&&h.stats&&h.stats.hFaites)||0;
 }
+// MOTS-4 (§585) : la ligne ne porte plus que ses années et ses barres. Le nom d'une campagne, ses dates et ses heures sont dans
+//   la bulle (_arcBulle) : au survol sur ordinateur, au toucher sur téléphone — demandé par Nico sur la maquette (16/11).
+//   Une barre est un BOUTON (clavier, lecteur d'écran : son nom est dans aria-label) de 36 px de haut ; le trait coloré est dedans.
+function _arcJour(iso){ var m=_pecIsoToMs(String(iso||'').slice(0,10)); return (m===null)?'':_pecJourCourt(m); }
 function _arcLigne(an,list,cur){
   var _b=_arcBornes(an), a=_arcN(_b.d0), b=_arcN(_b.d1);   /* ★ AXE-1 */
   var pc=function(d){ return Math.max(0,Math.min(100,(_arcN(d)-a)/(b-a)*100)); };
   var col=window._cmpCouleur||function(){ return '#8A5A38'; };
+  var today=_mvToday();
   var segs=list.slice().sort(function(x,y){ return String(x.debut).localeCompare(String(y.debut)); })
     .map(function(s){
       var x=pc(s.debut), w=pc(s.fin)-x; if(w<=0) w=1;
-      return '<div class="arc-seg" style="left:'+x+'%;width:'+w+'%;background:'+col(s)+'">'
-        +'<b>'+_pilEsc(s.nom)+'</b></div>';
+      var hh=_arcHeures(s.nom), enc=(today>=s.debut && today<=s.fin);
+      var dd=_arcJour(s.debut)+' → '+_arcJour(s.fin)+(enc?' · en cours':(hh>0?(' · '+_pilHa(hh)+' h'):''));
+      return '<button type="button" class="arc-seg" data-n="'+_pilEsc(s.nom)+'" data-d="'+_pilEsc(dd)+'" aria-label="'+_pilEsc(s.nom+', '+dd)+'"'
+        +' style="left:'+x+'%;width:'+w+'%"><i style="background:'+col(s)+'"></i></button>';
     }).join('');
-  var today=_mvToday();
-  if(today>=_arcISO(a)&&today<=_arcISO(b)) segs+='<div class="arc-today" style="left:'+pc(today)+'%"></div>';
-  var h=list.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
-  var meta=list.length+' campagne'+(list.length>1?'s':'');   // COHER-1 (§581)
-  meta+=h>0 ? (' · '+_pilHa(h)+' h') : ' · pas d’instantané';
-  return '<div class="arc-row"><div class="arc-lab"><span class="y">'+_pilEsc(_b.court||(an+'–'+(an+1)))   /* ★ AXE-1 */
-    +(cur?' <em>en cours</em>':'')+'</span><span class="m">'+meta+'</span></div>'
-    +'<div class="arc-fr'+(cur?' cur':' old')+'">'+segs+'</div></div>';
+  if(today>=_arcISO(a)&&today<=_arcISO(b)) segs+='<span class="arc-today" style="left:'+pc(today)+'%"></span>';
+  return '<div class="arc-row'+(cur?' cur':' old')+'"><span class="y">'+_pilEsc(_b.court||(an+'–'+(an+1)))+'</span>'   /* ★ AXE-1 */
+    +'<span class="arc-trk">'+segs+'</span></div>';
+}
+// La bulle de la frise : le nom et les dates de la barre visée, posée au-dessus d'elle et tenue dans la carte.
+var _ARC_FIXE=null;   // la barre touchée : sa bulle reste jusqu'au toucher suivant
+function _arcBulle(seg){
+  var fr=document.getElementById('arc-frise'), bul=document.getElementById('arc-bul'); if(!fr||!bul) return;
+  [].forEach.call(fr.querySelectorAll('.arc-seg.sel'), function(x){ x.classList.remove('sel'); });
+  if(!seg || !fr.contains(seg)){ bul.hidden=true; return; }
+  seg.classList.add('sel');
+  bul.innerHTML='<b></b><span></span>';
+  bul.firstChild.textContent=seg.getAttribute('data-n')||''; bul.lastChild.textContent=seg.getAttribute('data-d')||'';
+  bul.hidden=false;
+  var rf=fr.getBoundingClientRect(), rb=seg.getBoundingClientRect(), w=bul.offsetWidth;
+  var cx=rb.left+rb.width/2-rf.left, x=Math.max(w/2+4, Math.min(rf.width-w/2-4, cx));
+  bul.style.left=x+'px'; bul.style.top=(rb.top-rf.top+10)+'px';
+  bul.style.setProperty('--fl', Math.max(8,Math.min(92,50+(cx-x)/Math.max(1,w)*100))+'%');
 }
 // ═════════════════════════════════════════════════════════════════
 // ★★ ARCH-2 (26/09/2026) — LE BILAN PAR ANNÉE, CALCULÉ À PARTIR DES ARCHIVES DE CAMPAGNE
@@ -11185,31 +11203,30 @@ function _arcBlocAnnuel(){
     return adm ? '<button class="'+on.trim()+'" data-v="'+v+'" onclick="window._arcSetCadre&&window._arcSetCadre(this.getAttribute(\'data-v\'))">'+lbl+'</button>'
                : '<span class="'+on.trim()+'">'+lbl+'</span>';
   };
-  var bc=_arcAnBornes(cadre,_arcAnDe(cadre,_mvToday()));
-  var h='<div class="arcan"><div class="arcan-h"><div class="arcan-t">Bilan par ann\u00e9e</div>'
-    +'<div class="arcan-seg">'+opt('vigne','Ann\u00e9e vigne')+opt('exercice','Exercice comptable')+'</div></div>'
-    +'<div class="arcan-sub">Calcul\u00e9 \u00e0 partir des archives de campagne \u2014 '
-    +(cadre==='exercice'?'exercice comptable':'ann\u00e9e vigne')+' : <b>'+_pilEsc(bc.lbl||'')+'</b>.'
-    +(adm?'':' Le cadre est choisi par l\u2019administrateur.')+'</div>';
+  // MOTS-4 (§585) : « Calculé à partir des archives de campagne… », « Le cadre est choisi par l'administrateur » et
+  //   « Aucune campagne close cette année. Le bilan se remplit à chaque clôture. » sont dans la fiche pil.arc.bilan.
+  //   Une année sans clôture n'affiche que son nom ; les dates d'une année ne s'écrivent que si le cadre n'est pas celui de la frise.
+  var EC='<span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-med)">en cours</span>';
+  var h='<div class="pec-card arcan"><div class="pec-ch"><div class="pec-ct">Bilan par année</div>'
+    +'<div class="pec-cs pec-ci">'+(typeof _mvInfoBtn==='function'?_mvInfoBtn('pil.arc.bilan'):'')+'</div>'
+    +'<div class="arcan-seg">'+opt('vigne','Année vigne')+opt('exercice','Exercice')+'</div></div>';
   h+=L.map(function(A){
-    var r='<div class="arcan-y"><div class="arcan-yh"><b>'+_pilEsc(A.bornes.court||String(A.an))
-      +(A.enCours?'<em>en cours</em>':'')+'</b><span>'+_pilEsc(A.bornes.lbl||'')+'</span></div>';
-    if(!A.campagnes.length){
-      return r+'<div class="arcan-vide">Aucune campagne close cette ann\u00e9e. Le bilan se remplit \u00e0 chaque cl\u00f4ture.</div></div>';
-    }
+    var r='<div class="arcan-y"><div class="arcan-yh"><b>'+_pilEsc(A.bornes.court||String(A.an))+'</b>'+(A.enCours?EC:'')
+      +(cadre==='exercice'?('<span class="d">'+_pilEsc(_arcJour(A.bornes.d0)+' → '+_arcJour(A.bornes.d1))+'</span>'):'')+'</div>';
+    if(!A.campagnes.length) return r+'</div>';
     r+='<div class="arcan-camp">'+A.campagnes.map(function(n){ return '<span>'+_pilEsc(n)+'</span>'; }).join('')+'</div>';
     r+='<div class="arcan-g">'
-      +'<div><div class="l">Heures archiv\u00e9es</div><div class="v">'+(A.h>0?_pilHa(Math.round(A.h))+' h':'\u2014')+'</div></div>'
+      +'<div><div class="l">Heures archivées</div><div class="v">'+(A.h>0?_pilHa(Math.round(A.h))+' h':'—')+'</div></div>'
       +'<div><div class="l">Interventions</div><div class="v">'+A.inter+'</div></div>'
-      +'<div><div class="l">Parcelles touch\u00e9es</div><div class="v">'+A.nParc+'</div></div>'
+      +'<div><div class="l">Parcelles touchées</div><div class="v">'+A.nParc+'</div></div>'
       +'<div><div class="l">Sessions tracteur</div><div class="v">'+A.sess+'</div></div></div>';
     var tk=A.top.filter(function(t){ return t.h>=0.5; });
     if(tk.length){
       var aff=tk.slice(0,3), reste=tk.slice(3).reduce(function(n,t){ return n+t.h; },0);
-      r+='<div class="arcan-tk">'+aff.map(function(t){ return _pilEsc(t.nom)+' '+_pilHa(Math.round(t.h))+' h'; }).join(' \u00b7 ')
-        +(reste>=0.5?' \u00b7 autres '+_pilHa(Math.round(reste))+' h':'')+'</div>';
+      r+='<div class="arcan-tk">'+aff.map(function(t){ return _pilEsc(t.nom)+' '+_pilHa(Math.round(t.h))+' h'; }).join(' · ')
+        +(reste>=0.5?' · autres '+_pilHa(Math.round(reste))+' h':'')+'</div>';
     }
-    if(A.hRep>=0.5) r+='<div class="arcan-tk">dont '+_pilHa(Math.round(A.hRep))+' h r\u00e9parties : une campagne \u00e0 cheval sur deux ann\u00e9es est partag\u00e9e au prorata de ses interventions dat\u00e9es.</div>';
+    if(A.hRep>=0.5) r+='<div class="arcan-tk">dont '+_pilHa(Math.round(A.hRep))+' h réparties</div>';
     return r+'</div>';
   }).join('');
   return h+'</div>';
@@ -11239,37 +11256,42 @@ function _pilTabArc(d){
   //   de la barre, le même cadre : _mvCampagneBornes) ; ses barres = les CAMPAGNES. Les noms du code (_arcCampagneDe…) restent.
   //   La ligne ne porte que ses années (« 2026–2027 », comme le bilan par année dessous) : « Année vigne 2026–2027 en cours »
   //   passait à la ligne au téléphone ; la phrase du haut et le compteur disent ce qu'est une ligne.
-  if(!S.length) return '<div class="arc-empty">Aucune campagne datée. Elles apparaissent ici '
-    +'dès qu’une campagne porte un début et une fin (Réglages › Campagne).</div>';
+  // MOTS-4 (§585) — L'ÉCRAN, COMME LA MAQUETTE (docs/maquettes/maquette-archives-frise-v2.html) : une phrase, trois chiffres,
+  //   la frise (les barres seules, leur nom dans la bulle), le bilan par année, deux boutons. L'échelle des mois, le paragraphe
+  //   du haut et la note du bas sont partis : « août → juil. » est sur le titre de la frise, le reste dans les fiches.
+  if(!S.length) return '<div class="arc-empty">Aucune campagne datée. '
+    +'<button type="button" class="pil-diag-go ghost" data-diag="saisons">Réglages › Campagne ›</button></div>';
   var par={};
   S.forEach(function(s){ var k=_arcCampagneDe(s.debut); (par[k]=par[k]||[]).push(s); });
   var keys=Object.keys(par).map(Number).sort(function(x,y){ return y-x; });
-  var anCur=_arcCampagneDe(_mvToday());
+  var auj=_mvToday(), anCur=_arcCampagneDe(auj);
   var hTot=S.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
-  /* ★ AXE-1 : l'axe est un reglage, l'intro le LIT. Elle l'annonçait en dur —
-     un domaine regle sur octobre lisait « 1er août → 31 juillet » sous une frise
-     qui commençait en octobre. Un ecran qui recite un reglage qu'il n'a pas lu
-     est pire qu'un ecran muet : il fait croire que le reglage a rate. */
-  var _bc=_arcBornes(anCur);
-  var h='<div class="arc-intro">Toutes les années vigne sur le même axe, <b>'+_pilEsc(_bc.lbl||'1ᵉʳ août → 31 juillet')+'</b> : '
-    +'de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le '
-    +'décalage des travaux.</div>';
-  h+=(window._cmpEchelle?window._cmpEchelle(_arcN(_bc.d0),_arcN(_bc.d1)):'');
-  h+=keys.map(function(k){ return _arcLigne(k,par[k],k===anCur); }).join('');
-  h+='<div class="arc-kpi">'
-    +'<div><div class="v">'+keys.length+'</div><div class="l">année'+(keys.length>1?'s':'')+' vigne</div></div>'
-    +'<div><div class="v">'+S.length+'</div><div class="l">campagne'+(S.length>1?'s':'')+'</div></div>'
-    +'<div><div class="v">'+(hTot>0?_pilHa(hTot):'—')+'</div><div class="l">heures archivées</div></div>'
+  // Une clôture = un instantané au nom de la campagne (HISTORIQUE). « Cette année » : l'année vigne en cours.
+  var H0=window.HISTORIQUE||[];
+  var nClos=(par[anCur]||[]).filter(function(s){ return H0.some(function(x){ return x&&x.saisonNom===s.nom; }); }).length;
+  var enc=S.filter(function(s){ return auj>=s.debut && auj<=s.fin; })[0]||null;
+  /* ★ AXE-1 : l'axe est un reglage, le titre de la frise le LIT (« août → juil. », ou « oct. → sept. » chez qui l'a regle ainsi). */
+  var _bc=_arcBornes(anCur), m0=_pecIsoToMs(_bc.d0), m1=_pecIsoToMs(_bc.d1);
+  var axe=(m0!==null&&m1!==null)?(_pecMoisCourt(new Date(m0).getMonth())+' → '+_pecMoisCourt(new Date(m1).getMonth())):'';
+  var h='<div class="pec-wrap">'
+    +_pecEnteteVue('', '<b>'+keys.length+' année'+(keys.length>1?'s':'')+' vigne</b>, '+S.length+' campagne'+(S.length>1?'s':'')+'. '
+      +(nClos?(nClos+' clôture'+(nClos>1?'s':'')+' cette année.'):'Aucune clôture cette année.'))
+    +'<div class="pec-card"><div class="pec-kpis pec-k3">'
+    +'<div class="pec-k"><div class="l">Années vigne</div><div class="v">'+keys.length+'</div></div>'
+    +'<div class="pec-k"><div class="l">Campagnes</div><div class="v">'+S.length+'</div></div>'
+    +'<div class="pec-k"><div class="l">Heures archivées</div><div class="v">'+(hTot>0?(_pilHa(hTot)+'<small> h</small>'):'—')+'</div>'
+      +(hTot>0?'':'<div class="s">à la première clôture</div>')+'</div>'
+    +'</div></div>';
+  var frise='<div class="pec-card arc-card"><div class="pec-ch"><div class="pec-ct">La frise</div>'
+    +'<div class="pec-cs pec-ci">'+_pilEsc(axe)+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.arc.frise')):'')+'</div></div>'
+    +'<div class="arc-frise" id="arc-frise"><div class="arc-bul" id="arc-bul" role="status" hidden></div>'
+    +keys.map(function(k){ return _arcLigne(k,par[k],k===anCur); }).join('')+'</div>'
+    +(enc?('<div class="arc-fait"><span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-med)">en cours</span><span>'+_pilEsc(enc.nom)+'</span></div>'):'')
     +'</div>';
-  h+=_arcBlocAnnuel();   /* ★ ARCH-2 */
-  h+='<button class="arc-cmp" onclick="window._arcOpenCmp&&window._arcOpenCmp()">'
-    +_mvIcon('graphique',16)+' Comparer deux saisons</button>';
-  // Le bilan de campagne vit dans cave.js (importe AVANT pilotage.js) : on ne
-  // duplique pas le moteur, on ouvre la porte depuis l'ecran de fin d'annee.
-  h+='<button class="arc-cmp" onclick="window._bcExportChoix&&window._bcExportChoix()">'
-    +_mvIcon('livre',16)+' \u00c9diter le bilan de campagne</button>';
-  h+='<div class="arc-note">Les heures viennent des instantanés pris à la clôture de chaque '
-    +'campagne : parcelles, journal, sessions et avancement y sont figés.</div>';
+  // Le bilan de campagne vit dans cave.js (importe AVANT pilotage.js) : on ne duplique pas le moteur, on ouvre la porte.
+  var acts='<div class="pec-acts"><button class="pec-btn" onclick="window._arcOpenCmp&&window._arcOpenCmp()"><span>'+_mvIcon('graphique',16)+'</span> Comparer deux campagnes</button>'
+    +'<button class="pec-btn" onclick="window._bcExportChoix&&window._bcExportChoix()"><span>'+_mvIcon('livre',16)+'</span> Éditer le bilan</button></div>';
+  h+='<div class="pec-g2 pec-g21">'+frise+'<div>'+_arcBlocAnnuel()+acts+'</div></div></div>';   /* ★ ARCH-2 */
   return h;
 }
 // Appele depuis Reglages > Campagne : bascule sur Pilotage et ouvre directement l'onglet.
@@ -12778,7 +12800,14 @@ function _pilAfterFill(tab,d){
 
 // ── Délégation des interactions internes du contenu ──
 function _pilBindContent(content){
+  // MOTS-4 (§585) : la bulle de la frise des Archives — au survol et au clavier ; au toucher, elle reste jusqu'au toucher suivant.
+  content.addEventListener('mouseover', function(e){ var s=e.target.closest&&e.target.closest('.arc-seg'); if(s) _arcBulle(s); });
+  content.addEventListener('mouseout', function(e){ if(e.target.closest&&e.target.closest('.arc-seg')) _arcBulle((_ARC_FIXE&&document.body.contains(_ARC_FIXE))?_ARC_FIXE:null); });
+  content.addEventListener('focusin', function(e){ var s=e.target.closest&&e.target.closest('.arc-seg'); if(s) _arcBulle(s); });
   content.addEventListener('click', function(e){
+    var _as=e.target.closest('.arc-seg');
+    if(_as){ e.stopPropagation(); _ARC_FIXE=(_ARC_FIXE===_as)?null:_as; _arcBulle(_ARC_FIXE); return; }
+    if(_ARC_FIXE){ _ARC_FIXE=null; _arcBulle(null); }
     var _sb=e.target.closest('[data-sim]'); if(_sb){ e.stopPropagation(); _pilSimAction(_sb.getAttribute('data-sim'), _sb.getAttribute('data-ti')); return; }
     var _ob=e.target.closest('[data-op]'); if(_ob){ e.stopPropagation(); _pilOpAction(_ob); return; }
     var _lb=e.target.closest('.pil-lent-b'); if(_lb){ e.stopPropagation(); var _lv=_lb.getAttribute('data-lent'); if(_lv&&_lv!==_PIL_LENT){ _PIL_LENT=_lv; _PIL_LENT_PREP=null; renderPilotage(); } return; }   // CARTE-1 (§217)

@@ -103,7 +103,8 @@ function monterAn(S, opts = {}) {
   const u = ['function _mvAujIso(', 'function _mvExerciceMois(', 'function _mvExIso(', 'function _mvExerciceAn(', 'function _mvExercice(',
              'function _mvCampagneMois(', 'function _mvCampagneDe(', 'function _mvCampagneBornes(', 'function _saisonForDate('].map(n => bloc(S.utils, n));
   const lbl = (S.utils.match(/var MV_EX_MOIS_LBL = \[[^\]]*\];/) || [])[0];
-  const p = ['function _pilEsc(', 'function _pilHa(', 'function _arcN(', 'function _arcCampMois(', 'function _arcCampagneDe(', 'function _arcBornes(',
+  // MOTS-4 (§585) : le bilan écrit des dates courtes quand le cadre est l'exercice (_arcJour et ses trois aides).
+  const p = ['function _pilEsc(', 'function _pilHa(', 'function _pecMoisCourt(', 'function _pecIsoToMs(', 'function _pecJourCourt(', 'function _arcJour(', 'function _arcN(', 'function _arcCampMois(', 'function _arcCampagneDe(', 'function _arcBornes(',
              'function _arcCadre(', 'function _arcAnDe(', 'function _arcAnBornes(', 'function _arcAnnees(', 'function _arcBlocAnnuel(', 'function _arcSetCadre('].map(n => bloc(S.pil, n));
   if (u.concat(p).some(x => !x) || !lbl) throw new Error('extraction impossible (ARCH-2)');
   const W = { CONFIG: { eco: Object.assign({}, opts.eco || {}) }, SAISONS: JSON.parse(JSON.stringify(SAISONS)), HISTORIQUE: opts.H || [],

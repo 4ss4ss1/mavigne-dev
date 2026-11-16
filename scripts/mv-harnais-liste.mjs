@@ -830,6 +830,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots2.mjs --contre'],      //   plus d'avis de périmètre ni de ligne de contexte ; ce qui a quitté l'écran est dans une fiche ; les tableaux ne bougent pas
   ['node scripts/mv-harnais-mots3.mjs'],               // MOTS-3 (§584) : Postes & travaux et Parcelles en listes, comme la maquette — la ligne et la pastille d'écart jouées,
   ['node scripts/mv-harnais-mots3.mjs --contre'],      //   la tuile du temps jouée (un travail, plusieurs, aucun), le tableau complet replié, la porte du Journal
+  ['node scripts/mv-harnais-mots4.mjs'],               // MOTS-4 (§585) : Archives allégé — la ligne de la frise et sa bulle JOUÉES (nom, dates, heures ; tenue dans la carte),
+  ['node scripts/mv-harnais-mots4.mjs --contre'],      //   les gestes (survol, clavier, toucher), l'écran, le bilan par année, la fenêtre « Comparer deux campagnes »
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement

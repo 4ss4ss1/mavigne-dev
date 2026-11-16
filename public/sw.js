@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.03
+// MA VIGNE — Service Worker v12.04
+// v12.04 (16/11/2026) — MOTS-4 (§585) : Pilotage › Archives allégé — une phrase, trois chiffres, la frise (les barres seules : le nom d'une campagne, ses dates et ses heures s'affichent dans une bulle au survol sur ordinateur, au toucher sur téléphone), le bilan par année, deux boutons ; le paragraphe du haut, l'échelle des mois et la note du bas passent derrière les « i » ; « Comparer deux saisons » devient « Comparer deux campagnes », sa fenêtre aussi.
 // v12.03 (16/11/2026) — MOTS-3 (§584) : Postes & travaux et Parcelles en listes, comme la maquette — une ligne par poste, par travail, par parcelle (un nom, un montant, une jauge, une pastille d'écart), le détail d'une ligne s'ouvre d'un toucher ; l'anneau et le graphique en barres partent ; « Temps réel contre barème », « Écart au coût moyen à l'hectare » et « Le tableau complet » (les treize colonnes, à trier) sont des tuiles repliées ; la bande des heures sans validation mène au Journal.
 // v12.02 (16/11/2026) — MOTS-2 (§583) : les cinq autres vues d'Économie se lisent comme la Synthèse — Postes & travaux, Parcelles, Revient, Achats et Le détail de l'exercice ouvrent sur la campagne (ou le millésime, ou l'exercice) et ses dates, puis une phrase ; l'avis gris du haut et la ligne « ha · taux moyen » partent ; des heures payées sans validation ou des achats sans prix s'affichent en bande orange ; les sous-titres et les notes de méthode passent derrière les « i » ; les tableaux ne changent pas.
 // v12.01 (16/11/2026) — MOTS-1 (§582) : Économie › Synthèse se lit d'un coup d'œil — la campagne et ses dates, une phrase, la bande de ce qui manque au chiffrage, quatre chiffres (budget, engagé, reste, écart de cadence), trois tuiles repliées avec leur chiffre sur le titre (Coût à la fin, L'exercice, Prix de revient) ; la méthode passe derrière les « i », aucun calcul ne change
@@ -4735,7 +4736,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.03';
+const CACHE_NAME   = 'mavigne-v12.04';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4752,7 +4753,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.03 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.04 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4772,7 +4773,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.03 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.04 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
