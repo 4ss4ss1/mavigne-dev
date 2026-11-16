@@ -67,7 +67,7 @@ function monde(S, o = {}) {
     _pilStat: (n, u, w) => '<span class="pil-th-stat"><b>' + n + '</b>' + (u || '') + (w ? ' <b class="warn">' + w + '</b>' : '') + '</span>',
     _pilTile: (id, dot, title, stat, sub, g, body, info) => '<tile id="' + id + '" info="' + info + '"><h>' + title + '</h>' + stat + '<sub>' + (sub || '') + '</sub>' + body + '</tile>' };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext([fonction(S.pil, 'function _cfmIftRef('), bloc(S.pil), fonction(S.pil, 'function _pilIftLigne('), fonction(S.pil, 'function _pilIftTuile(')].join('\n'), ctx, { filename: 'ift-extrait.js' });
+  vm.runInContext([fonction(S.pil, 'function _cfmIftRef('), fonction(S.pil, 'function _cfmIftPoint(')   /* COHER-1 (§581) : la mention de la tuile, que compte aussi Aujourd'hui */, bloc(S.pil), fonction(S.pil, 'function _pilIftLigne('), fonction(S.pil, 'function _pilIftTuile(')].join('\n'), ctx, { filename: 'ift-extrait.js' });
   return ctx;
 }
 const proche = (a, b) => a != null && Math.abs(a - b) < 1e-9;

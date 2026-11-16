@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.09', d: '2026-11-16', items: [   // COHER-1 (§581) : trois désaccords entre écrans du Pilotage — la tuile Conformité, le coût à la fin, « campagne » dans Archives
+    { niv: 0, pour: ['admin'], emoji: 'bouclier', titre: 'Aujourd’hui\u00a0: la tuile Conformité compte ce que l’onglet signale',
+      desc: "Sur Aujourd’hui, la tuile «\u00a0Conformité\u00a0» affichait toujours «\u00a00 point à régler\u00a0», même quand l’onglet Conformité signalait un SIRET manquant. Elle compte maintenant ce que l’onglet écrit sur ses tuiles\u00a0: un plafond de cuivre dépassé, un registre phyto qui n’est pas prêt, un IFT sans catalogue. Sa dernière ligne nomme le premier point\u00a0; touchez la tuile pour voir les autres." },
+    { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Économie\u00a0: un seul «\u00a0coût à la fin\u00a0»',
+      desc: "Sous le graphique «\u00a0Rythme de dépense\u00a0», la projection prolongeait le rythme des derniers jours jusqu’à la fin de la campagne\u00a0: trois jours chargés suffisaient à annoncer «\u00a0budget épuisé\u00a0», à côté d’un verdict «\u00a0Le budget tient\u00a0». Elle rejoint maintenant le même «\u00a0coût à la fin\u00a0» qu’Aujourd’hui, à la fin prévue des travaux. «\u00a0Budget épuisé le…\u00a0» ne s’affiche que si ce coût dépasse le budget." },
+    { niv: 0, pour: ['admin'], emoji: 'carton', titre: 'Archives\u00a0: une ligne par année vigne',
+      desc: "Dans Archives, une ligne s’appelait «\u00a0Campagne 2026–2027\u00a0» et contenait des «\u00a0périodes\u00a0», alors que partout ailleurs la campagne est la période de travail. Une ligne porte maintenant ses années («\u00a02026–2027\u00a0»), et ses barres sont des campagnes, comme dans le bilan par année juste dessous." },
+  ] },
   { v: '11.08', d: '2026-11-15', items: [   // TETE-4C (§579) : le Pilotage prend le bandeau commun — la bande et les onglets dans l'en-tête, « Vous regardez » en ligne d'écran
     { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Pilotage\u00a0: le haut de l’écran tient en trois lignes',
       desc: "Le haut du Pilotage empilait quatre bandes\u00a0: le nom, la campagne et la météo, «\u00a0Vous regardez\u00a0», les onglets. Il a maintenant les trois lignes des autres pages\u00a0: le nom avec la campagne, la météo et «\u00a0? Aide\u00a0»\u00a0; les onglets\u00a0; puis «\u00a0Vous regardez\u00a0» et «\u00a0à compléter\u00a0». Le contenu commence plus haut. Au téléphone, «\u00a0Vous regardez\u00a0» tient en un bouton qui dit ce que vous regardez\u00a0: touchez-le pour déplier le choix. La date et la météo n’y sont plus dans le bandeau, comme sur les autres pages." },

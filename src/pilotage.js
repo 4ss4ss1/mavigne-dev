@@ -1080,7 +1080,7 @@ function _pilPanelPhyto(d){
   //   derniers passages restent, derrière un dépliant. Même case (`mat_phyto`), même fiche « i ». Sans registre.js : l'ancienne.
   var G=(typeof window._regCarte==='function')?window._regCarte():null;
   if(G){
-    var V=G.V, _av=!V.nLignes?null:(!V.siretOk?'SIRET manquant':(V.nManque?(V.nManque+' \u00e0 compl\u00e9ter'):null));
+    var V=G.V, _av=_cfmRegPoint(V);   // COHER-1 (§581) : la mention que compte la tuile d'Aujourd'hui
     var _liste=d.traits.length?('<details style="margin-top:12px"><summary style="cursor:pointer;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Les derni\u00e8res interventions</summary><div class="pil-ip-list" style="margin-top:8px">'+rows+'</div></details>'):'';
     return _pilTile('phyto','#5A9FD4','Le registre '+G.an, _pilStat(V.nLignes,' ligne'+(V.nLignes>1?'s':''),_av),
       V.nLignes?(V.nTrait+' traitement'+(V.nTrait>1?'s':'')+' \u00b7 au format du registre \u00e9lectronique'):('aucun traitement en '+G.an),
@@ -5202,7 +5202,9 @@ function _pilCk2Modele(d, m){
   if(jusq>borneJ) jusq=borneJ;
   var OUVL=[], xo=new Date(t0.getFullYear(), t0.getMonth(), t0.getDate());
   while(xo<=jusq){ if(ouv(xo)) OUVL.push(_pilPhotoIso(xo)); xo.setDate(xo.getDate()+1); }
-  var diag=[]; try{ diag=_pilDiag().filter(function(x){ return x&&x.touche&&x.touche.indexOf('cfm')>=0; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
+  // ★★★ COHER-1 (§581) : la tuile « Conformité » comptait les lignes de _pilDiag() marquées 'cfm' — aucune ne l'est : elle ne pouvait
+  //   dire que « 0 point à régler », sous un onglet qui signalait un SIRET manquant. Elle lit la liste de l'onglet (_pilCfmPoints).
+  var diag=[]; try{ diag=_pilCfmPoints(); }catch(e){ diag=[]; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Modele#cfm'); }
   window._ckSavoirFort=(sv||[]).filter(function(x){ return x&&x.prio===1; }).length;   // VIF-1 : la pastille du Pilotage dans la barre
   if(typeof window._railAlertesMaj==='function') setTimeout(window._railAlertesMaj,0);
   var _ckV={
@@ -5211,7 +5213,7 @@ function _pilCk2Modele(d, m){
     dateTxt:sem[t0.getDay()].replace(/^./,function(c){ return c.toUpperCase(); })+' '+t0.getDate()+' '+t0.toLocaleDateString('fr-FR',{month:'long'})+', semaine '+nSem,
     saisonDe:saisonDe, taches:taches, parcs:parcs, etats:etats, presta:presta, gens:gens, presents:nPres, effectifTotal:gens.length,
     presTxt:nPres+' présent'+(nPres>1?'s':'')+(abs.length?', '+(absPref&&!repos?absTxt.charAt(0).toLowerCase()+absTxt.slice(1):absTxt):''), absTxt:absTxt,
-    confN:diag.length, confTxt:diag.length?tx(diag[0].t||diag[0].txt||'Un point à régler'):'Rien à régler',
+    confN:diag.length, confTxt:diag.length?(tx(diag[0].t||'Un point à régler')+(diag.length>1?(' · +'+(diag.length-1)):'')):'Rien à régler',   // « Registre : SIRET manquant · +1 » : le repère d'un chiffre reste court (§580c, règle 2)
     equipes:equipes, depuis:depuis, evts:evts, tracCours:tracCours, photos:ph, reste:d.totalReste||0, total:hT, hFait:d.hDone||0, hTotal:hT, pct:Number(d.gaugePct)||0,
     capMoy:(m&&m.cadH)||0, besoin:(function(){ if(!(m&&m.obj)) return 0; var n=0, x=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+1); while(x<=m.obj&&n<400){ if(ouv(x)) n++; x.setDate(x.getDate()+1); } return n?Math.round((d.totalReste||0)/n):0; })(),
     meteo:meteo, savoir:sv,
@@ -7083,6 +7085,7 @@ function _pecMoisCourt(m){ return ['janv.','f\u00e9vr.','mars','avr.','mai','jui
 function _pecIsoToMs(iso){ var t=Date.parse(String(iso||'')+'T00:00:00'); return isNaN(t)?null:t; }
 function _pecMsToIso(ms){ var d=new Date(ms); var m=d.getMonth()+1, j=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
 function _pecDfrMs(ms){ var d=new Date(ms); return d.getDate()+' '+_pecMoisCourt(d.getMonth())+' '+d.getFullYear(); }
+function _pecJourCourt(ms){ var d=new Date(ms); return d.getDate()+' '+_pecMoisCourt(d.getMonth()); }   // COHER-1 (§581) : « 25 nov. », l'écriture du lexique (§580c)
 
 // ── État de la vue (par utilisateur, par domaine) ────────────────────
 // Trois choix memorises : la sous-vue ouverte, le tri du tableau parcelles et son
@@ -8126,7 +8129,7 @@ function _pecData(){
 //   · phyto → date du traitement.
 // Les heures faites sans aucune trace au journal (import, reconstruction 🩹) ne
 // sont pas inventables : elles forment un socle daté au premier jour, annoncé.
-function _pecTimeline(E){
+function _pecTimeline(E, finIso){
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
   var seasonNom=(s&&s.nom)?s.nom:'';
   var d1=(s&&s.debut)?s.debut:null, d2=(s&&s.fin)?s.fin:null;
@@ -8208,16 +8211,25 @@ function _pecTimeline(E){
   var pace=Math.max(0,(cum-vStart)/days);
 
   var budget=E.budget||0;
+  // ★★★ COHER-1 (§581) — LA PROJECTION REJOINT LE « COÛT À LA FIN » ; ELLE NE PROLONGE PLUS LE RYTHME.
+  //   Avant : projEndV = cum + rythme × jours jusqu'à la fin de la PÉRIODE. Sur la démo, trois jours à 638 € prolongés sur 124
+  //   jours donnaient « fin de période projetée à 81,0 k€ · budget épuisé le 18 nov. » — sous un verdict « Le budget tient », et
+  //   face au « Coût à la fin 15 317 € » d'Aujourd'hui. Les euros s'arrêtent quand le travail s'arrête : la projection va
+  //   à E.projFin (l'engagé, plus le reste au barème, corrigé de la cadence quand elle s'applique — LE chiffre d'Aujourd'hui,
+  //   _pilCk2Eco le lit au même endroit), à la FIN PRÉVUE des travaux (celle d'Aujourd'hui : _pilMargeCalc(d).proj, passée
+  //   par _pilTabEco), à défaut à la fin de la période. Elle part d'aujourd'hui : rien ne s'engage entre la dernière saisie
+  //   et ce matin. « Budget épuisé le » n'existe que si le coût à la fin dépasse le budget — le jour où la projection le croise.
+  //   Le rythme (pace, nDays) reste une MESURE affichée ; il ne prévoit plus rien.
+  var finV=(isFinite(E.projFin) && E.projFin>0) ? Math.max(cum, E.projFin) : null;
+  var projT0=(tToday!==null) ? Math.max(lastMs, tToday) : lastMs;
+  var finMs=finIso ? _pecIsoToMs(finIso) : null, finPrevue=(finMs!==null && finMs>projT0);
+  if(!finPrevue) finMs=(tEnd>projT0) ? tEnd : null;
+  if(finMs===null) finV=null;
   var projMs=null;
-  if(pace>0 && budget>cum) projMs = winEnd + Math.ceil((budget-cum)/pace)*86400000;
-  var projEndV = null;
-  if(pace>0){
-    var toEnd=Math.max(0,(tEnd-winEnd)/86400000);
-    projEndV = cum + pace*toEnd;
-  }
+  if(finV!==null && budget>cum && finV>budget) projMs = projT0 + (budget-cum)/(finV-cum)*(finMs-projT0);
   var objIso=_pilObjectifGet(), objMs=objIso?_pecIsoToMs(objIso):null;
   return { ok:pts.length>1 || socle>0, pts:pts, t0:t0, tEnd:tEnd, tToday:tToday, tLast:lastMs,
-           socle:socle, cum:cum, engageDate:engageDate, pace:pace, projMs:projMs, projEndV:projEndV,
+           socle:socle, cum:cum, engageDate:engageDate, pace:pace, projMs:projMs, finV:finV, finMs:finMs, finPrevue:finPrevue, projT0:projT0,
            budget:budget, objMs:objMs, objIso:objIso, nDays:days };
 }
 
@@ -8250,11 +8262,11 @@ function _pecBurnSvg(E,TL,w){
   var c0=window._mvGraphCadre(w,300), et=c0.etroit;
   var c=window._mvGraphCadre(w, et?244:320, { padL:et?46:64, padR:et?12:26, padT:26, padB:et?34:40 });
   var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
-  var tMax=Math.max(TL.tEnd, TL.tToday||0, TL.projMs||0, TL.tLast||0);
+  var tMax=Math.max(TL.tEnd, TL.tToday||0, TL.finMs||0, TL.tLast||0);   // COHER-1 (§581) : la fin prévue peut dépasser la période
   if(tMax<=TL.t0) tMax=TL.t0+86400000*30;
   tMax=TL.t0+(tMax-TL.t0)*1.02;
   var pFin=(E && E.cad && E.cad.ok && E.cad.applic && Math.abs(E.cad.ecart)>5) ? E.projFin : 0;
-  var yTop=_pecNiceMax(Math.max(TL.budget, TL.cum, TL.projEndV||0, pFin)*1.05);
+  var yTop=_pecNiceMax(Math.max(TL.budget, TL.cum, TL.finV||0, pFin)*1.05);
   function X(t){ return pL+(Math.max(TL.t0,Math.min(tMax,t))-TL.t0)/(tMax-TL.t0)*iw; }
   function Y(v){ return pT+ih-(Math.max(0,Math.min(yTop,v))/yTop)*ih; }
   var g='';
@@ -8295,9 +8307,10 @@ function _pecBurnSvg(E,TL,w){
   g+='<path d="'+dLine+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.mesure+'" stroke-linejoin="round" stroke-linecap="round"/>';
   // Projection : le prolongement de la MEME mesure, donc la meme couleur, en
   // pointille — ce n'est pas encore mesure.
-  if(TL.pace>0 && TL.projEndV!=null && TL.tEnd>lastP.t){
-    g+='<path d="M'+X(lastP.t).toFixed(1)+' '+Y(lastP.v).toFixed(1)+' L'+X(TL.tEnd).toFixed(1)+' '+Y(TL.projEndV).toFixed(1)+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="7 5" stroke-opacity=".55" stroke-linecap="round"/>'
-      +'<circle cx="'+X(TL.tEnd).toFixed(1)+'" cy="'+Y(TL.projEndV).toFixed(1)+'" r="3.5" fill="none" stroke="'+c.col.mesure+'" stroke-width="1.5"/>';
+  //   ★ COHER-1 (§581) : elle va au coût à la fin, à la fin prévue des travaux — à plat de la dernière saisie à aujourd'hui.
+  if(TL.finV!=null && TL.finMs!=null && TL.finMs>lastP.t){
+    g+='<path d="M'+X(lastP.t).toFixed(1)+' '+Y(lastP.v).toFixed(1)+' L'+X(TL.projT0).toFixed(1)+' '+Y(lastP.v).toFixed(1)+' L'+X(TL.finMs).toFixed(1)+' '+Y(TL.finV).toFixed(1)+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="7 5" stroke-opacity=".55" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<circle cx="'+X(TL.finMs).toFixed(1)+'" cy="'+Y(TL.finV).toFixed(1)+'" r="3.5" fill="none" stroke="'+c.col.mesure+'" stroke-width="1.5"/>';
   }
   g+='<circle cx="'+X(lastP.t).toFixed(1)+'" cy="'+Y(lastP.v).toFixed(1)+'" r="4" fill="'+c.col.mesure+'"/>';
   // Budget : une reference decidee. Le trait est en --or ; l'etiquette ne l'est
@@ -8328,7 +8341,7 @@ function _pecBurnSvg(E,TL,w){
   }
   var aria='Rythme d\u2019engagement des d\u00e9penses : '+_pecEurK(TL.cum)+' engag\u00e9s'
     +(TL.budget>0?(' sur un budget de '+_pecEurK(TL.budget)):'')
-    +(TL.projEndV!=null?(', projection de fin de p\u00e9riode '+_pecEurK(TL.projEndV)):'')+'.';
+    +(TL.finV!=null?(', co\u00fbt \u00e0 la fin '+_ecoEur(TL.finV)):'')+'.';
   return window._mvGraphSvg(c, aria, g);
 }
 
@@ -8532,8 +8545,9 @@ function _pecVerdict(E,TL){
     em=['graphique','vert']; t='La cadence colle au bar\u00e8me';
     d='\u00c9cart de <b>'+_pilEsc(_pecPct(Math.abs(ec)))+'</b> entre le temps pass\u00e9 et le bar\u00e8me : le budget de <b>'+_pilEsc(_ecoEur(E.budget))+'</b> est cr\u00e9dible. Engag\u00e9 \u00e0 ce jour <b>'+_pilEsc(_ecoEur(E.engage))+'</b>, reste \u00e0 engager <b>'+_pilEsc(_ecoEur(E.resteE))+'</b>.';
   }
-  if(TL && TL.ok && TL.pace>0 && TL.projMs && TL.objMs && TL.projMs>TL.objMs){
-    d+=' \u23F1 Au rythme actuel, le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, apr\u00e8s l\u2019objectif de fin des travaux.';
+  // COHER-1 (§581) : la date n'existe que si le coût à la fin dépasse le budget (_pecTimeline) — plus de « budget épuisé » sous « Le budget tient ».
+  if(TL && TL.ok && TL.projMs){
+    d+=' \u23F1 Le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, avant la fin des travaux.';
   }
   // ★ MARCHE 2 : la cadence ne vient PAS de la periode en cours. Le dire avant tout le
   //   reste, et remplacer le titre : les branches ci-dessus sont ecrites au present
@@ -8819,16 +8833,18 @@ function _pecViewSynthese(E,TL){
   // Courbe d'engagement
   var sub='';
   if(TL && TL.ok){
-    var pj = (TL.pace>0 && TL.projEndV!=null) ? ('fin de p\u00e9riode projet\u00e9e \u00e0 '+_pecEurK(TL.projEndV)) : 'rythme non mesurable';
+    // ★ COHER-1 (§581) : le même « coût à la fin » et la même « fin prévue » qu'Aujourd'hui, à l'euro et au jour près.
+    var pj = (TL.finV!=null) ? ('co\u00fbt \u00e0 la fin <b>'+_pilEsc(_ecoEur(TL.finV))+'</b>'+(TL.finPrevue?(', fin pr\u00e9vue <b>'+_pilEsc(_pecJourCourt(TL.finMs))+'</b>'):'')) : '';
     var _nd=Math.max(1,Math.round(TL.nDays||28));
-    sub='Rythme des '+_nd+' dernier'+(_nd>1?'s':'')+' jour'+(_nd>1?'s':'')+' : <b>'+_pilEsc(_ecoEur(TL.pace))+' par jour</b> \u00b7 '+_pilEsc(pj)
-      + (TL.projMs?(' \u00b7 budget \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>'):'');
+    sub=(TL.pace>0 ? ('Rythme des '+_nd+' dernier'+(_nd>1?'s':'')+' jour'+(_nd>1?'s':'')+' : <b>'+_pilEsc(_ecoEur(TL.pace))+' par jour</b>') : 'Rythme non mesurable')
+      + (pj?(' \u00b7 '+pj):'')
+      + (TL.projMs?(' \u00b7 budget \u00e9puis\u00e9 le <b>'+_pilEsc(_pecJourCourt(TL.projMs))+'</b>'):'');
   } else sub='Le trac\u00e9 se remplit \u00e0 mesure que les travaux sont valid\u00e9s au journal.';
   window._mvGraphSuivre('#pec-g-burn', function(w){ return _pecBurnSvg(E,TL,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Rythme de d\u00e9pense</div><div class="pec-cs">'+sub+'</div></div>'
     +'<div class="pec-cb"><div id="pec-g-burn"></div>'
     +'<div class="pec-leg"><span class="pec-lg"><em style="background:var(--terre)"></em>Engag\u00e9 cumul\u00e9</span>'
-    +'<span class="pec-lg"><i style="border-top:2px dashed var(--terre);opacity:.6"></i>Projection au rythme constat\u00e9</span>'
+    +'<span class="pec-lg"><i style="border-top:2px dashed var(--terre);opacity:.6"></i>Projection</span>'
     +'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Budget</span>'
     +(E.cad.ok&&E.cad.applic&&Math.abs(E.cad.ecart)>5?'<span class="pec-lg"><em style="background:'+(E.projFin>E.budget?'var(--rouge)':'var(--vert-med)')+'"></em>Fin projet\u00e9e \u00e0 la cadence mesur\u00e9e</span>':'')
     +(TL&&TL.objMs?'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Objectif de fin des travaux</span>':'')+'</div>'
@@ -10852,7 +10868,9 @@ function _pilTabEco(d){
       +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> R\u00e9glages du module</button></div>'
       +'</div></div></div>';
   }
-  var TL=_pecTimeline(E);
+  // COHER-1 (§581) : la fin prévue des travaux, celle d'Aujourd'hui (_pilCk2Modele lit le même m.proj) — la projection s'y arrête.
+  var _finIso=null; try{ var _mg=_pilMargeCalc(d); if(_mg && _mg.proj instanceof Date) _finIso=_pilPhotoIso(_mg.proj); }catch(e){ _finIso=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabEco#fin'); }
+  var TL=_pecTimeline(E, _finIso);
   var body;
   if(_PEC_SUB==='pos') body=_pecViewPostes(E);
   else if(_PEC_SUB==='par') body=_pecViewParcelles(E);
@@ -10884,6 +10902,39 @@ function _cfmCuivre(){
   return { avail:true, plaf:PLAF, rows:rows,
            over:rows.filter(function(r){ return r.ratio>1; }).length,
            warn:rows.filter(function(r){ return r.ratio>=0.875 && r.ratio<=1; }).length };
+}
+// ★★★ COHER-1 (§581) — LES POINTS À RÉGLER DE LA CONFORMITÉ : UNE LISTE, DEUX LECTEURS.
+//   La tuile « Conformité » d'Aujourd'hui et les tuiles de l'onglet lisent les MÊMES mentions, par les mêmes calculs
+//   (_cfmCuivre, _regCarte, _iftCalc) : elles ne peuvent plus se contredire. Un point = ce qui manque avant un contrôle et
+//   que l'onglet écrit sur une tuile : un plafond de cuivre dépassé, un registre qui n'est pas prêt (SIRET, lignes à
+//   compléter, traitements sans date), un IFT qui ne se calcule pas faute de catalogue. N'en sont PAS : la vigilance cuivre
+//   (sous le plafond), un délai de rentrée en cours (« À savoir » le dit), la protection restante (une lecture de saison).
+//   Une tuile éteinte dans « Choisir les indicateurs » ne compte pas : la tuile d'Aujourd'hui ne dit que ce que l'onglet montre.
+//   ⚠️ Les deux petites fonctions ci-dessous sont lues par les tuiles de l'onglet ET par la liste : changer la mention
+//     d'une tuile, c'est changer le point. mv-harnais-coher1 joue les deux sur les mêmes données.
+function _cfmRegPoint(V){
+  if(!V||!V.nLignes) return null;
+  if(!V.siretOk) return 'SIRET manquant';
+  if(V.nManque) return V.nManque+' à compléter';
+  if(V.sansDate) return V.sansDate+' sans date';
+  return null;
+}
+function _cfmIftPoint(R){ return (R&&R.lignes&&!R.ok)?'catalogue E-Phy absent':null; }
+function _pilCfmPoints(){
+  var P=[], pt;
+  if(_pilShow('cfm_cuivre')){
+    var cu=_cfmCuivre();
+    if(cu&&cu.avail&&cu.over) P.push({ id:'cuivre', court:String(cu.over), t:'Cuivre : plafond dépassé ('+cu.over+' parcelle'+(cu.over>1?'s':'')+')' });
+  }
+  if(_pilShow('mat_phyto') && typeof window._regCarte==='function'){
+    var G=window._regCarte(); pt=G?_cfmRegPoint(G.V):null;
+    if(pt) P.push({ id:'phyto', court:pt, t:'Registre : '+pt });
+  }
+  if(_pilShow('cfm_ift')){
+    pt=_cfmIftPoint(_iftCalc(_iftAnnee()));
+    if(pt) P.push({ id:'ift', court:pt, t:'IFT : catalogue E-Phy à charger' });
+  }
+  return P;
 }
 function _cfmIftRef(){ var c=(window.CONFIG&&window.CONFIG.conformite)||{}; var v=Number(c.ift_ref); return (isFinite(v)&&v>0)?{v:v,def:false}:{v:12,def:true}; }
 // ════════════════════════════════════════════════════════════════════════
@@ -11027,7 +11078,7 @@ function _pilIftTuile(){
       '<div class="pil-empty">Aucun traitement enregistré en '+an+'. L’IFT se calcule dès le premier, avec la dose du registre et la dose homologuée du catalogue E-Phy.</div>'+methode, 'pil.cfm.ift');
   }
   if(!R.ok){
-    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('—',''), R.nPass+' passage'+(R.nPass>1?'s':'')+' en '+an+' · catalogue E-Phy absent', null,
+    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('—',''), R.nPass+' passage'+(R.nPass>1?'s':'')+' en '+an+' · '+_cfmIftPoint(R), null,   // COHER-1 (§581)
       '<div class="pil-empty">Le catalogue E-Phy n’est pas chargé sur cet appareil\u00a0: sans les doses homologuées, l’IFT ne se calcule pas. Il se charge à la connexion — rouvrez cet onglet une fois en ligne.</div>'+methode, 'pil.cfm.ift');
   }
   // Le chiffre hors biocontrôle est celui de l'en-tête, toujours visible : le détail donne les trois autres.
@@ -11245,9 +11296,9 @@ function _arcLigne(an,list,cur){
   var today=_mvToday();
   if(today>=_arcISO(a)&&today<=_arcISO(b)) segs+='<div class="arc-today" style="left:'+pc(today)+'%"></div>';
   var h=list.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
-  var meta=list.length+' période'+(list.length>1?'s':'');
+  var meta=list.length+' campagne'+(list.length>1?'s':'');   // COHER-1 (§581)
   meta+=h>0 ? (' · '+_pilHa(h)+' h') : ' · pas d’instantané';
-  return '<div class="arc-row"><div class="arc-lab"><span class="y">Campagne '+_pilEsc(_b.court||(an+'–'+(an+1)))   /* ★ AXE-1 */
+  return '<div class="arc-row"><div class="arc-lab"><span class="y">'+_pilEsc(_b.court||(an+'–'+(an+1)))   /* ★ AXE-1 */
     +(cur?' <em>en cours</em>':'')+'</span><span class="m">'+meta+'</span></div>'
     +'<div class="arc-fr'+(cur?' cur':' old')+'">'+segs+'</div></div>';
 }
@@ -11408,8 +11459,14 @@ window._arcSetCadre=_arcSetCadre;
 
 function _pilTabArc(d){
   var S=(window.SAISONS||[]).filter(function(s){ return s&&s.debut&&s.fin&&s.fin>=s.debut; });
-  if(!S.length) return '<div class="arc-empty">Aucune période datée. Les campagnes apparaissent ici '
-    +'dès qu’une période porte un début et une fin (Réglages › Campagne).</div>';
+  // ★★ COHER-1 (§581) — « CAMPAGNE » N'A PLUS QU'UN SENS SUR CET ÉCRAN. La frise appelait « Campagne 2026–2027 » l'année
+  //   du 1er août au 31 juillet et « période » ce qu'elle contient, quand la barre « Vous regardez », le bilan par année
+  //   juste dessous et « Clôturer la campagne » appellent campagne la période de travail. Une ligne = une ANNÉE VIGNE (le mot
+  //   de la barre, le même cadre : _mvCampagneBornes) ; ses barres = les CAMPAGNES. Les noms du code (_arcCampagneDe…) restent.
+  //   La ligne ne porte que ses années (« 2026–2027 », comme le bilan par année dessous) : « Année vigne 2026–2027 en cours »
+  //   passait à la ligne au téléphone ; la phrase du haut et le compteur disent ce qu'est une ligne.
+  if(!S.length) return '<div class="arc-empty">Aucune campagne datée. Elles apparaissent ici '
+    +'dès qu’une campagne porte un début et une fin (Réglages › Campagne).</div>';
   var par={};
   S.forEach(function(s){ var k=_arcCampagneDe(s.debut); (par[k]=par[k]||[]).push(s); });
   var keys=Object.keys(par).map(Number).sort(function(x,y){ return y-x; });
@@ -11420,14 +11477,14 @@ function _pilTabArc(d){
      qui commençait en octobre. Un ecran qui recite un reglage qu'il n'a pas lu
      est pire qu'un ecran muet : il fait croire que le reglage a rate. */
   var _bc=_arcBornes(anCur);
-  var h='<div class="arc-intro">Toutes les campagnes sur le même axe, <b>'+_pilEsc(_bc.lbl||'1ᵉʳ août → 31 juillet')+'</b> : '
+  var h='<div class="arc-intro">Toutes les années vigne sur le même axe, <b>'+_pilEsc(_bc.lbl||'1ᵉʳ août → 31 juillet')+'</b> : '
     +'de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le '
     +'décalage des travaux.</div>';
   h+=(window._cmpEchelle?window._cmpEchelle(_arcN(_bc.d0),_arcN(_bc.d1)):'');
   h+=keys.map(function(k){ return _arcLigne(k,par[k],k===anCur); }).join('');
   h+='<div class="arc-kpi">'
-    +'<div><div class="v">'+keys.length+'</div><div class="l">campagne'+(keys.length>1?'s':'')+'</div></div>'
-    +'<div><div class="v">'+S.length+'</div><div class="l">périodes</div></div>'
+    +'<div><div class="v">'+keys.length+'</div><div class="l">année'+(keys.length>1?'s':'')+' vigne</div></div>'
+    +'<div><div class="v">'+S.length+'</div><div class="l">campagne'+(S.length>1?'s':'')+'</div></div>'
     +'<div><div class="v">'+(hTot>0?_pilHa(hTot):'—')+'</div><div class="l">heures archivées</div></div>'
     +'</div>';
   h+=_arcBlocAnnuel();   /* ★ ARCH-2 */

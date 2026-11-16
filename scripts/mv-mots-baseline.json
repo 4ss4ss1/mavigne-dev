@@ -7,6 +7,11 @@
    "date": "2026-11-16",
    "motif": "référence posée (MOTS-0, §580) : les 46 écrans de l’admin, sur tete4c",
    "hausses": []
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "COHER-1 (§581) : la ligne sous « Rythme de dépense » raccourcit (coût à la fin, fin prévue), Archives perd un mot avant son premier chiffre",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -186,19 +191,19 @@
     "lex": null
    },
    "Pilotage › Aujourd’hui › Terrain": {
-    "mots": 318,
+    "mots": 319,
     "p15": 0,
     "avant": 13,
     "lex": 13
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 504,
+    "mots": 505,
     "p15": 5,
     "avant": 13,
     "lex": 6
    },
    "Pilotage › Aujourd’hui › Économie": {
-    "mots": 262,
+    "mots": 263,
     "p15": 0,
     "avant": 13,
     "lex": 14
@@ -222,7 +227,7 @@
     "lex": 5
    },
    "Pilotage › Économie › Synthèse": {
-    "mots": 445,
+    "mots": 440,
     "p15": 5,
     "avant": 85,
     "lex": 14
@@ -266,7 +271,7 @@
    "Pilotage › Archives": {
     "mots": 110,
     "p15": 2,
-    "avant": 48,
+    "avant": 47,
     "lex": 5
    },
    "Réglages › Domaine": {
@@ -464,19 +469,19 @@
     "lex": null
    },
    "Pilotage › Aujourd’hui › Terrain": {
-    "mots": 323,
+    "mots": 324,
     "p15": 0,
     "avant": 14,
     "lex": 13
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 547,
+    "mots": 548,
     "p15": 5,
     "avant": 14,
     "lex": 6
    },
    "Pilotage › Aujourd’hui › Économie": {
-    "mots": 263,
+    "mots": 264,
     "p15": 0,
     "avant": 14,
     "lex": 14
@@ -500,7 +505,7 @@
     "lex": 5
    },
    "Pilotage › Économie › Synthèse": {
-    "mots": 448,
+    "mots": 443,
     "p15": 5,
     "avant": 85,
     "lex": 14
@@ -544,7 +549,7 @@
    "Pilotage › Archives": {
     "mots": 116,
     "p15": 2,
-    "avant": 54,
+    "avant": 53,
     "lex": 5
    },
    "Réglages › Domaine": {

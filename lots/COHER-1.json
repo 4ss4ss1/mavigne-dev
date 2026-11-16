@@ -1,0 +1,34 @@
+{
+  "lot": "COHER-1",
+  "section": "§581",
+  "base": "bc6f7918731aea64d0d8091df4c1f25ce6bfdd73",
+  "inclut": [],
+  "date": "2026-11-16",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "7bebae2f6c6e33d1afed85ad4a52bf30bcb0218c917f4fd8c186c4878e122c0f",
+    "docs/claude/INDEX.md": "59c294121dcf20d6f0b662d1a4ccbb30b2d0c56edb2bda8d734ccf094a95c3c0",
+    "docs/claude/chantiers-580-629.md": "032f926dca4d43247430fb0e3f4ac0677050a4b0419fed7463e778433c43e6a8",
+    "docs/claude/journal.md": "58cac322c1646e85a7b4890601c93ef92fcd8913b40af2e77ebfc2178bb02e26",
+    "guide/11-pilotage.html": "c8daaa84625ed7c37ae9fc04b2386064163ffab625deedbd3e28ec6a75e256e0",
+    "index.html": "9c025f9ae846e20cbd1f0e7ec21e34acf44aea0ff157ef93dbc186e1e4b33d61",
+    "public/demo/pilotage-auj-apres-pc.webp": "3cbb2c135c7b60c8becc1f2bfce53fb848c3a986024e8d61d6d6d45d6dfdb3ea",
+    "public/demo/pilotage-auj-pc.webp": "5a0de56e5abea4d994b11f8fa890177306486a81f21a965120e191c2f05d0cf5",
+    "public/guide.html": "ae911bdd19a4cf31c012bc115ee81710cfc3e9ca79278f14bb0b97cb0ed4cdc7",
+    "public/sw.js": "099826fee1a236d5498fbb416124050bc320017b7d5e87dabeed9f603dc513ae",
+    "scripts/harnais-claude-md.mjs": "ac8003fb5d320fa31377849ffa34bad2df64513da299ffe7ff9372c8199db338",
+    "scripts/mv-harnais-ift1.mjs": "eed765416a6a7c0c5b3cddf21e9d69dfcb36f0ce7987cba9a0495df10314d440",
+    "scripts/mv-harnais-liste.mjs": "116ee9e5e3a0167454d7ae5377c0cc049eb1af0c23986087f97c80c7deab6639",
+    "scripts/mv-harnais-ref1.mjs": "76c1d3a6f1d950628c2971523f13eda0ab96915c6aa19c91fbfcab135a0c4942",
+    "scripts/mv-harnais-robustesse-pilotage.mjs": "e7edaf2335c70fec8dbd2687bb297fc30ffd1863deb3daebfc339e757a2ecbd6",
+    "scripts/mv-mots-baseline.json": "5f2549802da3edba53de2615a50a04511ef57dfc368ebe37a61f03142ed72c3e",
+    "src/cockpit-vue.js": "dc8f6c7699bb0ab71cf4303ceb593abeb0cfc3fe8317f77763c12a5e2215a9a4",
+    "src/pilotage.js": "5d7d3080235f15c52df0e05cd7b3590514b1e8120f98536675d8da2c66cc8d88",
+    "src/utils.js": "a4904d85b4545e8923b6df13c1ed93989f2b9cb6730b656e628da2b6cf1a1b10",
+    "src/whats-new.js": "e228cfe9c0db8666cbb3f2a37481a7ddd8cff0bf449ecd585217c40b06704e94",
+    "scripts/mv-harnais-coher1.mjs": "a154d823344e84c7a0364d122df887243b43d41e43084a8a9dcf7facc49a38f6"
+  }
+}

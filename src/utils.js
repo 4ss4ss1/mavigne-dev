@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.08';
+export const APP_VERSION = '11.09';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3003,7 +3003,7 @@ var MV_AIDE = {
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
       ['Cave', "n’est plus un onglet : une carte dans Aujourd’hui dit combien de gestes pressent et ouvre la Cave. Le millésime, ses courbes et le parc à fûts vivent chez eux — Cave › Le millésime, La Réserve › Fûts."],
-      ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
+      ['Archives', "empile les années vigne sur un même axe, du 1er août au 31 juillet, chacune avec ses campagnes : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
       ['Le « i » est partout', ": chaque onglet suit la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
       ['Il se lit aussi sur téléphone', ": les chiffres du haut se rangent en une ligne qui défile, et le titre de l’onglet ne prend plus de place — la barre d’onglets le dit déjà. Le grand écran reste plus confortable pour les tableaux et les graphiques, mais vous n’avez plus à faire défiler un écran entier avant d’atteindre un chiffre."]
     ]
@@ -3215,7 +3215,9 @@ export const MV_INFO = {
     'Qu\u2019une parcelle soit validée ou non n\u2019y change rien : une semaine de dégrafage pas encore validée est déjà payée. C\u2019est ce qui permet de lire l\u2019avance ou le retard : <b>30 % du budget engagé pour 15 % du travail fait</b>, c\u2019est du retard, en euros.',
     'Deux choses en sont retirées. La <b>conduite du tracteur</b> et le temps du coéquipier, comptés à part dans leur propre poste. Les <b>journées de cave</b> : celles marquées au Planning — la journée, le matin ou l\u2019après-midi, d\u2019après l\u2019horaire du jour —, et un jour où le salarié figure parmi les intervenants d\u2019une opération du Chai (soutirage, ouillage…) : sa journée entière sort de la vigne, l\u2019opération ne disant pas combien de temps elle a pris.',
     'Le tracteur, le carburant et le phyto sont comptés comme avant. Le <b>budget</b>, lui, reste le barème : surface \u00d7 heures par hectare \u00d7 taux.',
-    'Un jour d\u2019atelier ou de bureau d\u2019un salarié vigne n\u2019est écrit nulle part : il reste compté dans la vigne. Un salarié sans taux sur sa fiche est compté au taux moyen du domaine.'
+    'Un jour d\u2019atelier ou de bureau d\u2019un salarié vigne n\u2019est écrit nulle part : il reste compté dans la vigne. Un salarié sans taux sur sa fiche est compté au taux moyen du domaine.',
+    // COHER-1 (§581) : la projection du graphique, dite là où l'engagé s'explique
+    'Sous le graphique <b>Rythme de dépense</b>, le pointillé part d\u2019aujourd\u2019hui et rejoint le <b>coût à la fin</b> — l\u2019engagé, plus le travail qui reste compté au barème — à la <b>fin prévue</b> des travaux : les deux chiffres d\u2019Aujourd\u2019hui. « Budget épuisé le… » ne s\u2019affiche que si ce coût dépasse le budget. Le rythme des derniers jours est une mesure : il ne prévoit rien.'
   ] },
 
   // ★ TV-1 (23/09/2026) — posée sur la carte « Temps réel contre barème » (_pecCarteTemps).

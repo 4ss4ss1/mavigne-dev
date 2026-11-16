@@ -44,6 +44,7 @@ function modele(S) {
     function _pilPhotoListe(){ return [{ d:'${iso(-2)}', reste:1300 }, { d:'${iso(-1)}', reste:1250 }]; }
     function _pilTraiterCalc(){ return { big:'Pas aujourd’hui', rai:'Hors <b>saison</b>', ban:'aucune parcelle à nu' }; }
     function _pilDiag(){ return [{ touche:['cfm'], t:'Registre à <b>compléter</b>' }]; }
+    function _pilCfmPoints(){ return [{ id:'phyto', court:'à compléter', t:'Registre à <b>compléter</b>' }]; }   // COHER-1 (§581) : la tuile lit la liste de l'onglet, plus les diagnostics
     function _pilGainsProlong(){ return {}; }
     this.__V = _pilCk2Modele({ data: [{ nom:'Taille', pct:61, h_done:449, h_total:706, surf_total:1.15 }, { nom:'Brulage', pct:19, h_done:66, h_total:403, surf_total:1.15 }, { nom:'Ebourgeonnage', type:'passages', pct:0 }],
       totalReste:1186, totalTotal:3100, hDone:1914, gaugePct:61.7, saison:{ nom:'Hiver 2026-2027' },
@@ -63,7 +64,7 @@ function suite(S) {
     && V.evts.length === 3 && V.evts[0].type === 'commence' && V.evts[1].h === Math.round(.36 * 706 / 1.15 * 10) / 10   /* surface × barème (h_total / surf_total) */);
   T('la décision du jour : « Traiter ? » et la tension lus dans leurs moteurs, sans balises', V.decision.traiter.raison === 'Hors saison' && V.decision.tension.v === 'Personne au seuil' && V.prio === 'taille'
     && V.decision.prio.v === 'Taille' && V.decision.prio.mode === 'dates' && /^Seule tâche dans ses dates/.test(V.decision.prio.raison));
-  T('la météo des cinq jours, le matériel dans « À savoir », la conformité par les diagnostics', V.meteo.length === 5 && V.meteo[1].ic === 'pluie' && V.meteo[2].ic === 'gel'
+  T('la météo des cinq jours, le matériel dans « À savoir », la conformité par la liste de l’onglet (COHER-1, §581)', V.meteo.length === 5 && V.meteo[1].ic === 'pluie' && V.meteo[2].ic === 'gel'
     && V.savoir.some(x => x.cat === 'materiel' && x.titre === 'Fendt 208 immobilisé') && V.confN === 1 && V.confTxt === 'Registre à compléter');
   T('la saison dit « d\u2019hiver », la date dit le jour et la semaine ; pas d\u2019économie inventée', V.saisonDe === 'd’hiver' && /semaine \d+$/.test(V.dateTxt) && V.eco === null);
   const vue = S.vue;

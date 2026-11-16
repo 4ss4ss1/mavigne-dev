@@ -73,6 +73,11 @@
   <p>La première carte de l'onglet répond à une seule question : <b>où en êtes-vous</b>. Elle tient en
   une ou deux phrases — l'écart, la projection, l'engagé — et pose les <b>boutons</b> qui vont avec :
   voir quel travail dérape, ouvrir le barème. Le détail du calcul est derrière son petit « i ».</p>
+  <p>Plus bas, le graphique <b>Rythme de dépense</b> trace ce qui est déjà engagé, jour après jour. Son
+  pointillé part d'aujourd'hui et rejoint le <b>coût à la fin</b> à la <b>fin prévue</b> des travaux :
+  ce sont les deux chiffres d'<b>Aujourd'hui</b>, à l'euro et au jour près. « Budget épuisé le… » ne
+  s'affiche que si ce coût dépasse le budget. Le rythme des derniers jours, écrit sous le titre, est une
+  mesure : il ne prévoit rien.</p>
   <div class="note"><span class="ni" aria-hidden="true">{ic:retour}</span><div>Quand la cadence affichée vient
   de la <b>campagne précédente</b> — parce que celle en cours n'est pas encore assez avancée pour se
   mesurer elle-même — le titre porte une flèche <b>{ic:retour}</b> et une ligne sous le texte nomme la campagne
@@ -293,6 +298,12 @@
   planning prévoyait — jamais au contrat : en modulation, une semaine haute est prévue. Au seuil : plus de 10 % au-dessus du
   prévu, ou une des deux dernières semaines au-delà de la moyenne autorisée réglée dans le Planning (44 h par défaut). En rouge :
   au-delà du maximum (48 h). Le chiffre du haut a sa petite courbe ; la carte détaille chaque personne et ouvre le Planning.</p>
+
+  <p><b>La tuile Conformité compte ce que l'onglet Conformité signale</b> : un plafond de cuivre dépassé,
+  un registre phyto qui n'est pas prêt (SIRET manquant, lignes à compléter, traitements sans date), un IFT
+  qui ne se calcule pas faute de catalogue E-Phy. Sa dernière ligne nomme le premier point ; la toucher
+  ouvre l'onglet. Une tuile éteinte dans « Choisir les indicateurs » de Conformité ne compte pas ; la
+  vigilance cuivre (sous le plafond) et un délai de rentrée en cours non plus.</p>
 
   <h3>{ic:tracteur} Le tracteur, sur les travaux en cours</h3>
   <p>Dans <b>Équipe &amp; matériel › Matériel</b>, sous le parc, la cuve et la consommation, le bloc
@@ -577,7 +588,7 @@
   Un écart lu sur la campagne précédente se lit de la même façon, sans multiplier le reste.</div>
 
   <h3>{ic:dossier} Archives des campagnes</h3>
-  <p>Toutes les campagnes sur un <b>même axe</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
+  <p>Toutes les <b>années vigne</b> sur un <b>même axe</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Chaque ligne porte ses années (« 2026–2027 ») ; ses barres sont vos <b>campagnes</b>, les périodes de travail que vous clôturez. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
   <p>Cet axe s'ouvre par défaut le <b>1<sup>er</sup> août</b>, et il <b>se règle</b> :
   <span class="path">Pilotage › {ic:engrenage} › Le cadre de votre campagne</span>, juste sous l'ouverture
   de votre exercice comptable. Une campagne est un <b>cycle de production</b> : ce qui la borne, c'est
@@ -595,7 +606,7 @@
   coïncider ; elles répondent à deux questions. Déplacer l'année vigne <b>recadre des chiffres déjà
   affichés</b> — une journée de travail peut passer d'une campagne à l'autre — mais ne touche ni au
   millésime d'un vin, ni à vos périodes de travail.</div></div>
-  <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une période jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
+  <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une campagne jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
   <p><b>Chaque archive est la photo de sa campagne</b> : l'état des parcelles et de l'avancement à la clôture, plus le journal et les sessions <b>de cette campagne seulement</b>. La clôture n'active la nouvelle campagne que si l'archive est bien enregistrée sur le serveur ; hors ligne, rien ne change et un message le dit.</p>
   <p>Sous la frise, le <b>bilan par année</b> regroupe les campagnes closes de chaque année — heures archivées, interventions, parcelles touchées, sessions tracteur et principales tâches. Il est <b>calculé</b> à partir des archives de campagne, jamais recopié. L'administrateur choisit le cadre : <b>année vigne</b> ou <b>exercice comptable</b> ; les autres le voient sans pouvoir le changer. Quand les deux s'ouvrent le même mois, les deux vues sont identiques. Si une campagne est à cheval sur deux années du cadre choisi, ses heures — totalisées pour la campagne entière dans l'archive — sont partagées au prorata de ses interventions datées, et la carte le signale (« dont … h réparties »).</p>
   <div class="note"><b>Pourquoi les vieilles périodes ont disparu des Réglages.</b> <span class="path">Réglages › Campagne</span> n'affiche que les dix-huit derniers mois, plus ce qui est en cours ou à venir : au-delà, la liste devenait illisible. Rien n'est supprimé — tout est ici.</div>
