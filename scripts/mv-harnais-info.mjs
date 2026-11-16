@@ -277,7 +277,8 @@ t('… avec SES cles, pas celles de la Synthese',
 t('_pexEntete ne fabrique plus de paves .pec-a',
   !/function _pexEntete[\s\S]{0,900}?pec-a /.test(PILNU));
 t('la garde comptable garde sa ligne de cadre a l\'ecran',
-  /pas un compte de r\\u00e9sultat/.test(PILNU) && /charges d\\u2019exploitation/.test(PILNU));
+  // MOTS-2 (§583) : la ligne de cadre reste (le titre) ; « Il chiffre vos charges d'exploitation… » est dans la fiche.
+  /pas un compte de r\\u00e9sultat/.test(PILNU) && !/charges d\\u2019exploitation/.test(PILNU) && /charges d’exploitation/.test(txt));
 t('… et sa liste est partie dans la fiche',
   !PILNU.includes('ni le fermage') && txt.includes('ni le fermage'));
 t('la garde porte sa pastille', /_mvInfoBtn\('pil\.exo\.garde'\)/.test(PILNU));

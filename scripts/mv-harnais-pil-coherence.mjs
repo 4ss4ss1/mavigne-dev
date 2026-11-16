@@ -199,7 +199,7 @@ export { _pilEchCadence };`;
   const M=await charger(src);
   t('⑫ _pexJourApres passe le 31 → 01 et le 28 févr. → 1er mars (UTC de bout en bout)', M._pexJourApres('2026-08-31')==='2026-09-01' && M._pexJourApres('2027-02-28')==='2027-03-01' && M._pexIsoPlus('2026-08-01',40)==='2026-09-10');
   const en=fn(SRC.pil,'_pexEntete').replace(/^\s*\/\/.*$/gm,'');
-  t('⑫ l\'en-tête dit Engagé / Prévu / À la clôture quand il reste du prévu', /E\.enCoursC/.test(en) && /Engag\\u00e9 \\u00e0 ce jour/.test(en) && /Pr\\u00e9vu jusqu/.test(en) && /pr\\u00e9vu compris/.test(en));
+  t('⑫ l\'en-tête dit Engagé / Prévu / À la clôture quand il reste du prévu', /E\.enCoursC/.test(en) && /<div class="l">Sorti<\/div>/.test(en) && /<div class="l">Prévu<\/div>/.test(en) && /<div class="l">À la clôture<\/div>/.test(en) && /pr\\u00e9vu compris/.test(en));
   t('⑫ l\'exercice clos garde son en-tête d\'avant', /D\\u00e9penses de l\\u2019exercice/.test(en));
   const gr=fn(SRC.pil,'_pexGraph').replace(/^\s*\/\/.*$/gm,'');
   t('⑫ le graphe hachure le prévu et marque la coupe', /pex-hach/.test(gr) && /\['salP','url\(#pex-hach\)'\]/.test(gr) && /aujourd\\u2019hui/.test(gr));

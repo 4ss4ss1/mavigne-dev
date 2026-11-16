@@ -22,6 +22,21 @@
    "date": "2026-11-16",
    "motif": "MOTS-1 (§582) : la bande de la Synthèse garde « 1 des 3 à compléter »",
    "hausses": []
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "hausse acceptée — MOTS-2 (§583) : Postes & travaux et Parcelles n'avaient aucun grand chiffre ; leur phrase du haut en pose un, à 14 mots du début (la barre des sous-vues en compte 10)",
+   "hausses": [
+    "Pilotage › Économie › Postes & travaux › téléphone › avant : aucun → 14",
+    "Pilotage › Économie › Parcelles › téléphone › avant : aucun → 14",
+    "Pilotage › Économie › Postes & travaux › ordinateur › avant : aucun → 14",
+    "Pilotage › Économie › Parcelles › ordinateur › avant : aucun → 14"
+   ]
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "MOTS-2 (§583) : les cinq autres vues d'Économie ouvrent sur une ligne et une phrase",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -243,34 +258,34 @@
     "lex": 0
    },
    "Pilotage › Économie › Postes & travaux": {
-    "mots": 221,
-    "p15": 3,
-    "avant": null,
-    "lex": 6
-   },
-   "Pilotage › Économie › Parcelles": {
-    "mots": 203,
-    "p15": 2,
-    "avant": null,
-    "lex": 4
-   },
-   "Pilotage › Économie › Revient": {
-    "mots": 178,
-    "p15": 1,
-    "avant": 15,
-    "lex": 2
-   },
-   "Pilotage › Économie › Achats": {
-    "mots": 271,
-    "p15": 5,
-    "avant": 59,
+    "mots": 120,
+    "p15": 0,
+    "avant": 14,
     "lex": 1
    },
-   "Pilotage › Économie › Le détail de l’exercice": {
-    "mots": 623,
-    "p15": 10,
-    "avant": 30,
+   "Pilotage › Économie › Parcelles": {
+    "mots": 106,
+    "p15": 0,
+    "avant": 14,
     "lex": 2
+   },
+   "Pilotage › Économie › Revient": {
+    "mots": 104,
+    "p15": 0,
+    "avant": 14,
+    "lex": 0
+   },
+   "Pilotage › Économie › Achats": {
+    "mots": 86,
+    "p15": 0,
+    "avant": 11,
+    "lex": 0
+   },
+   "Pilotage › Économie › Le détail de l’exercice": {
+    "mots": 217,
+    "p15": 0,
+    "avant": 14,
+    "lex": 1
    },
    "Pilotage › Conformité": {
     "mots": 90,
@@ -521,34 +536,34 @@
     "lex": 0
    },
    "Pilotage › Économie › Postes & travaux": {
-    "mots": 221,
-    "p15": 3,
-    "avant": null,
-    "lex": 6
-   },
-   "Pilotage › Économie › Parcelles": {
-    "mots": 204,
-    "p15": 2,
-    "avant": null,
-    "lex": 4
-   },
-   "Pilotage › Économie › Revient": {
-    "mots": 186,
-    "p15": 1,
-    "avant": 15,
-    "lex": 2
-   },
-   "Pilotage › Économie › Achats": {
-    "mots": 271,
-    "p15": 5,
-    "avant": 61,
+    "mots": 120,
+    "p15": 0,
+    "avant": 14,
     "lex": 1
    },
-   "Pilotage › Économie › Le détail de l’exercice": {
-    "mots": 631,
-    "p15": 10,
-    "avant": 42,
+   "Pilotage › Économie › Parcelles": {
+    "mots": 107,
+    "p15": 0,
+    "avant": 14,
     "lex": 2
+   },
+   "Pilotage › Économie › Revient": {
+    "mots": 112,
+    "p15": 0,
+    "avant": 14,
+    "lex": 0
+   },
+   "Pilotage › Économie › Achats": {
+    "mots": 86,
+    "p15": 0,
+    "avant": 11,
+    "lex": 0
+   },
+   "Pilotage › Économie › Le détail de l’exercice": {
+    "mots": 225,
+    "p15": 0,
+    "avant": 14,
+    "lex": 1
    },
    "Pilotage › Conformité": {
     "mots": 90,

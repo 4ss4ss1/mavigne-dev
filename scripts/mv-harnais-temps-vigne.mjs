@@ -351,7 +351,8 @@ function branchements(src) {
   const vp = extraire(L, '_pecViewPostes') || '', vpa = extraire(L, '_pecViewParcelles') || '';
   R.push(['J8 · le tableau Coût par travail affiche le réalisé et l\'écart', /_ecoEur\(t\.reE\)/.test(vp) && /_pecEcTd\(t\.ecE, t\.fE\)/.test(vp) && !/_ecoEur\(t\.fE\)/.test(vp)]);
   R.push(['J9 · le tableau Parcelles affiche le réalisé et l\'écart', /_ecoEur\(r\.engRe\)/.test(vpa) && /_pecEcTd\(r\.ecE, r\.moF\)/.test(vpa) && !/_ecoEur\(r\.engage\)/.test(vpa)]);
-  R.push(['J10 · les heures en attente sont dites sous le tableau des travaux', /E\.reAttE>=1/.test(vp)]);
+  // MOTS-2 (§583) : dites EN TÊTE, dans une bande orange (_pecBandeAttente).
+  R.push(['J10 · les heures en attente sont dites en tête de Postes & travaux et de Parcelles', /_pecBandeAttente\(E\)/.test(vp) && /_pecBandeAttente\(E\)/.test(vpa) && /E\.reAttE>=1/.test(extraire(L, '_pecBandeAttente') || '')]);
   R.push(['J11 · le graphe des travaux dessine le réalisé payé', /var re=\(t\.reE!=null\)\?t\.reE:t\.fE/.test(extraire(L, '_pecTaskSvg') || '')]);
   R.push(['J6 · la fiche pil.eco.engage existe et est posée', /'pil\.eco\.engage':\s*\{/.test(src.utl) && /_mvInfoBtn\('pil\.eco\.engage'\)/.test(L)]);
 

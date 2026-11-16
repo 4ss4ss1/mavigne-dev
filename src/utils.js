@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.10';
+export const APP_VERSION = '11.11';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2994,7 +2994,7 @@ var MV_AIDE = {
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
-      ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème. La <b>Synthèse</b> tient en une phrase, quatre chiffres et trois tuiles repliées : le coût à la fin, l’exercice, le prix de revient."],
+      ['Économie', "compare un budget de barème à ce qui est engagé — les heures réellement passées dans les rangs au planning, validées ou non —, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire. Dans <b>Postes & travaux</b>, le <b>temps réel</b> de chaque travail — les heures du planning versées aux parcelles validées, au prorata de la surface — se lit à côté du h/ha du barème. La <b>Synthèse</b> tient en une phrase, quatre chiffres et trois tuiles repliées : le coût à la fin, l’exercice, le prix de revient. Les cinq autres vues s’ouvrent de la même façon : la campagne, le millésime ou l’exercice et ses dates, puis une phrase ; ce qui demande un geste est dans une bande orange."],
       ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce, et les amendements chiffrés pas encore facturés) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['Économie › Revient', "répond à trois questions pour le millésime : combien de vin, combien de bouteilles, combien coûte chacune à la vigne. Tout se lit sur le <b>cycle</b> du millésime, d’une vendange à la suivante. Tant qu’une parcelle n’est pas récoltée, son rendement est la moyenne de ses millésimes connus — jamais le plafond — et les chiffres sont marqués <b>probable</b>. Le tableau se lit par appellation ; touchez une ligne pour voir ses parcelles. Deux réglages dans la roue crantée : les pertes d’élevage, et vos autres charges de l’année pour un coût complet indicatif. Une parcelle déclarée sans récolte cette année (Le Cuvier, «\u00a0Encore sur pied\u00a0») ne compte ni rendement ni bouteilles, et son coût se répartit sur les autres vignes."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
@@ -3241,6 +3241,18 @@ export const MV_INFO = {
     'Le <b>rythme</b> est une mesure des derniers jours travaillés : il ne prévoit rien.',
     'L\u2019<b>écart de cadence</b> vient de là : les heures <b>réellement travaillées au planning</b> sur la campagne, moins les heures de sessions tracteur, comparées aux heures de barème du travail fait.'
   ] },
+  // MOTS-2 (§583) : les trois paragraphes de conception et la carte « Ce que cet écran ne fait pas », retirés de l’écran (§580e)
+  'pil.eco.achats': { t: 'Achats : le seul endroit où l’on met les prix', p: [
+    'Chaque module y dépose ses lignes : un achat de La Réserve, un fût, une location, un passage chez le réparateur. C’est <b>le seul endroit où l’on met les prix</b>.',
+    '<b>Une ligne sans prix</b> compte pour zéro : le total est alors un <b>plancher</b>, écrit « ≥ », jamais une mesure. Le bouton « Chiffrer » ne montre que ces lignes.',
+    '<b>Rien ne se crée ici</b> : chaque ligne existe parce qu’un module l’a enregistrée. « Achat » ouvre le formulaire du module concerné, il n’en fabrique pas un second — un intrant phyto demande la catégorie, l’unité, la contenance et le catalogue E-Phy : deux formulaires divergeraient au premier lot.',
+    'Le prix retourne dans l’objet, pas dans une table à part : un fût coûte tant, ce n’est pas une ligne comptable séparée.',
+    'Les fiches d’entretien n’y montent pas : une vérification quotidienne — plein, huile, pression — n’est pas un achat. Le signal d’une intervention payante existe déjà : la machine est partie chez le réparateur.'
+  ] },
+  // MOTS-2 (§583) : les remarques du Revient (début du cycle estimé, vendange non datée, salarié sans taux…) : posées au rendu par _pecFiabRemq
+  'pil.eco.revremq': { t: 'Ce qui borne ce chiffre', p: [
+    'Aucune remarque à afficher pour l’instant. Ouvrez Économie › Revient pour que cette fiche se remplisse.'
+  ] },
   'pil.eco.remarques': { t: 'Les remarques du moment', p: [
     'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie pour que cette fiche se remplisse.'
   ] },
@@ -3404,14 +3416,18 @@ export const MV_INFO = {
     'Le <b>plafond de l’appellation</b> n’est jamais pris comme prévision : c’est un maximum réglementaire, pas ce que la vigne donnera. Il sert de repère dans la jauge.',
     'Le hL/ha est rapporté à la <b>parcelle entière</b>, comme dans la Cave. Les bouteilles, elles, ne comptent que la <b>part du domaine</b> : le raisin vendu en sort, et la part du coût qu’il porte aussi, au prorata des kilos. Une parcelle pas encore récoltée est comptée entièrement pour le domaine.',
     'Une parcelle sans estimation sort des bouteilles <b>et</b> de leur coût : diviser son coût par les bouteilles des autres gonflerait leur prix.',
-    'Une parcelle <b>sans récolte cette année</b> n’est pas une parcelle sans estimation : elle ne donnera rien. Elle reste dans son appellation, marquée «\u00a0pas de récolte\u00a0», hors du hL/ha et des bouteilles, et son coût est réparti sur les autres vignes plutôt que retiré.'
+    'Une parcelle <b>sans récolte cette année</b> n’est pas une parcelle sans estimation : elle ne donnera rien. Elle reste dans son appellation, marquée «\u00a0pas de récolte\u00a0», hors du hL/ha et des bouteilles, et son coût est réparti sur les autres vignes plutôt que retiré.',
+    // MOTS-2 (§583) : le mode d’emploi de la carte
+    'Touchez une appellation pour voir ses parcelles.'
   ] },
 
   'pil.eco.revconv': { t: 'Du raisin à la bouteille', p: [
     '<b>Kilos → hectolitres</b> : le rapport kg/hL réglé au Cuvier (le milieu de la fourchette), pour tout ce qui n’a pas de volume mesuré. C’est la même règle que la Cave : les deux écrans comptent les mêmes bouteilles.',
     '<b>Pertes d’élevage</b> : la part des anges <b>mesurée</b> sur le dernier millésime entièrement mis en bouteille, s’il y en a un ; sinon le réglage (5 % par défaut, dans la roue crantée).',
     '<b>Hectolitres → bouteilles</b> : 1 hL donne 133 bouteilles de 75 cl.',
-    'Avant, Économie utilisait sa propre hypothèse, 1,3 kg de raisin par bouteille : elle comptait environ 28 % de bouteilles de moins que la Cave. Il n’y a plus qu’une règle.'
+    'Avant, Économie utilisait sa propre hypothèse, 1,3 kg de raisin par bouteille : elle comptait environ 28 % de bouteilles de moins que la Cave. Il n’y a plus qu’une règle.',
+    // MOTS-2 (§583) : le sous-titre de la carte
+    'Ce sont les mêmes conversions que la Cave : un chiffre de rendement ne se calcule pas de deux façons.'
   ] },
 
   'pil.eco.revcout': { t: 'Ce que coûte une bouteille à la vigne', p: [
@@ -3431,7 +3447,10 @@ export const MV_INFO = {
     'Le <b>tracteur</b> et le <b>phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',
     'Le <b>GNR</b>, lui, est <b>mesuré</b> : c\u2019est la somme de vos pleins, au litre près. Ce qui reste approché, c\u2019est sa <b>répartition</b> entre parcelles — un plein est rattaché à une machine et à une date, jamais à une parcelle. Le total est juste, sa ventilation est proportionnelle aux heures machine.',
     'Tant qu\u2019<b>aucun plein n\u2019est relevé</b> sur la période, le carburant repasse à l\u2019ancien calcul — heures × consommation × prix — et la ligne affiche «\u202fL ESTIMÉS\u202f». Le mot est là pour être lu.',
-    'Un poste extrapolé <b>montera mécaniquement</b> au fil de la période. Ce n\u2019est pas une dérive.'
+    'Un poste extrapolé <b>montera mécaniquement</b> au fil de la période. Ce n\u2019est pas une dérive.',
+    // MOTS-2 (§583) : ce que la carte écrivait sous son titre et sous son tableau
+    'Ce sont les <b>coûts de culture</b> de la campagne. Les <b>achats</b>, les <b>réparations</b> et les <b>fûts</b> n’y sont pas : ils portent une date, ce budget n’en porte aucune — ils se lisent dans Le détail de l’exercice.',
+    'La pastille <b>projeté</b> dit que le tracteur, le GNR et le phyto du budget sont extrapolés à l’avancement ; sans elle, leur budget affiche ce qui est fait, seul.'
   ] },
 
   'pil.eco.travaux': { t: 'Le coût par travail', p: [
@@ -3441,7 +3460,9 @@ export const MV_INFO = {
     'L\u2019<b>écart</b> = réalisé \u2212 barème du travail <b>fait</b>. Les deux portent sur le même travail, celui qui est validé : <b>+</b> veut dire plus cher que prévu, <b>\u2212</b> moins cher. Sur le graphique, le trait vertical marque le barème du fait, et ce qui dépasse le budget est en rouge.',
     'Les heures payées qui <b>attendent une validation</b> sont dans l\u2019engagé, mais sur aucun travail encore : leur montant est écrit sous le tableau. Sans planning ouvert, le réalisé retombe au barème et l\u2019écart ne se lit pas.',
     '<b>Main-d\u2019\u0153uvre vigne uniquement.</b> Le tracteur, le GNR et le phyto ne sont pas répartis par travail : ils n\u2019en portent pas la trace.',
-    'Quand un travail dépasse durablement son barème, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches — jamais le taux horaire.'
+    'Quand un travail dépasse durablement son barème, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches — jamais le taux horaire.',
+    // MOTS-2 (§583) : la note sous le tableau des travaux
+    '<b>Réalisé</b> = les heures du planning versées aux parcelles validées, au taux chargé du jour. <b>Écart</b> = réalisé − barème du travail fait : <b>+</b> veut dire plus cher que prévu. Des heures payées et pas encore validées sont dans l’engagé, sur aucun travail : la bande orange, en tête d’écran, les compte.'
   ] },
 
   'pil.eco.parcelles': { t: 'Le tableau des parcelles', p: [
@@ -3450,7 +3471,9 @@ export const MV_INFO = {
     '<b>MO</b> = main-d\u2019\u0153uvre <b>payée</b> pour la parcelle : les heures du planning versées à ses validations, au taux du jour. <b>Écart</b> = cette MO \u2212 le barème du travail fait (<b>+</b> = plus cher que prévu) ; les heures d’un <b>travail à l’heure</b> (arrachage…) restent dans la MO de la parcelle, jamais dans son écart. <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>, au barème. <b>Budget</b> = le barème de la période.',
     '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
     'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
-    'La <b>MO</b> d\u2019une parcelle suit la règle du temps réel : la journée de ceux qui sont dans les rangs se partage entre les parcelles <b>validées ce jour-là</b>, au prorata du barème, et les jours sans aucune validation vont aux parcelles validées ensuite. Une parcelle chère ou bon marché dit donc ce que l\u2019équipe y a passé entre deux validations — d\u2019où l\u2019intérêt de valider chaque parcelle le jour où elle est finie. Une validation « faite au tracteur » n\u2019entre pas dans ce partage : le temps de la machine est compté par la session.'
+    'La <b>MO</b> d\u2019une parcelle suit la règle du temps réel : la journée de ceux qui sont dans les rangs se partage entre les parcelles <b>validées ce jour-là</b>, au prorata du barème, et les jours sans aucune validation vont aux parcelles validées ensuite. Une parcelle chère ou bon marché dit donc ce que l\u2019équipe y a passé entre deux validations — d\u2019où l\u2019intérêt de valider chaque parcelle le jour où elle est finie. Une validation « faite au tracteur » n\u2019entre pas dans ce partage : le temps de la machine est compté par la session.',
+    // MOTS-2 (§583) : la note sous le tableau des parcelles
+    'Le coût d’une parcelle est un <b>coût de culture</b> : ni vinification, ni foncier, ni amortissement du matériel. Le <b>budget</b> vient du barème h/ha du domaine ; la <b>main-d’œuvre réalisée</b>, des heures du planning versées aux parcelles validées, au taux de la fiche de chaque salarié le jour même ; le tracteur, du taux de son conducteur.'
   ] },
 
   'pil.exo.postes': { t: 'Les postes de l\u2019exercice', p: [
@@ -3459,7 +3482,10 @@ export const MV_INFO = {
     'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
     'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
     'Sur un exercice <b>en cours</b>, l\u2019année est coupée <b>au jour</b> : à gauche d\u2019aujourd\u2019hui, l\u2019<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du planning annonce jusqu\u2019à la clôture, hachurés. Un mois entamé est coupé au jour, jamais compté d\u2019un seul côté. Le carburant et les réparations n\u2019ont pas de prévu : Ma Vigne ne connaît que ce qui est sorti. Un amendement enregistré avec un prix (Phyto \u203a Fertilisation) entre au prévu des achats, à sa semaine prévue, et en sort dès que sa facture est saisie dans La Réserve : jamais compté deux fois.',
-    'Contre l\u2019an dernier, deux comparaisons : <b>à date comparable</b> — ce qui est sorti aux mêmes jours après l\u2019ouverture — et l\u2019<b>exercice complet</b>, qui contient du prévu et le dit.'
+    'Contre l\u2019an dernier, deux comparaisons : <b>à date comparable</b> — ce qui est sorti aux mêmes jours après l\u2019ouverture — et l\u2019<b>exercice complet</b>, qui contient du prévu et le dit.',
+    // MOTS-2 (§583) : les notes sous les tableaux de l’exercice
+    'Sur un exercice en cours, le reste est lu dans la grille du planning — un mois entamé est coupé au jour. Le carburant et les réparations n’ont <b>pas de colonne prévu</b> : Ma Vigne ne connaît que ce qui est sorti. Se lisent d’avance les salaires et les amendements enregistrés avec un prix, jusqu’à l’arrivée de leur facture.',
+    '<b>Achats d’intrants</b> : le prix HT porté par la ligne d’achat, à sa date — la facture, pas la sortie de stock. <b>Réparations</b> : chaque immobilisation, à sa date de retour — c’est le moment où la facture se déclenche ; les fiches d’entretien quotidiennes n’y figurent pas.'
   ] },
 
   'pil.exo.ateliers': { t: 'Vigne, cave, tracteur — et ce que ça ne dit pas', p: [
@@ -3467,7 +3493,9 @@ export const MV_INFO = {
     '<b>L\u2019atelier ne se saisit pas</b>, il se déduit. Un produit phyto part sur la vigne, un produit œno dans la cave, le carburant au tracteur. Une intervention passe au tracteur d\u2019office, parce qu\u2019une machine chez le réparateur, c\u2019est le tracteur qui coûte.',
     '<b>Les salaires n\u2019y sont pas, et ce n\u2019est pas un oubli.</b> Une entrée de planning porte des heures, un type de congé, un motif d\u2019absence — jamais une activité. Rien ne dit si une journée est partie à la vigne ou à la cuverie. Seule la conduite du tracteur est mesurée, et elle <b>reste</b> dans la masse salariale : ici on ne compte que son carburant, sinon la même heure serait payée deux fois.',
     '<b>« Non affecté » est affiché exprès.</b> Sans ce seau, un achat qui ne rentre dans aucune case serait rangé de force ailleurs, et le total mentirait avec l\u2019autorité d\u2019un chiffre.',
-    'Ce qui <b>n\u2019entre pas</b> : le matériel et les outils portés. Les fûts <b>achetés</b> n\u2019entrent que si vous l\u2019avez demandé — <em>Pilotage \u203a Économie \u203a Paramétrage</em>, « un fût acheté, comment le compter ». Une <b>location</b> de fûts, elle, entre toujours : c\u2019est un loyer, il revient tous les ans. Il est calculé au prorata des jours de contrat, sur les fûts que vous détenez.'
+    'Ce qui <b>n\u2019entre pas</b> : le matériel et les outils portés. Les fûts <b>achetés</b> n\u2019entrent que si vous l\u2019avez demandé — <em>Pilotage \u203a Économie \u203a Paramétrage</em>, « un fût acheté, comment le compter ». Une <b>location</b> de fûts, elle, entre toujours : c\u2019est un loyer, il revient tous les ans. Il est calculé au prorata des jours de contrat, sur les fûts que vous détenez.',
+    // MOTS-2 (§583) : les notes de la carte des consommables
+    'L’axe <b>nature</b> répond à « qu’ai-je payé », l’axe <b>atelier</b> à « pour quoi » : deux lectures des mêmes euros, jamais deux totaux. Les boutons ouvrent La Réserve — rien ne se saisit ici : le Pilotage lit, il n’écrit aucun fait d’exploitation.'
   ] },
 
   'pil.exo.salaires': { t: 'Heures payées, heures travaillées', p: [
@@ -3475,7 +3503,9 @@ export const MV_INFO = {
     'Le <b>bureau</b> y est, avec sa pastille : on chiffre une masse salariale, et un salaire est un salaire. Il reste <b>hors</b> de tout ce qui mesure la vigne \u2014 capacité, pic, cadence, renfort.',
     'L\u2019écart entre les deux, ce sont donc précisément <b>les congés et les absences rémunérées</b>. Il est normal ; c\u2019est son évolution qui parle.',
     'Une <b>ligne d\u2019équipe</b> compte son effectif réel, jour par jour : une équipe de quatre sur trois jours vaut douze journées-personne, pas trois.',
-    '\u{1F512} Ce tableau nomme la rémunération de chaque personne : il est réservé aux administrateurs, comme partout ailleurs dans Ma Vigne.'
+    '\u{1F512} Ce tableau nomme la rémunération de chaque personne : il est réservé aux administrateurs, comme partout ailleurs dans Ma Vigne.',
+    // MOTS-2 (§583) : le sous-titre du tableau des salaires
+    'Le taux affiché est le <b>taux horaire chargé</b> de la fiche — le coût employeur : heures payées × taux = coût. Chaque heure est valorisée au taux qui valait <b>ce jour-là</b> : quand un taux a changé dans l’exercice, la colonne montre les deux, et le mois du changement est coupé à la bonne date.'
   ] },
 
   'pil.camp.mois': { t: 'Le mois o\u00f9 s\u2019ouvre votre ann\u00e9e vigne', p: [
@@ -3520,7 +3550,10 @@ export const MV_INFO = {
     'Ma Vigne connaît <b>ce qui passe par elle</b> : les heures payées, le carburant, les achats d\u2019intrants, les réparations et les loyers de fûts. C\u2019est déjà l\u2019essentiel de vos charges d\u2019exploitation, et c\u2019est ce qui se pilote au fil de l\u2019année.',
     'Elle ne connaît <b>ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d\u2019exploitant, ni l\u2019embouteillage, ni les frais généraux</b> — elle ne les voit jamais passer.',
     'Ce chiffre sert donc à <b>piloter vos charges d\u2019un bilan à l\u2019autre</b> : voir si elles montent, où, et pourquoi. Il ne remplace pas votre comptable, et il ne se compare pas ligne à ligne à son bilan.',
-    'Le <b>produit consommé en traitements</b> n\u2019y est pas non plus : c\u2019est une sortie de stock, et l\u2019achat a déjà été compté le jour de la facture. Le compter deux fois gonflerait le total.'
+    'Le <b>produit consommé en traitements</b> n\u2019y est pas non plus : c\u2019est une sortie de stock, et l\u2019achat a déjà été compté le jour de la facture. Le compter deux fois gonflerait le total.',
+    // MOTS-2 (§583) : la carte « Ce qui n’entre pas dans ce total », retirée de l’écran
+    'Ce total chiffre vos <b>charges d’exploitation</b>, d’un bilan à l’autre — pas tout ce que coûte le domaine. Ni fermage, ni MSA, ni assurance, ni énergie, ni amortissement du matériel : c’est ce que Ma Vigne mesure — la vigne et la cave —, pas ce que votre comptable arrêtera.',
+    'La <b>location de fûts</b> entre, au prorata des jours de contrat : c’est un loyer qui revient tous les ans, pas un fût. Le matériel, les outils portés et les fûts achetés ne sont pas des consommables : on ne les rachète pas l’an prochain. Les fûts ont leur écran (La Réserve › Fûts) ; vous pouvez les faire entrer ici par la roue crantée du Pilotage.'
   ] },
 
   'pil.equipe': { t: 'Équipe', p: [

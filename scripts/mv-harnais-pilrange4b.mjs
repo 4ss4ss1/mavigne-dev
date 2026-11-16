@@ -23,15 +23,18 @@ let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };
 function jouer(S) {
   const P = S.pil;
-  const F26 = { an: 2026, lbl: 'Exercice 2026-27', court: '2026-27' }, COUR = { an: 2026, lbl: 'en cours' };
+  const F26 = { an: 2026, lbl: 'Exercice 2026-27', court: '2026-27', d0: '2026-08-01', d1: '2027-07-31' }, COUR = { an: 2026, lbl: 'en cours' };
   const c = { _PIL_SCOPE: { cadre: 'exo' }, cadre: { F: F26 }, window: { _mvExercice: () => COUR }, _pilEsc: (x) => String(x) };
   c._pilAnCadre = () => c.cadre;
-  vm.createContext(c); vm.runInContext(corps(P, '_pexEx') + '\n' + corps(P, '_pecDetailLib') + '\n' + corps(P, '_pexBarreEx'), c);
+  vm.createContext(c); // MOTS-2 (§583) : _pexBarreEx rend l'en-tête de la sous-vue (l'exercice et ses dates, puis une phrase) — il lui faut ses aides.
+  vm.runInContext(['_pexEx', '_pecDetailLib', '_pexBarreEx', '_pecEnteteVue', '_pecIsoToMs', '_pecJourCourt', '_pecMoisCourt', '_ecoEur'].map((n) => corps(P, n)).join('\n'), c);
   t('① le détail lit la fenêtre de la barre (_pilAnCadre().F), pas son propre choix', c._pexEx() === F26);
   c.cadre = null; t('① sans cadre lisible : l’exercice en cours', c._pexEx() === COUR);
   t('② son nom dit ce qu’il montre : exercice ou année vigne, selon la barre', c._pecDetailLib() === 'Le d\u00e9tail de l\u2019exercice' && (c._PIL_SCOPE.cadre = 'vig', c._pecDetailLib() === 'Le d\u00e9tail de l\u2019ann\u00e9e vigne'));
-  const b = c._pexBarreEx({ ex: F26, enCours: true });
-  t('② plus de puces d’année : la ligne dit l’année et renvoie à la barre', !/data-pec="exy"/.test(b) && /Exercice 2026-27/.test(b) && /Vous regardez/.test(b));
+  c._PIL_SCOPE.cadre = 'exo';
+  const b = c._pexBarreEx({ ex: F26, enCours: true, enCoursC: true, total: 370, totalClot: 1000 });
+  t('② plus de puces d’année : la ligne dit l’année et ses dates, puis une phrase ; plus de mode d’emploi à demeure (MOTS-2)', !/data-pec="exy"/.test(b) && /<b>Exercice 2026-27<\/b> · 1 août → 31 juil\.<\/span>/.test(b) && /<b>370 €<\/b> sortis : <b>37 %<\/b> de l’exercice\./.test(b.replace(/[\u202f\u00a0]/g, ' ')) && !/Vous regardez/.test(b));
+  c._PIL_SCOPE.cadre = 'vig'; t('② … et « Année vigne » quand la barre regarde l’année vigne', /<b>Année vigne 2026-27<\/b>/.test(c._pexBarreEx({ ex: F26, total: 5, totalClot: 5 })) && /de l’année|sortis\./.test(c._pexBarreEx({ ex: F26, enCoursC: true, total: 5, totalClot: 10 })));
   t('③ plus aucune mémoire d’année propre (_PEX_AN, « exy »)', !/_PEX_AN|'exy'/.test(P.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n')));
   t('③ la sous-vue ne porte plus les réglages ; la barre des sous-vues prend le nom calculé', !/_pexMoisChoix\(\)|_pilCampMoisChoix\(\)|_pexFutChoix\(\)/.test(corps(P, '_pexView')) && /if\(s\[0\]==='exe'\) lib=_pecDetailLib\(\);/.test(corps(P, '_pecSubNav')));
   const r = { window: { _mvAvale: () => {} }, _pexMoisChoix: () => '<i>EXO</i>', _pilCampMoisChoix: () => '<i>VIG</i>', _pexFutChoix: () => '<i>FUT</i>' };
@@ -50,8 +53,9 @@ if (!CONTRE) {
 } else {
   const R = (S, k, a, b) => { if (S[k].split(a).length !== 2) throw new Error('ancre : ' + a.slice(0, 50)); return Object.assign({}, S, { [k]: S[k].split(a).join(b) }); };
   const mutants = [
+    ['le mode d’emploi revient sous l’exercice', (S) => R(S, 'pil', "'</b> · '+_pilEsc(dates)+'</span></div>',", "'</b> · '+_pilEsc(dates)+' · se choisit dans la barre « Vous regardez »</span></div>',")],
     ['le détail ignore la barre', (S) => R(S, 'pil', '  if(C && C.F) return C.F;\n', '')],
-    ['les puces d’année reviennent', (S) => R(S, 'pil', "  return '<div class=\"pex-bar\"><div class=\"pex-win\">'", "  return '<div class=\"pex-bar\"><button data-pec=\"exy\" data-v=\"2025\">2025-26</button><div class=\"pex-win\">'")],
+    ['les puces d’année reviennent', (S) => R(S, 'pil', "'</b> · '+_pilEsc(dates)+'</span></div>',", "'</b> · '+_pilEsc(dates)+'</span><button data-pec=\"exy\" data-v=\"2025\">2025-26</button></div>',")],
     ['le nom ne suit plus le cadre', (S) => R(S, 'pil', "if(s[0]==='exe') lib=_pecDetailLib();", '')],
     ['la roue perd les réglages', (S) => R(S, 'pil', 'host.innerHTML=_pilParamBody(d)+_pilParamAnnees();', 'host.innerHTML=_pilParamBody(d);')],
     ['un réglage manque dans la roue', (S) => R(S, 'pil', 'h=_pexMoisChoix()+_pilCampMoisChoix()+_pexFutChoix();', 'h=_pexMoisChoix()+_pexFutChoix();')],

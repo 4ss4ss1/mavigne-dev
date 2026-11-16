@@ -194,7 +194,10 @@ t('pilotage et reserve donnent la MEME couleur a chaque atelier',
   ORD.every(k => colP[k] === colR[k]));
 t('les couleurs sont celles de la maquette',
   colP.vigne === '#3D6B27' && colP.cave === '#8A5A38' && colP.trac === '#2C3E50' && colP.gen === '#DED7C9');
-t('le hors-perimetre est une CARTE, pas une note', /function _pexHorsPerim\(\)/.test(SRC));
+// MOTS-2 (§583) : la carte « Ce qui n'entre pas dans ce total » (trois pavés à demeure, dont un renvoi périmé « en bas de cet écran ») est
+//   partie dans la fiche pil.exo.garde ; à l'écran il reste la ligne « Ce total n'est pas un compte de résultat » et son « i ».
+{ const UTI = readFileSync('src/utils.js', 'utf8'); const g = (/'pil\.exo\.garde': \{[\s\S]*?\n  \] \}/.exec(UTI) || [''])[0];
+t('le hors-perimetre se lit dans la fiche de la garde comptable, plus dans une carte', !/_pexHorsPerim/.test(SRC) && /location de fûts<\/b> entre, au prorata des jours de contrat/.test(g) && /La Réserve › Fûts/.test(g) && /roue crantée du Pilotage/.test(g) && /_mvInfoBtn\('pil\.exo\.garde'\)/.test(SRC)); }
 t('la sous-vue Achats porte le filtre « a chiffrer »', /data-pec="pachf"/.test(SRC));
 
 console.log('\n── LE GUIDE CONTRE LE CODE\n');

@@ -1,0 +1,38 @@
+{
+  "lot": "MOTS-2",
+  "section": "§583",
+  "base": "1a4d2e4e082fdf592babc5364bf3f5021a81d0c3",
+  "inclut": [],
+  "date": "2026-11-16",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "15f542267f59b2a3a377d15f3bd1b29c36a7fefd61ec0fae3606487c29f4ae41",
+    "docs/claude/INDEX.md": "d156d40d99f911e17525f5d1b02afb17e34250a0301ba2739260941d9836aa72",
+    "docs/claude/chantiers-580-629.md": "15f3e653775684988493876081703476740d0ac6a2f5adffcdd3ca3d28b6c083",
+    "docs/claude/journal.md": "e52e02cc4fd04e1569b7f57f37a1352437527498d2bf4529148f5ede84200b65",
+    "guide/11-pilotage.html": "ff866d69fc556ca8ad205cd5740c6ff4e1cf4866fffdd5bbe82a944af0478290",
+    "index.html": "768c097ff6c064654169bf15e13da38ba402d56217ca85859a01ab3bc07ed405",
+    "public/demo/cout-pc.webp": "380bcd42fbfd17060093853ba2f1b157fc69a79ce64bb348e63f4665b0ad0f7d",
+    "public/demo/r-ger-cout.webp": "4c9aa45e3ed8647f3ee02fd0d653caac8bdbae9cb3405b45adace9c6062ff027",
+    "public/demo/t-cout-pc.webp": "04a617015c71517a80d619c6093451ecf4107d23e97593f08803a6d96ffb8b50",
+    "public/demo/t-r-ger-cout.webp": "54b282ffd978bd2a2021a7dfb0bd8aa2b34230c1fb85e7a73f3e45185600c252",
+    "public/guide.html": "6916f0503548604b9db2f94df174f2c710b9c5459fd4eff6fb82d6ce9eb7034f",
+    "public/sw.js": "0b7f33bd84bf11d757f9d20d8eabeb48b8dd6bf99edef9fe96dff44446961e8f",
+    "scripts/harnais-claude-md.mjs": "91b271fe815c98430a894a044c70d1149de7f8dfce52af1c63cf32d14d8cf34d",
+    "scripts/mv-harnais-ateliers.mjs": "f61154b1ad9baa7d51b796db50f67b43aefe492ea7dfd0775e0454fe39117d52",
+    "scripts/mv-harnais-info.mjs": "3d0a415b6f24eae78c4b0fb1f51325be72f50285a43964d4102976332acf649e",
+    "scripts/mv-harnais-liste.mjs": "fb6678aecf858b734c2b13e587f8021270ff934b5039bf03d77b26bcdc41395a",
+    "scripts/mv-harnais-mots1.mjs": "f1eb319e398ffba7e593769a43ccc14d0874c9890ccafd949df2bbb53281036d",
+    "scripts/mv-harnais-pil-coherence.mjs": "e0783d8f68dc1cc2cb808992a36cdd583bd4de6b0a2b3b63aef5f82f38941a14",
+    "scripts/mv-harnais-pilrange4b.mjs": "e840752c46327f1c109fb4bd97fc57a5d37bffbe2f318aa6495a8f7d5535a62d",
+    "scripts/mv-harnais-temps-vigne.mjs": "424b32942fa6c0ce2c32563b1a7eea685533897055e9ef6fc81cd4d999e27928",
+    "scripts/mv-mots-baseline.json": "a93a67e31d1cd64b3852abe227773ea9f10fa9accac09dd5d1c02d4752fb7282",
+    "src/pilotage.js": "43c3c8c488ca78e060f4d8726c9d39d4411495e6e9871613c8b9acb9db483f9d",
+    "src/utils.js": "9cc8bed241b67c131c19a58974a2d9c7f9d45e1f37c4698defbef2fe44bd089e",
+    "src/whats-new.js": "598c9ff4830eadda014b2ed9d1eaeb1b49243ea955ce3afacd1592101000f1ec",
+    "scripts/mv-harnais-mots2.mjs": "787957c1d6d2f6d6f694a602f341382e3d51af1d7028d9b017f30d044bae6cc1"
+  }
+}

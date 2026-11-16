@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.11', d: '2026-11-16', items: [   // MOTS-2 (§583) : les cinq autres vues d'Économie, moins à lire
+    { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Économie\u00a0: les cinq autres vues, comme la Synthèse',
+      desc: "Postes & travaux, Parcelles, Revient, Achats et Le détail de l’exercice s’ouvrent maintenant sur une petite ligne (la campagne, le millésime ou l’exercice, avec ses dates) puis sur une phrase\u00a0: «\u00a01\u00a0940\u00a0€ engagés sur 15\u00a0784\u00a0€\u00a0», «\u00a01,56\u00a0€ la bouteille, à la vigne\u00a0». L’avis gris du haut a disparu. Des heures payées sans validation ou des achats sans prix s’affichent dans une bande orange, avec leur bouton. Les tableaux ne changent pas, aucun calcul ne change\u00a0; les explications sont derrière les «\u00a0i\u00a0»." },
+  ] },
   { v: '11.10', d: '2026-11-16', items: [   // MOTS-1 (§582) : Économie › Synthèse, moins à lire
     { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Économie\u00a0: la Synthèse se lit d’un coup d’œil',
       desc: "La Synthèse tenait sur plus de quatre écrans de téléphone, avec 85 mots à lire avant le premier chiffre. Elle tient maintenant en une phrase («\u00a0Le budget tient\u00a0: 12\u00a0% engagé pour 16\u00a0% du travail fait\u00a0»), quatre chiffres (budget, engagé, reste, écart de cadence) et trois tuiles repliées, leur chiffre sur le titre\u00a0: Coût à la fin, L’exercice, Prix de revient. Un poste compté pour zéro s’affiche en rouge sous la phrase, avec son bouton. Aucun calcul ne change\u00a0; les explications sont derrière les «\u00a0i\u00a0»." },

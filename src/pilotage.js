@@ -7194,14 +7194,18 @@ function _pecCss(){
   +'.pec-verdict{display:flex;gap:15px;align-items:flex-start;padding:17px 20px}'
   // MOTS-1 (§582) : la phrase (un titre, son repère), la ligne de la campagne au-dessus, la bande de ce qui demande un geste, le trait du travail fait
   +'.pec-verdict.pec-ph>div:last-child{flex:1;min-width:0}'
+  +'.pec-verdict.pec-ph>div:first-child:not(.em){flex:1;min-width:0}.pec-phi{flex:none}'   // MOTS-2 (§583) : l'en-tête des sous-vues, sa pastille « i » à droite
   //   (la taille et la graisse de la phrase sont celles du verdict de tout le Pilotage : styles.css, l'échelle unique)
-  +'.pec-verdict.pec-ph .t b{font-variant-numeric:lining-nums tabular-nums}'
+  +'.pec-verdict.pec-ph .t b{font-variant-numeric:lining-nums tabular-nums;white-space:nowrap}'
+  +'.pec-cs.pec-ci{flex:none;min-width:0}'   // MOTS-2 (§583) : un sous-titre réduit à sa pastille « i » reste sur la ligne du titre
   +'.pec-per{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:6px;line-height:1.4}'
   +'.pec-per b{color:var(--texte-med);font-weight:600}'
   +'.pec-ok{display:inline-flex;align-items:center;gap:5px;color:var(--vert-med);font-weight:600}'
   +'.pec-al{display:flex;align-items:center;gap:8px 11px;flex-wrap:wrap;padding:11px 14px;border-radius:13px;border:1px solid rgba(160,41,30,.35);background:var(--rouge-pale);font-size:var(--pt-txt,13px);color:var(--texte);line-height:1.35}'
   +'.pec-al .ic{display:inline-flex;color:var(--rouge);flex:none}'
   +'.pec-al .tx{flex:1;min-width:150px}'
+  +'.pec-al.or{border-color:rgba(184,118,20,.4);background:var(--or-pale)}'
+  +'.pec-al.or .ic{color:var(--orange)}'
   +'.pec-kpis.pec-k4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}'
   +'.pec-k4 .pec-k{padding:13px 16px}'
   +'.pec-k4 .pec-k .v{font-size:var(--pt-lg,24px)}'
@@ -7234,7 +7238,6 @@ function _pecCss(){
   +'.pec-empty{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-style:italic;padding:14px 2px}'
   +'.pec-grid2{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center}'
   +'@media(max-width:880px){.pec-grid2{grid-template-columns:1fr;gap:14px}}'
-  +'.pex-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}'
   +'.pex-win{font-size:var(--pt-txt,13px);color:var(--texte-doux);font-weight:600}'
   +'.pex-win b{color:var(--texte)}'
   +'.pex-set{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}'
@@ -8553,6 +8556,30 @@ function _pecPerLigne(droite){
   return '<div class="pec-per"><span><b>'+_pilEsc(nom||'—')+'</b>'
     +((a!==null&&b!==null)?(' · '+_pilEsc(_pecJourCourt(a))+' → '+_pilEsc(_pecJourCourt(b))):'')+'</span>'+(droite||'')+'</div>';
 }
+// ★★★ MOTS-2 (§583) — LES CINQ AUTRES SOUS-VUES D'ÉCONOMIE PRENNENT L'EN-TÊTE DE LA SYNTHÈSE.
+//   Ce que l'écran chiffre (une ligne : la campagne et ses dates, le millésime et son cycle, l'exercice), puis UNE phrase.
+//   L'avis « Cet écran chiffre…, pas l'exercice comptable affiché en haut » (24 mots, _pilAvertEco) et la ligne
+//   « … · 7,02 ha · taux moyen » de la sous-barre n'existent plus : chaque sous-vue nomme son cadre elle-même.
+//   Les sous-titres de carte, les modes d'emploi et les notes de méthode passent derrière les « i » (règles 4 et 7, §580c).
+//   ⚠️ Aucun calcul ne change, aucun tableau non plus.
+function _pecEnteteVue(per, phrase, cle){
+  // La pastille « i » se pose à droite de la carte, pas au bout de la phrase : au téléphone elle tombait seule sur une ligne.
+  return '<div class="pec-card"><div class="pec-verdict pec-ph"><div>'+(per||'')
+    +'<div class="t">'+phrase+'</div></div>'
+    +((cle && typeof _mvInfoBtn==='function')?('<span class="pec-phi">'+_mvInfoBtn(cle)+'</span>'):'')
+    +'</div></div>';
+}
+// Ce qui mérite un regard sans être un poste à zéro : une bande orange, sous la phrase (la palette du §580c).
+function _pecBandeAvis(txt, bouton){
+  return '<div class="pec-al or" role="status"><span class="ic">'+_mvIcon('alerte',18)+'</span><span class="tx">'+txt+'</span>'+(bouton||'')+'</div>';
+}
+// Des heures payées que personne n'a encore validées : dans l'engagé, sur aucun travail ni aucune parcelle. Dit en tête
+//   de Postes & travaux et de Parcelles — c'était la dernière phrase d'une note de quarante mots, sous chaque tableau.
+function _pecBandeAttente(E){
+  if(!(E && E.reOk && E.reAttE>=1)) return '';
+  return _pecBandeAvis('<b>'+_ecoH1(E.reAttH)+' h payées sans validation</b> · '+_pilEsc(_ecoEur(E.reAttE)));
+}
+function _pecDfrIso(iso){ var m=_pecIsoToMs(String(iso||'').slice(0,10)); return (m===null)?'—':_pecDfrMs(m); }
 function _pecVerdict(E,TL,Z){
   var M=_pecVerdictM(E,TL);
   var boutons=M.act.map(function(a){
@@ -8813,8 +8840,9 @@ function _pecViewPostes(E){
   //   la ligne de cadre en bas dit ce qu'elle N'EST PAS, avec la porte vers l'exercice.
   //   \u26a0 Le titre de l'exercice ne bouge PAS : « est parti » est un passe, et c'est
   //     exactement ce qu'il mesure. La collision se leve d'un seul cote.
-  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le co\u00fbt de la campagne</div>'
-    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode \u00b7 '+(E.projOn?'tracteur, GNR et phyto extrapol\u00e9s':'tracteur, GNR et phyto en r\u00e9alis\u00e9 seul')
+  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engagés sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b>.')+_pecBandeAttente(E)
+    +'<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le co\u00fbt de la campagne</div>'
+    +'<div class="pec-cs pec-ci">'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-grid2">'
     +'<div>'+_pecDonutSvg(items,_pecEurK(E.budget),'budget')+'</div>'
@@ -8822,8 +8850,7 @@ function _pecViewPostes(E){
     +'<tbody>'+legs+retRow+'</tbody>'
     +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td><td></td></tr></tfoot>'
     +'</table></div></div>'
-    +'<div class="pec-vcadre"><span>Ce sont les <b>co\u00fbts de culture</b> de la campagne. Les <b>achats</b>, les <b>r\u00e9parations</b> et les <b>f\u00fbts</b> n\u2019y sont pas\u00a0: ils portent une date, ce budget n\u2019en porte aucune.</span></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> Voir les d\u00e9penses de l\u2019exercice</button></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> '+_pilEsc(_pecDetailLib())+'</button></div>'
     +'</div></div>';
 
   // RÉAL-1 : Réalisé = ce que les heures versées au travail ont coûté (planning × taux du jour) ;
@@ -8848,14 +8875,10 @@ function _pecViewPostes(E){
       +'<td class="r">'+_pilEsc(_ecoEur(tS.rE))+'</td><td class="r">'+_pilEsc(_ecoEur(tS.bE))+'</td>'
       +'<td class="r">'+(tS.surf>0?_pilEsc(_ecoEur(tS.bE/tS.surf)):'\u2014')+'</td><td class="r">'+_pilEsc(_pecPct(E.budget>0?tS.bE/E.budget*100:0))+'</td></tr></tfoot>'
     : '';
-  var tNote;
-  if(E.reOk){
-    tNote='<b>R\u00e9alis\u00e9</b> = heures du planning vers\u00e9es aux parcelles valid\u00e9es, au taux charg\u00e9 du jour. <b>\u00c9cart</b> = r\u00e9alis\u00e9 \u2212 bar\u00e8me du travail fait\u00a0: <b>+</b> = plus cher que pr\u00e9vu.'
-      +(E.reAttE>=1?(' <b>'+_pilEsc(_ecoEur(E.reAttE))+'</b> ('+_ecoH1(E.reAttH)+' h) attendent une validation\u00a0: pay\u00e9s, dans l\u2019engag\u00e9, sur aucun travail encore.'):'')
-      +(E.reHorsE>=1?(' <b>'+_pilEsc(_ecoEur(E.reHorsE))+'</b> vers\u00e9s \u00e0 des travaux hors de la liste de la p\u00e9riode.'):'');
-  } else {
-    tNote='Planning pas encore ouvert ou p\u00e9riode sans dates\u00a0: le <b>r\u00e9alis\u00e9</b> est au bar\u00e8me, aucun \u00e9cart ne peut \u00eatre lu.';
-  }
+  // MOTS-2 (§583) : « Réalisé = …, Écart = … » est dans la fiche pil.eco.travaux ; les heures sans validation, en tête (_pecBandeAttente).
+  var tNote='';
+  if(E.reOk){ if(E.reHorsE>=1) tNote='<b>'+_pilEsc(_ecoEur(E.reHorsE))+'</b> versés à des travaux hors de la liste de la campagne.'; }
+  else tNote='Planning pas encore ouvert : le réalisé est au barème.';
   window._mvGraphSuivre('#pec-g-task', function(w){ return _pecTaskSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt par travail</div>'
     +'<div class="pec-cs">Main-d\u2019\u0153uvre vigne uniquement'
@@ -8863,8 +8886,8 @@ function _pecViewPostes(E){
     +'<div class="pec-cb"><div id="pec-g-task"></div>'
     +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl" style="min-width:640px"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">R\u00e9alis\u00e9</th><th class="r">\u00c9cart</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
     +'<tbody>'+(trows||'<tr><td colspan="9" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody>'+tfoot+'</table></div>'
-    +'<div class="pec-vcadre"><span>'+tNote+'</span></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Voir parcelle par parcelle</button></div>'
+    +(tNote?('<div class="pec-vcadre"><span>'+tNote+'</span></div>'):'')
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Parcelle par parcelle</button></div>'
     +'</div></div>';
   H+=_pecCarteTemps();
   return H;
@@ -8877,7 +8900,7 @@ function _pecCarteTemps(){
   var V=null; try{ V=_ecoTempsVigne(); }catch(e){ V=null; if(window.logError) window.logError({level:'info',cat:'eco',msg:'temps vigne illisible'}); }
   var info=(typeof _mvInfoBtn==='function')?(' '+_mvInfoBtn('pil.eco.temps')):'';
   var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Temps r\u00e9el contre bar\u00e8me</div>'
-    +'<div class="pec-cs">Heures du planning vers\u00e9es aux parcelles valid\u00e9es'+info+'</div></div><div class="pec-cb">';
+    +'<div class="pec-cs pec-ci">'+info+'</div></div><div class="pec-cb">';
   if(!V || !V.ok){
     return H+'<div class="pec-empty">P\u00e9riode sans dates, pas encore commenc\u00e9e, ou planning pas encore ouvert\u00a0: rien \u00e0 verser.</div></div></div>';
   }
@@ -8904,11 +8927,11 @@ function _pecCarteTemps(){
   }).join('');
   var att=V.gens.filter(function(g){ return g.hAtt>=0.5; });
   var attTxt=att.length
-    ? (' \u00b7 <b>'+_ecoH1(V.hAtt)+' h en attente</b> d\u2019une validation ('+_pilEsc(att.slice(0,3).map(function(g){ return g.nom+' '+_ecoH1(g.hAtt)+' h'; }).join(', '))+(att.length>3?'\u2026':'')+')')
+    ? (' \u00b7 <b>'+_ecoH1(V.hAtt)+' h en attente</b> ('+_pilEsc(att.slice(0,3).map(function(g){ return g.nom+' '+_ecoH1(g.hAtt)+' h'; }).join(', '))+(att.length>3?'\u2026':'')+')')
     : '';
   H+='<div class="pec-scroll"><table class="pec-tbl" style="min-width:480px"><thead><tr><th>Travail</th><th class="r">ha</th><th class="r">Heures</th><th class="r">h/ha r\u00e9el</th><th class="r">h/ha bar\u00e8me</th><th class="r">\u00c9cart</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>'
-    +'<div class="pec-vcadre"><span><b>'+_ecoH1(V.hAff)+' h</b> vers\u00e9es sur '+V.nEv+' validation'+(V.nEv>1?'s':'')
+    +'<div class="pec-vcadre"><span><b>'+_ecoH1(V.hAff)+' h</b> sur '+V.nEv+' validation'+(V.nEv>1?'s':'')
     +(V.hTrac>0?(' \u00b7 '+_ecoH1(V.hTrac)+' h de conduite tracteur retir\u00e9es'):'')
     +(V.hCave>0?(' \u00b7 '+_ecoH1(V.hCave)+' h de journ\u00e9es de cave retir\u00e9es'):'')+attTxt+'.</span></div>'
     +'</div></div>';
@@ -8975,18 +8998,16 @@ function _pecViewParcelles(E){
     +'<td class="r">'+_pilEsc(_ecoEur(E.tot.prestF||0))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.engRe))+'</td>'+_pecEcTd(E.ecRe, E.tot.moF)+'<td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
-  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
+  var H=_pecEnteteVue(_pecPerLigne(''), '<b>'+_pilEsc(_ecoEur(E.engRe))+'</b> réalisés sur <b>'+E.rows.length+' parcelle'+(E.rows.length>1?'s':'')+'</b>.')+_pecBandeAttente(E)
+    +'<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
     // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi du
     //   tableau. On le lit une fois, puis on connait ses colonnes. Il part dans
     //   la fiche, avec « cliquez pour trier ».
-    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
+    +'<div class="pec-cs pec-ci">'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:1040px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
-    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier pour un tableur</button></div>'
-    +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Le <b>budget</b> vient du bar\u00e8me h/ha du domaine\u00a0; la <b>MO r\u00e9alis\u00e9e</b>, des heures du planning vers\u00e9es aux parcelles valid\u00e9es, au taux de la fiche de paie de chaque salari\u00e9 le jour m\u00eame\u00a0; le tracteur, du taux de son conducteur.'
-    +(E.reOk && E.reAttE>=1 ? (' <b>'+_pilEsc(_ecoEur(E.reAttE))+'</b> d\u2019heures attendent une validation\u00a0: dans l\u2019engag\u00e9, sur aucune parcelle encore.') : '')
-    +'</div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> Tableau (CSV)</button>'
+    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier</button></div>'
     +'</div></div>';
   window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare</div>'
@@ -9050,10 +9071,7 @@ function _pecSubNav(E){
     var lib=s[2]; if(s[0]==='exe') lib=_pecDetailLib();   // PIL-RANGE-4b : « Le détail de l'exercice » ou « … de l'année vigne », selon la barre
     return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'+lib+'</button>';
   }).join('');
-  // MOTS-1 (§582) : sur la Synthèse, la campagne et ses dates ouvrent la phrase ; l'hectare est sous le budget, le taux dans « Prix de revient ».
-  var ctx=(_PEC_SUB==='syn' || !_PEC_SUB) ? '' : ('<div class="pec-cs" style="text-align:right;min-width:0">'+_pilEsc(_pilSaisonNom()||'\u2014')+' \u00b7 '
-    +_pilHa(E.tot.surf)+' ha \u00b7 taux moyen '+_pilEsc(_ecoEur2(E.rate))+' \u20AC/h</div>');
-  return '<div class="pec-subnav"><div class="pec-sub">'+b+'</div>'+ctx+'</div>';
+  return '<div class="pec-subnav"><div class="pec-sub">'+b+'</div></div>';   // MOTS-2 (§583) : plus de ligne « … · ha · taux moyen » — chaque sous-vue ouvre sur son cadre
 }
 
 // ── Onglet ÉCONOMIE ──────────────────────────────────────────────────
@@ -9780,9 +9798,13 @@ function _pilCampMoisChoix(){
 
 // ── Vue « Exercice » ────────────────────────────────────────────────
 function _pexBarreEx(E){
-  // PIL-RANGE-4b (§447) : plus de puces d'année — l'année se choisit dans la barre « Vous regardez », en haut.
-  return '<div class="pex-bar"><div class="pex-win">'+_pilEsc(E.ex.lbl)+(E.enCours?' \u00b7 <b>en cours</b>':'')
-    +' \u00b7 <span style="color:var(--texte-doux)">l\u2019ann\u00e9e se choisit dans la barre \u00ab\u00a0Vous regardez\u00a0\u00bb</span></div></div>';
+  // MOTS-2 (§583) : l'en-tête des sous-vues — l'exercice (ou l'année vigne, selon la barre « Vous regardez ») et ses dates,
+  //   puis UNE phrase : ce qui est sorti, et la part de l'année que cela fait. « L'année se choisit dans la barre… » est parti.
+  var vig=!!(_PIL_SCOPE && _PIL_SCOPE.cadre==='vig'), pc=Math.round(E.totalClot>0?E.total/E.totalClot*100:0);
+  var d0=_pecIsoToMs(String(E.ex.d0||'').slice(0,10)), d1=_pecIsoToMs(String(E.ex.d1||'').slice(0,10));
+  var dates=(d0!==null && d1!==null) ? (_pecJourCourt(d0)+' → '+_pecJourCourt(d1)) : String(E.ex.lbl||'');   // « 1 août → 31 juil. » : l'écriture courte du lexique (§580c)
+  return _pecEnteteVue('<div class="pec-per"><span><b>'+(vig?'Année vigne ':'Exercice ')+_pilEsc(E.ex.court||'')+'</b> · '+_pilEsc(dates)+'</span></div>',   // « en cours » ne s'écrit pas : la part de l'exercice, dans la phrase, le dit
+    '<b>'+_pilEsc(_ecoEur(E.total))+'</b> sortis'+(E.enCoursC?(' : <b>'+pc+' %</b> de '+(vig?'l’année':'l’exercice')):'')+'.');
 }
 function _pexMoisChoix(){
   var cur=(typeof window._mvExerciceMois==='function')?window._mvExerciceMois():7;
@@ -9919,22 +9941,21 @@ function _pexEntete(E){
     var cd=E.cmpDate, dDate=(cd&&cd.total>0)?((E.total-cd.total)/cd.total*100):null;
     var dClot=(cmp&&cmp.total>0)?((E.totalClot-cmp.total)/cmp.total*100):null;
     kpis='<div class="pec-kpis">'
-      +'<div class="pec-k"><div class="l">Engag\u00e9 \u00e0 ce jour</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
-        +'<div class="s">sorti au '+_pilEsc(_pilDfr(E.coupe))+' \u00b7 '+_ecoH1(E.hPaid)+' h pay\u00e9es</div></div>'
-      +'<div class="pec-k pex-prevu"><div class="l">Pr\u00e9vu jusqu\u2019\u00e0 la cl\u00f4ture</div><div class="v">'+_pilEsc(_ecoEur(E.totalP))+'</div>'
-        +'<div class="s">salaires lus dans la grille du planning \u00b7 '+_ecoH1(E.hPaidP)+' h</div></div>'
-      +'<div class="pec-k"><div class="l">\u00c0 la cl\u00f4ture, engag\u00e9 et pr\u00e9vu</div><div class="v">'+_pilEsc(_ecoEur(E.totalClot))+'</div>'
-        +'<div class="s">'+_pilEsc(_ecoEur(E.coutHaClot))+' \u00e0 l\u2019hectare sur '+_pilHa(E.surf)+' ha</div></div>'
+      +'<div class="pec-k"><div class="l">Sorti</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
+        +'<div class="s">'+_ecoH1(E.hPaid)+' h payées</div></div>'
+      +'<div class="pec-k pex-prevu"><div class="l">Prévu</div><div class="v">'+_pilEsc(_ecoEur(E.totalP))+'</div>'
+        +'<div class="s">'+_ecoH1(E.hPaidP)+' h au planning</div></div>'
+      +'<div class="pec-k"><div class="l">À la clôture</div><div class="v">'+_pilEsc(_ecoEur(E.totalClot))+'</div>'
+        +'<div class="s">'+_pilEsc(_ecoEur(E.coutHaClot))+'/ha</div></div>'
       +(dDate!=null
-        ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cd.ex.court)+' \u00e0 date comparable</div><div class="v">'+(dDate>0?'+':'')+_pilEsc(_pecPct(dDate))+'</div>'
-          +'<div class="s">'+_pilEsc(_pecEurK(cd.total))+' sortis aux m\u00eames jours'
-          +(dClot!=null?(' \u00b7 exercice complet '+(dClot>0?'+':'')+_pilEsc(_pecPct(dClot))+', <b>pr\u00e9vu compris</b>'):'')+'</div></div>'
+        ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cd.ex.court)+'</div><div class="v">'+(dDate>0?'+':'')+_pilEsc(_pecPct(dDate))+'</div>'
+          +'<div class="s">à date comparable'+(dClot!=null?(' · exercice complet '+(dClot>0?'+':'')+_pilEsc(_pecPct(dClot))):'')+'</div></div>'
         : (dClot!=null
             ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cmp.ex.court)+'</div><div class="v">'+(dClot>0?'+':'')+_pilEsc(_pecPct(dClot))+'</div>'
               +'<div class="s">'+_pilEsc(_pecEurK(cmp.total))+' l\u2019exercice pr\u00e9c\u00e9dent \u00b7 <b>pr\u00e9vu compris</b></div></div>'
             : '<div class="pec-k"><div class="l">Contre l\u2019an dernier</div><div class="v">\u2014</div><div class="s">pas de donn\u00e9es sur l\u2019exercice pr\u00e9c\u00e9dent</div></div>'))
       +'</div>'
-      +'<div class="pec-vcadre" style="margin:2px 0 12px"><span>Au <b>'+_pilEsc(_pilDfr(E.coupe))+'</b>\u00a0: <b>'+Math.round(E.totalClot>0?E.total/E.totalClot*100:0)+'\u00a0%</b> de l\u2019exercice est sorti. Le reste est lu dans la grille du planning \u2014 un mois entam\u00e9 est coup\u00e9 au jour. Le carburant, les achats et les r\u00e9parations n\u2019ont pas de pr\u00e9vu\u00a0: on ne sait que ce qui est sorti.</span></div>';
+      ;   // MOTS-2 (§583) : « 37 % de l’exercice est sorti » est la phrase du haut ; le reste est dans la fiche pil.exo.postes
   } else {
   kpis='<div class="pec-kpis">'
     +'<div class="pec-k"><div class="l">D\u00e9penses de l\u2019exercice</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
@@ -9959,7 +9980,6 @@ function _pexEntete(E){
   var garde='<div class="pec-card"><div class="pec-cb"><div class="pex-warn">'
     +'<div class="t">'+_mvIcon('recu',16)+' Ce total n\u2019est pas un compte de r\u00e9sultat'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.garde')):'')+'</div>'
-    +'<div class="d">Il chiffre vos <b>charges d\u2019exploitation</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas tout ce que co\u00fbte le domaine.</div>'
     +'</div></div></div>';
 
   var PV=!!E.enCoursC;
@@ -9979,14 +9999,13 @@ function _pexEntete(E){
   var tPostes='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 est parti l\u2019argent</div>'
     // ★ Le POURQUOI de « trois postes » — la conduite deja comptee dans les
     //   salaires — explique le calcul. Il part dans la fiche de l'exercice.
-    +'<div class="pec-cs">Trois postes, et rien d\u2019autre'
+    +'<div class="pec-cs pec-ci">'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
-    +'<thead><tr><th>Poste</th><th class="r">'+(PV?'Engag\u00e9':'Montant')+'</th>'+(PV?'<th class="r">Pr\u00e9vu</th><th class="r">\u00c0 la cl\u00f4ture</th>':'')+'<th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+(PV?' (cl\u00f4ture)':'')+'</th><th>Base de calcul</th></tr></thead>'
+    +'<thead><tr><th>Poste</th><th class="r">'+(PV?'Sorti':'Montant')+'</th>'+(PV?'<th class="r">Pr\u00e9vu</th><th class="r">\u00c0 la cl\u00f4ture</th>':'')+'<th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+(PV?' (cl\u00f4ture)':'')+'</th><th>Base de calcul</th></tr></thead>'
     +'<tbody>'+pr+'</tbody>'
     +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.total))+'</td>'+(PV?('<td class="r pex-prevu-c">'+_pilEsc(_ecoEur(E.totalP))+'</td><td class="r">'+_pilEsc(_ecoEur(E.totalClot))+'</td>'):'')+'<td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(PV?E.coutHaClot:E.coutHa))+'</td><td class="r">'+(dClotT!=null?((dClotT>0?'+':'')+_pilEsc(_pecPct(dClotT))):'\u2014')+'</td><td></td></tr></tfoot>'
     +'</table></div>'
-    +(PV?'<div class="pec-cs" style="padding:8px 2px 0">Le carburant et les r\u00e9parations n\u2019ont <b>pas de colonne pr\u00e9vu</b>\u00a0: Ma Vigne ne conna\u00eet que ce qui est sorti. Se lisent d\u2019avance les salaires (grille du planning) et les amendements enregistr\u00e9s avec un prix, jusqu\u2019\u00e0 l\u2019arriv\u00e9e de leur facture.</div>':'')
     +'</div></div>';
   return { alertes:A.join(''), kpis:kpis, garde:garde, tPostes:tPostes };
 }
@@ -10022,9 +10041,7 @@ function _pexTableSal(E){
   }).join('');
   var cpT=Math.max(0,E.hPaid-E.hWork);
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les salaires, personne par personne</div>'
-    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> et heures <b>travaill\u00e9es</b> \u2014 bureau compris'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
-    +' Le taux affich\u00e9 est le <b>taux horaire charg\u00e9</b> de la fiche \u2014 le co\u00fbt employeur\u00a0: heures pay\u00e9es \u00d7 taux = co\u00fbt.'
-    +' Chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>\u00a0: quand un taux a chang\u00e9 dans l\u2019exercice, la colonne montre les deux, et le mois du changement est coup\u00e9 \u00e0 la bonne date.'
+    +'<div class="pec-cs pec-ci">'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
     +'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
     +'<thead><tr><th>Personne</th><th class="r">Pay\u00e9es</th><th class="r">Travaill\u00e9es</th>'+(E.enCoursC?'<th class="r">Pr\u00e9vues</th>':'')+'<th class="r">CP &amp; abs.</th><th class="r">Taux charg\u00e9</th><th class="r">Co\u00fbt</th></tr></thead>'
@@ -10044,7 +10061,7 @@ function _pexTableAch(E){
       +'<td class="r">'+(a.eur>0?_pilEsc(_ecoEur(a.eur)):'<span style="color:'+_PEC_COL.ret+'">sans prix</span>')+'</td></tr>';
   }).join('');
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les achats d\u2019intrants</div>'
-    +'<div class="pec-cs">Le <b>prix HT port\u00e9 par la ligne d\u2019achat</b>, \u00e0 sa date \u2014 la facture, pas la sortie de stock.'
+    +'<div class="pec-cs">'
     +(E.achRows.length>60?(' Les 60 plus r\u00e9cents sont affich\u00e9s\u00a0; le total porte sur les '+E.achRows.length+'.'):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:520px">'
     +'<thead><tr><th>Date</th><th>Produit</th><th>Fournisseur</th><th class="r">Quantit\u00e9</th><th class="r">Prix HT</th></tr></thead>'
@@ -10078,8 +10095,7 @@ function _pexTableDep(E){
       +'<td class="r">'+val+'</td></tr>';
   }).join('');
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les passages chez le r\u00e9parateur</div>'
-    +'<div class="pec-cs">Chaque immobilisation, \u00e0 sa date de <b>retour</b> \u2014 c\u2019est le moment o\u00f9 la '
-    +'facture se d\u00e9clenche. Les fiches d\u2019entretien quotidiennes n\u2019y figurent pas.'
+    +'<div class="pec-cs">'
     +(E.repRows.length>60?(' Les 60 plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+E.repRows.length+'.'):'')
     +'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:520px">'
@@ -10101,8 +10117,7 @@ function _pexConso(E){
   var T=E.achT+E.gnrT+E.repT;
   var ate=(_PEC_AXE==='ate');
   var head='<div class="pec-ch"><div class="pec-ct">Les consommables</div>'
-    +'<div class="pec-cs">Ce qui se rach\u00e8te chaque ann\u00e9e, r\u00e9parti '
-    +(ate?'par <b>destination</b>':'par <b>nature de d\u00e9pense</b>')+'.'
+    +'<div class="pec-cs pec-ci">'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.ateliers')):'')+'</div>'
     +'<div class="pec-sub" role="group" aria-label="Axe de lecture">'
       +'<button data-pec="axe" data-v="nat"'+(ate?'':' class="on"')+'>par nature</button>'
@@ -10121,48 +10136,9 @@ function _pexConso(E){
   }
   var body;
   if(ate) body=_pexAxeAtelier(E,T); else body=_pexAxeNature(E,T);
-  return '<div class="pec-card">'+head+body+'</div>'+(ate?_pexHorsPerim():'');
+  return '<div class="pec-card">'+head+body+'</div>';   // MOTS-2 (§583) : « Ce qui n'entre pas dans ce total » est la fiche pil.exo.garde, posée sur « Ce total n'est pas un compte de résultat »
 }
 
-// Le hors-perimetre est une CARTE a lui, comme dans la maquette validee, et pas
-// une ligne de note en bas d'une autre. Ce qu'on exclut d'un total merite le
-// meme rang que ce qu'on y met : c'est la premiere question qu'on se pose devant
-// un chiffre qui ne colle pas au bilan comptable.
-// ★★★ CETTE CARTE PROMETTAIT LA LOCATION AVANT QU'ELLE EXISTE.
-//   Elle ecrivait « la location de futs, elle, entre » alors qu'aucun champ ne
-//   permettait de dire qu'un lot etait loue, et que _pexData ne lisait pas une
-//   seule fois INTRANTS.futs. La fiche d'aide `pil.exo.postes` disait la meme
-//   chose. Deux textes, une promesse, zero code. Depuis le lot FUT-LOC, elle est
-//   vraie — et le fut ACHETE depend d'un reglage, donc la carte le relit.
-function _pexHorsPerim(){
-  var t=_ecoFutTrait();
-  return '<div class="pec-card"><div class="pec-ch">'
-    +'<div class="pec-ct">Ce qui n\u2019entre pas dans ce total</div></div>'
-    +'<div class="pec-cb">'
-    +'<div class="pec-a ok"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
-    +'La <b>location</b> de f\u00fbts entre, <b>au prorata des jours</b> de contrat : c\u2019est un loyer '
-    +'qui revient tous les ans, pas un f\u00fbt. Il est calcul\u00e9 sur les f\u00fbts que vous d\u00e9tenez, '
-    +'libres et en vin.'
-    +'</div></div>'
-    +((t==='achat')
-      ? ('<div class="pec-a ok" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
-        +'Les <b>f\u00fbts achet\u00e9s</b> entrent aussi, en entier l\u2019ann\u00e9e de leur facture \u2014 '
-        +'c\u2019est le r\u00e9glage que vous avez choisi. Le mat\u00e9riel et les outils port\u00e9s, non : '
-        +'ils n\u2019ont pas de prix dans l\u2019application.'
-        +'</div></div>')
-      : ('<div class="pec-a info" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('outil',16):'')+'</span><div>'
-        +'<b>Le mat\u00e9riel, les outils port\u00e9s et les f\u00fbts achet\u00e9s</b> ne sont pas des consommables : '
-        +'on ne les rach\u00e8te pas l\u2019an prochain. Les f\u00fbts ont leur propre \u00e9cran \u2014 '
-        +'<b>La R\u00e9serve \u203a F\u00fbts</b>, pyramide des \u00e2ges en t\u00eate. Vous pouvez les faire entrer '
-        +'ici : le r\u00e9glage est en bas de cet \u00e9cran.'
-        +'</div></div>')) 
-    +'<div class="pec-a warn" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('alerte',16):'')+'</span><div>'
-    +'<b>Ce total n\u2019est pas un compte de r\u00e9sultat.</b> Ni fermage, ni MSA, ni assurance, ni \u00e9nergie, '
-    +'ni amortissement du mat\u00e9riel. C\u2019est ce que Ma\u00a0Vigne mesure \u2014 la vigne et la cave \u2014 '
-    +'pas ce que votre comptable arr\u00eatera.'
-    +'</div></div>'
-    +'</div></div>';
-}
 
 // ── Axe NATURE : l'axe historique, inchange dans son sens ───────────────────
 function _pexAxeNature(E,T){
@@ -10188,9 +10164,7 @@ function _pexAxeNature(E,T){
   });
   return k+'<div class="pec-cb" style="padding-top:16px">'
     +'<div class="pec-bar">'+bar+'</div><div class="pec-leg">'+leg+'</div>'
-    +'<div class="pec-vcadre"><span>Cet axe r\u00e9pond \u00e0 <b>« qu\u2019ai-je pay\u00e9 »</b>. '
-    +'L\u2019axe <b>atelier</b> r\u00e9pond \u00e0 <b>« pour quoi »</b>. Deux lectures des m\u00eames euros, '
-    +'jamais deux totaux.</span></div></div>';
+    +'</div>';
 }
 
 // ── Axe ATELIER : la destination ────────────────────────────────────────────
@@ -10248,10 +10222,6 @@ function _pexAxeAtelier(E,T){
   }
   return k+'<div class="pec-cb" style="padding-top:16px">'
     +'<div class="pec-bar">'+bar+'</div><div class="pec-leg">'+leg+'</div>'
-    +'<div class="pec-vcadre"><span><b>Les salaires ne sont pas r\u00e9partis.</b> '
-    +'Une entr\u00e9e de planning porte des heures, un type de cong\u00e9, un motif d\u2019absence '
-    +'\u2014 <b>jamais une activit\u00e9</b>. Seule la conduite du tracteur est mesur\u00e9e, et elle '
-    +'reste dans la masse salariale : ici on ne compte que le carburant.</span></div>'
     +'<div class="pec-scroll" style="margin-top:16px"><table class="pec-tbl" style="min-width:520px">'
     +'<thead><tr><th>Poste</th><th>D\u2019o\u00f9 vient le chiffre</th><th class="r">Montant</th><th class="r">\u20AC/ha</th></tr></thead>'
     +'<tbody>'+rows+'</tbody>'
@@ -10264,8 +10234,6 @@ function _pexAxeAtelier(E,T){
     +'<button class="pec-btn" data-pec="rsv" data-v="intrants"><span>+</span> Saisir un achat</button>'
     +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button>'
     +'</div>'
-    +'<div class="pec-note">Ces boutons <b>ouvrent La R\u00e9serve</b> \u2014 rien ne se saisit ici. '
-    +'Le Pilotage lit, il n\u2019\u00e9crit aucun fait d\u2019exploitation.</div>'
     +'</div>';
 }
 
@@ -10406,16 +10374,17 @@ function _pachView(){
 
   var h='';   // la sous-nav est posee par l'appelant
 
-  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Tout ce qui a \u00e9t\u00e9 acquis</div>'
-   +'<div class="pec-cs">Chaque module y d\u00e9pose ses lignes. C\u2019est <b>le seul endroit o\u00f9 l\u2019on met '
-   +'les prix</b>.</div></div>'
+  // MOTS-2 (§583) : une phrase, la bande de ce qui reste à chiffrer, puis les chiffres. Le « pourquoi » de l'écran est dans la fiche pil.eco.achats.
+  h+=_pecEnteteVue('', (sans.length?'Au moins ':'')+'<b>'+_pilEsc(_ecoEur(tot))+'</b> d’achats'+(sans.length?'':' chiffrés')+'.', 'pil.eco.achats')
+   +(sans.length?_pecBandeAvis('<b>'+sans.length+' achat'+(sans.length>1?'s':'')+' sans prix</b> · le total est un plancher', '<button class="pil-diag-go ghost" data-pec="pachf" data-v="sans">Chiffrer ›</button>'):'')
+   +'<div class="pec-card">'
    +'<div class="pec-kpis">'
    +'<div class="pec-k"><div class="l">Chiffr\u00e9</div><div class="v">'
      +_pilEsc(_ecoEur(tot).replace(' \u20AC',''))+' <small>\u20AC</small></div>'
      +'<div class="s">'+chif.length+' ligne'+(chif.length>1?'s':'')+' sur '+L.length+'</div></div>'
    +'<div class="pec-k"><div class="l">\u00c0 chiffrer</div><div class="v"'
      +(sans.length?(' style="color:'+_PEC_COL.ret+'"'):'')+'>'+sans.length+'</div>'
-     +'<div class="s">'+(sans.length?'le total est un plancher':'rien en attente')+'</div></div>'
+     +'<div class="s">'+(sans.length?'sans prix':'rien en attente')+'</div></div>'
    +'<div class="pec-k"><div class="l">Sources</div><div class="v">'
      +Object.keys(_PACH_SRC).filter(function(k){ return L.some(function(x){return x.src===k;}); }).length
      +' <small>/ 4</small></div><div class="s">R\u00e9serve, f\u00fbts, location, r\u00e9parateur</div></div>'
@@ -10469,27 +10438,7 @@ function _pachView(){
    +(rows||'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--texte-doux)">Rien dans ce filtre.</td></tr>')
    +'</tbody><tfoot><tr><td colspan="5">Total chiffr\u00e9</td><td class="r">'+_pilEsc(_ecoEur(tot))+'</td></tr></tfoot>'
    +'</table></div>'
-   +'<div class="pec-vcadre"><span><b>Le prix retourne dans l\u2019objet</b>, pas dans une table \u00e0 part. '
-   +'Un f\u00fbt co\u00fbte X\u00a0\u2014 ce n\u2019est pas une ligne comptable s\u00e9par\u00e9e, et une table li\u00e9e par identifiant '
-   +'laisserait des orphelins le jour o\u00f9 l\u2019objet est supprim\u00e9.</span></div>'
-   +'<div class="pec-note">'
-   +(sans.length?('<b>'+sans.length+' ligne'+(sans.length>1?'s':'')+' sans prix</b>\u00a0: le total ci-dessus est '
-      +'<b>un plancher, pas une mesure</b>.<br>'):'')
-   +'<b>Rien ne se cr\u00e9e ici</b>\u00a0: chaque ligne existe parce qu\u2019un module l\u2019a enregistr\u00e9e. '
-   +'\u00ab\u00a0Achat\u00a0\u00bb ouvre le formulaire du module concern\u00e9, il n\u2019en fabrique pas un second.'
-   +(V.length>120?('<br>Les 120 lignes les plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+V.length+'.'):'')
-   +'</div></div></div>';
-
-  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce que cet \u00e9cran ne fait pas</div></div>'
-   +'<div class="pec-cb">'
-   +'<div class="pec-a info"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('info',16):'')+'</span><div>'
-   +'<b>Il ne cr\u00e9e aucun formulaire.</b> Un intrant phyto demande la cat\u00e9gorie, l\u2019unit\u00e9, la contenance, '
-   +'la source de consommation et le catalogue E-Phy\u00a0: le refaire ici, ce serait deux formulaires \u00e0 tenir, '
-   +'qui divergeraient au premier lot.</div></div>'
-   +'<div class="pec-a info" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('cle',16):'')+'</span><div>'
-   +'<b>Les fiches d\u2019entretien n\u2019y montent pas.</b> Une checklist quotidienne \u2014 plein, huile, pression \u2014 '
-   +'n\u2019est pas un achat. Le signal d\u2019une intervention payante existe d\u00e9j\u00e0 et il est net\u00a0: '
-   +'<b>la machine est partie chez le r\u00e9parateur</b>.</div></div>'
+   +(V.length>120?('<div class="pec-note">Les 120 lignes les plus récentes sont affichées ; le total porte sur les '+V.length+'.</div>'):'')
    +'</div></div>';
   return h;
 }
@@ -10646,19 +10595,17 @@ function _pecViewRevient(){
       return '<button data-pec="revmil" data-v="'+m+'"'+(m===R.mil?' class="on"':'')+'>'+m+'</button>';
     }).join('')+'</div>';
   }
-  var cadre='cycle du '+_pecRevDt(cy.d0)+' au '+_pecRevDt(cy.d1)
-    +' \u00b7 '+(R.etat==='cons'?'tout est r\u00e9colt\u00e9':(pctR+' % r\u00e9colt\u00e9'))
-    +(T.nX?(' \u00b7 '+T.nX+' parcelle'+(T.nX>1?'s':'')+' sans r\u00e9colte'):'')
-    +' \u00b7 co\u00fbts de <b>culture</b> seulement';
+  // MOTS-2 (§583) : le cycle ouvre l'écran (une ligne) ; « coûts de culture seulement » est dans la fiche pil.eco.revient.
+  var cadre=_pilEsc(_pecDfrIso(cy.d0))+' → '+_pilEsc(_pecDfrIso(cy.d1))+(R.etat==='cons'?'':(' · '+pctR+' % récolté'))   /* tout récolté : la pastille « constaté » le dit déjà */
+    +(T.nX?(' · '+T.nX+' parcelle'+(T.nX>1?'s':'')+' sans récolte'):'');
   var sR=(T.hlha!=null)?(_pilNum(T.hl)+' hL sur '+_pilHa(T.haAvec)+' ha'):'aucun rendement connu';
   var cols=(R.etat==='cons')?T.cols:(Math.round(T.cols/100)*100);
   var sB='75 cl \u00b7 pertes '+_pecRevF1(R.pertes)+' % '+(R.pertesMes?('mesur\u00e9es sur '+R.pertesMes.mil):'(r\u00e9glage)')
     +(T.kgVendu>0?(' \u00b7 raisin vendu retir\u00e9'):'');
-  var sC=(T.eurCol!=null)
-    ? (_pecEurK(T.coutDom)+(projete?' engag\u00e9s et pr\u00e9vus':' sur le cycle')+' \u00f7 '+_pilNum(T.cols)+' cols')
-    : 'il faut un rendement pour diviser';
-  H+='<div class="pec-card">'+'<div class="pec-ch"><div class="pec-ct">Mill\u00e9sime '+R.mil+'</div>'
-    +'<div class="pec-cs">'+cadre+' '+_mvInfoBtn('pil.eco.revient')+'</div></div>'
+  var sC=(T.eurCol!=null) ? ('÷ '+_pilNum(T.cols)+' cols') : 'il faut un rendement pour diviser';
+  var phrase=(T.eurCol!=null) ? ('<b>'+_pecRevE2(T.eurCol)+' €</b> la bouteille, à la vigne'+(projete?', main-d’œuvre prévue comprise':'')+'.') : 'Pas encore de coût à la bouteille : il manque un rendement.';
+  H+=_pecEnteteVue('<div class="pec-per"><span><b>Millésime '+R.mil+'</b> · '+cadre+'</span></div>', phrase, 'pil.eco.revient')
+    +'<div class="pec-card">'
     +'<div class="pec-cb" style="padding-bottom:0">'+chips+'</div>'
     +'<div class="pec-kpis">'
     +'<div class="pec-k"><div class="l">Rendement'+_pecRevEtat(R)+'</div><div class="v">'
@@ -10667,8 +10614,8 @@ function _pecViewRevient(){
       +(T.haSans>0?('<br>'+_pilHa(T.haSans)+' ha sans estimation, compt\u00e9s \u00e0 part'):'')+'</div></div>'
     +'<div class="pec-k"><div class="l">Bouteilles'+_pecRevEtat(R)+'</div><div class="v">'
       +(T.cols>0?((R.etat==='cons'?'':'\u2248\u00a0')+_pilNum(cols)):'\u2014')+'</div><div class="s">'+sB+'</div></div>'
-    +'<div class="pec-k"><div class="l">Co\u00fbt vigne / bouteille'+(projete?'<span class="prv-e prv-e-j">projet\u00e9</span>':'')+'</div><div class="v">'
-      +(T.eurCol!=null?(_pecRevE2(T.eurCol)+'<small> \u20AC</small>'):'\u2014')+'</div><div class="s">'+sC+'</div></div>'
+    +'<div class="pec-k"><div class="l">Coût du cycle'+(projete?'<span class="prv-e prv-e-j">projeté</span>':'')+'</div><div class="v">'
+      +((T.coutDom>0)?_pilEsc(_pecEurK(T.coutDom)):'—')+'</div><div class="s">'+sC+'</div></div>'
     +'</div>';
   // Ce qui borne ou affaiblit le chiffre : dit, jamais deviné.
   var notes=[];
@@ -10680,7 +10627,7 @@ function _pecViewRevient(){
   if(R.rep&&R.rep.n>0) notes.push('Pas de r\u00e9colte cette ann\u00e9e\u00a0: '+(R.rep.n<=3?R.rep.noms.map(function(n){ return _pilEsc(n); }).join(', '):(R.rep.n+' parcelles'))
     +', '+_pilHa(R.rep.ha)+' ha.'+(R.rep.eur>0?(' '+(R.rep.n>1?'Leurs ':'Ses ')+_pecEurK(R.rep.eur)+' de culture sont r\u00e9partis \u00e0 la surface sur les autres vignes.'):''));   // SANSREC-1
   if(C.nSansTaux>0) notes.push(C.nSansTaux+' salari\u00e9'+(C.nSansTaux>1?'s':'')+' sans taux horaire, compt\u00e9'+(C.nSansTaux>1?'s':'')+' au taux moyen.');
-  if(notes.length) H+='<div class="pec-cb"><div class="pec-note">'+notes.join('<br>')+'</div></div>';
+  if(notes.length) H+='<div class="pec-cb">'+_pecFiabRemq(notes,'pil.eco.revremq')+'</div>';   // MOTS-2 (§583) : ce qui borne le chiffre s'ouvre d'un toucher (le rendu des remarques, §582)
   if(R.etat==='vide') H+='<div class="pec-cb"><div class="pec-acts" style="margin-top:0"><button class="pec-btn" data-pec="cave" data-v="vendange"><span>'+_mvIcon('raisin',16)+'</span> Saisir les r\u00e9coltes au Cuvier</button></div></div>';
   H+='</div>';
 
@@ -10713,7 +10660,7 @@ function _pecViewRevient(){
     +'<td style="text-align:right">'+(T.cols>0?_pilNum(T.cols):'\u2014')+'</td>'
     +'<td style="text-align:right">'+(T.eurCol!=null?(_pecRevE2(T.eurCol)+' \u20AC'):'\u2014')+'</td></tr></tbody></table></div>';
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Par appellation</div>'
-    +'<div class="pec-cs">touchez une ligne pour voir ses parcelles '+_mvInfoBtn('pil.eco.revrdt')+'</div></div>'
+    +'<div class="pec-cs pec-ci">'+_mvInfoBtn('pil.eco.revrdt')+'</div></div>'
     +'<div class="pec-cb">'+tb+'</div></div>';
 
   // ③ Du raisin à la bouteille — les conversions de la Cave
@@ -10721,7 +10668,7 @@ function _pecViewRevient(){
   var fx=function(l,v,s){ return '<div class="prv-fx"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>'; };
   var ar='<div class="prv-ar" aria-hidden="true">\u2192</div>';
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Du raisin \u00e0 la bouteille</div>'
-    +'<div class="pec-cs">les m\u00eames conversions que la Cave '+_mvInfoBtn('pil.eco.revconv')+'</div></div>'
+    +'<div class="pec-cs pec-ci">'+_mvInfoBtn('pil.eco.revconv')+'</div></div>'
     +'<div class="pec-cb"><div class="prv-flux">'
     +fx('Raisin', _pecRevF1(kgT/1000)+' t', (R.etat==='cons'?'pes\u00e9':('dont '+_pecRevF1(T.kgPese/1000)+' t pes\u00e9es')))+ar
     +fx('Vin du domaine', _pilNum(T.domHl)+' hL', (hlVendu>0.5?(_pilNum(hlVendu)+' hL de raisin vendu retir\u00e9s'):('\u00e0 '+_pilNum(R.kgHl)+' kg/hL')))+ar
@@ -10744,13 +10691,11 @@ function _pecViewRevient(){
       +'<div class="prv-cv">'+_pecRevE2(T.eurCol+R.autres/T.cols)+' \u20AC</div></div>';
   }
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce que co\u00fbte une bouteille \u00e0 la vigne</div>'
-    +'<div class="pec-cs">sur le cycle, par poste'+(projete?' \u00b7 main-d\u2019\u0153uvre pr\u00e9vue comprise':'')+' '+_mvInfoBtn('pil.eco.revcout')+'</div></div>'
+    +'<div class="pec-cs pec-ci">'+_mvInfoBtn('pil.eco.revcout')+'</div></div>'
     +'<div class="pec-cb">'+bar+leg+comp
-    +'<div class="pec-note"><b>Pas compt\u00e9 ici</b>\u00a0: vinification, f\u00fbts et \u00e9levage, mise en bouteille, bouchons, \u00e9tiquettes, '
-      +'fermage ou loyer, amortissements, frais de structure. Ce chiffre est <b>un plancher</b>, jamais un prix de revient complet.</div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> R\u00e9gler les hypoth\u00e8ses</button>'
-    +'<button class="pec-btn" data-pec="cave" data-v="millesime"><span>'+_mvIcon('raisin',16)+'</span> Voir le mill\u00e9sime en cave</button>'
-    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir le co\u00fbt de la campagne</button></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> Hypothèses</button>'
+    +'<button class="pec-btn" data-pec="cave" data-v="millesime"><span>'+_mvIcon('raisin',16)+'</span> Millésime en cave</button>'
+    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Coût de la campagne</button></div>'
     +'</div></div>';
   return H;
 }
@@ -10780,7 +10725,7 @@ function _pilTabEco(d){
   else if(_PEC_SUB==='exe') body=_pexView();
   else if(_PEC_SUB==='rev') body=_pecViewRevient();
   else body=_pecViewSynthese(E,TL);   // MOTS-1 (§582) : l'année (PIL-RANGE-2b, §444) est une des trois tuiles repliées de la Synthèse
-  return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
+  return '<div class="pec-wrap">'+_pecSubNav(E)+body+'</div>';   // MOTS-2 (§583) : plus d'avis de périmètre — chaque sous-vue nomme son cadre
 }
 
 // ── Conformité : délai de rentrée (heures) — même logique que utils.dreEffectif ──
@@ -11730,29 +11675,6 @@ function _pilCadreAvert(txt){
   return '<div style="margin:0 0 12px;padding:9px 12px;border-radius:9px;background:var(--bg-card);'
     +'border:1px solid var(--gris-clair);border-left:3px solid var(--or);color:var(--texte-doux);'
     +'font-size:var(--pt-txt,13px);line-height:1.5">'+_mvIcon('info',16)+' '+txt+'</div>';
-}
-// L'Economie chiffre la periode CONSULTEE : _ecoAllDefs lit getTachesSaison(),
-// et les sessions sont filtrees PAR NOM DE SAISON. Elle ne sait cadrer ni sur
-// l'exercice ni sur une autre campagne — sauf sa sous-vue « Exercice », faite
-// pour ca, et qui a donc l'avertissement inverse.
-function _pilAvertEco(){
-  var nom=_pilSaisonNom(), camp=_PIL_SCOPE.camp;
-  // REV-1 : le Revient a son propre cadre, le cycle du millésime — il l'écrit sous son titre.
-  if(_PEC_SUB==='rev'){
-    return camp ? ('Cette sous-vue cadre sur le <b>cycle du mill\u00e9sime</b>, d\u2019une vendange \u00e0 la suivante \u2014 pas sur <b>'
-      +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
-  }
-  if(_PEC_SUB==='exe'){
-    return camp ? ('Cette sous-vue cadre sur l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas sur <b>'
-      +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
-  }
-  // MOTS-1 (§582) : la Synthèse NOMME la campagne qu'elle chiffre et ses dates, en tête (_pecPerLigne) — plus d'avis de 24 mots.
-  if(_PEC_SUB==='syn' || !_PEC_SUB) return '';
-  if(!nom || (camp && camp===nom)) return '';
-  if(camp) return 'Vous regardez <b>'+_pilEsc(camp)+'</b> en haut, mais cet \u00e9cran chiffre <b>'+_pilEsc(nom)
-    +'</b>, la p\u00e9riode consult\u00e9e. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
-  return 'Cet \u00e9cran chiffre <b>'+_pilEsc(nom)+'</b>, la p\u00e9riode consult\u00e9e \u2014 pas l\u2019exercice comptable'
-    +' affich\u00e9 en haut. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
 }
 function _pilAvertCfm(){
   var camp=_PIL_SCOPE.camp;

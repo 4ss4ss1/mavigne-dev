@@ -153,12 +153,12 @@ function suite(S) {
   T('③ … son tableau et son graphique disent « sorti »', /<span role="columnheader">Sorti<\/span>/.test(S.pil) && /<\/em>sorti<\/span>'/.test(S.pil));
   const eco = sansCom(fnDe(S.pil, 'function _pilTabEco(d){'));
   T('③ la Synthèse n’a plus rien au-dessus d’elle que la sous-barre', /else body=_pecViewSynthese\(E,TL\);/.test(eco));
-  T('③ plus d’avis de périmètre sur la Synthèse (elle nomme sa campagne) ; les autres sous-vues le gardent', /if\(_PEC_SUB==='syn' \|\| !_PEC_SUB\) return '';\n\s+if\(!nom \|\| \(camp && camp===nom\)\) return '';/.test(sansCom(fnDe(S.pil, 'function _pilAvertEco(){'))) && /if\(_PEC_SUB==='rev'\)/.test(fnDe(S.pil, 'function _pilAvertEco(){')));
-  T('③ plus de ligne « … · ha · taux moyen » sous la sous-barre de la Synthèse', /var ctx=\(_PEC_SUB==='syn' \|\| !_PEC_SUB\) \? '' : \(/.test(fnDe(S.pil, 'function _pecSubNav(E){')));
+  T('③ plus d’avis de périmètre en Économie : chaque sous-vue nomme ce qu’elle chiffre (la Synthèse en MOTS-1, les cinq autres en MOTS-2, §583)', !/_pilAvertEco/.test(sansCom(S.pil)) && /return '<div class="pec-wrap">'\+_pecSubNav\(E\)\+body\+'<\/div>';/.test(eco));
+  T('③ plus de ligne « … · ha · taux moyen » sous la sous-barre (aucune sous-vue, depuis MOTS-2)', !/var ctx=|pec-ctx/.test(fnDe(S.pil, 'function _pecSubNav(E){')));
   T('③ plus de sous-titre qui redit l’onglet', /eco:'Économie',/.test(S.pil) && !/budget, rythme de dépense et prix de revient/.test(S.pil));
 
   /* ── ④ CE QUI SUIT ── */
-  const fi = S.uti.indexOf("'pil.eco.fin': {"), fj = S.uti.indexOf("'pil.eco.remarques': {");
+  const fi = S.uti.indexOf("'pil.eco.fin': {"), fj = S.uti.indexOf('\n  ] }', fi) + 6;   // la fiche seule : MOTS-2 (§583) en a posé deux autres juste après
   const fiche = fi > 0 && fj > fi ? S.uti.slice(fi, fj) : '';
   T('④ la fiche pil.eco.fin est déclarée : le coût à la fin, chaque euro à sa date, le rythme, la cadence', /t: 'Le coût à la fin, et son graphique'/.test(fiche) && /Chaque euro est posé à <b>sa<\/b> date/.test(fiche) && /Le <b>rythme<\/b> est une mesure/.test(fiche) && /L\\u2019<b>écart de cadence<\/b> vient de là/.test(fiche) && (fiche.match(/^    '/gm) || []).length === 4);
   T('④ la fiche de l’année dit ce que la tuile ne dit plus (tout le domaine, les euros sortis, deux questions)', /'pil\.an\.budget': \{ t: 'L’exercice, ou l’année vigne'/.test(S.uti) && /<b>salaires chargés compris<\/b>, pour <b>tout le domaine<\/b>/.test(S.uti) && /Deux questions, jamais deux totaux d’une même chose/.test(S.uti));
@@ -214,8 +214,8 @@ if (!CONTRE) {
     ['les remarques ne remplissent plus leur fiche', sur('pil', "if(typeof window._mvInfoSet==='function') window._mvInfoSet(cleRem, { p:R });", '')],
     ['la tuile de l’année redit « dépensé »', sur('pil', "_pilAnFig('Sorti','au '", "_pilAnFig('D\\u00e9pens\\u00e9','au '")],
     ['la tuile de l’année perd la porte du détail', sur('pil', "body=(avis||'')+body+'<div class=\"pec-acts\"><button class=\"pec-btn\" data-pec=\"sub\" data-v=\"exe\">", "body=(avis||'')+body+'<div class=\"pec-acts\"><button class=\"pec-btn\" data-pec=\"sub\" data-v=\"exo\">")],
-    ['l’avis de périmètre revient sur la Synthèse', sur('pil', "  if(_PEC_SUB==='syn' || !_PEC_SUB) return '';\n  if(!nom ||", '  if(!nom ||')],
-    ['la ligne de contexte revient sous la sous-barre', sur('pil', "var ctx=(_PEC_SUB==='syn' || !_PEC_SUB) ? '' : (", "var ctx=(false) ? '' : (")],
+    ['l’avis de périmètre revient en Économie', sur('pil', "return '<div class=\"pec-wrap\">'+_pecSubNav(E)+body+'</div>';", "return '<div class=\"pec-wrap\">'+_pecSubNav(E)+_pilCadreAvert(_pilAvertEco())+body+'</div>';")],
+    ['la ligne de contexte revient sous la sous-barre', sur('pil', "  return '<div class=\"pec-subnav\"><div class=\"pec-sub\">'+b+'</div></div>';", "  var ctx='7,02 ha'; return '<div class=\"pec-subnav\"><div class=\"pec-sub\">'+b+'</div><div class=\"pec-ctx\">'+ctx+'</div></div>';")],
     ['le sous-titre redit l’onglet', sur('pil', "eco:'Économie',", "eco:'Économie — budget, rythme de dépense et prix de revient',")],
     ['la bande d’exercice revient', (S) => ({ ...S, pil: S.pil + '\nfunction _pecBandeExo(){ return ""; }\n' })],
     ['la fiche pil.eco.fin perd la méthode des dates', sur('uti', "    'Chaque euro est posé à <b>sa</b> date : la main-d\\u2019œuvre", "    'La main-d\\u2019œuvre")],
