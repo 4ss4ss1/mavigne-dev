@@ -280,3 +280,17 @@
 
 **NON vérifié** : un vrai téléphone ; le thème sombre ; les vues Cave et Économie d’Aujourd’hui (pas touchées) ; un domaine avec beaucoup de tâches ou d’appellations ; l’écran d’un non-administrateur.
 
+## 587. ★★ MOTS-5B — LE CLIQUET DES MOTS ÉTAIT ROUGE APRÈS MOTS-5 : UNE ZONE DE TOUCHER QUI REMONTAIT (17/11 — `src/aujourdhui.css` · `scripts/mv-harnais-mots5.mjs`)
+
+**Ce que Nico a vu.** Après le push de « mots5 » (`345d78e`) : « le commit et push précédent n’est pas passé […] ce sont les mots qui ressortent ». Aucun défaut à l’écran au déploiement. Reproduit sur `345d78e` : `npm run test:mots` **rouge** — « mots avant le premier grand chiffre », ordinateur, 13 → 19 sur les trois vues d’Aujourd’hui (Terrain, Cave, Économie : la tête est commune). `test:gabarit` et `test:ux` verts.
+
+**La cause.** Le cliquet lit, pour chaque texte, **le haut de la boîte de son élément** (`el.getBoundingClientRect().top`) et compte les mots posés plus de 4 px au-dessus du premier grand chiffre — ici la phrase du jour. Pour que les pastilles de la phrase se touchent sur 44 px (§586, `test:ux`), je leur avais mis une bordure transparente de 8 px **tout autour**, reprise par une marge négative : le dessin ne bougeait pas, mais la boîte remontait de 8 px, donc au-dessus de la phrase. Les mots des deux pastilles (« point », « anticiper », « cuves », « mesurer », « en », « cave » : 6) passaient « avant le premier chiffre ».
+
+**Le correctif.** La bordure descend **sous** la pastille (16 px en bas, rien en haut), la marge négative aussi. La boîte fait toujours 44 px (`test:ux` vert), son haut est celui du dessin (`test:mots` vert **sans regraver** : 13). Rien ne change à l’écran. APP 11.14 → 11.15 (bloc d’annonce vide), SW 12.05 → 12.06.
+
+**⚠️ LA FAUTE DE MÉTHODE, ET LA RÈGLE.** La référence des mots avait été regravée au milieu de MOTS-5 ; la zone de toucher est venue **après**, pour verdir `test:ux` — et `test:mots` n’a pas été relancé. Les trois cliquets rendus (`npm run test:mots`, `test:ux`, `test:gabarit`) **ne sont pas dans la chaîne** (`mv-lanceur`). **Ils se lancent TOUS LES TROIS, EN DERNIER, après la dernière retouche de feuille ou de gabarit — et de nouveau si l’un d’eux fait retoucher quelque chose.** Corriger l’un peut rougir l’autre : ils mesurent la même boîte, pas la même chose (sa hauteur pour l’un, son haut pour l’autre).
+
+**Le harnais du lot (`mv-harnais-mots5.mjs`, 39 assertions, 33 contre-épreuves).** Deux assertions de plus (la bordure ne remonte pas ; la référence garde 13 mots au plus avant le premier chiffre sur ordinateur) et leurs contre-épreuves. ⚠️ Sa ligne des versions disait « 11.14 partout » : elle aurait rougi au premier lot suivant — elle dit maintenant « 11.14 au moins », comme celle de MOTS-4.
+
+**NON vérifié** : un vrai téléphone ; le thème sombre.
+

@@ -7,6 +7,7 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.15', d: '2026-11-17', items: [] },   // MOTS-5B (§587) : la zone de toucher des pastilles de la phrase du jour descend sous la pastille — le cliquet des mots repasse au vert ; rien ne change pour un client
   { v: '11.14', d: '2026-11-16', items: [   // MOTS-5 (§586) : Pilotage › Aujourd'hui, les mêmes cartes, moins de mots
     { niv: 0, pour: ['admin'], emoji: 'oeil', titre: 'Aujourd’hui\u00a0: les mêmes cartes, moins de mots',
       desc: "Pilotage › Aujourd’hui garde toutes ses cartes, à la même place. Dans chaque carte\u00a0: un titre, un chiffre, une barre ou une couleur. L’explication est derrière le «\u00a0i\u00a0»\u00a0; le détail s’ouvre au toucher (la raison d’une réponse dans «\u00a0La décision du jour\u00a0», ce que change un point d’«\u00a0À savoir\u00a0», les dates d’un chantier). Sous la phrase du jour, les points à voir sont des pastilles orange. Au téléphone, «\u00a0En direct\u00a0» et «\u00a0À savoir\u00a0» viennent juste sous la phrase, et les cartes prennent presque toute la largeur de l’écran. Aucun calcul ne change." },

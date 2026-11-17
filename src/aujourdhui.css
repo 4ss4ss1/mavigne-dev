@@ -18,8 +18,11 @@
 .ck2 .ck-fig-t.ko{color:var(--danger-texte)}
 .ck2 .ck-res-pl{display:inline-flex;flex-wrap:wrap;gap:var(--e-2,8px)}
 .ck2 .ck-res-pl .ck-res-pts{display:inline-flex;align-items:center;gap:var(--e-2,8px);min-height:28px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);background:var(--attention-doux);color:var(--texte);font:var(--fw-med,500) var(--pt-micro,12px)/1 var(--font-ui);letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer}
-/* La pastille garde son dessin (28 px) et se touche sur 44 : une bordure transparente autour, reprise par une marge négative. */
-.ck2 .ck-res-pl .ck-res-pts{min-height:44px;border:var(--e-2,8px) solid transparent;background-clip:padding-box;margin:calc(-1 * var(--e-2,8px))}
+/* La pastille garde son dessin (28 px) et se touche sur 44 : une bordure transparente, reprise par une marge négative.
+   ⚠️ MOTS-5B (§587) : la bordure descend SOUS la pastille (16 px en bas, rien en haut). Posée tout autour, elle remontait la
+   boîte de 8 px : la pastille passait au-dessus de la phrase du jour, et ses mots comptaient « avant le premier grand
+   chiffre » (npm run test:mots : 13 → 19 sur les trois vues d'Aujourd'hui). Le dessin, lui, n'a pas bougé. */
+.ck2 .ck-res-pl .ck-res-pts{min-height:44px;border-style:solid;border-color:transparent;border-width:0 var(--e-2,8px) var(--e-4,16px);background-clip:padding-box;margin:0 calc(-1 * var(--e-2,8px)) calc(-1 * var(--e-4,16px))}
 .ck2 .ck-res-pl .ck-res-pts::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--attention)}
 .ck2 .ck-res-pl .ck-res-pts.alerte{background:var(--danger-doux)}
 .ck2 .ck-res-pl .ck-res-pts.alerte::before{background:var(--danger)}

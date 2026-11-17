@@ -115,11 +115,19 @@ function suite(S) {
     && S.guide.includes('<b>Chaque carte se lit sans phrase</b>') && S.guide.includes('touchez la réponse pour lire sa raison'));
   const iw = S.wn.indexOf("  { v: '11.14',"), bw = iw >= 0 ? S.wn.slice(iw, S.wn.indexOf('\n  ] },', iw)) : '';
   T('⑤ l’annonce 11.14, pour l’admin, sans « & » dans son titre', /pour: \['admin'\]/.test(bw) && /titre: 'Aujourd’hui\\u00a0: les mêmes cartes, moins de mots'/.test(bw) && !/titre: '[^']*&/.test(bw));
-  T('⑤ les versions : APP 11.14 partout, SW 12.05 et sa ligne', /APP_VERSION = '11\.14'/.test(S.uti) && (S.idx.match(/11\.14/g) || []).length === 5 && !S.idx.includes('11.13')
-    && S.sw.startsWith('// MA VIGNE — Service Worker v12.05\n// v12.05 (16/11/2026) — MOTS-5 (§586)') && S.sw.includes("const CACHE_NAME   = 'mavigne-v12.05';"));
+  // MOTS-5B (§587) : « 11.14 au moins » — écrite « 11.14 partout », cette ligne aurait rougi au premier lot suivant.
+  const app = (S.uti.match(/export const APP_VERSION = '([\d.]+)'/) || [])[1];
+  T('⑤ les versions : l’appli à 11.14 au moins, cinq affichages ; le SW dit MOTS-5', !!app && Number(app) >= 11.14 && S.idx.split('v' + app).length - 1 === 4 && S.idx.includes('boot.js?v=' + app)
+    && /^\/\/ v12\.05 \(16\/11\/2026\) — MOTS-5 \(§586\)/m.test(S.sw), 'APP ' + app);
+  // MOTS-5B (§587) — le cliquet des mots lit le HAUT DE LA BOÎTE d'un texte : une zone de toucher qui remonte fait passer ses mots devant la phrase.
+  T('⑤ MOTS-5B : la zone de toucher d’une pastille descend sous elle (rien en haut) — elle ne passe pas au-dessus de la phrase',
+    C.includes('.ck2 .ck-res-pl .ck-res-pts{min-height:44px;border-style:solid;border-color:transparent;border-width:0 var(--e-2,8px) var(--e-4,16px);background-clip:padding-box;margin:0 calc(-1 * var(--e-2,8px)) calc(-1 * var(--e-4,16px))}')
+    && /^\/\/ v12\.06 \(17\/11\/2026\) — MOTS-5B \(§587\)/m.test(S.sw));
   let ref = null; try { ref = JSON.parse(S.ref); } catch (e) { ref = null; }
   const a = ref && ref.mesures && ref.mesures['téléphone'] && ref.mesures['téléphone']['Pilotage › Aujourd’hui › Terrain'];
   T('⑤ la référence des mots est regravée : la vue Terrain à 170 mots au plus au téléphone (319 avant), aucune phrase de 15 mots', !!a && a.mots <= 170 && a.p15 === 0, JSON.stringify(a));
+  const ao = ref && ref.mesures && ref.mesures['ordinateur'] && ref.mesures['ordinateur']['Pilotage › Aujourd’hui › Terrain'];
+  T('⑤ MOTS-5B : sur ordinateur, 13 mots au plus avant le premier grand chiffre (la date et la campagne, pas les pastilles)', !!ao && ao.avant !== null && ao.avant <= 13, JSON.stringify(ao));
   T('⑤ la maquette validée est au dépôt, et dite au LISEZMOI', /Pilotage › Aujourd’hui, maquette v4/.test(S.maq) && /`maquette-aujourdhui-v4\.html` — Pilotage › Aujourd’hui allégé/.test(S.lm));
   T('⑤ ce harnais et ses contre-épreuves sont dans la liste', S.liste.includes("['node scripts/mv-harnais-mots5.mjs']") && S.liste.includes("['node scripts/mv-harnais-mots5.mjs --contre']"));
   return out;
@@ -162,6 +170,8 @@ if (!CONTRE) {
     ['l’aide tait la règle', sur('uti', 'Chaque carte tient en un titre, un chiffre et une barre : ', '')],
     ['le guide tait le geste', sur('guide', 'touchez la réponse pour lire sa raison', 'les verdicts tombent sur la même ligne')],
     ['l’annonce est montrée à tout le monde', (S) => { const i = S.wn.indexOf("  { v: '11.14',"); const j = S.wn.indexOf("pour: ['admin']", i); return { ...S, wn: S.wn.slice(0, j) + "pour: ['tous']" + S.wn.slice(j + 15) }; }],
+    ['la zone de toucher d’une pastille remonte au-dessus de la phrase', sur('auj', 'border-width:0 var(--e-2,8px) var(--e-4,16px);background-clip:padding-box;margin:0 calc(-1 * var(--e-2,8px)) calc(-1 * var(--e-4,16px))}', 'border-width:var(--e-2,8px);background-clip:padding-box;margin:calc(-1 * var(--e-2,8px))}')],
+    ['la référence accepte les pastilles devant le premier chiffre', (S) => { const r = JSON.parse(S.ref); r.mesures['ordinateur']['Pilotage › Aujourd’hui › Terrain'].avant = 19; return { ...S, ref: JSON.stringify(r) }; }],
     ['le service worker ne dit pas le lot', sur('sw', '// v12.05 (16/11/2026) — MOTS-5 (§586)', '// v12.05 (16/11/2026) — divers')],
     ['la référence des mots n’a pas été regravée', refMut((t) => { t.mots = 319; })],
     ['la maquette n’est pas au dépôt', (S) => ({ ...S, maq: '' })],

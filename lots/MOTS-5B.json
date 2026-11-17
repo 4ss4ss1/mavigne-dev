@@ -1,0 +1,24 @@
+{
+  "lot": "MOTS-5B",
+  "section": "§587",
+  "base": "345d78ee87e80cfce1073a52cb6e0cd6444f7463",
+  "inclut": [],
+  "date": "2026-11-17",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "e0ff9f2397f2c16e86025918937d8fe4c49e7fce58f382d8a5f3528621384dca",
+    "docs/claude/INDEX.md": "4c286a3b9469f7f3d8b993d07f40e765303cf35d6ac78c3f67be423d72b4ddd8",
+    "docs/claude/chantiers-580-629.md": "f47292b8de6d038d5f43f37d9d254298117f53579c2f488de16bfaabd1d4c612",
+    "docs/claude/journal.md": "ba03470e187d3a990624d33003e1ea184047b57d04827c08b33fa46a93cdbee9",
+    "index.html": "972afb8c4298d49a43d509e313aa4b78248467b2a26377604a2a5a528bf42800",
+    "public/sw.js": "7253fd00070226e6eac99a4e3223a5049ee1e17799c2e12b76b20e701ead8bb3",
+    "scripts/harnais-claude-md.mjs": "6ddc47b0f5187abd556066589f6d50422cae360ad434cf0b249cccc4275acd26",
+    "scripts/mv-harnais-mots5.mjs": "9a0c7123021d6a2a9f3e7dd52bc51cd83d21345437160cdd1c33717b7a69b0d0",
+    "src/aujourdhui.css": "f44f2388e3e5a2e15d4f7090c0db8f60a15a91b1ee7c90831948953271a3e105",
+    "src/utils.js": "8733ced3a31a36ce78abe0e13fee49859f990118139a0fc7afb079a29f2eaef5",
+    "src/whats-new.js": "9b33a097bd7691884687de812cb206a50e6586fd90c76f9fe4e496c6c985217a"
+  }
+}
