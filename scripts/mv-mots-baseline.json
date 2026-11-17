@@ -47,6 +47,11 @@
    "date": "2026-11-16",
    "motif": "MOTS-4 (§585) : Archives allégé — une phrase, trois chiffres, la frise sans les noms, le bilan par année",
    "hausses": []
+  },
+  {
+   "date": "2026-11-16",
+   "motif": "MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — toutes les cartes gardées, moins de mots dans chacune",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -226,22 +231,22 @@
     "lex": null
    },
    "Pilotage › Aujourd’hui › Terrain": {
-    "mots": 319,
+    "mots": 157,
     "p15": 0,
     "avant": 13,
-    "lex": 13
+    "lex": 3
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 505,
+    "mots": 485,
     "p15": 5,
     "avant": 13,
-    "lex": 6
+    "lex": 2
    },
    "Pilotage › Aujourd’hui › Économie": {
-    "mots": 263,
+    "mots": 243,
     "p15": 0,
     "avant": 13,
-    "lex": 14
+    "lex": 10
    },
    "Pilotage › Travaux": {
     "mots": 104,
@@ -504,22 +509,22 @@
     "lex": null
    },
    "Pilotage › Aujourd’hui › Terrain": {
-    "mots": 324,
+    "mots": 164,
     "p15": 0,
-    "avant": 14,
-    "lex": 13
+    "avant": 13,
+    "lex": 3
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 548,
+    "mots": 533,
     "p15": 5,
-    "avant": 14,
-    "lex": 6
+    "avant": 13,
+    "lex": 2
    },
    "Pilotage › Aujourd’hui › Économie": {
-    "mots": 264,
+    "mots": 249,
     "p15": 0,
-    "avant": 14,
-    "lex": 14
+    "avant": 13,
+    "lex": 10
    },
    "Pilotage › Travaux": {
     "mots": 113,

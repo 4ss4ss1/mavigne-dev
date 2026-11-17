@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-11-15",
- "base": "fe09743",
+ "date": "2026-11-16",
+ "base": "d37e055",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -385,6 +385,17 @@
     "pilotage › téléphone › chromeDefile : 191 → 57",
     "pilotage › ordinateur › chromeDefile : 171 → 155"
    ]
+  },
+  {
+   "date": "2026-11-16",
+   "base": "d37e055",
+   "motif": "MOTS-5 (§586) : Aujourd'hui allégé — les lignes qui se déplient et les pastilles se touchent sur 44 px",
+   "hausses": [],
+   "baisses": [
+    "pilotage › téléphone › c44 : 41 → 35",
+    "pilotage › ordinateur › c44 : 41 → 37",
+    "pilotage › ordinateur › t12 : 56 → 51"
+   ]
   }
  ],
  "mesures": {
@@ -486,16 +497,16 @@
     "hauteur": 1335
    },
    "pilotage": {
-    "cibles": 63,
+    "cibles": 68,
     "c24": 0,
-    "c44": 41,
-    "textes": 233,
+    "c44": 35,
+    "textes": 203,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
     "pouce": null,
-    "hauteur": 4609
+    "hauteur": 3230
    },
    "reglages": {
     "cibles": 16,
@@ -608,16 +619,16 @@
     "hauteur": 1309
    },
    "pilotage": {
-    "cibles": 69,
+    "cibles": 75,
     "c24": 0,
-    "c44": 41,
-    "textes": 250,
+    "c44": 37,
+    "textes": 219,
     "t11": 0,
-    "t12": 56,
+    "t12": 51,
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,
-    "hauteur": 2165
+    "hauteur": 1838
    },
    "reglages": {
     "cibles": 16,

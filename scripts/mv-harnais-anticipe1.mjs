@@ -80,8 +80,9 @@ function suite(S) {
       'this.__r = (VV) => { V = VV; return htmlSavoir(); }; this.__info = INFO;'].join('\n');
     const ctx = { Math, Number, String, Array, Object, JSON }; vm.createContext(ctx); vm.runInContext(code, ctx);
     const h = ctx.__r({ savoir: SV }), lis = h.split('<li ').slice(1);
-    T('B1 l’étiquette « À anticiper » sur les quatre points, et sur eux seuls',
-      compte(h, /<span class="ck-sv-k">À anticiper<\/span>/g) === 4 && lis.slice(0, 4).every(x => x.includes(' fort"') && x.includes('ck-sv-k')) && lis.slice(4).every(x => !x.includes('ck-sv-k') && !x.includes(' fort"')));
+    // MOTS-5 (§586) : l'étiquette en mots « À anticiper » est partie — le fond orange (.fort) le dit, la pastille de la tête les compte.
+    T('B1 les quatre points sont marqués « fort » (le fond orange), et eux seuls ; plus d’étiquette en mots',
+      compte(h, /ck-sv-k/g) === 0 && lis.slice(0, 4).every(x => x.includes(' fort"')) && lis.slice(4).every(x => !x.includes(' fort"')));
     T('B2 les points tiennent dans les cinq lignes que « Tout voir » laisse visibles', lis.length === 9 && lis.slice(0, 5).filter(x => x.includes(' fort"')).length === 4);
     T('B3 une liste bien formée : balises équilibrées, ni undefined ni NaN',
       compte(h, /<li /g) === compte(h, /<\/li>/g) && compte(h, /<span/g) === compte(h, /<\/span>/g) && compte(h, /<div/g) === compte(h, /<\/div>/g) && !/undefined|NaN/.test(h));
@@ -93,8 +94,8 @@ function suite(S) {
   {
     const code = ['let V = null, HTML = ""; const VISEE = new Date(Date.UTC(2027, 2, 5)); const $ = () => ({ set innerHTML(v) { HTML = v; } }); function calerRefs() {}',
       morceau(S.vue, 'const NF0 = ', '\n'), morceau(S.vue, 'const nb = ', '\n'), morceau(S.vue, 'const esc = s => ', '\n'), morceau(S.vue, 'const maj1 = s => ', '\n'),
-      morceau(S.vue, 'const MOIS_L = ', '\n'), morceau(S.vue, 'const jourN = ', '\n'), morceau(S.vue, 'const dLong = ', '\n'), morceau(S.vue, 'const eur = v => ', '\n'),
-      morceau(S.vue, 'const btnI = ', '\n'), morceau(S.vue, 'function savoirItems() {', '\n}\n'), morceau(S.vue, 'const refChiffre = ', "join('') + '</span>';\n"),
+      morceau(S.vue, 'const MOIS_C = ', '\n'), morceau(S.vue, 'const MOIS_L = ', '\n'), morceau(S.vue, 'const jourN = ', '\n'), morceau(S.vue, 'const dCourt = ', '\n'), morceau(S.vue, 'const dLong = ', '\n'), morceau(S.vue, 'const eur = v => ', '\n'),
+      morceau(S.vue, 'const btnI = ', '\n'), morceau(S.vue, 'function savoirItems() {', '\n}\n'), morceau(S.vue, 'const refChiffre = ', "btnI(info, lab) + '</span>';\n"),
       morceau(S.vue, 'function majResume(r) {', '\n}\n'),
       'this.__m = (VV, r) => { V = VV; HTML = ""; majResume(r); return HTML; };'].join('\n');
     const ctx = { Math, Number, String, Array, Object, Intl, Date }; vm.createContext(ctx); vm.runInContext(code, ctx);
@@ -102,10 +103,10 @@ function suite(S) {
     const h4 = ctx.__m({ savoir: SV, eco: false }, r), h1 = ctx.__m({ savoir: SV.filter(x => x.cat !== 'retard' && x.cat !== 'contrat'), eco: false }, r),
       h0 = ctx.__m({ savoir: SV.filter(x => x.prio !== 1), eco: false }, r);
     T('C1 « 4 points à anticiper » est un bouton qui mène à eux (data-fn="anticiper"), son nom contient le texte vu',
-      h4.includes('<span class="ck-tient"><button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="4 points à anticiper, en tête d’« À savoir »">4 points à anticiper</button>.</span>')
-      && h4.startsWith('<span class="ck-fig"><span class="ck-fig-l"><button type="button" class="ck-fig-t" data-fn="allerFin" aria-describedby="ck-cap-t">45 jours de retard</button>,</span>'));
-    T('C2 un seul point : le singulier', h1.includes('>1 point à anticiper</button>.</span>'));
-    T('C3 rien à anticiper : une phrase, pas de bouton', h0.endsWith('rien à anticiper.') && !h0.includes('ck-res-pts'));
+      h4.includes('<button type="button" class="ck-res-pts dbl" data-fn="anticiper" aria-label="4 points à anticiper, en tête d’« À savoir »">4 points à anticiper</button>')
+      && h4.startsWith('<span class="ck-res-ph"><button type="button" class="ck-fig-t ko" data-fn="allerFin" aria-describedby="ck-cap-t">45 jours de retard</button>.</span>'));
+    T('C2 un seul point : le singulier', h1.includes('>1 point à anticiper</button>'));
+    T('C3 rien à anticiper : deux mots, pas de bouton', h0.includes('<span class="ck-res-rien">rien à anticiper</span>') && !h0.includes('ck-res-pts'));
   }
   // D. le geste
   {
@@ -169,8 +170,8 @@ console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' — ' + res.length + ' asse
 if (CONTRE) {
   const DEF = [
     ['le tri retiré', 'vue', 'return L.filter(x => x.prio === 1).concat(L.filter(x => x.prio !== 1));', 'return L;'],
-    ['l’étiquette retirée', 'vue', `(x.prio === 1 ? '<span class="ck-sv-k">À anticiper</span>' : '')`, `''`],
-    ['la phrase redevient du texte', 'vue', `const ptsB = '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>';`, 'const ptsB = pts;'],
+    ['le fond orange retiré', 'vue', `'<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '')`, `'<li class="ck-sv ck-sv-' + x.cat + ''`],
+    ['la phrase redevient du texte', 'vue', `const ptsB = n ? '<button type="button" class="ck-res-pts dbl" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>' : '';`, `const ptsB = n ? pts : '';`],
     ['le geste débranché', 'vue', "    if (fn && fn.dataset.fn === 'anticiper') { allerAnticiper(); return; }", ''],
     ['Économie gardée', 'vue', "  if (S.mode !== 'terrain') { choisirMode('terrain'); }", ''],
     ['plus de cinq points restent cachés', 'vue', 'if (forts.length > 5 && !l.classList', 'if (forts.length > 50 && !l.classList'],

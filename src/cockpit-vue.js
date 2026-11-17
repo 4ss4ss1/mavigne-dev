@@ -200,7 +200,8 @@ function preparerParcs(parcs) {
 }
 // Les mesures du dessin, en pixels : une seule colonne, resserrée, sous 420 px de large (téléphone) ; deux colonnes au-delà
 // — la colonne du plan dans le cockpit fait environ 450 px sur un écran de 1 280.
-function mesuresPlan(W) { const p = W < 420; return { p, G: p ? 5 : 6, GZ: p ? 18 : 22, HT: 28, C: W >= 900 ? 3 : (p ? 1 : 2) }; }
+// MOTS-5 (§586) : deux appellations de front dès 300 px (une seule avant, sous 420 px : le plan tombait de toute sa hauteur).
+function mesuresPlan(W) { const p = W < 420; return { p, G: p ? 5 : 6, GZ: p ? 18 : 22, HT: 28, C: W >= 900 ? 3 : (W >= 300 ? 2 : 1) }; }
 const dimsP = (p, s) => p.f ? [p.f.w * s, p.f.h * s] : [p.cote * s, p.cote * s];
 // Une appellation à la largeur w : ses parcelles par rangées, commune après commune (la plus grande d'abord), les plus
 // hautes d'abord dans chaque commune, centrées dans la hauteur de leur rangée.
@@ -392,17 +393,18 @@ const INFO = {
   cvmil: 'La chaîne du millésime de la Cave : les kilos rentrés d’après les caisses, convertis à la règle du Cuvier ; « en cuve » reste une estimation tant que rien n’est décuvé ; « au chai » est le volume réellement entonné, jamais la taille des fûts. Le coût par bouteille est dans Économie › Revient.',
   cvfil: 'Les derniers gestes de la cave, du plus récent au plus ancien : relevés du Cuvier, décuvages, ouillages, soutirages, sulfitages, analyses et dégustations du Chai. En tête, qui est en cave aujourd’hui d’après le Planning.',
   cvsavoir: 'Ce qui demande une décision en cave : une alerte, un ouillage en retard, un soutirage à prévoir au planning, une fin de fermentation, ce que dit le Diagnostic du Chai.',
-  fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris, et les journées de cave marquées au Planning, même à venir. Elle avance quand une parcelle est validée.',
+  fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris, et les journées de cave marquées au Planning, même à venir. Elle avance quand une parcelle est validée. Sur la jauge : le trait rouge est aujourd’hui, le losange la fin prévue.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
-  budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance.',
+  budget: 'Part du budget main-d’œuvre déjà payée — les heures du planning dans les rangs, hors travaux à l’heure (arrachage…) —, face à la part du travail faite au barème. Payer moins vite qu’on n’avance, c’est être en avance. Sur la barre : la partie pleine est la part engagée, le trait la part du travail fait.',
   // COHER-1 (§581) : la tuile compte ce que l'onglet Conformité écrit sur ses tuiles (_pilCfmPoints, pilotage.js) — plus un diagnostic à part.
   conformite: 'Ce que l’onglet Conformité signale avant un contrôle : un plafond de cuivre dépassé, un registre phyto qui n’est pas prêt (SIRET manquant, lignes à compléter, traitements sans date), un IFT qui ne se calcule pas faute de catalogue. La ligne du bas nomme le premier ; touchez la tuile pour les voir tous.',
-  savoir: 'Ce qui peut changer la journée ou la semaine. En tête, surlignés et marqués « À anticiper », les points que compte la phrase du haut de la page : une tâche dont les dates sont passées sans être finie, un contrat qui se termine dans les 30 jours, la pluie (2 mm et plus) ou le vent (40 km/h et plus) des deux jours qui viennent sur une commune où une tâche est en cours ; toucher la phrase mène ici. Sous chaque jour de la bande : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis le reste : la pluie ou le vent sans tâche en cours dans les communes touchées, les absences et le matériel. Les motifs d’absence ne sont visibles que de l’admin.',
-  decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir.',
-  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé.',
+  savoir: 'Ce qui peut changer la journée ou la semaine. En tête, surlignés et marqués « À anticiper », les points que compte la phrase du haut de la page : une tâche dont les dates sont passées sans être finie, un contrat qui se termine dans les 30 jours, la pluie (2 mm et plus) ou le vent (40 km/h et plus) des deux jours qui viennent sur une commune où une tâche est en cours ; toucher la phrase mène ici. Sous chaque jour de la bande : le risque de pluie (le plus haut de la journée), le cumul en millimètres et le vent le plus fort (vent moyen, sans les rafales). Puis le reste : la pluie ou le vent sans tâche en cours dans les communes touchées, les absences et le matériel. Les motifs d’absence ne sont visibles que de l’admin. Sous chaque jour : le risque de pluie (la barre bleue et son pourcentage), le vent le plus fort, puis le cumul de pluie. Touchez un point pour lire ce qu’il change.',
+  decision: 'Les quatre questions de chaque matin, chacune avec sa réponse et le bouton pour agir. Touchez une réponse pour lire sa raison.',
+  plan: 'Chaque parcelle a la forme de son contour, nord en haut, à la même échelle pour tout le domaine. Sa couleur dit l’état de la tâche choisie, celui de sa fiche pour la période : faite une fois validée, en cours une fois commencée ; un arrachage fini pour l’équipe est fait, la suite au prestataire. Une parcelle où la tâche est désactivée sur sa fiche ou dans la liste de la tâche, ou pas choisie pour la campagne (arrachage, désherbage, effeuillage), reste à sa place en contour pâle : ni à faire ni en retard, elle ne compte pas dans l’avancement. Le trait sous chaque appellation dit son avancement. Une parcelle en cours porte l’équipe qui l’a commencée, même un autre jour. Au survol, une loupe la montre en grand ; la toucher ouvre sa fiche. Les rangs dessinés sont un repère, pas le relevé des rangs ; une parcelle sans contour est un carré de sa surface, en pointillé. Sous le plan, « sans contour » nomme les parcelles concernées ; une famille à zéro s’efface de la légende.',
   fil: 'En ce moment : chaque parcelle en cours et depuis quand — même un autre jour —, avec ceux de son équipe qui y sont maintenant : ni ceux que le planning ne fait pas travailler aujourd’hui (absence, repos), ni ceux en cave ou au tracteur (« personne en ce moment » quand toute l’équipe est ailleurs) ; puis le tracteur en marche, en pause ou entre deux parcelles (moins de 45 min après la dernière finie), avec son équipe. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs, et personne n’y figure s’il était absent, au repos, en cave ou au tracteur à cette heure-là.',
-  courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif.',
+  chant: 'Les chantiers de la campagne, par date de début, les terminés en bas. Touchez un chantier pour l’afficher sur le plan : ses dates s’écrivent dessous.',
+  courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif. Sur le graphe : le pointillé est la projection, jusqu’à la fin prévue ; les tirets, l’allure objectif.',
   atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
   coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
   ecart: 'Le total de la carte « Écart au barème, par tâche » : toutes les heures réellement versées aux parcelles validées des tâches au barème, face au barème de ce même travail — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Ni la cave (journées, matins ou après-midis marqués au Planning, jours d’opération du Chai), ni le tracteur, ni les travaux à l’heure (arrachage…). Au-dessus de zéro, l’équipe met plus longtemps que le barème ; un tiret tant que rien n’est à comparer. La cadence qui corrige l’atterrissage est un autre calcul : toute la présence du planning, à partir de 40 % du travail fait (onglet Économie).',
@@ -436,7 +438,7 @@ const ICO = {
 };
 const btnI = (cle, lab) => '<button class="ck-i" type="button" data-info="' + cle + '" data-bulle="" aria-label="' + esc(lab) + '" aria-expanded="false">i</button>';
 const entete = (titre, cadre, info, idCadre, droite) => '<header class="ck-p-hd' + (droite ? ' serre' : '') + '"><div><h2 class="ck-titre-p">' + titre
-  + (info ? btnI(info, 'Comment lire « ' + titre.replace(/<[^>]+>/g, '') + ' »') : '') + '</h2><p class="ck-cadre"' + (idCadre ? ' id="' + idCadre + '"' : '') + '>' + cadre + '</p></div>' + (droite || '') + '</header>';
+  + (info ? btnI(info, 'Comment lire « ' + titre.replace(/<[^>]+>/g, '') + ' »') : '') + '</h2>' + ((cadre || idCadre) ? '<p class="ck-cadre"' + (idCadre ? ' id="' + idCadre + '"' : '') + '>' + cadre + '</p>' : '') + '</div>' + (droite || '') + '</header>';
 
 // La petite courbe d’un chiffre (grammaire SPARK-1 du kit).
 function spark(vals, mauvais, w = 92, h = 34) {
@@ -461,7 +463,7 @@ function spark(vals, mauvais, w = 92, h = 34) {
 //   sous-ligne masquée (pilotage.js/_pilBind le branche).
 function htmlCadreTete() {
   const roue = typeof document !== 'undefined' && document.getElementById('pil-gear');
-  return '<span class="ck-cadre-nom">Aujourd’hui</span>' + htmlBascule()
+  return htmlBascule()
     + (roue ? '<button type="button" class="ck-roue" data-fn="indicateurs" aria-label="Choisir les indicateurs" title="Choisir les indicateurs">' + cvIc('engrenage', 16) + '</button>' : '');
 }
 function htmlBascule() {
@@ -490,34 +492,39 @@ const tuile = (id, lab, num, vis, cadre, onglet, cible) =>
   '<div class="ck-ph" data-ph="' + id + '">'
   + '<button class="ck-ph-go" type="button" data-onglet="' + onglet + '" aria-label="' + esc(lab) + ' : ouvrir ' + esc(cible) + '"></button>'
   + '<div class="ck-ph-l"><span>' + lab + '</span>' + btnI(id, 'Comment ce chiffre est calculé') + ICO.chev + '</div>'
-  + '<div class="ck-ph-m"><span class="ck-ph-n">' + num + '</span><span class="ck-ph-vis">' + vis + '</span></div>'
+  + '<div class="ck-ph-m"><span class="ck-ph-n">' + num + '</span></div><div class="ck-ph-vis">' + vis + '</div>'
   + '<p class="ck-cadre">' + cadre + '</p></div>';
+// ★★ MOTS-5 (§586) — une tuile = un chiffre, une barre, trois mots. La petite courbe (dix jours d'historique) cède la place à
+//   la barre du chiffre : elle se lit sans légende. Budget : la barre est la part engagée, le trait la part du travail fait.
+const barrePh = (id, rep) => '<span class="ck-barre fine ck-ph-b"><i class="b-ph" id="' + id + '" style="width:0%"></i>' + (rep ? '<u id="' + id + '-r" style="left:0%"></u>' : '') + '</span>';
 function htmlPhotos(r) {
   const avs = '<span class="ck-avs" role="img" aria-label="' + esc(V.presTxt) + '">'
     + GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '">' + esc(g.p.charAt(0)) + '</span>').join('') + '</span>';
   const okIc = '<svg class="ck-ok-ic" viewBox="0 0 32 32" role="img" aria-label="Tout est à jour"><circle cx="16" cy="16" r="13"/><path d="M10.5 16.5l3.6 3.6 7.4-8"/></svg>';
-  return tuile('travaux', 'Travaux', '<b class="ck-cpt" id="ck-ph-trav" data-v="0">0</b><small>\u202f%</small>', spark(SPARK_TRAV, 'bas'),
-      '<span id="ck-ph-trav-c">' + nb(r.hF) + ' h faites sur ' + nb(r.hT) + ' h</span>', 'camp', 'Travaux')
-    + tuile('effectif', 'Effectif', '<b class="ck-cpt" id="ck-ph-eff" data-v="0">0</b><small>\u202fsur ' + V.effectifTotal + '</small>', avs,
-      esc(V.absTxt), 'equ', 'L’équipe et les tâches')
-    + (V.eco ? tuile('budget', 'Budget', '<b class="ck-cpt" id="ck-ph-bud" data-v="0">0</b><small>\u202f%</small>', spark(SPARK_BUD, 'haut'),
-      '<span id="ck-ph-bud-c">du budget main-d’œuvre dépensé, pour ' + nb(r.pct) + '\u00a0% du travail fait</span>', 'eco', 'Économie') : '')
-    + tuile('conformite', 'Conformité', '<b class="ck-cpt" id="ck-ph-conf" data-v="0">0</b><small>\u202f' + (V.confN > 1 ? 'points à régler' : 'point à régler') + '</small>',
-      V.confN ? '' : okIc, esc(V.confTxt), 'conf', 'Conformité');
+  const tousLa = !GENS.some(g => g.absent);
+  return tuile('travaux', 'Travaux', '<b class="ck-cpt" id="ck-ph-trav" data-v="0">0</b><small>\u202f%</small>', barrePh('ck-ph-trav-b'),
+      '<span id="ck-ph-trav-c">' + nb(r.hF) + ' / ' + nb(r.hT) + '\u202fh</span>', 'camp', 'Travaux')
+    + tuile('effectif', 'Équipe', '<b class="ck-cpt" id="ck-ph-eff" data-v="0">0</b><small>\u202f/ ' + V.effectifTotal + '</small>', avs,
+      tousLa ? 'présents' : esc(V.absTxt), 'equ', 'L’équipe et les tâches')
+    + (V.eco ? tuile('budget', 'Budget', '<b class="ck-cpt" id="ck-ph-bud" data-v="0">0</b><small>\u202f%</small>', barrePh('ck-ph-bud-b', true),
+      '<span id="ck-ph-bud-c">engagé \u00b7 fait ' + nb(r.pct) + '\u00a0%</span>', 'eco', 'Économie') : '')
+    + tuile('conformite', 'Conformité', '<b class="ck-cpt" id="ck-ph-conf" data-v="0">0</b>',
+      V.confN ? '<span class="ck-ph-pst">à régler</span>' : okIc, esc(V.confTxt), 'conf', 'Conformité');
 }
 
 function htmlVerdict(r) {
-  return '<div class="ck-v-haut"><span class="ck-v-k">Fin prévue des travaux</span><span class="ck-etat" id="ck-v-etat"></span></div>'
-    + '<h2 class="ck-v-phrase">Les travaux ' + V.saisonDe + ' finiront le <span class="ck-roule" id="ck-v-fin"><span>' + dLong(r.fin) + '</span></span>.</h2>'
-    + '<p class="ck-v-sous"><span id="ck-v-ecart"></span>, avec l’équipe prévue au <span class="nw">planning.' + btnI('fin', 'Comment la fin prévue est calculée') + '</span></p>'
+  // ★★ MOTS-5 (§586) : la date en grand, l'écart à côté, la jauge. La phrase « Les travaux d'automne finiront le… » et
+  //   « avec l'équipe prévue au planning » sont dans le « i ». Sur la jauge, le losange EST la date écrite au-dessus.
+  return '<div class="ck-v-haut"><span class="ck-v-k">Fin prévue' + btnI('fin', 'Comment la fin prévue est calculée') + '</span><span class="ck-etat" id="ck-v-etat"></span></div>'
+    + '<h2 class="ck-v-phrase"><span class="ck-roule" id="ck-v-fin"><span>' + dCourt(r.fin) + '</span></span><small id="ck-v-ecart"></small></h2>'
     + '<div class="ck-frise" id="ck-frise" aria-hidden="true">'
     + '<div class="ck-fr-piste"><i class="ck-fr-passe"></i><i class="ck-fr-proj"></i><i class="ck-fr-marge"></i></div>'
     + '<span class="ck-fr-mk ck-fr-auj"><em>Aujourd’hui</em></span>'
-    + '<span class="ck-fr-mk ck-fr-fin"><em id="ck-fr-fin-l"></em></span>'
-    + '<span class="ck-fr-mk ck-fr-visee"><em>Objectif, ' + dCourt(VISEE) + '</em></span>'
+    + '<span class="ck-fr-mk ck-fr-fin"></span>'
+    + '<span class="ck-fr-mk ck-fr-visee"><em>Objectif</em></span>'
     + '<span class="ck-fr-bout">' + dCourt(DEBUT) + '</span></div>'
     + '<div class="ck-v-act">' + (V.admin ? '<button class="ck-obj" type="button" data-fn="objectif" aria-label="Changer la date de l’objectif">'
-    + 'Objectif : tout fini le <b>' + dLong(VISEE) + '</b>' + ICO.crayon + '</button>' : '<span class="ck-obj ck-obj-lu">Objectif : tout fini le <b>' + dLong(VISEE) + '</b></span>')
+    + 'Objectif <b>' + dCourt(VISEE) + '</b>' + ICO.crayon + '</button>' : '<span class="ck-obj ck-obj-lu">Objectif <b>' + dCourt(VISEE) + '</b></span>')
     + '<button class="ck-btn ck-btn-pri" type="button" data-onglet="sim">Simuler un renfort</button></div>';
 }
 
@@ -544,17 +551,17 @@ function htmlSavoir(r) {
     + (m.pp != null ? '<span class="ck-met-pp" aria-hidden="true"><i style="width:' + pc(m.pp) + '%"></i></span><span class="ck-met-pc">' + pc(m.pp) + '\u00a0%</span>'
       : '<span class="ck-met-pp vide" aria-hidden="true"></span><span class="ck-met-pc">\u00a0</span>')
     + '<span class="ck-met-mm">' + (m.mm >= 0.5 ? String(m.mm).replace('.', ',') + '\u202fmm' : '\u00a0') + '</span>'
-    + '<span class="ck-met-v">' + (m.vent != null ? ICO.vent + '<span>' + Math.round(Number(m.vent) || 0) + '</span><span class="ck-met-vu">km/h</span>' : '\u00a0') + '</span></div>').join('') + '</div>'
-    + (METEO.some(m => m.pp != null) ? '<p class="ck-met-leg"><i></i>risque de pluie</p>' : ''));
+    + '<span class="ck-met-v">' + (m.vent != null ? ICO.vent + '<span>' + Math.round(Number(m.vent) || 0) + '</span><span class="ck-met-vu">km/h</span>' : '\u00a0') + '</span></div>').join('') + '</div>');
   const lis = items.map(x => '<li class="ck-sv ck-sv-' + x.cat + (x.prio === 1 ? ' fort' : '') + '"' + (x.id ? ' id="' + x.id + '"' : '') + '>'
     + '<span class="ck-sv-ic">' + ICO[x.ic] + '</span>'
-    + '<div class="ck-sv-tx">' + (x.prio === 1 ? '<span class="ck-sv-k">À anticiper</span>' : '') + '<div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'   // ANTICIPE-1 : l'étiquette, en mot
-    + (x.sous ? '<p class="ck-sv-s">' + esc(x.sous) + '</p>' : '')   // AUJ-8 : rien en cours, rien d'écrit
+    + '<div class="ck-sv-tx">' + (x.sous ? '<details class="ck-sv-d"><summary>' : '') + '<div class="ck-sv-h"><b>' + esc(x.titre) + '</b><span class="ck-sv-q">' + esc(x.quand) + '</span></div>'   // ANTICIPE-1 : l'étiquette, en mot
+    + (x.sous ? '</summary><p class="ck-sv-s">' + esc(x.sous) + '</p></details>' : '')   // AUJ-8 : rien en cours, rien d'écrit
     + (x.action ? '<button type="button" class="ck-sv-a"' + (x.onglet ? ' data-onglet="' + x.onglet + '"' : '') + (x.fn ? ' data-fn="' + x.fn + '"' : '')
       + (x.module ? ' data-module="' + x.module + '"' : '') + '>' + x.action + '</button>' : '')
     + '</div></li>').join('');
-  return entete('À savoir', 'Ce qui peut changer la journée ou la semaine', 'savoir', null,
-      '<span class="ck-prive" title="Les motifs d’absence ne sont visibles que de l’admin">' + ICO.cadenas + 'Admin</span>')
+  return entete('À savoir', '', 'savoir', null,
+      '<span class="ck-sv-dr">' + (items.length ? '<span class="ck-sv-n">' + items.length + ' point' + (items.length > 1 ? 's' : '') + '</span>' : '')
+      + '<span class="ck-prive" role="img" aria-label="Visible de l’admin seulement" title="Les motifs d’absence ne sont visibles que de l’admin">' + ICO.cadenas + '</span></span>')
     + met + '<ul class="ck-sv-l' + (S.svTout ? ' tout' : '') + '" id="ck-sv-l">' + lis + '</ul>'
     + (items.length ? '' : '<p class="ck-vide">Rien à signaler pour les jours qui viennent : ni absence, ni fin de contrat, ni retard, ni matériel immobilisé.</p>')
     + (items.length > 5 ? '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s ck-sv-tout" id="ck-sv-tout" aria-expanded="' + S.svTout + '">'
@@ -566,15 +573,18 @@ function htmlDecision() {
   const presents = GENS.map(g => '<span class="ck-av-m' + (g.absent ? ' abs' : '') + '" title="' + esc(g.absent ? (g.motif ? g.p + ' ' + g.motif : 'Absence\u00a0: ' + g.p) : g.p) + '">' + esc(g.p.charAt(0)) + '</span>').join('');   // ANTICIPE-1 (§420) : « absent » ne s'accordait pas
   const tens = GENS.filter(g => !g.absent && g.tens != null).map(g => '<span class="ck-tn" title="' + esc(g.p) + ' : ' + g.tens + '\u00a0%"><i style="height:' + Math.max(0, Math.min(100, (g.tens - 60) * 2.5)) + '%"'
     + (g.tens > 105 ? ' class="haut"' : '') + '></i><em>' + esc(g.p.charAt(0)) + '</em></span>').join('');
-  const dz = (t, v, raison, bande, pied, attr) => '<div class="ck-dz"' + (attr || '') + '><div class="ck-dz-t">' + t + '</div><div class="ck-dz-v">' + esc(v) + '</div>'
-    + '<p class="ck-dz-r">' + esc(raison) + '</p><div class="ck-dz-b">' + bande + '</div><div class="ck-dz-p">' + pied + '</div></div>';
+  // ★★ MOTS-5 (§586) : une question = une ligne — la question et son bouton, puis la réponse et son dessin. La raison de la
+  //   réponse se déplie en touchant la réponse (elle reste écrite : c'est elle qui dit « pluie à 14 h »).
+  const dz = (t, v, raison, bande, pied, attr) => '<div class="ck-dz"' + (attr || '') + '><div class="ck-dz-t">' + t + '</div><div class="ck-dz-p">' + pied + '</div>'
+    + (raison ? '<details class="ck-dz-d"><summary class="ck-dz-v">' + esc(v) + '</summary><p class="ck-dz-r">' + esc(raison) + '</p></details>' : '<div class="ck-dz-v">' + esc(v) + '</div>')
+    + '<div class="ck-dz-b">' + bande + '</div></div>';
+  const lien = (attr, court, long) => '<button type="button" class="ck-lien" ' + attr + ' aria-label="' + long + '">' + court + '</button>';
   const p = D.pres || {}, tr = D.traiter || {}, pr = D.prio || {}, te = D.tension || {};
   // PRO-1 (§269) : la fenêtre de traitement se DESSINE sur 24 heures. Avant, son dessin de l'ancienne tuile était
   //   aplati en texte et les heures se collaient : « 0 h12 h24 h ».
   let bTr = '';
   if (tr.fen) bTr = '<span class="ck-dz-fen"><span class="ck-dz-fen-piste" role="img" aria-label="Fenêtre de traitement de ' + tr.fen.g0 + ' h à ' + tr.fen.g1 + ' h">'
     + '<i style="left:' + (tr.fen.g0 / 24 * 100).toFixed(1) + '%;width:' + (Math.max(0, tr.fen.g1 - tr.fen.g0) / 24 * 100).toFixed(1) + '%"></i></span>'
-    + '<span class="ck-dz-fen-ax" aria-hidden="true"><span>0 h</span><span>12 h</span><span>24 h</span></span>'
     + (tr.risque ? '<span class="ck-dz-alerte">Pluie ensuite : risque de lessivage</span>' : '') + '</span>';
   else if (tr.prochaine) bTr = '<span class="ck-dz-calme">' + ICO.ok + 'Prochaine fenêtre : ' + esc(tr.prochaine) + '</span>';
   if (tr.soir && tr.soir.debut) bTr += '<span class="ck-dz-calme">' + esc(tr.soir.n + ' en fleur : le soir seulement, ' + tr.soir.debut + ' – ' + tr.soir.fin) + '</span>';   // ★ PHENO-2B (§564) : l’arrêté abeilles
@@ -582,14 +592,14 @@ function htmlDecision() {
   let bPr = '';
   if (V.prio && T[V.prio]) bPr = '<span class="ck-dz-barre"><span class="ck-barre"><i class="b-cours" id="ck-dz-prio-i" style="width:0%"></i></span><span class="ck-dz-pc" id="ck-dz-prio-t"></span></span>';
   else if (pr.choix && pr.choix.length) bPr = '<span class="ck-dz-chips">' + pr.choix.slice(0, 4).map(n => '<span>' + esc(n) + '</span>').join('') + (pr.choix.length > 4 ? '<span>+' + (pr.choix.length - 4) + '</span>' : '') + '</span>';
-  const piedPr = V.admin ? '<button type="button" class="ck-lien" data-fn="priorite">' + (pr.mode === 'choix' ? 'Choisir la priorité' : 'Changer la priorité') + '</button>'
+  const piedPr = V.admin ? lien('data-fn="priorite"', pr.mode === 'choix' ? 'Choisir' : 'Changer', pr.mode === 'choix' ? 'Choisir la priorité' : 'Changer la priorité')
     : '<span class="ck-dz-note">L’administrateur fixe la priorité</span>';
-  return entete('La décision du jour', 'Quatre questions, quatre réponses, un bouton chacune', 'decision')
+  return entete('La décision du jour', '', 'decision')
     + '<div class="ck-dz-g">'
-    + dz('Présences', p.v || '—', p.raison || '', '<span class="ck-avs">' + presents + '</span>', '<button type="button" class="ck-lien" data-module="planning">Ouvrir le planning</button>')
-    + dz('Traiter ?', tr.v || '—', tr.raison || '', bTr, '<button type="button" class="ck-lien" data-module="phyto">Registre phyto</button>', ' data-mvt="traiter"')
-    + dz('Tâche prioritaire', pr.v || '—', pr.raison || '', bPr, piedPr)
-    + dz('Tension de l’équipe', te.v || '—', te.raison || '', '<span class="ck-tns">' + tens + '</span>', te.v && te.v !== '—' ? '<button type="button" class="ck-lien" data-fn="tension">Voir le détail</button>' : '')
+    + dz('Présents', p.v || '—', p.raison || '', '<span class="ck-avs">' + presents + '</span>', lien('data-module="planning"', 'Planning', 'Ouvrir le planning'))
+    + dz('Traiter ?', tr.v || '—', tr.raison || '', bTr, lien('data-module="phyto"', 'Phyto', 'Registre phyto'), ' data-mvt="traiter"')
+    + dz('Priorité', pr.v || '—', pr.raison || '', bPr, piedPr)
+    + dz('Tension', te.v || '—', te.raison || '', '<span class="ck-tns">' + tens + '</span>', te.v && te.v !== '—' ? lien('data-fn="tension"', 'Détail', 'Voir le détail de la tension') : '')
     + '</div>';
 }
 
@@ -626,7 +636,7 @@ function svgPlan() {
 const LEG = [['faite', 'Faites'], ['cours', 'En cours'], ['afaire', 'À faire'], ['retard', 'En retard'], ['arr', 'Arrachée'], ['hors', 'Pas concernées']];
 function htmlPlan() {
   return '<header class="ck-p-hd"><div><h2 class="ck-titre-p">Le domaine en direct' + btnI('plan', 'Comment lire le plan') + '</h2>'
-    + '<p class="ck-cadre" id="ck-plan-cadre"></p></div>'
+    + '<p class="ck-cadre" id="ck-plan-cadre" hidden></p></div>'
     + '<div class="ck-seg" role="tablist" aria-label="Tâche affichée sur le plan">'
     + TACHES.map(t => '<button type="button" role="tab" data-t="' + t.id + '" aria-selected="' + (t.id === S.vue) + '">' + esc(t.nom) + '</button>').join('')
     + '<span class="ck-seg-ind" aria-hidden="true"></span></div></header>'
@@ -636,7 +646,7 @@ function htmlPlan() {
     + '<div class="ck-plan-pied"><div class="ck-leg" role="group" aria-label="Filtrer le plan par état">'
     + LEG.map(([k, l]) => '<button type="button" class="ck-leg-i" data-f="' + k + '" aria-pressed="false"' + (k === 'hors' ? ' hidden' : '') + '><i class="sw sw-' + k + '"></i>' + l + ' <b id="ck-leg-' + k + '" data-v="0">0</b></button>').join('')
     + '</div><div class="ck-echelle" id="ck-echelle" aria-hidden="true"></div></div>'
-    + '<p class="ck-plan-note" id="ck-plan-note" hidden></p>';
+    + '<details class="ck-plan-note" id="ck-plan-note" hidden></details>';
 }
 // L'échelle et le nord sous le plan : la promesse « à l'échelle » se lit, elle ne se croit pas sur parole.
 function majEchelle() {
@@ -653,7 +663,7 @@ function majNote() {
   const sans = PARCS.filter(p => !p.f), n = sans.length;
   if (!n) { el.hidden = true; return; }
   const noms = sans.map(p => p.nom), liste = n <= 3 ? (n === 1 ? noms[0] : noms.slice(0, -1).join(', ') + ' et ' + noms[n - 1]) : n + ' parcelles';
-  el.innerHTML = '<i aria-hidden="true"></i><span>' + (n === PARCS.length ? 'Aucun contour enregistré pour ce domaine : chaque parcelle est un carré de sa surface. Les contours se chargent à l’installation.'
+  el.innerHTML = '<summary><i aria-hidden="true"></i>' + (n === PARCS.length ? 'Aucun contour' : n + ' sans contour') + '</summary><span>' + (n === PARCS.length ? 'Aucun contour enregistré pour ce domaine : chaque parcelle est un carré de sa surface. Les contours se chargent à l’installation.'
     : esc(liste) + (n > 1 ? ' n’ont' : ' n’a') + ' pas de contour : ' + (n > 1 ? 'dessinées' : 'dessinée') + ' en carré de ' + (n > 1 ? 'leur' : 'sa') + ' surface.') + '</span>';
   el.hidden = false;
 }
@@ -692,17 +702,20 @@ function equipesHtml(t) {
 }
 // ★ CHANT-1 (§316) : la liste arrive rangée par le modèle (pilotage.js, _mvOrdreChantiers) — à faire ou en cours par date de
 //   début, l'arrachage fini pour l'équipe, puis les terminés. Ce que la fenêtre ajoute : passée sans être fini, ou la suite au prestataire.
-const suiteFen = (t, x) => x.etat === 'retard' ? ', fenêtre passée' : ((t.eqFini && x.pct < 99.95) ? ', la suite au prestataire' : '');
+const suiteFen = (t, x) => x.etat === 'retard' ? 'fenêtre passée' : ((t.eqFini && x.pct < 99.95) ? 'la suite au prestataire' : '');
 function htmlChantiers(r) {
-  return entete('Chantiers ' + V.saisonDe, 'Par date de début, les terminés en bas')
+  // ★★ MOTS-5 (§586) : un chantier = une ligne (nom, barre, %, heures). Ses dates s'écrivent sous le chantier affiché sur le
+  //   plan (celui qu'on a touché) ; « fenêtre passée » et « la suite au prestataire » restent toujours visibles.
+  return entete('Chantiers ' + V.saisonDe, '', 'chant')
     + '<ul class="ck-ch-l">' + TACHES.map(t => {
       const x = r.t[t.id];
       return '<li><button type="button" class="ck-ch' + (t.id === S.vue ? ' vue' : '') + '" data-t="' + t.id + '" aria-label="Afficher ' + esc(t.art) + ' sur le plan">'
         + '<span class="ck-ch-nom">' + esc(t.nom) + '<span class="ck-ch-eqw">' + equipesHtml(t.id) + '</span></span>'
-        + '<span class="ck-ch-pct t-' + x.etat + '"><b data-v="0">0</b>\u202f%</span>'
         + '<span class="ck-barre"><i class="b-' + x.etat + '" style="width:0%"></i></span>'
-        + '<span class="ck-ch-fen">du ' + dCourt(t.debut) + ' au ' + dCourt(t.fin) + '<span class="ck-ch-ret">' + suiteFen(t, x) + '</span></span>'
-        + '<span class="ck-ch-det"><b class="ck-ch-hf" data-v="0">0</b> / ' + nb(x.hT) + '\u202fh</span></button></li>';
+        + '<span class="ck-ch-pct t-' + x.etat + '"><b data-v="0">0</b>\u202f%</span>'
+        + '<span class="ck-ch-det"><b class="ck-ch-hf" data-v="0">0</b> / ' + nb(x.hT) + '\u202fh</span>'
+        + '<span class="ck-ch-ret">' + suiteFen(t, x) + '</span>'
+        + '<span class="ck-ch-fen">du ' + dCourt(t.debut) + ' au ' + dCourt(t.fin) + '</span></button></li>';
     }).join('') + '</ul>';
 }
 
@@ -773,7 +786,7 @@ function htmlEv(e) {
 function htmlFil() {
   const C = coursItems(), n = S.evts.length;
   return '<header class="ck-p-hd"><div><h2 class="ck-titre-p"><span class="ck-pt-vif ck-pt-fil" aria-hidden="true"></span>En direct' + btnI('fil', 'Comment lire « En direct »') + '</h2>'
-    + '<p class="ck-cadre">Qui est où en ce moment, et ce que l’équipe fait aujourd’hui</p></div></header>'
+    + '</div></header>'
     + '<p class="ck-fil-sec" id="ck-fil-sec-c"' + (C.length ? '' : ' hidden') + '>En ce moment</p>'
     + '<ul class="ck-fil-c" id="ck-fil-c">' + C.map(htmlCoursLi).join('') + '</ul>'
     + '<p class="ck-fil-sec" id="ck-fil-sec-j"' + (C.length ? '' : ' hidden') + '>Aujourd’hui</p>'
@@ -784,9 +797,9 @@ function htmlFil() {
 
 /* ── Les graphes — grammaire du kit (MV_GRAPH_COL) : la mesure en terre, le prévu en or,
    le fait en vert, le repère du jour en rouge, tout texte en texte-doux, une unité = un pixel. ── */
-function cadre(w, ymax, grand, x0) {
+function cadre(w, ymax, grand, x0, bas) {
   // PRO-1 (§269) : en grand (« Agrandir »), la hauteur suit l'écran.
-  const etroit = w < 560, h = grand ? Math.round(Math.max(300, Math.min(window.innerHeight * .62, w * .5))) : (etroit ? 230 : 270);
+  const etroit = w < 560, h = grand ? Math.round(Math.max(300, Math.min(window.innerHeight * .62, w * .5))) : (bas ? (etroit ? 180 : 200) : (etroit ? 230 : 270));   // MOTS-5 (§586) : « bas », la charge restante — son chiffre est écrit au-dessus
   const c = { w, h, etroit, padL: etroit ? 40 : 58, padR: 18, padT: 34, padB: 30, ymax, D0: x0 || DEBUT };   // D0 (AUJ-5) : le début de l'axe
   c.iw = w - c.padL - c.padR; c.ih = h - c.padT - c.padB;
   c.X = d => c.padL + (d - c.D0) / (XMAX - c.D0) * c.iw;
@@ -840,11 +853,12 @@ function debutCourbe() {
 function htmlCourbe(w) {
   const pas = pasNet(TOTAL, w < 560 ? 3 : 5), ymax = Math.max(pas, Math.ceil(TOTAL / pas) * pas), ticks = [];
   for (let v = 0; v <= ymax + 1e-6; v += pas) ticks.push(v);
-  const c = cadre(w, ymax, G.grand, debutCourbe()); G.c = c; G.w = w;
+  const c = cadre(w, ymax, G.grand, debutCourbe(), true); G.c = c; G.w = w;
   let s = axes(c, ticks, 'h');
   s += '<path id="ck-c-besoin" class="ck-c-besoin"/><path id="ck-c-proj" class="ck-c-proj"/>'
     + '<path id="ck-c-ligne" class="ck-c-ligne"/><circle id="ck-c-pt" class="ck-c-pt" r="4.5"/>'
     + '<g id="ck-c-fin"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-c-fin-l" class="ck-c-txt ck-c-fin-l" y="-13" text-anchor="middle"></text></g>'
+    + '<text id="ck-c-bes-l" class="ck-c-txt ck-c-bes-l">allure objectif</text>'
     + '<line id="ck-c-guide" class="ck-c-guide" y1="' + c.padT + '" y2="' + (c.h - c.padB) + '"/><circle id="ck-c-gpt" class="ck-c-gpt" r="4"/>'
     + '<rect class="ck-c-zone" x="' + c.padL + '" y="0" width="' + c.iw + '" height="' + c.h + '"/>';
   return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h + '" role="img" aria-label="Charge restante de la campagne : mesurée jusqu’à aujourd’hui, puis projetée jusqu’à la fin prévue">' + s + '</svg>'
@@ -865,7 +879,16 @@ function dessinerCourbe(reste, fin) {
   $('#ck-c-besoin').setAttribute('d', VISEE > AUJ ? 'M' + f1(xa) + ' ' + f1(ya) + 'L' + f1(xv) + ' ' + f1(y0) : '');
   const pt = $('#ck-c-pt'); pt.setAttribute('cx', f1(xa)); pt.setAttribute('cy', f1(ya));
   $('#ck-c-fin').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(y0) + ')');
-  const fl = $('#ck-c-fin-l'); if (fl) fl.setAttribute('text-anchor', xf > c.w - c.padR - 30 ? 'end' : 'middle');
+  const fl = $('#ck-c-fin-l'); if (fl) fl.setAttribute('text-anchor', xf > c.w - c.padR - 60 ? 'end' : (xf < c.padL + 60 ? 'start' : 'middle'));
+  // MOTS-5 (§586) : plus de légende sous le graphe — le nom est écrit sur le trait. « allure objectif » se pose aux deux
+  //   trois cinquièmes de sa droite ; il se tait quand la droite est trop courte ou collée à la projection (deux noms l'un sur l'autre).
+  const bl = $('#ck-c-bes-l');
+  if (bl) {
+    const vu = VISEE > AUJ && xv - xa > 150 && Math.abs(xv - xf) > 70;
+    bl.style.display = vu ? '' : 'none';
+    // À droite du trait qui descend, donc au-dessus de lui ; si la projection passe par là (fin après l'objectif), dessous.
+    if (vu) { const k = 0.6, tard = xf > xv; bl.setAttribute('text-anchor', tard ? 'end' : 'start'); bl.setAttribute('x', f1(xa + (xv - xa) * k + (tard ? -8 : 8))); bl.setAttribute('y', f1(ya + (y0 - ya) * k + (tard ? 12 : -3))); }
+  }
 }
 
 /* ══ VUE ÉCONOMIE ══ */
@@ -1007,54 +1030,37 @@ const libEtat = (t, e) => ({ faite: T[t].f ? 'faite' : 'fait', cours: 'en cours'
 const COUL = { faite: 'var(--et-faite-b)', cours: 'var(--et-cours-b)', afaire: 'var(--texte-doux)', retard: 'var(--et-retard-b)', arr: 'var(--texte-doux)', hors: 'var(--texte-doux)' };
 
 // ★★ AUJ-TETE-1 (§454) — la référence d’un chiffre : deux lignes, le libellé puis la valeur, le « i » au bout de la première.
+// ★★ MOTS-5 (§586) — LA PHRASE DU JOUR, COURTE. Avant : une phrase de quatre morceaux et, sous chaque chiffre, deux lignes
+//   de repères calées au pixel (AUJ-TETE-1 §454, calerRefs). Maintenant : la phrase (le délai, l'écart au budget), les points
+//   à voir en pastilles qui se touchent (ANTICIPE-1 §420, CAVEPIL-1 §436), puis UNE ligne de repères — « par rapport à quoi »
+//   reste écrit (Nico, 23/10), sur une ligne au lieu de quatre. Chaque repère garde son « i ».
 const refChiffre = (id, etat, lignes, info, lab) => '<span class="ck-cap' + (etat ? ' ' + etat : '') + '" id="' + id + '">'
-  + lignes.map((l, k) => '<span class="ck-cap-k">' + l[0] + '</span><b class="ck-cap-v">' + l[1] + '</b>' + (k === 0 ? btnI(info, lab) : '<span></span>')).join('') + '</span>';
+  + lignes.map((l, k) => (k ? ' \u00b7 ' : '') + '<span class="ck-cap-k">' + l[0] + '</span> ' + (k ? l[1] : '<b class="ck-cap-v">' + l[1] + '</b>')).join('') + btnI(info, lab) + '</span>';
 function majResume(r) {
-  const n = savoirItems(r).filter(x => x.prio === 1).length;
+  const items = savoirItems(r), n = items.filter(x => x.prio === 1).length;
   const temps = r.ecart > 0 ? r.ecart + ' jour' + (r.ecart > 1 ? 's' : '') + ' d’avance' : r.ecart < 0 ? -r.ecart + ' jour' + (r.ecart < -1 ? 's' : '') + ' de retard' : 'pile à l’heure';
   const e0 = Math.round(r.sous), argent = !(V.eco && r.budget > 0) ? '' : (e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget');   // AUJ-7 : à l'euro, comme partout
-  // ★ ANTICIPE-1 (§420) : les points annoncés se touchent — le bouton mène à eux, en tête d'« À savoir » (allerAnticiper).
   const pts = n + ' point' + (n > 1 ? 's' : '') + ' à anticiper';
-  // ★ CAVEPIL-1 (§436) : quand la cave presse, la phrase la nomme — touchée, elle ouvre la vue Cave.
-  const cv = V.cave && V.cave.lien ? '<button type="button" class="ck-res-pts ck-res-cave' + (V.cave.lienAlerte ? ' alerte' : '') + '" data-fn="cave" aria-label="' + esc(V.cave.lien) + ', ouvrir la vue Cave">' + esc(V.cave.lien) + '</button>' : '';
-  // ★★ AUJ-TETE-1 (§454) : sous chaque chiffre, sa référence — la fin prévue et l’objectif, le coût à la fin et le budget. Sans
-  //   objectif posé (VISEE n’est alors qu’un repère à 60 jours), la ligne « Objectif » ne s’écrit pas. Le chiffre se touche : le
-  //   délai mène au verdict de Terrain, l’écart au budget à la vue Économie.
-  const refT = refChiffre('ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '', [['Fin prévue', dLong(r.fin)]].concat(V.objectif ? [['Objectif', dLong(VISEE)]] : []), 'resTemps', 'Sur quoi ce délai est compté');
-  const refB = argent ? refChiffre('ck-cap-b', e0 < 0 ? 'ko' : e0 > 0 ? 'ok' : '', [['Coût à la fin', eur(r.att)], ['Budget', eur(r.budget)]], 'resBudget', 'Sur quoi cet écart est compté') : '';
-  const fig = (txt, fn, id, ref) => '<span class="ck-fig"><span class="ck-fig-l"><button type="button" class="ck-fig-t" data-fn="' + fn + '" aria-describedby="' + id + '">' + txt + '</button>,</span>' + ref + '</span>';
-  // AUJ-TETE-1 : un bouton garde sa ponctuation (.ck-tient). Au téléphone, « , et » partait seul en tête de ligne : le navigateur
-  //   coupe après un bouton, même devant une virgule (vu à la capture, déjà vrai avant ce lot).
-  const tient = (bt, p) => '<span class="ck-tient">' + bt + p + '</span>';
-  const ptsB = '<button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>';
-  const suite = n ? (cv ? tient(ptsB, ',') + ' et ' + tient(cv, '.') : tient(ptsB, '.')) : (cv ? 'rien à anticiper, et ' + tient(cv, '.') : 'rien à anticiper.');   // CAVEPIL-1 : la cave après les points, « et » devant
-  $('#ck-resume').innerHTML = fig(maj1(temps), 'allerFin', 'ck-cap-t', refT) + ' ' + (argent ? fig(argent, 'allerBudget', 'ck-cap-b', refB) + ' ' : '') + suite;
-  calerRefs();
-}
-// ★★ AUJ-TETE-1 (§454) : une référence plus large que son chiffre (« 6 jours d’avance » sous « Fin prévue 25 février ») déborde
-//   dessous sans creuser la phrase ; la suivante, sur la même ligne, se décale d’autant — le bord réel du texte, pas la boîte —,
-//   avec 20 px d’air. Rejouée à chaque phrase et quand la page change de largeur (ranger).
-function calerRefs() {
-  const F = $$('#ck-resume .ck-fig');
-  F.forEach(f => { const c = f.querySelector('.ck-cap'); if (c) c.style.marginLeft = ''; });
-  for (let k = 1; k < F.length; k++) {
-    const la = F[k - 1].querySelector('.ck-fig-l'), lb = F[k].querySelector('.ck-fig-l'), ca = F[k - 1].querySelector('.ck-cap'), cb = F[k].querySelector('.ck-cap');
-    if (!la || !lb || !ca || !cb) continue;
-    const pa = la.getBoundingClientRect(), pb = lb.getBoundingClientRect();
-    if (Math.abs(pa.top - pb.top) > 4) continue;                       // pas sur la même ligne : rien à caler
-    const bord = Math.max(...Array.from(ca.children).map(x => x.getBoundingClientRect().right));
-    const d = Math.ceil(bord + 20 - pb.left);
-    if (d > 0) cb.style.marginLeft = d + 'px';
-  }
+  // Au téléphone, « À savoir » est juste sous la phrase : une pastille qui redit un point écrit dessous s'efface (.dbl).
+  const cvDbl = items.some(x => x.cat === 'cave');
+  const cv = V.cave && V.cave.lien ? '<button type="button" class="ck-res-pts ck-res-cave' + (V.cave.lienAlerte ? ' alerte' : '') + (cvDbl ? ' dbl' : '') + '" data-fn="cave" aria-label="' + esc(V.cave.lien) + ', ouvrir la vue Cave">' + esc(V.cave.lien) + '</button>' : '';
+  const ptsB = n ? '<button type="button" class="ck-res-pts dbl" data-fn="anticiper" aria-label="' + pts + ', en tête d’« À savoir »">' + pts + '</button>' : '';
+  const refT = refChiffre('ck-cap-t', '', [['fin prévue', dCourt(r.fin)]].concat(V.objectif ? [['objectif', dCourt(VISEE)]] : []), 'resTemps', 'Sur quoi ce délai est compté');
+  const refB = argent ? refChiffre('ck-cap-b', '', [['coût à la fin', eur(r.att)], ['budget', eur(r.budget)]], 'resBudget', 'Sur quoi cet écart est compté') : '';
+  const fig = (txt, fn, id, etat) => '<button type="button" class="ck-fig-t' + (etat ? ' ' + etat : '') + '" data-fn="' + fn + '" aria-describedby="' + id + '">' + txt + '</button>';
+  $('#ck-resume').innerHTML = '<span class="ck-res-ph">' + fig(maj1(temps), 'allerFin', 'ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '')
+    + (argent ? ', ' + fig(argent, 'allerBudget', 'ck-cap-b', e0 < 0 ? 'ko' : '') : '') + '.</span>'
+    + '<span class="ck-res-pl">' + ((ptsB || cv) ? ptsB + cv : '<span class="ck-res-rien">rien à anticiper</span>') + '</span>'
+    + '<span class="ck-res-rep">' + refT + refB + '</span>';
 }
 function majVerdict(r) {
-  Anim.rouler($('#ck-v-fin'), dLong(r.fin));
+  Anim.rouler($('#ck-v-fin'), dCourt(r.fin));
   const ec = r.ecart, box = $('#ck-v-ecart');
   const modele = ec > 0 ? (ec > 1 ? 'av-n' : 'av-1') : ec < 0 ? (ec < -1 ? 'ap-n' : 'ap-1') : 'pile';
   if (box.dataset.m !== modele) {
     box.dataset.m = modele;
     box.innerHTML = modele === 'pile' ? 'Pile à l’objectif'
-      : '<b data-v="' + Math.abs(ec) + '">' + Math.abs(ec) + '</b> jour' + (Math.abs(ec) > 1 ? 's' : '') + (ec > 0 ? ' avant' : ' après') + ' l’objectif';
+      : '<b data-v="' + Math.abs(ec) + '">' + Math.abs(ec) + '</b>\u00a0j' + (ec > 0 ? ' avant' : ' après') + ' l’objectif';
     box.className = ec >= 0 ? 'ok' : 'ko';
   } else if (modele !== 'pile') Anim.compter(box.querySelector('b'), Math.abs(ec), nb, 600);
   const et = $('#ck-v-etat'), cls = ec >= 3 ? 'ok' : ec >= 0 ? 'juste' : 'ko';
@@ -1072,19 +1078,26 @@ function majVerdict(r) {
   q('.ck-fr-auj').style.left = a + '%';
   q('.ck-fr-fin').style.left = fi + '%';
   q('.ck-fr-visee').style.left = v + '%';
-  q('.ck-fr-fin').classList.toggle('droite', fi > 70);
   // PRO-1 (§269) : la date de début cède la place à « Aujourd’hui » quand ils se touchent, et « Aujourd’hui » à
   //   l'objectif en fin de saison — les deux étiquettes du bas se recouvraient.
   q('.ck-fr-bout').classList.toggle('masque', a < 16);
   q('.ck-fr-auj').classList.toggle('gauche', a < 6);
   q('.ck-fr-auj').classList.toggle('muet', v - a < 22 && v - a > -22);
-  $('#ck-fr-fin-l').textContent = 'Fin prévue, ' + dCourt(r.fin);
+}
+// MOTS-5 (§586) : les barres des tuiles — au montage (les chiffres y montent seuls, sans majPhotos) et à chaque mise à jour.
+function barresPh(r) {
+  const pc = v => Math.max(0, Math.min(100, Number(v) || 0)).toFixed(1) + '%';
+  const bt = $('#ck-ph-trav-b'), bb = $('#ck-ph-bud-b'), br = $('#ck-ph-bud-b-r');
+  if (bt) bt.style.width = pc(r.pct);
+  if (bb) bb.style.width = pc(r.budgetPct);   // AUJ-5 : sans taux horaire, la tuile Budget n'existe pas
+  if (br) br.style.left = pc(r.pct);
 }
 function majPhotos(r) {
   Anim.compter($('#ck-ph-trav'), r.pct);
   Anim.compter($('#ck-ph-bud'), r.budgetPct);
-  $('#ck-ph-trav-c').textContent = nb(r.hF) + ' h faites sur ' + nb(r.hT) + ' h';
-  const bc = $('#ck-ph-bud-c'); if (bc) bc.textContent = 'du budget main-d’œuvre dépensé, pour ' + nb(r.pct) + '\u00a0% du travail fait';   // AUJ-5 : sans taux horaire, la tuile n'existe pas
+  $('#ck-ph-trav-c').textContent = nb(r.hF) + ' / ' + nb(r.hT) + '\u202fh';
+  const bc = $('#ck-ph-bud-c'); if (bc) bc.textContent = 'engagé \u00b7 fait ' + nb(r.pct) + '\u00a0%';
+  barresPh(r);
 }
 function majSavoir(r) {
   const box = $('#ck-savoir'); if (!box) return;
@@ -1097,7 +1110,7 @@ function majDecision(r) {
   if (!id || !i || !tx) return;
   const x = r.t[id];
   i.style.width = x.pct.toFixed(2) + '%';
-  tx.textContent = nb(x.pct) + '\u00a0%, ' + nb(x.hF) + ' / ' + nb(x.hT) + '\u202fh';
+  tx.textContent = nb(x.pct) + '\u00a0%';
 }
 function majPlan(o = {}) {
   const t = S.vue; if (!t || !T[t]) return;
@@ -1119,6 +1132,7 @@ function majPlan(o = {}) {
   });
   majEquipes();
   LEG.forEach(([k]) => Anim.compter($('#ck-leg-' + k), n[k], nb, 600));
+  LEG.forEach(([k]) => { const b = $('.ck-leg-i[data-f="' + k + '"]'); if (b) b.classList.toggle('zero', !n[k]); });   // MOTS-5 : une famille à zéro s'efface
   const bh = $('.ck-leg-i[data-f="hors"]'); if (bh) bh.hidden = !n.hors;   // HORS-1 : la ligne n'existe que s'il y en a
   APPS.forEach(a => {
     const x = R.a[a.id], zp = $('#ck-zp-' + a.id); if (!x || !zp) return;
@@ -1212,14 +1226,14 @@ function majChantiers(r, o = {}) {
   });
 }
 function majCourbe(r) {
-  $('#ck-gr-cadre').textContent = nb(r.reste) + ' h à faire, ' + nb(r.capMoy) + ' h par jour en moyenne d’ici la fin';
-  const ca = $('#ck-agr-cadre'); if (ca) ca.textContent = $('#ck-gr-cadre').textContent;
+  $('#ck-gr-cadre').innerHTML = '<b>' + nb(r.reste) + '\u202fh</b><span>' + nb(r.capMoy) + ' h par jour</span>';   // MOTS-5 : le chiffre en grand
+  const ca = $('#ck-agr-cadre'); if (ca) ca.innerHTML = $('#ck-gr-cadre').innerHTML;
   if (!G.c) return;
   const r0 = G.reste, f0 = G.fin, r1 = r.reste, f1v = r.fin;
   if (r0 === r1 && +f0 === +f1v) return;
   G.reste = r1; G.fin = f1v;
   Anim.tween(780, k => dessinerCourbe(lerp(r0, r1, k), new Date(lerp(+f0, +f1v, k))));
-  $('#ck-c-fin-l').textContent = dCourt(f1v);
+  $('#ck-c-fin-l').textContent = 'fin prévue ' + dCourt(f1v);
 }
 function majFil() {
   const ol = $('#ck-fil-l');
@@ -1705,7 +1719,7 @@ function redimCourbe(force) {
   if (!w || (!force && Math.abs(w - G.w) < 3 && box.querySelector('svg'))) return;
   box.innerHTML = htmlCourbe(w);
   dessinerCourbe(G.reste, G.fin);
-  $('#ck-c-fin-l').textContent = dCourt(G.fin);
+  $('#ck-c-fin-l').textContent = 'fin prévue ' + dCourt(G.fin);
 }
 function redimEChart(a) { if (!V.eco) return; return redimEChart0(a); }
 function redimEChart0(force) {
@@ -1794,7 +1808,7 @@ const RANGS = {
   // ★ COLLE-1 (§412) : « En direct » en tête de la colonne de droite, dans sa carte, au-dessus d'« À savoir » (Nico, 21/10).
   t: { large: [['verdict', 'decision'], ['plan', 'chant', 'courbe'], ['fil', 'savoir']],
        moyen: [['verdict', 'decision', 'plan', 'chant', 'courbe'], [], ['fil', 'savoir']],   // AUJ-5 : « À savoir » reste à droite
-       petit: [['verdict', 'savoir', 'decision', 'plan', 'fil', 'chant', 'courbe'], [], []] },
+       petit: [['fil', 'savoir', 'verdict', 'decision', 'plan', 'chant', 'courbe'], [], []] },   // MOTS-5 (§586) : au téléphone, ce qui se passe et ce qui demande un geste d'abord
   // ★ CAVEPIL-1 (§436) : la vue Cave, comme la maquette — verdict et millésime à gauche, la cave en direct et la semaine au milieu,
   //   « En direct » et « À savoir » collés à droite ; au téléphone, ce qui presse d'abord.
   c: { large: [['cv-verdict', 'cv-mil'], ['cv-plan', 'cv-semaine'], ['cv-fil', 'cv-savoir']],
@@ -1847,11 +1861,11 @@ function indiceSeg() {
 }
 function ranger() {
   indiceSeg();
-  calerRefs();   // AUJ-TETE-1 (§454) : une phrase qui passe à la ligne ne garde pas un décalage qui ne vaut plus
   const pg = $('#ck-page');
   // PRO-1 (§269) : le cockpit a quitté l'écran (autre onglet, autre module) — l'observateur restait branché sur la
   //   page disparue et plantait à chaque redimensionnement (« reading 'clientWidth' », journalisé en erreur).
   if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }
+  if (pg.clientWidth < 200) return;   // MOTS-5 (§586) : une page pas encore posée (largeur nulle, le temps d'une capture ou d'un onglet caché) n'est pas un téléphone — on ne range rien
   const w = pg.clientWidth - 2 * parseFloat(getComputedStyle(pg).paddingLeft || 0);
   pg.style.setProperty('--ck-colle', colleHaut() + 'px');   // AUJ-6
   const taille = w >= 1000 ? 'large' : w >= 760 ? 'moyen' : 'petit';   // AUJ-5 : la maquette dès 1 000 px (1 150 avant)
@@ -1874,8 +1888,8 @@ function agrandir(on) {
   let boite = $('#ck-agr');
   if (!on) {
     if (!boite || boite.hidden) return;
-    const gr = boite.querySelector('#ck-gr'), leg = $('#ck-courbe .ck-gr-leg');
-    if (gr) { if (leg) leg.parentNode.insertBefore(gr, leg); else gr.remove(); }
+    const gr = boite.querySelector('#ck-gr'), carte = $('#ck-courbe');   // MOTS-5 (§586) : plus de légende sous le graphe — il revient en fin de carte
+    if (gr) { if (carte) carte.appendChild(gr); else gr.remove(); }
     boite.classList.remove('ouvert'); boite.hidden = true; G.grand = false; document.body.classList.remove('ck-agr-on');
     redimCourbe(true);
     const b = $('#ck-courbe [data-fn="agrandir"]'); if (b) b.focus();
@@ -1887,11 +1901,11 @@ function agrandir(on) {
     boite.setAttribute('role', 'dialog'); boite.setAttribute('aria-modal', 'true'); boite.setAttribute('aria-label', 'Charge restante, en grand');
     boite.innerHTML = '<div class="ck-agr-voile" data-fn="reduire"></div><div class="ck-agr-p ck2"><header class="ck-p-hd"><div><h2 class="ck-titre-p">Charge restante</h2>'
       + '<p class="ck-cadre" id="ck-agr-cadre"></p></div><button type="button" class="ck-btn ck-btn-ghost ck-btn-s" data-fn="reduire">Fermer</button></header>'
-      + '<div class="ck-agr-slot"></div><div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-mes"></i>Reste mesuré</span><span><i class="lg-proj"></i>Projection</span><span><i class="lg-bes"></i>Allure pour finir à l’objectif</span></div></div>';
+      + '<div class="ck-agr-slot"></div></div>';
     document.body.appendChild(boite);
     boite.addEventListener('click', ev => { if (ev.target.closest('[data-fn="reduire"]')) agrandir(false); });
   }
-  const ca = $('#ck-gr-cadre'); $('#ck-agr-cadre').textContent = ca ? ca.textContent : '';
+  const ca = $('#ck-gr-cadre'); $('#ck-agr-cadre').innerHTML = ca ? ca.innerHTML : '';
   boite.querySelector('.ck-agr-slot').appendChild(gr);
   boite.hidden = false; G.grand = true; document.body.classList.add('ck-agr-on');
   redimCourbe(true);
@@ -1953,8 +1967,7 @@ function monter() {
   $('#ck-fil').innerHTML = htmlFil();
   majCave();   // CAVEPIL-1 (§436)
   $('#ck-courbe').innerHTML = entete('Charge restante', '', 'courbe', 'ck-gr-cadre', '<button class="ck-btn ck-btn-ghost ck-btn-s" type="button" data-fn="agrandir">Agrandir</button>')
-    + '<div class="ck-gr" id="ck-gr"></div>'
-    + '<div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-mes"></i>Reste mesuré</span><span><i class="lg-proj"></i>Projection</span><span><i class="lg-bes"></i>Allure pour finir à l’objectif</span></div>';
+    + '<div class="ck-gr" id="ck-gr"></div>';
   if (!V.eco) return;   // pas d'économie branchée (pas de taux) : la vue Économie ne se dessine pas
   $('#ck-ever').innerHTML = htmlEVerdict(R);
   $('#ck-ekpi').innerHTML = htmlEKpis(R);
@@ -1975,6 +1988,7 @@ function monter() {
     .forEach(f => { try { f(); } catch (e) { if (window._mvAvale) window._mvAvale(e, 'cockpit-vue.js/entree'); } });
   const fin = () => {
     Anim.compter($('#ck-ph-trav'), r.pct, nb, 1100);
+    barresPh(r);
     Anim.compter($('#ck-ph-eff'), V.presents, nb, 700);
     Anim.compter($('#ck-ph-bud'), r.budgetPct, nb, 1100);
     Anim.compter($('#ck-ph-conf'), V.confN || 0, nb, 0);

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.04
+// MA VIGNE — Service Worker v12.05
+// v12.05 (16/11/2026) — MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — toutes les cartes gardées, à la même place ; dans chaque carte un titre, un chiffre, une barre ou une couleur (les tuiles ont une barre à la place de la petite courbe, « Fin prévue » la date en grand, « La décision du jour » une question par ligne, les chantiers une ligne chacun, la charge restante son chiffre en grand et les noms écrits sur les traits) ; l'explication derrière le « i », le détail au toucher ; la phrase du jour courte, les points à voir en pastilles, une ligne de repères ; au téléphone, « En direct » et « À savoir » juste sous la phrase, les tuiles deux par deux, 16 px de marge ; le plan montre deux appellations de front dès 300 px. Aucun calcul ne change. APP 11.14.
 // v12.04 (16/11/2026) — MOTS-4 (§585) : Pilotage › Archives allégé — une phrase, trois chiffres, la frise (les barres seules : le nom d'une campagne, ses dates et ses heures s'affichent dans une bulle au survol sur ordinateur, au toucher sur téléphone), le bilan par année, deux boutons ; le paragraphe du haut, l'échelle des mois et la note du bas passent derrière les « i » ; « Comparer deux saisons » devient « Comparer deux campagnes », sa fenêtre aussi.
 // v12.03 (16/11/2026) — MOTS-3 (§584) : Postes & travaux et Parcelles en listes, comme la maquette — une ligne par poste, par travail, par parcelle (un nom, un montant, une jauge, une pastille d'écart), le détail d'une ligne s'ouvre d'un toucher ; l'anneau et le graphique en barres partent ; « Temps réel contre barème », « Écart au coût moyen à l'hectare » et « Le tableau complet » (les treize colonnes, à trier) sont des tuiles repliées ; la bande des heures sans validation mène au Journal.
 // v12.02 (16/11/2026) — MOTS-2 (§583) : les cinq autres vues d'Économie se lisent comme la Synthèse — Postes & travaux, Parcelles, Revient, Achats et Le détail de l'exercice ouvrent sur la campagne (ou le millésime, ou l'exercice) et ses dates, puis une phrase ; l'avis gris du haut et la ligne « ha · taux moyen » partent ; des heures payées sans validation ou des achats sans prix s'affichent en bande orange ; les sous-titres et les notes de méthode passent derrière les « i » ; les tableaux ne changent pas.
@@ -4736,7 +4737,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.04';
+const CACHE_NAME   = 'mavigne-v12.05';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4753,7 +4754,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.04 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.05 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4773,7 +4774,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.04 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.05 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

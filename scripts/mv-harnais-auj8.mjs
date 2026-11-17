@@ -134,7 +134,8 @@ function partieC(S, T) {
   T('C3 une valeur inconnue laisse sa ligne vide (ni %, ni km/h, ni 0)', col.length === 3 && col[1].includes('ck-met-pp vide') && !col[1].includes('%') && !col[1].includes('km/h'));
   T('C4 le risque borné à 100 % ; un vent nul s’écrit 0 km/h ; 0,4 mm ne s’écrit pas', col.length === 3 && col[2].includes('width:100%') && col[2].includes('>100\u00a0%<')
     && col[2].includes('</svg><span>0</span><span class="ck-met-vu">km/h</span>') && !col[2].includes('mm<'));
-  T('C5 la légende ne dit qu’une chose : le risque de pluie', h.includes('<p class="ck-met-leg"><i></i>risque de pluie</p>') && !ctx.__r(M.map(m => Object.assign({}, m, { pp: null })), { savoir: sv }).includes('ck-met-leg'));
+  // MOTS-5 (§586) : plus de légende sous la météo — la barre bleue est expliquée dans le « i » d'« À savoir ».
+  T('C5 plus de légende sous la météo : le « i » dit ce qu’est la barre bleue', !h.includes('ck-met-leg') && S.vue.includes('le risque de pluie (la barre bleue et son pourcentage)'));
   T('C6 rien en cours : pas de phrase vide sous la ligne', (h.match(/class="ck-sv-s"/g) || []).length === 1 && h.includes('En cours : brûlage, 3 parcelles pas encore faites.'));
   const bande = h.slice(0, h.indexOf('<ul'));
   T('C7 une bande bien formée : balises équilibrées, ni undefined ni NaN', (bande.match(/<div/g) || []).length === (bande.match(/<\/div>/g) || []).length
@@ -150,7 +151,7 @@ function partieD(S, T) {
   T('D2 le guide décrit la bande et ce qui est en cours', S.guide.includes('le risque de pluie, le cumul en millimètres et le vent le plus fort') && S.guide.includes('avec ce qui est en cours dans les communes touchées'));
   T('D3 la nouveauté 8.80 : pastille sur « À savoir », pour l’admin', /\{ v: '8\.80', d: '2026-10-11', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-savoir'/.test(S.uti));
   T('D4 la feuille : la barre du brûlage partie, la barre du risque et la ligne du vent là, aucun jour grisé',
-    !S.css.includes('.ck-met-br') && S.css.includes('.ck-met-pp{') && S.css.includes('.ck-met-v{') && S.css.includes('.ck2 .ck-met-pp i,') && !/\.ck-met-j\.(chome|repos|off)/.test(S.css));
+    !S.css.includes('.ck-met-br') && S.css.includes('.ck-met-pp{') && S.css.includes('.ck-met-v{') && S.css.includes('.ck2 .ck-met-pp i{background:var(--meteo-pluie)}') && !/\.ck-met-j\.(chome|repos|off)/.test(S.css));
   T('D5 petit téléphone : « km/h » passe dessous pour les cinq jours à la fois (requête de conteneur), jamais pour un seul',
     S.css.includes('.ck-met{container:ck-met / inline-size}') && S.css.includes('@container ck-met (max-width:290px){.ck-met-vu{flex-basis:100%}}') && S.css.includes('.ck-met-vu{white-space:nowrap}'));
 }

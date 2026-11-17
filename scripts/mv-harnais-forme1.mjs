@@ -126,7 +126,7 @@ function suite(S) {
   T('aucune parcelle n’en recouvre une autre, toutes tiennent dans la largeur', Pp.PARCS.every((a, i) => Pp.PARCS.every((b, j) => i === j || !recouvre(a.box, b.box))) && Pp.PARCS.every(p => p.box[0] >= -.01 && p.box[0] + p.box[2] <= 640.01));
   T('sans contour : un carré de sa surface (0,25 ha → 50 m de côté)', (() => { const q = Pp.PARCS.find(p => p.nom === 'Sans contour'); return q && !q.f && Math.abs(q.box[2] - 50 * Pp.PLAN_S) < .01 && q.d.includes('A'); })());
   T('la commune est lue en toutes lettres, même rangée en objet', Pp.PARCS.find(p => p.nom === 'Lanière').commune === 'Gevrey-Chambertin');
-  T('au téléphone : une colonne, tout tient dans la largeur, sans défilement de côté', Pt.C === 1 && Pt.PLAN_W === 360 && Pt.PARCS.every(p => p.box[0] + p.box[2] <= 360.01));
+  T('au téléphone : deux appellations de front dès 300 px (MOTS-5, §586), tout tient dans la largeur, sans défilement de côté', Pt.C === 2 && Pt.PLAN_W === 360 && Pt.PARCS.every(p => p.box[0] + p.box[2] <= 360.01));
   // ⑤ Les gestes, la fiche, la feuille (lus sur le texte)
   T('toucher une parcelle du plan ouvre SA fiche (openDP), plus jamais la feuille d’une tâche',
     S.vue.includes("function ouvrirFeuille(pid) { const p = PIDX[pid]; if (p && !p.arr) { cacherLoupe(); if (typeof window.openDP === 'function') window.openDP(p.nom); } }") && !S.vue.includes('window.openSelParc'));

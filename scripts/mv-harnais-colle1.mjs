@@ -53,7 +53,7 @@ function verifs(S) {
   const G = rangs(S), t = G && G.t;
   ok('A. large : « En direct » puis « À savoir » en colonne de droite, rien d’autre', t && JSON.stringify(t.large) === JSON.stringify([['verdict', 'decision'], ['plan', 'chant', 'courbe'], ['fil', 'savoir']]), t && JSON.stringify(t.large));
   ok('B. moyen : la colonne de droite = [fil, savoir]', t && JSON.stringify(t.moyen) === JSON.stringify([['verdict', 'decision', 'plan', 'chant', 'courbe'], [], ['fil', 'savoir']]), t && JSON.stringify(t.moyen));
-  ok('C. téléphone inchangé', t && JSON.stringify(t.petit) === JSON.stringify([['verdict', 'savoir', 'decision', 'plan', 'fil', 'chant', 'courbe'], [], []]));
+  ok('C. téléphone : « En direct » puis « À savoir » en tête (MOTS-5, §586)', t && JSON.stringify(t.petit) === JSON.stringify([['fil', 'savoir', 'verdict', 'decision', 'plan', 'chant', 'courbe'], [], []]));
   ok('D. colleHaut compte le bandeau', corps(S.ck, 'function colleHaut() {').includes("'#page-pilotage .mod-header, #page-pilotage .pil-portee, #page-pilotage .pil-tabsbar'"));
   ok('E. ranger remesure « En direct »', /\n {2}filTaille\(\);/.test(corps(S.ck, 'function ranger() {')));
   ok('F. majFil remesure « En direct », et après les animations', /filTaille\(\); setTimeout\(filTaille, 520\)/.test(corps(S.ck, 'function majFil() {')));

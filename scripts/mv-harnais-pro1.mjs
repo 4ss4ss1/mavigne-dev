@@ -34,7 +34,7 @@ function jouer(S) {
   T('une seule bulle de courbe (id « ck-tip ») dans tout le module', (S.vue.match(/id="ck-tip"/g) || []).length === 1);
   // ② Les boutons
   T('« Changer la priorité » ouvre le choix de la priorité (data-fn « priorite » → openPriorityEdit)',
-    S.vue.includes(`data-fn="priorite">' + (pr.mode === 'choix' ? 'Choisir la priorité' : 'Changer la priorité')`)
+    S.vue.includes(`lien('data-fn="priorite"', pr.mode === 'choix' ? 'Choisir' : 'Changer', pr.mode === 'choix' ? 'Choisir la priorité' : 'Changer la priorité')`)
     && /fn\.dataset\.fn === 'priorite'\) \{\s*if \(typeof window\.openPriorityEdit === 'function'\) window\.openPriorityEdit\(\);/.test(S.vue) && !S.vue.includes('data-onglet="dec"'));
   T('« Agrandir » agit (plus d’instruction vide)', S.vue.includes("if (fn && fn.dataset.fn === 'agrandir') { agrandir(true); return; }") && !S.vue.includes('i2 >= 0) {}'));
   T('l’objectif se règle (plus de message de démonstration)', !S.vue.includes('data-toast=') && S.vue.includes('data-fn="objectif"')
@@ -90,7 +90,7 @@ console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' \u2014 ' + res.length + ' a
 if (CONTRE) {
   const DEF = [
     ['la balise cassée revient dans le squelette', 'vue', '<div class="ck-sr" id="ck-annonce"', "<d<div class=\"ck-tip\" id=\"ck-tip\"></div>\\'; <div class=\"ck-sr\" id=\"ck-annonce\""],
-    ['« Changer la priorité » renvoie vers un onglet', 'vue', 'data-fn="priorite">', 'data-onglet="dec">'],
+    ['« Changer la priorité » renvoie vers un onglet', 'vue', `lien('data-fn="priorite"'`, `lien('data-onglet="dec"'`],
     ['« Agrandir » rebranché sur une instruction vide', 'vue', "if (fn && fn.dataset.fn === 'agrandir') { agrandir(true); return; }", "if (fn && fn.dataset.fn === 'agrandir') { const i2 = 0; if (i2 >= 0) {} return; }"],
     ['le cockpit lit la tâche du moment par l’appel nu', 'pil', 'PP=_pilPrioDuJour(d).M;', 'PP=window._mvTacheDuMoment();'],
     ['ranger() plante sur une page disparue', 'vue', "if (!pg) { if (obs) { obs.disconnect(); obs = null; } return; }", ''],

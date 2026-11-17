@@ -19,7 +19,7 @@
      C. htmlTete : la date, la campagne lue (nom échappé, dates déjà échappées, piste), la phrase.
      D. htmlCadreTete / htmlBascule : le nom du cadre, la bascule (le point de la Cave accroché au mot), la roue si #pil-gear.
      E. Le squelette, le montage, les gestes (allerFin, allerBudget, la roue) — allerFin et allerBudget EXÉCUTÉS.
-     F. calerRefs, sur de fausses boîtes : la référence suivante se décale quand la précédente déborde, pas autrement.
+     F. (retirée par MOTS-5 §586 : les repères tiennent sur une ligne, calerRefs n'existe plus.)
      G. ouvrirInfo et les deux fiches : un titre et des paragraphes ; les fiches d'une phrase inchangées.
      H. La feuille : le bloc borné à .ck2 (sauf la sous-ligne masquée), jetons, pas de l'échelle, téléphone, la règle « meme »
         alignée sur la barre (701 px).
@@ -29,7 +29,7 @@
 import fs from 'fs'; import path from 'path'; import vm from 'vm'; import { fileURLToPath } from 'url';
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'); const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), css: L('src/styles.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')),
+const SRC0 = { vue: L('src/cockpit-vue.js'), pil: L('src/pilotage.js'), css: L('src/styles.css') + '\n' + L('src/aujourdhui.css'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')),
   guide: L('guide/11-pilotage.html'), sw: L('public/sw.js'), liste: L('scripts/mv-harnais-liste.mjs') };
 const morceau = (src, debut, fin) => { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); const j = src.indexOf(fin, i); if (j < 0) throw new Error('fin introuvable : ' + fin); return src.slice(i, j + fin.length); };
 const sansCom = s => s.replace(/^\s*\/\/.*$/gm, '');
@@ -45,13 +45,12 @@ function vueBac(S) {
     'const document = { getElementById: id => (id === "pil-gear" && GEAR) ? {} : null };',
     'const $ = s => (s === "#ck-resume" ? { set innerHTML(v) { HTML = v; } } : null); const $$ = () => [];',
     morceau(S.vue, 'const NF0 = ', '\n'), morceau(S.vue, 'const nb = ', '\n'), morceau(S.vue, 'const esc = s => ', '\n'), morceau(S.vue, 'const maj1 = s => ', '\n'),
-    morceau(S.vue, 'const MOIS_L = ', '\n'), morceau(S.vue, 'const jourN = ', '\n'), morceau(S.vue, 'const dLong = ', '\n'),
+    morceau(S.vue, 'const MOIS_C = ', '\n'), morceau(S.vue, 'const MOIS_L = ', '\n'), morceau(S.vue, 'const jourN = ', '\n'), morceau(S.vue, 'const dCourt = ', '\n'), morceau(S.vue, 'const dLong = ', '\n'),
     morceau(S.vue, 'const eur = v => ', '\n'), morceau(S.vue, 'const btnI = ', '\n'),
     'const ICO = { feuille: "<svg f></svg>", cave: "<svg c></svg>", euro: "<svg e></svg>" }; const cvIc = n => "<svg " + n + "></svg>";',
     morceau(S.vue, 'function savoirItems() {', '\n}\n'),
     morceau(S.vue, 'function htmlCadreTete() {', '\n}\n'), morceau(S.vue, 'function htmlBascule() {', '\n}\n'), morceau(S.vue, 'function htmlTete() {', '\n}\n'),
-    morceau(S.vue, 'const refChiffre = ', "join('') + '</span>';\n"), morceau(S.vue, 'function majResume(r) {', '\n}\n'),
-    'function calerRefs() {}',
+    morceau(S.vue, 'const refChiffre = ', "btnI(info, lab) + '</span>';\n"), morceau(S.vue, 'function majResume(r) {', '\n}\n'),
     'this.__res = (VV, vis, r) => { V = VV; VISEE = vis; HTML = ""; majResume(r); return HTML; };',
     'this.__tete = VV => { V = VV; return htmlTete(); };',
     'this.__cadre = (VV, g) => { V = VV; GEAR = !!g; return htmlCadreTete(); };', 'this.__eur = eur;'].join('\n');
@@ -69,13 +68,6 @@ function jouerAller(S, nom, sc) {
   const ctx = { S: { mode: sc.mode }, V: { eco: sc.eco }, reduit: () => !!sc.reduit, requestAnimationFrame: f => f(),
     choisirMode: m => { modes.push(m); ctx.S.mode = m; }, $: s => (s === '#ck-verdict' || s === '#ck-ever' ? el(s) : null) };
   vm.createContext(ctx); vm.runInContext(morceau(S.vue, 'function ' + nom + '() {', '\n}\n') + '\n' + nom + '();', ctx); return { appels, modes };
-}
-function jouerCaler(S, figs) {
-  const boite = r => ({ getBoundingClientRect: () => r });
-  const F = figs.map(f => { const cap = { style: { marginLeft: f.avant || '' }, children: f.fins.map(x => boite({ right: x })) };
-    return { cap, querySelector: s => (s === '.ck-fig-l' ? boite({ top: f.top, left: f.left }) : s === '.ck-cap' ? cap : null) }; });
-  const ctx = { Math, Array, $$: () => F }; vm.createContext(ctx); vm.runInContext(morceau(S.vue, 'function calerRefs() {', '\n}\n') + '\ncalerRefs();', ctx);
-  return F.map(f => f.cap.style.marginLeft);
 }
 
 function suite(S) {
@@ -102,32 +94,31 @@ function suite(S) {
     const c = vueBac(S), V0 = { savoir: pts(3), eco: true, objectif: '2027-03-05', cave: CAVE }, vis = J(2027, 3, 5);
     const r0 = { ecart: -45, fin: J(2027, 5, 7), sous: -5210, budget: 52400, att: 57610 };
     const h = c.__res(V0, vis, r0), eur = c.__eur;
-    T('B1 le retard : un bouton qui mène à la fin prévue, décrit par sa référence (fin prévue, objectif, « i »), trait rouge',
-      h.startsWith('<span class="ck-fig"><span class="ck-fig-l"><button type="button" class="ck-fig-t" data-fn="allerFin" aria-describedby="ck-cap-t">45 jours de retard</button>,</span><span class="ck-cap ko" id="ck-cap-t">')
-      && h.includes('<span class="ck-cap-k">Fin prévue</span><b class="ck-cap-v">7\u00a0mai</b><button class="ck-i" type="button" data-info="resTemps"')
-      && h.includes('<span class="ck-cap-k">Objectif</span><b class="ck-cap-v">5\u00a0mars</b><span></span></span></span>'));
-    T('B2 l’écart au budget : un bouton vers Économie, sa référence (coût à la fin, budget, « i »), trait rouge',
-      h.includes('data-fn="allerBudget" aria-describedby="ck-cap-b">' + eur(5210) + ' au-dessus du budget</button>,</span><span class="ck-cap ko" id="ck-cap-b">')
-      && h.includes('<span class="ck-cap-k">Coût à la fin</span><b class="ck-cap-v">' + eur(57610) + '</b><button class="ck-i" type="button" data-info="resBudget"')
-      && h.includes('<span class="ck-cap-k">Budget</span><b class="ck-cap-v">' + eur(52400) + '</b>'));
+    // MOTS-5 (§586) : la phrase d'abord, puis UNE ligne de repères — « fin prévue 7 mai · objectif 5 mars (i) ».
+    T('B1 le retard : un bouton rouge qui mène à la fin prévue, décrit par son repère (fin prévue, objectif, « i »)',
+      h.startsWith('<span class="ck-res-ph"><button type="button" class="ck-fig-t ko" data-fn="allerFin" aria-describedby="ck-cap-t">45 jours de retard</button>, ')
+      && h.includes('<span class="ck-cap" id="ck-cap-t"><span class="ck-cap-k">fin prévue</span> <b class="ck-cap-v">7\u00a0mai</b> \u00b7 <span class="ck-cap-k">objectif</span> 5\u00a0mars<button class="ck-i" type="button" data-info="resTemps"'));
+    T('B2 l’écart au budget : un bouton rouge vers Économie, son repère (coût à la fin, budget, « i »)',
+      h.includes('class="ck-fig-t ko" data-fn="allerBudget" aria-describedby="ck-cap-b">' + eur(5210) + ' au-dessus du budget</button>.</span>')
+      && h.includes('<span class="ck-cap" id="ck-cap-b"><span class="ck-cap-k">coût à la fin</span> <b class="ck-cap-v">' + eur(57610) + '</b> \u00b7 <span class="ck-cap-k">budget</span> ' + eur(52400) + '<button class="ck-i" type="button" data-info="resBudget"'));
     const hok = c.__res(V0, vis, { ecart: 6, fin: J(2027, 2, 25), sous: 1840, budget: 52400, att: 50560 });
-    T('B3 en avance et sous le budget : les mots, et le trait vert', hok.includes('>6 jours d’avance</button>') && hok.includes('<span class="ck-cap ok" id="ck-cap-t">')
-      && hok.includes('>' + eur(1840) + ' sous le budget</button>') && hok.includes('<span class="ck-cap ok" id="ck-cap-b">') && hok.includes('25\u00a0février'));
+    T('B3 en avance et sous le budget : les mots, l’avance en vert', hok.includes('class="ck-fig-t ok" data-fn="allerFin" aria-describedby="ck-cap-t">6 jours d’avance</button>')
+      && hok.includes('class="ck-fig-t" data-fn="allerBudget" aria-describedby="ck-cap-b">' + eur(1840) + ' sous le budget</button>') && hok.includes('25\u00a0févr.'));
     T('B4 un seul jour : le singulier, en retard comme en avance', c.__res(V0, vis, Object.assign({}, r0, { ecart: -1 })).includes('>1 jour de retard</button>')
       && c.__res(V0, vis, Object.assign({}, r0, { ecart: 1 })).includes('>1 jour d’avance</button>'));
     const hp = c.__res(V0, vis, { ecart: 0, fin: J(2027, 3, 5), sous: 0, budget: 52400, att: 52400 });
     T('B5 pile : « Pile à l’heure », « pile dans le budget », le trait neutre', hp.includes('>Pile à l’heure</button>') && hp.includes('<span class="ck-cap" id="ck-cap-t">')
       && hp.includes('>pile dans le budget</button>') && hp.includes('<span class="ck-cap" id="ck-cap-b">'));
     const hso = c.__res(Object.assign({}, V0, { objectif: null }), J(2026, 12, 22), r0);
-    T('B6 sans objectif posé : la fin prévue seule (le repère à 60 jours ne s’écrit pas)', hso.includes('Fin prévue') && !hso.includes('Objectif'));
+    T('B6 sans objectif posé : la fin prévue seule (le repère à 60 jours ne s’écrit pas)', hso.includes('fin prévue') && !hso.includes('objectif'));
     const hse = c.__res(Object.assign({}, V0, { eco: false }), vis, r0), hsb = c.__res(V0, vis, Object.assign({}, r0, { budget: 0 }));
     T('B7 sans économie (ou sans budget) : ni l’écart, ni sa référence', !hse.includes('ck-cap-b') && !hse.includes('allerBudget') && !hsb.includes('ck-cap-b'));
-    T('B8 les points et la cave gardent leur ponctuation (« , et » ne part plus seul en tête de ligne)',
-      h.includes(' <span class="ck-tient"><button type="button" class="ck-res-pts" data-fn="anticiper" aria-label="3 points à anticiper, en tête d’« À savoir »">3 points à anticiper</button>,</span> et <span class="ck-tient"><button type="button" class="ck-res-pts ck-res-cave" data-fn="cave"')
-      && h.endsWith('1 cuve demande un contrôle en cave</button>.</span>'));
+    T('B8 les points et la cave : deux pastilles qui se touchent, après la phrase, avant les repères',
+      h.includes('.</span><span class="ck-res-pl"><button type="button" class="ck-res-pts dbl" data-fn="anticiper" aria-label="3 points à anticiper, en tête d’« À savoir »">3 points à anticiper</button><button type="button" class="ck-res-pts ck-res-cave')
+      && h.includes('1 cuve demande un contrôle en cave</button></span><span class="ck-res-rep">'));
     const h1 = c.__res(Object.assign({}, V0, { savoir: pts(1), cave: null }), vis, r0), h0c = c.__res(Object.assign({}, V0, { savoir: [] }), vis, r0), h00 = c.__res(Object.assign({}, V0, { savoir: [], cave: null }), vis, r0);
-    T('B9 un point sans cave ; aucun point avec ou sans cave', h1.endsWith('>1 point à anticiper</button>.</span>') && h0c.includes('rien à anticiper, et <span class="ck-tient"><button')
-      && h00.endsWith(' rien à anticiper.') && !h00.includes('ck-tient'));
+    T('B9 un point sans cave ; aucun point avec ou sans cave', h1.includes('>1 point à anticiper</button></span>') && h0c.includes('<span class="ck-res-pl"><button type="button" class="ck-res-pts ck-res-cave') && !h0c.includes('rien à anticiper')
+      && h00.includes('<span class="ck-res-pl"><span class="ck-res-rien">rien à anticiper</span></span>'));
     T('B10 des phrases bien formées : balises équilibrées, ni undefined, ni NaN, ni null', [h, hok, hp, hso, hse, hsb, h1, h0c, h00].every(equilibre));
   }
   // C. la tête
@@ -148,7 +139,7 @@ function suite(S) {
   {
     const c = vueBac(S), V0 = { eco: true, cave: CAVE };
     const d = c.__cadre(V0, true);
-    T('D1 le nom du cadre, la bascule (trois vues), la roue « Choisir les indicateurs »', d.startsWith('<span class="ck-cadre-nom">Aujourd’hui</span><div class="ck-bascule" role="tablist"')
+    T('D1 la bascule (trois vues) et la roue « Choisir les indicateurs » — le mot « Aujourd’hui » ne se redit plus (MOTS-5)', d.startsWith('<div class="ck-bascule" role="tablist"') && !d.includes('ck-cadre-nom')
       && d.includes('data-mode="terrain"') && d.includes('data-mode="cave"') && d.includes('data-mode="eco"')
       && d.endsWith('<button type="button" class="ck-roue" data-fn="indicateurs" aria-label="Choisir les indicateurs" title="Choisir les indicateurs"><svg engrenage></svg></button>'));
     T('D2 sans #pil-gear (pas de panneau à ouvrir) : pas de roue', !c.__cadre(V0, false).includes('ck-roue'));
@@ -172,13 +163,6 @@ function suite(S) {
     const b0 = jouerAller(S, 'allerBudget', { mode: 'terrain', eco: false }), b1 = jouerAller(S, 'allerBudget', { mode: 'terrain', eco: true });
     T('E5 l’écart au budget : rien sans économie ; sinon la vue Économie et son atterrissage', b0.modes.length === 0 && b0.appels.length === 0
       && b1.modes.join() === 'eco' && b1.appels.length === 1 && b1.appels[0][0] === '#ck-ever');
-    T('E6 la largeur change : les références se recalent (ranger appelle calerRefs)', /function ranger\(\) \{\n  indiceSeg\(\);\n  calerRefs\(\);/.test(S.vue));
-  }
-  // F. calerRefs
-  {
-    T('F1 la référence précédente déborde : la suivante se décale, 20 px d’air (333 + 20 − 310 = 43)', jouerCaler(S, [{ top: 100, left: 160, fins: [300, 333, 240] }, { top: 100, left: 310, fins: [450] }])[1] === '43px');
-    T('F2 rien ne déborde : pas de décalage, et l’ancien est effacé', jouerCaler(S, [{ top: 100, left: 160, fins: [302] }, { top: 100, left: 326, fins: [480], avant: '17px' }])[1] === '');
-    T('F3 pas sur la même ligne (téléphone) : pas de décalage', jouerCaler(S, [{ top: 100, left: 40, fins: [333] }, { top: 160, left: 40, fins: [250] }])[1] === '');
   }
   // G. la bulle et les deux fiches
   {
@@ -208,17 +192,17 @@ function suite(S) {
     const esp = (bloc.match(/(?:padding|margin|gap)(?:-[a-z]+)?:[^;}]*/g) || []).flatMap(x => (x.match(/(\d+)px/g) || []).map(v => parseInt(v)));
     T('H4 jetons seulement : ni couleur en dur, ni taille de texte hors des pas, espacements sur l’échelle', !/#[0-9a-fA-F]{3,8}\b|rgba?\(/.test(horsVar) && !/font-size\s*:\s*\d/.test(bloc)
       && esp.length > 0 && esp.every(v => [2, 4, 8, 12, 16, 20, 24, 32, 40].includes(v)));
-    T('H5 le téléphone : le nom du cadre s’efface, la bascule prend la ligne, la campagne passe à la ligne',
-      /@media \(max-width:699px\)\{[^@]*\.ck2 \.ck-cadre-nom\{display:none\}[^@]*\.ck2 \.ck-cadre-tete \.ck-bascule\{flex:1\}[^@]*\.ck2 \.ck-per\{flex-basis:100%\}/.test(bloc));
+    T('H5 le téléphone : la bascule prend la ligne, la campagne passe à la ligne',
+      /@media \(max-width:699px\)\{[^@]*\.ck2 \.ck-cadre-tete \.ck-bascule\{flex:1\}[^@]*\.ck2 \.ck-per\{flex-basis:100%\}/.test(bloc) && !S.css.includes('ck-cadre-nom'));
     T('H6 la ligne de repère ne répète pas la barre là où la barre montre ses dates (dès 701 px, la barre les cache à 700)',
       bloc.includes('@media (min-width:701px){.ck2 .ck-per.meme .ck-per-d{display:none}}') && /@media\(max-width:700px\)\{[^}]*\}*[\s\S]{0,900}\.pil-ptlab,\.pil-ptbornes\{display:none\}/.test(S.pil));
-    T('H7 la ponctuation collée, le texte d’un bouton libre ; le trait rouge ou vert', bloc.includes('.ck2 .ck-fig-l,.ck2 .ck-tient{white-space:nowrap}') && bloc.includes('.ck2 .ck-tient>.ck-res-pts{white-space:normal}')
-      && bloc.includes('.ck2 .ck-cap.ko::before{background:var(--danger)}') && bloc.includes('.ck2 .ck-cap.ok::before{background:var(--ok)}'));
+    T('H7 le retard en rouge, l’avance en vert ; un repère ne se coupe pas', S.css.includes('.ck2 .ck-fig-t.ko{color:var(--danger-texte)}') && S.css.includes('.ck2 .ck-fig-t.ok{color:var(--ok-texte)}')
+      && S.css.includes('.ck2 .ck-cap{white-space:nowrap}') && !S.css.includes('ck-tient'));
   }
   // I. l'accompagnement
   {
     T('I1 la fiche MV_AIDE du Pilotage : la bascule en haut à droite, les références, l’exception d’Aujourd’hui',
-      S.uti.includes('en haut à droite du cadre, la bascule <b>Terrain · Cave · Économie</b>') && S.uti.includes('le <b>coût à la fin</b> et le <b>budget</b> sous l’écart au budget')
+      S.uti.includes('en haut à droite du cadre, la bascule <b>Terrain · Cave · Économie</b>') && S.uti.includes('le <b>coût à la fin</b> et le <b>budget</b> pour l’écart au budget')
       && S.uti.includes('<b>Aujourd’hui</b> fait exception : il lit toujours la campagne en cours') && S.uti.includes("['La vue Cave', \": la bascule, en haut à droite du cadre, passe à trois vues"));
     T('I2 le guide : la campagne lue, les références, Aujourd’hui parmi les écrans qui gardent leur cadre, l’atterrissage juste',
       S.guide.includes('la campagne que lisent les chiffres de la page') && S.guide.includes('le <b>coût à la fin</b> et le <b>budget</b> sous l\'écart au budget')
@@ -239,28 +223,25 @@ const res = jouer(SRC0); let ko = 0; res.forEach(([n, ok]) => { if (!ok) ko++; c
 console.log('\n' + (ko ? 'ROUGE ' + ko : 'VERT') + ' — ' + res.length + ' assertions, ' + ko + ' échec' + (ko > 1 ? 's' : ''));
 if (CONTRE) {
   const DEF = [
-    ['la référence du délai retirée', 'vue', "fig(maj1(temps), 'allerFin', 'ck-cap-t', refT)", "fig(maj1(temps), 'allerFin', 'ck-cap-t', '')"],
-    ['l’objectif écrit sans objectif posé', 'vue', ".concat(V.objectif ? [['Objectif', dLong(VISEE)]] : [])", ".concat([['Objectif', dLong(VISEE)]])"],
+    ['le repère du délai retiré', 'vue', "'<span class=\"ck-res-rep\">' + refT + refB + '</span>'", "'<span class=\"ck-res-rep\">' + refB + '</span>'"],
+    ['l’objectif écrit sans objectif posé', 'vue', ".concat(V.objectif ? [['objectif', dCourt(VISEE)]] : [])", ".concat([['objectif', dCourt(VISEE)]])"],
     ['le pluriel du retard cassé', 'vue', "' jour' + (r.ecart < -1 ? 's' : '') + ' de retard'", "' jours de retard'"],
-    ['le trait sans état', 'vue', "refChiffre('ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '',", "refChiffre('ck-cap-t', '',"],
-    ['la ponctuation décollée', 'vue', "const tient = (bt, p) => '<span class=\"ck-tient\">' + bt + p + '</span>';", 'const tient = (bt, p) => bt + p;'],
+    ['le retard sans sa couleur', 'vue', "fig(maj1(temps), 'allerFin', 'ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '')", "fig(maj1(temps), 'allerFin', 'ck-cap-t', '')"],
+    ['« rien à anticiper » redevenu muet', 'vue', "'<span class=\"ck-res-rien\">rien à anticiper</span>'", "''"],
     ['la bascule redescend sous la phrase', 'vue', "  $('#ck-cadre-tete').innerHTML = htmlCadreTete();", "  void 0;"],
     ['la sous-ligne reste visible', 'css', '#page-pilotage:has(#ck-cadre-tete) .pil-souslig{display:none}\n', ''],
     ['la ligne de repère répète la barre', 'css', '@media (min-width:701px){.ck2 .ck-per.meme .ck-per-d{display:none}}\n', ''],
     ['la marque « meme » jamais posée', 'pil', 'meme:(_PIL_SCOPE.camp===sa.nom)', 'meme:false'],
     ['les dates écrites autrement que la barre', 'pil', 'r.bornesHtml=_pilPorteeBornes(d0,d1);', "r.bornesHtml=d0+' – '+d1;"],
     ['la piste hors de la campagne', 'pil', 'b>=a && o>=a && o<=b) r.pct=', 'b>=a) r.pct='],
-    ['calerRefs ne décale plus', 'vue', "if (d > 0) cb.style.marginLeft = d + 'px';", "if (d > 1e9) cb.style.marginLeft = d + 'px';"],
-    ['un décalage ancien jamais effacé', 'vue', "F.forEach(f => { const c = f.querySelector('.ck-cap'); if (c) c.style.marginLeft = ''; });", ''],
     ['les fiches à titre ignorées', 'vue', "if (f && typeof f === 'object') {", 'if (false) {'],
     ['le point de la Cave décroché du mot', 'vue', '<span class="ck-b-lab">Cave', 'Cave<span class="ck-b-lab">'],
     ['la roue sans panneau', 'vue', "{ const g = document.getElementById('pil-gear'); if (g) g.click(); return; }", '{ return; }'],
     ['le budget mène nulle part', 'vue', "  if (S.mode !== 'eco') choisirMode('eco');\n  const v = $('#ck-ever');", "  const v = $('#ck-ever');"],
-    ['les références figées à la première largeur', 'vue', '  indiceSeg();\n  calerRefs();', '  indiceSeg();'],
     ['l’aide pas à jour', 'uti', '<b>Aujourd’hui</b> fait exception : il lit toujours la campagne en cours, et la nomme sous sa date.', ''],
     ['le guide pas à jour', 'guide', 'la campagne que lisent les chiffres de la page', ''],
     ['l’atterrissage du guide redevenu faux', 'guide', "compté au barème et\n  corrigé de la cadence mesurée de l'équipe dès 40 % du travail fait — avant, l'écart déjà constaté est reporté tel quel.", "à la cadence\n  mesurée de l'équipe."],
-    ['une couleur écrite en dur', 'css', '.ck2 .ck-cap.ko::before{background:var(--danger)}', '.ck2 .ck-cap.ko::before{background:#C2381B}'],
+    ['une couleur écrite en dur', 'css', '.ck2 .ck-fig-t.ko{color:var(--danger-texte)}', '.ck2 .ck-fig-t.ko{color:#C2381B}'],
   ];
   let m = 0; DEF.forEach(([nom, f, a, b]) => { const S = Object.assign({}, SRC0); if (S[f].split(a).length !== 2) { console.log('  ??  ' + nom + ' — motif introuvable ou multiple'); m++; return; } S[f] = S[f].replace(a, b); const rouge = jouer(S).some(x => !x[1]); if (!rouge) m++; console.log((rouge ? '  mord  ' : '  RATE  ') + nom); });
   console.log('\n' + (m ? 'CONTRE-ÉPREUVES ROUGES ' + m : 'CONTRE-ÉPREUVES VERTES') + ' — ' + DEF.length + ' défauts réinjectés'); process.exit(ko || m ? 1 : 0);

@@ -100,9 +100,10 @@ function suite(S) {
     && Vv.includes("const etat = (pct >= 99.95 || t.eqFini) ? 'fait'") && Vv.includes('TACHES.find(t => t.pct < 100 && !t.eqFini)'));
   T('la fenêtre dit « la suite au prestataire » (fini pour l\u2019équipe) ou « fenêtre passée » — au montage comme à la mise à jour', () => {
     const l = ligne(Vv, /const suiteFen = [^\n]*\n/), c = {}; vm.createContext(c); vm.runInContext(l.replace('const suiteFen', 'this.suiteFen'), c); const f = c.suiteFen;
-    return f({ eqFini: true }, { etat: 'fait', pct: 50 }) === ', la suite au prestataire' && f({}, { etat: 'retard', pct: 40 }) === ', fenêtre passée'
+    return f({ eqFini: true }, { etat: 'fait', pct: 50 }) === 'la suite au prestataire' && f({}, { etat: 'retard', pct: 40 }) === 'fenêtre passée'
       && f({ eqFini: true }, { etat: 'fait', pct: 100 }) === '' && f({}, { etat: 'cours', pct: 10 }) === '' && (Vv.match(/suiteFen\(t, x\)/g) || []).length === 2; });
-  T('le sous-titre dit la règle dans le cockpit v2 (le repli de cockpit.js est retiré)', () => Vv.includes("'Par date de début, les terminés en bas'")
+  // MOTS-5 (§586) : la règle n'est plus un sous-titre — elle est dans le « i » de la carte (fiche « chant »).
+  T('la règle de l’ordre est dans le « i » de la carte (plus de sous-titre)', () => Vv.includes("chant: 'Les chantiers de la campagne, par date de début, les terminés en bas.") && Vv.includes("entete('Chantiers ' + V.saisonDe, '', 'chant')")
     && !Vv.includes('Dans l\u2019ordre des dates de la campagne'));
   T('les deux lectures sont exposées (pilotage.js et le kit les appellent par window)', () => /window\._mvOrdreChantiers=_mvOrdreChantiers;/.test(sansCom(S.uti)) && /window\._mvChantiersCtx=_mvChantiersCtx;/.test(sansCom(S.app)));
   T('la mention a sa règle de feuille, aux jetons seuls', () => /\.mvk-note\{margin:0 0 var\(--e-1,4px\);font-size:var\(--pt-micro,11px\);color:var\(--texte-doux\);\}/.test(S.css));

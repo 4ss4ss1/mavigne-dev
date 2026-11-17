@@ -1,0 +1,119 @@
+/* ═════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★★ MOTS-5 (§586) — AUJOURD'HUI ALLÉGÉ : TOUTES LES CARTES, MOINS DE MOTS DANS CHACUNE
+   Nico (16/11) : « l'onglet comme il était avant me semblait bien, il faut l'alléger » — rien ne quitte l'écran, chaque
+   carte garde sa place. Dans une carte : un titre, un chiffre, une barre ou une couleur ; l'explication derrière le « i »,
+   le détail au toucher. Maquette validée : docs/maquettes/maquette-aujourdhui-v4.html. Ces règles viennent après celles
+   de REF-1 / PRO-1 et les recouvrent sous .ck2 ; la vue Cave et la vue Économie ne sont pas touchées (lots suivants).
+   Fichier à part : styles.css est à son plafond (1 024 ko, mv-harnais-typo) — rien n'y entre. Importé par app.js après
+   styles.css et bandeau.css : il passe donc après eux. Tout se lit dans la charte, avec un repli.
+   ═════════════════════════════════════════════════════════════════════════════════════════════════ */
+/* ── La tête : la bascule à droite de la date, la phrase, les pastilles, une ligne de repères ── */
+.ck2 .ck-cadre-tete{justify-content:flex-end}
+@media (min-width:700px){
+  .ck2 .ck-cadre-tete{float:right;margin:calc(-1 * var(--e-2,8px)) 0 var(--e-2,8px) var(--e-4,16px)}
+  .ck2 .ck-photos{clear:both}
+}
+.ck2 .ck-tete-res{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px) var(--e-3,12px);color:var(--texte)}
+.ck2 .ck-fig-t.ok{color:var(--ok-texte)}
+.ck2 .ck-fig-t.ko{color:var(--danger-texte)}
+.ck2 .ck-res-pl{display:inline-flex;flex-wrap:wrap;gap:var(--e-2,8px)}
+.ck2 .ck-res-pl .ck-res-pts{display:inline-flex;align-items:center;gap:var(--e-2,8px);min-height:28px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);background:var(--attention-doux);color:var(--texte);font:var(--fw-med,500) var(--pt-micro,12px)/1 var(--font-ui);letter-spacing:0;text-decoration:none;white-space:nowrap;cursor:pointer}
+/* La pastille garde son dessin (28 px) et se touche sur 44 : une bordure transparente autour, reprise par une marge négative. */
+.ck2 .ck-res-pl .ck-res-pts{min-height:44px;border:var(--e-2,8px) solid transparent;background-clip:padding-box;margin:calc(-1 * var(--e-2,8px))}
+.ck2 .ck-res-pl .ck-res-pts::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--attention)}
+.ck2 .ck-res-pl .ck-res-pts.alerte{background:var(--danger-doux)}
+.ck2 .ck-res-pl .ck-res-pts.alerte::before{background:var(--danger)}
+.ck2 .ck-res-rien{font:var(--fw-med,500) var(--pt-micro,12px)/1 var(--font-ui);letter-spacing:0;color:var(--texte-doux)}
+.ck2 .ck-res-rep{flex-basis:100%;display:flex;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-5,20px);font:normal var(--pt-txt,13px)/1.4 var(--font-ui);letter-spacing:0;color:var(--texte-doux)}
+.ck2 .ck-cap{white-space:nowrap}
+.ck2 .ck-cap .ck-i{margin-left:var(--e-2,8px);vertical-align:middle}
+.ck-page[data-taille="petit"] .ck-res-pts.dbl{display:none}
+.ck-page[data-taille="petit"] .ck-res-pl:not(:has(.ck-res-pts:not(.dbl))):not(:has(.ck-res-rien)){display:none}
+/* ── Les quatre tuiles : le chiffre, la barre, trois mots ── */
+.ck2 .ck-photos .ck-ph{min-height:0;gap:var(--e-1,4px);padding:var(--e-3,12px) var(--e-4,16px)}
+.ck2 .ck-photos .ck-ph-vis{position:relative;z-index:1;pointer-events:none;display:flex;align-items:center;min-height:24px}
+.ck2 .ck-ph-b{flex:1;grid-column:auto;overflow:visible}
+.ck2 .ck-ph-b i.b-ph{background:var(--texte)}
+.ck2 .ck-ph-b u{position:absolute;top:-3px;bottom:-3px;width:2px;transform:translateX(-50%);border-radius:1px;background:var(--texte);transition:left var(--mv-d4) var(--mv-sortie)}
+.ck2 .ck-ph-pst{display:inline-flex;align-items:center;gap:var(--e-2,8px);height:24px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);background:var(--attention-doux);color:var(--texte);font-size:var(--pt-micro,12px);font-weight:var(--fw-med,500);white-space:nowrap}
+.ck2 .ck-ph-pst::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--attention)}
+.ck2 .ck-photos .ck-ph .ck-cadre{margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:699px){
+  .ck2 .ck-photos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);overflow:hidden}
+  .ck2 .ck-photos .ck-ph{min-width:0;border-right:0}
+  .ck2 .ck-photos .ck-ph:nth-child(odd){border-right:1px solid var(--ligne,#ECE6DA)}
+  .ck2 .ck-photos .ck-ph:nth-child(n+3){border-top:1px solid var(--ligne,#ECE6DA)}
+}
+/* ── La fin prévue : la date en grand, l'écart à côté ── */
+.ck2 .ck-v-k .ck-i{margin-left:var(--e-2,8px)}
+.ck2 .ck-v-phrase{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-3,12px);max-width:none;margin-top:var(--e-2,8px)}
+.ck2 .ck-v-phrase small{font:var(--fw-med,500) var(--pt-txt,13px)/1.3 var(--font-ui);letter-spacing:0;color:var(--texte-med)}
+.ck2 .ck-v-phrase small.ok{color:var(--ok-texte)}
+.ck2 .ck-v-phrase small.ko{color:var(--danger-texte)}
+.ck2 .ck-v-phrase small b{font-weight:var(--fw-semi,600)}
+/* ── À savoir : le compte en pastille, le détail d'un point au toucher ; au téléphone, les points avant la météo ── */
+.ck2 .ck-sv-dr{display:inline-flex;align-items:center;gap:var(--e-2,8px);flex:none}
+.ck2 .ck-sv-n{display:inline-flex;align-items:center;gap:var(--e-2,8px);height:24px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);background:var(--attention-doux);color:var(--texte);font-size:var(--pt-micro,12px);font-weight:var(--fw-med,500);white-space:nowrap}
+.ck2 .ck-sv-n::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--attention)}
+.ck2 #ck-savoir .ck-met-v{order:1}
+.ck2 #ck-savoir .ck-met-mm{order:2}
+/* Une ligne qui se déplie se touche sur 44 px de haut, sans changer de dessin : le remplissage est repris par une marge négative. */
+.ck2 .ck-sv-d>summary{list-style:none;cursor:pointer;padding:var(--e-3,12px) 0;margin:calc(-1 * var(--e-3,12px)) 0}
+.ck2 .ck-sv-d>summary::-webkit-details-marker{display:none}
+.ck2 .ck-sv-d>summary .ck-sv-h b::after{content:"";display:inline-block;width:6px;height:6px;margin-left:var(--e-2,8px);border-right:1.5px solid var(--texte-doux);border-bottom:1.5px solid var(--texte-doux);transform:rotate(45deg);vertical-align:3px}
+.ck2 .ck-sv-d[open]>summary .ck-sv-h b::after{transform:rotate(225deg);vertical-align:-1px}
+.ck-page[data-taille="petit"] #ck-savoir{display:flex;flex-direction:column}
+.ck-page[data-taille="petit"] #ck-savoir .ck-sv-tout{order:1}
+.ck-page[data-taille="petit"] #ck-savoir .ck-met{order:2;margin-top:var(--e-2,8px)}
+/* ── La décision du jour : une question par ligne ── */
+.ck2 #ck-decision .ck-p-hd{margin-bottom:var(--e-1,4px)}
+.ck2 .ck-dz-g{grid-template-columns:minmax(0,1fr);margin:0;border-top:0}
+.ck2 .ck-dz-g .ck-dz{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--e-0,2px) var(--e-3,12px);padding:var(--e-2,8px) 0;border:0;border-top:1px solid var(--ligne,#ECE6DA)}
+.ck2 .ck-dz-g .ck-dz-t{grid-column:1;grid-row:1}
+.ck2 .ck-dz-g .ck-dz-p{grid-column:2;grid-row:1;justify-self:end;margin:0;padding:0}
+.ck2 .ck-dz-g .ck-dz-d,.ck2 .ck-dz-g .ck-dz>.ck-dz-v{grid-column:1;grid-row:2;min-width:0}
+.ck2 .ck-dz-g .ck-dz-b{grid-column:2;grid-row:2;justify-self:end;min-height:24px;margin:0;max-width:150px}
+.ck2 .ck-dz-g .ck-dz-b .ck-dz-fen,.ck2 .ck-dz-g .ck-dz-b .ck-dz-barre{width:120px}
+.ck2 .ck-dz-g .ck-dz-b .ck-dz-barre{flex-direction:row;align-items:center;gap:var(--e-2,8px)}
+.ck2 .ck-dz-g .ck-dz-b .ck-dz-barre .ck-barre{flex:1}
+.ck2 .ck-dz-d[open]{grid-column:1/-1}
+.ck2 .ck-dz-d[open]~.ck-dz-b{grid-column:1/-1;grid-row:3;justify-self:start}
+.ck2 .ck-dz-d>summary{display:flex;align-items:center;min-height:44px;margin:calc(-1 * var(--e-3,12px)) 0;list-style:none;cursor:pointer}
+.ck2 .ck-dz-d>summary::-webkit-details-marker{display:none}
+.ck2 .ck-dz-d>summary::after{content:"";display:inline-block;width:6px;height:6px;margin-left:var(--e-2,8px);border-right:1.5px solid var(--texte-doux);border-bottom:1.5px solid var(--texte-doux);transform:rotate(45deg) translate(-1px,-1px)}
+.ck2 .ck-dz-d[open]>summary::after{transform:rotate(225deg) translate(-1px,-1px)}
+.ck2 .ck-dz-g .ck-dz-r{min-height:0;margin:var(--e-0,2px) 0 0}
+.ck2 .ck-dz-g .ck-lien{gap:var(--e-1,4px)}
+/* ── Le plan : la note en un mot, une famille à zéro effacée ── */
+.ck2 details.ck-plan-note{display:block}
+.ck2 .ck-plan-note>summary{display:inline-flex;align-items:center;gap:var(--e-2,8px);min-height:44px;margin:calc(-1 * var(--e-3,12px)) 0;list-style:none;cursor:pointer}
+.ck2 .ck-plan-note>summary::-webkit-details-marker{display:none}
+.ck2 .ck-plan-note>summary i{margin-top:0}
+.ck2 .ck-plan-note>span{display:block;margin-top:var(--e-1,4px)}
+.ck2 #ck-plan .ck-leg-i.zero{opacity:.55}
+.ck2 #ck-plan .ck-leg-i.zero[data-f="arr"]{display:none}
+/* ── Les chantiers : un chantier, une ligne ; ses dates sous celui qu'on regarde ── */
+.ck2 .ck-ch{grid-template-columns:minmax(0,5.8em) minmax(36px,1fr) 3em 5.8em;gap:var(--e-0,2px) var(--e-3,12px);min-height:44px;padding:var(--e-2,8px)}
+.ck2 .ck-ch .ck-barre{grid-column:auto}
+.ck2 .ck-ch .ck-ch-pct,.ck2 .ck-ch .ck-ch-det{justify-self:end;text-align:right}
+.ck2 .ck-ch-ret{grid-column:1/-1;font-size:var(--pt-micro,12px);color:var(--attention-texte)}
+.ck2 .ck-ch-ret:empty{display:none}
+.ck2 .ck-ch .ck-ch-fen{grid-column:1/-1;display:none}
+.ck2 .ck-ch.vue .ck-ch-fen{display:block}
+/* ── La charge restante : le chiffre en grand, les noms sur les traits ── */
+.ck2 #ck-gr-cadre,.ck2 #ck-agr-cadre{display:flex;align-items:baseline;gap:var(--e-3,12px);margin-top:var(--e-1,4px)}
+.ck2 #ck-gr-cadre::before,.ck2 #ck-agr-cadre::before{display:none}
+.ck2 #ck-gr-cadre b,.ck2 #ck-agr-cadre b{font:var(--fw-semi,600) var(--pt-lg,24px)/1.1 var(--font-ui);letter-spacing:var(--ls-titre);color:var(--texte)}
+/* ── Au téléphone : « En direct » puis « À savoir » juste sous la phrase, avant les tuiles (Nico, 16/11) ── */
+.ck-page[data-taille="petit"]{display:flex;flex-direction:column}
+.ck-page[data-taille="petit"]>.ck-vue{order:5}
+.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden]),.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col{display:contents}
+.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>*{order:4;margin-top:var(--e-4,16px)}
+.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-fil{order:1}
+.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-savoir{order:2}
+.ck-page[data-taille="petit"]>#ck-photos{order:3;margin-top:var(--e-4,16px)}
+/* ── Au téléphone : les cartes presque d'un bord à l'autre (16 px de marge au lieu de 40) ── */
+@media (max-width:699px){.ck2 .ck-page{margin-left:calc(-1 * var(--e-2,8px));margin-right:calc(-1 * var(--e-2,8px));padding-left:0;padding-right:0}}
+.ck2 .ck-frise{margin-top:0}
+/* La réponse d'une question se lit comme une ligne de liste, pas comme un titre : elle tient sur sa ligne à côté de son dessin. */
+:is(#page-pilotage, #ovReglPilotage) .ck-dz-g .ck-dz-v { font-size: var(--t-ligne) !important; }

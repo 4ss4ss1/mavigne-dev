@@ -6119,7 +6119,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-v-phrase{margin:12px 0 0;max-width:15em;font:600 clamp(var(--pt-xxl,32px),8.2vw,var(--pt-hero,40px))/1.06 var(--font-titre);letter-spacing:-.006em;color:var(--texte);text-wrap:balance}
 .ck-roule{display:inline-grid;overflow:hidden;vertical-align:bottom;padding:0 .02em .1em;margin-bottom:-.1em}
 .ck-roule>span{grid-area:1/1;white-space:nowrap}
-.ck-v-sous{margin:12px 0 0;max-width:44ch;font-size:var(--pt-base,14px);line-height:1.5;color:var(--texte-med)}
 #ck-v-ecart b{font-weight:600;font-variant-numeric:lining-nums tabular-nums}
 #ck-v-ecart.ok b{color:var(--vert-tx)}#ck-v-ecart.ko b{color:var(--orange-tx)}
 .ck-etat{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 12px;border-radius:var(--ck-r-full);font-size:var(--pt-micro,12px);font-weight:600;white-space:nowrap;transition:background-color var(--mv-d3),color var(--mv-d3)}
@@ -6137,8 +6136,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-fr-auj::before{content:"";position:absolute;left:-.5px;top:17px;width:1.5px;height:20px;background:var(--rouge)}
 .ck-fr-auj em{top:44px;transform:translateX(-50%)}
 .ck-fr-fin::before{content:"";position:absolute;left:-6px;top:21px;width:12px;height:12px;border-radius:2px;background:var(--or);transform:rotate(45deg);box-shadow:0 0 0 3px var(--bg-app)}
-.ck-fr-fin em{top:-2px;transform:translateX(-50%);font-weight:600;color:var(--or-tx)}
-.ck-fr-fin.droite em{transform:translateX(calc(-100% + 10px))}
 .ck-fr-visee::before{content:"";position:absolute;left:-.5px;top:15px;width:1px;height:24px;background:var(--texte-doux)}
 .ck-fr-visee em{top:44px;transform:translateX(calc(-100% + 4px))}
 .ck-fr-bout{left:0;top:44px}
@@ -6304,7 +6301,7 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-gr-leg{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
 .ck-gr-leg span{display:inline-flex;align-items:center;gap:8px}
 .ck-gr-leg i{display:inline-block;width:20px;height:0}
-.lg-mes{border-top:2px solid var(--terre)}.lg-proj{border-top:2.5px dotted var(--or)}.lg-bes{border-top:1.5px dashed var(--texte-doux)}
+.lg-mes{border-top:2px solid var(--terre)}
 
 /* ═══ LE VERDICT : petites pièces ═══ */
 .ck-v-k{font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte-doux)}
@@ -6337,8 +6334,6 @@ button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
 .ck-met{container:ck-met / inline-size}
 @container ck-met (max-width:290px){.ck-met-vu{flex-basis:100%}}   /* petit téléphone : « km/h » dessous pour les cinq jours, jamais pour un seul */
 .ck-met-v svg{flex:none;width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.ck-met-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:8px 2px 2px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
-.ck-met-leg i{display:inline-block;width:14px;height:4px;margin-right:-8px;border-radius:2px;background:var(--info)}
 .ck-sv-l{list-style:none;margin:8px 0 0;padding:0}
 .ck-sv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px 0;box-shadow:inset 0 1px 0 var(--ligne,#ECE6DA)}
 .ck-sv:first-child{box-shadow:none}
@@ -7895,7 +7890,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
    La ligne de repère (la campagne lue) garde le nom seul quand la barre « Vous regardez » montre déjà ses dates (dès 701 px). */
 #page-pilotage:has(#ck-cadre-tete) .pil-souslig{display:none}
 .ck2 .ck-cadre-tete{display:flex;align-items:center;gap:var(--e-3,12px);min-height:var(--h-row,36px);margin:calc(-1 * var(--e-4,16px)) 0 var(--e-4,16px)}
-.ck2 .ck-cadre-nom{flex:1;min-width:0;font-size:var(--pt-txt,13px);font-weight:var(--fw-med,500);color:var(--texte-doux)}
 .ck2 .ck-cadre-tete .ck-bascule{padding:var(--e-0,2px);border-radius:var(--r-md,8px)}
 .ck2 .ck-cadre-tete .ck-bascule button{min-height:var(--h-ctl,32px);padding:0 var(--e-3,12px);gap:var(--e-2,8px);border-radius:var(--r-sm,6px);font-size:var(--pt-txt,13px)}
 .ck2 .ck-cadre-tete .ck-bascule button svg{width:var(--ic-sm,16px);height:var(--ic-sm,16px)}
@@ -7914,20 +7908,12 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 .ck2 .ck-per-piste i{position:absolute;top:0;bottom:0;left:0;border-radius:inherit;background:var(--texte-doux)}
 @media (min-width:701px){.ck2 .ck-per.meme .ck-per-d{display:none}}
 .ck2 .ck-tete-res{max-width:none;margin-top:var(--e-2,8px)}
-.ck2 .ck-fig{display:inline-flex;flex-direction:column;vertical-align:baseline}
-.ck2 .ck-fig-l,.ck2 .ck-tient{white-space:nowrap}
-.ck2 .ck-tient>.ck-res-pts{white-space:normal}
 .ck2 .ck-fig-t{display:inline;margin:0;padding:0;border:0;border-radius:var(--ck-r-sm);background:none;font:inherit;font-weight:var(--fw-semi,600);letter-spacing:inherit;color:var(--texte);cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:1px;text-underline-offset:.18em;transition:text-decoration-color var(--mv-d2)}
 @media (hover:hover){.ck2 .ck-fig-t:hover{text-decoration-color:currentColor}}
-.ck2 .ck-cap{position:relative;width:0;min-width:100%;display:grid;grid-template-columns:max-content max-content max-content;align-items:center;column-gap:var(--e-2,8px);margin:var(--e-1,4px) 0 var(--e-2,8px);padding-left:var(--e-5,20px);font:var(--fw-reg,400) var(--pt-micro,12px)/1.4 var(--font-ui);letter-spacing:0;color:var(--texte-doux)}
-.ck2 .ck-cap::before{content:"";position:absolute;left:0;top:.7em;width:14px;height:1.5px;border-radius:var(--r-full,999px);background:var(--encours)}
-.ck2 .ck-cap.ko::before{background:var(--danger)}
-.ck2 .ck-cap.ok::before{background:var(--ok)}
 .ck2 .ck-cap-k{white-space:nowrap}
 .ck2 .ck-cap-v{font-weight:var(--fw-semi,600);color:var(--texte);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ck2 .ck-cap .ck-i{width:var(--ic-sm,16px);height:var(--ic-sm,16px);margin-left:0;font-size:var(--pt-nano,11px)}
 @media (max-width:699px){
-  .ck2 .ck-cadre-nom{display:none}
   .ck2 .ck-cadre-tete .ck-bascule{flex:1}
   .ck2 .ck-cadre-tete .ck-bascule button{flex:1;min-height:var(--h-row,36px);padding:0 var(--e-2,8px);gap:var(--e-1,4px)}
   .ck2 .ck-roue{width:calc(var(--h-row,36px) + var(--e-1,4px));height:calc(var(--h-row,36px) + var(--e-1,4px))}
@@ -8658,11 +8644,6 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 .ck-dz-fen{display:flex;flex-direction:column;gap:4px;width:100%}
 .ck-dz-fen-piste{position:relative;display:block;height:8px;border-radius:var(--ck-r-full);background:var(--hover)}
 .ck-dz-fen-piste i{position:absolute;top:0;bottom:0;border-radius:var(--ck-r-full);background:var(--vert-med)}
-.ck-dz-fen-ax{position:relative;display:block;height:16px;font-size:var(--pt-nano,11px);color:var(--texte-doux)}
-.ck-dz-fen-ax span{position:absolute;top:0;white-space:nowrap}
-.ck-dz-fen-ax span:nth-child(1){left:0}
-.ck-dz-fen-ax span:nth-child(2){left:50%;transform:translateX(-50%)}
-.ck-dz-fen-ax span:nth-child(3){right:0}
 .ck-dz-alerte{font-size:var(--pt-micro,12px);color:var(--orange)}
 .ck-dz-chips{display:flex;flex-wrap:wrap;gap:4px}
 .ck-dz-chips span{padding:2px 8px;border-radius:var(--ck-r-full);background:var(--hover);font-size:var(--pt-micro,12px);color:var(--texte-med)}
@@ -8839,7 +8820,7 @@ html .ck-agr-voile{ background:var(--voile); }
 .ck2 .ck-met-ic .m-eau,.ck2 .ck-met-ic .m-gel,.ck2 .ck-sv-ic .m-eau{stroke:var(--meteo-pluie)}
 .ck2 .ck-met-j.alerte{background:color-mix(in srgb,var(--meteo-pluie) 10%,transparent)}
 .ck2 .ck-met-mm{color:var(--meteo-pluie)}
-.ck2 .ck-met-pp i,.ck2 .ck-met-leg i{background:var(--meteo-pluie)}   /* AUJ-8 (§312) : la barre du risque de pluie, à la couleur de la pluie */
+.ck2 .ck-met-pp i{background:var(--meteo-pluie)}   /* AUJ-8 (§312) : la barre du risque de pluie, à la couleur de la pluie */
 .ck2 .ck-sv-meteo .ck-sv-ic{background:color-mix(in srgb,var(--meteo-pluie) 12%,transparent)}
 .ck2 .ck-calque .ck-eq::before{display:none}
 .ck2 .ck-calque.vif .ck-eq::before{display:block;inset:-5px;border:2px solid var(--ok);animation:ck-presence 1.6s ease-out infinite}
