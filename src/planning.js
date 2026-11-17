@@ -1081,6 +1081,16 @@ function _planJourCouvert(mbr,m,d){
   }
   return false;
 }
+// ★ CDDCDI-1 (17/11/2026) — LE PASSE D'UN CONTRAT ARCHIVE SE VOIT, IL NE SE SAISIT PAS.
+//   _planInContract (compteur) ne lit que le contrat EN COURS : le jour ou un CDD
+//   devient CDI, toute la grille d'avant la date du CDI tombait en « – » (Hors contrat),
+//   alors que la personne etait la, sans coupure. Pour l'AFFICHAGE, la question est
+//   « etait-il la ? » (_planJourCouvert, tous contrats). Les compteurs, plafonds et
+//   ecritures restent sur _planInContract : ils ne bougent pas.
+//   Rend true si le jour est hors du contrat en cours MAIS couvert par un contrat archive.
+function _planJourArchive(mbr,m,d){
+  return !_planInContract(mbr,m,d)&&_planJourCouvert(mbr,m,d);
+}
 // Drapeau de contexte, meme patron que _planCtxYear. Pose UNIQUEMENT par les
 // cinq entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
 // code se comporte a l'octet pres comme avant ce lot.
@@ -3416,7 +3426,17 @@ function _pl2WiDefault(){
   return 0;
 }
 function _pl2Cell(mbr,plId,d,L){
-  if(!_planInContract(mbr,planMonth,d))return{txt:'\u2013',cls:'pl2c-hc',hc:true};
+  var _ro=false;
+  if(!_planInContract(mbr,planMonth,d)){
+    // CDDCDI-1 : un jour d'un contrat archive s'affiche (lecture seule), il ne devient pas « hors contrat ».
+    if(!_planJourCouvert(mbr,planMonth,d))return{txt:'\u2013',cls:'pl2c-hc',hc:true};
+    _ro=true;
+  }
+  var c=_pl2CellJour(mbr,plId,d,L);
+  if(_ro)c.ro=true;
+  return c;
+}
+function _pl2CellJour(mbr,plId,d,L){
   var e=_pEntDay(mbr.nom,planMonth,d);
   var pl=_planPlanned(plId,planMonth,d);
   if(e&&e.type==='cp')return{txt:'CP',cls:'pl2c-cp'};
@@ -3545,6 +3565,7 @@ function _pl2Board(){
         if(_n>1)c.txt=c.txt+'<sup style="font-size:8px;font-weight:700;opacity:.8">\u00d7'+_n+'</sup>';
       }
       if(c.hc){h+='<div class="pl2-cell pl2-cell-hc'+(we?' pl2-we':'')+'"><span class="pl2-chip pl2c-hc">\u2013</span></div>';return;}
+      if(c.ro){h+='<div class="pl2-cell pleq-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule"><span class="pl2-chip '+c.cls+'">'+c.txt+'</span></div>';return;}
       var sel=_pl2Sel[mbr.nom+'|'+d]?' pl2-selon':'';
       // ★ JCAVE-1 (§428) : la marque « cave » du jour — une bande au pied de la case : toute la largeur pour la journée,
       //   la moitié gauche pour le matin, la droite pour l'après-midi. Le chiffre ne change pas : les heures restent payées.
@@ -3558,7 +3579,7 @@ function _pl2Board(){
     if(d==null){h+='<div class="pl2-tot">\u00b7</div>';return;}
     var t=0;
     mbrs.forEach(function(mbr){
-      if(!_planInContract(mbr,planMonth,d))return;
+      if(!_planInContract(mbr,planMonth,d)&&!_planJourArchive(mbr,planMonth,d))return;
       var e=_pEntDay(mbr.nom,planMonth,d);
       t+=_planEffective(_planPlId(mbr),planMonth,d,e)*_planEffN(mbr,planMonth,d);
     });
@@ -5994,6 +6015,7 @@ function _planRecupCartes(mbr,dm){
       if(dt.getMonth()!==dm){g+='<span></span>';continue;}
       var ce=_pl2Cell(mbr,plId,d,L);
       g+=ce.hc?'<span class="pl2-chip pl2c-hc">'+ce.txt+'</span>'
+        :ce.ro?'<span class="pl2-chip '+ce.cls+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule">'+ce.txt+'</span>'
         :'<button type="button" class="pl2-chip '+ce.cls+'" onclick="planFicheOpenDay('+d+')" aria-label="'+d+' '+PLAN_MOIS[dm]+'">'+ce.txt+'</button>';
     }
   });
