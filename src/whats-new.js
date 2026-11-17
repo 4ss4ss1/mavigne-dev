@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.17', d: '2026-11-17', items: [   // MOTS-7 (§589) : Pilotage › Aujourd'hui, la vue Économie allégée — et CDDCDI-1 (Planning), régularisé dans le même lot
+    { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Aujourd’hui, vue Économie\u00a0: les mêmes cartes, moins de mots',
+      desc: "La vue Économie du Pilotage garde ses six cartes, à la même place. «\u00a0Atterrissage\u00a0» s’appelle «\u00a0Coût à la fin\u00a0», comme dans la phrase du haut\u00a0: le montant en grand, l’écart au budget en couleur. Les quatre chiffres tiennent en un nom, un chiffre et deux ou trois mots. Le graphe de la main-d’œuvre écrit «\u00a0fait\u00a0» et «\u00a0engagé\u00a0» au-dessus de lui. Un poste, une appellation, une tâche tiennent sur une ligne\u00a0: touchez-la pour lire le détail. Les appellations vont de la plus chère à la moins chère. Les explications sont derrière les «\u00a0i\u00a0». Aucun calcul ne change." },
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning\u00a0: un CDD devenu CDI garde son passé à l’écran',
+      desc: "Quand un CDD devient CDI, la grille du Planning affichait un tiret sur tous les jours d’avant le CDI, comme si la personne n’était pas là. Ces jours restent maintenant affichés, en lecture seule\u00a0: on les lit, on ne les modifie pas. Les compteurs ne changent pas." },
+  ] },
   { v: '11.16', d: '2026-11-17', items: [   // MOTS-6 (§588) : Pilotage › Aujourd'hui, la vue Cave — les mêmes cartes, moins de mots
     { niv: 0, pour: ['admin'], emoji: 'barrique', titre: 'Aujourd’hui, vue Cave\u00a0: les mêmes cartes, moins de mots',
       desc: "La vue Cave du Pilotage garde ses six cartes, à la même place. «\u00a0Ce qui presse\u00a0» montre le chiffre en grand et ce qui suit en pastilles. Une cuve se lit à son dessin, son état et sa mesure\u00a0; une cuvée à son nom, son état et ses fûts. Touchez une cuve, une cuvée, une ligne du millésime ou un point d’«\u00a0À savoir\u00a0» pour lire le détail\u00a0; «\u00a0Ouvrir\u00a0» mène à l’écran de la Cave. Les explications sont derrière les «\u00a0i\u00a0». Au téléphone, «\u00a0En direct\u00a0» et «\u00a0À savoir\u00a0» passent en tête, comme dans la vue Terrain. Aucun calcul ne change." },

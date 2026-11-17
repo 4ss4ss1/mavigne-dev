@@ -642,3 +642,4 @@
 | 586 | 586. ★★★ MOTS-5 — AUJOURD’HUI ALLÉGÉ : TOUTES LES CARTES GARDÉES, MOINS DE MOTS DANS CHACUNE (16/11 — `src/… | `docs/claude/chantiers-580-629.md` |
 | 587 | 587. ★★ MOTS-5B — LE CLIQUET DES MOTS ÉTAIT ROUGE APRÈS MOTS-5 : UNE ZONE DE TOUCHER QUI REMONTAIT (17/11 —… | `docs/claude/chantiers-580-629.md` |
 | 588 | 588. ★★★ MOTS-6 — AUJOURD’HUI, LA VUE CAVE ALLÉGÉE : LES SIX CARTES GARDÉES, MOINS DE MOTS DANS CHACUNE (17… | `docs/claude/chantiers-580-629.md` |
+| 589 | 589. ★★★ MOTS-7 — AUJOURD’HUI, LA VUE ÉCONOMIE ALLÉGÉE, ET CDDCDI-1 RÉGULARISÉ (17/11 — `src/cockpit-vue.js… | `docs/claude/chantiers-580-629.md` |

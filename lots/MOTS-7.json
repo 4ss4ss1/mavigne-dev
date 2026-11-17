@@ -1,0 +1,51 @@
+{
+  "lot": "MOTS-7",
+  "section": "§589",
+  "base": "1b140084bb5aeed0d06d68bea5d82717852786b9",
+  "inclut": [],
+  "date": "2026-11-17",
+  "tutos": {
+    "ok": true,
+    "empreinte": "d5a693f3f557ad5fd3fa252eae3378c992d26a5cbb268b5d18ac08ca79fca1fa",
+    "date": "2026-11-17T17:24:35.412Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "cave"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "f32dc440f5f3cafd8e19d3ba8416326700756b2b44ca06f816a60116425ea696",
+    "docs/claude/INDEX.md": "04dd1d4731e544006213c0df94742cbdda745cbae5efbcc55bf2b52aec3b3c35",
+    "docs/claude/chantiers-580-629.md": "3b8590612a58fea6d2e67f6159d0de3121dd8c3e2e18f6c989ae62918671da06",
+    "docs/claude/journal.md": "4f8b73e308e17ade00c4c975f6298881354244e990dfebf50b6f19ede1844e96",
+    "docs/maquettes/LISEZMOI.md": "92e6606fb108eeead4889a40a64f28b32019c8d5d370631a46169244eba7998d",
+    "guide/10-planning.html": "1e14f12481b3f07851068ba5c090bba1c84122c22660f58e88e648774d22f695",
+    "guide/11-pilotage.html": "c648b50be632c4180b09f20028551125832ab672e76bae5cbc3ef50a82c2e2e4",
+    "index.html": "5e33d897069cd5ba824f704cae69381e3b700b813686b5090449e04c1006ec9c",
+    "public/guide.html": "9f779369a6cf4ce246ccb6e4bbafbabdbd45438da224c71ba7cd3108b1902879",
+    "public/sw.js": "dd6d9a20aa9e6255790a5148b56ed30ccb2ecd1d319718d70f06e636f88eb42e",
+    "scripts/harnais-claude-md.mjs": "2f7567b50bed52a419cd3bb30be56544b13be5687fb50b7131457cfb65abfe0f",
+    "scripts/mv-harnais-auj5.mjs": "b2866aeedb151ed82911ccdbd16e0d98af618508b0bdfcf74866b9cfaba18077",
+    "scripts/mv-harnais-ecart1.mjs": "80ec248a46a17ce5ce340ec0411ccc2daee54acb289b444c3cfff036ee242bbb",
+    "scripts/mv-harnais-liste.mjs": "ad5cb3c4d12997d1fa9409b9d51085f96784997333897407cc208d9e6a2046ba",
+    "scripts/mv-harnais-mots5.mjs": "416c57501c56962f169406de7d0cecc12a4f9fb966f0e0c9c4052e4ed3bcf419",
+    "scripts/mv-harnais-pro1.mjs": "a7fa73a6d56213248402800395f267e88d93f629a69eefc202a3d5af9e916a9e",
+    "scripts/mv-harnais-ref2.mjs": "88af99d985a3c73d6ed83d9edb3ba555b388c7e57ce6d179e2a25cafad0463b3",
+    "scripts/mv-harnais-retard.mjs": "77a970221b1aad51bab18917a501b75362e3b74593e0d2e887e9654ade580203",
+    "scripts/mv-mots-baseline.json": "0c63d434f505bc2cb1d6a57a0f0d576149d23812855c01c798ed2be40ef09298",
+    "src/aujourdhui.css": "32aeb781f61b97407ba2b0cb48e668c97c1bdaa8d43ad2f99f6be753329e324f",
+    "src/cockpit-vue.js": "06dcb639eb63edbe680ad77a7fb7f58918070f66d49de4586fad0e6a1997e738",
+    "src/planning.js": "879e7061969d446266ae0f15be9ad211124ea49c17955269fd09c99b1e300645",
+    "src/styles.css": "17153bb88d6ab130f441e4f0b83ab844aa89dcd340c8262ae6a95f16eb20604c",
+    "src/utils.js": "79456522c87a2226e1d621a435411f7f5b18c31c78aa1494bee25c754f90f1bc",
+    "src/whats-new.js": "56af097a9a2148cc4cddb9bc903e377821c9af19ea3736afbb41c3177fff3a00",
+    "docs/maquettes/maquette-aujourdhui-economie-v1.html": "b0bc17fee48f5555e8e379be7c2b8e3e2a47bd9c99da6f981d9ebdedce5d2dec",
+    "scripts/mv-harnais-cddcdi1.mjs": "6dadcecfe46d09e209065f26cfef0e5634cb1d212b18f36c45dc46e85eceea48",
+    "scripts/mv-harnais-mots7.mjs": "56e2f08d8c21a7b9f2ec5f06f7a1d94fcbcfeadb87730badea4cc808eace9931"
+  }
+}

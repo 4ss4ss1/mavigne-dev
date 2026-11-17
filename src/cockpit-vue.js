@@ -370,7 +370,8 @@ const pct1 = v => { const n = Math.round(v * 10) / 10; return (n > 0 ? '+' : n <
 //   l'arrêtait à 10 % : +13 % et +620 % remplissaient la même longueur). Une seule règle pour le dessin et la mise à jour.
 const NFH = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
 const ecTxt = v => (v == null || !isFinite(v)) ? '\u2014' : pct1(v * 100);
-const ecCadre = r => r.ecartMoy == null ? 'rien de validé à comparer' : 'heures réelles face au barème';
+const ecCadre = r => r.ecartMoy == null ? 'rien de validé' : r.ecartMoy < 0 ? 'plus rapide' : r.ecartMoy > 0 ? 'plus lent' : 'au barème';   // MOTS-7 (§589) : le sens de l'écart, en deux mots
+const ecCls = r => (r.ecartMoy == null || !isFinite(r.ecartMoy) || !r.ecartMoy) ? '' : r.ecartMoy > 0 ? 'lent' : 'vite';
 const hTxt = h => (Math.abs(h) < 100 ? NFH.format(Math.round(h * 10) / 10) : nb(h)) + '\u202fh';
 const TA_ECH = 50;
 const taBarre = e => ({ w: Math.min(TA_ECH, Math.abs(e)) / TA_ECH * 50, hors: Math.abs(e) > TA_ECH });
@@ -405,14 +406,14 @@ const INFO = {
   fil: 'En ce moment : chaque parcelle en cours et depuis quand — même un autre jour —, avec ceux de son équipe qui y sont maintenant : ni ceux que le planning ne fait pas travailler aujourd’hui (absence, repos), ni ceux en cave ou au tracteur (« personne en ce moment » quand toute l’équipe est ailleurs) ; puis le tracteur en marche, en pause ou entre deux parcelles (moins de 45 min après la dernière finie), avec son équipe. Un arrachage en étapes compte depuis sa première étape validée. Aujourd’hui : les validations, les débuts de parcelle et le travail au tracteur de la journée (parcelles finies, avec le temps mesuré au chrono ; session ouverte ; traitement), du plus récent au plus ancien. L’équipe passe d’abord ; celui qui a saisi n’y figure que s’il était dans les rangs, et personne n’y figure s’il était absent, au repos, en cave ou au tracteur à cette heure-là.',
   chant: 'Les chantiers de la campagne, par date de début, les terminés en bas. Touchez un chantier pour l’afficher sur le plan : ses dates s’écrivent dessous.',
   courbe: 'Le reste mesuré : une ligne relie la photo de chaque jour au point d’aujourd’hui, en direct. La photo est prise à la première ouverture du Pilotage par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans photo est un trou. L’axe part de la première photo. La projection suit la capacité du planning ; la ligne fine montre l’allure qu’il faudrait pour finir pile à l’objectif. Sur le graphe : le pointillé est la projection, jusqu’à la fin prévue ; les tirets, l’allure objectif.',
-  atterrissage: 'La fin projetée de l’onglet Économie : ce qui est déjà dépensé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté.',
-  coutha: 'L’atterrissage de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
-  ecart: 'Le total de la carte « Écart au barème, par tâche » : toutes les heures réellement versées aux parcelles validées des tâches au barème, face au barème de ce même travail — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Ni la cave (journées, matins ou après-midis marqués au Planning, jours d’opération du Chai), ni le tracteur, ni les travaux à l’heure (arrachage…). Au-dessus de zéro, l’équipe met plus longtemps que le barème ; un tiret tant que rien n’est à comparer. La cadence qui corrige l’atterrissage est un autre calcul : toute la présence du planning, à partir de 40 % du travail fait (onglet Économie).',
+  atterrissage: 'Le coût à la fin de l’onglet Économie : ce qui est déjà engagé, plus le travail qui reste, compté au barème et corrigé de la cadence mesurée de l’équipe quand elle s’applique (sinon au barème seul). Tracteur, GNR et phyto suivent l’avancement ; les prestations et les travaux à l’heure comptent ce qu’ils ont coûté. Sur la barre : la partie pleine est l’engagé, le losange le coût à la fin, la zone de couleur l’écart au budget.',
+  coutha: 'Le coût à la fin de la campagne, divisé par les hectares en production (une vigne arrachée n’en a plus). Le prévu est le budget, divisé de la même façon.',
+  ecart: 'Le total de la carte « Écart par tâche » : toutes les heures réellement versées aux parcelles validées des tâches au barème, face au barème de ce même travail — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Ni la cave (journées, matins ou après-midis marqués au Planning, jours d’opération du Chai), ni le tracteur, ni les travaux à l’heure (arrachage…). Au-dessus de zéro, l’équipe met plus longtemps que le barème ; un tiret tant que rien n’est à comparer. La cadence qui corrige l’atterrissage est un autre calcul : toute la présence du planning, à partir de 40 % du travail fait (onglet Économie).',
   cadence: 'Heures de barème validées par jour travaillé, sur les quatre dernières semaines, face à l’allure qu’il faut tenir pour finir à l’objectif.',
   inaction: 'Ce que coûterait le retard si rien n’est décidé : le travail hors de sa fenêtre prend du temps en plus chaque semaine. C’est une hypothèse de calcul, pas une mesure.',
-  echart: 'Du début de la période à aujourd’hui : le budget main-d’œuvre payé (heures du planning, au jour où elles ont été faites, hors travaux à l’heure) et le travail fait au barème (à la date des validations). Tant que le payé reste sous le fait, la main-d’œuvre coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
-  postes: 'Main-d’œuvre : la barre est son budget, la partie pleine ce qui est payé, le trait la fin prévue ; à droite, l’écart prévu. Tracteur, GNR, phyto : leur prévu suit l’avancement ; à droite, ce qui reste à dépenser. Prestations et travaux à l’heure (arrachage…) : payés au réel, sans prévu.',
-  apps: 'Le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. Une appellation sans travail validé ne se compare pas.',
+  echart: 'Du début de la période à aujourd’hui : la part du budget main-d’œuvre engagée (heures du planning, au jour où elles ont été faites, hors travaux à l’heure) et la part du travail faite au barème (à la date des validations). Tant que l’engagé reste sous le fait, la main-d’œuvre coûte moins que prévu. Les pointillés prolongent jusqu’à la fin prévue.',
+  postes: 'Main-d’œuvre : la barre est son budget, la partie pleine l’engagé, le trait le coût à la fin ; à droite, l’écart au budget. Tracteur, GNR, phyto : leur prévu suit l’avancement ; à droite, ce qui reste à dépenser. Prestations et travaux à l’heure (arrachage…) : comptés au réel, sans prévu. Sous la barre : engagé / budget. Toucher un poste dit son détail.',
+  apps: 'La main-d’œuvre engagée à l’hectare, à ce jour : le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. De la plus chère à la moins chère ; une appellation sans travail validé ne se compare pas. Toucher une appellation dit sa surface.',
   taches: 'Pour chaque tâche au barème qui a du travail validé : les heures réellement versées à ses parcelles validées, face au barème de ces mêmes parcelles — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Les heures de cave n’y entrent pas : les journées, matins ou après-midis marqués au Planning, et les jours d’opération du Chai. À droite du zéro, l’équipe va moins vite que le barème. La barre est à l’échelle jusqu’à 50 % ; au-delà, elle est pleine et finit en pointe. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
 };
 // ★ MOTS-6 (§588) : ce qu'une carte ajoute à sa bulle, au moment où elle se dessine — le pourquoi du jour, la règle chiffrée
@@ -895,30 +896,37 @@ function dessinerCourbe(reste, fin) {
 }
 
 /* ══ VUE ÉCONOMIE ══ */
+// ★★★ MOTS-7 (§589) — LA VUE ÉCONOMIE ALLÉGÉE : LES SIX CARTES GARDÉES, MOINS DE MOTS DANS CHACUNE (maquette validée le 17/11,
+//   docs/maquettes/maquette-aujourdhui-economie-v1.html — la règle des vues Terrain, MOTS-5, et Cave, MOTS-6). Dans une carte :
+//   un titre, un chiffre, une barre ou une couleur. Le pourquoi du jour et la méthode vont derrière le « i » (INFO_PLUS) ; le
+//   détail d'un poste, d'une appellation, d'une tâche se déplie au toucher. Les mots (§580c) : « coût à la fin » (plus
+//   « atterrissage »), « engagé » (plus « dépensé » ni « payé » : le mot de la tuile Budget), « Cadence », « Retard ». Aucun calcul ne change.
 function htmlEVerdict(r) {
-  return '<div class="ck-v-haut"><span class="ck-v-k">Atterrissage de la campagne</span><span class="ck-etat" id="ck-ev-etat"></span></div>'
-    + '<h2 class="ck-v-phrase">La campagne devrait coûter <span class="ck-roule" id="ck-ev-att"><span>' + eur(r.att) + '</span></span>.</h2>'
-    + '<p class="ck-v-sous"><span id="ck-ev-sous"></span>' + btnI('atterrissage', 'Comment l’atterrissage est calculé') + '</p>'
+  return '<div class="ck-v-haut"><span class="ck-v-k">Coût à la fin' + btnI('atterrissage', 'Comment le coût à la fin est calculé') + '</span><span class="ck-etat" id="ck-ev-etat"></span></div>'
+    + '<h2 class="ck-v-phrase ck-ev-ph"><span class="ck-roule" id="ck-ev-att"><span>' + eur(r.att) + '</span></span><small id="ck-ev-sous"></small></h2>'
     + '<div class="ck-frise ck-frise-e" id="ck-efrise" aria-hidden="true">'
     + '<div class="ck-fr-piste"><i class="ck-fr-dep"></i><i class="ck-fr-reste"></i><i class="ck-fr-marge"></i></div>'
-    + '<span class="ck-fr-mk ck-fr-mdep"><em id="ck-ef-dep"></em></span>'
-    + '<span class="ck-fr-mk ck-fr-fin"><em id="ck-ef-att"></em></span>'
-    + '<span class="ck-fr-mk ck-fr-visee"><em id="ck-ef-bud"></em></span></div>'
+    + '<span class="ck-fr-mk ck-fr-mdep"></span><span class="ck-fr-mk ck-fr-fin"></span><span class="ck-fr-mk ck-fr-visee"></span></div>'
+    + '<p class="ck-ev-rep"><span>engagé <b id="ck-ef-dep"></b></span><span>budget <b id="ck-ef-bud"></b></span></p>'
     + '<div class="ck-v-act"><button class="ck-btn ck-btn-pri" type="button" data-onglet="eco">Ouvrir l’Économie</button>'
-    + '<button class="ck-btn ck-btn-ghost" type="button" data-fn="export">Exporter pour la compta</button></div>';
+    + '<button class="ck-btn ck-btn-ghost" type="button" data-fn="export" aria-label="Exporter pour la compta">Exporter</button></div>';
 }
 function htmlEKpis(r) {
-  const k = (id, lab, num, vis, cadreTxt, info) => '<div class="ck-ph ck-ek" data-ek="' + id + '">'
+  // Une tuile : son nom, son chiffre, deux ou trois mots. Ce que la phrase d'avant expliquait est derrière le « i ».
+  const k = (id, lab, num, vis, sous, info) => '<div class="ck-ph ck-ek" data-ek="' + id + '">'
     + '<div class="ck-ph-l"><span>' + lab + '</span>' + btnI(info, 'Comment ce chiffre est calculé') + '</div>'
     + '<div class="ck-ph-m"><span class="ck-ph-n">' + num + '</span><span class="ck-ph-vis">' + vis + '</span></div>'
-    + '<p class="ck-cadre">' + cadreTxt + '</p></div>';
+    + (sous ? '<p class="ck-ek-s">' + sous + '</p>' : '') + '</div>';
+  const x = (V.eco || {}).inaction, calme = !x || !(x.h > 1);
+  INFO_PLUS.cadence = ['Pour tenir l’objectif du ' + dCourt(VISEE) + ', il faut ' + nb(r.besoin) + '\u202fh par jour.'];
+  INFO_PLUS.inaction = [calme ? 'Aujourd’hui, les travaux tiennent dans leurs fenêtres.'
+    : 'Aujourd’hui : ' + nb(x.h) + '\u202fh en plus, environ ' + eur100(x.eur) + ' si rien n’est décidé' + (x.horsDelai ? ', ' + x.horsDelai + ' tâche' + (x.horsDelai > 1 ? 's' : '') + ' hors délai' : '') + '.'];
   return '<div class="ck-ek-g">'
-    + k('coutha', 'Coût à l’hectare', '<b id="ck-ek-ha" data-v="0">0</b><small>\u202f€/ha</small>', '', '<span id="ck-ek-ha-c">prévu : ' + nb(r.coutHaPrevu) + '\u202f€/ha</span>', 'coutha')
-    + k('ecart', 'Écart au barème', '<b id="ck-ek-ec">' + ecTxt(r.ecartMoy) + '</b>', spark(SPARK_ECART, 'haut'), '<span id="ck-ek-ec-c">' + ecCadre(r) + '</span>', 'ecart')   // ECART-1 : le total de la carte
-    + k('cadence', 'Cadence de l’équipe', '<b>' + nb(r.capMoy) + '</b><small>\u202fh/j</small>', '', '<span id="ck-ek-cad-c">il en faut ' + nb(r.besoin) + ' pour finir le ' + dLong(VISEE) + '</span>', 'cadence')
-    + (function () { const x = (V.eco || {}).inaction; const ok = !x || !(x.h > 1);
-        return k('inaction', 'Coût de l’inaction', ok ? '<b class="ck-ek-calme">Rien à rattraper</b>' : '<b>+\u202f' + nb(x.h) + '</b><small>\u202fh</small>', '',
-          ok ? 'les travaux tiennent dans leurs fenêtres' : 'env. ' + eur100(x.eur) + ' si rien n’est décidé' + (x.horsDelai ? ', ' + x.horsDelai + ' tâche' + (x.horsDelai > 1 ? 's' : '') + ' hors délai' : ''), 'inaction'); })()
+    + k('coutha', 'Coût à l’hectare', '<b id="ck-ek-ha" data-v="0">0</b><small>\u202f€/ha</small>', '', '<span id="ck-ek-ha-c">prévu ' + nb(r.coutHaPrevu) + '</span>', 'coutha')
+    + k('ecart', 'Écart au barème', '<b id="ck-ek-ec" class="' + ecCls(r) + '">' + ecTxt(r.ecartMoy) + '</b>', spark(SPARK_ECART, 'haut'), '<span id="ck-ek-ec-c">' + ecCadre(r) + '</span>', 'ecart')   // ECART-1 : le total de la carte
+    + k('cadence', 'Cadence', '<b>' + nb(r.capMoy) + '</b><small>\u202fh/j</small>', '', '<span id="ck-ek-cad-c">il en faut ' + nb(r.besoin) + '</span>', 'cadence')
+    + k('inaction', 'Retard', calme ? '<span class="ck-ph-pst ok">rien à rattraper</span>' : '<b>+\u202f' + nb(x.h) + '</b><small>\u202fh</small>', '',
+        calme ? '' : 'env. ' + eur100(x.eur) + (x.horsDelai ? ' · ' + x.horsDelai + ' hors délai' : ''), 'inaction')
     + '</div>';
 }
 const GE = { c: null, w: 0, att: null, fin: null };
@@ -937,8 +945,9 @@ function htmlEChart(w) {
   s += '<line class="ck-e-budget" x1="' + c.padL + '" x2="' + (c.w - c.padR) + '" y1="' + f1(c.Y(100)) + '" y2="' + f1(c.Y(100)) + '"/>'
     + '<path id="ck-e-pfait" class="ck-e-pfait"/><path id="ck-e-pdep" class="ck-e-pdep"/>'
     + '<path id="ck-e-fait" class="ck-e-fait"/><path id="ck-e-dep" class="ck-e-dep"/>'
-    + '<g id="ck-e-bout"><circle class="ck-e-bf" r="4.5"/><text class="ck-c-txt ck-e-lf" text-anchor="end" x="-9" y="4">100 % fait</text></g>'
-    + '<g id="ck-e-bout2"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/><text id="ck-e-ld" class="ck-c-txt ck-e-ld" text-anchor="end" x="-10" y="16"></text></g>'
+    + '<g id="ck-e-bout"><circle class="ck-e-bf" r="4.5"/></g>'
+    + '<g id="ck-e-bout2"><rect class="ck-c-fin" x="-5" y="-5" width="10" height="10" rx="1.5" transform="rotate(45)"/></g>'
+    + '<g id="ck-e-lab"><text id="ck-e-lt" class="ck-c-txt ck-e-ld" y="16"></text><text id="ck-e-ld" class="ck-c-txt" y="30"></text></g>'
     + '<line id="ck-e-guide" class="ck-c-guide" y1="' + c.padT + '" y2="' + (c.h - c.padB) + '"/>'
     + '<rect class="ck-c-zone" x="' + c.padL + '" y="0" width="' + c.iw + '" height="' + c.h + '"/>';
   return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h + '" role="img" aria-label="Main-d’œuvre : part du budget payée face à la part du travail faite, du début de la période à aujourd’hui, puis projetées jusqu’à la fin prévue">' + s + '</svg>'
@@ -955,7 +964,13 @@ function dessinerEChart(at, fin) {
   $('#ck-e-pdep').setAttribute('d', 'M' + f1(xa) + ' ' + f1(c.Y(z.dep)) + 'L' + f1(xf) + ' ' + f1(c.Y(at)));
   $('#ck-e-bout').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(c.Y(100)) + ')');
   $('#ck-e-bout2').setAttribute('transform', 'translate(' + f1(xf) + ' ' + f1(c.Y(at)) + ')');
-  const ld = $('#ck-e-ld'); ld.textContent = nb(at) + '\u202f% du budget'; ld.setAttribute('y', at > 100 ? -10 : 16);   // au-dessus du losange quand il passe le budget
+  // MOTS-7 (§589) : au bout des pointillés, la fin prévue et ses deux parts — à droite du point tant qu'il y a la place, sinon à gauche.
+  const droite = xf + 168 < c.w - c.padR, lab = $('#ck-e-lab');
+  lab.setAttribute('transform', 'translate(' + f1(xf + (droite ? 10 : -10)) + ' ' + f1(c.Y(Math.min(100, at))) + ')');
+  lab.setAttribute('text-anchor', droite ? 'start' : 'end');
+  $('#ck-e-lt').textContent = 'fin prévue ' + dCourt(fin);
+  $('#ck-e-ld').textContent = 'fait 100\u202f% · engagé ' + nb(at) + '\u202f%';
+  const cf = $('#ck-e-cf'), cd = $('#ck-e-cd'); if (cf) cf.textContent = nb(z.fait) + '\u202f%'; if (cd) cd.textContent = nb(z.dep) + '\u202f%';
 }
 // ★★ AUJ-7 (§309) — « PAR POSTE » NE DIT QUE CE QUI EST CALCULÉ. À droite : l'écart prévu de la main-d'œuvre et de toute la
 //   campagne (jamais « 0 » ni « −0 » : « au budget ») ; pour le tracteur, le GNR, le phyto : ce qui reste à dépenser d'après
@@ -968,62 +983,69 @@ function lignePoste(l) {
   const ech = echPoste(l), w = v => (v / ech * 100).toFixed(1) + '%';
   let droite, cls = 'neutre', barre = '', gauche;
   if (l.ref === 'ecart') {
-    droite = ecartTxt(l.att - l.budget); cls = Math.round(l.att - l.budget) <= 0 ? 'ok' : 'ko'; gauche = eur(l.dep) + ' sur ' + eur(l.budget);
+    droite = ecartTxt(l.att - l.budget); cls = Math.round(l.att - l.budget) <= 0 ? 'ok' : 'ko'; gauche = nb(l.dep) + ' / ' + eur(l.budget);
     barre = '<div class="ck-puce"><i class="bud" style="width:' + w(l.budget) + '"></i><i class="dep" id="ck-po-b-' + l.id + '" style="width:0%"></i><i class="att' + (Math.round(l.att - l.budget) > 0 ? ' ko' : '') + '" id="ck-po-a-' + l.id + '" style="left:' + w(l.att) + '"></i></div>';   // au-delà du budget, le trait passe en orange
   } else if (l.ref === 'proj') {
-    droite = 'reste ' + eur(l.budget - l.dep); gauche = eur(l.dep) + ' sur ' + eur(l.budget) + ' prévus';
+    droite = 'reste ' + eur(l.budget - l.dep); gauche = nb(l.dep) + ' / ' + eur(l.budget);
     barre = '<div class="ck-puce"><i class="bud" style="width:' + w(l.budget) + '"></i><i class="dep" id="ck-po-b-' + l.id + '" style="width:0%"></i></div>';
   } else {
     droite = eur(l.dep); gauche = l.id === 'hb' ? 'payé à l’heure, sans barème' : l.id === 'pre' ? 'facturé, sans prévu' : 'pas encore de prévu';
   }
-  return '<li class="ck-po" data-po="' + l.id + '"><div class="ck-po-h"><span class="n">' + esc(l.nom) + '</span><span class="ck-po-d ' + cls + '">' + esc(droite) + '</span></div>'
-    + barre + '<div class="ck-po-s"><span>' + esc(gauche) + '</span><span>' + esc(l.note || '') + '</span></div></li>';
+  // MOTS-7 (§589) : un poste = son nom, son écart, sa barre, « engagé / budget ». Les heures, le taux, les litres au toucher.
+  const tete = '<div class="ck-po-h"><span class="n">' + esc(l.nom) + '</span><span class="ck-po-d ' + cls + '">' + esc(droite) + '</span></div>'
+    + (barre ? '<div class="ck-po-b">' + barre + '<span class="ck-po-q">' + esc(gauche) + '</span></div>' : '');
+  const det = [barre ? '' : gauche, l.note || ''].filter(Boolean).join(' · ');
+  return '<li class="ck-po' + (l.id === 'tot' ? ' ck-po-tot' : '') + '" data-po="' + l.id + '">' + (det ? '<details class="ck-dp"><summary>' + tete + '</summary><p class="ck-po-s">' + esc(det) + '</p></details>' : '<div class="ck-dp">' + tete + '</div>') + '</li>';
 }
 const ligneMO = r => ({ id: 'mo', nom: 'Main-d’œuvre', ref: 'ecart', budget: r.moBudget, dep: r.moDep, att: r.moAtt,
   note: r.moH > 0 ? nb(r.moH) + ' h dans les rangs, ' + tauxH(r.moDep / r.moH) + ' de l’heure' : '' });
+const ligneTot = r => ({ id: 'tot', nom: 'Toute la campagne', ref: 'ecart', budget: r.budget, dep: r.dep, att: r.att, note: 'coût à la fin ' + eur(r.att) });
 function htmlPostes(r) {
-  const et = Math.round(r.att - r.budget);
-  return entete('Par poste', 'Dépensé, et où chaque poste devrait atterrir', 'postes')
-    + '<ul class="ck-po-l">' + [ligneMO(r)].concat(POSTES).map(lignePoste).join('')
-    + '<li class="ck-po ck-po-tot"><div class="ck-po-h"><span class="n">Toute la campagne</span><span class="ck-po-d ' + (et <= 0 ? 'ok' : 'ko') + '" id="ck-po-d-tot">' + esc(ecartTxt(r.att - r.budget)) + '</span></div>'
-    + '<div class="ck-po-s"><span id="ck-po-s-tot">' + eur(r.dep) + ' dépensés sur ' + eur(r.budget) + '</span><span id="ck-po-a-tot">atterrissage ' + eur(r.att) + '</span></div></li></ul>';
+  return entete('Par poste', '', 'postes') + '<ul class="ck-po-l">' + [ligneMO(r)].concat(POSTES, [ligneTot(r)]).map(lignePoste).join('') + '</ul>';
 }
 // Les barres pleines s'élargissent après le montage (transition de la feuille).
 function majPostes(r) {
   const fixe = l => { const ech = echPoste(l), b = $('#ck-po-b-' + l.id), a = $('#ck-po-a-' + l.id);
     if (b) b.style.width = (l.dep / ech * 100).toFixed(2) + '%'; if (a) a.style.left = ((l.att || 0) / ech * 100).toFixed(2) + '%'; };
-  fixe(ligneMO(r)); POSTES.forEach(l => { if (l.ref === 'proj') fixe(l); });
+  fixe(ligneMO(r)); fixe(ligneTot(r)); POSTES.forEach(l => { if (l.ref === 'proj') fixe(l); });
 }
 function htmlApps(r) {
   // AUJ-7 : une appellation sans hectare en production (sa seule vigne est arrachée) ne s'affiche plus ; sans travail validé,
-  //   elle dit « — » au lieu de « 0 €/ha » et sort de la comparaison.
+  //   elle sort de la comparaison. MOTS-7 (§589) : une ligne par appellation, de la plus chère à la moins chère (le nom, la
+  //   barre, le coût) ; sa surface au toucher ; celles sans travail validé sur une ligne repliée ; l'écart en un chiffre.
   const LA = APPS.filter(a => r.a[a.id] && r.a[a.id].ha > 0);
-  const max = Math.max(1, ...LA.map(a => r.a[a.id].coutHa));
   const tri = LA.filter(a => r.a[a.id].coutHa > 0).sort((x, y) => r.a[y.id].coutHa - r.a[x.id].coutHa), hi = tri[0], lo = tri[tri.length - 1];
-  return entete('Par appellation', 'Main-d’œuvre engagée à l’hectare, à ce jour', 'apps')
-    + '<ul class="ck-ap-l">' + LA.map(a => {
-      const x = r.a[a.id], v = x.coutHa > 0;
-      return '<li class="ck-ap"><div class="ck-ap-h"><span class="n">' + esc(a.nom) + '</span><span class="v">' + (v ? nb(x.coutHa) + '\u202f€/ha' : '—') + '</span></div>'
-        + '<div class="ck-ap-b"><span class="ck-barre fine"><i class="b-terre" style="width:' + (x.coutHa / max * 100).toFixed(1) + '%"></i></span>'
-        + (a.ecart != null ? '<span class="ck-ap-c ' + (a.ecart > 0.05 ? 'ko' : a.ecart < 0 ? 'ok' : '') + '">' + pct1(a.ecart * 100) + '</span>' : '') + '</div>'
-        + '<div class="ck-ap-s">' + haTxt(x.ha) + ' en production' + (v ? '' : ', aucun travail validé') + '</div></li>';
-    }).join('') + '</ul>'
-    + (hi && lo && hi !== lo && r.a[lo.id].coutHa > 0 ? '<p class="ck-ap-note">' + esc(hi.nom) + ' a demandé ' + nb((r.a[hi.id].coutHa / r.a[lo.id].coutHa - 1) * 100) + '\u00a0% de plus à l’hectare que ' + esc(lo.nom) + ', d’après les heures validées de la campagne.</p>' : '');
+  const sans = LA.filter(a => !(r.a[a.id].coutHa > 0)), max = Math.max(1, ...tri.map(a => r.a[a.id].coutHa));
+  const ecart = hi && lo && hi !== lo ? nb((r.a[hi.id].coutHa / r.a[lo.id].coutHa - 1) * 100) : '';
+  // La phrase de la bulle est du TEXTE : ouvrirInfo l'échappe (esc) avant de la poser — pas d'esc ici, il doublerait les entités.
+  const nomHaut = hi ? String(hi.nom) : '', nomBas = lo ? String(lo.nom) : '';
+  INFO_PLUS.apps = ecart ? [nomHaut + ' a demandé ' + ecart + '\u00a0% de plus à l’hectare que ' + nomBas + ', d’après les heures validées de la campagne.'] : [];
+  return entete('Par appellation', '', 'apps')
+    + '<ul class="ck-ap-l">' + tri.map(a => {
+      const x = r.a[a.id];
+      return '<li class="ck-ap"><details class="ck-dp"><summary class="ck-ap-h"><span class="n">' + esc(a.nom) + '</span>'
+        + '<span class="ck-barre fine"><i class="b-terre" style="width:' + (x.coutHa / max * 100).toFixed(1) + '%"></i></span><span class="v">' + nb(x.coutHa) + '\u202f€/ha</span></summary>'
+        + '<p class="ck-ap-s">' + haTxt(x.ha) + ' en production</p></details></li>';
+    }).join('')
+    + (sans.length ? '<li class="ck-ap ck-ap-z"><details class="ck-dp"><summary><span>' + sans.length + ' sans travail validé</span>' + cvIc('chevron', 14) + '</summary>'
+      + '<p class="ck-ap-s">' + sans.map(a => esc(a.nom) + ' · ' + haTxt(r.a[a.id].ha)).join('<br>') + '</p></details></li>' : '') + '</ul>'
+    + (ecart ? '<p class="ck-ap-note"><b>+' + ecart + '\u00a0%</b><span>de ' + esc(lo.nom) + ' à ' + esc(hi.nom) + '</span></p>' : '');
 }
 // AUJ-7 : seules les tâches AU BARÈME qui ont du travail validé. Un travail à l'heure (arrachage…) n'a pas de barème en face, une
 //   tâche pas commencée rien à comparer — elles s'affichaient à « 0,0 % », « 0 h de barème, 0 h réelles ».
 const tachesE = () => TACHES.filter(t => ((V && V.eco && V.eco.ecTache) || {})[t.cle || t.nom] != null);
 function htmlTaches(r) {
-  const L = tachesE(), tete = entete('Écart au barème, par tâche', 'Heures réelles face au barème, sur les parcelles validées', 'taches');
+  const L = tachesE(), tete = entete('Écart par tâche', '', 'taches');
   if (!L.length) return tete + '<p class="ck-fil-vide">Aucun travail au barème validé pour l’instant : rien à comparer.</p>';
+  // MOTS-7 (§589) : une tâche = son nom, sa barre, son écart. Ses heures (au barème, réelles) au toucher.
   return tete
-    + '<div class="ck-ta-ax" aria-hidden="true"><span>plus rapide</span><span>barème</span><span>plus lent</span></div>'
+    + '<div class="ck-ta-ax ck-ta-g" aria-hidden="true"><span></span><span><span>plus rapide</span><span>plus lent</span></span><span></span></div>'
     + '<ul class="ck-ta-l">' + L.map(t => {
       const x = r.t[t.id], e = x.ecart * 100, b = taBarre(e);   // ECART-1 : à l'échelle jusqu'à ±50 %, la pointe au-delà
-      return '<li class="ck-ta" data-ta="' + t.id + '"><span class="ck-ta-n">' + esc(t.nom) + '</span>'
+      return '<li class="ck-ta" data-ta="' + t.id + '"><details class="ck-dp"><summary class="ck-ta-g"><span class="ck-ta-n">' + esc(t.nom) + '</span>'
         + '<span class="ck-ta-b"><i class="ck-ta-zero"></i><i class="' + taClasse(e) + '" id="ck-ta-v-' + t.id + '" style="' + (e > 0 ? 'left:50%' : 'right:50%') + ';width:' + b.w.toFixed(1) + '%"></i></span>'
-        + '<span class="ck-ta-e ' + (e > 0 ? 'lent' : 'vite') + '" id="ck-ta-e-' + t.id + '">' + pct1(e) + '</span>'
-        + '<span class="ck-ta-s" id="ck-ta-s-' + t.id + '">' + taHeures(x) + '</span></li>';
+        + '<span class="ck-ta-e ' + (e > 0 ? 'lent' : 'vite') + '" id="ck-ta-e-' + t.id + '">' + pct1(e) + '</span></summary>'
+        + '<p class="ck-ta-s" id="ck-ta-s-' + t.id + '">' + taHeures(x) + '</p></details></li>';
     }).join('') + '</ul>';
 }
 
@@ -1275,8 +1297,11 @@ function majEco(r) {
   // ★ AUJ-7 (§309) : un seul arrondi, à l'euro, partout (la tête arrondissait à la centaine, « Par poste » à l'euro : le même
   //   chiffre s'écrivait deux fois). La phrase dit sur quoi repose le travail qui reste : la cadence mesurée, ou le barème.
   const e0 = Math.round(r.sous);
-  $('#ck-ev-sous').textContent = (e0 === 0 ? 'Pile dans le budget de ' : e0 > 0 ? eur(e0) + ' sous le budget de ' : eur(-e0) + ' au-dessus du budget de ') + eur(r.budget)
-    + (r.cadAppl ? ', au rythme mesuré de l’équipe.' : ', le travail restant compté au barème.');
+  // MOTS-7 (§589) : l'écart en deux ou trois mots, à côté du montant ; sur quoi repose le travail qui reste, derrière le « i ».
+  const sous = $('#ck-ev-sous');
+  sous.textContent = e0 === 0 ? 'pile dans le budget' : e0 > 0 ? eur(e0) + ' sous le budget' : eur(-e0) + ' au-dessus du budget';
+  sous.className = e0 >= 0 ? 'ok' : 'ko';
+  INFO_PLUS.atterrissage = [r.cadAppl ? 'Aujourd’hui, le travail qui reste suit le rythme mesuré de l’équipe.' : 'Aujourd’hui, le travail qui reste est compté au barème.'];
   const et = $('#ck-ev-etat');
   et.className = 'ck-etat ' + (e0 >= 0 ? 'ok' : 'ko');
   et.textContent = e0 > 0 ? 'Sous le budget' : e0 === 0 ? 'Dans le budget' : 'Au-dessus du budget';
@@ -1292,14 +1317,14 @@ function majEco(r) {
   q('.ck-fr-fin').style.left = f(r.att) + '%';
   q('.ck-fr-visee').style.left = f(r.budget) + '%';
   q('.ck-fr-fin').classList.toggle('droite', f(r.att) > 70);
-  { const _pd = r.budget ? r.dep / Math.max(r.budget, r.att) : 0, _pb = r.budget ? r.budget / Math.max(r.budget, r.att) : 1;
-    $('#ck-ef-dep').textContent = Math.abs(_pb - _pd) < .4 ? '' : 'Dépensé, ' + eur(r.dep); }   // REF-2 : deux étiquettes trop proches ne se chevauchent pas
-  $('#ck-ef-att').textContent = 'Atterrissage, ' + eur(r.att);
-  $('#ck-ef-bud').textContent = 'Budget, ' + eur(r.budget);
+  $('#ck-ef-dep').textContent = eur(r.dep);   // MOTS-7 (§589) : sous la barre, à ses deux bouts — plus d'étiquette sur un repère (elles se chevauchaient)
+  $('#ck-ef-bud').textContent = eur(r.budget);
   Anim.compter($('#ck-ek-ha'), r.coutHa);
   $('#ck-ek-ec').textContent = ecTxt(r.ecartMoy);
+  $('#ck-ek-ec').className = ecCls(r);
   $('#ck-ek-ec-c').textContent = ecCadre(r);
-  $('#ck-ek-cad-c').textContent = 'il en faut ' + nb(r.besoin) + ' pour finir le ' + dLong(VISEE);
+  $('#ck-ek-cad-c').textContent = 'il en faut ' + nb(r.besoin);
+  INFO_PLUS.cadence = ['Pour tenir l’objectif du ' + dCourt(VISEE) + ', il faut ' + nb(r.besoin) + '\u202fh par jour.'];
   majPostes(r);   // AUJ-7 : les textes sont posés au montage ; seules les barres pleines bougent
   // ★ ECART-1 (§460) : une tâche qui devient comparable en direct n'a pas encore sa ligne — la carte se redessine. Avant, la ligne
   //   introuvable levait, et toute la page se remontait (VIF-1 : le repli de _pilRafraichirVif).
@@ -1809,7 +1834,7 @@ function suivreEChart0(ev) {
   else { fa = 100; de = GE.att; quoi = ', travaux finis'; }
   const gx = c.X(jour), gl = $('#ck-e-guide');
   gl.setAttribute('x1', gx); gl.setAttribute('x2', gx); gl.style.opacity = 1;
-  tip.innerHTML = '<b>' + JOURS_C[jour.getUTCDay()] + ' ' + dCourt(jour) + quoi + '</b><span><i class="pt-fait"></i>Travail fait : ' + nb(fa) + '\u202f%</span><span><i class="pt-dep"></i>Budget dépensé : ' + nb(de) + '\u202f%</span>';
+  tip.innerHTML = '<b>' + JOURS_C[jour.getUTCDay()] + ' ' + dCourt(jour) + quoi + '</b><span><i class="pt-fait"></i>fait ' + nb(fa) + '\u202f%</span><span><i class="pt-dep"></i>engagé ' + nb(de) + '\u202f%</span>';   // MOTS-7 (§589) : les mots de la légende
   placerTip(tip, c, gx, c.Y((fa + de) / 2));
 }
 function cacherTip() {
@@ -1994,9 +2019,10 @@ function monter() {
   if (!V.eco) return;   // pas d'économie branchée (pas de taux) : la vue Économie ne se dessine pas
   $('#ck-ever').innerHTML = htmlEVerdict(R);
   $('#ck-ekpi').innerHTML = htmlEKpis(R);
-  $('#ck-echart').innerHTML = entete('Main-d’œuvre : dépensé face au fait', 'Tant que le dépensé reste sous le fait, la campagne coûte moins que prévu', 'echart')
-    + '<div class="ck-gr" id="ck-egr"></div>'
-    + '<div class="ck-gr-leg" aria-hidden="true"><span><i class="lg-fait"></i>Travail fait</span><span><i class="lg-mes"></i>Budget dépensé</span></div>';
+  // MOTS-7 (§589) : les deux parts du jour en chiffres, au-dessus du graphe — elles servent de légende.
+  $('#ck-echart').innerHTML = entete('Main-d’œuvre', '', 'echart')
+    + '<p class="ck-e-chf"><span><i class="lg-fait"></i>fait <b id="ck-e-cf"></b></span><span><i class="lg-mes"></i>engagé <b id="ck-e-cd"></b></span></p>'
+    + '<div class="ck-gr" id="ck-egr"></div>';
   $('#ck-epos').innerHTML = htmlPostes(R);
   $('#ck-eapp').innerHTML = htmlApps(R);
   $('#ck-etac').innerHTML = htmlTaches(R);

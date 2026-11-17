@@ -836,6 +836,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots5.mjs --contre'],      //   et les colonnes du plan JOUÉS ; le téléphone (« En direct » et « À savoir » en tête, tuiles deux par deux) ; l'aide, le guide, l'annonce
   ['node scripts/mv-harnais-mots6.mjs'],               // MOTS-6 (§588) : la vue Cave d'Aujourd'hui allégée — les six cartes toujours là ; le modèle (vrai _pilCk2Cave) et le dessin (vrai cockpit)
   ['node scripts/mv-harnais-mots6.mjs --contre'],      //   JOUÉS sur le domaine de démo ; le verdict de la Cave en pièces, rien de recalculé ; aucun bouton de geste ; le téléphone, la feuille, l'aide, le guide, l'annonce
+  ['node scripts/mv-harnais-mots7.mjs'],               // MOTS-7 (§589) : la vue Économie d'Aujourd'hui allégée — les six cartes toujours là, chacune JOUÉE (le vrai cockpit monté dans Node) ;
+  ['node scripts/mv-harnais-mots7.mjs --contre'],      //   les mots du lexique (coût à la fin, dépensé) ; rien de recalculé ; la feuille, l'aide, le guide, l'annonce, la référence des mots
+  ['node scripts/mv-harnais-cddcdi1.mjs'],             // CDDCDI-1 (§589, régularisé dans MOTS-7) : au Planning, le passé d'un contrat archivé se voit (lecture seule), il ne se saisit pas ;
+  ['node scripts/mv-harnais-cddcdi1.mjs --contre'],    //   une coupure reste « – » ; les compteurs ne lisent que le contrat en cours ; la vraie case montée dans Node
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement

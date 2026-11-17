@@ -3565,7 +3565,8 @@ function _pl2Board(){
         if(_n>1)c.txt=c.txt+'<sup style="font-size:8px;font-weight:700;opacity:.8">\u00d7'+_n+'</sup>';
       }
       if(c.hc){h+='<div class="pl2-cell pl2-cell-hc'+(we?' pl2-we':'')+'"><span class="pl2-chip pl2c-hc">\u2013</span></div>';return;}
-      if(c.ro){h+='<div class="pl2-cell pleq-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule"><span class="pl2-chip '+c.cls+'">'+c.txt+'</span></div>';return;}
+      // MOTS-7 (§589, régularisation) : sa classe à elle (pl2-cell-ro, curseur au repos) — « pleq-ro » est celle de la vue Équipe du salarié.
+      if(c.ro){h+='<div class="pl2-cell pl2-cell-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule"><span class="pl2-chip '+c.cls+'">'+c.txt+'</span></div>';return;}
       var sel=_pl2Sel[mbr.nom+'|'+d]?' pl2-selon':'';
       // ★ JCAVE-1 (§428) : la marque « cave » du jour — une bande au pied de la case : toute la largeur pour la journée,
       //   la moitié gauche pour le matin, la droite pour l'après-midi. Le chiffre ne change pas : les heures restent payées.

@@ -46,7 +46,7 @@ function suite(S) {
     T('le dépensé et le fait au fil des jours : datés par le moteur, ils ne font que monter, le dernier point = les chiffres du jour', s2.length === 3 && s2[0].d === '2026-10-01' && s2[1].dep >= s2[0].dep && s2[1].fait >= s2[0].fait && s2[2].d === '2026-10-08' && s2[2].dep === Math.round(41000 / 61412 * 1000) / 10 && s2[2].fait === 61 && Math.abs(s2[1].dep - Math.round(2000 / 61412 * 1000) / 10) < 1e-9); }
   T('sans taux horaire : pas de photo économique (ni bascule, ni budget)', eco(S, Object.assign({}, E0, { configured: false })) === null);
   const v = S.vue;
-  T('la vue Économie lit le modèle : cadence et inaction réelles, aucune phrase de démonstration', v.includes("'<b>' + nb(r.capMoy) + '</b><small>\\u202fh/j</small>'") && v.includes('const x = (V.eco || {}).inaction;') && !v.includes('la pente et l’âge des vignes') && !v.includes('<b>35</b>'));
+  T('la vue Économie lit le modèle : cadence et inaction réelles, aucune phrase de démonstration', v.includes("'<b>' + nb(r.capMoy) + '</b><small>\\u202fh/j</small>'") && v.includes('const x = (V.eco || {}).inaction, calme = !x || !(x.h > 1);') && !v.includes('la pente et l’âge des vignes') && !v.includes('<b>35</b>'));
   T('pas de petite courbe sans historique, pas de tracé vide', /\|\| [a-z]+\.length < 2\) return '';/.test(v));
   T('« Exporter pour la compta » : l’export CSV de l’onglet Économie', v.includes("if (fn && fn.dataset.fn === 'export') { if (typeof window._pilEcoExport === 'function') window._pilEcoExport(); return; }") && S.pil.includes("_pecExport('csv', _pecData())"));
   T('la photo économique se branche dans Aujourd’hui', S.pil.includes('var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V);'));

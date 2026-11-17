@@ -136,9 +136,9 @@ function partieB(S, T) {
     && !h.includes('ck-ta-v-taille') && h.includes('+602,6' + NNBSP + '%') && h.includes('+16,1' + NNBSP + '%'));
   T('B4 sous la ligne, les heures du même calcul — au dixième sous 100 h', h.includes('15,4' + NNBSP + 'h de barème, 108' + NNBSP + 'h réelles') && h.includes('322' + NNBSP + 'h de barème, 374' + NNBSP + 'h réelles')
     && v.hTxt(15.44) === '15,4' + NNBSP + 'h' && v.hTxt(374.4) === '374' + NNBSP + 'h');
-  T('B5 la tuile lit le total, garde le tiret, et dit ce qu’elle compare', v.ecCadre({ ecartMoy: null }) === 'rien de validé à comparer' && v.ecCadre({ ecartMoy: .4 }) === 'heures réelles face au barème'
+  T('B5 la tuile lit le total, garde le tiret, et dit ce qu’elle compare', v.ecCadre({ ecartMoy: null }) === 'rien de validé' && v.ecCadre({ ecartMoy: .4 }) === 'plus lent' && v.ecCadre({ ecartMoy: -.4 }) === 'plus rapide'   /* MOTS-7 (§589) : le sens de l'écart, en deux mots */
     && code.includes("{ const em = (v.eco || {}).ecartMoy; r.ecartMoy = (em == null || !isFinite(em)) ? null : em; }")
-    && code.includes(`'<b id="ck-ek-ec">' + ecTxt(r.ecartMoy) + '</b>'`) && code.includes(`'<span id="ck-ek-ec-c">' + ecCadre(r) + '</span>'`)
+    && code.includes(`'<b id="ck-ek-ec" class="' + ecCls(r) + '">' + ecTxt(r.ecartMoy) + '</b>'`) && code.includes(`'<span id="ck-ek-ec-c">' + ecCadre(r) + '</span>'`)
     && code.includes("$('#ck-ek-ec').textContent = ecTxt(r.ecartMoy);") && code.includes("$('#ck-ek-ec-c').textContent = ecCadre(r);"));
   T('B6 en direct : une ligne qui manque fait redessiner la carte ; sinon la barre, sa pointe et ses heures se mettent à jour',
     code.includes("if (tachesE().length !== $$('#ck-etac .ck-ta').length || tachesE().some(t => !$('#ck-ta-v-' + t.id))) $('#ck-etac').innerHTML = htmlTaches(r);")
@@ -149,10 +149,10 @@ function partieB(S, T) {
 
 // ── C. L'accompagnement ; D. le branchement ────────────────────────────────
 function partieC(S, T) {
-  T('C1 les fiches « i » : la tuile est le total de la carte ; la carte, ses heures et son échelle', S.vue.includes("  ecart: 'Le total de la carte « Écart au barème, par tâche » : toutes les heures réellement versées")
+  T('C1 les fiches « i » : la tuile est le total de la carte ; la carte, ses heures et son échelle', S.vue.includes("  ecart: 'Le total de la carte « Écart par tâche » : toutes les heures réellement versées")   /* MOTS-7 (§589) : la carte s'appelle « Écart par tâche » */
     && /  taches: '[^\n]*« Temps réel contre barème »[^\n]*La barre est à l’échelle jusqu’à 50 % ; au-delà, elle est pleine et finit en pointe\./.test(S.vue));
   T('C2 l’aide du Pilotage dit ce qu’est l’écart au barème', S.uti.includes('l’écart au barème (le total des tâches de la carte « par tâche », en heures réelles face au barème des parcelles validées ; un tiret tant que rien n’est à comparer)'));
-  T('C3 le guide public le dit aussi', S.guide.includes("L'<b>écart au barème</b> est le total de la carte « Écart au barème, par tâche »"));
+  T('C3 le guide public le dit aussi', S.guide.includes("L'<b>écart au barème</b> est le total de la carte « Écart par tâche »"));
   T('C4 la nouveauté au Journal (niveau 0, une correction), pour les administrateurs', /\{ v: '10\.15', d: '2026-10-26', items: \[\n    \{ niv: 0, pour: \['admin'\], emoji: 'graphique', titre: 'Pilotage › Aujourd’hui, vue Économie : l’écart au barème dit la même chose partout',/.test(S.uti));
   T('C5 la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.includes("['node scripts/mv-harnais-ecart1.mjs']") && S.liste.includes("['node scripts/mv-harnais-ecart1.mjs --contre']"));
 }

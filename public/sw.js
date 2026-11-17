@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.07
+// MA VIGNE — Service Worker v12.08
+// v12.08 (17/11/2026) — MOTS-7 (§589) : Pilotage › Aujourd'hui, la vue Économie allégée comme les vues Terrain et Cave — les six cartes gardées, à la même place ; « Coût à la fin » (ex « Atterrissage ») montre le montant en grand, l'écart au budget en couleur, la barre et ses deux bouts ; les quatre chiffres tiennent en un nom, un chiffre et deux ou trois mots (« Cadence », « Retard ») ; « Main-d'œuvre » écrit « fait » et « engagé » en chiffres au-dessus du graphe, la fin prévue au bout des pointillés ; « Par poste », « Par appellation » (de la plus chère à la moins chère) et « Écart par tâche » tiennent en une ligne chacun, le détail au toucher. Les explications passent derrière les « i ». Aucun calcul ne change. Dans le même lot, CDDCDI-1 régularisé : au Planning, les jours d'un contrat archivé (un CDD devenu CDI) restent affichés, en lecture seule, au lieu de « – » ; les compteurs ne changent pas ; son harnais, et deux contrôles réparés. APP 11.17.
 // v12.07 (17/11/2026) — MOTS-6 (§588) : Pilotage › Aujourd'hui, la vue Cave allégée comme la vue Terrain — les six cartes gardées, à la même place ; « Ce qui presse » montre le chiffre en grand, la suite en pastilles et trois compteurs ; « Le millésime » le tonnage en grand, la barre et une ligne de légende par étape ; « La cave en direct » une cuve par son dessin, son état et sa mesure, une cuvée par son nom, son état et ses fûts, les cuvées en cours et à jour sur une ligne chacune ; « La cave dans la semaine » cinq jours, une ligne orange et une ligne par période ; « En direct » trois gestes ; « À savoir » un point par ligne avec un bouton court. Le pourquoi et la méthode passent derrière les « i », le détail se déplie au toucher, « Ouvrir » mène à la Cave. Au téléphone, « En direct » et « À savoir » passent en tête. Aucun calcul ne change. APP 11.16.
 // v12.06 (17/11/2026) — MOTS-5B (§587) : Pilotage › Aujourd'hui — la zone de toucher des pastilles de la phrase du jour descend sous la pastille au lieu de l'entourer : elle remontait la boîte au-dessus de la phrase, et le cliquet des mots (npm run test:mots) comptait ses mots avant le premier grand chiffre (13 → 19, rouge après MOTS-5). Rien ne change à l'écran. APP 11.15.
 // v12.05 (16/11/2026) — MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — toutes les cartes gardées, à la même place ; dans chaque carte un titre, un chiffre, une barre ou une couleur (les tuiles ont une barre à la place de la petite courbe, « Fin prévue » la date en grand, « La décision du jour » une question par ligne, les chantiers une ligne chacun, la charge restante son chiffre en grand et les noms écrits sur les traits) ; l'explication derrière le « i », le détail au toucher ; la phrase du jour courte, les points à voir en pastilles, une ligne de repères ; au téléphone, « En direct » et « À savoir » juste sous la phrase, les tuiles deux par deux, 16 px de marge ; le plan montre deux appellations de front dès 300 px. Aucun calcul ne change. APP 11.14.
@@ -4739,7 +4740,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.07';
+const CACHE_NAME   = 'mavigne-v12.08';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4756,7 +4757,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.07 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.08 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4776,7 +4777,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.07 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.08 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

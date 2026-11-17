@@ -354,3 +354,77 @@ Gestes rejoués à l’écran, téléphone et ordinateur : une cuve, une cuvée,
 **Les trois cliquets rendus, lancés en dernier** (règle du §587) : `npm run test:mots` (référence regravée, 6 baisses, aucune hausse), `npm run test:ux`, `npm run test:gabarit` — verts.
 
 **NON vérifié** : un vrai téléphone ; le thème sombre ; un domaine avec beaucoup de cuves (plus de six de front) ou de cuvées ; un signe fort du Diagnostic à l’écran (joué par le harnais CAVEPIL-1, pas regardé) ; une semaine avec des journées de cave au planning (jouée par le harnais, pas regardée) ; un écran non admin. **Reste à faire** : la vue Économie d’Aujourd’hui, même règle, maquette d’abord.
+
+## 589. ★★★ MOTS-7 — AUJOURD’HUI, LA VUE ÉCONOMIE ALLÉGÉE, ET CDDCDI-1 RÉGULARISÉ (17/11 — `src/cockpit-vue.js` · `src/aujourdhui.css` · `src/styles.css` · `src/planning.js` · `src/utils.js` · `src/whats-new.js` · `guide/11-pilotage.html` · `guide/10-planning.html` · `scripts/mv-harnais-mots7.mjs` · `scripts/mv-harnais-cddcdi1.mjs`)
+
+**La demande.** Après MOTS-6 (§588, la vue Cave), Nico : « suite ». Maquette téléphone et ordinateur, Avant / Après, cadre réel de l’appli : `docs/maquettes/maquette-aujourdhui-economie-v1.html` — « C’est parfait ». Dans le même message : « régularise en même temps et si tu veux faire un lot de l’intégralité, c’est mieux » — le commit « planning » (`1b14008`, CDDCDI-1) était arrivé sans harnais, sans version, sans doc, et cassait deux contrôles. Un seul lot pour les deux. Base `1b14008`. APP 11.16 → 11.17, SW 12.07 → 12.08.
+
+### 589a. La vue Économie, carte par carte
+
+Même règle que les vues Terrain (§586) et Cave (§588) : rien ne quitte l’écran, les six cartes restent à leur place ; dans une carte, un chiffre, une barre ou une couleur ; le pourquoi du jour et la méthode derrière le « i » (`INFO_PLUS`) ; le détail au toucher (`<details class="ck-dp">`). **Aucun calcul ne change.**
+
+| Carte | Avant | Après |
+|---|---|---|
+| **Coût à la fin** (ex « Atterrissage de la campagne ») | « La campagne devrait coûter 15 317 € . », une phrase de suite, trois étiquettes sur les repères de la frise (qui se chevauchaient) | le montant en grand, « 467 € sous le budget » en couleur à côté ; la frise sans étiquette ; dessous « engagé 1 940 € » et « budget 15 784 € » ; « Ouvrir l’Économie », « Exporter » (nom long en `aria-label`) |
+| **Les quatre chiffres** | sous chaque chiffre, une à quatre lignes ; « Rien à rattraper » en gros titre vert | le nom, le chiffre, deux ou trois mots (« prévu 2 248 », « plus rapide », « il en faut 11 ») ; « Cadence », « Retard » ; l’écart au barème en vert (plus rapide) ou orange (plus lent) ; « rien à rattraper » en pastille verte ; la phrase d’avant derrière le « i » |
+| **Main-d’œuvre** (ex « Main-d’œuvre : dépensé face au fait ») | un titre long, un sous-titre, une légende sous le graphe, « 100 % fait » et « 97 % du budget » aux deux bouts | « fait 16 % » et « engagé 12 % » en chiffres au-dessus, qui servent de légende ; au bout des pointillés « fin prévue 25 nov. » puis « fait 100 % · engagé 97 % » (à droite du point s’il y a la place, sinon à gauche) |
+| **Par poste** | un sous-titre, trois lignes par poste | le nom, l’écart, la barre, « 1 888 / 15 447 € » ; les heures, le taux, les litres au toucher ; « Toute la campagne » a désormais sa barre, son trait et le coût à la fin au toucher |
+| **Par appellation** | un sous-titre, trois lignes par appellation, dans l’ordre du domaine ; les appellations sans travail en entier ; une note de trois lignes | une ligne par appellation (nom, barre, €/ha), **de la plus chère à la moins chère** ; la surface au toucher ; « 2 sans travail validé » sur une ligne repliée ; « +230 % de Bourgogne à Gevrey-Chambertin » ; la phrase derrière le « i » |
+| **Écart par tâche** (ex « Écart au barème, par tâche ») | un sous-titre, trois mots d’échelle, deux lignes par tâche | le nom, la barre, l’écart ; les heures au toucher ; « plus rapide / plus lent » au-dessus de la barre seule |
+
+Au téléphone, l’ordre ne change pas (la vue n’a ni « En direct » ni « À savoir »).
+
+### 589b. Les mots (§580c)
+
+- « Atterrissage » → **« coût à la fin »**, le mot de la phrase du haut — à l’écran, dans les bulles, l’aide et le guide.
+- « Dépensé » / « payé » → **« engagé »** : le mot du lexique pour les euros de la campagne, celui de la tuile Budget. ⚠️ La maquette validée écrit « dépensé » : le cliquet des mots le compte hors lexique (`d[ée]pens[ée]e?s?`). Le code suit le lexique ; l’écart est dit au LISEZMOI.
+- « Cadence de l’équipe » → « Cadence » ; « Coût de l’inaction » → « Retard » ; la bulle du graphe (survol) dit « fait » / « engagé » comme sa légende.
+- La date longue de la tête (« Mardi 27 octobre ») reste le seul mot hors lexique de la vue : elle est commune aux trois vues.
+
+### 589c. CDDCDI-1, régularisé
+
+**Le commit** (`1b14008`, `src/planning.js` seul) : quand un CDD devient CDI, la fiche garde le CDI comme contrat en cours ; la grille ne lisait que lui (`_planInContract`) et tous les jours d’avant tombaient en « – ». `_pl2Cell` affiche maintenant un jour couvert par un contrat archivé (`_planJourCouvert`), marqué `ro` (lecture seule), sans en faire un bouton ; la ligne « Σ jour » compte ces jours (`_planJourArchive`) ; la fiche du mois ne les ouvre pas. Les compteurs restent sur `_planInContract` — la règle des « deux portails ».
+
+**Ce que le lot y ajoute** :
+- `mv-harnais-retard.mjs` **plantait** : son banc ne chargeait pas `_pl2CellJour`. Ajouté à sa liste.
+- `mv-harnais-vueeq1.mjs --contre` : une contre-épreuve visait `h+='<div class="pl2-cell pleq-ro'`, et la case en lecture seule de l’admin avait pris la classe `pleq-ro` de la vue Équipe du salarié — deux ancres. La case a maintenant sa classe à elle, **`pl2-cell-ro`** (curseur au repos, avec `.pl2-cell-out` et `.pl2-cell-hc`).
+- **`mv-harnais-cddcdi1.mjs`** : 15 assertions, 14 contre-épreuves, sur les vraies fonctions de contrat et la vraie case montées dans Node (un CDD archivé sans coupure, un CDD suivi d’une coupure).
+- La version (11.17), l’annonce à l’admin (« Planning : un CDD devenu CDI garde son passé à l’écran »), une ligne d’aide (Planning), une puce au guide (`10-planning.html`).
+- **Pas vérifié à l’écran** : la démo n’a pas de contrat archivé ; la grille n’a été jouée que dans Node.
+
+### 589d. Comment c’est fait
+
+- Les pièces du jour vont dans `INFO_PLUS` (déclaré à côté d’`INFO`) : `atterrissage` (le reste au barème ou au rythme mesuré), `cadence` (l’allure pour tenir l’objectif), `inaction` (pourquoi le retard est nul, ou ce qu’il coûte), `apps` (l’écart entre appellations). `ouvrirInfo` les met avant la méthode (MOTS-6).
+- `ecCadre` dit le sens (« plus rapide », « plus lent », « au barème », « rien de validé ») ; `ecCls` la couleur. `ligneTot` fait de « Toute la campagne » une ligne de poste comme les autres.
+- Feuille : tout dans `src/aujourdhui.css` (bloc MOTS-7). `styles.css` n’a fait que perdre ses règles mortes (`.ck-ek-calme`, `.ck-gr-leg`, `.ck-ap-b`, `.ck-ap-c`, `.ck-e-lf`, l’étiquette « dépensé » de la frise, l’ancienne grille des tâches…) — sauf `.ck-fr-visee em`, partagée avec la vue Terrain (589g).
+
+### 589e. Mesuré (build, démo au 27/10)
+
+| | Avant | Après |
+|---|---|---|
+| Mots de la vue Économie (`npm run test:mots`) — téléphone | 243 | **115** |
+| … ordinateur | 249 | **121** |
+| Mots hors lexique | 10 | 1 (la date de la tête) |
+| Hauteur de la page — téléphone (390 px) | 3 098 px (3,7 écrans) | 2 382 px (2,8 écrans) |
+| … ordinateur (1 366 px) | 1 628 px (1,8 écran) | 1 181 px (1,3 écran) |
+
+Gestes rejoués à l’écran, téléphone et ordinateur : un poste, une appellation, la ligne « sans travail validé », une tâche se déplient ; les bulles « i » du coût à la fin, de la cadence, du retard et des appellations ouvrent sur la phrase du jour ; « Ouvrir l’Économie » ouvre l’onglet ; rien ne déborde d’une carte ; aucune erreur.
+
+### 589f. Écarts avec la maquette
+
+- « engagé » au lieu de « dépensé » (589b).
+- La page est plus haute que la maquette (téléphone 2,8 écrans contre 2,3 ; ordinateur 1,3 contre 1,1) : les zones de toucher de 44 px et les marges réelles des cartes.
+- « Coût à la fin » n’a pas de fond de carte, comme « Fin prévue » (Terrain) et « Ce qui presse » (Cave).
+- Sur ordinateur, dans les tuiles étroites, les noms (« Coût à l’hectare », « Écart au barème ») passent sur deux lignes et « rien à rattraper » aussi.
+
+### 589g. Leçons
+
+- ⚠️ **Une espace fine écrite en clair dans le source** (le caractère, au lieu de `\u202f`) ne se voit pas à l’écran et passe tous les contrôles rendus ; elle casse les harnais qui cherchent le texte du source (ici REF-2). Avant de livrer : `grep -c $'\u202f\|\u00a0'` sur chaque fichier touché, comparé à `HEAD`.
+- ⚠️ **Une règle « morte » peut servir ailleurs** : `.ck-fr-visee em` (l’étiquette d’un repère de frise) semblait propre à la vue Économie ; la frise de la vue Terrain l’utilise aussi (« Objectif »). Retirée, l’étiquette est remontée au-dessus du trait — aucun harnais ni cliquet ne l’a vu, **la capture de démo l’a vu** (`mv-demo-captures`, comparée pixel à pixel). Rendue, et gardée par `mots7`. Avant de retirer une règle : chercher chacune de ses classes dans tout `src/`, pas seulement dans la fonction réécrite.
+- ⚠️ **Un commit poussé sans lot** (CDDCDI-1) : la chaîne le dit, pas le commit. Deux contrôles rouges depuis `1b14008` ; relancer la chaîne à chaque reprise, même quand le lot précédent était vert.
+
+**Harnais adaptés** : `auj5` (la règle à 20 px n’a plus `.ck-ek-calme`), `ecart1` (`ecCadre`, la classe de l’écart, le nom de la carte), `mots5` (« fin prévue » s’écrit trois fois), `pro1` (« pile dans le budget »), `ref2` (l’inaction lue avec son calme), `retard` (`_pl2CellJour`). **Nouveaux** : `mots7` (37 assertions, 51 contre-épreuves), `cddcdi1` (15, 14). Les contre-épreuves de chaque harnais ne se lancent que sur une suite verte (§588).
+
+**Les trois cliquets rendus, lancés en dernier** (§587) : `npm run test:mots` (référence regravée : 4 baisses, aucune hausse), `npm run test:ux`, `npm run test:gabarit` — verts.
+
+**NON vérifié** : un vrai téléphone ; le thème sombre ; un domaine au-dessus du budget (l’écart en orange, la zone de la frise en orange) ; un retard non nul à l’écran (joué par le harnais) ; un domaine avec beaucoup de postes ou d’appellations ; la grille du Planning avec un contrat archivé, à l’écran. **Reste à faire** dans « ★ MOINS DE TEXTE » : la suite du plan (§28) — Travaux, Décider, L’équipe & le matériel, Conformité dans leurs lots de déménagement, puis Cave › Le Millésime, Cave › Aujourd’hui, Phyto › Registre, la Réserve, le balayage.

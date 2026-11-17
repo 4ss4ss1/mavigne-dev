@@ -62,7 +62,7 @@ function extraire(nom) {
 const VOULUES = [
   '_planMinOf', '_planAbsT', '_planAbsH', '_planAbsDef', '_planAbsMotif',
   '_planTimingH', '_planRetardFaites', '_planRetardH', '_planRetardVide',
-  '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
+  '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_pl2CellJour', '_planRefH',   // CDDCDI-1 (§589) : _pl2Cell délègue le jour à _pl2CellJour
   '_planDefTiming', '_planRetardBornes', '_planSolid', '_planSolidJour', '_planEstSolid', '_planPlanned',   // ★ BASEAN-1
   '_planFmt', '_planDays',
   // RECUP-1 : _planDayH, _planWorkH et _pl2Cell lisent aussi l'absence sur une partie de journee

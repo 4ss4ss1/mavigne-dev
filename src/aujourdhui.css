@@ -3,7 +3,7 @@
    Nico (16/11) : « l'onglet comme il était avant me semblait bien, il faut l'alléger » — rien ne quitte l'écran, chaque
    carte garde sa place. Dans une carte : un titre, un chiffre, une barre ou une couleur ; l'explication derrière le « i »,
    le détail au toucher. Maquette validée : docs/maquettes/maquette-aujourdhui-v4.html. Ces règles viennent après celles
-   de REF-1 / PRO-1 et les recouvrent sous .ck2 ; la vue Cave suit la même règle (MOTS-6, en fin de fichier), la vue Économie viendra.
+   de REF-1 / PRO-1 et les recouvrent sous .ck2 ; les vues Cave (MOTS-6) et Économie (MOTS-7) suivent la même règle, en fin de fichier.
    Fichier à part : styles.css est à son plafond (1 024 ko, mv-harnais-typo) — rien n'y entre. Importé par app.js après
    styles.css et bandeau.css : il passe donc après eux. Tout se lit dans la charte, avec un repli.
    ═════════════════════════════════════════════════════════════════════════════════════════════════ */
@@ -218,3 +218,60 @@
 /* Le chevron d'un point reste collé à son dernier mot : sans largeur propre, il ne passe jamais seul à la ligne. */
 .ck2 #ck-cv-savoir .ck-sv-h{padding-right:var(--e-4,16px)}
 .ck2 #ck-cv-savoir .ck-sv-d>summary .ck-sv-h b::after{margin-right:calc(-1 * (6px + var(--e-2,8px)))}
+/* ═════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★★ MOTS-7 (§589) — LA VUE ÉCONOMIE D'AUJOURD'HUI, ALLÉGÉE COMME LES VUES TERRAIN ET CAVE
+   Maquette validée le 17/11 : docs/maquettes/maquette-aujourdhui-economie-v1.html. Les six cartes restent ; dans chacune, un
+   chiffre, une barre ou une couleur. Le détail d'un poste, d'une appellation, d'une tâche se déplie au toucher (.ck-dp).
+   Ces règles recouvrent celles d'AUJ-2 / AUJ-7 / ECART-1 (styles.css), dont les règles mortes ont été retirées.
+   ═════════════════════════════════════════════════════════════════════════════════════════════════ */
+.ck2 .ck-dp>summary{list-style:none;cursor:pointer}
+.ck2 .ck-dp>summary::-webkit-details-marker{display:none}
+.ck2 .ck-dp>summary:focus-visible{outline:2px solid var(--anneau);outline-offset:2px;border-radius:var(--r-sm,6px)}
+/* ── Coût à la fin : le montant en grand, l'écart au budget en couleur, la barre, ses deux bouts ── */
+.ck2 .ck-ev-ph small{font-weight:var(--fw-semi,600)}
+.ck2 .ck-ev-ph small.ko{color:var(--attention-texte)}
+.ck2 .ck-frise-e{height:40px}
+.ck2 .ck-ev-rep{display:flex;justify-content:space-between;gap:var(--e-3,12px);margin:0;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .ck-ev-rep b{color:var(--texte);font-weight:var(--fw-semi,600);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.ck2 #ck-ever .ck-v-act{margin-top:var(--e-3,12px)}
+/* ── Les quatre chiffres : le nom, le chiffre, deux ou trois mots ── */
+.ck2 .ck-ek-s{margin:var(--e-1,4px) 0 0;font-size:var(--pt-micro,12px);line-height:1.3;color:var(--texte-doux)}
+.ck2 .ck-ek .ck-ph-n b.vite{color:var(--ok-texte)}
+.ck2 .ck-ek .ck-ph-n b.lent{color:var(--attention-texte)}
+.ck2 .ck-ph-pst.ok{background:var(--ok-doux)}
+.ck2 .ck-ph-pst.ok::before{background:var(--ok)}
+/* ── Main-d'œuvre : les deux parts du jour en chiffres, qui servent de légende ── */
+.ck2 .ck-e-chf{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--e-1,4px) var(--e-4,16px);margin:var(--e-1,4px) 0 0;font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.ck2 .ck-e-chf span{display:inline-flex;align-items:baseline;gap:var(--e-2,8px)}
+.ck2 .ck-e-chf i{align-self:center;display:inline-block;width:16px;height:0}
+.ck2 .ck-e-chf b{font:var(--fw-semi,600) var(--pt-md,20px)/1.1 var(--font-ui);letter-spacing:var(--ls-titre);color:var(--texte);font-variant-numeric:lining-nums}
+/* ── Par poste : le nom, l'écart, la barre, « engagé / budget » ── */
+.ck2 .ck-po{padding:var(--e-1,4px) 0}
+.ck2 .ck-po .ck-dp>summary,.ck2 .ck-po div.ck-dp{display:flex;flex-direction:column;justify-content:center;min-height:44px}
+.ck2 .ck-po-h{margin-bottom:var(--e-1,4px)}
+.ck2 .ck-po-b{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--e-3,12px)}
+.ck2 .ck-po-q{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.ck2 .ck-po-s{margin:0 0 var(--e-1,4px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}
+/* ── Par appellation : une ligne chacune ; celles sans travail validé sur une ligne repliée ; l'écart en un chiffre ── */
+.ck2 .ck-ap{padding:0}
+.ck2 summary.ck-ap-h{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(40px,1fr) auto;align-items:center;gap:var(--e-3,12px);min-height:44px}
+.ck2 .ck-ap-h .n{line-height:1.25}
+.ck2 .ck-ap-h .v{min-width:4.6em;text-align:right}
+.ck2 .ck-ap-s{margin:0 0 var(--e-2,8px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}
+.ck2 .ck-ap-z summary{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);min-height:44px;font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.ck2 .ck-ap-z .mv-ic{flex:none;color:var(--texte-doux);transform:rotate(-90deg)}
+.ck2 .ck-ap-z details[open] .mv-ic{transform:none}
+.ck2 .ck-ap-note{display:flex;align-items:baseline;gap:var(--e-2,8px);margin:0;padding:var(--e-3,12px) 0 0;box-shadow:inset 0 1px 0 var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-med)}
+.ck2 .ck-ap-note b{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap;font-variant-numeric:lining-nums}
+/* ── Écart par tâche : le nom, la barre, l'écart ; ses heures au toucher ── */
+.ck2 .ck-ta{padding:0}
+.ck2 .ck-ta-g{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:var(--e-1,4px) var(--e-2,8px);min-height:44px}   /* ECART-1 (§460) : 8 px entre la barre et l'écart */
+.ck2 .ck-ta-ax{min-height:0;margin-top:var(--e-1,4px);font-size:var(--pt-nano,11px);color:var(--texte-doux)}
+.ck2 .ck-ta-ax>span:nth-child(2){display:flex;justify-content:space-between}
+.ck2 .ck-ta-s{margin:0 0 var(--e-2,8px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}
+@media (max-width:520px){.ck2 .ck-ta-g{grid-template-columns:88px minmax(0,1fr) 64px}}
+.ck2 .ck-ek-g .ck-ph{min-height:0;gap:var(--e-1,4px);padding:var(--e-3,12px) var(--e-4,16px)}
+/* Dans une tuile étroite (ordinateur), la pastille « rien à rattraper » passe sur deux lignes plutôt que de sortir de la tuile. */
+.ck2 .ck-ek .ck-ph-pst{height:auto;min-height:24px;padding-top:var(--e-1,4px);padding-bottom:var(--e-1,4px);border-radius:var(--r-lg,12px);white-space:normal;line-height:1.25}
+.ck2 .ck-ek .ck-ph-pst::before{flex:none}
+.ck2 .ck-ap-h .ck-barre{grid-column:auto}

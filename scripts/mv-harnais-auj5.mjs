@@ -81,7 +81,7 @@ function partieC(S, T) {
   T('C6 la tuile Budget se lit en clair', (vue.match(/engagé \\u00b7 fait ' \+ nb\(r\.pct\)/g) || []).length === 2 && !vue.includes('de la main-d’œuvre, pour') && vue.includes('le trait la part du travail fait'));
   T('C7 la météo a ses couleurs à elle, tirées de la racine', css.includes(':root{--meteo-soleil:var(--or);--meteo-pluie:var(--bleu);--meteo-nuage:var(--texte-doux)}') && vue.includes('class="m-sol"') && vue.includes('class="m-eau"') && vue.includes('class="m-nuage"'));
   T('C8 la pastille de présence clignote un jour travaillé, fixe si les animations sont coupées', vue.includes("calque.classList.toggle('vif', !!(V && V.jourTravaille !== false));") && css.includes('.ck2 .ck-calque.vif .ck-eq::before{display:block;') && css.includes('@media (prefers-reduced-motion:reduce){.ck2 .ck-calque.vif .ck-eq::before{display:none}}'));
-  T('C9 une seule échelle : la phrase de fin prévue à 28 px, titres et réponses à 20 px', css.includes('.ck2 .ck-v-phrase{max-width:16em;font-size:var(--pt-xl,28px);line-height:1.15}') && css.includes('.ck2 .ck-titre-p,.ck2 .ck-dz-v,.ck2 .ck-ek-calme{font-size:var(--pt-md,20px)}'));
+  T('C9 une seule échelle : la phrase de fin prévue à 28 px, titres et réponses à 20 px', css.includes('.ck2 .ck-v-phrase{max-width:16em;font-size:var(--pt-xl,28px);line-height:1.15}') && css.includes('.ck2 .ck-titre-p,.ck2 .ck-dz-v{font-size:var(--pt-md,20px)}')   /* MOTS-7 (§589) : « Rien à rattraper » est devenu une pastille */);
 }
 
 async function verifier(S) {
