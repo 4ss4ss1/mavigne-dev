@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.17';
+export const APP_VERSION = '11.18';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -980,11 +980,11 @@ function _mvkDet(t){
   if((t.surf_total||0)>0) return _mvkHa(t.surf_done)+' / '+_mvkHa(t.surf_total)+' ha';
   return '\u2014';
 }
-function _mvkLigne(nom,pct,etat,det,sous){
-  var p=Math.max(0,Math.min(100,Math.round(Number(pct)||0)));
-  return '<div class="mvk-ligne'+(sous?' sous':'')+'"><span class="nom">'+nom+'</span>'
+function _mvkLigne(nom,pct,etat,det,sous,balise){
+  var p=Math.max(0,Math.min(100,Math.round(Number(pct)||0))), b=balise||'div';
+  return '<'+b+' class="mvk-ligne'+(sous?' sous':'')+'"><span class="nom">'+nom+'</span>'
     +'<span class="mvk-barre"><i class="mvk-'+etat+'" style="width:'+p+'%"></i></span>'
-    +'<span class="pct mvk-t-'+etat+'">'+p+'\u00a0%</span><span class="det">'+det+'</span></div>';
+    +'<span class="pct mvk-t-'+etat+'">'+p+'\u00a0%</span><span class="det">'+det+'</span></'+b+'>';
 }
 // ★ CHANT-1 (§316) — L'ORDRE DES CHANTIERS, UNE SEULE RÈGLE. Nico (12/10) : « ils doivent apparaître dans l'ordre de leur
 //   date de commencement […] peu importe la date de fin », puis les terminés en bas ; l'arrachage fini pour l'équipe, lui,
@@ -1001,14 +1001,22 @@ function _mvOrdreChantiers(rows,ctx){
     .map(function(x){ return x.t; });
 }
 // CHANT-1 : les lignes dans l'ordre commun ; l'arrachage fini pour l'équipe en vert, son vrai %, et une mention dessous.
-function _mvkAvancement(rows,retards){
-  var R=retards||{};
+// ★ MOTS-8 (§590) — `opt`, facultatif (l'Accueil n'en passe pas : rien n'y change) : { col:fn(nom) → la couleur de la tâche,
+//   en pastille devant son nom ; dates:fn(t, enRetard) → le détail qui se déplie au toucher (HTML écrit par l'appelant, déjà
+//   échappé). La barre garde la couleur d'ÉTAT (KIT-1) : c'est elle qui dit « en retard ». Avec un détail, la ligne devient le
+//   <summary> d'un <details> ; le <summary> n'accepte que du texte en ligne, d'où la ligne en <span> (_mvkLigne, 6e argument).
+function _mvkAvancement(rows,retards,opt){
+  var R=retards||{}, O=opt||{};
   var C=(typeof window!=='undefined'&&typeof window._mvChantiersCtx==='function')?window._mvChantiersCtx():null;
   var EQ=(C&&C.equipeFinie)||{};
   var L=(typeof _mvOrdreChantiers==='function')?_mvOrdreChantiers(rows,C):(Array.isArray(rows)?rows:[]);
   return L.map(function(t){
     var eqf=!!EQ[t.nom]&&(Number(t.pct)||0)<100, late=!eqf&&!!R[t.nom];
-    var h=_mvkLigne(_escHtml(tNom(t.nom)), t.pct||0, eqf?'fait':_mvkEtat(t.pct||0,late), _mvkDet(t), false);
+    var nomH=_escHtml(tNom(t.nom));
+    if(typeof O.col==='function') nomH='<i class="mvk-pt" style="background:'+_escAttr(O.col(t.nom))+'" aria-hidden="true"></i>'+nomH;
+    var dt=(typeof O.dates==='function')?(O.dates(t,late)||''):'';
+    var ligne=_mvkLigne(nomH, t.pct||0, eqf?'fait':_mvkEtat(t.pct||0,late), _mvkDet(t), false, dt?'span':'div');
+    var h=dt?('<details class="mvk-det"><summary>'+ligne+'</summary><p class="mvk-dt">'+dt+'</p></details>'):ligne;
     if(eqf) h+='<div class="mvk-note">Fini pour l’équipe, la suite au prestataire</div>';
     var niv=(t.type==='niveaux'||t.nom==='Relevage'), pas=(t.type==='passages'||t.nom==='Ebourgeonnage'||t.nom==='Pioche');
     if(t.detail && t.detail.length>1 && (niv||pas)){
@@ -2975,15 +2983,15 @@ var MV_AIDE = {
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Touchez une campagne dans L’année et les trois chiffres du haut et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée (sauf ses sous-vues Exercice et Revient, qui ont chacune leur cadre), la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
-      ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>Travaux</b>, le niveau de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
+      ['Les trois chiffres du haut', "— les travaux, le renfort, le budget — ne s’affichent que sur <b>Travaux</b>, le niveau de zoom : un nom, un chiffre, une barre ou une pastille ; la phrase entière au survol. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
       ['Le budget de l’année et le renfort', " : le cadre (exercice comptable ou année vigne) se choisit dans la barre <b>« Vous regardez »</b>. Le <b>budget de l’année</b> s’ouvre en tête de la Synthèse d’<b>Économie</b>, avec les avis du cadre (vendange à cheval sur deux exercices, année vigne aux mêmes dates que l’exercice) ; <b>le renfort à prévoir</b> est dans <b>Équipe & matériel</b>, partie Personnel. L’onglet « L’année » n’existe plus : ceux qui l’avaient ouvert arrivent sur Économie."],
-      ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que Travaux, sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
+      ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances lisent la même simulation que Travaux, sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux. Les travaux au temps passé (arrachage, désherbage manuel, effeuillage, vendange) n’y figurent pas : ils n’ont pas de barème, par nature. L’entreplantation y figure tant qu’aucun pied n’est compté, et son bouton ouvre la feuille des comptes. Une période sans traitement n’a rien à compléter côté phyto : zéro est alors le vrai chiffre."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
       ['La carte du domaine se lit de cinq façons', " : l’avancement, les jours depuis le dernier traitement, le cépage, l’IFT de l’année face à votre référence, le coût engagé à l’hectare. La légende suit la vue ; une parcelle sans donnée reste grise."],
-      ['Travaux', "(l’ancien « La campagne ») montre l’avancement — la jauge de saison en tête d’« Avancement par tâche », puis « La charge par tâche » —, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; ce qui manquera en personnes d’ici la fin de l’année, lui, se lit dans « L’année »."],
-      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans pieds comptés ni trous percés — ne prévoit pas d’heures : dans « Avancement par tâche », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
+      ['Travaux', "(l’ancien « La campagne ») s’ouvre sur une phrase : ce qui est fait, et la fin prévue — la même date qu’Aujourd’hui, verte avant l’objectif, rouge après. Dessous, trois tuiles comme celles d’Aujourd’hui (les travaux, le <b>renfort</b>, le budget), puis <b>Avancement</b> (la barre de la campagne, fait · reste · prévu, une ligne par tâche : toucher une tâche dit ses dates) et <b>La charge par tâche</b> — une couleur par tâche, la même partout dans l’onglet. Trois cartes repliées montrent leur chiffre : <b>Le temps de l’équipe</b> (la présence, la part dans les rangs ; ouverte, la frise prévu/fait, la courbe par semaine et l’écart), <b>Échéances</b>, <b>Carte du domaine</b>. Chaque carte a son bouton : « Ouvrir » mène au module où l’on agit — les parcelles, le planning, la carte. Rien ne se saisit dans le Pilotage. La méthode est derrière les « i »."],
+      ['Une tâche sans barème à l’hectare', "— arrachage, désherbage manuel, entreplantation sans pieds comptés ni trous percés — ne prévoit pas d’heures : dans « Avancement », elle s’avance en <b>surface</b> faite sur surface concernée, la même part que sur la liste des parcelles. Quand l’équipe a fini ses étapes d’arrachage partout, la tâche se range en tête des terminées, en vert, avec « la suite au prestataire »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
@@ -3410,7 +3418,33 @@ export const MV_INFO = {
   'pil.avc.temps': { t: 'Où va le temps de l\u2019équipe', p: [
     'La répartition compte la <b>présence au planning</b>, découpée entre vigne, tracteur et le reste. Elle ne vient pas du journal : le journal dit <b>qui</b> a travaillé, jamais combien d\u2019heures.',
     '<b>Une moyenne n\u2019est pas un pic.</b> Cet écran donne une moyenne sur la campagne ; la <b>frise des 52 semaines</b>, dans « L\u2019année », donne la semaine la plus chargée — et c\u2019est elle qui décide d\u2019un recrutement.',
-    'Le poste « Autres » se vide à mesure que vous renseignez un <b>barème h/ha par activité</b> dans Réglages \u203a Tracteur : tant qu\u2019il est vide, le tracteur ne peut pas être détaché du reste.'
+    'Le poste « Autres » se vide à mesure que vous renseignez un <b>barème h/ha par activité</b> dans Réglages \u203a Tracteur : tant qu\u2019il est vide, le tracteur ne peut pas être détaché du reste.',
+    // MOTS-8 (§590) : ce que disait la carte sous la barre
+    '« pers. » : des personnes à temps plein, en moyenne sur la campagne. La barre est la part de chaque poste dans la présence.'
+  ] },
+  // ★ MOTS-8 (§590) — les fiches des cartes de Pilotage › Travaux : la méthode qui était écrite sur l'écran.
+  'pil.avc.avancement': { t: 'Avancement', p: [
+    'Les heures <b>faites</b> au barème, sur les parcelles validées, face aux heures <b>prévues</b> de chaque tâche de la campagne ; ce qui <b>reste</b> est la différence. La barre du haut : toute la campagne. Le pourcentage est écrit en tête de l\u2019onglet.',
+    'Une ligne par tâche, dans l\u2019ordre où elles commencent, les finies en bas. La couleur de la <b>barre</b> dit l\u2019état (fini, en cours, en retard : sa fenêtre est passée) ; la <b>pastille</b> devant le nom est la couleur de la tâche, la même dans « La charge par tâche » et la frise.',
+    'Touchez une tâche : sa fenêtre prévue, ce que dit le journal, et l\u2019écart au départ.',
+    '« N-1 » : la même campagne l\u2019an dernier, quand elle est archivée et faite à 80 % au moins.'
+  ] },
+  'pil.avc.charge': { t: 'La charge par tâche', p: [
+    'Les heures de chaque tâche, au barème. « Reste » : ce qui reste à faire ; « Fait » : ce qui est fait ; « Prévu » : toute la campagne.',
+    'Une tâche garde sa couleur partout dans l\u2019onglet : sa place dans la campagne décide de sa couleur, pas la taille de sa part.'
+  ] },
+  'pil.avc.frise': { t: 'Prévu et fait', p: [
+    'Le grand trait : la fenêtre prévue de chaque tâche, dans sa couleur, avec ses heures. Le trait fin : le travail validé au journal, du premier au dernier jour (hachuré quand la tâche est finie, orange tant qu\u2019elle est en cours). Le pointillé : aujourd\u2019hui.',
+    'Les fenêtres se règlent dans la <b>roue crantée</b> du Pilotage.'
+  ] },
+  'pil.avc.courbe': { t: 'Personnes nécessaires par semaine', p: [
+    'Chaque barre : les personnes qu\u2019il faut cette semaine-là pour tenir les fenêtres des tâches, au barème. La ligne : l\u2019équipe présente au planning. En rouge : il manque du monde cette semaine-là, et le pic est écrit au-dessus.',
+    'Même axe que la frise juste au-dessus : une date tombe au même endroit sur les deux.'
+  ] },
+  'pil.avc.echeances': { t: 'Échéances', p: [
+    'Le même calcul qu\u2019Aujourd\u2019hui : les heures qui restent au barème, retirées jour après jour de l\u2019équipe inscrite au planning, sans renfort et aux heures normales. Chaque tâche finit dans sa fenêtre, avec l\u2019équipe qu\u2019elle partage avec les tâches ouvertes en même temps.',
+    'La fin d\u2019une tâche est une <b>fourchette</b> : le rythme varie d\u2019une semaine à l\u2019autre. « Jours travaillés » : comptés depuis aujourd\u2019hui. « La plus longue » : celle qui finit en dernier.',
+    'Sans planning pour la suite, le calcul prend le rythme des quatre dernières semaines, et la carte le dit. « Déborde » : la tâche dépasse sa fenêtre ; « perdu » : une tâche sans rattrapage (la vendange) qui ne sera pas faite à temps.'
   ] },
 
   'pil.eco.revient': { t: 'Le revient d’un millésime', p: [
@@ -3612,7 +3646,7 @@ export const MV_INFO = {
   ] },
 
   'pil.carte': { t: 'Carte du domaine', p: [
-    'Le chiffre est l’avancement de la campagne. La carte, elle, se lit de cinq façons : choisissez la vue au-dessus, la légende suit.',
+    'Le chiffre est le nombre de parcelles en place, avec leur surface ; l’avancement est en tête de l’onglet. La carte se lit de cinq façons : choisissez la vue au-dessus, la légende suit.',
     '<b>Avancement</b> : la couleur habituelle des parcelles. <b>Dernier traitement</b> : les jours depuis la dernière intervention du registre phyto sur la parcelle, toutes campagnes confondues — vert le jour même, rouge à partir de 14 jours.',
     '<b>Cépage</b> : celui de la fiche parcelle. <b>IFT</b> : l\u2019IFT de l\u2019année de chaque parcelle, hors biocontrôle, calculé comme dans Conformité, face à votre référence — vert jusqu\u2019à elle, orange au-dessus, rouge au-delà de 25 %.',
     '<b>Coût / ha</b> : ce que la parcelle a coûté jusqu’ici à l’hectare, comme dans Économie › Parcelles. L’échelle va de la parcelle la moins chère à la plus chère.',

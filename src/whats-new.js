@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.18', d: '2026-11-17', items: [   // MOTS-8 (§590) : Pilotage › Travaux allégé sur place — l'onglet reste, ses cartes aussi
+    { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Pilotage, onglet Travaux\u00a0: les mêmes cartes, moins de mots',
+      desc: "L’onglet Travaux reste dans le Pilotage, avec toutes ses cartes. En haut, une phrase\u00a0: ce qui est fait, et la fin prévue, la même date qu’Aujourd’hui. Les trois chiffres prennent la forme des tuiles d’Aujourd’hui\u00a0; «\u00a0Effectif\u00a0» devient «\u00a0Renfort\u00a0». Une tâche garde la même couleur partout dans l’onglet. Toucher une tâche dit ses dates\u00a0; les explications sont derrière les «\u00a0i\u00a0». Chaque carte a son bouton «\u00a0Ouvrir\u00a0», vers les parcelles, le planning ou la carte. Aucun calcul ne change." },
+  ] },
   { v: '11.17', d: '2026-11-17', items: [   // MOTS-7 (§589) : Pilotage › Aujourd'hui, la vue Économie allégée — et CDDCDI-1 (Planning), régularisé dans le même lot
     { niv: 0, pour: ['admin'], emoji: 'euro', titre: 'Aujourd’hui, vue Économie\u00a0: les mêmes cartes, moins de mots',
       desc: "La vue Économie du Pilotage garde ses six cartes, à la même place. «\u00a0Atterrissage\u00a0» s’appelle «\u00a0Coût à la fin\u00a0», comme dans la phrase du haut\u00a0: le montant en grand, l’écart au budget en couleur. Les quatre chiffres tiennent en un nom, un chiffre et deux ou trois mots. Le graphe de la main-d’œuvre écrit «\u00a0fait\u00a0» et «\u00a0engagé\u00a0» au-dessus de lui. Un poste, une appellation, une tâche tiennent sur une ligne\u00a0: touchez-la pour lire le détail. Les appellations vont de la plus chère à la moins chère. Les explications sont derrière les «\u00a0i\u00a0». Aucun calcul ne change." },

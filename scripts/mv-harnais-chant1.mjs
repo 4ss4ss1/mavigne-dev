@@ -27,7 +27,7 @@ function mondeU(S, stub) {
   const U = S.uti;
   const code = ['_mvkNb', '_mvkHa'].map(n => ligne(U, new RegExp('function ' + n + '\\([a-z]\\)\\{[^\\n]*\\n'))).join('')
     + ligne(U, /function _mvkEtat\(pct,enRetard\)\{[^\n]*\n/)
-    + ['_mvOrdreChantiers(rows,ctx){', '_mvkDet(t){', '_mvkLigne(nom,pct,etat,det,sous){', '_mvkAvancement(rows,retards){']
+    + ['_mvOrdreChantiers(rows,ctx){', '_mvkDet(t){', '_mvkLigne(nom,pct,etat,det,sous,balise){', '_mvkAvancement(rows,retards,opt){']
         .map(s => sansCom(fn(U, 'function ' + s))).join('\n')
     + '\nthis.__f={_mvOrdreChantiers,_mvkAvancement};';
   vm.runInContext(code, ctx);

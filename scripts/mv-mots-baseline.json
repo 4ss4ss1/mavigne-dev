@@ -62,6 +62,11 @@
    "date": "2026-11-17",
    "motif": "MOTS-7 (§589) : la vue Économie d'Aujourd'hui allégée — les six cartes gardées, moins de mots dans chacune ; « coût à la fin », « engagé »",
    "hausses": []
+  },
+  {
+   "date": "2026-11-17",
+   "motif": "Pilotage › Travaux",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -259,10 +264,10 @@
     "lex": 1
    },
    "Pilotage › Travaux": {
-    "mots": 104,
-    "p15": 1,
-    "avant": 11,
-    "lex": 16
+    "mots": 65,
+    "p15": 0,
+    "avant": 7,
+    "lex": 2
    },
    "Pilotage › L’équipe & le matériel": {
     "mots": 254,
@@ -537,10 +542,10 @@
     "lex": 1
    },
    "Pilotage › Travaux": {
-    "mots": 113,
-    "p15": 1,
-    "avant": 11,
-    "lex": 16
+    "mots": 65,
+    "p15": 0,
+    "avant": 0,
+    "lex": 2
    },
    "Pilotage › L’équipe & le matériel": {
     "mots": 259,

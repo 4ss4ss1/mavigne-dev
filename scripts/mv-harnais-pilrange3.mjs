@@ -25,23 +25,24 @@ let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };
 function jouer(S) {
   const P = S.pil;
-  const avc = (show) => { const c = { _pilShow: (k) => !!show[k], _pilPanelTemps: () => '<i>TEMPS</i>', _pilPanelEcheances: () => '<i>ECH</i>', _pilPanelCarte: () => '<i>CARTE</i>' };
+  const avc = (show) => { const c = { _pilShow: (k) => !!show[k], _pilPanelTemps: () => '<i>TEMPS</i>', _pilPanelEcheances: () => '<i>ECH</i>', _pilPanelCarte: () => '<i>CARTE</i>',
+    _mvInfoBtn: () => '', _pilTvBtn: (c2, l) => '<button>' + l + '</button>' };   // MOTS-8 (§590) : le « i » et le bouton « Ouvrir » de la carte
     vm.createContext(c); vm.runInContext(corps(P, '_pilTabAvc'), c); return c._pilTabAvc({ data: [] }); };
   const tout = { avc_gauge: 1, avc_bar: 1, avc_pie: 1, avc_temps: 1, avc_echeances: 1, avc_carte: 1 };
   const h = avc(tout);
-  t('① la jauge n’est plus une carte en tête : elle ouvre « Avancement par tâche », avant les barres', !/^<div class="pil-gauge"/.test(h) && /Avancement par tâche<\/div>[\s\S]*?<div class="pil-gauge pil-gauge-in" id="pil-gauge"><\/div><div class="pil-bar" id="pil-bar">/.test(h), h.slice(0, 160));
+  t('① la jauge n’est plus une carte en tête : elle ouvre « Avancement » (MOTS-8 : son nom court), avant les barres', !/^<div class="pil-gauge"/.test(h) && /Avancement<\/div>[\s\S]*?<div class="pil-gauge pil-gauge-in" id="pil-gauge"><\/div><div class="pil-bar" id="pil-bar">/.test(h), h.slice(0, 160));
   t('① une seule jauge à l’écran', (h.match(/id="pil-gauge"/g) || []).length === 1);
-  t('① « Avancement par tâche » décoché : pas de jauge non plus', !/pil-gauge/.test(avc(Object.assign({}, tout, { avc_bar: 0 }))));
-  t('① le donut s’ouvre sur « La charge par tâche · restante », « Le temps de l’équipe » reste à part', /id="pil-pie-title">La charge par tâche · restante</.test(h) && /<i>TEMPS<\/i>/.test(h));
+  t('① « Avancement » décoché : pas de jauge non plus', !/pil-gauge/.test(avc(Object.assign({}, tout, { avc_bar: 0 }))));
+  t('① le donut s’appelle « La charge par tâche » (MOTS-8 : « Reste · Fait · Prévu » le dit), « Le temps de l’équipe » reste à part', /id="pil-pie-title">La charge par tâche</.test(h) && />Reste<\/button>/.test(h) && /<i>TEMPS<\/i>/.test(h));
   const fn = pieFn(P), modes = {};
-  for (const m of ['reste', 'fait', 'plan']) { const c = { _PIL_STATE: { pie: m }, Math, _PIL_PIE_COLORS: ['#111', '#222', '#333', '#444', '#555', '#666', '#777', '#888'] }; vm.createContext(c); vm.runInContext(corps(P, fn), c); try { const r = c[fn]({ data: [{ nom: 'Taille', h_reste: 10, h_done: 5, h_total: 15 }] }); modes[m] = r && r.title; } catch (e) { modes[m] = 'PLANTE ' + e.message; } }
-  t('② les trois modes du donut gardent le même nom : restante, réalisée, planifiée', modes.reste === 'La charge par tâche · restante' && modes.fait === 'La charge par tâche · réalisée' && modes.plan === 'La charge par tâche · planifiée', JSON.stringify(modes));
+  for (const m of ['reste', 'fait', 'plan']) { const c = { _PIL_STATE: { pie: m }, Math, _PIL_PIE_COLORS: ['#111', '#222', '#333', '#444', '#555', '#666', '#777', '#888'], _pilTCol: () => '#111' }; vm.createContext(c); vm.runInContext(corps(P, fn), c); try { const r = c[fn]({ data: [{ nom: 'Taille', h_reste: 10, h_done: 5, h_total: 15 }] }); modes[m] = r && r.title; } catch (e) { modes[m] = 'PLANTE ' + e.message; } }
+  t('② les trois modes du donut gardent le même nom — MOTS-8 (§590) : un seul, « La charge par tâche »', modes.reste === 'La charge par tâche' && modes.fait === 'La charge par tâche' && modes.plan === 'La charge par tâche', JSON.stringify(modes));
   t('③ la jauge se dessine sous la case « Avancement par tâche »', /if\(_pilShow\('avc_bar'\)\) _pilRenderGauge\(d\);/.test(P) && !/_pilShow\('avc_gauge'\)/.test(P));
   t('③ dans la carte, la jauge perd son cadre (pas une carte dans la carte)', P.includes("+'.pil-panel .pil-gauge-in{background:none;border:0;"));
-  t('③ « Afficher dans cet onglet » : plus de « Jauge de saison », le donut s’appelle « La charge par tâche »', /avc:\[\['avc_bar','Avancement par tâche \(et la saison\)'\],\['avc_pie','La charge par tâche'\],/.test(P) && !/Jauge de saison/.test(P));
+  t('③ « Afficher dans cet onglet » : plus de « Jauge de saison », le donut s’appelle « La charge par tâche »', /avc:\[\['avc_bar','Avancement'\],\['avc_pie','La charge par tâche'\],/.test(P) && !/Jauge de saison/.test(P));
   t('④ l’onglet s’appelle « Travaux » : menu, intitulé, barre latérale, recherche, cockpit', /\['avc','raisin','Travaux'\]/.test(P) && /avc:'Travaux — /.test(P) && /\['avc', 'Travaux'\]/.test(S.coq) && /'camp', 'Travaux'\)/.test(S.vue));   // DEMO-5 (§500) : le chapitre « Travaux » de la visite guidée est parti avec elle
   t('④ la barre « Vous regardez » garde « La campagne » (ce qu’on regarde, pas l’onglet)', /B\('camp','La campagne'\)/.test(P));
-  t('④ l’aide et le guide disent « Travaux », et la différence donut / temps de l’équipe', S.utils.includes("['Travaux', \"(l’ancien « La campagne ») montre") && /Aujourd'hui · Travaux ·/.test(S.guide) && /<b>La charge par tâche<\/b> \(le donut\)/.test(S.guide));
+  t('④ l’aide et le guide disent « Travaux », et la différence donut / temps de l’équipe', S.utils.includes("['Travaux', \"(l’ancien « La campagne ») s’ouvre sur une phrase") && /Aujourd'hui · Travaux ·/.test(S.guide) && /<b>La charge par tâche<\/b> \(le donut\)/.test(S.guide));
   t('⑤ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange3.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange3.mjs --contre'") > 0);
 }
 if (!CONTRE) {
@@ -53,8 +54,8 @@ if (!CONTRE) {
   const mutants = [
     ['la jauge redevient une carte en tête', (S) => R(S, 'pil', "  var charts='';", "  H+='<div class=\"pil-gauge\" id=\"pil-gauge\"></div>';\n  var charts='';")],
     ['la jauge sort de la carte', (S) => R(S, 'pil', '<div class="pil-gauge pil-gauge-in" id="pil-gauge"></div><div class="pil-bar"', '<div class="pil-bar"')],
-    ['le donut reprend son ancien nom', (S) => R(S, 'pil', 'id="pil-pie-title">La charge par tâche · restante<', 'id="pil-pie-title">Charge restante<')],
-    ['un mode du donut change de nom', (S) => R(S, 'pil', "title='La charge par tâche · planifiée'", "title='Charge planifiée'")],
+    ['le donut reprend son ancien nom', (S) => R(S, 'pil', 'id="pil-pie-title">La charge par t\\u00e2che', 'id="pil-pie-title">Charge restante')],
+    ['un mode du donut change de nom', (S) => R(S, 'pil', "var src=[], title='La charge par tâche', unit='h';", "var src=[], title='Charge planifiée', unit='h';")],
     ['la jauge ne se dessine plus', (S) => R(S, 'pil', "if(_pilShow('avc_bar')) _pilRenderGauge(d);", '')],
     ['l’onglet redevient « La campagne »', (S) => R(S, 'pil', "['avc','raisin','Travaux']", "['avc','raisin','La campagne']")],
     ['la barre latérale dit encore « La campagne »', (S) => R(S, 'coq', "['avc', 'Travaux']", "['avc', 'La campagne']")],

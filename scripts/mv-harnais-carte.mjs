@@ -147,7 +147,8 @@ t('la sous-ligne est stylee', /\.pil-souslig\{max-width:\d+px/.test(P)
    visibles d'un coup d'oeil. En frise, pas repliees. */
 t('les photos passent en frise sous 700 px', /max-width:700px[\s\S]{0,400}\.pil-photos\{display:flex/.test(P));
 t('… et gardent leurs quatre cartes', /_pilPhotosHtml/.test(SQ));
-t('la fleche « voir le detail » seule disparait en frise', /\.pil-photo \.go\{display:none\}/.test(P));
+// MOTS-8 (§590) : « voir le detail » est parti partout — la tuile entiere est le bouton, le chevron le dit.
+t('la fleche « voir le detail » a disparu (la tuile est le bouton, un chevron le dit)', !/voir le d\\u00e9tail \\u203A<\/span><\/button>/.test(P) && !/\.pil-photo \.go\{/.test(P) && /_mvIcon\('chevron',16\)\+'<\/span>'/.test(P));
 t('la largeur des photos est bornee en frise', /\.pil-photo\{flex:0 0 auto;width:auto;min-width:\d+px;max-width:\d+px/.test(P));
 t('le masthead se compacte sur telephone', /max-width:700px[\s\S]{0,900}\.pil-dom\{font-size:var\(--pt-lg/.test(P));
 // PIL-RANGE-2a (§443) : le fil d'Ariane devient la barre « Vous regardez » ; sur telephone, son etiquette et ses dates s'effacent.

@@ -428,3 +428,76 @@ Gestes rejoués à l’écran, téléphone et ordinateur : un poste, une appella
 **Les trois cliquets rendus, lancés en dernier** (§587) : `npm run test:mots` (référence regravée : 4 baisses, aucune hausse), `npm run test:ux`, `npm run test:gabarit` — verts.
 
 **NON vérifié** : un vrai téléphone ; le thème sombre ; un domaine au-dessus du budget (l’écart en orange, la zone de la frise en orange) ; un retard non nul à l’écran (joué par le harnais) ; un domaine avec beaucoup de postes ou d’appellations ; la grille du Planning avec un contrat archivé, à l’écran. **Reste à faire** dans « ★ MOINS DE TEXTE » : la suite du plan (§28) — Travaux, Décider, L’équipe & le matériel, Conformité dans leurs lots de déménagement, puis Cave › Le Millésime, Cave › Aujourd’hui, Phyto › Registre, la Réserve, le balayage.
+
+## 590. ★★★ MOTS-8 — PILOTAGE › TRAVAUX ALLÉGÉ SUR PLACE : L’ONGLET RESTE, SES CARTES AUSSI (17/11 — `src/pilotage.js` · `src/utils.js` · `src/pilotage.css` (neuve) · `src/app.js` · `src/whats-new.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-mots8.mjs`)
+
+**La demande.** Nico (17/11), en reprenant le plan du rangement : « J’aimerais bien garder le mode de pilotage comme il est actuellement, avec travaux, décider, l’équipe, le matériel, conformité […] que le pilote puisse ouvrir sans avoir à ouvrir les autres onglets, les autres modules, vraiment pour visiter un petit peu tout ce qu’il y a à voir. […] Regarde un petit peu ce qui se fait. » Recherche faite (les tableaux de bord de direction des outils de gestion de chantier et d’exploitation : une vue de pilotage qui se suffit à elle-même, qui résume et renvoie vers l’outil de travail) ; recommandation : **garder les quatre onglets** avec trois règles — confirmée (« oui »). Puis « suite » : maquette de Travaux, téléphone et ordinateur, Avant / Après, cadre réel — `docs/maquettes/maquette-pilotage-travaux-v1.html` — « go ».
+
+### 590a. La décision du 17/11 (elle remplace celle du 13/11 pour le Pilotage)
+
+- Travaux, L’équipe & le matériel, Décider et Conformité **restent** dans le Pilotage. Les cinq lots de déménagement (Travaux et Décider dans la Vigne, l’équipe au Planning, le matériel au Tracteur, Conformité au Phyto) sont **abandonnés** ; chaque onglet s’allège sur place.
+- **① Le Pilotage montre et décide, les modules font** : un bouton « Ouvrir » par carte vers le module où l’on agit ; seules les micro-actions (une priorité, un objectif) se font dans le Pilotage.
+- **② Les mêmes chiffres** : le Pilotage LIT les calculs des modules, il ne recalcule rien (la leçon de COHER-1, §581).
+- **③ Un résumé, pas une copie** : environ cinq éléments par carte, la liste entière dans le module.
+- Le reste du plan ne change pas (la Cave rangée, « Vous regardez » sur Économie et Archives seulement, l’Accueil de l’admin). Consigné au §28, « ★ RANGEMENT ADMIN » et « ★ MOINS DE TEXTE ».
+
+### 590b. Travaux, carte par carte
+
+| Carte | Avant | Après |
+|---|---|---|
+| **Le haut** | le sous-titre « Travaux — où en est-on, et quand aura-t-on fini » | la réponse : « **16 % fait**, fin prévue **25 nov.** » — la date de la fin prévue d’Aujourd’hui (`_pilMargeCalc`, la même), verte avant l’objectif, rouge après |
+| **Le bandeau** | trois photos avec une icône, deux lignes de texte et « voir le détail › » ; au téléphone, elles défilaient, coupées | trois tuiles comme celles d’Aujourd’hui : le nom (et son point quand le chiffre attend une donnée), un chevron, le chiffre, une barre ou une pastille, deux ou trois mots. « Effectif : 0 pers. à trouver » → **« Renfort : 0 »** et la pastille « l’équipe suffit » ; « dépensés au 27 oct. · 159 k€ attendus » → **« sorti · prévu 159 k€ »** et sa barre. La phrase d’avant reste au survol (titre de la tuile). Au téléphone, les trois tiennent de front |
+| **Avancement** (ex « Avancement par tâche ») | « Avancement de la saison », le nom de la campagne, le 16 % une deuxième fois, « réalisées · restantes · planifiées · terminées · en cours » | la barre, « 175 h fait · 948 h reste · 1 123 h prévu », la pastille « 3 en cours » ; une ligne par tâche avec la pastille de sa couleur ; **toucher une tâche** dit sa fenêtre prévue, ce que dit le journal, l’écart au départ (« départ 31 j plus tôt »), « sa fenêtre est passée » ; « Ouvrir les parcelles » |
+| **La charge par tâche** | un titre qui changeait avec le bouton (« · restante », « · réalisée »…) ; la couleur d’une tâche suivait le RANG de sa part — elle changeait d’un bouton à l’autre | un titre fixe et son « i » ; « Reste · Fait · Prévu » ; **une couleur par tâche** |
+| **Le temps de l’équipe** (replié) | « 4 574 h de présence », « 1 123 h de barème · 1,8 ETP vigne », un titre tronqué (« … · Après-vendange 2026-2027 ») | « 4 574 h », « de présence · 25 % dans les rangs ». Ouvert : la barre et trois lignes (« dans les rangs », « au tracteur », « cave, trajets, entretien… » — heures, part, personnes à temps plein) ; une ligne orange **« Le tracteur n’a pas de barème » + « Régler »** (les activités du Tracteur) au lieu d’une phrase de deux lignes ; la frise « Prévu et fait », « Personnes nécessaires par semaine », « Écart au prévu » en une ligne par tâche (le détail au toucher) ; « Ouvrir le planning » ; les trois boutons Frise · Semaines · Écart en bas. « Il faut 1,8 personne… en moyenne », « Une moyenne n’est pas un pic » : dans le « i », avec les chiffres du jour (fiche vivante) |
+| **Échéances** (ex « Échéances par tâche ») | « fin de saison ~mer. 25 nov. · 20 j ouvrés · même calcul qu’Aujourd’hui — la campagne sans renfort, aux heures normales » ; « pôle long » | replié : « 3 tâches », « fin de la dernière : 21–27 nov. ». Ouvert : « Fin prévue : mer. 25 nov., dans 20 jours travaillés », une ligne par tâche (sa fin ; « la plus longue » en pastille ; % fait, heures, fenêtre, jours au toucher) ; la méthode dans le « i » |
+| **Carte du domaine** | « 16 % » (le troisième de l’écran), « 8 parcelles · 7,02 ha » | « 8 parcelles », « 7,02 ha · colorées par avancement » (la vue choisie) ; « Ouvrir la carte » (Vigne › Carte) |
+
+### 590c. Une couleur par tâche — et la barre garde son état
+
+- Trois couleurs vivaient dans l’onglet : le donut (au rang de la part), la frise et l’écart (`_PIL_TASK_COL`, neuf tâches connues — les autres toutes brunes, Taille et Tirage confondus), les barres (l’état). **`_pilTCol(nom)`** : la place de la tâche dans la période consultée (`s.taches`), dans la palette du donut ; hors liste, une place fixe tirée du nom. `_taskColor` la lit (frise, écart, fenêtres de la roue) ; `_PIL_TASK_COL` est parti.
+- ⚠️ **Écart avec la maquette** : la maquette peignait la barre d’une tâche à sa couleur. La barre garde la couleur d’**état** (KIT-1, §226 : « fini, en cours, en retard ») — c’est elle qui dit « en retard » ; la couleur de la tâche passe en **pastille devant le nom**. Le kit commun `_mvkAvancement` prend un 3e argument facultatif (`{col, dates}`) : l’Accueil, qui n’en passe pas, ne change pas d’un caractère (le harnais le vérifie) ; avec des dates, la ligne devient le `<summary>` d’un `<details>`, en `<span>` (6e argument de `_mvkLigne`) — un `<summary>` n’accepte que du texte en ligne.
+- Dans la démo, l’ordre de la campagne est Palissage, Tirage, Taille : le Palissage est bordeaux, la Taille violette (la maquette, dessinée à la main, avait l’inverse).
+
+### 590d. Comment c’est fait
+
+- `_pilTabAvc(d, m)` : les cartes dans un cadre `.pil-tv` ; `m` = `_pilMargeCalc(d)`, calculé UNE fois par `_pilFillContent` pour la phrase (`_pilTvPhrase`, posée dans `#pil-souslig-t`) et pour `_pilPanelEcheances(d, m)`.
+- Le bandeau : `_pilPhotoHtml(k, val, unite, vis, sous, cible, drapeau, quest, titre)` (l’icône est partie ; `vis` = `_pilPhBar` ou `_pilPhPl`) ; le point `_pilFlag` n’écrit plus « ! » (son nom est dans `aria-label` et au survol) ; avec une campagne zoomée, la deuxième tuile s’appelle « Équipe au pic » (le pic de cette campagne, « +N à prévoir » s’il manque du monde).
+- « Ouvrir » : `_pilTvBtn` / `_pilTvGo` (`data-tvgo`) — `parcelles` (Vigne, onglet Liste : la Vigne garde son dernier onglet), `carte` (Vigne › Carte, `switchPTab`), `planning`, `tracbar` (→ `_pilGo('tracact')`, cible neuve : roue du Tracteur, bloc `set-sec-act-trac`).
+- Les dates d’une tâche (`_pilTvDatesFn`) lisent les fenêtres de la frise (`cd.taskWindows`) et le journal (`_pilTaskReal`) — rien quand la portée regarde une autre campagne que celle des pourcentages.
+- Les fiches neuves : `pil.avc.avancement`, `pil.avc.charge`, `pil.avc.frise`, `pil.avc.courbe`, `pil.avc.echeances` ; `pil.avc.temps` devient vivante (les chiffres du jour devant la méthode, comme `pil.eco.fin`) ; `pil.carte` dit son nouveau chiffre.
+- **Feuille neuve `src/pilotage.css`**, importée après `aujourdhui.css` : les onglets du Pilotage allégés sur place y vivront (styles.css est au plafond). Le bloc GABARIT-1 de styles.css pose bordures, fond et marges des photos en `!important` et les empilait au téléphone : la feuille le reprend au même niveau, plus précise (`.pil-tv-tu`).
+- COH-1 tenu : sous 0,05 personne, la part en personnes ne s’écrit pas (« 0,0 pers. »).
+
+### 590e. Le bandeau compte l’exercice, les cartes la campagne
+
+En haut, « 1 869 h prévu sur l’exercice » (ce que dit « Vous regardez ») ; dessous, 1 123 h (la campagne). Ce lot ne change pas ce comportement — il écrit seulement « sur l’exercice » sous le chiffre. **À régler avec le lot « Vous regardez »**, proposé juste après (noté au §28).
+
+### 590f. Mesuré (build, démo au 27/10)
+
+| | Avant | Après |
+|---|---|---|
+| Mots de Travaux (`npm run test:mots`) — téléphone | 104 | **65** |
+| … ordinateur | 113 | **65** |
+| Mots hors lexique | 16 | 2 (« Avancement », le titre validé sur la maquette, et « colorées par avancement » — le lexique dit « fait ») |
+| Phrases de 15 mots et plus | 1 | 0 |
+| Mots avant le premier grand chiffre — téléphone / ordinateur | 11 / 11 | 7 / 0 |
+| Hauteur de la page — téléphone (390 px) | 1 739 px (2,1 écrans) | 1 598 px (1,9 écran) |
+| … ordinateur (1 366 px) | 979 px | 943 px |
+
+La maquette promettait 1,6 écran au téléphone : les zones de toucher de 44 px et les marges réelles des cartes.
+
+Gestes rejoués à l’écran (téléphone et ordinateur) : une tâche se déplie et dit ses dates ; « N-1 » (« Aucune saison comparable archivée… ») ; « Fait » / « Prévu » / « Reste » (la même couleur pour chaque tâche, le titre fixe) ; « Ouvrir les parcelles » (Vigne › Liste), « Ouvrir la carte » (Vigne › Carte), « Ouvrir le planning », « Régler » (la roue du Tracteur, bloc des activités) ; le bouton « Frise » cache et rend la frise ; le point d’une tuile ouvre « à compléter » ; le « i » de « La charge par tâche ».
+
+### 590g. Leçons
+
+- ⚠️ **Les outils d’écriture décodent les séquences d’échappement** (`\u00a0` écrit dans un fichier devient le caractère) : c’est par là que des espaces brutes entraient dans le source (§589g). Méthode du lot : écrire deux barres obliques dans le code neuf, puis un script les ramène à une et remet en séquence les espaces brutes des seules lignes neuves ; comparer le compte d’espaces brutes à `HEAD` avant de livrer.
+- ⚠️ **Une règle `!important` d’un autre lot** (GABARIT-1) gagne sur une feuille neuve même plus précise : il faut la reprendre au même niveau, et le dire dans la feuille.
+- ⚠️ **« ≈ » n’est pas dans la police de l’appli** (U+2248, hors du sous-ensemble d’Outfit — le cliquet SUBSET l’a vu : `pilotage.js` 27 → 29) : comme « ≥ » (§583c), il se dessine dans une police de repli. Échéances l’a perdu (« fin de la dernière : 21–27 nov. » — une fourchette dit déjà l’estimation ; « environ »). ★ Le lexique (§580c) le recommande pour une estimation : à trancher — l’ajouter au sous-ensemble de la police, ou écrire « environ ».
+- ⚠️ **Une couleur « par tâche » ne doit pas écraser une couleur qui porte un sens** : la maquette mettait la couleur de la tâche sur la barre ; la barre disait l’état (le retard). La pastille devant le nom porte la tâche, la barre garde l’état.
+
+**Harnais adaptés** : `pilrange3` (« Avancement », le titre fixe du donut), `kit1` et `chant1` (les signatures du kit commun), `coh1` (« 0,0 pers. » ne s’écrit pas), `pilrange2b` (la tuile Budget sans icône), `pil-coherence` (la source d’Échéances dans le « i »), `info` (`pil.avc.temps` devient vivante, comme `pil.eco.fin`), `pil1` et `gabarit1` (`.pil-gauge-lab` / `.pil-gauge-pct` partis : leurs règles mortes ont quitté `styles.css`, avec `.pil-gauge-top` et `.pil-photo .go`), `pilrange4a` (la ligne des cases de Travaux), `subset` (« ≈ »), `robustesse-pilotage` (le barème se lit au survol de la tuile), `pastilles` (`PLAFOND_MAIN` 40 → 39 : l’écart n’écrit plus ses pastilles sur place), `carte` (« voir le détail » est parti : la tuile est le bouton, un chevron le dit). **Nouveau** : `mots8` (38 assertions, 47 contre-épreuves).
+
+**Les trois cliquets rendus, lancés en dernier** (§587) : `npm run test:mots` (référence regravée : Travaux 104 → 65, 113 → 65), `npm run test:ux`, `npm run test:gabarit` — verts (le cliquet du gabarit a vu un `<small>` à 10,8 px — le nom de la campagne dans « Où va le temps » — : sa taille est posée, 12 px).
+
+**NON vérifié** : un vrai téléphone ; le thème sombre ; une campagne zoomée dans « Vous regardez » (la tuile « Équipe au pic ») ; un domaine sans planning (le repli sur le rythme des quatre semaines) ; un domaine en surcharge (la ligne orange « Surcharge ») ; la carte Leaflet (les tuiles du fond ne se chargent pas hors ligne ici). **Reste à faire** dans « ★ MOINS DE TEXTE » : L’équipe & le matériel, Décider, Conformité sur place ; le lot « Vous regardez » (590e) ; la suite du plan (§28).

@@ -139,7 +139,8 @@ export { _pilEchCadence };`;
   const ech=fn(SRC.pil,'_pilPanelEcheances').replace(/^\s*\/\/.*$/gm,'');
   t('⑥ Echeances lit _pilMargeCalc, pas sa propre cadence', /_pilMargeCalc\(d\)/.test(ech) && !/_pilEchCadence\(d\)/.test(ech));
   t('⑥ le « N j » par tache lit la simulation du cockpit (m.capa.taches), depuis aujourd\'hui', /m\.capa\.taches/.test(ech) && /_pilWdBetween\(m\.today,s\.fin\)/.test(ech) && !/_pilCapaProj/.test(ech));
-  t('⑥ la ligne de cadre nomme la source', /m\u00eame calcul qu/.test(ech) && /le planning ne couvre pas la suite/.test(ech));
+  // MOTS-8 (§590) : « même calcul qu’Aujourd’hui » passe dans la fiche « i » de la carte ; le repli sur la cadence reste écrit sous le chiffre.
+  t('⑥ la carte nomme sa source : la fiche « i » (le même calcul qu’Aujourd’hui), et le repli sous le chiffre', /_mvInfoBtn\('pil\.avc\.echeances'\)/.test(ech) && /au rythme des 4 derni/.test(ech));
 }
 
 // ── ⑦ Presences du jour = memes nombres que le cockpit ───────────────────────

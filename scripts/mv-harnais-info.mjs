@@ -227,11 +227,14 @@ const vivantes = [...PILNU.matchAll(/_mvInfoSet\('([^']+)'/g)].map(m => m[1]);
 t('toute fiche remplie a l\'execution est declaree', vivantes.every(k => cles.includes(k)),
   vivantes.filter(k => !cles.includes(k)).join(', '));
 t('… et son repli dit honnetement qu\'elle est vide',
-  vivantes.filter(k => k !== 'pil.eco.fin').every(k => /Aucune remarque|pas encore/.test(MV_INFO[k].p.join(' '))));
+  vivantes.filter(k => k !== 'pil.eco.fin' && k !== 'pil.avc.temps').every(k => /Aucune remarque|pas encore/.test(MV_INFO[k].p.join(' '))));
 // MOTS-1 (§582) : pil.eco.fin n'est pas une fiche « vide en attendant » — son texte fixe est la méthode elle-même, et le
 //   rendu y AJOUTE les heures du moment (base.concat). Elle doit donc être pleine, et le rendu ne doit pas l'écraser.
 t('… sauf pil.eco.fin : sa methode est ecrite, le rendu y ajoute les heures du moment',
   MV_INFO['pil.eco.fin'] && MV_INFO['pil.eco.fin'].p.length >= 4 && /_mvInfoSet\('pil\.eco\.fin', \{ p: base\.concat\(/.test(PILNU));
+// MOTS-8 (§590) : pil.avc.temps de même — sa méthode est écrite ; le rendu met devant elle les chiffres du jour (ce qui était sous la barre).
+t('… et pil.avc.temps : sa methode est ecrite, le rendu met devant elle les chiffres du jour',
+  MV_INFO['pil.avc.temps'] && MV_INFO['pil.avc.temps'].p.length >= 4 && /_mvInfoSet\('pil\.avc\.temps',\{ p:\[_vif\]\.concat\(_base0\) \}\)/.test(PILNU));
 
 /* ══ 5 sexies. LE MUR D'ALERTES D'ECONOMIE ══
    Douze paragraphes empiles, tous au meme poids : ce qui met un chiffre a ZERO

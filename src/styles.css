@@ -2371,10 +2371,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 }
 /* — Jauge de saison — */
 .pil-gauge{padding:16px 20px;}
-.pil-gauge-top{display:flex;justify-content:space-between;align-items:flex-start;}
-.pil-gauge-lab{font-family:var(--font-ui);font-size:var(--pt-micro,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600;}
-.pil-gauge-pct{font-family:var(--font-titre);font-size:var(--pt-hero,40px);font-weight:600;color:var(--vert-med);line-height:.9;font-variant-numeric:lining-nums tabular-nums;}
-.pil-gauge-pct small{font-size:18px;color:var(--texte-doux);font-weight:500;}
 .pil-gauge-track{height:10px;border-radius:6px;background:var(--gris-clair);overflow:hidden;margin:12px 0 10px;}
 .pil-gauge-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#9A5A38,#C8853A,#D9A441,#7FA83A,#5B9B3A);transition:width .8s cubic-bezier(.22,.61,.36,1);}
 .pil-gauge-meta{display:flex;flex-wrap:wrap;gap:6px 22px;}
@@ -5878,7 +5874,7 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 #graph-inner{width:100%;overflow-x:auto;}
 /* Les grands chiffres : chiffres ALIGNÉS et PROPORTIONNELS. En chasse fixe, le « 1 » de la Cormorant prend la
    largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
-.pil-th-stat b,.pil-big,.pil-kval,.pil-gauge-pct,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
+.pil-th-stat b,.pil-big,.pil-kval,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
 .pil-wrap{max-width:var(--page-max,1200px);}
 @media (min-width:1200px){ #page-home,#page-parcelles,#page-journal,#page-pilotage,#page-tracteur,#page-phyto,#page-cave,#page-reserve,#page-planning,#page-reglages{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
 
@@ -8536,10 +8532,8 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 #page-pilotage .pil-photo{ border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); background:var(--bg-card); box-shadow:none; }
 #page-pilotage .pil-photo:is(.on,.sel,.cur,.act,.open){ border-color:var(--accent); }
 #page-pilotage .pil-photo *{ letter-spacing:0!important; text-transform:none!important; }
-#page-pilotage .pil-photo .go{ color:var(--accent-texte); }
 #page-pilotage .pil-photo :is(b,strong){ font-family:var(--font-ui); font-weight:var(--fw-semi,600); }
-#page-pilotage .pil-gauge-lab,#page-pilotage .pil-dz-lbl{ letter-spacing:0; text-transform:none; }
-#page-pilotage .pil-gauge-pct{ font-family:var(--font-ui); font-weight:var(--fw-semi,600); color:var(--texte); }
+#page-pilotage .pil-dz-lbl{ letter-spacing:0; text-transform:none; }
 #page-pilotage .pil-dz-wrap{ border-color:var(--ligne,#E7E6E2); }
 #page-pilotage .pil-dz-day{ border-color:var(--ligne,#E7E6E2); background:var(--bg-doux); }
 #page-pilotage .pil-dz-day .mid b{ font-family:var(--font-ui); font-weight:var(--fw-semi,600); }
@@ -10419,11 +10413,11 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) :is(b, strong) { font-weight: var(--fw-semi, 600) !important; }
 /* 2. LES CHIFFRES */
 :is(#page-pilotage, #ovReglPilotage) .pec-verdict .t { font-size: var(--t-verdict) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-gauge-pct, .pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-prot-big, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-gauge-pct small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
 /* 3. LES TITRES */
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct, .pil-t2h .t) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-sec-h { font-size: var(--t-section) !important; font-weight: var(--fw-semi, 600) !important; }
@@ -10445,7 +10439,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) svg :is(text, tspan):not(.ck2 *):not(.pil-donut-c1) { font-size: var(--t-axe) !important; }
 :is(#page-pilotage, #ovReglPilotage) svg :is(text, tspan):not(.ck2 *)[font-size="24"] { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; }
 /* 8. LES REPÈRES DU PILOTAGE (numéros d'onglet, année, « choses à compléter ») et les boutons d'aller */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-lvn, .pil-annav-l, #pil-diagbtn, .pil-diag-go, .pil-av, .pec-pill, .pec-remq-n, .pil-flag, .pil-photo .go) { font-weight: var(--fw-semi, 600) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-lvn, .pil-annav-l, #pil-diagbtn, .pil-diag-go, .pil-av, .pec-pill, .pec-remq-n, .pil-flag) { font-weight: var(--fw-semi, 600) !important; }
 /* 9. LES CHOIX (sous-onglets d'Économie, bascules dans les cartes) : la pièce .ck-seg d'Aujourd'hui */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-seg, .pec-sub) { display: inline-flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; max-width: 100% !important; scrollbar-width: none; gap: 0 !important; padding: 2px !important; border: 0 !important; border-radius: var(--r-full, 999px) !important; background: var(--gris-clair) !important; box-shadow: none !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-seg, .pec-sub) > button { flex: none !important; min-height: 32px !important; padding: 0 14px !important; border: 0 !important; border-radius: var(--r-full, 999px) !important; background: none !important; box-shadow: none !important; color: var(--texte-med) !important; font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; white-space: nowrap; }

@@ -26,7 +26,7 @@ function monde(S) {
   const U = S.uti;
   const code = ['_mvkNb', '_mvkHa'].map(n => ligne(U, new RegExp('function ' + n + '\\([a-z]\\)\\{[^\\n]*\\n'))).join('')
     + ligne(U, /function _mvkEtat\(pct,enRetard\)\{[^\n]*\n/)
-    + ['_mvkDet(t){', '_mvkLigne(nom,pct,etat,det,sous){', '_mvkAvancement(rows,retards){', '_mvkRetards(cd){', '_mvGraphDessine(e){']
+    + ['_mvkDet(t){', '_mvkLigne(nom,pct,etat,det,sous,balise){', '_mvkAvancement(rows,retards,opt){', '_mvkRetards(cd){', '_mvGraphDessine(e){']   // MOTS-8 (§590) : un 6e et un 3e argument facultatifs
         .map(s => sansCom(fn(U, 'function ' + s))).join('\n')
     + '\nthis.__f={_mvkEtat,_mvkDet,_mvkAvancement,_mvkRetards,_mvGraphDessine};';
   vm.runInContext(code, ctx);
@@ -63,7 +63,7 @@ function suite(S) {
     && /window\.openOv\('ovGraph'\)/.test(S.uti) && /e\.agr = !\(opts && opts\.agrandir === false\)/.test(S.uti));
   T('la barre des cartes de parcelle dit l\u2019état (verte finie, dorée sinon), le dégradé reste à la carte',
     /var _fk=\(pct===100\)\?'var\(--vert-med\)':'var\(--or\)';/.test(S.app) && (S.app.match(/fill:_fk,/g) || []).length === 3 && !/fill:_gc,/.test(S.app));
-  T('le Pilotage appelle le dessin commun ; l’ancienne carte de l’Accueil est retirée (ACCV-3)', !/function renderHomeCard\(/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\)\)/.test(S.pil)
+  T('le Pilotage appelle le dessin commun ; l’ancienne carte de l’Accueil est retirée (ACCV-3)', !/function renderHomeCard\(/.test(S.app) && /window\._mvkAvancement\(d\.data,_pilRetards\(\),/.test(S.pil)
     && !/function _pilBarQte\(/.test(S.pil) && !/function tAbr\(/.test(S.uti) && !/\btAbr\b/.test(sansCom(S.app)));
   const css = S.css;
   T('les grands chiffres en chiffres proportionnels (« 12 % », plus « I 2 % »)', /\.pil-th-stat b,[^{]*\{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;\}/.test(css)
@@ -83,7 +83,7 @@ if (ko) process.exit(1);
 const sub = (k, a, b, tout) => S => Object.assign({}, S, { [k]: tout ? S[k].split(a).join(b) : S[k].replace(a, b) });
 const D = [
   ['la couleur repart du pourcentage', sub('uti', "return (pct>=100)?'fait':(enRetard?'retard':'cours');", "return (pct>=100)?'fait':(pct<50?'retard':'cours');")],
-  ['les noms abrégés reviennent', sub('uti', 'h=_mvkLigne(_escHtml(tNom(t.nom))', 'h=_mvkLigne(_escHtml(TABREV[t.nom]||t.nom)')],
+  ['les noms abrégés reviennent', sub('uti', 'var nomH=_escHtml(tNom(t.nom));', 'var nomH=_escHtml(TABREV[t.nom]||t.nom);')],
   ['la fenêtre du jour n\u2019est plus « passée »', sub('uti', 'o>=w.we', 'o>w.we')],
   ['« Agrandir » disparaît', sub('uti', 'var agr = (html && e.agr !== false)', 'var agr = (false && e.agr !== false)')],
   ['la barre des parcelles revient au dégradé', sub('app', 'fill:_fk,', 'fill:_gc,', true)],

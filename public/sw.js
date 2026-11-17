@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.08
+// MA VIGNE — Service Worker v12.09
+// v12.09 (17/11/2026) — MOTS-8 (§590) : Pilotage › Travaux allégé sur place — l'onglet reste dans le Pilotage avec toutes ses cartes (décision du 17/11 : un pilote visite tout sans ouvrir les autres modules). En haut, une phrase : ce qui est fait et la fin prévue (la même date qu'Aujourd'hui), à la place du sous-titre ; les trois chiffres prennent la forme des tuiles d'Aujourd'hui (« Effectif » devient « Renfort », le budget « sorti »), la phrase d'avant au survol, au téléphone les trois de front ; « Avancement » : la barre de la campagne, fait · reste · prévu, une ligne par tâche, ses dates au toucher ; une couleur par tâche, la même dans l'avancement, le donut, la frise et l'écart ; les trois cartes repliées montrent un chiffre utile ; un bouton « Ouvrir » par carte (parcelles, planning, carte de la Vigne, activités du tracteur). Les explications passent derrière les « i ». Aucun calcul ne change. Feuille à part : src/pilotage.css. APP 11.18.
 // v12.08 (17/11/2026) — MOTS-7 (§589) : Pilotage › Aujourd'hui, la vue Économie allégée comme les vues Terrain et Cave — les six cartes gardées, à la même place ; « Coût à la fin » (ex « Atterrissage ») montre le montant en grand, l'écart au budget en couleur, la barre et ses deux bouts ; les quatre chiffres tiennent en un nom, un chiffre et deux ou trois mots (« Cadence », « Retard ») ; « Main-d'œuvre » écrit « fait » et « engagé » en chiffres au-dessus du graphe, la fin prévue au bout des pointillés ; « Par poste », « Par appellation » (de la plus chère à la moins chère) et « Écart par tâche » tiennent en une ligne chacun, le détail au toucher. Les explications passent derrière les « i ». Aucun calcul ne change. Dans le même lot, CDDCDI-1 régularisé : au Planning, les jours d'un contrat archivé (un CDD devenu CDI) restent affichés, en lecture seule, au lieu de « – » ; les compteurs ne changent pas ; son harnais, et deux contrôles réparés. APP 11.17.
 // v12.07 (17/11/2026) — MOTS-6 (§588) : Pilotage › Aujourd'hui, la vue Cave allégée comme la vue Terrain — les six cartes gardées, à la même place ; « Ce qui presse » montre le chiffre en grand, la suite en pastilles et trois compteurs ; « Le millésime » le tonnage en grand, la barre et une ligne de légende par étape ; « La cave en direct » une cuve par son dessin, son état et sa mesure, une cuvée par son nom, son état et ses fûts, les cuvées en cours et à jour sur une ligne chacune ; « La cave dans la semaine » cinq jours, une ligne orange et une ligne par période ; « En direct » trois gestes ; « À savoir » un point par ligne avec un bouton court. Le pourquoi et la méthode passent derrière les « i », le détail se déplie au toucher, « Ouvrir » mène à la Cave. Au téléphone, « En direct » et « À savoir » passent en tête. Aucun calcul ne change. APP 11.16.
 // v12.06 (17/11/2026) — MOTS-5B (§587) : Pilotage › Aujourd'hui — la zone de toucher des pastilles de la phrase du jour descend sous la pastille au lieu de l'entourer : elle remontait la boîte au-dessus de la phrase, et le cliquet des mots (npm run test:mots) comptait ses mots avant le premier grand chiffre (13 → 19, rouge après MOTS-5). Rien ne change à l'écran. APP 11.15.
@@ -4740,7 +4741,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.08';
+const CACHE_NAME   = 'mavigne-v12.09';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4757,7 +4758,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.08 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.09 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4777,7 +4778,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.08 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.09 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

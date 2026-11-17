@@ -3278,7 +3278,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     fini&nbsp;?</i> — et vient du <b>même calcul que La campagne sans renfort</b>&nbsp;: chaque travail
     dans <b>sa fenêtre</b>, l'équipe partagée entre les travaux ouverts en même temps, le tracteur
     déduit, aux heures normales du planning. C'est <b>la seule date de fin du module</b>&nbsp;: la carte
-    « Échéances par tâche » de Travaux lit la même simulation, travail par travail. « Vers le »
+    « Échéances » de Travaux lit la même simulation, travail par travail. « Vers le »
     signale une fin après la période, l'équipe de la dernière semaine reconduite.</li>
     <li><b>Charge restante</b>, exprimée en <b>jours travaillés au planning</b> comptés depuis aujourd'hui : un jour férié, un jour non travaillé de l'horaire annualisé ou une fermeture ne comptent pas.</li>
     <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures passées dans les rangs
@@ -3333,35 +3333,42 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   Les machines immobilisées sont dans « À savoir », sur Aujourd'hui.</p>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Travaux (l'ancien « La campagne »)</h3>
+  <p>Travaux s'ouvre sur une phrase : ce qui est fait, et la fin prévue — la même date qu'Aujourd'hui, verte avant
+  l'objectif, rouge après. Dessous, trois tuiles comme celles d'Aujourd'hui : les <b>travaux</b> (les heures prévues de ce que
+  vous regardez), le <b>« Renfort »</b> (0 quand l'équipe suffit ; la phrase entière au survol) et le <b>budget</b> (ce qui est
+  sorti, et sa barre sur le prévu). Chaque carte tient en un titre, un chiffre, une barre ou une couleur : la méthode est
+  derrière les « i », le détail se déplie au toucher, et un bouton « Ouvrir » mène au module où l'on agit — les parcelles,
+  le planning, la carte. Rien ne se saisit dans le Pilotage. Aucun calcul n'a changé.</p>
   <ul class="dot">
-    <li><b>Avancement par tâche</b>, avec comparatif de l'année précédente ; la <b>jauge de la saison</b>
-    l'ouvre (pourcentage, heures faites, restantes et prévues, tâches finies et en cours).
-    Les tâches s'y rangent comme sur Aujourd'hui : par date de début, les terminées en bas ; l'arrachage fini pour l'équipe passe en tête des terminées, avec la mention « la suite au prestataire ».
+    <li><b>Avancement</b>, avec comparatif de l'année précédente (« N-1 ») ; la barre de la campagne l'ouvre (fait, reste,
+    prévu, les tâches en cours et finies). Une ligne par tâche, une pastille de sa couleur devant son nom ; la toucher dit
+    sa fenêtre prévue, ce que dit le journal et l'écart au départ.
+    Les tâches s'y rangent comme sur Aujourd'hui : par date de début, les terminées en bas ; l'arrachage fini pour l'équipe passe en tête des terminées, avec la mention « la suite au prestataire ».
     Une tâche sans heures prévues à l'hectare (arrachage, désherbage manuel) s'y lit en <b>surface</b>
     faite sur surface concernée — la même part que sur la liste des parcelles.</li>
     <li><b>Agrandir</b> : chaque graphique porte ce bouton ; le même dessin s'ouvre en grand, à la largeur de
     l'écran. Les barres d'avancement n'ont qu'un code de couleur, le même qu'à l'Accueil : <b>vert</b> fini,
     <b>doré</b> en cours, <b>orange</b> quand la fenêtre du travail est passée sans qu'il soit fini.</li>
-    <li><b>La charge par tâche</b> (le donut) : quelle tâche pèse le plus dans ce qui reste, ce qui est fait ou ce qui est prévu. À ne pas confondre avec <b>le temps de l'équipe</b>, qui dit où passent les heures de présence (vigne, tracteur, le reste).</li>
+    <li><b>La charge par tâche</b> (le donut) : quelle tâche pèse le plus dans ce qui reste, ce qui est fait ou ce qui est prévu. Une couleur par tâche, la même partout dans l'onglet (l'avancement, le donut, la frise, l'écart), quel que soit le bouton choisi. À ne pas confondre avec <b>le temps de l'équipe</b>, qui dit où passent les heures de présence (vigne, tracteur, le reste).</li>
     <li><b>Carte du domaine, en cinq vues</b> : l'avancement, les jours depuis le dernier traitement, le cépage,
     l'IFT de l'année face à votre référence (hors biocontrôle, le calcul de Conformité), et le coût engagé à
     l'hectare. La légende suit la vue choisie ; une parcelle sans donnée reste grise. Touchez une parcelle pour
     lire sa valeur.</li>
-    <li><b>Où va le temps de l'équipe</b> : la présence de la campagne partagée entre les travaux de
-    vigne au barème, le tracteur et le reste (cave, trajets, entretien). Sous la barre, trois blocs
-    dépliables : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
+    <li><b>Le temps de l'équipe</b> : replié, les heures de présence et la part passée dans les rangs. Ouvert, la présence de la campagne partagée entre les travaux de
+    vigne au barème, le tracteur et le reste (cave, trajets, entretien) ; une ligne orange quand le tracteur n'a pas de barème, avec « Régler ». Sous la barre, trois blocs
+    à montrer ou cacher (Frise, Semaines, Écart) : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
     par semaine</b>, et l'<b>écart</b> entre ce qui était prévu et ce que dit le journal. Ces quatre
     blocs parlent d'<b>une campagne</b> : ils étaient rangés dans « L'année », ils sont ici.
     Ce qui manquera en personnes d'ici la fin de l'année se lit dans « L'équipe &amp; le matériel »,
     carte « Le renfort à prévoir ».</li>
-    <li><b>Échéances par tâche</b> : date de fin projetée pour chacune, en jours travaillés au planning.</li>
+    <li><b>Échéances</b> : repliée, la fin de la dernière tâche ; ouverte, la fin de tout, puis une ligne par tâche (« la plus longue » en pastille), ses heures et ses jours travaillés au toucher.</li>
     <li><b>La fenêtre d'une tâche s'arrête le jour écrit.</b> Si vous fixez la fin d'un travail au
     25 avril, le 25 avril travaille. La même règle vaut pour le dernier jour de la période elle-même.</li>
     <li><b>Les heures se répartissent au prorata des jours travaillables</b>, jamais des jours du
     calendrier. Une semaine avec le 1<sup>er</sup> mai et l'Ascension n'a que trois jours pour absorber
     du travail : elle en reçoit trois cinquièmes, et les semaines pleines récupèrent le reste. C'est
     pour cela qu'une semaine de ponts apparaît plus calme que sa voisine sur les courbes.</li>
-    <li><b>Carte du domaine</b> colorée par avancement, libellés masquables. Un anneau doré qui respire
+    <li><b>Carte du domaine</b> : repliée, le nombre de parcelles et leur surface ; colorée par avancement, libellés masquables ; « Ouvrir la carte » mène à celle de la Vigne. Un anneau doré qui respire
     marque, sur la priorité du moment, la parcelle commencée et pas finie — sinon la prochaine à faire.</li>
   </ul>
 
