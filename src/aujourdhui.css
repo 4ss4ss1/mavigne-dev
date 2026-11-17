@@ -3,7 +3,7 @@
    Nico (16/11) : « l'onglet comme il était avant me semblait bien, il faut l'alléger » — rien ne quitte l'écran, chaque
    carte garde sa place. Dans une carte : un titre, un chiffre, une barre ou une couleur ; l'explication derrière le « i »,
    le détail au toucher. Maquette validée : docs/maquettes/maquette-aujourdhui-v4.html. Ces règles viennent après celles
-   de REF-1 / PRO-1 et les recouvrent sous .ck2 ; la vue Cave et la vue Économie ne sont pas touchées (lots suivants).
+   de REF-1 / PRO-1 et les recouvrent sous .ck2 ; la vue Cave suit la même règle (MOTS-6, en fin de fichier), la vue Économie viendra.
    Fichier à part : styles.css est à son plafond (1 024 ko, mv-harnais-typo) — rien n'y entre. Importé par app.js après
    styles.css et bandeau.css : il passe donc après eux. Tout se lit dans la charte, avec un repli.
    ═════════════════════════════════════════════════════════════════════════════════════════════════ */
@@ -107,16 +107,114 @@
 .ck2 #ck-gr-cadre,.ck2 #ck-agr-cadre{display:flex;align-items:baseline;gap:var(--e-3,12px);margin-top:var(--e-1,4px)}
 .ck2 #ck-gr-cadre::before,.ck2 #ck-agr-cadre::before{display:none}
 .ck2 #ck-gr-cadre b,.ck2 #ck-agr-cadre b{font:var(--fw-semi,600) var(--pt-lg,24px)/1.1 var(--font-ui);letter-spacing:var(--ls-titre);color:var(--texte)}
-/* ── Au téléphone : « En direct » puis « À savoir » juste sous la phrase, avant les tuiles (Nico, 16/11) ── */
+/* ── Au téléphone : « En direct » puis « À savoir » juste sous la phrase, avant les tuiles (Nico, 16/11) ──
+   MOTS-6 (§588) : la vue Cave prend le même ordre (maquette validée le 17/11). */
 .ck-page[data-taille="petit"]{display:flex;flex-direction:column}
 .ck-page[data-taille="petit"]>.ck-vue{order:5}
-.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden]),.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col{display:contents}
-.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>*{order:4;margin-top:var(--e-4,16px)}
-.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-fil{order:1}
-.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-savoir{order:2}
+.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden]),.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col{display:contents}
+.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col>*{order:4;margin-top:var(--e-4,16px)}
+.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col>:is(#ck-fil,#ck-cv-fil){order:1}
+.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col>:is(#ck-savoir,#ck-cv-savoir){order:2}
 .ck-page[data-taille="petit"]>#ck-photos{order:3;margin-top:var(--e-4,16px)}
 /* ── Au téléphone : les cartes presque d'un bord à l'autre (16 px de marge au lieu de 40) ── */
 @media (max-width:699px){.ck2 .ck-page{margin-left:calc(-1 * var(--e-2,8px));margin-right:calc(-1 * var(--e-2,8px));padding-left:0;padding-right:0}}
 .ck2 .ck-frise{margin-top:0}
 /* La réponse d'une question se lit comme une ligne de liste, pas comme un titre : elle tient sur sa ligne à côté de son dessin. */
 :is(#page-pilotage, #ovReglPilotage) .ck-dz-g .ck-dz-v { font-size: var(--t-ligne) !important; }
+/* ═════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★★ MOTS-6 (§588) — LA VUE CAVE D'AUJOURD'HUI, ALLÉGÉE COMME LA VUE TERRAIN
+   Maquette validée le 17/11 : docs/maquettes/maquette-aujourdhui-cave-v1.html. Les six cartes restent ; dans chacune, un
+   chiffre, une barre ou une couleur. Le détail d'une cuve, d'une cuvée, d'une étape ou d'un point se déplie au toucher.
+   Ces règles recouvrent celles de CAVEPIL-1 à 3 (styles.css), dont les règles mortes ont été retirées.
+   ═════════════════════════════════════════════════════════════════════════════════════════════════ */
+.ck2 :is(.cv-cuve,.cv-cuvee,.cv-lg)>summary{list-style:none;cursor:pointer}
+.ck2 :is(.cv-cuve,.cv-cuvee,.cv-lg)>summary::-webkit-details-marker{display:none}
+.ck2 :is(.cv-cuve,.cv-cuvee,.cv-lg)>summary:focus-visible{outline:2px solid var(--anneau);outline-offset:2px;border-radius:var(--r-sm,6px)}
+.ck2 .cv-dt{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-0,2px) var(--e-3,12px);font-size:var(--pt-micro,12px);line-height:1.4;color:var(--texte-doux)}
+/* ── Ce qui presse : le chiffre en grand, son mot, la suite en pastilles, trois compteurs ── */
+.ck2 .cv-v-ph>span{font:var(--fw-semi,600) var(--pt-sm,16px)/1.3 var(--font-ui);letter-spacing:0}
+.ck2 .cv-v-ph>b{font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-v-ph>small{font-weight:var(--fw-reg,400);font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-v-puis{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin:var(--e-2,8px) 0 0}
+.ck2 .cv-sem3{margin-top:var(--e-3,12px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);overflow:hidden}
+.ck2 .cv-sem3>div{padding:var(--e-2,8px)}
+.ck2 .cv-sem3>div+div{padding-left:var(--e-2,8px)}
+.ck2 .cv-sem3 dt{line-height:1.25}
+.ck2 .cv-sem3 dd b{margin:0;font-size:var(--pt-base,14px);white-space:nowrap}
+.ck2 .cv-verdict .ck-v-act{margin-top:var(--e-3,12px)}
+/* ── Le Cuvier : le dessin, le nom, l'état, la mesure ── */
+.ck2 .cv-cuves{align-items:start}
+.ck2 details.cv-cuve{display:block;cursor:default}
+.ck2 .cv-cuve>summary{display:flex;flex-direction:column;align-items:flex-start;gap:var(--e-1,4px)}
+.ck2 .cv-cuve-d{width:auto;height:64px}
+.ck2 .cv-cuve .cv-dt{margin-top:var(--e-1,4px)}
+/* ── Le Chai : le nom, l'état, les fûts ; ce qui suit son cours sur une ligne ── */
+.ck2 details.cv-cuvee{cursor:default}
+.ck2 .cv-cuvee-h{align-items:center;justify-content:space-between;flex-wrap:nowrap}
+.ck2 .cv-cuvee-h b{min-width:0}
+.ck2 .cv-cuvee-h .mvpas{flex:none}
+.ck2 .cv-cuvee-f{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-2,8px);margin-top:var(--e-1,4px);font-size:var(--pt-micro,12px);color:var(--texte-med);font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-cuvee-f .cv-futs{margin-top:0}
+.ck2 .cv-cuvee-f .rt{font-weight:var(--fw-semi,600);color:var(--danger-texte)}
+.ck2 .cv-cuvee .cv-dt{margin-top:var(--e-1,4px)}
+.ck2 .cv-grp-h{grid-template-columns:minmax(0,1fr) auto;min-height:44px}
+.ck2 .cv-grp-ic,.ck2 .cv-grp-b>span{display:none}
+.ck2 .cv-grp:not(.ouvert) .cv-grp-s{display:none}
+.ck2 .cv-grp-b .mv-ic{transform:rotate(-90deg)}
+.ck2 .cv-grp.ouvert .cv-grp-b .mv-ic{transform:none}
+.ck2 .cv-grp-x{padding-left:0}
+.ck2 .cv-btl{justify-content:space-between;min-height:44px}
+.ck2 .cv-btl b{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600)}
+.ck2 .cv-btl span{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}
+/* ── La semaine : cinq jours (aujourd'hui plus large), une ligne orange, une ligne par période ── */
+.ck2 .cv-jours{display:flex}
+.ck2 .cv-j{flex:1 1 0;min-width:0;min-height:96px;gap:var(--e-1,4px)}
+.ck2 .cv-j.auj{flex:1.7 1 0}
+.ck2 .cv-j-ev{margin-top:auto}
+.ck2 .cv-tot-c{font-size:var(--pt-micro,12px);color:var(--texte-med);white-space:nowrap}
+.ck2 .cv-manque{align-items:center}
+.ck2 .cv-manque>span{flex:1;min-width:0}
+.ck2 .cv-manque b{font-weight:var(--fw-semi,600)}
+.ck2 .cv-manque .ck-sv-a{margin:0;background:var(--bg-card)}
+.ck2 .cv-s{grid-template-columns:minmax(0,1fr) auto;gap:var(--e-0,2px) var(--e-3,12px)}
+.ck2 .cv-s-t{grid-column:1}
+.ck2 .cv-s-t b{display:inline}
+.ck2 .cv-s-t small{margin-left:var(--e-2,8px);font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap}
+.ck2 .cv-s-d{grid-column:1;display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-2,8px);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+.ck2 .cv-s-j{color:var(--ok-texte)}
+.ck2 .cv-s>.ck-sv-a{grid-column:2;grid-row:1/3}
+/* ── Le millésime : le tonnage en grand, la barre, une ligne de légende par étape ── */
+.ck2 .cv-mil-t{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-3,12px);margin:var(--e-1,4px) 0 0}
+.ck2 .cv-mil-t b{font:var(--fw-semi,600) var(--pt-lg,24px)/1.1 var(--font-ui);letter-spacing:var(--ls-titre);color:var(--texte);font-variant-numeric:lining-nums}
+.ck2 .cv-mil-t small{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.ck2 .cv-barre{margin-top:var(--e-3,12px)}
+.ck2 .cv-lgs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--e-4,16px);margin-top:var(--e-1,4px)}
+.ck2 .cv-lg>summary,.ck2 .cv-lg-l{display:flex;align-items:center;gap:var(--e-2,8px);min-height:28px;font-size:var(--pt-micro,12px);color:var(--texte-med)}
+.ck2 .cv-lg i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--encours)}
+.ck2 .cv-lg i.vendu{background:repeating-linear-gradient(135deg,var(--gris) 0 3px,transparent 3px 5px)}
+.ck2 .cv-lg i.cuve{background:var(--vin-liq)}
+.ck2 .cv-lg i.chai{background:var(--vin-chai)}
+.ck2 .cv-lg b{margin-left:auto;color:var(--texte);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.ck2 .cv-lg.a-venir b{color:var(--texte-doux)}
+.ck2 .cv-lg p{margin:0 0 var(--e-1,4px) calc(10px + var(--e-2,8px));font-size:var(--pt-micro,12px);line-height:1.35;color:var(--texte-doux)}
+.ck2 p.cv-rdt{align-items:baseline;margin-top:var(--e-2,8px)}
+.ck2 p.cv-rdt b{font-size:var(--pt-sm,16px)}
+.ck2 p.cv-liens{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-4,16px);margin:var(--e-3,12px) 0 0}
+@media (max-width:699px),(pointer:coarse){.ck2 .cv-lg>summary{min-height:44px}}
+/* ── En direct : trois gestes, la suite sous « Tout voir » ; À savoir : le compte en pastille ── */
+.ck2 .cv-fil:not(.ouvert) .cv-fil-l>li:nth-child(n+4){display:none}
+.ck2 .ck-sv-n.alerte{background:var(--danger-doux)}
+.ck2 .ck-sv-n.alerte::before{background:var(--danger)}
+/* Un point d'« À savoir » en cave : son titre et son moment à gauche, son bouton court à droite (maquette). */
+.ck2 #ck-cv-savoir .ck-sv-tx{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--e-0,2px) var(--e-3,12px)}
+.ck2 #ck-cv-savoir .ck-sv-tx>.ck-sv-a{grid-column:2;margin:0}
+.ck2 #ck-cv-savoir .ck-sv-h{justify-content:flex-start;column-gap:var(--e-3,12px)}
+/* Un jour étroit ne laisse jamais déborder un mot (« Dégustation », « Décuvage ») : il se coupe plutôt que de sortir de sa case. */
+.ck2 .cv-j{padding-left:var(--e-0,2px);padding-right:var(--e-0,2px)}
+.ck2 .cv-j-ev li{hyphens:auto;overflow-wrap:anywhere}
+@media (max-width:699px){.ck2 .cv-j.auj{flex:1.4 1 0}}
+/* Dans une colonne étroite (ordinateur), la légende du millésime passe sur une colonne : un nom, une valeur par ligne. */
+@container (max-width:280px){.ck2 .cv-lgs{grid-template-columns:minmax(0,1fr)}}
+/* Le chevron d'un point reste collé à son dernier mot : sans largeur propre, il ne passe jamais seul à la ligne. */
+.ck2 #ck-cv-savoir .ck-sv-h{padding-right:var(--e-4,16px)}
+.ck2 #ck-cv-savoir .ck-sv-d>summary .ck-sv-h b::after{margin-right:calc(-1 * (6px + var(--e-2,8px)))}

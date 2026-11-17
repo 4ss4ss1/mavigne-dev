@@ -5291,7 +5291,11 @@ function _pilCk2Cave(V){
   var unite=function(L){ var g=gestes(L); if(!g.length) return ['\u2014','rien de pr\u00e9vu']; var tousOu=g.every(function(i){ return i.kind==='ouillage'; }); return [String(g.length), tousOu?(g.length>1?'ouillages':'ouillage'):(g.length>1?'gestes':'geste')]; };
   var L34=[]; sem.slice(2).forEach(function(w){ L34=L34.concat(w.items||[]); });
   var nCv=Y.cuvees.length, nCu=Y.suivies||0;
-  var verdict={etat:PL[0], etatTxt:PL[1], phrase:phrase, sous:v.s||'',
+  // ★★ MOTS-6 (§588) — LA VUE CAVE ALLÉGÉE : les mêmes faits, en pièces courtes (le chiffre, son mot, ce qui suit en pastilles).
+  //   Rien n'est recalculé : chaque pièce est un morceau de ce que la Cave dit déjà. Le pourquoi et la méthode vont derrière le « i ».
+  var vPuis=(Array.isArray(v.puis)?v.puis:[]).map(function(x){ var mm=/^(\d+)\s+cuv\u00e9es?\s+(?:ont fini leur|a fini sa) malo$/.exec(String(x)); return mm?(mm[1]+'\u00a0'+(+mm[1]>1?'malos finies':'malo finie')):String(x); });
+  var vQuand=(v.cls==='due'&&!duDiag&&!/aujourd/.test(v.t||''))?'aujourd\u2019hui':'';
+  var verdict={etat:PL[0], etatTxt:PL[1], phrase:phrase, sous:v.s||'', t:String(v.t||''), quand:vQuand, puis:vPuis, pourquoi:String(v.why||(vPuis.length?'':(v.s||''))),
     sem:[['Cette semaine'].concat(unite(s0)), ['Semaine prochaine'].concat(unite(sem[1]&&sem[1].items)), ['Dans 2 \u00e0 4 semaines'].concat(unite(L34))],
     cadre:duDiag?'Le Diagnostic du Chai croise le labo, les gestes et les d\u00e9gustations. Un statut d\u00e9crit des indices, pas une certitude.'
       :('Calcul\u00e9 par la Cave sur '+(nCu?pl(nCu,'cuve suivie','cuves suivies')+' au Cuvier et ':'')+pl(nCv,'cuv\u00e9e')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'),
@@ -5304,7 +5308,7 @@ function _pilCk2Cave(V){
     var puce=e==='alerte'?'\u00c0 contr\u00f4ler':(e==='faire'?(k.indexOf('mesure')>=0?'\u00c0 mesurer':(k.indexOf('decuvage')>=0?'\u00c0 d\u00e9cuver':'\u00c0 faire'))
       :(dec?'D\u00e9cuv\u00e9e':(c.statut==='mpf'?'Mac\u00e9ration'+(c.jEntree!=null?' \u00b7 J'+c.jEntree:''):('FA'+(c.faPct!=null?' \u00b7 '+c.faPct+'\u00a0%':'')))));
     var lect=c.d20!=null?(c.d20+(c.temp!=null?' \u00b7 '+nb(c.temp)+'\u00a0\u00b0C':'')):'\u2014';
-    var p=c.proj||{}, suite=dec?('D\u00e9cuv\u00e9e le '+dC(c.decuvage.date)):(c.statut==='mpf'?'Mac\u00e9ration \u00e0 froid':(p.etat==='normal'&&p.date?'Fin estim\u00e9e '+jC(p.date):(p.etat==='sec'?'Vin sec, d\u00e9cuvage possible':(p.etat==='ralentit'?'Ralentit, \u00e0 contr\u00f4ler':''))));
+    var p=c.proj||{}, suite=dec?('D\u00e9cuv\u00e9e le '+dC(c.decuvage.date)):(c.statut==='mpf'?'Mac\u00e9ration \u00e0 froid':(p.etat==='normal'&&p.date?'Fin de FA pr\u00e9vue '+jC(p.date):(p.etat==='sec'?'Vin sec, d\u00e9cuvage possible':(p.etat==='ralentit'?'Ralentit, \u00e0 contr\u00f4ler':''))));
     var rows=[];
     if(c.parcelles.length) rows.push(['Parcelles',c.parcelles.join(', ')]);
     if(c.kg) rows.push(['Raisin',Math.round(c.kg).toLocaleString('fr-FR')+'\u00a0kg']);
@@ -5312,7 +5316,7 @@ function _pilCk2Cave(V){
     if(dec) rows.push(['D\u00e9cuvage',dC(c.decuvage.date)+(c.decuvage.hl?' \u00b7 '+nb(c.decuvage.hl)+'\u00a0hL':'')+(c.decuvage.cuvee?' \u00b7 '+c.decuvage.cuvee:'')]);
     if(c.jRel!=null) rows.push(['Dernier relev\u00e9',(c.jRel<=0?'aujourd\u2019hui':(c.jRel===1?'hier':'il y a '+c.jRel+'\u00a0j'))+(c.d20!=null?' \u00b7 '+lect:'')]);
     if(c.note) rows.push(['Note','\u00ab\u00a0'+c.note+'\u00a0\u00bb']);
-    if(p.etat==='normal'&&p.date) rows.push(['Fin estim\u00e9e',jC(p.date)+(p.marge!=null?', \u00e0 '+pl(p.marge,'jour')+' pr\u00e8s':'')]);
+    if(p.etat==='normal'&&p.date) rows.push(['Fin de FA pr\u00e9vue',jC(p.date)+(p.marge!=null?', \u00e0 '+pl(p.marge,'jour')+' pr\u00e8s':'')]);
     return {id:c.id, nom:c.nom.split(/\s+[\u2014-]\s+/)[0], mat:mat, cap:c.cap, hl:c.hl, e:e, puce:puce, v:lect,
       s:suite+(dec&&c.decuvage.cuvee?' \u00b7 '+c.decuvage.cuvee:''), bulles:c.statut==='fa'&&!dec&&c.hl>0, froid:c.statut==='mpf'&&!dec,
       go:'cuve:'+c.id, tip:{t:c.nom, rows:rows}};
@@ -5352,6 +5356,7 @@ function _pilCk2Cave(V){
     var sgCv=(c.signes&&c.signes.cuvee)?{sgs:c.signes.cuvee.sgs, t:c.signes.cuvee.sgs.map(function(k){ return SGL[k]; }).join(', '), d:dC(c.signes.cuvee.d), qui:c.signes.cuvee.qui||''}:null;
     if(sgRes.length||sgCv) rows.push(['D\u00e9gustation', sgRes.map(function(r){ return r[1]+'\u00a0: '+r[2].join(', '); }).concat(sgCv?[sgCv.t+' sur la cuv\u00e9e, le '+sgCv.d]:[]).join(' \u00b7 ')]);
     return {id:c.id, nom:c.nom, futs:c.futs||0, hl:c.hl?nb(c.hl)+'\u00a0hL':'', e:e, puce:puce, s:parts.join(' \u00b7 '), go:f?'diag':'cuvee:'+c.id, tip:{t:c.nom, rows:rows},
+      rt:retard, d:parts.filter(function(x){ return !/^<span class="rt">/.test(x); }).join(' \u00b7 '),   // MOTS-6 : le retard à part, le reste pour le détail
       futsD:futsD, sgRes:sgRes, sgCv:sgCv,   // CAVEPIL-2
       pro:c.pro||'', proTxt:c.pro?JC[dI(c.pro).getDay()]+'\u00a0'+dC(c.pro):'', cours:e==='cours'?(m.t==='Apr\u00e8s la FA'?'fa':'malo'):'',   // ★ CAVEPIL-3 (§457) : la ligne « À jour » (prochain ouillage) et la ligne « En cours » (FA ou malo)
       r:e==='alerte'?0:(e==='faire'?(retard?1:2):(e==='cours'?3:4))};
@@ -5370,11 +5375,11 @@ function _pilCk2Cave(V){
     return {j:JC[dI(x).getDay()], d:String(dI(x).getDate()), auj:x===auj, passe:x<auj, gens:gensDu(x), ev:ev.slice(0,3)};
   });
   var jSem=joursDe(lu,add(lu,4)), lourds=gestes(s0).filter(function(i){ return i&&i.date>=auj&&(i.kind==='soutirage'||i.kind==='ouillage'); });
-  var manque='';
+  var manque='', manqueC='';   // MOTS-6 : manqueC, le même compte sans la phrase (« 2 soutirages, 1 ouillage »)
   if(lourds.length&&!joursDe(auj,add(lu,4))){
     var nS=lourds.filter(function(i){ return i.kind==='soutirage'; }).length, nO=lourds.length-nS;
     manque=([nS?pl(nS,'soutirage'):'', nO?pl(nO,'ouillage'):''].filter(Boolean).join(' et '));
-    manque=(lourds.length>1?'Les ':'Le ')+manque+(lourds.length>1?' n\u2019ont':' n\u2019a')+' pas encore de journ\u00e9e de cave au planning.';
+    manqueC=manque.replace(' et ',', '); manque=(lourds.length>1?'Les ':'Le ')+manque+(lourds.length>1?' n\u2019ont':' n\u2019a')+' pas encore de journ\u00e9e de cave au planning.';
   }
   var resumeS=function(W, a, b){
     var g=gestes(W), r={futs:0,litres:0};
@@ -5382,12 +5387,14 @@ function _pilCk2Cave(V){
     var nO=g.filter(function(i){ return i.kind==='ouillage'; }).length, nA=g.length-nO;
     var txt=!g.length?'Rien de pr\u00e9vu par la Cave':([nO?pl(nO,'ouillage'):'', nA?pl(nA,'autre geste','autres gestes'):''].filter(Boolean).join(' \u00b7 ')+(r.futs?' \u00b7 '+pl(r.futs,'f\u00fbt')+(r.litres?' \u00b7 environ '+r.litres+'\u00a0L':''):''));
     var jp=joursDe(a,b);
-    return {txt:txt, plan:g.length?(jp?nb(jp)+' '+(jp>1?'journ\u00e9es':'journ\u00e9e')+' de cave au planning':'Aucune journ\u00e9e de cave au planning'):'', vide:!!(g.length&&!jp)};
+    return {txt:txt, plan:g.length?(jp?nb(jp)+' '+(jp>1?'journ\u00e9es':'journ\u00e9e')+' de cave au planning':'Aucune journ\u00e9e de cave au planning'):'', vide:!!(g.length&&!jp),
+      court:txt.replace(' \u00b7 environ ',' \u00b7 ').replace(/^Rien de pr\u00e9vu par la Cave$/,'rien de pr\u00e9vu'), jours:(g.length&&jp)?nb(jp)+'\u00a0'+(jp>1?'journ\u00e9es':'journ\u00e9e'):''};   // MOTS-6
   };
   var w1=sem[1]||{items:[],lundi:add(lu,7)}, r1=resumeS(w1.items||[], w1.lundi, add(w1.lundi,4));
   var d3=add(lu,14), f4=add(lu,25), r34=resumeS(L34, d3, f4);
   var semaine={jours:jours, tot:jSem?nb(jSem)+' '+(jSem>1?'jours':'jour'):'Aucune journ\u00e9e', totTxt:jSem?'de l\u2019\u00e9quipe en cave cette semaine, d\u2019apr\u00e8s le Planning. Ils ne comptent pas pour la vigne\u00a0: la fin pr\u00e9vue des travaux en tient compte.':'de cave au planning cette semaine.',
-    manque:manque, suite:[['Semaine prochaine', dC(w1.lundi)+' \u2013 '+dC(add(w1.lundi,4)), r1.txt, r1.plan, r1.vide], ['Dans 2 \u00e0 4 semaines', dC(d3)+' \u2013 '+dC(f4), r34.txt, r34.plan, r34.vide]], vide:!jSem&&!lourds.length};
+    manque:manque, manqueC:manqueC, totC:jSem?nb(jSem)+'\u00a0'+(jSem>1?'jours':'jour')+' de cave':'',
+    suite:[['Semaine prochaine', dC(w1.lundi)+' \u2013 '+dC(add(w1.lundi,4)), r1.txt, r1.plan, r1.vide, r1.court, r1.jours], ['Dans 2 \u00e0 4 semaines', dC(d3)+' \u2013 '+dC(f4), r34.txt, r34.plan, r34.vide, r34.court, r34.jours]], vide:!jSem&&!lourds.length};
   // — le millésime : la chaîne de la Cave —
   var ch=null; try{ ch=(typeof window._mlChaine==='function')?window._mlChaine(Y.mil):null; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#chaine'); }
   var mil=null;
@@ -5406,42 +5413,51 @@ function _pilCk2Cave(V){
         ['chai','Au chai',nb(ch.hlFut||0)+'\u00a0hL',ch.futs?pl(ch.futs,'f\u00fbt'):''],
         ['btl','En bouteille',ch.btl?Number(ch.btl).toLocaleString('fr-FR'):'\u00e0 venir',ch.btl?'bouteilles':'',ch.btl?0:1]],
       rdt:(rdt&&rdt.hlHa)?'Rendement du domaine\u00a0: <b>'+nb(Math.round(rdt.hlHa))+'\u00a0hL/ha</b>'+(rdt.ha?', sur '+nb(rdt.ha)+'\u00a0ha r\u00e9colt\u00e9s pour la cave':'')+'.':'Rendement du domaine\u00a0: il se lira au d\u00e9cuvage.',
-      aussi:aussi, note:'Les kilos sont convertis \u00e0 '+kgHl+'\u00a0kg/hL, la r\u00e8gle du Cuvier. Le volume au chai est mesur\u00e9.'};
+      aussi:aussi, note:'Les kilos sont convertis \u00e0 '+kgHl+'\u00a0kg/hL, la r\u00e8gle du Cuvier. Le volume au chai est mesur\u00e9.',
+      // MOTS-6 : le tonnage en grand, une ligne de légende par étape (en hL, comme la barre), le rendement en chiffre
+      t:nb(t)+'\u00a0t', sousT:'environ '+Math.round((ch.kg||0)/kgHl)+'\u00a0hL'+(ch.parcelles?' \u00b7 '+pl(ch.parcelles,'parcelle'):''),
+      leg:[['vendu','raisin vendu',nb(Math.round(hlVendu))+'\u00a0hL',ch.kgVendu?nb(Math.round(ch.kgVendu/100)/10)+'\u00a0t':''],
+        ['cuve','en cuve',nb(ch.hlCuve||0)+'\u00a0hL',ch.hlCuve?pl((ch.cuves||[]).filter(function(x){ return x&&x.statut!=='termine'; }).length,'cuve')+', d\u2019apr\u00e8s les caisses':'tout est d\u00e9cuv\u00e9'],
+        ['chai','au chai',nb(ch.hlFut||0)+'\u00a0hL',ch.futs?pl(ch.futs,'f\u00fbt'):''],
+        ['btl','en bouteille',ch.btl?Number(ch.btl).toLocaleString('fr-FR'):'\u00e0 venir',ch.btl?'bouteilles, soit '+nb(hlBtl)+'\u00a0hL':'rien n\u2019est encore tir\u00e9',ch.btl?0:1]],
+      rdtV:(rdt&&rdt.hlHa)?nb(Math.round(rdt.hlHa))+'\u00a0hL/ha':'', rdtS:(rdt&&rdt.hlHa&&rdt.ha)?'Le rendement se compte sur les '+nb(rdt.ha)+'\u00a0ha r\u00e9colt\u00e9s pour la cave.':'Le rendement du domaine se lira au d\u00e9cuvage.'};
   }
   // — En direct : les derniers gestes de la cave —
   var rel=function(x){ var j=ecart(x,auj); return j<=0?'aujourd\u2019hui':(j===1?'hier':(j<7?JC[dI(x).getDay()]+'\u00a0'+dI(x).getDate():dC(x))); };
   var moi=gensDu(auj).map(function(p){ return [p[0].charAt(0).toUpperCase(), p[0]+' est en cave '+(p[1]==='j'?'aujourd\u2019hui':(p[1]==='m'?'ce matin':'cet apr\u00e8s-midi')), '', 'en cave']; });
-  var fil={enCe:moi, items:(Y.recents||[]).slice(0,12).map(function(r){ return [r.ic||'journal', r.t+(r.q?'\u00a0: '+r.q:''), r.s||'', rel(r.d)]; })};
+  // MOTS-6 : le geste et son contenant (« Relevé · Cuve 3 », sans la matière ni la contenance), la mesure dessous, le moment en court.
+  var qCourt=function(q){ return String(q||'').replace(/\s+[\u2014-]\s+[^\u2192]*?(?=\s+\u2192|$)/,''); };
+  var fil={enCe:moi, items:(Y.recents||[]).slice(0,12).map(function(r){ return [r.ic||'journal', r.t+(r.q?' \u00b7 '+qCourt(r.q):''), String(r.s||'').replace(/^(\d+) \u00e0 /,'$1 \u00b7 '), rel(r.d).replace(/^aujourd\u2019hui$/,'auj.')]; })};
   // — À savoir, en cave —
   var sv=[], dgAll=[];
   var enElev={}; Y.cuvees.forEach(function(c){ enElev[String(c.id)]=1; });   // les cuvées en élevage selon la Cave (une mise mal datée n'y est pas)
   try{ dgAll=(typeof window._dgnSynthese==='function')?window._dgnSynthese().filter(function(x){ return x&&!x.mise&&enElev[String(x.id)]; }):[]; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#diag'); }
   var nomCv={}; Y.cuvees.forEach(function(c){ nomCv[String(c.id)]=c.nom; });
   dg.forEach(function(d,k){ sv.push({c:'alerte', fort:1, alerte:1, k:k?'':'Signes forts', ic:'microscope', t:d.nom+'\u00a0: '+String(d.txt||'').replace(/^./,function(x){ return x.toLowerCase(); }), q:'Diagnostic',
-    s:'Le Diagnostic du Chai rel\u00e8ve des indices qui vont ensemble. Un statut d\u00e9crit des indices, pas une certitude.', a:'Ouvrir le diagnostic', go:'diag'}); });
-  s0.forEach(function(i){ if(i&&(i.kind==='alerte'||i.kind==='malo')) sv.push({c:'alerte', fort:1, alerte:1, k:sv.length?'':'Alerte', ic:'alerte', t:i.titre+'\u00a0: '+(i.note||'\u00e0 contr\u00f4ler'), q:'Aujourd\u2019hui', s:i.detail||'', a:i.kind==='malo'?'Ouvrir la cuv\u00e9e':'Ouvrir le Cuvier', go:i.kind==='malo'?'cuvee:'+i.ref:'cuve:'+i.ref}); });
+    s:'Le Diagnostic du Chai rel\u00e8ve des indices qui vont ensemble. Un statut d\u00e9crit des indices, pas une certitude.', a:'Ouvrir le diagnostic', ac:'Diagnostic', go:'diag'}); });
+  s0.forEach(function(i){ if(i&&(i.kind==='alerte'||i.kind==='malo')) sv.push({c:'alerte', fort:1, alerte:1, k:sv.length?'':'Alerte', ic:'alerte', t:i.titre+'\u00a0: '+(i.note||'\u00e0 contr\u00f4ler'), q:'Aujourd\u2019hui', s:i.detail||'', a:i.kind==='malo'?'Ouvrir la cuv\u00e9e':'Ouvrir le Cuvier', ac:i.kind==='malo'?'Cuv\u00e9e':'Cuvier', go:i.kind==='malo'?'cuvee:'+i.ref:'cuve:'+i.ref}); });
   s0.forEach(function(i){ if(i&&i.kind==='ouillage'&&i.urgence==='due'){ var cv=Y.cuvees.filter(function(c){ return String(c.id)===String(i.ref); })[0], o=cv&&cv.ouillage, rt=(o&&/^\+(\d+)/.test(o.d||''))?parseInt(o.d.slice(1),10):0;
-    sv.push({c:'faire', fort:1, k:sv.length?'':'\u00c0 anticiper', ic:'goutte', t:i.titre+' \u00e0 ouiller', q:rt?'En retard de '+rt+'\u00a0j':'Aujourd\u2019hui', s:String(i.detail||'').replace('~','environ ')+(o&&o.last?'. Dernier ouillage le '+point(dC(o.last)):''), a:'Ouvrir la cuv\u00e9e', go:'cuvee:'+i.ref}); } });
+    sv.push({c:'faire', fort:1, k:sv.length?'':'\u00c0 anticiper', ic:'goutte', t:i.titre+' \u00e0 ouiller', q:rt?'En retard de '+rt+'\u00a0j':'Aujourd\u2019hui', s:String(i.detail||'').replace('~','environ ')+(o&&o.last?'. Dernier ouillage le '+point(dC(o.last)):''), a:'Ouvrir la cuv\u00e9e', ac:'Cuv\u00e9e', go:'cuvee:'+i.ref}); } });
   var aSout=s0.filter(function(i){ return i&&i.kind==='soutirage'; });
   if(aSout.length) sv.push({c:'faire', fort:1, k:sv.length?'':'\u00c0 anticiper', ic:'barrique', t:(aSout.length>1?aSout.length+' cuv\u00e9es ont fini leur malo':'1 cuv\u00e9e a fini sa malo'), q:'\u00c0 soutirer',
-    s:aSout.map(function(i){ return i.titre; }).join(' et ')+'.'+(manque&&/soutirage/.test(manque)?' Aucune journ\u00e9e de cave n\u2019est pr\u00e9vue au planning pour '+(aSout.length>1?'les':'la')+' soutirer.':''), a:'Pr\u00e9voir au planning', go:'planning'});
+    s:aSout.map(function(i){ return i.titre; }).join(' et ')+'.'+(manque&&/soutirage/.test(manque)?' Aucune journ\u00e9e de cave n\u2019est pr\u00e9vue au planning pour '+(aSout.length>1?'les':'la')+' soutirer.':''), a:'Pr\u00e9voir au planning', ac:'Pr\u00e9voir', go:'planning'});
   sem.slice(0,1).forEach(function(w){ (w.items||[]).forEach(function(i){ if(i&&i.kind==='fa') sv.push({c:'cours', ic:'sablier', t:'Fin de fermentation, '+String(i.titre||'').split(/\s+[\u2014-]\s+/)[0], q:jC(i.date),
     s:'Estim\u00e9e '+String(i.detail||'').replace(/^fin de fermentation estim\u00e9e\s*\u00b7\s*/,'').replace('\u00b1 ','\u00e0 ').replace(/ j$/,'\u00a0jour pr\u00e8s')+(i.note?'\u00a0: '+i.note:'')+'. Le d\u00e9cuvage suivra.'}); }); });
   if(!dg.length){
     var att=dgAll.filter(function(x){ return x.g==='att'; }), sansA=dgAll.filter(function(x){ return !x.nAna; }).length, der=null;
     // la dernière analyse, seulement si le Diagnostic en lit une chiffrée (sinon « aucune analyse » et « la dernière le … » se contrediraient)
     if(sansA<dgAll.length) try{ ((typeof window._laboLignes==='function')?window._laboLignes():[]).forEach(function(l){ var x=String((l&&l.date)||'').slice(0,10); if(x&&x<=auj&&(!der||x>der)) der=x; }); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCk2Cave#labo'); }
-    if(att.length) sv.push({c:'faire', ic:'microscope', t:(att.length>1?att.length+' cuv\u00e9es \u00e0 surveiller':(nomCv[att[0].id]||att[0].nom)+'\u00a0: '+String(att[0].txt||'').toLowerCase()), q:'Diagnostic', s:'Des indices au Diagnostic du Chai, sans aller jusqu\u2019aux signes forts.', a:'Ouvrir le diagnostic', go:'diag'});
+    if(att.length) sv.push({c:'faire', ic:'microscope', t:(att.length>1?att.length+' cuv\u00e9es \u00e0 surveiller':(nomCv[att[0].id]||att[0].nom)+'\u00a0: '+String(att[0].txt||'').toLowerCase()), q:'Diagnostic', s:'Des indices au Diagnostic du Chai, sans aller jusqu\u2019aux signes forts.', a:'Ouvrir le diagnostic', ac:'Diagnostic', go:'diag'});
     else if(dgAll.length) sv.push({c:'ok', ic:'microscope', t:'Diagnostic du Chai\u00a0: aucun signe', q:pl(dgAll.length,'cuv\u00e9e'),
-      s:(sansA?pl(sansA,'cuv\u00e9e n\u2019a','cuv\u00e9es n\u2019ont')+' encore aucune analyse chiffr\u00e9e au labo\u00a0: une partie des risques n\u2019est pas \u00e9valuable.':'Toutes ont une analyse au labo.')+(der?' Derni\u00e8re analyse le '+point(dC(der)):''), a:'Ouvrir le diagnostic', go:'diag'});
+      s:(sansA?pl(sansA,'cuv\u00e9e n\u2019a','cuv\u00e9es n\u2019ont')+' encore aucune analyse chiffr\u00e9e au labo\u00a0: une partie des risques n\u2019est pas \u00e9valuable.':'Toutes ont une analyse au labo.')+(der?' Derni\u00e8re analyse le '+point(dC(der)):''), a:'Ouvrir le diagnostic', ac:'Diagnostic', go:'diag'});
   }
   // — le lien avec Terrain : la phrase du haut, le point de la bascule, la ligne d'« À savoir » —
   var presse=v.cls!=='ok', lien=!presse?'':(duDiag?'un signe fort au Chai':String(v.t||'').replace(/^./,function(x){ return x.toLowerCase(); })+' en cave');
   if(presse&&_pilShow('auj_cave_sv')&&Array.isArray(V.savoir)) V.savoir.push({cat:'cave', prio:2, titre:'Cave\u00a0: '+(duDiag?'signe fort au Chai':v.t), quand:'Aujourd\u2019hui',
     sous:String(v.s||'').split(/\.\s/)[0].replace(/\.$/,'')+'.', action:'Voir la cave', fn:'cave'});
   return {pt:presse?(alerte?'alerte':'attention'):'', lien:lien, lienAlerte:alerte, verdict:verdict,
-    cuvier:{resume:cuves.length?(pl(cuves.length,'cuve')+(hlCu?' \u00b7 environ '+nb(Math.round(hlCu))+'\u00a0hL en cuve':'')):'Cuverie vide', cuves:cuves, vide:!cuves.length, cap:capCu},
-    chai:{resume:pl(cuvees.length,'cuv\u00e9e')+' \u00b7 '+pl(tf,'f\u00fbt')+(th?' \u00b7 environ '+nb(Math.round(th))+'\u00a0hL':''), cuvees:cuvees},
+    cuvier:{resume:cuves.length?(pl(cuves.length,'cuve')+(hlCu?' \u00b7 environ '+nb(Math.round(hlCu))+'\u00a0hL en cuve':'')):'Cuverie vide', cuves:cuves, vide:!cuves.length, cap:capCu, court:cuves.length?(pl(cuves.length,'cuve')+(hlCu?' \u00b7 '+nb(Math.round(hlCu))+'\u00a0hL':'')):'vide'},
+    chai:{resume:pl(cuvees.length,'cuv\u00e9e')+' \u00b7 '+pl(tf,'f\u00fbt')+(th?' \u00b7 environ '+nb(Math.round(th))+'\u00a0hL':''), cuvees:cuvees, court:pl(cuvees.length,'cuv\u00e9e')+' \u00b7 '+pl(tf,'f\u00fbt')+(th?' \u00b7 '+nb(Math.round(th))+'\u00a0hL':'')},
     btl:{resume:nBtl?Number(nBtl).toLocaleString('fr-FR')+' bouteilles':'', l:Y.btl.map(function(b){ return {nom:b.nom, n:Number(b.n).toLocaleString('fr-FR')+' bouteilles', s:b.date?'mises le '+dC(b.date):'', go:'elevage'}; })},
     semaine:semaine, mil:mil, fil:fil, savoir:sv};
 }

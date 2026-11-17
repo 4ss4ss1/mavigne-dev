@@ -52,6 +52,11 @@
    "date": "2026-11-16",
    "motif": "MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — toutes les cartes gardées, moins de mots dans chacune",
    "hausses": []
+  },
+  {
+   "date": "2026-11-17",
+   "motif": "MOTS-6 (§588) : la vue Cave d'Aujourd'hui allégée — les six cartes gardées, moins de mots dans chacune",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -237,10 +242,10 @@
     "lex": 3
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 485,
-    "p15": 5,
+    "mots": 226,
+    "p15": 0,
     "avant": 13,
-    "lex": 2
+    "lex": 1
    },
    "Pilotage › Aujourd’hui › Économie": {
     "mots": 243,
@@ -515,10 +520,10 @@
     "lex": 3
    },
    "Pilotage › Aujourd’hui › Cave": {
-    "mots": 533,
-    "p15": 5,
+    "mots": 232,
+    "p15": 0,
     "avant": 13,
-    "lex": 2
+    "lex": 1
    },
    "Pilotage › Aujourd’hui › Économie": {
     "mots": 249,

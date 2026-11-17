@@ -102,7 +102,7 @@ function suite(S) {
   // ④ le téléphone
   T('④ au téléphone, « En direct » puis « À savoir » en tête de la liste', V.includes("petit: [['fil', 'savoir', 'verdict', 'decision', 'plan', 'chant', 'courbe'], [], []] },"));
   T('④ … et avant les tuiles : l’ordre se fait dans la feuille (la vue et ses colonnes s’effacent, order)', C.includes('.ck-page[data-taille="petit"]{display:flex;flex-direction:column}')
-    && C.includes('.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-fil{order:1}') && C.includes('.ck-page[data-taille="petit"]>#ck-vue-terrain:not([hidden])>.ck-col>#ck-savoir{order:2}')
+    && C.includes('.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col>:is(#ck-fil,#ck-cv-fil){order:1}') && C.includes('.ck-page[data-taille="petit"]>:is(#ck-vue-terrain,#ck-vue-cave):not([hidden])>.ck-col>:is(#ck-savoir,#ck-cv-savoir){order:2}')   /* MOTS-6 (§588) : la vue Cave prend le même ordre */
     && C.includes('.ck-page[data-taille="petit"]>#ck-photos{order:3;') && C.includes('.ck-page[data-taille="petit"]>.ck-vue{order:5}'));
   T('④ la feuille du lot est à part, lue après styles.css et bandeau.css (styles.css est à son plafond : rien n’y entre)',
     /import '\.\/bandeau\.css';[^\n]*\nimport '\.\/aujourdhui\.css';/.test(S.app) && !S.css.includes('ck-res-pl') && !S.css.includes('MOTS-5 (§586) — AUJOURD') && S.auj.includes('★★★ MOTS-5 (§586)'));

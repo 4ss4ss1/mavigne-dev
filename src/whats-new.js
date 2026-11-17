@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.16', d: '2026-11-17', items: [   // MOTS-6 (§588) : Pilotage › Aujourd'hui, la vue Cave — les mêmes cartes, moins de mots
+    { niv: 0, pour: ['admin'], emoji: 'barrique', titre: 'Aujourd’hui, vue Cave\u00a0: les mêmes cartes, moins de mots',
+      desc: "La vue Cave du Pilotage garde ses six cartes, à la même place. «\u00a0Ce qui presse\u00a0» montre le chiffre en grand et ce qui suit en pastilles. Une cuve se lit à son dessin, son état et sa mesure\u00a0; une cuvée à son nom, son état et ses fûts. Touchez une cuve, une cuvée, une ligne du millésime ou un point d’«\u00a0À savoir\u00a0» pour lire le détail\u00a0; «\u00a0Ouvrir\u00a0» mène à l’écran de la Cave. Les explications sont derrière les «\u00a0i\u00a0». Au téléphone, «\u00a0En direct\u00a0» et «\u00a0À savoir\u00a0» passent en tête, comme dans la vue Terrain. Aucun calcul ne change." },
+  ] },
   { v: '11.15', d: '2026-11-17', items: [] },   // MOTS-5B (§587) : la zone de toucher des pastilles de la phrase du jour descend sous la pastille — le cliquet des mots repasse au vert ; rien ne change pour un client
   { v: '11.14', d: '2026-11-16', items: [   // MOTS-5 (§586) : Pilotage › Aujourd'hui, les mêmes cartes, moins de mots
     { niv: 0, pour: ['admin'], emoji: 'oeil', titre: 'Aujourd’hui\u00a0: les mêmes cartes, moins de mots',

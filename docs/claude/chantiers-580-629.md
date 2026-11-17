@@ -294,3 +294,63 @@
 
 **NON vérifié** : un vrai téléphone ; le thème sombre.
 
+## 588. ★★★ MOTS-6 — AUJOURD’HUI, LA VUE CAVE ALLÉGÉE : LES SIX CARTES GARDÉES, MOINS DE MOTS DANS CHACUNE (17/11 — `src/cockpit-vue.js` · `src/pilotage.js` · `src/cave.js` · `src/aujourdhui.css` · `src/styles.css` · `src/utils.js` · `src/whats-new.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-mots6.mjs`)
+
+**La demande.** Après MOTS-5 (§586, la vue Terrain), Nico : « suite », puis « oui » à « finir Aujourd’hui : la vue Cave, puis la vue Économie ». Maquette téléphone et ordinateur, Avant / Après, cadre réel de l’appli : `docs/maquettes/maquette-aujourdhui-cave-v1.html` — « Parfait pour la maquette » (17/11). Base `9da4aa8` (« mots5b »). APP 11.15 → 11.16, SW 12.06 → 12.07.
+
+**La règle, la même que la vue Terrain.** Rien ne quitte l’écran : les six cartes restent, à la même place sur ordinateur. Dans une carte : un titre, un chiffre, une barre ou une couleur. Le pourquoi du jour et la méthode vont derrière le « i ». Le détail se déplie au toucher. Aucun calcul ne change.
+
+### 588a. Carte par carte
+
+| Carte | Avant | Après |
+|---|---|---|
+| **Ce qui presse** (ex « Ce qui presse en cave ») | une grande phrase, une phrase de suite (« Pas de relevé… Puis : … »), une note de trois lignes | le chiffre en grand, son mot, « aujourd’hui » en petit ; ce qui suit en pastilles ; trois compteurs (« cette semaine », « semaine prochaine », « dans 2 à 4 sem. ») ; les deux boutons |
+| **Le millésime** | une phrase, quatre blocs de trois lignes, une phrase de rendement, une note | le tonnage en grand ; la barre ; une ligne de légende par étape, **en hL comme la barre** ; ce qu’elle compte (tonnes, cuves, fûts) au toucher ; « rendement — 38 hL/ha » ; les autres millésimes ; les deux liens |
+| **La cave en direct** | sous chaque cuve : matière, contenance, état, mesure, suite ; par cuvée : nom, fûts, volume, état, ronds, une ligne de suite | une cuve : son dessin (64 px), son nom, son état, sa mesure ; une cuvée : son nom, son état, ses fûts, son retard ; le reste au toucher, avec « Ouvrir » ; « En cours » et « À jour » : le nom, le compte, un chevron |
+| **La cave dans la semaine** | un sous-titre, la légende des ronds, une phrase de total, un bandeau de deux lignes, trois lignes par période | cinq jours (aujourd’hui plus large) ; une ligne orange « 2 soutirages, 1 ouillage sans journée de cave » + « Prévoir » ; une ligne par période, « sans journée » en pastille |
+| **En direct** | un sous-titre, le nom complet de la cuve à chaque ligne, une liste coupée en fondu | « Relevé · Cuve 3 », la mesure dessous, « auj. » ; trois gestes, la suite sous « Tout voir » (dans l’en-tête) |
+| **À savoir** | quatre blocs de quatre à cinq lignes | le compte en pastille ; un point par ligne, avec un bouton court (« Cuvée », « Prévoir », « Diagnostic », « Cuvier » — le nom long en `aria-label`) ; ce que change le point au toucher |
+
+Au téléphone : « En direct », puis « À savoir », juste sous la phrase du jour, puis les tuiles et les cartes de la cave — l’ordre de la vue Terrain (`RANGS.c.petit`, et la feuille : `:is(#ck-vue-terrain,#ck-vue-cave)`).
+
+### 588b. Comment c’est fait
+
+- **Rien n’est recalculé.** `_mlVerdict` (cave.js) rend, en plus de `t` et `s`, ses pièces : `why` (le pourquoi du premier point) et `puis` (ce qui suit, trois au plus). `_pilCk2Cave` (pilotage.js) ajoute au modèle des **pièces courtes**, à côté des champs d’avant, tous gardés : `verdict.t / quand / puis / pourquoi`, `cuvier.court`, `chai.court`, par cuvée `rt` (le retard d’ouillage) et `d` (le reste), `semaine.manqueC / totC`, par période `court` et `jours`, `mil.t / sousT / leg / rdtV / rdtS`, par point `ac` (le bouton court). Le fil est mis en forme court (« Relevé · Cuve 3 », « 1006 · 23 °C », « auj. »). « 2 cuvées ont fini leur malo » se dit « 2 malos finies » dans la pastille — la seule réécriture, faite sur le texte de la Cave.
+- **`INFO_PLUS`** (cockpit-vue.js, à côté d’`INFO`) : ce qu’une carte ajoute à sa bulle au moment où elle se dessine — le pourquoi du verdict et son cadre, le total des journées de cave, la règle des kilos et le rendement. `ouvrirInfo` les met **avant** la méthode. Une fiche à titre (objet) ne change pas.
+- **Le toucher.** Une cuve, une cuvée, une étape du millésime sont des `<details>` : le toucher **déplie** (avant, il ouvrait l’écran de la Cave). « Ouvrir » (`cvOuvrir`, un `data-cave`) y mène. Au survol (souris) et au clavier, la bulle `cvTip` reste ; elle s’efface quand la ligne se déplie. **Toujours aucun bouton de geste.**
+- **Les rangées « En cours » / « À jour »** (CAVEPIL-3, §457) : même HTML ; la feuille cache l’icône, le mot « Tout voir » et, repliée, la ligne du prochain ouillage. Le chevron seul reste. Dépliée, la rangée redonne tout.
+- **La feuille** : tout dans `src/aujourdhui.css` (bloc MOTS-6). `styles.css` (au plafond) n’a fait que **perdre** ses règles mortes (`.cv-etapes`, `.cv-et`, `.cv-mil-tete`, `.cv-note`, `.cv-leg-j`, `.cv-tot`, `.cv-cuvee-s`, `.cv-btl-ic`, le fondu d’« En direct »…) : 1 047 060 → 1 043 231 octets.
+- **Le lexique (§580c)** : « Fin estimée jeu. 29 » (sous une cuve, puis dans son détail) devient « Fin de FA prévue jeu. 29 ».
+
+### 588c. Mesuré (build, démo au 27/10, Chromium du bac à sable)
+
+| | Avant | Après |
+|---|---|---|
+| Mots de la vue Cave (`npm run test:mots`) — téléphone | 485 | **226** |
+| … ordinateur | 533 | **232** |
+| Phrases de 15 mots et plus | 5 | **0** |
+| Mots hors lexique | 2 | 1 (la date longue de la tête, commune aux trois vues) |
+| Hauteur de la page — téléphone (390 px) | 4 282 px (5,1 écrans) | 3 306 px (3,9 écrans) |
+| … ordinateur (1 366 px) | 2 167 px (2,4 écrans) | 1 790 px (2,0 écrans) |
+
+Gestes rejoués à l’écran, téléphone et ordinateur : une cuve, une cuvée, une rangée, une ligne du millésime, un point d’« À savoir » se déplient ; les bulles « i » de « Ce qui presse », de la semaine et du millésime ouvrent sur la phrase du jour ; « Tout voir » déplie le fil ; « Ouvrir » ouvre la Cave ; la légende filtre.
+
+### 588d. Écarts avec la maquette, à connaître
+
+- **La page est plus haute que sur la maquette** (téléphone 3,9 écrans contre 3,2 annoncés ; ordinateur 2,0 contre 1,6) : la légende à quatre boutons du plan, les zones de toucher de 44 px et les marges réelles des cartes prennent plus de place que le dessin.
+- **« Ouvrir »** n’était pas sur la maquette : le toucher d’une cuve ou d’une cuvée dépliant son détail, il fallait une porte vers l’écran de la Cave. Elle est dans le détail déplié.
+- **« Ce qui presse » n’a pas de fond de carte**, comme « Fin prévue » de la vue Terrain (la pièce `.ck-verdict`) ; la maquette le dessinait en carte.
+- **Les libellés gardent leur majuscule** (« À mesurer », « Alerte 0 », « Prioritaire ») : ce sont les pastilles de l’appli. La légende du plan garde ses boutons (elle filtre).
+- **« En retard de 5 j »** dans « À savoir » (la maquette écrivait « retard 5 j ») : le texte est celui de la Cave. Sur la ligne de la cuvée, c’est bien « retard 5 j ».
+- **Au téléphone, « aujourd’hui » fait 1,4 fois un autre jour** (1,7 sur ordinateur) ; un mot long (« Décuvage », « Dégustation ») se coupe plutôt que de sortir de sa case.
+- **Sur ordinateur, la légende du millésime tient sur une colonne** quand la carte est étroite (sous 280 px) : sur deux colonnes, les noms passaient à la ligne.
+
+### 588e. Les harnais
+
+- **`mv-harnais-mots6.mjs`** : 49 assertions, 51 contre-épreuves. Le modèle sort du **vrai** `_pilCk2Cave`, le verdict du **vrai** `_mlVerdict`, le dessin du **vrai** cockpit, montés dans Node sur le domaine de démo ; chaque carte est comparée à ce que montre la maquette.
+- **Adaptés** : `cavepil1` (deux contre-épreuves visaient des lignes parties), `cavepil3` (la bulle, l’aide et le guide disent « Toucher la ligne », plus « Tout voir »), `autete1` (son bac charge `INFO_PLUS`), `mots5` (l’ordre du téléphone couvre les deux vues).
+- ⚠️ **Une contre-épreuve ne prouve rien tant que la suite de base est rouge** : `mots6 --contre` annonçait « 51 rougissent » alors qu’une assertion (la référence des mots, pas encore regravée) était rouge — toutes les mutations « rougissaient » par elle. Relancée après le vert : une restait verte (« le retard d’une cuvée est inventé »), assertion ajoutée. **Lancer `--contre` seulement sur une suite verte.**
+
+**Les trois cliquets rendus, lancés en dernier** (règle du §587) : `npm run test:mots` (référence regravée, 6 baisses, aucune hausse), `npm run test:ux`, `npm run test:gabarit` — verts.
+
+**NON vérifié** : un vrai téléphone ; le thème sombre ; un domaine avec beaucoup de cuves (plus de six de front) ou de cuvées ; un signe fort du Diagnostic à l’écran (joué par le harnais CAVEPIL-1, pas regardé) ; une semaine avec des journées de cave au planning (jouée par le harnais, pas regardée) ; un écran non admin. **Reste à faire** : la vue Économie d’Aujourd’hui, même règle, maquette d’abord.

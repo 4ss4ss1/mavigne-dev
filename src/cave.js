@@ -6180,11 +6180,12 @@ function _mlVerdict(sem, ctx){
   if(parc&&parc.aReformer>0) cand.push({cls:'warn', t:parc.aReformer+' f\u00fbt'+(parc.aReformer>1?'s arrivent':' arrive')+' en fin de vie',
     why:'Apr\u00e8s ce mill\u00e9sime, ces barriques auront fait '+parc.vie+' vins.'});
   if(!cand.length) return {cls:'ok', t:'Rien ne presse aujourd\u2019hui',
-    s:'Ouillage \u00e0 jour, aucune fermentation \u00e0 surveiller, parc \u00e0 f\u00fbts suffisant.'};
+    s:'Ouillage \u00e0 jour, aucune fermentation \u00e0 surveiller, parc \u00e0 f\u00fbts suffisant.', puis:[]};
   // ★ CAVEAUJ-1 (§434) : d'abord pourquoi, puis ce qui suit (« Puis : … », trois au plus).
   var first=cand[0], s=first.why, suite=cand.slice(1,4).map(function(c){ return c.t; });
   if(suite.length) s+=' Puis\u00a0: '+suite.join(' \u00b7 ')+(cand.length>4?'\u2026':'.');
-  return {cls:first.cls, t:first.t, s:s};
+  // ★ MOTS-6 (§588) : les mêmes mots, en pièces — le Pilotage écrit ce qui suit en pastilles, sans redécouper la phrase.
+  return {cls:first.cls, t:first.t, s:s, why:first.why, puis:suite};
 }
 
 var _AUJ_ICO={ouillage:'goutte', mesure:'thermometre', fa:'sablier', decuvage:'cuve', alerte:'alerte',

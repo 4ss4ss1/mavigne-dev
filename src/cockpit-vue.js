@@ -387,12 +387,12 @@ const INFO = {
     'Coût à la fin : ce qui est déjà payé, plus le travail qui reste, compté au barème et corrigé du rythme mesuré de l’équipe quand il compte, dès 40 % du travail fait.',
     'Avant 40 %, l’écart est celui déjà constaté — la part du budget main-d’œuvre payée face à la part du travail validé —, reporté tel quel jusqu’à la fin. Une parcelle commencée ne compte comme faite qu’à sa validation.'] },
   // ★ CAVEPIL-1 (§436) — la vue Cave
-  cvverdict: 'Le verdict de la Cave, mot pour mot — celui de Cave › Aujourd’hui : relevés de densité, dernier ouillage, analyses de malo, soutirages, et le Diagnostic du Chai quand il relève des signes forts. Le Pilotage le lit, il ne le refait pas. Les trois chiffres comptent les gestes des quatre semaines de la Cave.',
-  cvplan: 'Chaque cuve suivie au Cuvier, et au Chai un rond par fût là où les fûts demandent un geste, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu. Les cuvées qui suivent leur cours (fermentation, malo), puis celles qui sont à jour, tiennent chacune sur une ligne : leur nombre, leurs fûts et, pour les cuvées à jour, le prochain ouillage. « Tout voir », ou leur état dans la légende, les déplie avec tous leurs fûts. Un fût marqué à sa dernière dégustation — fleur, piqué ou oxydé — garde toujours son rond ; le signe part quand une dégustation plus récente du même fût ne le note plus. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Toucher ouvre l’écran de la Cave.',
-  cvsemaine: 'Les journées de cave marquées au Planning (la journée, le matin ou l’après-midi), face aux gestes des quatre semaines de la Cave. Un ouillage qui tombe un week-end revient au vendredi, un jour férié à la veille, comme dans la Cave. Les journées de cave ne comptent pas pour la vigne : la fin prévue des travaux en tient compte.',
-  cvmil: 'La chaîne du millésime de la Cave : les kilos rentrés d’après les caisses, convertis à la règle du Cuvier ; « en cuve » reste une estimation tant que rien n’est décuvé ; « au chai » est le volume réellement entonné, jamais la taille des fûts. Le coût par bouteille est dans Économie › Revient.',
-  cvfil: 'Les derniers gestes de la cave, du plus récent au plus ancien : relevés du Cuvier, décuvages, ouillages, soutirages, sulfitages, analyses et dégustations du Chai. En tête, qui est en cave aujourd’hui d’après le Planning.',
-  cvsavoir: 'Ce qui demande une décision en cave : une alerte, un ouillage en retard, un soutirage à prévoir au planning, une fin de fermentation, ce que dit le Diagnostic du Chai.',
+  cvverdict: 'Le verdict de la Cave, mot pour mot — celui de Cave › Aujourd’hui : relevés de densité, dernier ouillage, analyses de malo, soutirages, et le Diagnostic du Chai quand il relève des signes forts. Le Pilotage le lit, il ne le refait pas. Les trois compteurs comptent les gestes des quatre semaines de la Cave.',
+  cvplan: 'Chaque cuve suivie au Cuvier, et au Chai un rond par fût là où les fûts demandent un geste, de la couleur de ce qu’il demande cette semaine : rouge pour une alerte (fermentation qui ralentit, malo bloquée, signe fort au Diagnostic), orange pour un geste attendu. Les cuvées qui suivent leur cours (fermentation, malo), puis celles qui sont à jour, tiennent chacune sur une ligne : leur nombre, leurs fûts et, pour les cuvées à jour, le prochain ouillage. Toucher la ligne, ou leur état dans la légende, les déplie avec tous leurs fûts. Un fût marqué à sa dernière dégustation — fleur, piqué ou oxydé — garde toujours son rond ; le signe part quand une dégustation plus récente du même fût ne le note plus. Le niveau d’une cuve est estimé d’après les caisses, comme au Cuvier. Toucher une cuve ou une cuvée déplie son détail ; « Ouvrir » mène à l’écran de la Cave.',
+  cvsemaine: 'Les journées de cave marquées au Planning, face aux gestes des quatre semaines de la Cave. Dans un jour, un rond plein est une journée de cave, un demi-rond le matin ou l’après-midi, comme au Planning. « Sans journée » : des gestes attendus, et aucune journée de cave au planning pour les faire. Les litres d’ouillage sont une estimation. Un ouillage qui tombe un week-end revient au vendredi, un jour férié à la veille, comme dans la Cave. Les journées de cave ne comptent pas pour la vigne : la fin prévue des travaux en tient compte.',
+  cvmil: 'La chaîne du millésime de la Cave : les kilos rentrés d’après les caisses, convertis à la règle du Cuvier ; « en cuve » reste une estimation tant que rien n’est décuvé ; « au chai » est le volume réellement entonné, jamais la taille des fûts. Toucher une ligne de la légende dit ce qu’elle compte. Le coût par bouteille est dans Économie › Revient.',
+  cvfil: 'Les derniers gestes de la cave, du plus récent au plus ancien : relevés du Cuvier, décuvages, ouillages, soutirages, sulfitages, analyses et dégustations du Chai. En tête, qui est en cave aujourd’hui d’après le Planning. « Tout voir » déplie la suite.',
+  cvsavoir: 'Ce qui demande une décision en cave : une alerte, un ouillage en retard, un soutirage à prévoir au planning, une fin de fermentation, ce que dit le Diagnostic du Chai. Toucher un point dit ce qu’il change.',
   fin: 'La fin prévue prend les heures qui restent au barème et les retire, jour après jour, de la capacité inscrite au planning : contrats en cours, absences, formations et congés compris, et les journées de cave marquées au Planning, même à venir. Elle avance quand une parcelle est validée. Sur la jauge : le trait rouge est aujourd’hui, le losange la fin prévue.',
   travaux: 'Heures du barème des parcelles validées, sur le total des tâches de la campagne. Une parcelle commencée ne compte qu’à sa validation.',
   effectif: 'Personnes prévues au planning aujourd’hui, hors bureau, et celles qui manquent (congé, arrêt, récupération). Un jour sans travail au planning — week-end, jour chômé —, la tuile montre le prochain jour travaillé et le dit.',
@@ -415,6 +415,9 @@ const INFO = {
   apps: 'Le barème du travail validé dans chaque appellation, au coût horaire de l’équipe, divisé par ses hectares en production. Une appellation sans travail validé ne se compare pas.',
   taches: 'Pour chaque tâche au barème qui a du travail validé : les heures réellement versées à ses parcelles validées, face au barème de ces mêmes parcelles — les chiffres de « Temps réel contre barème », dans l’onglet Économie. Les heures de cave n’y entrent pas : les journées, matins ou après-midis marqués au Planning, et les jours d’opération du Chai. À droite du zéro, l’équipe va moins vite que le barème. La barre est à l’échelle jusqu’à 50 % ; au-delà, elle est pleine et finit en pointe. Un travail à l’heure (arrachage…) n’a pas de barème : il a sa ligne dans « Par poste ».',
 };
+// ★ MOTS-6 (§588) : ce qu'une carte ajoute à sa bulle, au moment où elle se dessine — le pourquoi du jour, la règle chiffrée
+//   (cvVerdict, cvSemaine, cvMil). ouvrirInfo les lit avant la méthode : ces phrases ne sont plus écrites dans la carte.
+const INFO_PLUS = {};
 const SVG = (d, cls) => '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
 const ICO = {
   chev: '<svg class="ck-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>',
@@ -1344,7 +1347,9 @@ function toast(o) {
    ici que le texte : la position, la pointe, le toucher à côté, Échap et le défilement sont ceux de toute l'appli. */
 function ouvrirInfo(btn, clavier) {
   if (typeof window._mvBulleOuvrir !== 'function') { if (window.logError) window.logError({ level: 'info', cat: 'cockpit', msg: '_mvBulleOuvrir absent' }); return; }
-  const k = btn.dataset.info, f = INFO[k];
+  const k = btn.dataset.info, f = INFO[k], plus = INFO_PLUS[k] || [];
+  // ★ MOTS-6 (§588) : une carte peut ajouter ses phrases du jour (le pourquoi du verdict, la règle chiffrée), avant la méthode.
+  if (plus.length && typeof f === 'string') { window._mvBulleOuvrir(btn, { p: plus.concat([f]).map(esc) }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier }); return; }
   // ★ AUJ-TETE-1 (§454) : une fiche peut porter un titre et plusieurs paragraphes ({ t, p: [...] }) ; les autres restent une phrase.
   if (f && typeof f === 'object') { window._mvBulleOuvrir(btn, { t: f.t, p: (f.p || []).map(esc) }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier }); return; }
   window._mvBulleOuvrir(btn, { p: [esc(INFO[k] || '')] }, { sig: '.ck-i[data-info="' + k + '"]', clavier: !!clavier });
@@ -1450,12 +1455,20 @@ function cvSgRes(c) {
   if (c.sgCv) L.push('<span>' + c.sgCv.sgs.map(cvSgIcone).join('') + '<b>' + esc(c.sgCv.t) + '</b> sur la cuvée, le ' + esc(c.sgCv.d) + '</span>');
   return L.length ? '<span class="cv-sgs">' + L.join('') + '</span>' : '';
 }
+// ★★★ MOTS-6 (§588) — LA VUE CAVE ALLÉGÉE : TOUTES LES CARTES, MOINS DE MOTS DANS CHACUNE (maquette validée le 17/11,
+//   docs/maquettes/maquette-aujourdhui-cave-v1.html — la règle de la vue Terrain, MOTS-5). Dans une carte : un titre, un chiffre,
+//   une barre ou une couleur. Le pourquoi du jour et la méthode vont derrière le « i » (INFO_PLUS, lu par ouvrirInfo) ; le détail
+//   d'une cuve, d'une cuvée, d'une étape du millésime ou d'un point se déplie au toucher (<details>), avec « Ouvrir » pour l'écran
+//   de la Cave. Toujours aucun bouton de geste : chaque porte reste un data-cave.
+const CV_SEM3 = ['cette semaine', 'semaine prochaine', 'dans 2 à 4 sem.'];
+const cvOuvrir = (go, nom) => '<button type="button" class="ck-lien" data-cave="' + esc(go) + '" aria-label="' + esc('Ouvrir ' + nom + ' dans la Cave') + '">Ouvrir</button>';
 function cvVerdict(C) {
-  const v = C.verdict;
-  return '<div class="ck-v-haut"><span class="ck-v-k">Ce qui presse en cave</span><span class="ck-etat ' + v.etat + '">' + esc(v.etatTxt) + '</span></div>'
-    + '<h2 class="ck-v-phrase">' + esc(v.phrase) + '</h2>' + (v.sous ? '<p class="ck-v-sous">' + esc(v.sous) + '</p>' : '')
-    + '<dl class="cv-sem3">' + v.sem.map(x => '<div><dt>' + esc(x[0]) + '</dt><dd><b>' + esc(x[1]) + '</b>' + esc(x[2]) + '</dd></div>').join('') + '</dl>'
-    + '<p class="ck-cadre"><span>' + esc(v.cadre) + btnI('cvverdict', 'Comment ce verdict est calculé') + '</span></p>'
+  const v = C.verdict, m = /^(\d+(?:[.,]\d+)?)\s+(.+)$/.exec(v.t || '');
+  INFO_PLUS.cvverdict = [v.pourquoi, v.cadre].filter(Boolean);
+  return '<div class="ck-v-haut"><span class="ck-v-k">Ce qui presse' + btnI('cvverdict', 'Comment ce verdict est calculé') + '</span><span class="ck-etat ' + v.etat + '">' + esc(v.etatTxt) + '</span></div>'
+    + '<h2 class="ck-v-phrase cv-v-ph">' + (m ? '<b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span>' : '<span>' + esc(v.t || v.phrase) + '</span>') + (v.quand ? '<small>' + esc(v.quand) + '</small>' : '') + '</h2>'
+    + ((v.puis || []).length ? '<p class="cv-v-puis">' + v.puis.map(t => '<span class="ck-ph-pst">' + esc(t) + '</span>').join('') + '</p>' : '')
+    + '<dl class="cv-sem3">' + v.sem.map((x, k) => '<div><dt>' + (CV_SEM3[k] || esc(x[0])) + '</dt><dd><b>' + esc(x[1] === '\u2014' ? '\u2014' : x[1] + '\u00a0' + x[2]) + '</b></dd></div>').join('') + '</dl>'
     + '<div class="ck-v-act">' + v.act.map((a, k) => '<button type="button" class="ck-btn ' + (k ? 'ck-btn-ghost' : 'ck-btn-pri') + '" data-cave="' + esc(a[1]) + '">' + esc(a[0]) + '</button>').join('') + '</div>';
 }
 // ★★ CAVEPIL-3 (§457) — Nico (25/10) : « les fûts à jour, verts, prennent de la place pour pas grand-chose ». Maquette validée
@@ -1467,11 +1480,12 @@ function cvVerdict(C) {
 const cvPl = (n, a, b) => n + '\u00a0' + (n > 1 ? (b || a + 's') : a);
 function cvCuvee(c) {
   CV_TIPS['c' + c.id] = c.tip;
-  return '<button type="button" class="cv-cuvee cv-e-' + c.e + '" data-e="' + c.e + '" data-tip="c' + esc(c.id) + '" data-cave="' + esc(c.go) + '" aria-label="' + esc(c.nom + ', ' + c.futs + ' fûts, ' + c.hl + ' : ' + c.puce + '. ' + c.s.replace(/<[^>]+>/g, '')) + '">'
-    + '<span class="cv-cuvee-h"><b>' + esc(c.nom) + '</b><span>' + c.futs + '\u00a0fût' + (c.futs > 1 ? 's' : '') + (c.hl ? ' · ' + esc(c.hl) : '') + '</span><span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span></span>'
-    + '<span class="cv-futs" aria-hidden="true">' + (c.futsD ? (CV_FUTS['c' + c.id] = c.futsD).map((f, i) => '<span class="cv-fw" data-fut="c' + esc(c.id) + ':' + i + '">' + cvFut(f.sg) + '</span>').join('')
-      : Array.from({ length: Math.min(c.futs, 400) }, () => cvFut('')).join('')) + '</span>'
-    + (c.s ? '<span class="cv-cuvee-s">' + c.s.replace(/<(?!\/?span(?: class="rt")?>)[^>]+>/g, '') + '</span>' : '') + cvSgRes(c) + '</button>';
+  const det = [c.hl, c.d != null ? c.d : String(c.s || '').replace(/<[^>]+>/g, '')].filter(Boolean).join(' · ');
+  return '<details class="cv-cuvee cv-e-' + c.e + '" data-e="' + c.e + '"><summary data-tip="c' + esc(c.id) + '" aria-label="' + esc(c.nom + ', ' + c.futs + ' fûts, ' + c.hl + ' : ' + c.puce + '. ' + String(c.s || '').replace(/<[^>]+>/g, '')) + '">'
+    + '<span class="cv-cuvee-h"><b>' + esc(c.nom) + '</b><span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span></span>'
+    + '<span class="cv-cuvee-f"><span class="cv-futs" aria-hidden="true">' + (c.futsD ? (CV_FUTS['c' + c.id] = c.futsD).map((f, i) => '<span class="cv-fw" data-fut="c' + esc(c.id) + ':' + i + '">' + cvFut(f.sg) + '</span>').join('')
+      : Array.from({ length: Math.min(c.futs, 400) }, () => cvFut('')).join('')) + '</span><span class="cv-cuvee-n">' + cvPl(c.futs, 'fût') + '</span>' + (c.rt ? '<span class="rt">retard ' + c.rt + '\u00a0j</span>' : '') + '</span></summary>'
+    + '<div class="cv-dt">' + (det ? '<span>' + esc(det) + '</span>' : '') + cvSgRes(c) + cvOuvrir(c.go, c.nom) + '</div></details>';
 }
 // La phase d'une cuvée en cours, pour la bulle de sa rangée : « fermentation à finir en fûts », « malo en cours · 1,1 g/L ».
 const cvPhase = c => c.cours === 'fa' ? 'fermentation à finir en fûts' : 'malo ' + String(c.puce || 'En cours').replace(/^E/, 'e');
@@ -1511,67 +1525,76 @@ function cvPlan(C) {
   const leg = CV_ETATS.map(e => '<button type="button" class="ck-leg-i cv-e-' + e[0] + '" data-f="' + e[0] + '" aria-pressed="' + (S.cvFiltre === e[0]) + '"' + (n[e[0]] ? '' : ' disabled') + '><i aria-hidden="true"></i>' + e[1] + ' <b>' + (n[e[0]] || 0) + '</b></button>').join('');
   const cuves = C.cuvier.cuves.map(c => {
     CV_TIPS['u' + c.id] = c.tip;
-    return '<button type="button" class="cv-cuve cv-' + c.mat + ' cv-e-' + c.e + '" data-e="' + c.e + '" data-tip="u' + esc(c.id) + '" data-cave="' + esc(c.go) + '" aria-label="' + esc(c.nom + ', ' + c.mat + ' ' + c.cap + ' hL : ' + c.puce + '. ' + c.v + '. ' + c.s) + '">'
-      + cvCuveSvg(c) + '<span class="cv-cuve-n">' + esc(c.nom) + '</span><span class="cv-cuve-m">' + esc(c.mat) + ' · ' + esc(String(c.cap).replace('.', ',')) + '\u00a0hL</span>'
-      + '<span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span><span class="cv-cuve-v">' + esc(c.v) + '</span>' + (c.s ? '<span class="cv-cuve-v">' + esc(c.s) + '</span>' : '') + '</button>';
+    // MOTS-6 : le dessin, le nom, l'état, la mesure ; la matière, la contenance et la suite au toucher.
+    return '<details class="cv-cuve cv-' + c.mat + ' cv-e-' + c.e + '" data-e="' + c.e + '"><summary data-tip="u' + esc(c.id) + '" aria-label="' + esc(c.nom + ', ' + c.mat + ' ' + c.cap + ' hL : ' + c.puce + '. ' + c.v + '. ' + c.s) + '">'
+      + cvCuveSvg(c) + '<span class="cv-cuve-n">' + esc(c.nom) + '</span>'
+      + '<span class="mvpas mvpas-statut ' + (CV_PAS[c.e] || '') + '">' + esc(c.puce) + '</span><span class="cv-cuve-v">' + esc(c.v) + '</span></summary>'
+      + '<div class="cv-dt"><span>' + esc([c.mat + ' · ' + String(c.cap).replace('.', ',') + '\u00a0hL', c.s].filter(Boolean).join(' · ')) + '</span>' + cvOuvrir(c.go, c.nom) + '</div></details>';
   }).join('');
   // CAVEPIL-3 : ce qui demande un geste, dessiné ; ce qui suit son cours, puis ce qui est à jour, sur une rangée chacun.
   const det = C.chai.cuvees.filter(c => c.e !== 'ok' && c.e !== 'cours'), cours = C.chai.cuvees.filter(c => c.e === 'cours'), ok = C.chai.cuvees.filter(c => c.e === 'ok');
   const chai = (det.length ? '<div class="cv-cuvees">' + det.map(cvCuvee).join('') + '</div>' : '')
     + (cours.length ? cvGroupe('cours', cours, false) : '') + (ok.length ? cvGroupe('ok', ok, !det.length && !cours.length && ok.length > 1) : '');
-  const btl = C.btl.l.map(b => '<button type="button" class="cv-btl" data-cave="' + esc(b.go) + '"><span class="cv-btl-ic">' + cvIc('bouteille', 16) + '</span><span><b>' + esc(b.nom) + '</b><span>' + esc(b.n + (b.s ? ' · ' + b.s : '')) + '</span></span></button>').join('');
-  return entete('La cave en direct', 'Chaque cuve, et les fûts qui demandent quelque chose', 'cvplan')
+  const btl = C.btl.l.map(b => '<button type="button" class="cv-btl" data-cave="' + esc(b.go) + '" title="' + esc(b.n + (b.s ? ' · ' + b.s : '')) + '"><b>' + esc(b.nom) + '</b>' + (C.btl.l.length > 1 ? '<span>' + esc(b.n) + '</span>' : '') + '</button>').join('');
+  return entete('La cave en direct', '', 'cvplan')
     + '<div class="ck-leg cv-leg" role="group" aria-label="Filtrer par état">' + leg + '</div>'
-    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Cuvier</b><span>' + esc(C.cuvier.resume) + '</span></div>'
+    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Cuvier</b><span>' + esc(C.cuvier.court || C.cuvier.resume) + '</span></div>'
     + (C.cuvier.cuves.length ? '<div class="cv-cuves" style="--n:' + Math.max(3, C.cuvier.cuves.length) + '">' + cuves + '</div>' : '<p class="ck-vide">Aucune cuve suivie. Le Cuvier reprendra avec la prochaine vendange.</p>') + '</div>'
-    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Chai</b><span>' + esc(C.chai.resume) + '</span></div>'
+    + '<div class="cv-zone"><div class="cv-zone-h"><b>Le Chai</b><span>' + esc(C.chai.court || C.chai.resume) + '</span></div>'
     + (C.chai.cuvees.some(c => (c.sgRes && c.sgRes.length) || c.sgCv) ? '<p class="cv-sg-leg"><span>Signes de la dernière dégustation</span>' + Object.keys(CV_SG).map(k => '<span>' + cvSgIcone(k) + CV_SG[k][1] + '</span>').join('') + '</p>' : '')
     + (C.chai.cuvees.length ? chai : '<p class="ck-vide">Aucune cuvée en élevage.</p>') + '</div>'
     + (btl ? '<div class="cv-zone"><div class="cv-zone-h"><b>En bouteille</b><span>' + esc(C.btl.resume) + '</span></div>' + btl + '</div>' : '');
 }
 function cvSemaine(C) {
   const W = C.semaine, PART = { j: 'la journée', m: 'le matin', a: 'l’après-midi' };
+  INFO_PLUS.cvsemaine = [W.tot + ' ' + W.totTxt];
+  const prevoir = V.admin ? '<button type="button" class="ck-sv-a" data-cave="planning">Prévoir</button>' : '';
   const jours = W.jours.map(j => '<div class="cv-j' + (j.auj ? ' auj' : '') + (j.passe ? ' passe' : '') + '"' + (j.auj ? ' aria-current="date"' : '') + '>'
     + '<p class="cv-j-n">' + esc(j.j) + '<b>' + esc(j.d) + '</b></p>'
-    + '<div class="cv-j-gens">' + j.gens.map(g => '<span class="cv-pers ' + g[1] + '" title="' + esc(g[0] + ', ' + PART[g[1]]) + '">' + esc(g[0].charAt(0).toUpperCase()) + '</span>').join('') + '</div>'
-    + (j.ev.length ? '<ul class="cv-j-ev">' + j.ev.map(e => '<li' + (e[1] ? ' class="fait"' : '') + '>' + esc(e[0]) + '</li>').join('') + '</ul>' : '<p class="cv-j-vide">' + (j.passe ? '\u2014' : 'rien') + '</p>') + '</div>').join('');
-  return entete('La cave dans la semaine', 'Les journées de cave du Planning, face aux gestes prévus par la Cave', 'cvsemaine')
+    + (j.gens.length ? '<div class="cv-j-gens">' + j.gens.map(g => '<span class="cv-pers ' + g[1] + '" title="' + esc(g[0] + ', ' + PART[g[1]]) + '">' + esc(g[0].charAt(0).toUpperCase()) + '</span>').join('') + '</div>' : '')
+    + (j.ev.length ? '<ul class="cv-j-ev">' + j.ev.map(e => '<li' + (e[1] ? ' class="fait"' : '') + '>' + esc(e[0]) + '</li>').join('') + '</ul>' : '<p class="cv-j-vide">\u2014</p>') + '</div>').join('');
+  return entete('La cave dans la semaine', '', 'cvsemaine', null, W.totC ? '<span class="cv-tot-c">' + esc(W.totC) + '</span>' : '')
     + '<div class="cv-jours">' + jours + '</div>'
-    + '<p class="cv-leg-j"><span><i class="cv-pers j" aria-hidden="true"></i>la journée</span><span><i class="cv-pers m" aria-hidden="true"></i>le matin</span><span><i class="cv-pers a" aria-hidden="true"></i>l’après-midi</span><span>comme au Planning</span></p>'
-    + '<p class="cv-tot"><b>' + esc(W.tot) + '</b> ' + esc(W.totTxt) + '</p>'
-    + (W.manque ? '<div class="cv-manque">' + cvIc('calendrier', 16) + '<span>' + esc(W.manque) + '</span></div>' : '')
-    + '<ul class="cv-suite">' + W.suite.map(x => '<li class="cv-s"><div><b>' + esc(x[0]) + '</b><span class="d">' + esc(x[1]) + '</span></div><div><p>' + esc(x[2]) + '</p>'
-      + (x[3] ? '<p class="plan' + (x[4] ? ' vide' : '') + '">' + esc(x[3]) + '</p>' : '') + '</div>'
-      + (x[4] && V.admin ? '<button type="button" class="ck-sv-a" data-cave="planning">Prévoir</button>' : '<span></span>') + '</li>').join('') + '</ul>'
+    + (W.manque ? '<div class="cv-manque"><span>' + (W.manqueC ? '<b>' + esc(W.manqueC) + '</b> sans journée de cave' : esc(W.manque)) + '</span>' + prevoir + '</div>' : '')
+    + '<ul class="cv-suite">' + W.suite.map(x => '<li class="cv-s"><span class="cv-s-t"><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></span>'
+      + '<span class="cv-s-d">' + esc(x[5] != null ? x[5] : x[2]) + (x[4] ? '<span class="ck-ph-pst">sans journée</span>' : (x[6] ? '<span class="cv-s-j">' + esc(x[6]) + '</span>' : '')) + '</span>'
+      + (x[4] ? prevoir : '') + '</li>').join('') + '</ul>'
     + '<div class="ck-v-act"><button type="button" class="ck-btn ck-btn-ghost ck-btn-s" data-cave="planning">Ouvrir le planning</button></div>';
 }
 function cvMil(C) {
   const M = C.mil;
-  if (!M) return entete('Le millésime', 'De la vigne à la bouteille', 'cvmil') + '<p class="ck-vide">Pas encore de récolte saisie pour ce millésime.</p>';
+  if (!M) return entete('Le millésime', '', 'cvmil') + '<p class="ck-vide">Pas encore de récolte saisie pour ce millésime.</p>';
+  INFO_PLUS.cvmil = [M.note, M.rdtS].filter(Boolean);
   const tot = M.barre.reduce((a, b) => a + b[1], 0) || 1;
-  return entete(esc(M.titre), esc(M.cadre), 'cvmil')
-    + '<p class="cv-mil-tete">' + M.tete + '</p>'
+  // Une ligne de légende par étape, en hL comme la barre ; ce qu'elle compte (tonnes, cuves, fûts) au toucher.
+  const ligne = e => { const tete = '<i class="' + e[0] + '" aria-hidden="true"></i><span>' + esc(e[1]) + '</span><b>' + esc(e[2]) + '</b>';
+    return e[3] ? '<details class="cv-lg' + (e[4] ? ' a-venir' : '') + '"><summary>' + tete + '</summary><p>' + esc(e[3]) + '</p></details>' : '<div class="cv-lg' + (e[4] ? ' a-venir' : '') + '"><span class="cv-lg-l">' + tete + '</span></div>'; };
+  return entete(esc(M.titre), '', 'cvmil')
+    + '<p class="cv-mil-t"><b>' + esc(M.t) + '</b><small>' + esc(M.sousT) + '</small></p>'
     + '<div class="cv-barre" role="img" aria-label="' + esc(M.etapes.map(e => e[1] + ' ' + e[2]).join(', ')) + '">' + M.barre.filter(b => b[1] > 0).map(b => '<i class="' + b[0] + '" style="flex:' + (b[1] / tot).toFixed(4) + ' 1 0"></i>').join('') + '</div>'
-    + '<ul class="cv-etapes">' + M.etapes.map(e => '<li class="cv-et ' + e[0] + (e[4] ? ' a-venir' : '') + '"><span>' + esc(e[1]) + '</span><b>' + esc(e[2]) + '</b>' + (e[3] ? '<small>' + esc(e[3]) + '</small>' : '') + '</li>').join('') + '</ul>'
-    + '<div class="cv-rdt"><span>' + M.rdt + '</span><span class="cv-liens"><button type="button" class="cv-lien" data-cave="millesime">Le millésime</button><button type="button" class="cv-lien" data-cave="revient">Coût par bouteille</button></span></div>'
+    + '<div class="cv-lgs">' + (M.leg || []).map(ligne).join('') + '</div>'
+    + (M.rdtV ? '<p class="cv-rdt"><span>rendement</span><b>' + esc(M.rdtV) + '</b></p>' : '')
     + (M.aussi.length ? '<ul class="cv-aussi" aria-label="Aussi en cave">' + M.aussi.map(a => '<li><b>' + esc(a[0]) + '</b>' + esc(a[1]) + '</li>').join('') + '</ul>' : '')
-    + '<p class="cv-note">' + esc(M.note) + '</p>';
+    + '<p class="cv-liens"><button type="button" class="cv-lien" data-cave="millesime">Le millésime</button><button type="button" class="cv-lien" data-cave="revient">Coût par bouteille</button></p>';
 }
 function cvFil(C) {
   const F = C.fil, ev = x => '<li class="ck-ev"><span class="ck-ev-ic cv-ev-ic">' + cvIc(x[0], 16) + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(x[1]) + '</span>' + (x[2] ? '<span class="ck-ev-s">' + esc(x[2]) + '</span>' : '') + '</span><time>' + esc(x[3]) + '</time></li>';
   const enCe = F.enCe.map(x => '<li class="ck-ev"><span class="ck-av ck-av-s cv-av">' + esc(x[0]) + '</span><span class="ck-ev-tx"><span class="ck-ev-t">' + esc(x[1]) + '</span></span><span class="ck-ev-tag">' + esc(x[3]) + '</span></li>').join('');
-  const long = F.items.length > 3;
-  return entete('<span class="ck-pt-fil" aria-hidden="true"></span>En direct', 'Les derniers gestes de la cave', 'cvfil')
-    + (long ? '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s cv-fil-tout" id="ck-cv-fil-tout" aria-expanded="' + !!S.cvFil + '">' + (S.cvFil ? 'Replier' : 'Tout voir') + '</button>' : '')
-    + '<div class="' + (long ? 'cv-fil-corps' : '') + '">'
+  const long = F.items.length > 3;   // MOTS-6 : trois gestes à l'écran, la suite sous « Tout voir » (dans l'en-tête, comme la vue Terrain)
+  return entete('<span class="ck-pt-fil" aria-hidden="true"></span>En direct', '', 'cvfil', null,
+      long ? '<button type="button" class="ck-btn ck-btn-ghost ck-btn-s cv-fil-tout" id="ck-cv-fil-tout" aria-expanded="' + !!S.cvFil + '">' + (S.cvFil ? 'Replier' : 'Tout voir') + '</button>' : '')
+    + '<div class="cv-fil-corps">'
     + (enCe ? '<p class="ck-fil-sec">En ce moment</p><ul class="ck-fil-c">' + enCe + '</ul><p class="ck-fil-sec">Les derniers gestes</p>' : '')
-    + (F.items.length ? '<ul class="ck-fil-l">' + F.items.map(ev).join('') + '</ul>' : '<p class="ck-vide">Aucun geste de cave ces dix derniers jours.</p>') + '</div>';
+    + (F.items.length ? '<ul class="ck-fil-l tout cv-fil-l">' + F.items.map(ev).join('') + '</ul>' : '<p class="ck-vide">Aucun geste de cave ces dix derniers jours.</p>') + '</div>';
 }
 function cvSavoir(C) {
-  const lis = C.savoir.map(x => '<li class="ck-sv cv-c-' + x.c + (x.fort ? ' fort' : '') + (x.alerte ? ' cv-al' : '') + '"><span class="ck-sv-ic">' + cvIc(x.ic, 16) + '</span><div class="ck-sv-tx">'
-    + (x.k ? '<span class="ck-sv-k">' + esc(x.k) + '</span>' : '') + '<div class="ck-sv-h"><b>' + esc(x.t) + '</b><span class="ck-sv-q">' + esc(x.q) + '</span></div>'
-    + (x.s ? '<p class="ck-sv-s">' + esc(x.s) + '</p>' : '') + (x.a ? '<button type="button" class="ck-sv-a" data-cave="' + esc(x.go || 'auj') + '">' + esc(x.a) + '</button>' : '') + '</div></li>').join('');
-  return entete('À savoir', 'Ce qui peut changer la journée ou la semaine, en cave', 'cvsavoir')
+  const L = C.savoir, n = L.length;
+  // MOTS-6 : un point, une ligne — son titre, son moment, un bouton court ; ce qu'il change se déplie au toucher.
+  const lis = L.map(x => '<li class="ck-sv cv-c-' + x.c + (x.fort ? ' fort' : '') + (x.alerte ? ' cv-al' : '') + '"><span class="ck-sv-ic">' + cvIc(x.ic, 16) + '</span><div class="ck-sv-tx">'
+    + (x.s ? '<details class="ck-sv-d"><summary>' : '') + '<div class="ck-sv-h"><b>' + esc(x.t) + '</b><span class="ck-sv-q">' + esc(x.q) + '</span></div>'
+    + (x.s ? '</summary><p class="ck-sv-s">' + esc(x.s) + '</p></details>' : '')
+    + (x.a ? '<button type="button" class="ck-sv-a" data-cave="' + esc(x.go || 'auj') + '"' + (x.ac ? ' aria-label="' + esc(x.a) + '"' : '') + '>' + esc(x.ac || x.a) + '</button>' : '') + '</div></li>').join('');
+  return entete('À savoir', '', 'cvsavoir', null, n ? '<span class="ck-sv-dr"><span class="ck-sv-n' + (L.some(x => x.alerte) ? ' alerte' : '') + '">' + n + ' point' + (n > 1 ? 's' : '') + '</span></span>' : '')
     + (lis ? '<ul class="ck-sv-l tout">' + lis + '</ul>' : '<p class="ck-vide">Rien à signaler en cave pour les jours qui viennent.</p>');
 }
 function majCave() {
@@ -1609,7 +1632,7 @@ function cvTip(el) {
   if (!T || !T.rows || !T.rows.length) return;
   let b = document.getElementById('ck-cv-tip');
   if (!b) { b = document.createElement('div'); b.id = 'ck-cv-tip'; b.className = 'ck-cv-tip ck2'; b.setAttribute('role', 'tooltip'); document.body.appendChild(b); }
-  b.innerHTML = '<b class="t">' + (CV_SG[sg] ? cvSgIcone(sg) + ' ' : '') + esc(T.t) + '</b><dl>' + T.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl><p>' + esc(T.p || 'Toucher ouvre l’écran de la Cave.') + '</p>';
+  b.innerHTML = '<b class="t">' + (CV_SG[sg] ? cvSgIcone(sg) + ' ' : '') + esc(T.t) + '</b><dl>' + T.rows.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl><p>' + esc(T.p || 'Toucher déplie le détail ; « Ouvrir » mène à la Cave.') + '</p>';
   const r = el.getBoundingClientRect(), bw = Math.min(320, window.innerWidth - 16);
   let x = r.right + 12; if (x + bw > window.innerWidth - 8) x = Math.max(8, r.left - bw - 12);
   b.style.left = x + 'px'; b.style.top = Math.max(8, Math.min(r.top, window.innerHeight - 240)) + 'px';
@@ -1813,7 +1836,7 @@ const RANGS = {
   //   « En direct » et « À savoir » collés à droite ; au téléphone, ce qui presse d'abord.
   c: { large: [['cv-verdict', 'cv-mil'], ['cv-plan', 'cv-semaine'], ['cv-fil', 'cv-savoir']],
        moyen: [['cv-verdict', 'cv-plan', 'cv-semaine', 'cv-mil'], [], ['cv-fil', 'cv-savoir']],
-       petit: [['cv-verdict', 'cv-plan', 'cv-savoir', 'cv-semaine', 'cv-mil', 'cv-fil'], [], []] },
+       petit: [['cv-fil', 'cv-savoir', 'cv-verdict', 'cv-plan', 'cv-semaine', 'cv-mil'], [], []] },   // MOTS-6 (§588) : au téléphone, le même ordre que la vue Terrain
   e: { large: [['ever', 'ekpi'], ['echart', 'etac'], ['epos', 'eapp']],
        moyen: [['ever', 'ekpi', 'epos'], ['echart', 'etac', 'eapp'], []],
        petit: [['ever', 'ekpi', 'echart', 'epos', 'eapp', 'etac'], [], []] },
@@ -2015,7 +2038,7 @@ let R = null, branche = false, obs = null;
 function brancher() {
   window.addEventListener('scroll', () => { cacherLoupe(); cvCacherTip(); }, { passive: true, capture: true });   // FORME-1 ; CAVEPIL-1 : la bulle d'une cuve non plus
   // ★ CAVEPIL-1 (§436) : la bulle d'une cuve ou d'une cuvée, au survol (souris) ou au clavier. Au doigt, pas de bulle : le
-  //   toucher ouvre l'écran de la Cave.
+  //   toucher déplie le détail de la ligne (MOTS-6, §588), « Ouvrir » mène à l'écran de la Cave.
   document.addEventListener('pointerover', ev => { const el = ev.target.closest && (ev.target.closest('#ck-cv-plan [data-fut]') || ev.target.closest('#ck-cv-plan [data-tip]')); if (el && ev.pointerType !== 'touch') cvTip(el); });   // CAVEPIL-2 : un fût d'abord
   document.addEventListener('pointerout', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && !el.contains(ev.relatedTarget)) cvCacherTip(); });
   document.addEventListener('focusin', ev => { const el = ev.target.closest && ev.target.closest('#ck-cv-plan [data-tip]'); if (el && el.matches(':focus-visible')) cvTip(el); });
@@ -2033,6 +2056,7 @@ function brancher() {
     if (ct) { S.cvFil = !S.cvFil; const f = $('#ck-cv-fil'); if (f) f.classList.toggle('ouvert', S.cvFil); ct.textContent = S.cvFil ? 'Replier' : 'Tout voir'; ct.setAttribute('aria-expanded', String(S.cvFil)); return; }
     const gh = ev.target.closest('#ck-cv-plan .cv-grp-h');   // CAVEPIL-3 (§457) : la rangée « À jour » ou « En cours » déplie ses cuvées
     if (gh) { const k = gh.dataset.grp, ouvert = !!(S.cvGrp[k] || S.cvFiltre === k); if (ouvert && S.cvFiltre === k) S.cvFiltre = null; S.cvGrp[k] = !ouvert; cvCacherTip(); cvFiltrer(); return; }
+    if (ev.target.closest('#ck-cv-plan summary')) cvCacherTip();   // MOTS-6 (§588) : la ligne se déplie, sa bulle s'efface
     const ca = ev.target.closest('[data-cave]');
     if (ca) { cvCacherTip(); if (typeof window._pilCaveAller === 'function') window._pilCaveAller(ca.dataset.cave); return; }
     const seg = ev.target.closest('.ck-seg [role="tab"]');

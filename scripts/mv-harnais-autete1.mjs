@@ -167,7 +167,7 @@ function suite(S) {
   // G. la bulle et les deux fiches
   {
     const appels = [];
-    const code = [morceau(S.vue, 'const esc = s => ', '\n'), morceau(S.vue, 'const INFO = {', '\n};\n'), morceau(S.vue, 'function ouvrirInfo(btn, clavier) {', '\n}\n'),
+    const code = [morceau(S.vue, 'const esc = s => ', '\n'), morceau(S.vue, 'const INFO = {', '\n};\n'), morceau(S.vue, 'const INFO_PLUS = {', '\n'), morceau(S.vue, 'function ouvrirInfo(btn, clavier) {', '\n}\n'),   // MOTS-6 (§588) : ce qu'une carte ajoute à sa bulle
       'this.__o = k => ouvrirInfo({ dataset: { info: k } }, false); this.__info = INFO;'].join('\n');
     const ctx = { window: { _mvBulleOuvrir: (b, f, o) => appels.push([f, o]) }, String, Array, Object }; vm.createContext(ctx); vm.runInContext(code, ctx);
     ctx.__o('resTemps'); ctx.__o('fin');

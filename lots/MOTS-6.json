@@ -1,0 +1,48 @@
+{
+  "lot": "MOTS-6",
+  "section": "§588",
+  "base": "9da4aa85c4b3363cbdada5a700feed4b7902ddbb",
+  "inclut": [],
+  "date": "2026-11-17",
+  "tutos": {
+    "ok": true,
+    "empreinte": "432bf0fc3c089c4d354a149aa09adcd80281c0db810369e0dafc3cb6c295e8b7",
+    "date": "2026-11-17T06:35:26.852Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "7e4ecbd3412cad85c585cb979a67e8f0935614225f65bb962a6358efccf5610f",
+    "docs/claude/INDEX.md": "2f8f7baae3153fcee80ae2faca764c4a748bd0a59821390ddd1bd2a2e132740d",
+    "docs/claude/chantiers-580-629.md": "0d147a6dbca4cf7e62d5d4dcf00ff3c8a9386f7d534b360c41f40b5661f9773f",
+    "docs/claude/journal.md": "60110fc44f5d097577e93514ef8974e9e1cd9698babe19f54abff9beb15b1bcb",
+    "docs/maquettes/LISEZMOI.md": "4b2ee317b21519618d7b0685482fbece7616b5ba7e1bf739dc9b6a214bff64d2",
+    "guide/11-pilotage.html": "07611b62cfa0bc5774c76421de9038b3f76e9ca94312d95c7e63f22632eefa06",
+    "index.html": "c8ab6d430db65f91a5e793de999f4482543941d50c6ff89771abda6d36ff1f7e",
+    "public/demo/pilotage-auj-apres-pc.webp": "2a1754fde3677dd8ee3dfc326e8ae7023fce2396750de8a024aa2499386a54f5",
+    "public/demo/pilotage-auj-pc.webp": "d6fbe252d61e2b983d90d468f9b7acd49891f2b32ad64f49bf79d771161bed51",
+    "public/guide.html": "b2842c7763f4d9a12a60e8efa26cfa2e8a4b4c795e34a7713df04601da149394",
+    "public/sw.js": "85e75ae34d25828add8c40605af2531773741ff5ceb156e3586faa0f9d65c3bc",
+    "scripts/harnais-claude-md.mjs": "bbe8717abef1ef7c52f7a64c425232049444973f30bc71369df6fa6500eaee24",
+    "scripts/mv-harnais-autete1.mjs": "0e6b702086195355fe872e48a0aa156c8048b8618249e7bd3274fad5931c8ce3",
+    "scripts/mv-harnais-cavepil1.mjs": "b8a4b6c093c7cb7492c0e3dbb068bc58838b751e81926c9c0acfe986b8d833c6",
+    "scripts/mv-harnais-cavepil3.mjs": "ca76437983e0cd1c1b9fe7a0a07dd9a502b8572ed86d29e479c5ce94a91afea0",
+    "scripts/mv-harnais-liste.mjs": "b05dddc817a2ea913eebb9c31d91f73ec31c0a5ebce6722bf35eabb33ef49fed",
+    "scripts/mv-harnais-mots5.mjs": "1e4a15c741ffd1b2b8ff4dda089fb72e9a70664dc4cd881ca5125b1946961417",
+    "scripts/mv-mots-baseline.json": "b52595a680abe5a7d312987df2f5967c25787d821ca49952f00a528c602a5fe7",
+    "src/aujourdhui.css": "38000ca2ac1a2ef416f1415a357c153b998717750b30db8e9cd04abfe355660f",
+    "src/cave.js": "fb9d9fc97f4d8a369a6bad47cd752cf80476c4ade802ede9ee2e0573cb62359e",
+    "src/cockpit-vue.js": "e7d2253840b4966d2fa4e21b4cfebf95c0264a498ddac393a254c9e11b877e0e",
+    "src/pilotage.js": "6f357c1409993f36d6441b8205fb9493710249b5c967488641745b880c21868c",
+    "src/styles.css": "7b15749ae415afe32b9fa4ebcb525aa11039935dc02f9aae4686b98e114b2e76",
+    "src/utils.js": "f3bf994000d2d7fe99e44f0835186cefae6ad992e407d572f2d1f1aae74d14e0",
+    "src/whats-new.js": "f24af2b6783d2700460ccb03dbaffccca8f3968921e91b11315ef7226ae3151c",
+    "docs/maquettes/maquette-aujourdhui-cave-v1.html": "79ab772fde2409e96bbc61bb28e31ac024ca378ffc18ea26d2379e9f58ad31f9",
+    "scripts/mv-harnais-mots6.mjs": "5518d806363532cb981498a72d85b20e05cc43b111129441174247903a4dfa4f"
+  }
+}

@@ -154,8 +154,8 @@ const MUT = [
   ['la vue ignore le module masqué', (S) => ({ ...S, pil: S.pil.replace("if((typeof window._mvModOff==='function'&&window._mvModOff('cave'))", "if(false&&(typeof window._mvModOff==='function'&&window._mvModOff('cave'))") })],
   ['le verdict de la Cave oublie le signe fort', (S) => ({ ...S, cave: S.cave.replace('var dgF=(ctx.diag||[]).filter(', 'var dgF=([]).filter(') })],
   ['l\u2019Aujourd\u2019hui de la Cave oublie le Diagnostic', (S) => ({ ...S, cave: S.cave.replace('parc:parc, diag:_mlDiagForts()});', 'parc:parc});') })],
-  ['un bouton de geste dans la vue Cave', (S) => ({ ...S, vue: S.vue.replace("'<button type=\"button\" class=\"ck-sv-a\" data-cave=\"' + esc(x.go || 'auj') + '\">'", "'<button type=\"button\" class=\"ck-sv-a\" onclick=\"_mlGo(\\'ouillage\\')\">'") })],
-  ['une couleur écrite dans la feuille', (S) => ({ ...S, css: S.css.replace('.ck2 .cv-cuvee-s .rt{font-weight:600;color:var(--danger-texte)}', '.ck2 .cv-cuvee-s .rt{font-weight:600;color:#BA361A}') })],
+  ['un bouton de geste dans la vue Cave', (S) => ({ ...S, vue: S.vue.replace("'<button type=\"button\" class=\"ck-sv-a\" data-cave=\"' + esc(x.go || 'auj') + '\"' + (x.ac", "'<button type=\"button\" class=\"ck-sv-a\" onclick=\"_mlGo(\\'ouillage\\')\"' + (x.ac")   /* MOTS-6 (§588) : le bouton court porte son libellé long (aria-label) */ })],
+  ['une couleur écrite dans la feuille', (S) => ({ ...S, css: S.css.replace('.ck2 .cv-cuve-v{color:var(--texte-med);font-variant-numeric:lining-nums tabular-nums}', '.ck2 .cv-cuve-v{color:#BA361A;font-variant-numeric:lining-nums tabular-nums}')   /* MOTS-6 (§588) : la règle d'avant (.cv-cuvee-s) est partie avec sa ligne */ })],
   ['les deux sombres ne disent plus la même chose', (S) => ({ ...S, charte: S.charte.replace('--froid-doux:rgba(143,190,232,.15);}', '--froid-doux:rgba(143,190,232,.25);}') })],
 ];
 
