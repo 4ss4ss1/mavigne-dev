@@ -73,6 +73,19 @@ service firebase.storage {
       allow update: if false;
       allow delete: if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());
     }
+    // ★ FRAIS-1 (§595) — les photos des frais à rembourser (un ticket, une carte grise) : l'administrateur du domaine seul les
+    //   dépose, les lit et les supprime — comme les heures sup, un salarié ne voit pas les frais de ses collègues (MOTIFS-1,
+    //   §250). Une image d'1 Mo au plus (l'appli la réduit vers 250 ko) ; jamais de remplacement : une nouvelle photo, un
+    //   nouveau fichier. Jamais le compte démo.
+    match /tenants/{tenant}/frais/{filename} {
+      allow read:   if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());
+      allow create: if !isDemoAccount()
+                    && isTenantAdmin(tenant)
+                    && request.resource.size <= 1 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());
+    }
     match /tenants/{tenant}/analyses/{filename} {
       // Lecture : membre du tenant (ou GT admin), jamais le compte démo.
       allow read:   if !isDemoAccount() && (isTenantMember(tenant) || isGtAdmin());

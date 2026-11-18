@@ -3573,6 +3573,29 @@ window.fbObsPhoto = function (id, blob) {
   });
 };
 
+// ★★ FRAIS-1 (§595) — LES PHOTOS DES FRAIS (un ticket, une carte grise) : tenants/<domaine>/frais/<id>.jpg. storage.rules : l'admin du
+//   domaine seul les dépose, les lit et les supprime ; une image d'1 Mo au plus (planning-frais.js la réduit comme celle d'un
+//   signalement). Rien ne s'envoie en démo ni en préparation : la ligne garde alors « photo jointe » sans fichier ({demo:1}).
+//   Rend une promesse de {url, path}, ou null si l'envoi échoue (le geste le dit : la ligne reste « ticket manquant »).
+window.fbFraisPermis = function () { return _mvObsPermis() && !!(window.isAdmin && window.isAdmin()); };
+window.fbFraisPhoto = function (id, blob) {
+  return new Promise(function (ok) {
+    try {
+      if (!window.fbFraisPermis() || !blob || !/^[A-Za-z0-9_-]{4,48}$/.test(String(id))) { ok(null); return; }
+      var chemin = 'tenants/' + TENANT_ID + '/frais/' + id + '.jpg', r = _storageRef(_storage, chemin);
+      var t = uploadBytesResumable(r, blob, { contentType: 'image/jpeg' });   // la porte des tutos (jamais l'appel brut)
+      t.on('state_changed', null, function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbFraisPhoto'); ok(null); },
+        function () { getDownloadURL(t.snapshot.ref).then(function (url) { ok({ url: url, path: chemin }); }, function () { ok(null); }); });
+    } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbFraisPhoto#2'); ok(null); }
+  });
+};
+window.fbFraisPhotoSuppr = function (chemin) {
+  try {
+    if (!window.fbFraisPermis() || !/^tenants\/[^/]+\/frais\/[A-Za-z0-9_-]{4,48}\.jpg$/.test(String(chemin))) return Promise.resolve(false);
+    return deleteObject(_storageRef(_storage, String(chemin))).then(function () { return true; }, function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbFraisPhotoSuppr'); return false; });
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbFraisPhotoSuppr#2'); return Promise.resolve(false); }
+};
+
 window.fbAppendError = async function(entry) {
   try {
     var ref = fbDocRef('error_log');

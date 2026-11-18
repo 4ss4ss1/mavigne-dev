@@ -1,0 +1,48 @@
+{
+  "lot": "FRAIS-1",
+  "section": "§595",
+  "base": "ad038e8b9135b8a69dbc8c4f5b04e3e506c7acff",
+  "inclut": [],
+  "date": "2026-11-18",
+  "tutos": {
+    "ok": true,
+    "empreinte": "cedf1f15817b99c1baf7245604c1b9c50571733ec43c8f6e3dbba40e299df14e",
+    "date": "2026-11-18T19:45:30.265Z",
+    "joues": {
+      "téléphone": 26,
+      "ordinateur": 26,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "314cd9e4d7e707871df64d3dca9335771b84af2c3c0a6e8f8e3e4a6e67e34205",
+    "CLAUDE.md": "2fab1f52ebc66f040d6cc6b305544f6ab68573e4a34fb0ba4ec88ac59fb97431",
+    "docs/claude/INDEX.md": "7df4fa67e9ad31f0c5320506d0aaeddd08a5efcf96e0d09f92d3120d69d176d1",
+    "docs/claude/chantiers-580-629.md": "04bd598e0c359e6e81fb71f00d3fd5b411fda0f3b740537da59029cc187faa38",
+    "docs/claude/journal.md": "27c880f44802e90d1b19d12b92cd3214183113ce0c211812017beea51bb19aff",
+    "docs/maquettes/LISEZMOI.md": "5a61683afa6a2c09adde33cbe26d3855421c2c045a18e95815123416a8fb513f",
+    "guide/10-planning.html": "8850c1f29665c7358e13d815094ce8ba94d972fe91d25a8b345f13ab96d8eaa3",
+    "index.html": "0c803f657c35293f9cacc8c3987e63c9d8d6d0eb6c77e622aee3d952114899cd",
+    "public/demo.html": "847b5c310d8680aa7d88703440312c2460daea92a5431a4e70b5f4cc7a86e81f",
+    "public/demo/fiche-jean.webp": "a19ec2c4da42308c95d94d9fc57e09f502f25cc9e2e0c9ad13297a0c6036cf5d",
+    "public/sw.js": "d0d52c0e5d02f98077fe6661aaf3ab9923d1b5db9b6d2dc08915c50e29b47dd0",
+    "scripts/harnais-claude-md.mjs": "ae064e56688b8a6d27c3379122f0fbd2812c265cfc37b8aaaef140ee56429bfe",
+    "scripts/mv-harnais-ajour1.mjs": "a53a37037fe86dae40869ff1b19f7f4113104f8785cbd2dcb9176951b2e9a8ae",
+    "scripts/mv-harnais-info.mjs": "d72e090ba472847d39aca8a8cab73a79a7a40365bc3fac1f45e93de174f5f6d3",
+    "scripts/mv-harnais-liste.mjs": "5645d8af47e127e92ffcd9f9a3873ccecfdbe3b7b69189324b7066e0d126f6e6",
+    "scripts/tutos-couverture.json": "22fd34dc991f484f7179af1c2b8983bf4abc0241820375cb05b95248916b302c",
+    "src/app.js": "9a5cc8368345af5e6047d783c652b2290a0b2e7411ac6449ad7e2631e8b270e5",
+    "src/firebase.js": "df6efcb64a77654a3cee69212e4e2f6ec680f165707a460c6ffcc231a9b3d902",
+    "src/planning.js": "6a8d6240e25a7b6c695aab85b77c34cb94058901307812dd7c4f2f8875d7ca86",
+    "src/tutos.js": "872e0a834a9fca44822e2815eeabb73a9da206f3d6b691af09ee78a2abd2bde6",
+    "src/utils.js": "a0bb46a2f1dc216876c8d5622ccb57ecfd4b969f2195eb1e4098917a67b90dc6",
+    "src/whats-new.js": "56e23efb7b67925ee49a867f33ea5e102df954ed544072e04073dccba0b3ecc0",
+    "storage.rules": "7307eb195380238fdbf986d658786243095abb66709e0b9e79c6f89a2d44d118",
+    "docs/maquettes/maquette-frais-v2.html": "329b04ffbf493f393eecf43922ac11432ab52c917bc948253d3b5f55781dc8e4",
+    "scripts/mv-harnais-frais1.mjs": "b412eae8830b51d3487d73e92ed859597e239212b3fac5027e40a71eb8465fcc",
+    "src/frais.css": "cbb0706ec677776de5f7356f65b486bd68014c99ba4d1833af73fed625d1c1c6",
+    "src/planning-frais.js": "459ee3fbe91a8877bd60c4c38e0eabc09abce88f57c3f50c44a92cf33d5776dd"
+  }
+}

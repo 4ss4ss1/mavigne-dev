@@ -2803,11 +2803,15 @@ function _planHsupPayeBank(nom,m){return((PLANNING_HSUP[nom]||{})[_planHsupKey(m
 function _planHsupFige(nom,m){var r=(PLANNING_HSUP[nom]||{})[_planHsupKey(m)];return(r&&r.fige&&typeof r.fige==='object')?r.fige:null;}
 function _planFigeInstantane(mbr,m){
   var P=_planPaieMois(mbr,m),r=P.r||{},arr=function(v){return Math.round((v||0)*10000)/10000;};
-  return {le:_pfAujIso(),payes:(r.payes||[]).map(function(q){return {taux:q.taux,nat:q.nat,brut:arr(q.brut)};}),retenue:arr(P.nonPayees),
+  var o={le:_pfAujIso(),payes:(r.payes||[]).map(function(q){return {taux:q.taux,nat:q.nat,brut:arr(q.brut)};}),retenue:arr(P.nonPayees),
           spill:arr((r.spill||0)-(r.spillNC||0)),                // ★ PAIE-1 : ce que le compteur a paye en plus du mois
           bank:(r.payesBank||[]).map(function(q){return {taux:q.taux||0,nat:q.nat,mois:q.mois,brut:arr(q.brut)};}),   // ★ DIM-2 : leur taux et leur mois
           maj:_planHsupPayable()?(P.majPayee||[]).map(function(x){return {taux:x.taux,nat:x.nat,h:arr(x.h)};}):[],
           majRep:_planHsupPayable()?((P.report&&P.report.maj)||[]).map(function(x){return {taux:x.taux,nat:x.nat,h:arr(x.h)};}):[]};
+  // ★ FRAIS-1 (§595) : les frais du mois partent avec la paie — leurs montants se figent avec elle (planning-frais.js).
+  var fr=(typeof window._fraisInstantane==='function')?window._fraisInstantane(mbr.nom,_pY(),m):null;
+  if(fr)o.frais=fr;
+  return o;
 }
 function _planHsupSupOv(nom,m){var r=(PLANNING_HSUP[nom]||{})[_planHsupKey(m)];return(r&&typeof r.sup_override==='number')?r.sup_override:null;}
 function _planSupMonth(mbr,m){var o=_planHsupSupOv(mbr.nom,m);return(o!=null)?Math.max(0,o):_planSupCalc(mbr,m);}
@@ -5381,7 +5385,8 @@ function _pfCadreCompta(mbr,P,D){
     +'<div class="pf-cpt">'+K.L.map(function(l){
         return '<div class="pf-cl pf-cl-'+l.k+(l.ton?' pf-cl-'+l.ton:'')+'"><span class="pf-cl-l">'+l.l+'</span>'
           +'<span class="pf-cl-v">'+(l.ton==='ko'?_mvIcon('alerte',18):(l.ton==='ok'&&l.k==='base'?_mvIcon('check',18):''))+'<span>'+l.v+'</span></span>'
-          +(l.p?'<p class="pf-cl-p">'+l.p+'</p>':'')+'</div>';}).join('')+'</div>'
+          +(l.p?'<p class="pf-cl-p">'+l.p+'</p>':'')+'</div>';}).join('')
+      +((typeof window._fraisCompta==='function')?window._fraisCompta(mbr.nom,_pY(),P.m):'')+'</div>'   // ★ FRAIS-1 (§595) : les remboursements, hors salaire
     +'<div class="pf-sal"><h4>Pour le salari\u00e9</h4><dl class="pf-lst">'+_pfLignes(K.I)+'</dl>'
       +(P.recupNC>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>R\u00e9cup prise non couverte\u00a0: '+_planFmt(P.recupNC)+'.</span></p>':'')+'</div>'
     +'<p class="pf-pied">'+K.pied+(K.semaines?' '+K.semaines+(/[.]$/.test(K.semaines)?'':'.'):'')+(K.plan?' <span class="pf-plan">'+K.plan+'</span>':'')+'</p>'
@@ -6376,18 +6381,19 @@ function _planFicheRender(){
   // ★ FICHE-1 : Résumé, Jours, Compteur, Congés et acomptes. Les anciens identifiants
   //   d'onglet (« mois », « cp », « ac ») se lisent encore : un lien ancien ne tombe pas à vide.
   var t={mois:'jours',ac:'cp'}[_planFicheTabId]||_planFicheTabId;
-  if(['resume','jours','hsup','cp'].indexOf(t)<0)t='resume';
+  if(['resume','jours','hsup','cp','frais'].indexOf(t)<0)t='resume';   // ★ FRAIS-1 (§595) : le volet « Frais »
   _planFicheTabId=t;
   document.querySelectorAll('#ovPlanFiche .pl2-ftab').forEach(function(b){var on=b.getAttribute('data-f')===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
   var body=document.getElementById('pf-body');
   if(!body)return;
   // Une equipe collective n'a ni solde de conges ni compteur d'heures sup : ces
   // onglets afficheraient des chiffres faux avec l'aplomb de chiffres vrais.
-  if(_coll&&(t==='cp'||t==='hsup'||t==='resume')){body.innerHTML=_planCollNote(mbr);return;}
+  if(_coll&&(t==='cp'||t==='hsup'||t==='resume'||t==='frais')){body.innerHTML=_planCollNote(mbr);return;}
   var P=_planPaieMois(mbr,planMonth),h='';
   if(t==='resume')h=_pfResume(mbr,P);
   else if(t==='jours')h=_pfJours(mbr,P)+_planLegalCard(mbr);
   else if(t==='hsup')h=_pfCompteur(mbr,P);
+  else if(t==='frais')h=(typeof window._pfFrais==='function')?window._pfFrais(mbr,P):'';   // ★ FRAIS-1 (§595) : planning-frais.js
   else h=_pfConges(mbr,P);
   body.innerHTML=h;
   _plGensMarque();   // PLAN-2 (§280)
@@ -6435,7 +6441,7 @@ function _pfFige(mbr,P){
   var h='<section class="pf-card pf-dem" aria-labelledby="pf-fige-t"><div class="pf-card-t"><h3 id="pf-fige-t">Envoi \u00e0 la compta</h3><span>'+mois+'</span></div>';
   if(P.fige){
     var rs=P.reportSuivant||0;
-    h+='<p class="pf-res">Fig\u00e9 le <b>'+_planFmtJour(P.fige.le)+'</b>\u00a0: '+F(P.payeTotal)+' d\u2019heures sup pay\u00e9es, '+F(P.nonPayees)+' retenues.</p>'
+    h+='<p class="pf-res">Fig\u00e9 le <b>'+_planFmtJour(P.fige.le)+'</b>\u00a0: '+F(P.payeTotal)+' d\u2019heures sup pay\u00e9es, '+F(P.nonPayees)+' retenues'+((typeof window._fraisFigeTexte==='function')?window._fraisFigeTexte(mbr.nom,_pY(),P.m):'')+'.</p>'
       +'<p class="pl2-note">'+(Math.abs(rs)>0.0001?(rs>0?'Depuis, '+F(rs)+' de plus \u00e0 retenir passent sur '+suiv+', reprises d\u2019abord sur la r\u00e9cup et les heures sup.':'Depuis, '+F(-rs)+' retenues de trop sont rendues sur '+suiv+'.'):'Rien n\u2019a chang\u00e9 depuis l\u2019envoi.')+' Ce qui change encore passe sur '+suiv+'.</p>'
       +'<div class="pf-rac"><button type="button" onclick="planFicheDefiger(\''+nm+'\')">D\u00e9figer</button></div>';
   } else {
@@ -7037,6 +7043,7 @@ function _planRenderCadre(){
       +'<button class="plan-btn-saisir" style="width:100%" onclick="planSaveMaj()">Enregistrer les majorations</button>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">S\u2019applique aux heures <b>r\u00e9ellement faites</b> ces jours-l\u00e0. Un f\u00e9ri\u00e9 ch\u00f4m\u00e9 reste pay\u00e9 sans majoration\u00a0; un cong\u00e9, une r\u00e9cup ou une absence ne majorent rien. Un f\u00e9ri\u00e9 qui tombe un dimanche prend le <b>taux le plus fort</b>, jamais les deux. Le samedi n\u2019est pas concern\u00e9. Calcul actif \u00e0 partir de <b>janvier 2026</b>\u00a0: les mois ant\u00e9rieurs ne bougent pas.</div>'
     +'</div>';
+  if(typeof window._fraisCadreHtml==='function')html+=window._fraisCadreHtml();   // ★ FRAIS-1 (§595) : barème fiscal ou taux du domaine
   html+='<div class="plan-sec-lbl">Templates de planning</div>';
   ids.forEach(function(id){
     var isDefault=!!PLAN_DEF[id];
@@ -8257,7 +8264,7 @@ function _planReleveFiche_(nom,mbr,_ctr){
   var lignes=function(L){return L.map(function(r){return '<div class="r'+(r[0]==='pf-rien'?' rien':(r[0]==='pf-fort'?' fort':(r[0]==='pf-att'?' att':'')))+'"><span>'+r[1]+'</span><span>'+r[2]+'</span></div>';}).join('');};
   var tete=function(n){
     return '<div class="hd"><div><h1>Relev\u00e9 d\u2019heures</h1><div class="s"><b>'+_escHtml(nom)+'</b>, '+_ctrTxt+', planning '+_escHtml(_pfPlanNom(plId))+'</div></div>'
-      +'<div class="d"><b>'+mois+'</b>'+(dom?_escHtml(dom)+'<br>':'')+(n===1?'Le mois, jour par jour':'Le compteur et l\u2019ann\u00e9e')+'</div></div>';   // ★ DIM-2 : « Page 1 sur 2 » mentait quand le mois déborde
+      +'<div class="d"><b>'+mois+'</b>'+(dom?_escHtml(dom)+'<br>':'')+(n===1?'Le mois, jour par jour':(n===3?'Les frais \u00e0 rembourser':'Le compteur et l\u2019ann\u00e9e'))+'</div></div>';   // ★ DIM-2 : « Page 1 sur 2 » mentait quand le mois déborde
   };
   var pied=function(){return '<div class="cr"><span>'+_escHtml(nom)+', '+moisL+' '+planYear+'</span><span>'+(dom?_escHtml(dom)+', ':'')+'Ma Vigne, \u00e9dit\u00e9 le '+_edite+'</span></div>';};
   var V=_pfV3(mbr,P,D,A),AB=V.AB,jDom=V.jDom,jRec=V.jRec,prevA=V.prevA,faitA=V.faitA,detteFin=V.detteFin,domCouvert=V.domCouvert,salCouvert=V.salCouvert,
@@ -8266,7 +8273,8 @@ function _planReleveFiche_(nom,mbr,_ctr){
   //   à droite, ce qui ne change pas la paie. Même source que l'écran (_pfCompta).
   var K=_pfCompta(mbr,P,D,V,A);
   var cadre='<div class="cad"><div class="cad-h"><h2>Pour la compta</h2><b>'+mois+(P.fige?' \u00b7 fig\u00e9 le '+_planFmtJour(P.fige.le):'')+'</b></div><div class="cad-g">'
-    +'<div class="cpt">'+K.L.map(function(l){return '<div class="cl '+l.k+(l.ton?' '+l.ton:'')+'"><span class="cl-l">'+l.l+'</span><span class="cl-v">'+l.v+'</span>'+(l.p?'<p class="cl-p">'+l.p+'</p>':'')+'</div>';}).join('')+'</div>'
+    +'<div class="cpt">'+K.L.map(function(l){return '<div class="cl '+l.k+(l.ton?' '+l.ton:'')+'"><span class="cl-l">'+l.l+'</span><span class="cl-v">'+l.v+'</span>'+(l.p?'<p class="cl-p">'+l.p+'</p>':'')+'</div>';}).join('')
+      +((typeof window._fraisReleveCadre==='function')?window._fraisReleveCadre(nom,_pY(),m):'')+'</div>'   // ★ FRAIS-1 (§595) : les remboursements, hors salaire
     +'<div class="sal"><h3>Pour le salari\u00e9</h3>'+K.I.map(function(x){return '<div class="r'+(x[0]==='pf-fort'?' fort':'')+'"><span>'+x[1]+'</span><span>'+x[2]+'</span></div>';}).join('')
       +(P.recupNC>0.0001?'<p class="ko">R\u00e9cup prise non couverte\u00a0: '+F(P.recupNC)+'.</p>':'')+'</div>'
     +'</div><div class="pd">'+K.pied+(K.semaines?' '+K.semaines+(/[.]$/.test(K.semaines)?'':'.'):'')+'</div></div>';
@@ -8506,12 +8514,15 @@ function _planReleveFiche_(nom,mbr,_ctr){
     +'.cnow{font-size:var(--pt-nano,9.5px);color:#15803D;background:#F0FDF4;border-radius:8px;padding:1px 5px;margin-left:4px}'
     +'.ctr .note,.soldean .nt{font-size:var(--pt-nano,9.5px);color:#57534E;margin-top:4px;line-height:1.4}.ctr .note b{color:#44403C}'
     +'.soldean{display:flex;flex-wrap:wrap;gap:3px 14px;align-items:baseline}.soldean .t{width:100%}.soldean .it{font-size:var(--pt-nano,9.5px);color:#57534E}.soldean .it b{color:#1C1917}.soldean .nt{width:100%}';
+  var FR=(typeof window._fraisRelevePage==='function')?window._fraisRelevePage(nom,_pY(),m):{html:'',css:''};   // ★ FRAIS-1 (§595)
+  css+=FR.css;
   var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
     +(_base?('<base href="'+_escAttr(_base)+'">'):'')
     +'<title>Relev\u00e9 d\u2019heures \u2014 '+_escHtml(nom)+' \u2014 '+mois+'</title>'
     +'<link rel="stylesheet" href="/fonts/fonts.css"><style>'+css+'</style></head><body>'
     +'<section class="pg pg1">'+tete(1)+cadre+jours+pied()+'</section>'
     +'<section class="pg pg2">'+tete(2)+page2+pied()+'</section>'
+    +(FR.html?'<section class="pg pg3">'+tete(3)+FR.html+pied()+'</section>':'')   // ★ FRAIS-1 (§595) : la page des frais, tickets en annexe
     // Même impression que le relevé d'avant : une fois la police arrivée.
     +'<script>(function(){function p(){setTimeout(function(){window.print();},120);}'
     +'if(document.fonts&&document.fonts.ready){document.fonts.ready.then(p);setTimeout(p,2500);}else{setTimeout(p,500);}})();<\/script></body></html>';
@@ -9810,6 +9821,9 @@ window._planApplyAbs        = _planApplyAbs;
 window._planApplySimple     = _planApplySimple;
 window.planKpiAlert         = planKpiAlert;
 window.openPlanFiche        = openPlanFiche;
+// ★ FRAIS-1 (§595) — planning-frais.js lit la fiche ouverte (la personne, le mois, l'année) et repeint la roue du Planning.
+window._planFicheCtx        = function(){ return _planFicheNom?{nom:_planFicheNom,m:planMonth,y:_pY()}:null; };
+window._planRenderCadre     = _planRenderCadre;
 window.closePlanFiche       = closePlanFiche;
 window.planFicheTab         = planFicheTab;
 window.planFicheMois        = planFicheMois;

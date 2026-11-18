@@ -737,3 +737,65 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Dans un simulateur, la réponse reste près des boutons.** L’en-tête de la carte dit la fin prévue ; le résultat la redit sous les réglages, parce qu’au téléphone l’en-tête est à 800 px quand on touche − ou +. Une redite qui sert n’est pas une redite.
 - ⚠️ **Le lexique du §28 disait encore « ≈ » pour une estimation** ; PORTEE-1 (§591) l’a sorti du Pilotage — U+2248 n’est pas dans la police de l’appli. La maquette l’a montré, `portee1` l’a refusé dans la chaîne : « environ ». La ligne du lexique est corrigée.
 - ⚠️ **Une capture « pleine page » cache ce qui colle** : le script qui masquait les barres du bas (position fixe ou collante) masquait aussi les en-têtes de jour de la tournée — on croyait la liste sans jours. Ne masquer que le fixe.
+
+## 595. ★★★ FRAIS-1 — PLANNING › LES FRAIS À REMBOURSER : TICKETS, CARTE BANCAIRE ET INDEMNITÉS KM, ENVOYÉS AVEC LA PAIE (18/11 — `src/planning-frais.js` (neuf) · `src/frais.css` (neuve) · `src/planning.js` · `src/app.js` · `src/firebase.js` · `src/utils.js` · `src/whats-new.js` · `src/tutos.js` · `index.html` · `storage.rules` · `public/sw.js` · `guide/10-planning.html` · `docs/maquettes/maquette-frais-v2.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-frais1.mjs` (neuf) · `scripts/mv-harnais-ajour1.mjs` · `scripts/mv-harnais-info.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/tutos-couverture.json` · `public/demo.html` · `public/demo/fiche-jean.webp`)
+
+**La demande.** Nico (18/11) : « au niveau de l’équipe planning, une case frais personnels à rembourser » — les tickets et paiements par carte avancés pour le domaine, avec leur motif, envoyés à la compta en même temps que la paie ; et les forfaits kilométriques d’un déplacement avec le véhicule personnel, justes selon la puissance et les kilomètres en plus ; recherches sur Internet, puis maquette. Précisé : **l’admin seul saisit et valide**. Sur la v1 (trajets en étapes A → B, domicile déduit), Nico : « fais juste le nombre de kilomètres parcourus pour un trajet professionnel […] la justification […] pas d’étapes […] On marque juste le nombre de kilomètres supplémentaires parcourus. Point. » Maquette v2 (`docs/maquettes/maquette-frais-v2.html`) : « parfait (on suit les recommandations) ». Puis « Tu peux pas faire les trois lots en même temps ? » : un seul lot.
+
+### 595a. Recherché avant la maquette (et ce qu’on n’a pas pu vérifier)
+
+- **Le barème fiscal kilométrique** publié le **9 avril 2026** pour les revenus 2025 (le tableau de l’arrêté du 27/03/2023, inchangé) : d ≤ 5 000 km → d × a ; 5 001 à 20 000 → d × b + c ; au-delà → d × e ; de 3 CV et moins à 7 CV et plus. **100 % électrique : + 20 %** (le tableau `e` de `FRAIS_BAREME`). Hybride : le barème des voitures thermiques.
+- **URSSAF** : les indemnités sont exonérées dans la limite du barème ; au-delà, l’excédent entre dans l’assiette des cotisations, sauf si l’employeur prouve les frais réels. Le trajet domicile – travail n’est pas indemnisé, sauf contrainte. Garder les justificatifs et la carte grise (au nom du salarié ou de son foyer).
+- **PLF 2027** : un plancher de + 10 % du barème pour les revenus 2026, adopté en première lecture le 15/10/2026, **pas définitif**, et hors 100 % électrique — **non intégré**, à surveiller (§595f).
+- **Accords territoriaux** : certains fixent leur propre taux (exemple trouvé : 0,53 €/km, CUMA de la Mayenne). **Rien de vérifié pour la Côte-d’Or** : d’où le « taux du domaine », facultatif, dans la roue.
+
+### 595b. Ce qui change
+
+- **Planning › Personnel › la fiche d’un salarié : un cinquième onglet « Frais »** (`_pfFrais`, `src/planning-frais.js`). En haut une phrase : « **87,42 €** à rembourser avec la paie de novembre » (ou « Novembre figé : 87,42 € partis avec la paie »), la pastille « 1 ticket manquant », deux tuiles (Tickets, Km), « + Ticket », « + Trajet », la liste du mois, les cartes « Sa voiture » et « Km payés en 2026 » (le palier, le taux du km suivant, un « i » `plan.frais.km`).
+- **Un ticket** : le montant, la date, pour quoi (achat pour le domaine, carburant d’un engin, péage et parking, repas, hébergement, autre — le carburant de sa propre voiture passe par les km), le motif, payé avec sa carte ou en espèces, la TVA si elle est indiquée, la photo (réduite comme celle d’un signalement, `_mvPhotoReduire`). Sans photo : « ticket manquant », sur le volet, dans la compta et sur le relevé.
+- **Un trajet** : les km faits **en plus** de son trajet habituel, et « Où et pourquoi ». Rien d’autre — pas d’étapes, pas de domicile (décision de Nico). L’aperçu du montant se calcule pendant la saisie, au palier de l’année.
+- **Sa voiture** (demandée avant le premier trajet) : modèle facultatif, puissance (case P.6 de la carte grise), énergie, carte grise au nom du salarié ou de son foyer, et sa photo.
+- **Le calcul** : chaque trajet vaut `barème(km de l’année avant lui + ses km) − barème(km de l’année avant lui)`, dans l’ordre de saisie, sur l’année civile du mois de paie (`_fraisCalcAnnee`). La somme des trajets de l’année est donc **exactement** le barème des km de l’année : le changement de palier se répartit tout seul. Un mois figé garde ses montants (`fige.frais.mt`). Le **taux du domaine** (`CONFIG.frais_km`, 0 < taux < 5 €/km) remplace le barème par km × taux ; au-dessus du barème, la roue prévient (l’excédent est cotisé).
+- **Le mois** : un frais part avec la paie du mois affiché dans la fiche ; si ce mois est figé, avec le premier mois suivant qui ne l’est pas (`_fraisMoisCible`). Les lignes d’un mois figé sont verrouillées (une ligne simple, pas un bouton).
+- **Résumé › « Pour la compta »** : un bloc « Remboursements, hors salaire » — Frais avancés (« 3 tickets, joints au relevé · 2 manquants »), Indemnités km (« 84 km · 5 CV essence · barème fiscal »), À rembourser.
+- **Figer** fige aussi les frais (`_fraisInstantane` → `fige.frais` : tickets, km, total, km de l’année, nombre, montant de chaque trajet) ; la phrase de Figer dit « payé, retenu et remboursé ».
+- **Le relevé** : une page 3 « Les frais à rembourser » — tickets et paiements, indemnités kilométriques, la voiture et le barème lu, le total, les justificatifs (photos ou « ticket manquant ») ; le cadre papier de la page 1 l’annonce.
+- **La roue du Planning** : « Barème fiscal » (par défaut, sa date de publication dite) ou « Taux du domaine ».
+- **Supprimer un frais se répare** (ANNULER-1, §471) : le geste part tout de suite, « Annuler » remet la ligne à sa place ; sa photo ne s’efface du serveur qu’après le toast (8 s), et seulement si la ligne n’est pas revenue.
+- **Les données** : `PLANNING_HSUP[nom].frais = { voiture, lignes }` — dans `planning_hsup`, déjà lu par l’admin seul (MOTIFS-1, §250) : **aucune clé Firestore nouvelle, aucune règle Firestore changée**. Vérifié avant : aucun code ne parcourt les clés de `PLANNING_HSUP[nom]` comme des mois ; le renommage d’un salarié déplace l’objet entier. **Les photos** : `tenants/<domaine>/frais/<id>.jpg` (`fbFraisPhoto`, `fbFraisPhotoSuppr`, `firebase.js`) — `storage.rules` : l’admin du domaine lit, dépose et supprime ; une image d’1 Mo au plus ; pas de modification ; jamais le compte de démo. En démo, la photo reste « jointe » sans fichier (`{demo:1}`).
+- **La démo** : Jean a quatre frais dans le mois de la démo (deux trajets de 24 km, un ticket de 38,90 € avec sa photo, un repas de 18 € sans) ; la capture « fiche-jean » de la démo du site est refaite (`mv-demo-captures.mjs --ecrans fiche-jean` : « Pour la compta » y montre maintenant « Remboursements, hors salaire »), et sa scène dit « frais à rembourser ».
+- **Le tuto** « Comment faire pour noter un frais à rembourser ? » (10 étapes : Personnel, Jean, Frais, Ticket, 18,50, Repas, le motif, Ajouter, la phrase) ; quatre gestes exemptés avec leur raison (fermer, la photo, supprimer, le taux).
+- `MV_AIDE.planning` (cinq onglets, « Les frais à rembourser »), `MV_INFO['plan.frais.km']`, `guide/10-planning.html`, l’annonce 11.23 (admin).
+
+### 595c. Vu en route, corrigé dans le lot
+
+- **v1 → v2 du modèle de trajet** : l’exemple de Nico (domicile Nuits-Saint-Georges, travail Gevrey, labo à Beaune) donnait 0 km avec la déduction du trajet habituel. La v2 ne déduit rien : on tape les km en plus.
+- **L’arrondi** : arrondir chaque barème avant la différence donnait 14,00 € au lieu de 13,99 € (le 3ᵉ trajet de la maquette). On arrondit la différence.
+- **C24b** (`harnais-sec7 --contre`) : des variables dans les `onclick` des lignes et des choix. Passés en `data-*` lus par `this.dataset`.
+- **Sur ordinateur, la liste tenait en une lettre de large** : la fiche est une colonne d’environ 420 px à droite de la liste des salariés, et la grille du volet suivait la largeur de l’écran (`@media`). Elle suit maintenant **la largeur du volet** (`.frs{container-type:inline-size}`, `@container`).
+- **Le relevé** disait « photo jointe » en orange, comme « ticket manquant » : gris, trait plein.
+- **Supprimer** partait sans retour : « Annuler » (ci-dessus).
+
+### 595d. Mesuré (build, dans le navigateur)
+
+- Joué dans l’appli construite, entrée par la démo (téléphone 390 × 844, ordinateur 1366 × 900, clair et sombre), sans erreur de page : le volet de Jean (**87,42 €** = 56,90 € de tickets + 30,52 € pour 48 km) ; + Ticket 24,90 € « Repas » → la pastille passe à 2 manquants ; + Trajet 36 km → **22,90 €** (palier 1, 0,636 €/km), total **135,22 €** ; Résumé › « Pour la compta » (81,80 €, 53,42 €, 135,22 €) ; le relevé (3 pages, la page 3 lue) ; la roue ; **Figer** → `fige.frais` = 56,90 / 30,52 / 87,42, 48 km, les deux trajets à 15,26 € ; un ticket saisi ensuite part en **décembre** (« part avec la paie de décembre ») ; une ligne figée ne s’ouvre pas ; taux du domaine 0,50 → 24,00 € pour 48 km, retour au barème → 30,52 €.
+- Le tuto `frais` : 10/10 étapes au téléphone, sur ordinateur, au panneau et au miroir ; le côte à côte et le vieux boot.js verts.
+
+### 595e. Harnais
+
+`scripts/mv-harnais-frais1.mjs` (24 assertions, 19 contre-épreuves) : le barème publié, l’électrique, la maquette (Marie : 15,26 / 15,26 / 13,99 €, cumul 456 km ; Arthur 96,07 €), la somme des trajets = le barème de l’année, l’année qui repart, le taux du domaine, les totaux du mois et le ticket manquant, le mois figé et ses montants, le mois cible, l’instantané de Figer, la compta, le relevé, la robustesse et l’échappement, supprimer puis Annuler (la photo attend le toast), le branchement (index, planning, app, storage.rules, AJOUR-1, aide, « i », guide, annonce, sw, maquette, liste). `ajour1` : `ovPlanFrais` est un FORMULAIRE. `info` : son corpus lit `planning-frais.js` (sinon la fiche `plan.frais.km` passait pour orpheline — la règle d’AXE-1 : une surface qui pose une pastille entre dans le corpus). `onglets1` a refusé « <b>Le mois</b> » dans le guide (l’ancien nom de l’onglet) : la puce dit « Avec quelle paie ». `tutos-couverture.json` : quatre exemptions, plafond inchangé (793).
+
+### 595f. Restes, à leur lot
+
+- **Le barème des revenus 2026** sera publié au printemps 2027 : d’ici là, les trajets de 2027 se calculent au barème du 9 avril 2026 (`FRAIS_BAREME` ne porte qu’un tableau). Si le PLF 2027 passe (+ 10 %), c’est ce nouveau tableau qui le portera.
+- **La Côte-d’Or** : aucun accord territorial vérifié ; le taux du domaine reste au choix de l’admin.
+- **Deux-roues** (motos, cyclomoteurs) : un autre barème, pas fait. **Un changement de voiture en cours d’année** : le cumul des km se compte sur l’année, toutes voitures confondues (le barème se lit par véhicule) — à faire si le cas se présente.
+- **Une photo prise hors réseau** n’est pas mise en file d’attente : l’envoi échoue, la ligne reste « ticket manquant », à reprendre au retour du réseau.
+- **Le salarié ne voit pas ses frais** (l’admin seul saisit et valide, décision de Nico) ; s’il faut un jour les lui montrer, `planning_hsup` est en lecture admin seule (§250).
+- **Non regardé à l’écran** : le sombre du relevé (il s’imprime en clair), un vrai envoi de photo au serveur (bac à sable sans réseau).
+
+### 595g. Leçons
+
+- ⚠️ **Sur ordinateur, la fiche d’un salarié est une colonne** : une grille qui suit la largeur de l’écran (`@media`) s’y écrase. Régler la mise en page d’un volet sur **sa** largeur (`container-type:inline-size`, `@container`).
+- ⚠️ **Une ligne qu’on supprime avec sa photo** : la photo ne part du serveur qu’une fois l’« Annuler » passé — sinon Annuler remet une ligne qui pointe vers un fichier effacé.
+- ⚠️ **Toucher `src/firebase.js` fait rejouer tous les tutos** (TUTO-10, §425 : `TOUS_FICHIERS`) — à compter dans le temps du lot.

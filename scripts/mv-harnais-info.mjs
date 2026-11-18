@@ -23,6 +23,8 @@ const CAVE = fs.readFileSync('src/cave.js', 'utf8') + '\n' + fs.readFileSync('sr
    ligne au-dessus, deux lots plus tard — quand une surface pose une pastille,
    elle entre dans le corpus, sinon la fiche passe pour orpheline. */
 const REGL = fs.readFileSync('src/reglages.js', 'utf8');
+// ★ FRAIS-1 (§595) : les frais à rembourser posent leur pastille (plan.frais.km) depuis leur module — même règle.
+const PLFR = fs.readFileSync('src/planning-frais.js', 'utf8');
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
 function corpsPil(nom){
@@ -32,7 +34,7 @@ function corpsPil(nom){
   return '';
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
-const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL), CKNU = nu(COCKPIT);
+const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL), CKNU = nu(COCKPIT), PLFRNU = nu(PLFR);
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -83,8 +85,8 @@ t('les balises <b> sont refermees',
    litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
    facon dont elle est posee. */
 const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
-              PILNU, CKNU, CAVENU, REGLNU, HTML].join('\n');
-const posees = new Set([...[UNU, PILNU, CKNU, CAVENU, REGLNU, HTML].join('\n')
+              PILNU, CKNU, CAVENU, REGLNU, PLFRNU, HTML].join('\n');
+const posees = new Set([...[UNU, PILNU, CKNU, CAVENU, REGLNU, PLFRNU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),

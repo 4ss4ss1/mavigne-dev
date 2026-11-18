@@ -9,6 +9,7 @@ import './styles.css';
 import './bandeau.css';   // ★ TETE-4A (§577) : le bandeau commun — une feuille à part (styles.css est à son plafond), lue juste après elle
 import './aujourdhui.css';   // ★ MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — une feuille à part, pour la même raison ; elle passe après styles.css et recouvre ses règles du cockpit
 import './pilotage.css';   // ★ MOTS-8 (§590) : les onglets du Pilotage allégés sur place (Travaux d'abord) — une feuille à part, après les trois autres
+import './frais.css';   // ★ FRAIS-1 (§595) : les frais à rembourser (Planning › Personnel › Frais) — une feuille à part, après les quatre autres
 import { mvIdsParcelles, mvIdsJournal, mvCarteParcelles, mvNomsParPid, mvNomsJournal } from './ids.js';   // IDS-1 (§252, §253) : identifiants permanents des parcelles
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
@@ -35,6 +36,7 @@ import './diagnostic.js';   // DIAG-1 (§429) : le diagnostic du Chai — lectur
 import './planning.js';
 import './planning-annee.js';   // ANNEE-DEC (§542) : l'année d'un modèle, sortie de planning.js — chargée juste après lui
 import './planning-modeles.js';  // MODELES-DEC (§558) : qui suit un modèle, ses fériés — sortis de planning-annee.js, chargés juste après elle
+import './planning-frais.js';   // FRAIS-1 (§595) : les frais à rembourser et les indemnités km — le volet « Frais » de la fiche
 import './reglages.js';
 import './tracteur.js';
 import './phyto.js';
@@ -2235,7 +2237,18 @@ function _visiteScenario(){
     _ap('planning_entries',_pe);
     // Regle « heures dues » active sur toute l'annee de la demo
     try{ if(window.CONFIG) window.CONFIG.hsup_dues_debut=_YR+'-01'; }catch(e3){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'hsup_dues_debut'}); }
-    var _hs={}; _hs['Jean']={}; _hs['Jean'][_mk]={paye:0}; _ap('planning_hsup',_hs);
+    var _hs={}; _hs['Jean']={}; _hs['Jean'][_mk]={paye:0};
+    // ★ FRAIS-1 (§595) — des frais du mois pour Jean : deux trajets, deux tickets dont un sans sa photo (le volet « Frais »).
+    try{
+      var _jf=function(dd){ return _mk+'-'+_p2(Math.max(1,Math.min(dd,now.getDate()))); };
+      _hs['Jean'].frais={ voiture:{modele:'',cv:5,energie:'essence',carte:'personne',carteGrise:{demo:1}}, lignes:[
+        {id:'fdemo1',n:1,t:'trajet',mois:_mk,date:_jf(4),motif:'Attaches de palissage, magasin agricole',km:24,cv:5,elec:false},
+        {id:'fdemo2',n:2,t:'ticket',mois:_mk,date:_jf(4),motif:'Attaches de palissage',cat:'achat',montant:38.9,tva:6.48,paye:'cb',photo:{demo:1}},
+        {id:'fdemo3',n:3,t:'trajet',mois:_mk,date:_jf(12),motif:'Échantillons au labo, en fin de journée',km:24,cv:5,elec:false},
+        {id:'fdemo4',n:4,t:'ticket',mois:_mk,date:_jf(12),motif:'Repas de la formation',cat:'repas',montant:18,tva:null,paye:'cb',photo:null}
+      ] };
+    }catch(e5){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'frais'}); }
+    _ap('planning_hsup',_hs);
     var _ac={}; _ac['Jean']={}; _ac['Jean'][_mk]=[{date:'2026-'+_p2(_m+1)+'-15',montant:300,note:'Acompte'}]; _ap('planning_acomptes',_ac);
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wd'); }
 
@@ -11304,6 +11317,7 @@ function _obsCompresser(f,cb){
     img.src=url;
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_obsCompresser'); cb(null); }
 }
+window._mvPhotoReduire=_obsCompresser;   // ★ FRAIS-1 (§595) : la photo d'un ticket, d'une carte grise — réduite de la même façon (planning-frais.js)
 function _obsId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function _obsEnregistrer(){
   var F=_obsF; if(!F||!F.type||!_obsPeutSignaler()) return; _obsNoteLue();

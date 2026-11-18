@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Vigne — Frais à rembourser, maquette v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;
+  --texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--texte-pale:#A3A19B;
+  --ligne:#E7E6E2;--ligne-forte:#CDCAC2;--survol:rgba(28,26,22,.055);--presse:rgba(28,26,22,.095);
+  --accent:#7A2850;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--sur-accent:#FFFFFF;--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.13);--ok-texte:#217343;
+  --attention:#A15C00;--attention-doux:rgba(161,92,0,.13);--attention-texte:#975600;
+  --danger:#C2381B;--danger-doux:rgba(194,56,27,.12);--danger-texte:#BA361A;
+  --terre-tx:#8A5A38;
+  --inverse:#1F1E1B;--sur-inverse:#F5F4F1;--cadre:#1F1E1B;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);
+  --shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+}
+:root[data-theme="dark"],:root[data-theme="dark"] body{color-scheme:dark}
+:root[data-theme="dark"]{
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --terre-tx:#D9A27A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg-app:#0D0D0C;--bg-card:#151514;--bg-doux:#1A1A19;--texte:#EDECE9;--texte-med:#B4B2AC;--texte-doux:#8F8D87;--texte-pale:#5F5D58;
+  --ligne:#272624;--ligne-forte:#3E3D39;--survol:rgba(255,248,235,.055);--presse:rgba(255,248,235,.09);
+  --accent:#8A3560;--accent-texte:#E59ABD;--accent-doux:rgba(229,154,189,.15);--sur-accent:#FFFFFF;--anneau:rgba(229,154,189,.50);
+  --ok:#76C995;--ok-doux:rgba(118,201,149,.15);--ok-texte:#76C995;
+  --attention:#E9AA4A;--attention-doux:rgba(233,170,74,.15);--attention-texte:#E9AA4A;
+  --danger:#F28B6A;--danger-doux:rgba(242,139,106,.15);--danger-texte:#F28B6A;
+  --terre-tx:#D9A27A;
+  --inverse:#EDECE9;--sur-inverse:#151514;--cadre:#2B2A27;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40);--shadow-md:0 8px 20px -6px rgba(0,0,0,.60);
+}}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg-app);color:var(--texte);font-family:var(--font-ui);font-size:var(--pt-txt);line-height:1.5}
+h1,h2,h3,h4,h5{font-family:var(--font-titre);font-weight:600;letter-spacing:-0.01em;margin:0;line-height:1.15}
+p{margin:0}
+a{color:var(--accent-texte)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.num,b,.mt{font-variant-numeric:lining-nums tabular-nums}
+
+/* ── la page de la maquette ── */
+.entete{position:sticky;top:0;z-index:60;background:var(--bg-card);border-bottom:1px solid var(--ligne);padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.entete h1{font-size:var(--pt-lg)}
+.entete .base{color:var(--texte-med);font-size:var(--pt-micro)}
+.entete nav{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.entete nav a,.entete nav button{color:var(--texte);text-decoration:none;border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:4px 10px;font-size:var(--pt-micro);background:var(--bg-card)}
+.entete nav a:hover,.entete nav button:hover{background:var(--survol)}
+@media (max-width:700px){.entete{position:static}}
+.page{max-width:1280px;margin:0 auto;padding:28px 20px 90px;overflow-x:clip}
+.intro{max-width:78ch;color:var(--texte-med);font-size:var(--pt-base)}
+.intro b{color:var(--texte)}
+.intro p+p{margin-top:8px}
+.bloc{margin-top:60px}
+.bloc>h2{font-size:var(--pt-xl)}
+.bloc>.ou{color:var(--texte-med);max-width:82ch;margin-top:8px;font-size:var(--pt-base)}
+.ecrans{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:22px}
+.col-tel{width:390px;max-width:100%}
+.legende-ecran{color:var(--texte-med);font-size:var(--pt-micro);margin:0 0 8px;max-width:62ch}
+.etiquette{display:inline-block;font-size:var(--pt-nano);font-weight:700;letter-spacing:.02em;border-radius:var(--r-full);padding:2px 9px;margin-bottom:8px;background:var(--accent-doux);color:var(--accent-texte)}
+
+/* ── les cadres ── */
+.tel{width:390px;max-width:100%;min-width:0;background:var(--bg-app);border:9px solid var(--cadre);border-radius:38px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;display:flex;flex-direction:column}
+.tel-barre{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 6px;font-size:var(--pt-micro);color:var(--texte-med);flex:none}
+.tel-corps{padding:0 12px 18px;flex:1;min-height:760px}
+.pc{width:100%;min-width:0;background:var(--bg-app);border:1px solid var(--ligne-forte);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md);position:relative}
+.pc-barre{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg-doux);border-bottom:1px solid var(--ligne)}
+.pc-barre i{width:9px;height:9px;border-radius:50%;background:var(--ligne-forte);display:block}
+.pc-barre span{margin-left:10px;color:var(--texte-doux);font-size:var(--pt-nano)}
+.pc-app{display:grid;grid-template-columns:168px minmax(0,1fr);min-height:760px}
+.pc-nav{background:var(--bg-card);border-right:1px solid var(--ligne);padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.pc-nav .logo{font-family:var(--font-titre);font-size:var(--pt-md);font-weight:700;padding:2px 8px 12px}
+.pc-nav span{padding:7px 10px;border-radius:var(--r-md);color:var(--texte-med);font-size:var(--pt-txt)}
+.pc-nav span.on{background:var(--accent-doux);color:var(--accent-texte);font-weight:600}
+.pc-main{padding:14px 20px 22px;min-width:0}
+.pc-grille{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1060px){.pc-app{grid-template-columns:minmax(0,1fr)}.pc-nav{display:none}}
+@media (max-width:820px){.pc-grille{grid-template-columns:minmax(0,1fr)}}
+
+/* ── l'appli ── */
+.app-tete{display:flex;align-items:center;gap:10px;padding:4px 2px 8px}
+.app-tete h4{font-size:var(--pt-lg)}
+.onglets{display:flex;gap:4px;border-bottom:1px solid var(--ligne);margin:0 0 14px}
+.onglets span{padding:7px 12px;font-size:var(--pt-txt);color:var(--texte-med);border-bottom:2px solid transparent;margin-bottom:-1px}
+.onglets span.on{color:var(--texte);font-weight:600;border-bottom-color:var(--accent)}
+.gens{display:flex;flex-direction:column;gap:8px}
+.gcarte{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:10px 12px;min-height:56px}
+.gcarte:hover{background:var(--survol)}
+.gcarte.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:var(--pt-base);flex:none}
+.gcarte .n{font-weight:600;display:block}
+.gcarte small{color:var(--texte-doux);font-size:var(--pt-nano)}
+.gcarte .fr{margin-left:auto;font-size:var(--pt-nano);font-weight:700;border-radius:var(--r-full);padding:2px 8px;background:var(--bg-doux);color:var(--texte-med);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.fiche{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);overflow:hidden;min-width:0}
+.fiche-h{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
+.fiche-h .qui{min-width:0}
+.fiche-h .qui b{display:block;font-size:var(--pt-sm)}
+.fiche-h .qui small{color:var(--texte-doux);font-size:var(--pt-nano)}
+.fiche-h .mois{margin-left:auto;display:flex;align-items:center;gap:2px;font-weight:600;font-size:var(--pt-txt);white-space:nowrap}
+.fiche-h .mois span{width:30px;height:30px;display:grid;place-items:center;border-radius:var(--r-md);color:var(--texte-med)}
+.retour{display:flex;align-items:center;gap:4px;color:var(--texte-med);font-size:var(--pt-txt);padding:2px 2px 6px}
+.volets{position:relative;display:flex;gap:2px;border-bottom:1px solid var(--ligne);padding:0 8px;overflow-x:auto;scrollbar-width:none}
+.volets::-webkit-scrollbar{display:none}
+.volets button{border:0;background:none;padding:9px 11px;font-size:var(--pt-txt);color:var(--texte-med);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;min-height:40px}
+.volets button.on{color:var(--texte);font-weight:600;border-bottom-color:var(--accent)}
+.volets button .nv{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle}
+.fiche-b{padding:14px}
+.vide-volet{color:var(--texte-doux);font-size:var(--pt-txt);padding:30px 6px;text-align:center}
+
+.phrase{font-size:var(--pt-sm);line-height:1.35}
+.phrase b{font-size:var(--pt-md)}
+.bande{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pas{display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-nano);font-weight:700;border-radius:var(--r-full);padding:2px 9px;white-space:nowrap;line-height:1.6}
+.pas svg{width:12px;height:12px}
+.pas.att{background:var(--attention-doux);color:var(--attention-texte)}
+.pas.ok{background:var(--ok-doux);color:var(--ok-texte)}
+.pas.ko{background:var(--danger-doux);color:var(--danger-texte)}
+.pas.gris{background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne)}
+.tuiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tuile{border:1px solid var(--ligne);border-radius:var(--r-lg);padding:10px 12px;background:var(--bg-doux);min-width:0}
+.tuile span{display:block;font-size:var(--pt-micro);color:var(--texte-med);font-weight:600}
+.tuile b{display:block;font-size:var(--pt-lg);font-weight:700;line-height:1.15}
+.tuile small{color:var(--texte-doux);font-size:var(--pt-nano)}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions .bt{flex:1}
+.bt{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:var(--r-md);border:1px solid var(--ligne-forte);background:var(--bg-card);font-size:var(--pt-base);font-weight:600;color:var(--texte);white-space:nowrap}
+.bt:hover{background:var(--survol)}
+.bt svg{width:18px;height:18px}
+.bt.pri{background:var(--accent);border-color:var(--accent);color:var(--sur-accent)}
+.bt.pri:hover{filter:brightness(1.08)}
+.bt.pri:disabled{opacity:.45;filter:none}
+.bt.pt{min-height:34px;padding:4px 10px;font-size:var(--pt-txt);font-weight:600}
+.bt.dgr{color:var(--danger-texte);border-color:transparent;background:none}
+.grp{display:flex;align-items:baseline;gap:8px;margin:18px 0 4px;font-family:var(--font-ui);font-size:var(--pt-micro);font-weight:700;color:var(--texte-med);text-transform:none;letter-spacing:.02em}
+.grp span{font-weight:600;color:var(--texte-doux)}
+.lst{list-style:none;margin:0;padding:0}
+.lst li+li{border-top:1px solid var(--ligne)}
+.lg{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;border:0;background:none;padding:10px 4px;min-height:52px;border-radius:var(--r-md)}
+.lg:hover{background:var(--survol)}
+.lg[disabled]{cursor:default}
+.lg[disabled]:hover{background:none}
+.lg .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--bg-doux);border:1px solid var(--ligne);color:var(--texte-med)}
+.lg .ic svg{width:18px;height:18px}
+.lg .q{flex:1;min-width:0}
+.lg .q .m{display:block;font-weight:600;font-size:var(--pt-base);overflow-wrap:anywhere}
+.lg .q small{display:block;color:var(--texte-doux);font-size:var(--pt-micro)}
+.lg .q .pass{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.lg .mt{font-weight:700;font-size:var(--pt-base);white-space:nowrap;padding-top:2px}
+.vide{color:var(--texte-doux);padding:10px 4px;font-size:var(--pt-txt)}
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);padding:12px 14px}
+.carte+.carte{margin-top:10px}
+.carte-t{display:flex;align-items:center;gap:8px;font-size:var(--pt-micro);color:var(--texte-med);font-weight:700}
+.carte-t .bt,.carte-t .ibtn{margin-left:auto}
+.carte .gros{font-size:var(--pt-md);font-weight:700;margin-top:4px;display:block}
+.carte .sous{color:var(--texte-med);font-size:var(--pt-txt);margin-top:2px}
+.barre{height:8px;border-radius:4px;background:var(--bg-doux);border:1px solid var(--ligne);overflow:hidden;margin-top:8px;position:relative}
+.barre i{display:block;height:100%;background:var(--accent);border-radius:4px 0 0 4px}
+.barre-l{display:flex;justify-content:space-between;font-size:var(--pt-nano);color:var(--texte-doux);margin-top:3px}
+.ibtn{width:22px;height:22px;border-radius:50%;border:1px solid var(--ligne-forte);background:var(--bg-card);display:inline-grid;place-items:center;font-size:12px;font-weight:700;color:var(--texte-med);padding:0;flex:none;position:relative}
+.ibtn::before{content:"";position:absolute;inset:-11px}
+.infotxt{display:none;margin-top:8px;font-size:var(--pt-micro);color:var(--texte-med);background:var(--bg-doux);border:1px solid var(--ligne);border-radius:var(--r-md);padding:8px 10px}
+.infotxt.on{display:block}
+.cote{display:flex;flex-direction:column;gap:10px}
+.fr-grille{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:4px}
+.fiche-b{container-type:inline-size}
+@container (min-width:640px){.fr-grille{grid-template-columns:minmax(0,1fr) 270px}.fr-grille .lg .q .m{white-space:normal}}
+.pc .tuiles{grid-template-columns:repeat(2,minmax(0,200px))}
+.pc .actions .bt{flex:none}
+.pc .lst .lg .q .m{white-space:normal}
+
+/* ── les fenêtres de saisie ── */
+.voile{position:absolute;inset:0;background:rgba(20,18,14,.38);z-index:20}
+.feuille{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow:auto;background:var(--bg-card);border-radius:18px 18px 0 0;padding:10px 16px 16px;box-shadow:0 -10px 30px -12px rgba(20,18,14,.35);z-index:21;border-top:1px solid var(--ligne)}
+.pc .feuille{left:50%;right:auto;bottom:auto;top:56px;transform:translateX(-50%);width:460px;max-width:calc(100% - 40px);max-height:calc(100% - 80px);border-radius:var(--r-lg);border:1px solid var(--ligne-forte)}
+.poignee{width:42px;height:4px;border-radius:2px;background:var(--ligne-forte);margin:0 auto 10px}
+.pc .poignee{display:none}
+.feuille-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.feuille-h h5{font-size:var(--pt-lg)}
+.feuille-h .qui{color:var(--texte-doux);font-size:var(--pt-micro)}
+.feuille-h .x{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--ligne);background:var(--bg-card);display:grid;place-items:center;color:var(--texte-med)}
+.champ{display:flex;flex-direction:column;gap:4px;margin-top:12px;min-width:0}
+.champ>label,.champ>.lbl{font-size:var(--pt-micro);font-weight:700;color:var(--texte-med)}
+.champ input,.champ select{border:1px solid var(--ligne-forte);border-radius:var(--r-md);padding:9px 10px;background:var(--bg-card);min-height:44px;font-size:16px;width:100%;min-width:0}
+.champ input.grosse{font-size:var(--pt-lg);font-weight:700;padding:6px 10px}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.puces{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--ligne-forte);border-radius:var(--r-full);padding:6px 12px;background:var(--bg-card);font-weight:600;font-size:var(--pt-txt);min-height:38px;color:var(--texte)}
+.chip:hover{background:var(--survol)}
+.chip.on{background:var(--accent);color:var(--sur-accent);border-color:var(--accent)}
+.micro{font-size:var(--pt-nano);color:var(--texte-doux);line-height:1.45}
+.photo{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--ligne-forte);border-radius:var(--r-lg);padding:10px 12px;background:var(--bg-doux)}
+.photo.prise{border-style:solid;background:var(--bg-card)}
+.photo .vign{width:46px;height:60px;flex:none}
+.photo .t{flex:1;min-width:0;font-size:var(--pt-txt)}
+.photo .t b{display:block}
+.calc{margin-top:14px;border:1px solid var(--ligne);border-radius:var(--r-lg);background:var(--bg-doux);padding:10px 12px;font-size:var(--pt-txt)}
+.calc .r{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--texte-med)}
+.calc .r b{color:var(--texte)}
+.calc .r.tot{border-top:1px solid var(--ligne-forte);margin-top:4px;padding-top:7px;color:var(--texte);font-weight:600}
+.calc .r.tot b{font-size:var(--pt-md)}
+.calc .r.pal{font-size:var(--pt-micro)}
+.calc .alerte{color:var(--attention-texte);font-weight:600;display:flex;gap:6px;align-items:flex-start}
+.calc .alerte svg{width:16px;height:16px;flex:none;margin-top:2px}
+.feuille-p{position:sticky;bottom:-16px;background:var(--bg-card);margin:16px -16px -16px;padding:10px 16px 14px;border-top:1px solid var(--ligne);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.feuille-p .eff{flex:1 1 100%;font-size:var(--pt-micro);color:var(--texte-med)}
+.feuille-p .eff b{color:var(--texte)}
+.feuille-p .bt.pri{margin-left:auto;min-width:130px}
+.ajoute{position:absolute;left:50%;transform:translateX(-50%);top:58px;z-index:30;background:var(--inverse);color:var(--sur-inverse);border-radius:var(--r-full);padding:6px 14px;font-size:var(--pt-micro);font-weight:600;white-space:nowrap;box-shadow:var(--shadow-md)}
+
+/* ── Pour la compta (comme l'appli : .pf-paie) ── */
+.paie{background:var(--bg-card);border:1.5px solid var(--texte);border-radius:15px;overflow:hidden}
+.paie-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 16px 8px;border-bottom:1.5px solid var(--texte)}
+.paie-h h3{font-size:var(--pt-lg);font-weight:700;line-height:1}
+.paie-h span{font-size:var(--pt-txt);font-weight:600;color:var(--texte-med)}
+.cpt{padding:4px 16px 8px}
+.cl{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;column-gap:12px;padding:8px 0;border-top:1px solid var(--ligne)}
+.cl:first-child{border-top:none}
+.cl .l{font-size:var(--pt-base);font-weight:600;white-space:nowrap}
+.cl .v{text-align:right;font-size:var(--pt-md);font-weight:700;line-height:1.2}
+.cl .v.rien{color:var(--texte-doux);font-size:var(--pt-base);font-weight:600}
+.cl .p{grid-column:1/-1;font-size:var(--pt-micro);color:var(--texte-doux);margin-top:1px}
+.cl.vieux .l,.cl.vieux .v{opacity:.55}
+.sep{display:flex;align-items:center;gap:8px;margin:6px 0 0;padding-top:10px;border-top:1.5px solid var(--texte);font-size:var(--pt-micro);font-weight:700;color:var(--texte-med)}
+.sep .pas{margin-left:auto}
+.cl.neuf{position:relative}
+.cl.neuf::before{content:"";position:absolute;left:-16px;top:6px;bottom:6px;width:3px;background:var(--accent);border-radius:2px}
+.cl.tot .l{font-size:var(--pt-sm)}
+.cl.tot .v{font-size:var(--pt-lg);color:var(--accent-texte)}
+.paie-pied{padding:8px 16px;border-top:1.5px solid var(--texte);font-size:var(--pt-txt);color:var(--texte-med)}
+.envoi{margin-top:12px}
+.envoi p{font-size:var(--pt-txt);color:var(--texte-med);margin-top:6px}
+.envoi p b{color:var(--texte)}
+.envoi .bt{margin-top:10px}
+.choixp{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.deux{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:20px;align-items:start}
+@media (min-width:980px){.deux{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
+
+/* ── la page imprimée : toujours sur papier blanc ── */
+.papier{background:#fff;color:#1B1A18;border:1px solid #CDCAC2;border-radius:4px;box-shadow:var(--shadow-md);padding:28px 30px;max-width:820px;font-size:12px;line-height:1.45}
+.papier h4{font-family:var(--font-titre);font-size:22px;margin:0}
+.papier .ent{display:flex;justify-content:space-between;gap:12px;border-bottom:2px solid #1B1A18;padding-bottom:8px;margin-bottom:12px}
+.papier .ent small{color:#55534E;display:block}
+.papier h6{font-size:12px;margin:16px 0 6px;font-family:var(--font-ui);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#55534E}
+.papier table{width:100%;border-collapse:collapse}
+.papier th,.papier td{text-align:left;padding:5px 6px;border-bottom:1px solid #E7E6E2;vertical-align:top}
+.papier th{font-weight:700;color:#55534E;font-size:11px;border-bottom:1.5px solid #1B1A18}
+.papier td.n,.papier th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.papier tfoot td{font-weight:700;border-bottom:0;border-top:1.5px solid #1B1A18}
+.papier .manque{color:#975600;font-weight:700}
+.papier .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding:10px 12px;border:2px solid #1B1A18;border-radius:6px}
+.papier .total b{font-size:20px}
+.papier .note{color:#55534E;margin-top:8px}
+.papier .annexe{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.papier .annexe figure{margin:0;width:110px;text-align:center;font-size:11px;color:#55534E}
+.papier .annexe svg{width:110px;height:140px;display:block;border:1px solid #CDCAC2;border-radius:3px;background:#FBFAF7}
+.papier .annexe .vide{width:110px;height:140px;display:grid;place-items:center;border:1.5px dashed #D9B067;border-radius:3px;color:#975600;font-weight:700;padding:6px}
+.papier .num-pastille{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#1B1A18;color:#fff;font-size:10px;font-weight:700}
+
+/* ── le calcul ── */
+.exemple{max-width:880px;margin-top:18px}
+.exemple .ligne-c{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--ligne);font-size:var(--pt-base)}
+.exemple .ligne-c:last-child{border-bottom:0}
+.exemple .ligne-c span{color:var(--texte-med)}
+.exemple .ligne-c.fort b{font-size:var(--pt-md);color:var(--ok-texte)}
+.exemple .ligne-c.faux b{color:var(--attention-texte)}
+.simu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.simu{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.simu-r{display:flex;flex-wrap:wrap;gap:16px 28px;margin-top:14px;align-items:baseline}
+.simu-r div span{display:block;font-size:var(--pt-micro);color:var(--texte-med);font-weight:600}
+.simu-r div b{font-size:var(--pt-lg)}
+.bar-tab{width:100%;border-collapse:collapse;margin-top:8px;font-size:var(--pt-txt);background:var(--bg-card);border:1px solid var(--ligne);border-radius:var(--r-lg);overflow:hidden}
+.bar-tab th,.bar-tab td{padding:7px 10px;border-bottom:1px solid var(--ligne);text-align:left;white-space:nowrap}
+.bar-tab th{font-size:var(--pt-micro);color:var(--texte-med)}
+.bar-tab td{font-variant-numeric:tabular-nums}
+.bar-tab tr.hl td{background:var(--accent-doux)}
+.bar-tab td.hl{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
+.tabs-deux{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:18px}
+@media (min-width:980px){.tabs-deux{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.tabs-deux h3{font-size:var(--pt-md)}
+.defile{overflow-x:auto}
+
+/* ── les textes, les décisions ── */
+.regles{list-style:none;margin:18px 0 0;padding:0;max-width:900px}
+.regles li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:12px 0;border-bottom:1px solid var(--ligne);font-size:var(--pt-base)}
+.regles li .no{width:26px;height:26px;border-radius:50%;background:var(--accent-doux);color:var(--accent-texte);display:grid;place-items:center;font-weight:700;font-size:var(--pt-micro)}
+.regles li b{display:block}
+.regles li .src{font-size:var(--pt-micro);color:var(--texte-doux);margin-top:3px}
+.regles li.veille .no{background:var(--attention-doux);color:var(--attention-texte)}
+.decisions{list-style:none;margin:18px 0 0;padding:0;max-width:940px;counter-reset:d}
+.decisions li{border:1px solid var(--ligne-forte);border-radius:var(--r-lg);background:var(--bg-card);padding:12px 16px;margin-top:10px}
+.decisions li h3{font-size:var(--pt-md)}
+.decisions li p{font-size:var(--pt-txt);color:var(--texte-med);margin-top:4px}
+.decisions li p.reco{color:var(--texte)}
+.decisions li p.reco b{color:var(--ok-texte)}
+.hors{margin-top:16px;font-size:var(--pt-txt);color:var(--texte-med);max-width:900px}
+</style>
+</head>
+<body>
+<header class="entete">
+  <h1>Frais à rembourser</h1>
+  <span class="base">Maquette v2 · Planning › Personnel · 18 novembre 2026 · données fictives</span>
+  <nav aria-label="Sections">
+    <a href="#volet">1 · Le volet Frais</a>
+    <a href="#saisir">2 · Saisir</a>
+    <a href="#compta">3 · Pour la compta</a>
+    <a href="#calcul">4 · Le calcul des km</a>
+    <a href="#textes">5 · Les textes</a>
+    <a href="#decisions">Décisions</a>
+    <button type="button" id="theme" aria-label="Changer de thème">Thème : auto</button>
+  </nav>
+</header>
+
+<main class="page">
+  <section class="intro">
+    <p><b>Le besoin.</b> Rembourser ce qu’un salarié a avancé pour le domaine — tickets, paiements par carte, et trajets faits avec sa voiture — en même temps que la paie, sur la feuille qui part à la compta.</p>
+    <p><b>Proposé.</b> Un 5ᵉ volet « Frais » dans la fiche de chacun (Planning › Personnel). L’administrateur seul saisit ; ce qu’il saisit est validé. Pour un trajet, il saisit les km en plus et le motif ; ils sont payés au barème fiscal, selon la puissance de la voiture et les km faits depuis janvier. Tout part dans « Pour la compta » et sur le relevé imprimé, tickets joints, et se fige avec le mois.</p>
+    <p><b>v2 :</b> un trajet = les km en plus faits avec sa voiture, la date, et où et pourquoi. Plus de départ, d’arrivée ni d’aller-retour.</p>
+    <p>Domaine fictif : Marie, Arthur, Lucie, Léo, Paul. Tout se touche : les ajouts, les modifications et le « Figer » se répercutent partout dans la page.</p>
+  </section>
+
+  <!-- ══════════ 1 · LE VOLET FRAIS ══════════ -->
+  <section class="bloc" id="volet">
+    <h2>1 · Le volet « Frais » de la fiche</h2>
+    <p class="ou">Une phrase : ce qui part avec la paie du mois. Une bande seulement s’il manque quelque chose (un ticket, la carte grise). Deux chiffres, deux boutons, puis la liste du mois. La voiture et les km de l’année en dessous.</p>
+    <div class="ecrans">
+      <div class="col-tel">
+        <span class="etiquette">Téléphone</span>
+        <p class="legende-ecran">La fiche s’ouvre en fenêtre. Touchez une ligne pour la modifier.</p>
+        <div class="tel" id="f-tel"></div>
+      </div>
+      <div style="flex:1 1 100%;min-width:0">
+        <span class="etiquette">Ordinateur</span>
+        <p class="legende-ecran">La liste à gauche, la fiche à droite. Touchez un nom : le téléphone suit. Le petit montant sur chaque nom = les frais du mois.</p>
+        <div class="pc" id="f-pc"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 2 · SAISIR ══════════ -->
+  <section class="bloc" id="saisir">
+    <h2>2 · Saisir : un ticket, un trajet, la voiture</h2>
+    <p class="ou">Trois fenêtres, ouvertes ici pour les voir d’un coup. Elles fonctionnent : « Ajouter » range la ligne dans le volet de la personne, en haut de la page.</p>
+    <div class="ecrans">
+      <div class="col-tel">
+        <span class="etiquette">+ Ticket</span>
+        <p class="legende-ecran">La photo d’abord, puis le montant. « Pour quoi » en un toucher ; le motif en quelques mots.</p>
+        <div class="tel" id="f-tk"></div>
+      </div>
+      <div class="col-tel">
+        <span class="etiquette">+ Trajet</span>
+        <p class="legende-ecran">Les km en plus, la date, où et pourquoi. Le montant se calcule tout seul.</p>
+        <div class="tel" id="f-tj"></div>
+      </div>
+      <div class="col-tel">
+        <span class="etiquette">Sa voiture</span>
+        <p class="legende-ecran">Saisie une fois. La puissance (case P.6 de la carte grise) et l’énergie font le taux.</p>
+        <div class="tel" id="f-vt"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3 · POUR LA COMPTA ══════════ -->
+  <section class="bloc" id="compta">
+    <h2>3 · Pour la compta : la paie et les remboursements, ensemble</h2>
+    <p class="ou">Dans le Résumé, la carte « Pour la compta » garde ses cases (salaire de base, heures à 25, 50 et 100 %) et gagne un bloc à part, hors salaire. « Figer » fige aussi les frais : ce qui est saisi ensuite part avec le mois suivant. Le relevé imprimé gagne une page, tickets en annexe.</p>
+    <div class="choixp" id="choix-compta"></div>
+    <div class="deux">
+      <div>
+        <div id="compta-carte"></div>
+        <div class="carte envoi" id="compta-envoi"></div>
+      </div>
+      <div>
+        <span class="etiquette">Le relevé imprimé — la page ajoutée</span>
+        <div class="defile"><div class="papier" id="compta-papier"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4 · LE CALCUL ══════════ -->
+  <section class="bloc" id="calcul">
+    <h2>4 · Le calcul des km</h2>
+    <p class="ou">Le barème donne un montant pour <b>tous les km professionnels de l’année</b>, et la formule change à 5 000 et à 20 000 km. Payé chaque mois, chaque trajet prend donc le montant qu’il ajoute au total de l’année : barème(km après) − barème(km avant). Au 31 décembre, le total payé est exactement celui du barème, sans régularisation, et un mois figé ne bouge plus.</p>
+    <div class="carte exemple" id="exemple"></div>
+    <div class="carte exemple">
+      <div class="carte-t">Essayer</div>
+      <div class="simu" style="margin-top:8px">
+        <div class="champ"><label for="s-cv">Puissance</label><select id="s-cv"></select></div>
+        <div class="champ"><label for="s-en">Énergie</label><select id="s-en"><option value="essence">Thermique, hybride</option><option value="electrique">100 % électrique</option></select></div>
+        <div class="champ"><label for="s-av">Km depuis janvier</label><input id="s-av" type="number" inputmode="numeric" min="0" value="4930"></div>
+        <div class="champ"><label for="s-km">Km du trajet</label><input id="s-km" type="number" inputmode="numeric" min="0" value="190"></div>
+      </div>
+      <div class="simu-r" id="simu-r"></div>
+    </div>
+    <div class="tabs-deux" id="tables"></div>
+  </section>
+
+  <!-- ══════════ 5 · LES TEXTES ══════════ -->
+  <section class="bloc" id="textes">
+    <h2>5 · Ce que disent les textes (vérifié le 18 novembre 2026)</h2>
+    <p class="ou">Ce n’est pas le Code du travail qui fixe les km : c’est le barème de l’administration fiscale, que l’URSSAF prend comme limite. Sources en dessous de chaque point.</p>
+    <ol class="regles">
+      <li><span class="no">1</span><div><b>Le barème en vigueur est celui publié le 9 avril 2026, pour les revenus 2025.</b> Il n’a pas été revalorisé : mêmes chiffres qu’en 2025, dernière hausse en 2023 (5,4 %). Il dépend de la puissance (CV) et des km de l’année : jusqu’à 5 000, de 5 001 à 20 000, au-delà.<p class="src"><a href="https://www.service-public.gouv.fr/particuliers/actualites/A14686" target="_blank" rel="noopener">Service-Public, « Frais professionnels : les barèmes kilométriques 2026 sont disponibles » (9 avril 2026)</a> · <a href="https://www.weblex.fr/chiffres-cles/bareme-fiscal-de-remboursement-des-frais-kilometriques-2026" target="_blank" rel="noopener">tableaux recopiés par WebLex (20 avril 2026)</a>.</p></div></li>
+      <li><span class="no">2</span><div><b>Sans cotisations, dans la limite du barème.</b> Les indemnités versées au salarié contraint d’utiliser sa voiture pour le travail sont exonérées jusqu’au barème. Au-delà, l’excédent entre dans les cotisations, sauf si l’employeur prouve des frais réels plus élevés.<p class="src"><a href="https://www.legisocial.fr/paie-remuneration/avantages-epargne-salariale-partage-valeur/utilisation-vehicule-personnel-fins-professionnelles-frais-professionnels-avantages-nature.html" target="_blank" rel="noopener">Legisocial, véhicule personnel à des fins professionnelles</a> · <a href="https://open.lefebvre-dalloz.fr/actualites/droit-social/frais-vehicule-baremes-kilometriques-restent-inchanges-2024_fefcba465-5ac3-408a-bfc4-5a874564c345" target="_blank" rel="noopener">Lefebvre Dalloz (barèmes 2024)</a>.</p></div></li>
+      <li><span class="no">3</span><div><b>Le palier se lit sur les km de toute l’année.</b> Versé chaque mois : partir d’une estimation, puis vérifier en fin d’année que les km réels ne changent pas de palier. La formule choisie vaut pour tous les km de l’année, pas tranche par tranche comme l’impôt.<p class="src"><a href="https://www.legisocial.fr/simulateurs/simulateur-frais-kilometriques.html" target="_blank" rel="noopener">Legisocial, simulateur de frais kilométriques</a> · <a href="https://www.petite-entreprise.net/?p=21615" target="_blank" rel="noopener">Petite-Entreprise.net</a>.</p></div></li>
+      <li><span class="no">4</span><div><b>Voiture 100 % électrique : +20 %.</b> Les hybrides rechargeables suivent le barème des autres voitures.<p class="src"><a href="https://www.service-public.gouv.fr/particuliers/actualites/A14686" target="_blank" rel="noopener">Service-Public (9 avril 2026)</a> · <a href="https://www.toutsurmesfinances.com/impots/bareme-kilometrique-pour-la-declaration-des-revenus.html" target="_blank" rel="noopener">Toutsurmesfinances</a>.</p></div></li>
+      <li><span class="no">5</span><div><b>Le trajet maison → lieu de travail habituel suit d’autres règles.</b> L’employeur n’a pas à l’indemniser en kilomètres. Exception : le salarié contraint de prendre sa voiture (pas de transports en commun, horaires) — alors aux mêmes conditions. D’où « km en plus » dans la saisie.<p class="src"><a href="https://www.editions-tissot.fr/actualite/droit-du-travail/indemnites-kilometriques-quelles-regles-de-remboursement" target="_blank" rel="noopener">Éditions Tissot</a> · <a href="https://www.legisocial.fr/simulateurs/simulateur-frais-kilometriques.html" target="_blank" rel="noopener">Legisocial</a> · <a href="https://open.lefebvre-dalloz.fr/droit-social/actualites/nouvelles-precisions-boss-frais-mobilite-dfs-frais-transport-tests-covid_f6c69f3ba-29f9-4a75-904c-7193ffeeb197" target="_blank" rel="noopener">Lefebvre Dalloz (précisions du BOSS)</a>.</p></div></li>
+      <li><span class="no">6</span><div><b>Garder les preuves.</b> Le moyen de transport, la distance, la puissance fiscale, le nombre de trajets ; la carte grise. Sans pièces justificatives, les indemnités entrent dans les cotisations. Pour un ticket : la photo.<p class="src"><a href="https://www.legisocial.fr/paie-remuneration/avantages-epargne-salariale-partage-valeur/utilisation-vehicule-personnel-fins-professionnelles-frais-professionnels-avantages-nature.html" target="_blank" rel="noopener">Legisocial</a> · <a href="https://www.editions-tissot.fr/actualite/droit-du-travail/frais-professionnels-vehicule-quel-est-le-bareme-applicable" target="_blank" rel="noopener">Éditions Tissot</a> · <a href="https://www.pluxee.fr/blog/indemnite-kilometrique-employeur-bareme/" target="_blank" rel="noopener">Pluxee</a>.</p></div></li>
+      <li><span class="no">7</span><div><b>Carte grise.</b> Côté impôt, le barème vaut si la voiture est au nom du salarié ou d’un membre de son foyer fiscal. Côté cotisations, une analyse du cabinet CMS estime qu’il suffit que le salarié utilise son véhicule personnel. On note donc au nom de qui elle est.<p class="src"><a href="https://www.service-public.gouv.fr/particuliers/actualites/A14686" target="_blank" rel="noopener">Service-Public (9 avril 2026)</a> · <a href="https://cms.law/fr/fra/a-la-une/indemnites-kilometriques-nul-besoin-que-le-salarie-soit-proprietaire-du-vehicule-pour-beneficier-des-exonerations-sociales" target="_blank" rel="noopener">CMS Francis Lefebvre</a>.</p></div></li>
+      <li class="veille"><span class="no">!</span><div><b>À surveiller : +10 % pour les revenus 2026, pas encore acquis.</b> Un amendement au projet de loi de finances pour 2027, adopté en séance le 15 octobre 2026 en première lecture à l’Assemblée, pose un plancher : le barème 2026 au moins égal à celui de 2025 + 10 %, voitures 100 % électriques exclues. Rien n’est définitif : vote du budget, puis Sénat. S’il passe, le barème change dans Ma Vigne ; ce qui est figé ne bouge pas.<p class="src"><a href="https://datan.fr/votes/legislature-17/vote_8753" target="_blank" rel="noopener">Datan (vote n° 8753)</a> · <a href="https://www.assistant-juridique.fr/actualites/entreprises/bareme_kilometrique_majoration_votee.jsp" target="_blank" rel="noopener">Assistant-Juridique (4 novembre 2026)</a> · <a href="https://www.legifiscal.fr/actualites-fiscales/4691-plf-2027-bareme-kilometrique-gele-2023-pourrait-revalorise-10.html" target="_blank" rel="noopener">Legifiscal</a>.</p></div></li>
+      <li><span class="no">8</span><div><b>Un accord peut fixer son propre taux.</b> La convention nationale production agricole et CUMA est un plancher ; les indemnités km relèvent souvent des accords territoriaux (exemple : 0,53 € le km dans une grille CUMA de la Mayenne, 2026). Rien de vérifié pour la Côte-d’Or : à voir avec la compta. D’où un réglage « taux du domaine » (décision 5).<p class="src"><a href="https://travail-industrie.com/outils/conventions-collectives/production-agricole-cuma-grille-salaires-accords-territoriaux-idcc-7024" target="_blank" rel="noopener">Travail-Industrie, convention IDCC 7024 (septembre 2026)</a> · <a href="https://mayenne.cuma.fr/app/uploads/sites/52/2026/01/02-grille-smc-01-05-2026.pdf" target="_blank" rel="noopener">FD Cuma de la Mayenne, grille du 7 avril 2026</a>.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- ══════════ DÉCISIONS ══════════ -->
+  <section class="bloc" id="decisions">
+    <h2>Décisions</h2>
+    <p class="ou">Six points. La recommandation est en vert ; un « go » la suit.</p>
+    <ol class="decisions">
+      <li><h3>1 · Où</h3><p class="reco"><b>Recommandé :</b> un volet « Frais » dans la fiche de chacun (Planning › Personnel), un bloc dans « Pour la compta », une page de plus dans le relevé imprimé.</p><p>Autre choix : un écran « Frais de l’équipe » à part, tous les salariés sur une liste.</p></li>
+      <li><h3>2 · Le mois</h3><p class="reco"><b>Recommandé :</b> un frais part avec la paie du mois où il est saisi ; si ce mois est figé, avec le suivant — comme les heures.</p><p>Autre choix : le mois de la date du ticket (un ticket d’octobre saisi en novembre rouvrirait octobre).</p></li>
+      <li><h3>3 · Le palier</h3><p class="reco"><b>Recommandé :</b> au fil de l’année (barème après − barème avant). Juste au centime au 31 décembre, rien à régulariser.</p><p>Autre choix : un palier choisi en début d’année d’après une estimation, puis une régularisation en décembre.</p></li>
+      <li><h3>4 · Les km</h3><p class="reco"><b>Décidé (18/11) :</b> l’admin saisit les km en plus faits avec sa voiture, et où et pourquoi. Pas de départ ni d’arrivée, pas d’étapes.</p></li>
+      <li><h3>5 · Le taux</h3><p class="reco"><b>Recommandé :</b> le barème fiscal par défaut ; dans Réglages, un taux fixe du domaine possible (accord, usage). S’il dépasse le barème, l’écran le dit : l’excédent entre dans les cotisations.</p><p>Autre choix : le barème seul, sans réglage.</p></li>
+      <li><h3>6 · Les véhicules</h3><p class="reco"><b>Recommandé :</b> les voitures d’abord. Motos et scooters ont leur propre barème : un lot plus tard, si un client en a besoin.</p></li>
+    </ol>
+    <p class="hors"><b>Hors de cette maquette :</b> les paniers repas forfaitaires de la convention, le forfait mobilités durables (vélo), la saisie par le salarié lui-même. À l’intégration : l’aide « ? », le guide et le tuto suivent, comme pour tout écran.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+'use strict';
+/* ═══ Le barème fiscal publié le 9 avril 2026 (revenus 2025) — Service-Public A14686, WebLex ═══
+   [jusqu'à 5 000 km : d × a] [5 001 à 20 000 : d × b + c] [au-delà de 20 000 : d × e] */
+var BT={3:[.529,.316,1065,.370],4:[.606,.340,1330,.407],5:[.636,.357,1395,.427],6:[.665,.374,1457,.447],7:[.697,.394,1515,.470]};
+var BE={3:[.635,.379,1278,.444],4:[.727,.408,1596,.488],5:[.763,.428,1674,.512],6:[.798,.449,1748,.536],7:[.836,.473,1818,.564]};
+var CVL={3:'3 CV et moins',4:'4 CV',5:'5 CV',6:'6 CV',7:'7 CV et plus'};
+var CVC={3:'3 CV',4:'4 CV',5:'5 CV',6:'6 CV',7:'7 CV'};
+var ENL={essence:'essence',diesel:'diesel',hybride:'hybride',electrique:'100 % électrique'};
+var CATS={achat:'Achat pour le domaine',carburant:'Carburant d’un engin',peage:'Péage, parking',repas:'Repas',hebergement:'Hébergement',autre:'Autre'};
+var MC=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+var AUJ='2026-11-18';
+
+function bareme(v,d){var c=(v.energie==='electrique'?BE:BT)[v.cv];if(d<=5000)return d*c[0];if(d<=20000)return d*c[1]+c[2];return d*c[3];}
+function palier(d){return d<=5000?1:(d<=20000?2:3);}
+function r2(x){return Math.round(x*100)/100;}
+function eur(x){return (r2(x)).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+function kmf(x){return (Math.round(x*10)/10).toLocaleString('fr-FR',{maximumFractionDigits:1})+' km';}
+function cf(x,n){return x.toLocaleString('fr-FR',{minimumFractionDigits:n==null?3:n,maximumFractionDigits:n==null?3:n});}
+function dt(s){var p=String(s).split('-');return p.length<3?s:(+p[2])+' '+MC[+p[1]-1];}
+function num(s){s=String(s==null?'':s).replace(/\s/g,'').replace(',','.');var v=parseFloat(s);return isNaN(v)?0:v;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function cle(a,b){return [a,b].sort().join('|');}
+
+/* ═══ Les icônes ═══ */
+var IC={
+ ticket:'<path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+ voiture:'<path d="M3 13l2.2-5.2A2 2 0 0 1 7 6.6h10a2 2 0 0 1 1.8 1.2L21 13v5h-3v-2H6v2H3z"/><path d="M3 13h18"/><circle cx="7.5" cy="15.5" r=".6"/><circle cx="16.5" cy="15.5" r=".6"/>',
+ photo:'<path d="M4 8h3.2L9 6h6l1.8 2H20v11H4z"/><circle cx="12" cy="13" r="3.4"/>',
+ check:'<path d="M5 12.5l4.2 4.2L19 7"/>',
+ alerte:'<path d="M12 3.5l9 16H3z"/><path d="M12 10v4.2M12 17v.4"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ cadenas:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ gauche:'<path d="M15 5l-7 7 7 7"/>',droite:'<path d="M9 5l7 7-7 7"/>'
+};
+function ic(n,s){return '<svg viewBox="0 0 24 24" width="'+(s||18)+'" height="'+(s||18)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[n]+'</svg>';}
+function recu(n,manque){ // la vignette d'un ticket photographié
+  return '<svg viewBox="0 0 110 140" aria-hidden="true"><rect x="22" y="10" width="66" height="120" fill="#fff" stroke="#CDCAC2"/><path d="M22 130l6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5 6-5 6 5" fill="none" stroke="#CDCAC2"/>'
+   +'<rect x="34" y="20" width="42" height="6" fill="#55534E"/><rect x="30" y="36" width="50" height="3" fill="#A3A19B"/><rect x="30" y="44" width="38" height="3" fill="#A3A19B"/><rect x="30" y="52" width="46" height="3" fill="#A3A19B"/><rect x="30" y="60" width="30" height="3" fill="#A3A19B"/>'
+   +'<rect x="30" y="78" width="50" height="1.5" fill="#55534E"/><rect x="30" y="86" width="22" height="5" fill="#1B1A18"/><rect x="58" y="86" width="22" height="5" fill="#1B1A18"/><rect x="30" y="100" width="50" height="3" fill="#A3A19B"/><rect x="40" y="110" width="30" height="3" fill="#A3A19B"/>'
+   +(n?'<circle cx="92" cy="18" r="11" fill="#1B1A18"/><text x="92" y="22" font-size="12" font-weight="700" text-anchor="middle" fill="#fff" font-family="Outfit,sans-serif">'+n+'</text>':'')+'</svg>';
+}
+
+/* ═══ L'équipe fictive, novembre 2026 ═══ */
+function L(o){o.mois=o.mois||'nov';return o;}
+var GENS=[
+ {id:'marie',nom:'Marie',coul:'#3D6B27',contrat:'CDI',h:['4 h','aucune','aucune'],avant:386,
+  voiture:{modele:'Clio',cv:5,energie:'essence',carte:'la personne',carteOk:true},
+  lignes:[
+   L({id:1,t:'trajet',date:'2026-11-04',km:24,motif:'Attaches de palissage, magasin agricole de Nuits'}),
+   L({id:2,t:'ticket',date:'2026-11-04',cat:'achat',motif:'Attaches de palissage',montant:38.90,tva:6.48,paye:'cb',photo:true}),
+   L({id:3,t:'trajet',date:'2026-11-12',km:24,motif:'Échantillons au labo de Beaune, en fin de journée'}),
+   L({id:4,t:'ticket',date:'2026-11-12',cat:'peage',motif:'Parking du labo',montant:3.50,tva:null,paye:'cb',photo:true}),
+   L({id:5,t:'trajet',date:'2026-11-17',km:22,motif:'Formation taille à Dijon'}),
+   L({id:6,t:'ticket',date:'2026-11-17',cat:'repas',motif:'Repas de la formation',montant:18.00,tva:null,paye:'cb',photo:false})
+  ]},
+ {id:'arthur',nom:'Arthur',coul:'#8A5A38',contrat:'CDI',h:['aucune','aucune','aucune'],avant:4930,
+  voiture:{modele:'Partner',cv:7,energie:'diesel',carte:'la personne',carteOk:true},
+  lignes:[
+   L({id:1,t:'trajet',date:'2026-11-06',km:190,motif:'Pépinière de Mâcon, choisir les plants 2027'}),
+   L({id:2,t:'ticket',date:'2026-11-06',cat:'repas',motif:'Repas à Mâcon',montant:16.50,tva:null,paye:'cb',photo:true}),
+   L({id:3,t:'ticket',date:'2026-11-09',cat:'carburant',motif:'Gasoil du quad',montant:42.10,tva:7.02,paye:'cb',photo:true})
+  ]},
+ {id:'lucie',nom:'Lucie',coul:'#7A2850',contrat:'CDD',h:['2 h','aucune','aucune'],avant:120,
+  voiture:{modele:'Zoé',cv:4,energie:'electrique',carte:'son foyer',carteOk:false},
+  lignes:[L({id:1,t:'trajet',date:'2026-11-08',km:28,motif:'Pièces du pulvé, fournisseur à Dijon'})]},
+ {id:'leo',nom:'Léo',coul:'#2E6B8A',contrat:'Saisonnier',h:['aucune','aucune','aucune'],avant:0,voiture:null,
+  lignes:[L({id:1,t:'ticket',date:'2026-11-14',cat:'achat',motif:'Gants de taille',montant:12.90,tva:null,paye:'especes',photo:true})]},
+ {id:'paul',nom:'Paul',coul:'#5E5A8A',contrat:'CDI',h:['aucune','aucune','aucune'],avant:0,voiture:null,lignes:[]}
+];
+function P(id){for(var i=0;i<GENS.length;i++)if(GENS[i].id===id)return GENS[i];return GENS[0];}
+var S={sel:'marie',fige:{}};
+
+/* ═══ Le calcul ═══ */
+function kmTrajet(p,l){var t=num(l.km);return {tot:t,ret:t};}
+function calc(p){
+  var c=p.avant,out={};
+  p.lignes.filter(function(l){return l.t==='trajet';}).sort(function(a,b){return a.id-b.id;}).forEach(function(l){
+    var k=kmTrajet(p,l),mt=p.voiture?r2(bareme(p.voiture,c+k.ret)-bareme(p.voiture,c)):0;
+    out[l.id]={k:k,mt:mt,avant:c,apres:c+k.ret};c+=k.ret;
+  });
+  return {L:out,cumul:c};
+}
+function apercuTrajet(p,d){ // le calcul d'un trajet en cours de saisie, placé après les trajets déjà saisis
+  var C=calc(p),k=kmTrajet(p,d),c=C.cumul;
+  if(d._edit){var o=C.L[d._edit];if(o)c=o.avant;} // une modification garde sa place dans l'année
+  var mt=p.voiture?r2(bareme(p.voiture,c+k.ret)-bareme(p.voiture,c)):0;
+  return {k:k,mt:mt,avant:c,apres:c+k.ret};
+}
+function totaux(p){
+  var C=calc(p),t={tk:0,ntk:0,manq:0,ik:0,kmRet:0,nTr:0,dec:0,nDec:0,C:C};
+  p.lignes.forEach(function(l){
+    var mt=l.t==='ticket'?l.montant:C.L[l.id].mt;
+    if(l.mois==='dec'){t.dec+=mt;t.nDec++;return;}
+    if(l.t==='ticket'){t.tk+=l.montant;t.ntk++;if(!l.photo)t.manq++;}
+    else{t.ik+=mt;t.kmRet+=C.L[l.id].k.ret;t.nTr++;}
+  });
+  t.tk=r2(t.tk);t.ik=r2(t.ik);t.tot=r2(t.tk+t.ik);t.dec=r2(t.dec);
+  return t;
+}
+function verrou(p,l){return !!S.fige[p.id]&&l.mois!=='dec';}
+
+/* ═══ Les cadres de la page ═══ */
+var FR={
+  tel:{el:'f-tel',kind:'tel',tab:'frais',sheet:null},
+  pc:{el:'f-pc',kind:'pc',tab:'frais',sheet:null},
+  tk:{el:'f-tk',kind:'tel',tab:'frais',fixe:'ticket',pid:'marie',sheet:null},
+  tj:{el:'f-tj',kind:'tel',tab:'frais',fixe:'trajet',pid:'marie',sheet:null},
+  vt:{el:'f-vt',kind:'tel',tab:'frais',fixe:'voiture',pid:'lucie',sheet:null}
+};
+function pers(F){return P(F.pid||S.sel);}
+
+function brouillon(type,p){
+  if(type==='ticket')return {t:'ticket',date:AUJ,cat:'achat',motif:'',montant:'',tva:'',paye:'cb',photo:false};
+  if(type==='trajet')return {t:'trajet',date:AUJ,km:'',motif:''};
+  var v=p.voiture||{modele:'',cv:5,energie:'essence',carte:'la personne',carteOk:false};
+  return {t:'voiture',modele:v.modele,cv:v.cv,energie:v.energie,carte:v.carte,carteOk:v.carteOk};
+}
+
+// Les fenêtres « fixes » de la section 2 : déjà remplies, pour se lire d'un coup d'œil
+function exemple(F){
+  var p=pers(F);
+  if(F.fixe==='ticket')return {t:'ticket',date:AUJ,cat:'achat',motif:'Ficelle de liage',montant:'24,90',tva:'4,15',paye:'cb',photo:true};
+  if(F.fixe==='trajet')return {t:'trajet',date:AUJ,km:'24',motif:'Échantillons au labo de Beaune, en fin de journée'};
+  return brouillon('voiture',p);
+}
+function ouvrir(F,type,id){
+  var p=pers(F);
+  if(type==='trajet'&&!p.voiture&&!id){F.sheet={type:'voiture',d:brouillon('voiture',p),puis:'trajet'};return;}
+  if(id){
+    var l=p.lignes.filter(function(x){return x.id===id;})[0];if(!l)return;
+    var d=JSON.parse(JSON.stringify(l));d._edit=id;
+    if(d.t==='ticket'){d.montant=cf(l.montant,2);d.tva=l.tva==null?'':cf(l.tva,2);}
+    else d.km=String(l.km).replace('.',',');
+    F.sheet={type:d.t,d:d};
+  } else F.sheet={type:type,d:brouillon(type,p)};
+}
+function valide(F){
+  var s=F.sheet,d=s.d,p=pers(F);
+  if(s.type==='ticket')return num(d.montant)>0&&d.motif.trim().length>0;
+  if(s.type==='trajet')return !!p.voiture&&num(d.km)>0&&d.motif.trim().length>0;
+  return !!d.cv&&!!d.energie;
+}
+function enregistrer(F){
+  if(!valide(F))return;
+  var s=F.sheet,d=s.d,p=pers(F),msg='';
+  if(s.type==='voiture'){
+    p.voiture={modele:d.modele.trim(),cv:+d.cv,energie:d.energie,carte:d.carte,carteOk:!!d.carteOk};
+    msg='Voiture de '+p.nom+' enregistrée';
+    if(s.puis){ouvrir(F,s.puis);majTout(F,msg);return;}
+  } else {
+    var l;
+    if(d._edit){l=p.lignes.filter(function(x){return x.id===d._edit;})[0];}
+    else{l={id:p.lignes.reduce(function(m,x){return Math.max(m,x.id);},0)+1,mois:S.fige[p.id]?'dec':'nov'};p.lignes.push(l);}
+    l.t=d.t;l.date=d.date||AUJ;l.motif=d.motif.trim();
+    if(d.t==='ticket'){l.cat=d.cat;l.montant=r2(num(d.montant));l.tva=String(d.tva).trim()===''?null:r2(num(d.tva));l.paye=d.paye;l.photo=!!d.photo;}
+    else l.km=num(d.km);
+    msg=(d._edit?'Modifié':'Ajouté')+(F.fixe?' au volet de '+p.nom:'')+(l.mois==='dec'?' · part avec décembre':'');
+  }
+  F.sheet=F.fixe?{type:F.fixe,d:exemple(F)}:null;
+  majTout(F,msg);
+}
+function supprimer(F){
+  var d=F.sheet.d,p=pers(F);
+  p.lignes=p.lignes.filter(function(x){return x.id!==d._edit;});
+  F.sheet=F.fixe?{type:F.fixe,d:exemple(F)}:null;
+  majTout(F,'Supprimé');
+}
+
+/* ═══ Le dessin du volet Frais ═══ */
+function htmlLigne(F,p,l,C){
+  var lock=verrou(p,l),ps=[],ico,m,sub,mt;
+  if(l.t==='ticket'){
+    ico='ticket';m=esc(l.motif);sub=dt(l.date)+' · '+CATS[l.cat]+' · '+(l.paye==='cb'?'sa carte':'espèces');mt=l.montant;
+    if(!l.photo)ps.push('<span class="pas att">'+ic('alerte',12)+'ticket manquant</span>');
+  } else {
+    var c=C.L[l.id];ico='voiture';m=esc(l.motif);
+    sub=dt(l.date)+' · '+kmf(c.k.tot)+' avec sa voiture';mt=c.mt;
+    if(palier(c.apres)!==palier(c.avant))ps.push('<span class="pas gris">passe au palier '+palier(c.apres)+'</span>');
+  }
+  if(l.mois==='dec')ps.push('<span class="pas gris">avec décembre</span>');
+  if(lock)ps.push('<span class="pas gris">'+ic('cadenas',12)+'figé</span>');
+  return '<li><button type="button" class="lg" '+(lock?'disabled aria-disabled="true"':'data-act="edit" data-f="'+F.k+'" data-id="'+l.id+'"')+'>'
+    +'<span class="ic">'+ic(ico)+'</span><span class="q"><span class="m">'+m+'</span><small>'+sub+'</small>'+(ps.length?'<span class="pass">'+ps.join('')+'</span>':'')+'</span>'
+    +'<span class="mt">'+eur(mt)+'</span></button></li>';
+}
+function htmlVoiture(F,p){
+  var v=p.voiture;
+  if(!v)return '<div class="carte"><div class="carte-t">'+ic('voiture',16)+'Sa voiture</div><p class="sous">Pas de voiture déclarée.</p><button type="button" class="bt pt" style="margin-top:8px" data-act="open" data-type="voiture" data-f="'+F.k+'">Déclarer sa voiture</button></div>';
+  return '<div class="carte"><div class="carte-t">'+ic('voiture',16)+'Sa voiture<button type="button" class="bt pt" data-act="open" data-type="voiture" data-f="'+F.k+'">Modifier</button></div>'
+    +'<span class="gros">'+(v.modele?esc(v.modele)+' · ':'')+CVC[v.cv]+' · '+ENL[v.energie]+'</span>'
+    +'<div class="bande" style="margin-top:6px">'+(v.carteOk?'<span class="pas ok">'+ic('check',12)+'carte grise</span>':'<span class="pas att">'+ic('alerte',12)+'carte grise à joindre</span>')
+    +(v.energie==='electrique'?'<span class="pas gris">+20 %</span>':'')+'</div>'
+    +'</div>';
+}
+function htmlAnnee(F,p,t){
+  var v=p.voiture;if(!v)return '';
+  var c=t.C.cumul,pl=palier(c),co=(v.energie==='electrique'?BE:BT)[v.cv],taux=pl===1?co[0]:(pl===2?co[1]:co[3]);
+  var pc=Math.min(100,c/5000*100),iid='i-'+F.k+'-an';
+  return '<div class="carte"><div class="carte-t">Km payés depuis janvier<button type="button" class="ibtn" data-act="info" data-i="'+iid+'" aria-label="Comment se calcule le palier">i</button></div>'
+    +'<span class="gros">'+kmf(c)+'</span>'
+    +(pl===1?'<div class="barre" aria-hidden="true"><i style="width:'+pc.toFixed(1)+'%"></i></div><div class="barre-l"><span>0</span><span>5 000 km</span></div>':'')
+    +'<p class="sous">Palier '+pl+' · '+cf(taux)+' € le km suivant</p>'
+    +'<div class="infotxt" id="'+iid+'">Barème fiscal publié le 9 avril 2026 (revenus 2025), '+CVL[v.cv]+(v.energie==='electrique'?', électrique (+20 %)':'')+'. Jusqu’à 5 000 km : '+cf(co[0])+' € le km. De 5 001 à 20 000 : km × '+cf(co[1])+' + '+co[2].toLocaleString('fr-FR')+' €. Au-delà : km × '+cf(co[3])+'. Chaque trajet prend ce qu’il ajoute au total de l’année.</div></div>';
+}
+function htmlFrais(F,p){
+  var t=totaux(p),C=t.C,fige=!!S.fige[p.id],h='';
+  if(fige)h+='<p class="phrase">'+ic('cadenas',16)+' Novembre figé : <b>'+eur(t.tot)+'</b> partis avec la paie.'+(t.nDec?' <b style="font-size:inherit">'+eur(t.dec)+'</b> avec décembre.':'')+'</p>';
+  else if(t.tot>0)h+='<p class="phrase"><b>'+eur(t.tot)+'</b> à rembourser avec la paie de novembre.</p>';
+  else h+='<p class="phrase">Rien à rembourser en novembre.</p>';
+  var bd=[];
+  if(t.manq)bd.push('<span class="pas att">'+ic('alerte',12)+t.manq+' ticket'+(t.manq>1?'s':'')+' manquant'+(t.manq>1?'s':'')+'</span>');
+  if(p.voiture&&!p.voiture.carteOk&&t.nTr)bd.push('<span class="pas att">'+ic('alerte',12)+'carte grise à joindre</span>');
+  if(bd.length)h+='<div class="bande">'+bd.join('')+'</div>';
+  if(t.ntk||t.nTr)h+='<div class="tuiles"><div class="tuile"><span>Tickets</span><b>'+(t.ntk?eur(t.tk):'—')+'</b><small>'+(t.ntk?t.ntk+' ticket'+(t.ntk>1?'s':''):'aucun ticket')+'</small></div>'
+     +'<div class="tuile"><span>Km</span><b>'+(t.nTr?eur(t.ik):'—')+'</b><small>'+(t.nTr?kmf(t.kmRet):'aucun trajet')+'</small></div></div>';
+  h+='<div class="actions"><button type="button" class="bt pri" data-act="open" data-type="ticket" data-f="'+F.k+'">'+ic('plus')+'Ticket</button><button type="button" class="bt pri" data-act="open" data-type="trajet" data-f="'+F.k+'">'+ic('plus')+'Trajet</button></div>';
+  var nov=p.lignes.filter(function(l){return l.mois!=='dec';}),dec=p.lignes.filter(function(l){return l.mois==='dec';});
+  var tri=function(a,b){return a.date<b.date?-1:(a.date>b.date?1:a.id-b.id);};
+  var liste='<h5 class="grp">Novembre <span>'+nov.length+'</span></h5>'+(nov.length?'<ul class="lst">'+nov.sort(tri).map(function(l){return htmlLigne(F,p,l,C);}).join('')+'</ul>':'<p class="vide">Aucun frais ce mois-ci.</p>');
+  if(dec.length)liste+='<h5 class="grp">Avec la paie de décembre <span>'+dec.length+'</span></h5><ul class="lst">'+dec.sort(tri).map(function(l){return htmlLigne(F,p,l,C);}).join('')+'</ul>';
+  h+='<div class="fr-grille"><div>'+liste+'</div><div class="cote" style="margin-top:14px">'+htmlVoiture(F,p)+htmlAnnee(F,p,t)+'</div></div>';
+  return h;
+}
+
+/* ═══ Pour la compta ═══ */
+function htmlCompta(p){
+  var t=totaux(p),fige=!!S.fige[p.id];
+  var cl=function(l,v,c,pp){return '<div class="cl '+(c||'')+'"><span class="l">'+l+'</span><span class="v'+(/aucun/.test(v)?' rien':'')+'">'+v+'</span>'+(pp?'<p class="p">'+pp+'</p>':'')+'</div>';};
+  var h='<section class="paie" aria-label="Pour la compta"><header class="paie-h"><h3>Pour la compta</h3><span>Novembre 2026'+(fige?' · figé le 18 nov.':'')+'</span></header><div class="cpt">'
+    +cl('Salaire de base','maintenu','vieux')+cl('Heures à 25 %',p.h[0],'vieux')+cl('Heures à 50 %',p.h[1],'vieux')+cl('Heures à 100 %',p.h[2],'vieux')+cl('Retenue','aucune','vieux')
+    +'<div class="sep">Remboursements, hors salaire<span class="pas gris">nouveau</span></div>'
+    +cl('Frais avancés',t.ntk?eur(t.tk):'aucun','neuf',t.ntk?t.ntk+' ticket'+(t.ntk>1?'s':'')+', joints au relevé'+(t.manq?' · '+t.manq+' manquant'+(t.manq>1?'s':''):''):'')
+    +cl('Indemnités km',t.nTr?eur(t.ik):'aucune','neuf',t.nTr&&p.voiture?kmf(t.kmRet)+' · '+CVC[p.voiture.cv]+' '+ENL[p.voiture.energie]+' · barème fiscal':'')
+    +cl('À rembourser',t.tot>0?eur(t.tot):'aucun','neuf tot')
+    +'</div><p class="paie-pied">Les cases du haut ne changent pas. Le bloc du bas se saisit à part sur la paie.</p></section>';
+  return h;
+}
+function htmlEnvoi(p){
+  var t=totaux(p),fige=!!S.fige[p.id];
+  if(fige)return '<div class="carte-t">Envoi à la compta</div><p>Figé le <b>18 nov.</b> : '+(p.h[0]==='aucune'?'aucune heure sup payée':p.h[0]+' d’heures sup payées')+', aucune retenue, <b>'+eur(t.tot)+'</b> de frais.</p>'
+    +'<p>'+(t.nDec?eur(t.dec)+' saisis depuis partent avec décembre.':'Un frais saisi maintenant part avec décembre.')+'</p>'
+    +'<button type="button" class="bt pt" data-act="defiger">Défiger</button>';
+  return '<div class="carte-t">Envoi à la compta</div><p>Au moment d’envoyer la feuille, figez ce qui est payé, retenu <b>et remboursé</b> : ce qui changera ensuite passera sur décembre.</p>'
+    +'<button type="button" class="bt pri" data-act="figer">'+ic('check')+'Figer novembre</button>';
+}
+function htmlPapier(p){
+  var t=totaux(p),C=t.C,v=p.voiture;
+  var tk=p.lignes.filter(function(l){return l.t==='ticket'&&l.mois!=='dec';}).sort(function(a,b){return a.date<b.date?-1:1;});
+  var tr=p.lignes.filter(function(l){return l.t==='trajet'&&l.mois!=='dec';}).sort(function(a,b){return a.date<b.date?-1:1;});
+  var h='<div class="ent"><div><h4>Frais à rembourser</h4><small>Relevé de novembre 2026 · la page des frais</small></div><div style="text-align:right"><b>'+esc(p.nom)+'</b><small>'+esc(p.contrat)+' · Domaine fictif</small></div></div>';
+  h+='<h6>Tickets et paiements</h6>';
+  if(tk.length){
+    h+='<table><thead><tr><th>N°</th><th>Date</th><th>Pour quoi</th><th>Motif</th><th>Payé</th><th class="n">dont TVA</th><th class="n">Montant</th></tr></thead><tbody>';
+    tk.forEach(function(l,i){h+='<tr><td><span class="num-pastille">'+(i+1)+'</span></td><td>'+dt(l.date)+'</td><td>'+CATS[l.cat]+'</td><td>'+esc(l.motif)+(l.photo?'':' <span class="manque">— ticket manquant</span>')+'</td><td>'+(l.paye==='cb'?'carte':'espèces')+'</td><td class="n">'+(l.tva==null?'—':eur(l.tva))+'</td><td class="n">'+eur(l.montant)+'</td></tr>';});
+    h+='</tbody><tfoot><tr><td colspan="6">Total des tickets</td><td class="n">'+eur(t.tk)+'</td></tr></tfoot></table>';
+  } else h+='<p class="note">Aucun.</p>';
+  h+='<h6>Indemnités kilométriques</h6>';
+  if(tr.length&&v){
+    h+='<table><thead><tr><th>Date</th><th>Motif</th><th class="n">Km</th><th class="n">Montant</th></tr></thead><tbody>';
+    tr.forEach(function(l){var c=C.L[l.id];h+='<tr><td>'+dt(l.date)+'</td><td>'+esc(l.motif)+'</td><td class="n">'+kmf(c.k.tot)+'</td><td class="n">'+eur(c.mt)+'</td></tr>';});
+    h+='</tbody><tfoot><tr><td colspan="2">Total des km</td><td class="n">'+kmf(t.kmRet)+'</td><td class="n">'+eur(t.ik)+'</td></tr></tfoot></table>';
+    h+='<p class="note">Voiture : '+(v.modele?esc(v.modele)+', ':'')+CVL[v.cv]+', '+ENL[v.energie]+' ; carte grise au nom de '+esc(v.carte)+(v.carteOk?' (jointe)':' (<span class="manque">à joindre</span>)')+'. Barème fiscal publié le 9 avril 2026 (revenus 2025). Km payés depuis janvier : '+kmf(C.cumul)+'.</p>';
+  } else h+='<p class="note">Aucun trajet.</p>';
+  h+='<div class="total"><span>À rembourser avec la paie de novembre</span><b>'+eur(t.tot)+'</b></div>';
+  if(tk.length){
+    h+='<h6>Justificatifs</h6><div class="annexe">'+tk.map(function(l,i){return '<figure>'+(l.photo?recu(i+1):'<div class="vide">'+(i+1)+' · ticket manquant</div>')+'<figcaption>'+(i+1)+' · '+eur(l.montant)+'</figcaption></figure>';}).join('')+'</div>';
+  }
+  return h;
+}
+
+/* ═══ Les fenêtres de saisie ═══ */
+function chips(F,champ,liste,val){
+  return '<div class="puces" role="group">'+liste.map(function(o){return '<button type="button" class="chip'+(String(o[0])===String(val)?' on':'')+'" aria-pressed="'+(String(o[0])===String(val))+'" data-act="set" data-f="'+F.k+'" data-c="'+champ+'" data-v="'+esc(o[0])+'">'+o[1]+'</button>';}).join('')+'</div>';
+}
+
+function htmlCalcTrajet(F){
+  var p=pers(F),d=F.sheet.d;
+  if(!p.voiture)return '<div class="calc"><p class="alerte">'+ic('alerte',16)+'<span>Pas de voiture déclarée : la puissance fait le taux.</span></p></div>';
+  var a=apercuTrajet(p,d),v=p.voiture,h='<div class="calc" aria-live="polite">';
+  if(!(num(d.km)>0))return h+'<div class="r"><span>Km</span><b>à saisir</b></div></div>';
+  var p1=palier(a.avant),p2=palier(a.apres);
+  h+='<div class="r pal"><span>Depuis janvier : '+kmf(a.avant)+' → '+kmf(a.apres)+'</span><b>palier '+(p1===p2?p1:p1+' puis '+p2)+'</b></div>';
+  h+='<div class="r tot"><span>'+CVC[v.cv]+' '+ENL[v.energie]+' · barème fiscal</span><b>'+eur(a.mt)+'</b></div>';
+  return h+'</div>';
+}
+function htmlFeuille(F){
+  var s=F.sheet,d=s.d,p=pers(F),fige=!!S.fige[p.id],h='';
+  var titre={ticket:d._edit?'Le ticket':'Nouveau ticket',trajet:d._edit?'Le trajet':'Nouveau trajet',voiture:'Sa voiture'}[s.type];
+  h+='<div class="poignee"></div><div class="feuille-h"><div><h5>'+titre+'</h5><span class="qui">'+esc(p.nom)+'</span></div>'+(F.fixe?'':'<button type="button" class="x" data-act="close" data-f="'+F.k+'" aria-label="Fermer">'+ic('x',16)+'</button>')+'</div>';
+  if(s.puis)h+='<p class="micro" style="margin-bottom:4px">D’abord sa voiture : la puissance fait le taux. Le trajet suit.</p>';
+  if(s.type==='ticket'){
+    h+=d.photo?'<div class="photo prise"><span class="vign">'+recu(0).replace('viewBox="0 0 110 140"','viewBox="18 6 74 128" width="46" height="60"')+'</span><span class="t"><b>Photo prise</b><span class="micro">Jointe au relevé imprimé.</span></span><button type="button" class="bt pt" data-act="set" data-f="'+F.k+'" data-c="photo" data-v="">Reprendre</button></div>'
+      :'<button type="button" class="photo" style="width:100%;text-align:left" data-act="set" data-f="'+F.k+'" data-c="photo" data-v="1"><span class="vign" style="display:grid;place-items:center;color:var(--texte-med)">'+ic('photo',28)+'</span><span class="t"><b>Photographier le ticket</b><span class="micro">Ou choisir une photo, un PDF.</span></span></button>';
+    h+='<div class="duo"><div class="champ"><label>Montant</label><input class="grosse" data-in="montant" data-f="'+F.k+'" inputmode="decimal" placeholder="0,00" value="'+esc(d.montant)+'"></div>'
+      +'<div class="champ"><label>Date</label><input type="date" data-in="date" data-f="'+F.k+'" value="'+esc(d.date)+'" max="'+AUJ+'"></div></div>';
+    h+='<div class="champ"><span class="lbl">Pour quoi</span>'+chips(F,'cat',Object.keys(CATS).map(function(k){return [k,CATS[k]];}),d.cat)+'<p class="micro">Le carburant de sa propre voiture passe par les km.</p></div>';
+    h+='<div class="champ"><label>Motif</label><input data-in="motif" data-f="'+F.k+'" placeholder="Ex. attaches de palissage" value="'+esc(d.motif)+'" maxlength="80"></div>';
+    h+='<div class="duo"><div class="champ"><span class="lbl">Payé avec</span>'+chips(F,'paye',[['cb','Sa carte'],['especes','Espèces']],d.paye)+'</div>'
+      +'<div class="champ"><label>dont TVA <span style="font-weight:500">(si indiquée)</span></label><input data-in="tva" data-f="'+F.k+'" inputmode="decimal" placeholder="—" value="'+esc(d.tva)+'"></div></div>';
+  } else if(s.type==='trajet'){
+    h+='<div class="duo"><div class="champ"><label>Km en plus</label><input class="grosse" data-in="km" data-f="'+F.k+'" inputmode="decimal" placeholder="0" value="'+esc(d.km)+'"></div>'
+      +'<div class="champ"><label>Date</label><input type="date" data-in="date" data-f="'+F.k+'" value="'+esc(d.date)+'" max="'+AUJ+'"></div></div>';
+    h+='<p class="micro" style="margin-top:4px">Les km faits pour le travail avec sa voiture, en plus de son trajet habituel.</p>';
+    h+='<div class="champ"><label>Où et pourquoi</label><input data-in="motif" data-f="'+F.k+'" placeholder="Ex. échantillons au labo de Beaune" value="'+esc(d.motif)+'" maxlength="100"></div>';
+    h+='<div id="calcbox-'+F.k+'">'+htmlCalcTrajet(F)+'</div>';
+  } else {
+    h+='<div class="champ"><label>Modèle <span style="font-weight:500">(facultatif)</span></label><input data-in="modele" data-f="'+F.k+'" placeholder="Ex. Clio" value="'+esc(d.modele)+'" maxlength="30"></div>';
+    h+='<div class="champ"><span class="lbl">Puissance</span>'+chips(F,'cv',[[3,'3 CV et moins'],[4,'4 CV'],[5,'5 CV'],[6,'6 CV'],[7,'7 CV et plus']],d.cv)+'<p class="micro">Case P.6 de la carte grise.</p></div>';
+    h+='<div class="champ"><span class="lbl">Énergie</span>'+chips(F,'energie',[['essence','Essence'],['diesel','Diesel'],['hybride','Hybride'],['electrique','100 % électrique']],d.energie)+'<p class="micro">Électrique : +20 %. Hybride : le barème des voitures.</p></div>';
+    h+='<div class="champ"><span class="lbl">Carte grise au nom de</span>'+chips(F,'carte',[['la personne','La personne'],['son foyer','Son foyer']],d.carte)+'</div>';
+    h+='<div class="champ">'+(d.carteOk?'<div class="photo prise"><span class="vign" style="display:grid;place-items:center;color:var(--ok-texte)">'+ic('check',26)+'</span><span class="t"><b>Carte grise jointe</b></span><button type="button" class="bt pt" data-act="set" data-f="'+F.k+'" data-c="carteOk" data-v="">Retirer</button></div>'
+      :'<button type="button" class="photo" style="width:100%;text-align:left" data-act="set" data-f="'+F.k+'" data-c="carteOk" data-v="1"><span class="vign" style="display:grid;place-items:center;color:var(--texte-med)">'+ic('photo',26)+'</span><span class="t"><b>Photographier la carte grise</b><span class="micro">À garder en cas de contrôle.</span></span></button>')+'</div>';
+  }
+  var eff=s.type==='voiture'?'Vaut pour les trajets à venir ; un mois figé ne bouge pas.':'Part avec la paie de <b>'+(fige?'décembre':'novembre')+'</b>.';
+  if(s.type!=='voiture'&&d._edit){var lx=p.lignes.filter(function(x){return x.id===d._edit;})[0];eff='Part avec la paie de <b>'+(lx&&lx.mois==='dec'?'décembre':'novembre')+'</b>.';}
+  h+='<div class="feuille-p"><span class="eff">'+eff+'</span>'
+    +(d._edit?'<button type="button" class="bt dgr pt" data-act="del" data-f="'+F.k+'">Supprimer</button>':'')
+    +(F.fixe?'':'<button type="button" class="bt pt" data-act="close" data-f="'+F.k+'">Annuler</button>')
+    +'<button type="button" class="bt pri" data-act="save" data-f="'+F.k+'" id="save-'+F.k+'"'+(valide(F)?'':' disabled')+'>'+(d._edit||s.type==='voiture'?'Enregistrer':'Ajouter')+'</button></div>';
+  return h;
+}
+
+/* ═══ Les cadres ═══ */
+function htmlVolets(F){
+  var v=[['resume','Résumé'],['jours','Jours'],['hsup','Compteur'],['cp','Congés et acomptes'],['frais','Frais']];
+  return '<div class="volets" role="tablist">'+v.map(function(x){return '<button type="button" role="tab" aria-selected="'+(F.tab===x[0])+'" class="'+(F.tab===x[0]?'on':'')+'" data-act="tab" data-f="'+F.k+'" data-t="'+x[0]+'">'+x[1]+(x[0]==='frais'?'<span class="nv" aria-hidden="true"></span>':'')+'</button>';}).join('')+'</div>';
+}
+function htmlCorpsFiche(F,p){
+  if(F.tab==='frais')return htmlFrais(F,p);
+  if(F.tab==='resume')return htmlCompta(p);
+  return '<p class="vide-volet">Volet existant, inchangé.</p>';
+}
+function htmlFicheTete(p){
+  return '<div class="fiche-h"><span class="ava" style="background:'+p.coul+'">'+p.nom.charAt(0)+'</span><span class="qui"><b>'+esc(p.nom)+'</b><small>'+esc(p.contrat)+'</small></span>'
+    +'<span class="mois"><span>'+ic('gauche',16)+'</span>Novembre 2026<span>'+ic('droite',16)+'</span></span></div>';
+}
+function rendre(F){
+  var el=document.getElementById(F.el);if(!el)return;
+  var p=pers(F),h='';
+  if(F.kind==='tel'){
+    h='<div class="tel-barre"><span>9:41</span><span>Ma Vigne</span></div><div class="tel-corps">'
+      +'<div class="retour">'+ic('gauche',16)+'Personnel</div>'
+      +'<div class="fiche">'+htmlFicheTete(p)+htmlVolets(F)+'<div class="fiche-b">'+htmlCorpsFiche(F,p)+'</div></div></div>';
+  } else {
+    h='<div class="pc-barre"><i></i><i></i><i></i><span>mavigneapp.fr — Planning</span></div><div class="pc-app"><nav class="pc-nav" aria-hidden="true"><span class="logo">Ma Vigne</span>'
+      +['Accueil','Vigne','Tracteur','Phyto','Cave','Planning','Pilotage','Réserve','Réglages'].map(function(m){return '<span class="'+(m==='Planning'?'on':'')+'">'+m+'</span>';}).join('')+'</nav>'
+      +'<div class="pc-main"><div class="app-tete"><h4>Planning</h4></div><div class="onglets"><span>Mois</span><span>Année</span><span class="on">Personnel</span></div>'
+      +'<div class="pc-grille"><div class="gens">'+GENS.map(function(g){var t=totaux(g);return '<button type="button" class="gcarte'+(g.id===S.sel?' on':'')+'" aria-current="'+(g.id===S.sel)+'" data-act="sel" data-p="'+g.id+'"><span class="ava" style="background:'+g.coul+'">'+g.nom.charAt(0)+'</span><span><span class="n">'+esc(g.nom)+'</span><small>'+esc(g.contrat)+'</small></span>'+(t.tot>0?'<span class="fr" title="Frais de novembre">'+ic('ticket',12)+eur(t.tot)+'</span>':'')+'</button>';}).join('')+'</div>'
+      +'<div class="fiche">'+htmlFicheTete(p)+htmlVolets(F)+'<div class="fiche-b">'+htmlCorpsFiche(F,p)+'</div></div></div></div></div>';
+  }
+  if(F.sheet)h+='<div class="voile"'+(F.fixe?'':' data-act="close" data-f="'+F.k+'"')+'></div><div class="feuille" role="dialog" aria-modal="false" aria-label="Saisie">'+htmlFeuille(F)+'</div>';
+  if(F.msg)h+='<div class="ajoute" role="status">'+esc(F.msg)+'</div>';
+  el.innerHTML=h;
+  var vo=el.querySelector('.volets'),on=vo&&vo.querySelector('button.on');
+  if(on&&vo.scrollWidth>vo.clientWidth)vo.scrollLeft=Math.max(0,on.offsetLeft+on.offsetWidth-vo.clientWidth+8);
+}
+function rendreCompta(){
+  var p=P(S.sel);
+  document.getElementById('choix-compta').innerHTML=GENS.map(function(g){return '<button type="button" class="chip'+(g.id===S.sel?' on':'')+'" aria-pressed="'+(g.id===S.sel)+'" data-act="sel" data-p="'+g.id+'">'+esc(g.nom)+'</button>';}).join('');
+  document.getElementById('compta-carte').innerHTML=htmlCompta(p);
+  document.getElementById('compta-envoi').innerHTML=htmlEnvoi(p);
+  document.getElementById('compta-papier').innerHTML=htmlPapier(p);
+}
+var minuteur={};
+function majTout(src,msg){
+  Object.keys(FR).forEach(function(k){if(FR[k]!==src)FR[k].msg=null;});
+  if(src&&msg){src.msg=msg;clearTimeout(minuteur[src.k]);minuteur[src.k]=setTimeout(function(){src.msg=null;rendre(src);},2200);}
+  Object.keys(FR).forEach(function(k){rendre(FR[k]);});
+  rendreCompta();
+}
+Object.keys(FR).forEach(function(k){FR[k].k=k;if(FR[k].fixe)FR[k].sheet={type:FR[k].fixe,d:exemple(FR[k])};});
+
+/* ═══ Les gestes ═══ */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var act=b.getAttribute('data-act'),F=FR[b.getAttribute('data-f')];
+  if(act==='sel'){S.sel=b.getAttribute('data-p');FR.tel.sheet=null;FR.pc.sheet=null;majTout();return;}
+  if(act==='tab'){F.tab=b.getAttribute('data-t');rendre(F);return;}
+  if(act==='open'){if(F.fixe){ /* les fenêtres de la section 2 restent ouvertes */ return;}ouvrir(F,b.getAttribute('data-type'));rendre(F);var i=document.querySelector('#'+F.el+' .feuille input,#'+F.el+' .feuille button');if(i)i.focus();return;}
+  if(act==='edit'){if(F.fixe)return;ouvrir(F,null,+b.getAttribute('data-id'));rendre(F);return;}
+  if(act==='close'){if(F.fixe)return;F.sheet=null;rendre(F);return;}
+  if(act==='set'){
+    var c=b.getAttribute('data-c'),v=b.getAttribute('data-v'),d=F.sheet.d;
+    if(c==='photo'||c==='carteOk')d[c]=!!v;else if(c==='cv')d.cv=+v;else d[c]=v;
+    rendre(F);return;
+  }
+  if(act==='save'){enregistrer(F);return;}
+  if(act==='del'){supprimer(F);return;}
+  if(act==='figer'){S.fige[S.sel]=true;majTout();return;}
+  if(act==='defiger'){
+    var p=P(S.sel);delete S.fige[S.sel];p.lignes.forEach(function(l){l.mois='nov';});majTout();return;
+  }
+  if(act==='info'){var x=document.getElementById(b.getAttribute('data-i'));if(x)x.classList.toggle('on');return;}
+});
+function saisie(e){
+  var el=e.target;if(!el.matches||!el.matches('[data-in]'))return;
+  var F=FR[el.getAttribute('data-f')];if(!F||!F.sheet)return;
+  F.sheet.d[el.getAttribute('data-in')]=el.value;
+  if(F.sheet.type==='trajet'){var box=document.getElementById('calcbox-'+F.k);if(box)box.innerHTML=htmlCalcTrajet(F);}
+  var sv=document.getElementById('save-'+F.k);if(sv)sv.disabled=!valide(F);
+}
+document.addEventListener('input',saisie);
+document.addEventListener('change',saisie);
+
+/* ═══ Section 4 : l'exemple d'Arthur, l'essai, les tableaux ═══ */
+function rendreExemple(){
+  var v={cv:7,energie:'diesel'},av=4930,km=190,ap=av+km;
+  var fa=r2(bareme(v,ap)),fb=r2(bareme(v,av)),bon=r2(fa-fb),naif=r2(km*BT[7][0]);
+  document.getElementById('exemple').innerHTML='<div class="carte-t">L’exemple d’Arthur : 7 CV diesel, '+kmf(av)+' payés depuis janvier, la pépinière de Mâcon en aller-retour ('+kmf(km)+')</div>'
+    +'<div class="ligne-c"><span>Barème pour '+kmf(ap)+' (palier 2) : '+cf(BT[7][1])+' × '+ap.toLocaleString('fr-FR')+' + 1 515</span><b>'+eur(fa)+'</b></div>'
+    +'<div class="ligne-c"><span>Barème pour '+kmf(av)+' (palier 1) : '+cf(BT[7][0])+' × '+av.toLocaleString('fr-FR')+'</span><b>'+eur(fb)+'</b></div>'
+    +'<div class="ligne-c fort"><span>Ce trajet : la différence</span><b>'+eur(bon)+'</b></div>'
+    +'<div class="ligne-c faux"><span>Payé au taux du palier 1 sur les '+kmf(km)+' ('+cf(BT[7][0])+' × '+km+')</span><b>'+eur(naif)+' — '+eur(naif-bon)+' au-dessus du barème de l’année</b></div>';
+}
+var cvSel=document.getElementById('s-cv');
+cvSel.innerHTML=[3,4,5,6,7].map(function(c){return '<option value="'+c+'"'+(c===7?' selected':'')+'>'+CVL[c]+'</option>';}).join('');
+function rendreSimu(){
+  var v={cv:+cvSel.value,energie:document.getElementById('s-en').value},av=Math.max(0,num(document.getElementById('s-av').value)),km=Math.max(0,num(document.getElementById('s-km').value)),ap=av+km;
+  var mt=r2(bareme(v,ap)-bareme(v,av)),p1=palier(av),p2=palier(ap);
+  document.getElementById('simu-r').innerHTML='<div><span>Ce trajet</span><b>'+eur(mt)+'</b></div><div><span>Palier</span><b>'+(p1===p2?p1:p1+' → '+p2)+'</b></div><div><span>Barème de l’année, après</span><b>'+eur(bareme(v,ap))+'</b></div><div><span>Soit, par km du trajet</span><b>'+(km?cf(mt/km)+' €':'—')+'</b></div>';
+  var tab=function(B,titre,el){
+    var h='<div><h3>'+titre+'</h3><div class="defile"><table class="bar-tab"><thead><tr><th>Puissance</th><th>Jusqu’à 5 000 km</th><th>De 5 001 à 20 000 km</th><th>Au-delà de 20 000 km</th></tr></thead><tbody>';
+    [3,4,5,6,7].forEach(function(c){var o=B[c],on=el&&c===v.cv;h+='<tr class="'+(on?'hl':'')+'"><td>'+CVL[c]+'</td><td class="'+(on&&p2===1?'hl':'')+'">d × '+cf(o[0])+'</td><td class="'+(on&&p2===2?'hl':'')+'">(d × '+cf(o[1])+') + '+o[2].toLocaleString('fr-FR')+'</td><td class="'+(on&&p2===3?'hl':'')+'">d × '+cf(o[3])+'</td></tr>';});
+    return h+'</tbody></table></div><p class="micro" style="margin-top:6px">d = km professionnels de l’année. Barème publié le 9 avril 2026 (revenus 2025).</p></div>';
+  };
+  document.getElementById('tables').innerHTML=tab(BT,'Voitures : essence, diesel, hybrides, hydrogène',v.energie!=='electrique')+tab(BE,'Voitures 100 % électriques (+20 %)',v.energie==='electrique');
+}
+['s-cv','s-en','s-av','s-km'].forEach(function(id){document.getElementById(id).addEventListener('input',rendreSimu);document.getElementById(id).addEventListener('change',rendreSimu);});
+
+/* ═══ Le thème ═══ */
+(function(){var b=document.getElementById('theme'),m=['auto','clair','sombre'],i=0;
+  b.addEventListener('click',function(){i=(i+1)%3;var r=document.documentElement;if(m[i]==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',m[i]==='clair'?'light':'dark');b.textContent='Thème : '+m[i];});})();
+
+majTout();rendreExemple();rendreSimu();
+window.__MV_FRAIS={bareme:bareme,calc:calc,totaux:totaux,GENS:GENS,BT:BT,BE:BE};
+})();
+</script>
+</body>
+</html>

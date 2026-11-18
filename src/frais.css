@@ -1,0 +1,96 @@
+/* ═════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★ FRAIS-1 (§595) — LES FRAIS À REMBOURSER : le volet « Frais » de la fiche (Planning › Personnel), la fenêtre de
+   saisie (ovPlanFrais), le bloc des remboursements de « Pour la compta » et le taux du domaine (roue du Planning).
+   Maquette validée : docs/maquettes/maquette-frais-v2.html. Une phrase, une bande si quelque chose manque, deux
+   chiffres, deux boutons, la liste du mois ; la voiture et les km de l'année à côté (au téléphone, dessous).
+   Fichier à part : styles.css est à son plafond (mv-harnais-typo). Importé par app.js après pilotage.css. Tout se
+   lit dans la charte, avec un repli ; les boutons sont les pièces du jeu commun (.mvbtn, CHARTE-3) — rien ici ne
+   leur donne un fond, une bordure ou un arrondi.
+   ═════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Le volet se règle sur SA largeur, pas sur celle de l'écran : sur ordinateur, la fiche est une colonne à droite de la liste ── */
+.frs{container-type:inline-size}
+
+/* ── La phrase, la bande, les pastilles ── */
+.frs-ph{display:flex;align-items:baseline;gap:var(--e-2,8px);margin:0 0 var(--e-2,8px);font-size:var(--pt-sm,16px);line-height:1.35;color:var(--texte-med,#55534E)}
+.frs-ph b{font-size:var(--pt-md,20px);font-weight:var(--fw-semi,600);color:var(--texte,#1B1A18);font-variant-numeric:lining-nums tabular-nums}
+.frs-ph svg{flex:none;align-self:center;color:var(--texte-doux,#686660)}
+.frs-pass{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);margin-top:var(--e-1,4px)}
+.frs-bande{margin:0 0 var(--e-3,12px)}
+.frs-pas{display:inline-flex;align-items:center;gap:var(--e-1,4px);min-height:22px;padding:0 var(--e-2,8px);border-radius:var(--r-full,999px);
+  background:var(--gris-clair,#F0EEE9);color:var(--texte-med,#55534E);font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);white-space:nowrap}
+.frs-pas svg{flex:none}
+.frs-pas.ok{background:var(--ok-doux,rgba(35,122,71,.13));color:var(--ok-texte,#217343)}
+.frs-pas.or{background:var(--attention-doux,rgba(161,92,0,.13));color:var(--attention-texte,#975600)}
+
+/* ── Les deux chiffres, les deux boutons ── */
+.frs-tu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e-2,8px);margin:0 0 var(--e-3,12px)}
+.frs-t{display:flex;flex-direction:column;gap:2px;min-width:0;padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);background:var(--bg-doux,#F7F5F1)}
+.frs-t span{font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);color:var(--texte-med,#55534E)}
+.frs-t b{font-size:var(--pt-lg,24px);font-weight:var(--fw-bold,700);line-height:1.15;color:var(--texte,#1B1A18);font-variant-numeric:lining-nums tabular-nums}
+.frs-t small{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+.frs-act{display:flex;gap:var(--e-2,8px);margin:0 0 var(--e-2,8px)}
+.frs-act .mvbtn{flex:1 1 0}
+@container (min-width:560px){.frs-tu{grid-template-columns:repeat(2,minmax(0,220px))}.frs-act .mvbtn{flex:0 0 auto}}
+
+/* ── La liste du mois ── */
+.frs-g{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--e-3,12px);margin-top:var(--e-2,8px)}
+@container (min-width:680px){.frs-g{grid-template-columns:minmax(0,1fr) 260px}}
+.frs-grp{display:flex;align-items:baseline;gap:var(--e-2,8px);margin:var(--e-2,8px) 0 var(--e-1,4px);font-family:var(--font-ui,Outfit,sans-serif);font-size:var(--pt-micro,12px);font-weight:var(--fw-bold,700);color:var(--texte-med,#55534E)}
+.frs-grp span{font-weight:var(--fw-semi,600);color:var(--texte-doux,#686660)}
+.frs-l{list-style:none;margin:0;padding:0}
+.frs-l li+li{border-top:1px solid var(--ligne,#E7E6E2)}
+.frs-li{display:flex;align-items:flex-start;gap:var(--e-3,12px);width:100%;min-height:52px;padding:var(--e-2,8px) var(--e-1,4px);border:0;background:transparent;
+  color:inherit;font:inherit;text-align:left;border-radius:var(--r-md,8px)}
+button.frs-li{cursor:pointer}
+@media (hover:hover){button.frs-li:hover{background:var(--survol,rgba(28,26,22,.055))}}
+.frs-ic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--ligne,#E7E6E2);background:var(--bg-doux,#F7F5F1);color:var(--texte-med,#55534E)}
+.frs-q{flex:1;min-width:0;display:flex;flex-direction:column}
+.frs-m{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte,#1B1A18);overflow-wrap:anywhere}
+.frs-s{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);line-height:1.45}
+.frs-mt{flex:none;padding-top:2px;font-size:var(--pt-base,14px);font-weight:var(--fw-bold,700);color:var(--texte,#1B1A18);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.frs-vide{margin:var(--e-2,8px) 0;font-size:var(--pt-txt,13px);color:var(--texte-doux,#686660)}
+
+/* ── La voiture, les km de l'année ── */
+.frs-cote{display:flex;flex-direction:column;gap:var(--e-2,8px)}
+.frs-carte.pf-card{margin:0}
+.frs-ct{display:flex;align-items:center;gap:var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:var(--fw-bold,700);color:var(--texte-med,#55534E)}
+.frs-ct > .mvbtn,.frs-ct > .mv-i{margin-left:auto}
+.frs-gros{display:block;margin-top:var(--e-1,4px);font-size:var(--pt-md,20px);font-weight:var(--fw-bold,700);color:var(--texte,#1B1A18);font-variant-numeric:lining-nums tabular-nums}
+.frs-sous{margin:var(--e-1,4px) 0 0;font-size:var(--pt-txt,13px);color:var(--texte-med,#55534E)}
+.frs-carte .mvbtn{margin-top:var(--e-2,8px)}
+.frs-ct > .mvbtn{margin-top:0}
+.frs-barre{position:relative;height:8px;margin-top:var(--e-2,8px);border-radius:4px;border:1px solid var(--ligne,#E7E6E2);background:var(--bg-doux,#F7F5F1);overflow:hidden}
+.frs-barre i{display:block;height:100%;background:var(--accent,#7A2850)}
+.frs-barre-l{display:flex;justify-content:space-between;margin-top:2px;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660)}
+
+/* ── « Pour la compta » : le bloc des remboursements, sous les cases de la paie (.pf-paie de styles.css) ── */
+.frs-sep{margin:var(--e-2,8px) 0 0;padding-top:var(--e-2,8px);border-top:1.5px solid var(--texte,#1B1A18);font-size:var(--pt-micro,12px);font-weight:var(--fw-bold,700);color:var(--texte-med,#55534E)}
+.frs-sep + .pf-cl{border-top:none}
+.pf-cl.frs-tot .pf-cl-v{color:var(--accent-texte,#7A2850)}
+
+/* ── La fenêtre de saisie (ovPlanFrais) ── */
+.frs-form{display:flex;flex-direction:column;gap:var(--e-3,12px)}
+.frs-c{display:flex;flex-direction:column;gap:var(--e-1,4px);min-width:0}
+.frs-c > span:first-child{font-size:var(--pt-micro,12px);font-weight:var(--fw-bold,700);color:var(--texte-med,#55534E)}
+.frs-c .mvchamp{width:100%;min-width:0}
+.frs-gros-in.mvchamp{font-size:var(--pt-lg,24px);font-weight:var(--fw-bold,700)}
+.frs-duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--e-3,12px)}
+.mvbtn-choix.frs-choix{display:flex;flex-wrap:wrap;width:100%}
+.frs-photo{display:flex;align-items:center;gap:var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border:1.5px dashed var(--ligne-forte,#CDCAC2);border-radius:var(--r-lg,12px);background:var(--bg-doux,#F7F5F1);color:var(--texte-med,#55534E)}
+.frs-photo.prise{border-style:solid;background:var(--bg-card,#FFFFFF);color:var(--ok-texte,#217343)}
+.frs-photo b{font-size:var(--pt-base,14px);color:var(--texte,#1B1A18)}
+.frs-photo > svg{flex:none}
+.frs-photo .mvbtn{position:relative;overflow:hidden}
+.frs-file{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:var(--pt-micro,12px)}
+.frs-calc{display:flex;flex-direction:column;gap:2px;padding:var(--e-2,8px) var(--e-3,12px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-lg,12px);background:var(--bg-doux,#F7F5F1);font-size:var(--pt-txt,13px)}
+.frs-r{display:flex;justify-content:space-between;align-items:baseline;gap:var(--e-3,12px);color:var(--texte-med,#55534E)}
+.frs-r b{color:var(--texte,#1B1A18);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.frs-rt{margin-top:var(--e-1,4px);padding-top:var(--e-2,8px);border-top:1px solid var(--ligne-forte,#CDCAC2);color:var(--texte,#1B1A18);font-weight:var(--fw-semi,600)}
+.frs-rt b{font-size:var(--pt-md,20px)}
+.frs-al{display:flex;align-items:flex-start;gap:var(--e-2,8px);margin:0;color:var(--attention-texte,#975600);font-weight:var(--fw-semi,600)}
+.frs-al svg{flex:none;margin-top:2px}
+
+/* ── La roue du Planning : le taux du domaine ── */
+.plan-card.frs-cadre{flex-direction:column;align-items:stretch;gap:var(--e-2,8px)}
+.frs-or{color:var(--attention-texte,#975600)}

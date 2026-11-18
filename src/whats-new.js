@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.23', d: '2026-11-18', items: [   // FRAIS-1 (§595) : les frais à rembourser et les indemnités km, avec la paie
+    { niv: 0, pour: ['admin'], emoji: 'recu', titre: 'Planning\u00a0: les frais à rembourser, avec la paie',
+      desc: "La fiche d’un salarié gagne un onglet «\u00a0Frais\u00a0»\u00a0: les tickets qu’il a avancés pour le domaine (la photo, le montant, pour quoi, le motif) et les km faits avec sa voiture (les km en plus, où et pourquoi). Les km se paient au barème fiscal, selon la puissance de la voiture et les km de l’année — ou au taux du domaine, s’il est posé dans la roue crantée du Planning. Le total part dans «\u00a0Pour la compta\u00a0», hors salaire, se fige avec le mois, et le relevé gagne une page des frais, tickets en annexe. Administrateur seulement." }
+  ] },
   { v: '11.22', d: '2026-11-18', items: [   // MOTS-10 (§594) : Pilotage › Décider allégé sur place — une phrase, trois cartes repliées
     { niv: 0, pour: ['admin'], emoji: 'curseurs', titre: 'Pilotage, Décider\u00a0: une phrase, trois cartes repliées',
       desc: "En haut de Décider, une phrase\u00a0: le travail, où l’équipe sera ce soir, la fin prévue, et si l’équipe suffit. La tournée du jour, Qui fait quoi et le Renfort arrivent repliées\u00a0: un chiffre et une pastille (tient, déborde, l’équipe suffit)\u00a0; touchez-en une pour simuler, avec les mêmes boutons qu’avant. Sous Qui fait quoi, «\u00a0Ouvrir la priorité du moment\u00a0» mène là où l’on fixe qui fait quoi. «\u00a0Simuler un renfort\u00a0» ouvre maintenant la carte du renfort. Aucun calcul ne change." }

@@ -92,6 +92,8 @@ function _tuSessions() { return [{ id: 'tu-coeq', activite: 'Ensemencement', con
 function _tuSess() { return (window.SESSIONS || []).find(function (s) { return s && s.id === 'tu-coeq'; }) || null; }
 function _tuEqOuverte(sel) { var o = document.getElementById('sd-eq-overlay'); return !!(o && !o.hidden && _q(sel)); }
 function _ouvert(id) { var o = document.getElementById(id); return !!(o && o.classList.contains('open')); }
+// ★ FRAIS-1 (§595) : le nombre de frais d'un salarié, pour voir qu'un ticket vient d'être ajouté.
+function _tuFraisN(nom) { var h = (window.PLANNING_HSUP || {})[nom]; return (h && h.frais && Array.isArray(h.frais.lignes)) ? h.frais.lignes.length : 0; }
 function _gnr() { var c = window.CONFIG || {}; return c.gnr || { capacite: 0, niveau: 0 }; }
 // ★ JCAVE-1 (§428) : le nombre de cases marquées en cave (CONFIG.cave_jours), pour voir qu'une marque vient d'être posée.
 function _caveN() { var C = (window.CONFIG || {}).cave_jours || {}, n = 0; Object.keys(C).forEach(function (k) { n += Object.keys(C[k] || {}).length; }); return n; }
@@ -601,6 +603,53 @@ var TU_TUTOS = [
         txt: function () { return 'C’était pour voir : {T} « ' + L('[data-tuto="plan.annee.ann"]') + ' ».'; },
         fait: function (memo) { var e = window._planAnneeEtat && window._planAnneeEtat(); return !!memo.abU && !!e && !e.brouillon; },
         ok: 'Le modèle est comme avant.' },
+    ] },
+  // ★ FRAIS-1 (§595) — un ticket à rembourser, dans la fiche d'un salarié : il part avec la paie du mois. Le domaine
+  //   d'entraînement n'a aucun frais au départ ; la photo du ticket n'est pas jouée (pas d'appareil photo dans un tuto) :
+  //   le ticket reste « manquant », c'est ce que la dernière étape fait voir.
+  { id: 'frais', titre: 'Comment faire pour noter un frais à rembourser ?', fin: 'noter un frais à rembourser',
+    module: 'Planning', pages: ['planning'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['openPlanFrais', 'planFraisChamp', 'planFraisChoix', 'planFraisEnregistrer'],
+    avant: function (memo) { memo.frN = _tuFraisN('Jean'); },
+    retenir: ['Planning › Personnel › le salarié › onglet « Frais ».',
+              '« Ticket » : le montant, pour quoi, le motif, et la photo du ticket si vous l’avez ; « Trajet » : les km faits en plus avec sa voiture, et pourquoi.',
+              'Tout part avec la paie du mois : dans « Pour la compta » du Résumé et sur le relevé. Un mois figé est fermé : le frais suivant part le mois d’après.'],
+    etapes: [
+      { type: 'aller', page: 'planning', pourquoi: 'Les frais d’un salarié se notent dans sa fiche, au Planning.' },
+      { type: 'toucher', cible: '[data-tuto="plan.tab.gens"]',
+        txt: function () { return '{T} l’onglet « ' + L('[data-tuto="plan.tab.gens"]') + ' ».'; },
+        fait: function (memo) { var v = _vis(_q('.pl2-mcard[data-plcard="Jean"]')); if (v) memo.frA = true; return v; },
+        ok: 'Chaque salarié, avec ses heures du mois.' },
+      { type: 'toucher', cible: '.pl2-mcard[data-plcard="Jean"]',
+        txt: function () { return 'Jean a payé un repas de formation avec sa carte. {T} Jean.'; },
+        fait: function (memo) { var c = window._planFicheCtx && window._planFicheCtx(); var v = !!memo.frA && !!c && c.nom === 'Jean' && _vis(_q('[data-tuto="plan.fiche.frais"]')); if (v) memo.frB = true; return v; },
+        ok: 'Sa fiche du mois, et ses onglets en haut.' },
+      { type: 'toucher', cible: '[data-tuto="plan.fiche.frais"]',
+        txt: function () { return '{T} l’onglet « ' + L('[data-tuto="plan.fiche.frais"]') + ' », au bout des onglets de la fiche.'; },
+        fait: function (memo) { var v = !!memo.frB && _vis(_q('[data-tuto="plan.frais.ticket"]')); if (v) memo.frC = true; return v; },
+        ok: 'Ce que le domaine lui doit ce mois : ses tickets et ses km.' },
+      { type: 'toucher', cible: '[data-tuto="plan.frais.ticket"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.frais.ticket"]') + ' ».'; },
+        fait: function (memo) { var v = !!memo.frC && _ouvert('ovPlanFrais') && !!_q('[data-tuto="plan.frais.montant"]'); if (v) memo.frD = true; return v; },
+        ok: 'La fenêtre du ticket. La photo est facultative : sans elle, le ticket est marqué « manquant » jusqu’à ce qu’elle arrive.' },
+      { type: 'taper', cible: '[data-tuto="plan.frais.montant"]', exemple: '18,50',
+        txt: function () { return 'Tapez le montant du ticket, par exemple 18,50.'; }, txtReel: 'le montant de votre ticket.',
+        valide: function (x) { var n = _num(x); return n > 0 && n < 10000; },
+        ok: function (x) { return _num(x).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' € : c’est noté.'; } },
+      { type: 'toucher', cible: '#pfr-body [data-c="cat"][data-v="repas"]',
+        txt: function () { return 'Pour quoi ? {T} « ' + L('#pfr-body [data-c="cat"][data-v="repas"]') + ' ».'; },
+        fait: function () { var b = _q('#pfr-body [data-c="cat"][data-v="repas"]'); return !!b && b.getAttribute('aria-pressed') === 'true'; },
+        ok: 'La catégorie range le ticket sur le relevé de la compta.' },
+      { type: 'taper', cible: '[data-tuto="plan.frais.motif"]', exemple: 'Repas de la formation taille',
+        txt: function () { return 'Le motif, pour la compta : tapez-le, par exemple « Repas de la formation taille ».'; }, txtReel: 'pourquoi ce frais.',
+        valide: function (x) { return String(x || '').trim().length >= 2; },
+        ok: function () { return 'Le motif suit le ticket sur le relevé.'; } },
+      { type: 'toucher', cible: '[data-tuto="plan.frais.ok"]',
+        txt: function () { return '{T} « ' + L('[data-tuto="plan.frais.ok"]') + ' ».'; },
+        fait: function (memo) { return !!memo.frD && !_ouvert('ovPlanFrais') && _tuFraisN('Jean') > (memo.frN || 0); },
+        ok: 'Le ticket est dans la liste, « ticket manquant » tant que sa photo n’y est pas.' },
+      { type: 'regarder', cible: '[data-tuto="plan.frais.phrase"]',
+        txt: function () { return 'En haut, ce que le domaine doit à Jean avec la paie du mois ; le même total part dans « Pour la compta » du Résumé et sur le relevé. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] },
   { id: 'gnr', titre: 'Comment faire pour noter un plein de GNR\u00a0?', fin: 'noter un plein de GNR',
     module: 'Tracteur', pages: ['tracteur'], pour: 'admin', duree: '1 min', depart: 'home',
