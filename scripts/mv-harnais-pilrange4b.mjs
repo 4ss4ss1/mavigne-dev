@@ -43,7 +43,7 @@ function jouer(S) {
   t('④ la roue charge le style d’Économie et ajoute la section', /_pecCss\(\);[\s\S]{0,200}host\.innerHTML=_pilParamBody\(d\)\+_pilParamAnnees\(\);/.test(corps(P, '_pilParamRender')));
   t('④ le compte des fûts se règle dans la roue (le geste est écouté là)', /closest\('\[data-pec="futtr"\]'\)[\s\S]{0,160}_pexSetFutTrait/.test(P));
   t('④ changer un réglage repeint aussi la roue ouverte (par _pilFillContent → _pilParamRefresh, une seule fois)', /_pilParamRefresh\(d\);/.test(corps(P, '_pilFillContent')) && /_pilFillContent\(_pilData\(\)\);/.test(corps(P, '_pexSetMois')) && /_pilFillContent\(_pilData\(\)\);/.test(corps(P, '_pilSetCampMois')) && !/_pilParamRefresh\(/.test(corps(P, '_pexSetMois') + corps(P, '_pilSetCampMois')));
-  t('⑤ la nouveauté et le guide le disent', /titre: 'Économie : « Le détail de l’exercice » suit la barre du haut'/.test(S.utils) && /<b>Le détail de l'exercice<\/b> — le coût d'un bilan à l'autre, qui suit l'année choisie/.test(S.guide));
+  t('⑤ la nouveauté et le guide le disent', /titre: 'Économie : « Le détail de l’exercice » suit la barre du haut'/.test(S.utils) && /<b>Le détail de l'exercice<\/b> — le coût d'un bilan à l'autre, dont la ligne « Vous regardez » choisit l'année/.test(S.guide));
   t('⑥ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange4b.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange4b.mjs --contre'") > 0);
 }
 if (!CONTRE) {

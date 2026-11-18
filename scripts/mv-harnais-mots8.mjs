@@ -92,30 +92,17 @@ function suite(S) {
   T('② … la MÊME fin prévue qu’Aujourd’hui (_pilMargeCalc, une fois par rendu), posée à la place du sous-titre', P.includes("var _mAvc=null; try{ _mAvc=_pilMargeCalc(d); }") && P.includes("host.innerHTML=_pilTabAvc(d,_mAvc);")
     && P.includes("var _ph=document.getElementById('pil-souslig-t'); if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);")
     && P.includes(`+'<div class="pil-souslig'+(tab==='avc'?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+(tab==='avc'?'':_pilEsc(_pilTabLabel(tab)))+'</span>'`));
-  // ③ le bandeau
-  const D0 = { cad: { enCours: true, cadre: 'exo', auj: '2026-10-27', d1: '2027-07-31', court: '2026-2027' }, renf: { ok: true, fen: [], finCouv: '2027-02-28' }, bud: { tot: 159000, dep: 58000, enCours: true, coupe: '2026-10-27' } };
+  // ③ le bandeau — ★ PORTEE-1 (§591) : ses tuiles de l'ANNÉE (Travaux, Renfort, Budget sorti) ont laissé la place à deux tuiles de la
+  //   CAMPAGNE (l'équipe au pic, le budget engagé), jouées par mv-harnais-portee1. Ce qui reste de MOTS-8 : la forme de la tuile.
   let B = null;
-  try { B = monter(S, ['_pilPhotoHtml', '_pilPhBar', '_pilPhPl', '_pilFlag', '_pilPhotoEffAn', '_pilPhotoBudAn'], { _pilOrdD: (o) => new Date(Date.UTC(2026, 0, 1) + o * 864e5) }); }
+  try { B = monter(S, ['_pilPhotoHtml', '_pilPhBar', '_pilPhPl', '_pilFlag'], {}); }
   catch (e) { T('③ les tuiles du bandeau se dessinent (' + e.message + ')', false); return out; }
-  essai('③ « Renfort » : 0 quand l’équipe suffit, une pastille verte, jusqu’à quand ; la phrase d’avant au survol', () => {
-    const h = B._pilPhotoEffAn(D0, ''), t = texte(h);
-    return [t === 'Renfort 0 l’équipe suffit jusqu’au 28 févr.' && h.includes('<span class="pil-tv-pl ok">l’équipe suffit</span>') && h.includes('title="Personne à ajouter : l’équipe prévue suffit jusqu’au 28 févr."') && h.includes('data-pgo="equ" data-pq="effectif"'), t];
-  });
-  essai('③ … un renfort à prévoir : « +2 pers. », une pastille orange, dès quand ; le point orange', () => {
-    const D = JSON.parse(JSON.stringify(D0)); D.renf.fen = [{ n: 2, a: '2026-12-03', oMax: 340 }]; const h = B._pilPhotoEffAn(D, ''), t = texte(h);
-    return [/^Renfort \+2 pers\. à prévoir dès le 3 déc\.$/.test(t) && h.includes('<span class="pil-tv-pl or">à prévoir</span>') && /class="pil-flag" role="img" style="background:var\(--orange\)"/.test(h), t];
-  });
-  essai('③ « Budget » : le sorti en grand, sa barre sur le prévu, « sorti · prévu 159 k€ » ; les dates au survol', () => {
-    const h = B._pilPhotoBudAn(D0, ''), t = texte(h);
-    return [/^Budget 58 k€ sorti · prévu 159.k€$/.test(t) && h.includes('<i style="width:36%"></i>') && h.includes('title="Sorti au 27 oct. : 58 k€ · prévu au 31 juil. : 159 k€"'), t];
-  });
   essai('③ une tuile : un bouton, son nom, son point, un chevron, le chiffre — plus de « voir le détail », plus de « ! » écrit', () => {
     const h = B._pilPhotoHtml('Travaux', '1 869', ' h', '', 'prévu sur l’exercice', 'avc', B._pilFlag('r', '1 chose à compléter'), 'travaux', 'de <b>barème</b>');
     return [/^<button type="button" class="pil-photo" data-pgo="avc" data-pq="travaux" title="de barème"><span class="k"><span class="kn">Travaux<span class="pil-flag" role="img" style="background:var\(--rouge\)" title="1 chose à compléter" aria-label="1 chose à compléter"><\/span><\/span><svg class="ic"><\/svg><\/span><span class="v">1 869<span class="u"> h<\/span><\/span><span class="s">prévu sur l’exercice<\/span><\/button>$/.test(h)
       && !/voir le d/.test(S.pil.slice(S.pil.indexOf('function _pilPhotoHtml('), S.pil.indexOf('function _pilNb('))), h];
   });
-  T('③ « Travaux » : les heures de la portée ; « prévu sur l’exercice », sa barre quand le pourcentage existe ; les campagnes à cheval au survol', P.includes("else { sT='pr\\u00e9vu sur '+cadreN;") && P.includes("else if(D.pct!=null){ sT=D.pct+'\\u00a0% fait'; vT=_pilPhBar(D.pct);")
-    && P.includes("(D.nChev>0?(' \\u00b7 '+D.nChev+' \\u00e0 cheval, au prorata de ses jours'):'')") && P.includes("return '<div class=\"pil-photos pil-tv-tu\">'+pTrav+pEff+pBud+'</div>';"));
+  T('③ le bandeau garde la forme des tuiles d’Aujourd’hui, sur la campagne (PORTEE-1)', P.includes("return '<div class=\"pil-photos pil-tv-tu pil-tv-tu2\">'+pEff+pBud+'</div>';") && !/function _pilPhotoEffAn\(|function _pilPhotoBudAn\(/.test(S.pil));
   // ④ une couleur par tâche
   essai('④ une couleur par tâche : sa place dans la campagne, distincte des autres ; hors liste, une place fixe', () => {
     const a = monter(S, ['_pilTCol'], { _pilSaison: () => ({ taches: ['Palissage', 'Tirage', 'Taille'] }) });
@@ -165,11 +152,11 @@ function suite(S) {
   T('⑤ les cinq « i » ont leur fiche, et la Carte dit son nouveau chiffre', ['pil.avc.avancement', 'pil.avc.charge', 'pil.avc.frise', 'pil.avc.courbe', 'pil.avc.echeances'].every((k) => S.uti.includes("  '" + k + "': { t: '"))
     && S.uti.includes("'Le chiffre est le nombre de parcelles en place, avec leur surface ; l’avancement est en tête de l’onglet.") && /'« pers\. » : des personnes à temps plein, en moyenne sur la campagne\./.test(S.uti));
   // ⑥ le lexique
-  const neuf = ['_pilRenderGauge', '_pilTabAvc', '_pilTvPhrase', '_pilTvDatesFn', '_pilPhotoEffAn', '_pilPhotoBudAn', '_pilPhotosHtml', '_pilPanelTemps', '_pilPanelEcheances', '_pilEcartHtml', '_pilPanelCarte'].map((n) => sansCom(corps(S.pil, n))).join('\n');
+  const neuf = ['_pilRenderGauge', '_pilTabAvc', '_pilTvPhrase', '_pilTvDatesFn', '_pilPhotosHtml', '_pilPanelTemps', '_pilPanelEcheances', '_pilEcartHtml', '_pilPanelCarte'].map((n) => sansCom(corps(S.pil, n))).join('\n');
   const chaines = (neuf.match(/'(?:[^'\\]|\\.)*'/g) || []).join(' ');
   T('⑥ les mots du lexique : plus « réalisées », « restantes », « planifiées », « Effectif », « à trouver », « dépensés », « ETP », « pôle long », « ~ » à l’écran de l’onglet',
     !/réalis|restante|planifi|Effectif|\\u00e0 trouver|à trouver|d\\u00e9pens|dépens|ETP|p\\u00f4le|pôle|'~'/.test(chaines) && / fait<\/span>'/.test(chaines) && / reste<\/span>'/.test(chaines), (chaines.match(/réalis|restante|planifi|Effectif|à trouver|dépens|ETP|pôle/) || [''])[0]);
-  T('⑥ « Renfort », « sorti », « campagne » : les mots du lexique sont là', /_pilPhotoHtml\('Renfort'/.test(S.pil) && /'sorti \\u00b7 pr\\u00e9vu '/.test(S.pil) && S.pil.includes("Aucune t\\u00e2che sur la campagne</div>"));
+  T('⑥ « à prévoir », « engagé », « campagne » : les mots du lexique sont là (PORTEE-1 : le bandeau de la campagne)', /' \\u00e0 pr\\u00e9voir'/.test(S.pil) && /'engag\\u00e9 \\u00b7 budget '/.test(S.pil) && S.pil.includes("Aucune t\\u00e2che sur la campagne</div>"));
   // ⑦ la feuille, l'aide, le guide, l'annonce, les versions
   T('⑦ les règles du lot sont dans pilotage.css (styles.css est au plafond), lue après aujourdhui.css', S.pcss.includes('★★★ MOTS-8 (§590)') && !/pil-tv-|mvk-det|mvk-pt/.test(S.css) && Buffer.byteLength(S.css) <= 1024 * 1024
     && S.app.indexOf("import './pilotage.css';") > S.app.indexOf("import './aujourdhui.css';") && S.app.indexOf("import './aujourdhui.css';") > 0);
@@ -177,7 +164,7 @@ function suite(S) {
   T('⑦ au téléphone, les trois tuiles tiennent de front, un filet entre elles (le bloc GABARIT-1 les empilait)', /@media \(max-width:760px\)\{[\s\S]*#page-pilotage \.pil-photos\.pil-tv-tu\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/.test(S.pcss)
     && S.pcss.includes('#page-pilotage .pil-photos.pil-tv-tu > .pil-photo + .pil-photo{border-top:0 !important;border-left:var(--bw,1px) solid var(--ligne,#E7E6E2) !important}'));
   T('⑦ l’aide du Pilotage dit la phrase, les tuiles, la couleur, le toucher et les boutons', /« La campagne »\) s’ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.uti) && /une couleur par tâche, la même partout dans l’onglet/.test(S.uti) && /« Ouvrir » mène au module où l’on agit/.test(S.uti));
-  T('⑦ le guide aussi', /Travaux s'ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.guide) && /« Renfort »/.test(S.guide) && /[Uu]ne couleur par tâche, la même partout dans l'onglet/.test(S.guide));
+  T('⑦ le guide aussi', /Travaux s'ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.guide) && /<b>équipe au pic<\/b>/.test(S.guide) /* PORTEE-1 (§591) : « Renfort » est parti avec les tuiles de l'année */ && /[Uu]ne couleur par tâche, la même partout dans l'onglet/.test(S.guide));
   const wn = S.wn.slice(S.wn.indexOf("  { v: '11.18',"), S.wn.indexOf("  { v: '11.17',"));
   T('⑦ l’annonce 11.18 : pour l’admin, sans « & », et dit « Aucun calcul ne change »', wn.length > 200 && /pour: \['admin'\], emoji: '[a-z]+', titre: 'Pilotage, onglet Travaux\\u00a0: les mêmes cartes, moins de mots'/.test(wn) && !/titre: '[^']*&/.test(wn) && /Aucun calcul ne change/.test(wn));
   const app = (S.uti.match(/export const APP_VERSION = '([\d.]+)'/) || [])[1] || '0', nApp = parseFloat(app);
@@ -214,11 +201,6 @@ if (!CONTRE) {
     ['la phrase ne dit plus quand l’équipe ne suffit pas', sur('pil', "else if(m && m.capa && m.capa.ok===false) h+=", "else if(false) h+=")],
     ['le sous-titre-question revient sur Travaux', sur('pil', "(tab==='avc'?'':_pilEsc(_pilTabLabel(tab)))", "_pilEsc(_pilTabLabel(tab))")],
     ['la phrase ne se pose plus', sur('pil', "if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);", "")],
-    ['« Effectif » revient', sur('pil', "if(!F.length) return _pilPhotoHtml('Renfort'", "if(!F.length) return _pilPhotoHtml('Effectif'")],
-    ['la pastille verte du renfort disparaît', sur('pil', "_pilPhPl('l\\u2019\\u00e9quipe suffit','ok'),\n    R.finCouv", "'',\n    R.finCouv")],
-    ['« à trouver » revient', sur('pil', "_pilPhPl('\\u00e0 pr\\u00e9voir','or')", "_pilPhPl('\\u00e0 trouver','or')")],
-    ['le budget perd sa barre', sur('pil', "_pilPhBar(B.dep/B.tot*100),'sorti", "'','sorti")],
-    ['« dépensés » revient', sur('pil', "'sorti \\u00b7 pr\\u00e9vu '+K(B.tot)", "'d\\u00e9pens\\u00e9s \\u00b7 pr\\u00e9vu '+K(B.tot)")],
     ['« voir le détail » revient sur les tuiles', sur('pil', "+'<span class=\"s\">'+sous+'</span></button>';", "+'<span class=\"s\">'+sous+'</span><span class=\"go\">voir le d\\u00e9tail \\u203A</span></button>';")],
     ['le « ! » revient écrit dans le point', sur('pil', `aria-label="'+_pilEsc(titre)+'"></span>';`, `aria-label="'+_pilEsc(titre)+'">!</span>';`)],
     ['la phrase d’avant ne passe plus au survol', sur('pil', "(tt?' title=\"'+_pilEsc(tt)+'\"':'')", "''")],

@@ -44,7 +44,7 @@ function jouer(S) {
   // ④ les photos, les cases, la cible an_cadres
   const c3 = {}; vm.createContext(c3); vm.runInContext(corps(P, '_pilPhotosIci'), c3);
   t('④ les photos restent sur La campagne (plus sur L’année)', c3._pilPhotosIci('avc') === true && c3._pilPhotosIci('an') === false && c3._pilPhotosIci('eco') === false);
-  t('④ aucune photo ne mène plus à « an » (Effectif → equ, Budget → eco, Travaux → avc)', !/_pilPhotoHtml\([^\n]*'an'[,)]/.test(P) && /return _pilPhotoHtml\('Budget',K\(B\.dep\),' k\\u20ac',[^\n]*,'eco',/.test(P)   /* MOTS-8 (§590) : la tuile n'a plus d'icône */);
+  t('④ aucune photo ne mène plus à « an » (Équipe au pic → equ, Budget → eco)', !/_pilPhotoHtml\([^\n]*'an'[,)]/.test(P) && /pBud=_pilPhotoHtml\('Budget',_pilNb\(dep\),[^\n]*,'eco',fB,'budget',/.test(P)   /* PORTEE-1 (§591) : le bandeau lit la campagne — deux tuiles, plus « Travaux » */);
   t('④ les cases : Économie gagne « Le budget de l’année », Équipe « Le renfort à prévoir », plus de liste « an »', /eco:\[\['an_budget',/.test(P) && /\['an_frise','Le renfort \\u00e0 pr\\u00e9voir'\]\],\n  eco:/.test(P) && !/\n  an: \[\['an_budget'/.test(P) && /tab==='eco'\|\|tab==='cfm'\);/.test(P));
   t('④ « an_cadres » mène à Économie › Synthèse, et fait clignoter les avis (ou la barre)', /_PIL_TAB='eco'; _pilSaveTab\('eco'\); _PEC_SUB='syn'/.test(P) && /getElementById\('pil-an-cadres'\)\|\|document\.getElementById\('pil-crumb'\)/.test(P));
   // ⑤ les autres portes
@@ -65,7 +65,7 @@ if (!CONTRE) {
     ['les avis et le budget sur toutes les sous-vues', (S) => R(S, 'pil', "else body=_pecViewSynthese(E,TL);", "else body=_pecViewSynthese(E,TL);\n  body=_pilAnAvisHtml()+body;")],
     ['le renfort quitte Personnel', (S) => R(S, 'pil', "+(_pilShow('an_frise')?'<div class=\"pil-panels\">'+_pilPanelAnRenfort()+'</div>':'')", "")],
     ['les photos reviennent sur « an »', (S) => R(S, 'pil', "function _pilPhotosIci(tab){ return tab==='avc'; }", "function _pilPhotosIci(tab){ return tab==='an' || tab==='avc' || tab==='eco'; }")],
-    ['la photo Budget mène encore à « an »', (S) => R(S, 'pil', "_pilEsc(C.court),'eco',flag||'','budget','');", "_pilEsc(C.court),'an',flag||'','budget','');")],   // MOTS-8 (§590) : l'ancre suit la nouvelle tuile
+    ['la photo Budget mène encore à « an »', (S) => R(S, 'pil', "'engag\\u00e9 \\u00b7 budget '+_pilNb(bud)+'\\u00a0\\u20ac','eco',fB,'budget',", "'engag\\u00e9 \\u00b7 budget '+_pilNb(bud)+'\\u00a0\\u20ac','an',fB,'budget',")],   // PORTEE-1 (§591) : l'ancre suit la tuile de la campagne
     ['« an_cadres » cherche encore L’année', (S) => R(S, 'pil', "_PIL_TAB='eco'; _pilSaveTab('eco'); _PEC_SUB='syn'", "_PIL_TAB='an'; _pilSaveTab('an'); _PEC_SUB='syn'")],
     ['le cockpit mène encore à « an »', (S) => R(S, 'vue', "an: 'eco' };", "an: 'an' };")],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-pilrange2b.mjs'").join("mv-harnais-pilrangeY.mjs'") })],

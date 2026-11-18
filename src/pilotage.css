@@ -138,3 +138,36 @@
   #page-pilotage .pil-tv .pil-donut{width:118px}
   #page-pilotage .pil-tv-sl small{min-width:0}
 }
+
+/* ★★★ PORTEE-1 (§591) — la campagne se choisit à la pastille du haut ; « Vous regardez » n'est plus que l'année, sur Le détail ═══ */
+/* La pastille est un bouton (elle ouvre le menu des campagnes, comme dans la Vigne) */
+#page-pilotage button.pil-saison-btn{display:inline-flex;align-items:center;gap:var(--e-1,4px);font:inherit;line-height:inherit;cursor:pointer;position:relative}
+#page-pilotage button.pil-saison-btn::after{content:"";position:absolute;inset:-8px -4px}
+@media (hover:hover){#page-pilotage button.pil-saison-btn:hover{border-color:var(--texte-doux)!important}}
+/* La ligne d'écran dit la campagne lue (ses dates, le jour où l'on est), en texte : ce n'est pas un réglage */
+#page-pilotage .pil-ptcamp-t{display:inline-flex;align-items:baseline;gap:var(--e-2,8px);min-width:0;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+#page-pilotage .pil-ptcamp-t .pil-ptbornes{display:inline;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Le bandeau de Travaux : deux tuiles (l'équipe au pic, le budget de la campagne) */
+#page-pilotage .pil-photos.pil-tv-tu.pil-tv-tu2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){
+  #page-pilotage .pil-photos.pil-tv-tu.pil-tv-tu2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #page-pilotage .pil-ptcamp-t .pil-ptlab{display:none}
+}
+#page-pilotage .pil-ptcamp-t .pil-ptcourt{display:none}
+@media (max-width:760px){
+  #page-pilotage .pil-ptcamp-t .pil-ptbornes{display:none}
+  #page-pilotage .pil-ptcamp-t .pil-ptcourt{display:inline;white-space:nowrap}
+}
+/* la campagne lue n'est pas l'active : la pastille passe à l'ambre (la règle commune du bandeau la repeignait en gris) */
+body .mod-header .hv2-saison-pill.pil-saison-btn.consult{background:var(--or-pale)!important;color:var(--attention)!important;box-shadow:inset 0 0 0 1px var(--or-clair)!important}
+body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var(--attention)!important}
+@media (max-width:760px){ #page-pilotage .pil-cons-t{display:none} }
+/* au téléphone, le chevron ne doit pas couper le nom de la campagne (« Après-vendange 2026-… ») */
+@media (max-width:760px){
+  #page-pilotage .mod-meta-row button.pil-saison-btn{gap:2px}
+  #page-pilotage .pil-saison-btn .hv2-sc-chev svg{width:12px;height:12px}
+  body .mod-header .hv2-saison-pill.pil-saison-btn.consult{padding:0 var(--e-1,4px)!important;border-radius:var(--r-xs,4px)!important}
+}
+/* ★ PORTEE-1 (§591) : la carte « Fin prévue » d'une campagne finie — sa fin, ce qui est fait ; ni frise, ni objectif, ni renfort à simuler */
+#ck-verdict.ck-v-finie .ck-frise,#ck-verdict.ck-v-finie .ck-v-act{display:none}
+#ck-verdict .ck-etat.fini{background:var(--survol);color:var(--texte-med)}

@@ -4277,9 +4277,10 @@ function _updateSaisonSelector(){
 }
 window._updateSaisonSelector=_updateSaisonSelector;
 
-function _seasonMenuToggle(e){ if(e)e.stopPropagation(); var m=document.getElementById('saison-menu'); var pl=document.getElementById('hv2-saison-pill'); if(!m)return; var willOpen=!m.classList.contains('open'); if(willOpen){ if(m.parentNode!==document.body)document.body.appendChild(m); _updateSaisonSelector(); if(pl){var r=pl.getBoundingClientRect(); m.style.top=(r.bottom+6)+'px'; m.style.left=Math.max(8,Math.min(r.left,(window.innerWidth||360)-262))+'px';} m.classList.add('open'); if(pl)pl.classList.add('open'); } else { _seasonMenuClose(); } }
+// ★ PORTEE-1 (§591) : `ancre` (facultatif) — la pastille qui ouvre le menu ; le Pilotage passe la sienne. Sans elle, celle de la Vigne.
+function _seasonMenuToggle(e,ancre){ if(e)e.stopPropagation(); var m=document.getElementById('saison-menu'); var pl=ancre||document.getElementById('hv2-saison-pill'); if(!m)return; var willOpen=!m.classList.contains('open'); if(willOpen){ if(m.parentNode!==document.body)document.body.appendChild(m); _updateSaisonSelector(); if(pl){var r=pl.getBoundingClientRect(); m.style.top=(r.bottom+6)+'px'; m.style.left=Math.max(8,Math.min(r.left,(window.innerWidth||360)-262))+'px';} m.classList.add('open'); if(pl){ pl.classList.add('open'); if(pl.tagName==='BUTTON') pl.setAttribute('aria-expanded','true'); } } else { _seasonMenuClose(); } }
 window._seasonMenuToggle=_seasonMenuToggle;
-function _seasonMenuClose(){ var m=document.getElementById('saison-menu'); var pl=document.getElementById('hv2-saison-pill'); if(m)m.classList.remove('open'); if(pl)pl.classList.remove('open'); }
+function _seasonMenuClose(){ var m=document.getElementById('saison-menu'); if(m)m.classList.remove('open'); document.querySelectorAll('.hv2-saison-pill.open').forEach(function(pl){ pl.classList.remove('open'); pl.setAttribute('aria-expanded','false'); }); }
 window._seasonMenuClose=_seasonMenuClose;
 document.addEventListener('click', function(ev){ var m=document.getElementById('saison-menu'); if(m&&m.classList.contains('open')){ var pl=document.getElementById('hv2-saison-pill'); if(pl&&!pl.contains(ev.target))_seasonMenuClose(); } });
 

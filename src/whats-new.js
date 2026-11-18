@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.19', d: '2026-11-18', items: [   // PORTEE-1 (§591) : « Vous regardez » ne reste que sur Économie › Le détail — la campagne se choisit à la pastille
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Pilotage\u00a0: la campagne se choisit à la pastille du haut',
+      desc: "La pastille de la campagne, en haut du Pilotage, ouvre maintenant le même menu que dans la Vigne\u00a0: une seule façon de changer de campagne. La ligne «\u00a0Vous regardez\u00a0» ne reste que sur Économie › Le détail, pour choisir l’exercice ou l’année vigne. Travaux, L’équipe & le matériel et Décider rappellent les dates de la campagne et le jour où vous en êtes. Le haut de Travaux montre deux chiffres de la campagne, les mêmes qu’Aujourd’hui\u00a0: l’équipe au pic et le budget. Une campagne passée met la pastille en ambre\u00a0; Aujourd’hui et Travaux en font le bilan au lieu d’une fin prévue." }
+  ] },
   { v: '11.18', d: '2026-11-17', items: [   // MOTS-8 (§590) : Pilotage › Travaux allégé sur place — l'onglet reste, ses cartes aussi
     { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Pilotage, onglet Travaux\u00a0: les mêmes cartes, moins de mots',
       desc: "L’onglet Travaux reste dans le Pilotage, avec toutes ses cartes. En haut, une phrase\u00a0: ce qui est fait, et la fin prévue, la même date qu’Aujourd’hui. Les trois chiffres prennent la forme des tuiles d’Aujourd’hui\u00a0; «\u00a0Effectif\u00a0» devient «\u00a0Renfort\u00a0». Une tâche garde la même couleur partout dans l’onglet. Toucher une tâche dit ses dates\u00a0; les explications sont derrière les «\u00a0i\u00a0». Chaque carte a son bouton «\u00a0Ouvrir\u00a0», vers les parcelles, le planning ou la carte. Aucun calcul ne change." },

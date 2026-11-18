@@ -177,9 +177,10 @@ export { _pilEchCadence };`;
 }
 
 // ── ⑪ photo Travaux : prorata des jours d'une periode a cheval ───────────────
+// ★ PORTEE-1 (§591) : la tuile « Travaux » de l'ANNÉE (et son prorata des campagnes à cheval) est partie — le bandeau de
+//   Travaux lit LA campagne, sans prorata (mv-harnais-portee1). Ce qui reste à garder : qu'elle ne revienne pas à moitié.
 {
-  const ph=fn(SRC.pil,'_pilPhotosData').replace(/^\s*\/\/.*$/gm,'');
-  t('⑪ une periode a cheval compte au prorata', /part=Math\.max\(0,\(b2-a2\+1\)\)\/\(b-a\+1\)/.test(ph) && /nChev\+\+/.test(ph));
+  t('⑪ plus de photo Travaux de l\'année à prorater : _pilPhotosData est parti, le bandeau lit la campagne', !/function _pilPhotosData\(/.test(SRC.pil) && /PP=_pilPicPortee\(_pilSaisonNom\(\)\);/.test(SRC.pil));
 }
 
 

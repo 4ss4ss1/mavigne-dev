@@ -519,7 +519,7 @@ function htmlPhotos(r) {
 function htmlVerdict(r) {
   // ★★ MOTS-5 (§586) : la date en grand, l'écart à côté, la jauge. La phrase « Les travaux d'automne finiront le… » et
   //   « avec l'équipe prévue au planning » sont dans le « i ». Sur la jauge, le losange EST la date écrite au-dessus.
-  return '<div class="ck-v-haut"><span class="ck-v-k">Fin prévue' + btnI('fin', 'Comment la fin prévue est calculée') + '</span><span class="ck-etat" id="ck-v-etat"></span></div>'
+  return '<div class="ck-v-haut"><span class="ck-v-k"><span id="ck-v-k-t">Fin prévue</span>' + btnI('fin', 'Comment la fin prévue est calculée') + '</span><span class="ck-etat" id="ck-v-etat"></span></div>'
     + '<h2 class="ck-v-phrase"><span class="ck-roule" id="ck-v-fin"><span>' + dCourt(r.fin) + '</span></span><small id="ck-v-ecart"></small></h2>'
     + '<div class="ck-frise" id="ck-frise" aria-hidden="true">'
     + '<div class="ck-fr-piste"><i class="ck-fr-passe"></i><i class="ck-fr-proj"></i><i class="ck-fr-marge"></i></div>'
@@ -1073,12 +1073,37 @@ function majResume(r) {
   const refT = refChiffre('ck-cap-t', '', [['fin prévue', dCourt(r.fin)]].concat(V.objectif ? [['objectif', dCourt(VISEE)]] : []), 'resTemps', 'Sur quoi ce délai est compté');
   const refB = argent ? refChiffre('ck-cap-b', '', [['coût à la fin', eur(r.att)], ['budget', eur(r.budget)]], 'resBudget', 'Sur quoi cet écart est compté') : '';
   const fig = (txt, fn, id, etat) => '<button type="button" class="ck-fig-t' + (etat ? ' ' + etat : '') + '" data-fn="' + fn + '" aria-describedby="' + id + '">' + txt + '</button>';
+  // ★ PORTEE-1 (§591) : une campagne consultée qui est FINIE n'a ni retard ni « coût à la fin » à projeter — « 35 jours de retard,
+  //   fin prévue 14 déc. » pour une campagne close le 23 oct. Elle dit son bilan : terminée le…, ce qui est fait, l'engagé face au budget.
+  const PF = (V.per && V.per.finie && V.per.fin) ? deIso(V.per.fin) : null;
+  if (PF) {
+    const eF = Math.round(r.budget - r.dep), argF = !(V.eco && r.budget > 0) ? '' : (eF === 0 ? 'pile dans le budget' : eF > 0 ? eur(eF) + ' sous le budget' : eur(-eF) + ' au-dessus du budget');
+    const refF = refChiffre('ck-cap-t', '', [['fait', nb(r.pct) + '\u00a0%']], 'resTemps', 'Sur quoi ce chiffre est compt\u00e9');
+    const refBF = argF ? refChiffre('ck-cap-b', '', [['engag\u00e9', eur(r.dep)], ['budget', eur(r.budget)]], 'resBudget', 'Sur quoi cet \u00e9cart est compt\u00e9') : '';
+    $('#ck-resume').innerHTML = '<span class="ck-res-ph">' + fig('Campagne termin\u00e9e le ' + dCourt(PF), 'allerFin', 'ck-cap-t', '')
+      + (argF ? ', ' + fig(argF, 'allerBudget', 'ck-cap-b', eF < 0 ? 'ko' : '') : '') + '.</span>'
+      + '<span class="ck-res-pl">' + ((ptsB || cv) ? ptsB + cv : '<span class="ck-res-rien">rien \u00e0 anticiper</span>') + '</span>'
+      + '<span class="ck-res-rep">' + refF + refBF + '</span>';
+    return;
+  }
   $('#ck-resume').innerHTML = '<span class="ck-res-ph">' + fig(maj1(temps), 'allerFin', 'ck-cap-t', r.ecart < 0 ? 'ko' : r.ecart > 0 ? 'ok' : '')
     + (argent ? ', ' + fig(argent, 'allerBudget', 'ck-cap-b', e0 < 0 ? 'ko' : '') : '') + '.</span>'
     + '<span class="ck-res-pl">' + ((ptsB || cv) ? ptsB + cv : '<span class="ck-res-rien">rien à anticiper</span>') + '</span>'
     + '<span class="ck-res-rep">' + refT + refB + '</span>';
 }
 function majVerdict(r) {
+  // ★ PORTEE-1 (§591) : une campagne FINIE (consultée depuis la pastille) n'a plus de fin à prévoir — « En retard, 14 déc. » pour
+  //   une campagne close le 23 oct. La carte dit sa fin et ce qui a été fait ; la frise, l'objectif et « Simuler un renfort » se
+  //   retirent (pilotage.css : .ck-v-finie). Même règle que la phrase du haut (majResume) : la fin de la campagne, pas l'objectif.
+  const PF = (V.per && V.per.finie && V.per.fin) ? deIso(V.per.fin) : null, carte = $('#ck-verdict'), kt = $('#ck-v-k-t');
+  if (carte) carte.classList.toggle('ck-v-finie', !!PF);
+  if (kt) kt.textContent = PF ? 'Fin de la campagne' : 'Fin prévue';
+  if (PF) {
+    Anim.rouler($('#ck-v-fin'), dCourt(PF));
+    const bx = $('#ck-v-ecart'); bx.dataset.m = 'finie'; bx.className = ''; bx.textContent = nb(r.pct) + '\u00a0% fait';
+    const e1 = $('#ck-v-etat'); e1.className = 'ck-etat fini'; e1.textContent = 'Terminée';
+    return;
+  }
   Anim.rouler($('#ck-v-fin'), dCourt(r.fin));
   const ec = r.ecart, box = $('#ck-v-ecart');
   const modele = ec > 0 ? (ec > 1 ? 'av-n' : 'av-1') : ec < 0 ? (ec < -1 ? 'ap-n' : 'ap-1') : 'pile';

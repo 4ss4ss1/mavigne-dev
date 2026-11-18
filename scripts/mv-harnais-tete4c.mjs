@@ -65,20 +65,22 @@ function jouer(S) {
     t('②bis les onglets ne sont rendus qu’une fois, par l’en-tête ; un rendu neuf replie le choix', !/_pilTabsHtml\(/.test(sq) && /_pilPtOuvert=false;/.test(sq) && (pil.match(/\+_pilTabsHtml\(/g) || []).length === 1);
     t('②ter plus rien n’empile la barre : ni bande collante à elle, ni onglets calés sous elle, ni enveloppe .pil-portee-in', !/\.pil-portee\{position:sticky/.test(pil) && !/pil-tabsbar/.test(pil) && !/pil-portee-in/.test(pil));
   }
-  // ③ « Vous regardez », JOUÉE dans ses trois cadres : ce que dit le bouton du téléphone, et le choix complet derrière lui
+  // ③ « Vous regardez », JOUÉE dans ses deux cadres : ce que dit le bouton du téléphone, et le choix complet derrière lui.
+  //   ★ PORTEE-1 (§591) : elle ne vit plus que sur Économie › Le détail (_pilCrumbAnnee) et ne choisit plus que l'année — la
+  //   campagne se choisit à la pastille du haut (mv-harnais-portee1).
   {
     const ctx = { _PIL_SCOPE: { camp: null, cadre: 'exo', recul: 0 }, _pilPtOuvert: false, window: {},
       _pilAnCadre: () => ({ court: '2026–2027', prevOk: true, recul: 0, d0: '2026-08-01', d1: '2027-07-31' }), _pilPorteePeriode: () => ({ debut: '2026-11-12', fin: '2027-02-28' }),
       _pilPorteeBornes: () => 'du 1 août au 31 juil.', _mvInfoBtn: (k) => '<button class="mv-info" data-info="' + k + '">i</button>' }; vm.createContext(ctx);
-    vm.runInContext(['function _pilEsc(', 'function _pilPorteeMode(', 'function _pilCrumbHtml('].map((d) => fonction(S.pil, d)).join('\n'), ctx);
-    const C = () => vm.runInContext('_pilCrumbHtml()', ctx);
+    vm.runInContext(['function _pilEsc(', 'function _pilPorteeMode(', 'function _pilCrumbAnnee('].map((d) => fonction(S.pil, d)).join('\n'), ctx);
+    const C = () => vm.runInContext('_pilCrumbAnnee()', ctx);
     const dit = (h) => (/<span class="pil-ptres-t">([^<]*)<\/span>/.exec(h) || [])[1];
     const exo = C(); ctx._PIL_SCOPE.cadre = 'vig'; const vig = C(); ctx._PIL_SCOPE.camp = 'Hiver "26"'; const camp = C();
-    t('③ jouée : le bouton dit ce qu’on regarde — « ' + dit(exo) + ' », « ' + dit(vig) + ' », le nom de la campagne', dit(exo) === 'Exercice 2026–2027' && dit(vig) === 'Année vigne 2026–2027' && dit(camp) === 'Hiver &quot;26&quot;');
+    t('③ jouée : le bouton dit l’année qu’on regarde — « ' + dit(exo) + ' », « ' + dit(vig) + ' » ; une campagne ne s’y lit plus', dit(exo) === 'Exercice 2026–2027' && dit(vig) === 'Année vigne 2026–2027' && dit(camp) === 'Année vigne 2026–2027');
     t('③bis le bouton vient en premier, replié par défaut, et commande #pil-ptchoix', /^<button type="button" class="pil-ptres" data-ptres="1" aria-expanded="false" aria-controls="pil-ptchoix" aria-label="Vous regardez : Exercice 2026–2027\. Changer">/.test(exo));
     const iC = exo.indexOf('<div class="pil-ptchoix" id="pil-ptchoix">'); const ch = exo.slice(iC);
-    t('③ter tout le choix est derrière lui, d’un bloc : les trois cadres, les flèches de l’année, les dates, la bulle d’information', iC > 0 && finBloc(exo, iC) === exo.length && ['data-portee="camp"', 'data-portee="vig"', 'data-portee="exo"', 'data-anrecul="-1"', 'data-anrecul="1"', 'class="pil-ptbornes"', 'data-info="pil.cadres"'].every((x) => ch.includes(x)) && /class="on" aria-pressed="true">L’exercice</.test(ch));
-    t('③quater en campagne : son bouton et sa liste (#pil-ptpop) sont dans le choix', camp.slice(camp.indexOf('id="pil-ptchoix"')).includes('data-ptpop="1"') && camp.includes('id="pil-ptpop" hidden'));
+    t('③ter tout le choix est derrière lui, d’un bloc : les deux cadres, les flèches de l’année, les dates, la bulle d’information', iC > 0 && finBloc(exo, iC) === exo.length && ['data-portee="vig"', 'data-portee="exo"', 'data-anrecul="-1"', 'data-anrecul="1"', 'class="pil-ptbornes"', 'data-info="pil.cadres"'].every((x) => ch.includes(x)) && /class="on" aria-pressed="true">L’exercice</.test(ch));
+    t('③quater plus de campagne dans le choix, ni sa liste (PORTEE-1)', !ch.includes('data-portee="camp"') && !/pil-ptpop|data-ptpop/.test(exo + camp));
     ctx._pilPtOuvert = true; t('③quinquies déplié, la barre repeinte le dit encore (aria-expanded)', /data-ptres="1" aria-expanded="true"/.test(C()));
   }
   // ④ le geste, JOUÉ : déplier pose .pt-ouvert sur la ligne et le dit au bouton ; un toucher hors de la ligne referme
@@ -89,7 +91,7 @@ function jouer(S) {
     vm.runInContext('_pilPtOuvrir(true)', ctx); const a = [ligne.classList.contains('pt-ouvert'), bouton.attrs['aria-expanded'], ctx.__etat()].join('|');
     vm.runInContext('_pilPtOuvrir(false)', ctx); const b = [ligne.classList.contains('pt-ouvert'), bouton.attrs['aria-expanded'], ctx.__etat()].join('|');
     t('④ jouée : déplié (' + a + ') puis replié (' + b + ')', a === 'true|true|true' && b === 'false|false|false');
-    t('④bis le geste : le bouton bascule, un toucher hors de la ligne referme — avant tout autre geste de la barre', /var _pr=e\.target\.closest\('\[data-ptres\]'\);\s*\n\s*if\(_pr\)\{ e\.stopPropagation\(\); _pilPtOuvrir\(!_pilPtOuvert\); return; \}\s*\n\s*if\(_pilPtOuvert && !e\.target\.closest\('#pil-portee'\)\) _pilPtOuvrir\(false\);\s*\n\s*var _pop=/.test(pil));
+    t('④bis le geste : le bouton bascule, un toucher hors de la ligne referme — avant tout autre geste de la barre', /var _pr=e\.target\.closest\('\[data-ptres\]'\);\s*\n\s*if\(_pr\)\{ e\.stopPropagation\(\); _pilPtOuvrir\(!_pilPtOuvert\); return; \}\s*\n\s*if\(_pilPtOuvert && !e\.target\.closest\('#pil-portee'\)\) _pilPtOuvrir\(false\);\s*\n\s*var _ptV=/.test(pil));   // PORTEE-1 (§591) : la liste des campagnes (_pop) est partie
   }
   // ⑤ la feuille : la page ne défile plus dans elle-même ; la ligne colle sur ordinateur ; le bouton au téléphone et sur tablette
   {
@@ -136,7 +138,8 @@ if (!CONTRE) {
     ['un rendu neuf laisse le choix déplié', m('pil', "  _pilPtOuvert=false;\n  return _pilHdrHtml(d,tab)", "  return _pilHdrHtml(d,tab)")],
     ['la bande collante de la barre revient dans le style du module', m('pil', "  var css=''\n", "  var css=''\n  +'.pil-portee{position:sticky;top:0;z-index:34;}'\n")],
     ['le bouton dit toujours « Exercice », même sur l’année vigne', m('pil', "(mode==='vig'?'Ann\\u00e9e vigne':'Exercice')", "(mode==='vig'?'Exercice':'Exercice')")],
-    ['le nom de la campagne n’est plus échappé dans le bouton', m('pil', "<span class=\"pil-ptres-t\">'+_pilEsc(resume)+'</span>", "<span class=\"pil-ptres-t\">'+resume+'</span>")],
+    // PORTEE-1 (§591) : le bouton ne porte plus de nom de campagne (saisi par l'utilisateur) — seulement l'année calculée ; la
+    //   contre-épreuve « le nom de la campagne n'est plus échappé » n'a plus d'objet.
     ['la bulle d’information reste hors du choix', m('pil', "+'<div class=\"pil-ptchoix\" id=\"pil-ptchoix\">'+h+_mvInfoBtn('pil.cadres')+'</div>';", "+'<div class=\"pil-ptchoix\" id=\"pil-ptchoix\">'+h+'</div>'+_mvInfoBtn('pil.cadres');")],
     ['la barre repeinte oublie qu’elle est dépliée', m('pil', "aria-expanded=\"'+(_pilPtOuvert?'true':'false')+'\" aria-controls=\"pil-ptchoix\"", "aria-expanded=\"false\" aria-controls=\"pil-ptchoix\"")],
     ['déplier ne pose plus la classe sur la ligne', m('pil', "if(p) p.classList.toggle('pt-ouvert',_pilPtOuvert);", "if(p) p.classList.toggle('pt-ouvert',false);")],

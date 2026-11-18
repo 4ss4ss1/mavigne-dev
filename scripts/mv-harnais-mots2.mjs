@@ -72,7 +72,8 @@ function suite(S) {
   const eco = sansCom(fnDe(S.pil, 'function _pilTabEco(d){'));
   T('② plus d’avis de périmètre : la sous-barre, puis la vue', /return '<div class="pec-wrap">'\+_pecSubNav\(E\)\+body\+'<\/div>';/.test(eco) && !/_pilAvertEco/.test(P) && !/pas l\\u2019exercice comptable affich|pas l’exercice comptable affich/.test(P));
   T('② plus de ligne « … · ha · taux moyen » sous la sous-barre', /return '<div class="pec-subnav"><div class="pec-sub">'\+b\+'<\/div><\/div>';/.test(sansCom(fnDe(S.pil, 'function _pecSubNav(E){'))));
-  T('② l’avis de Conformité, lui, n’a pas bougé (ce lot ne touche que l’Économie)', /_pilCadreAvert\(_pilAvertCfm\(\)\)/.test(P) && /function _pilCadreAvert\(txt\)/.test(P));
+  // PORTEE-1 (§591) : l'avis de Conformité (« ne se recadre pas sur <campagne zoomée> ») est parti avec le zoom par campagne.
+  T('② l’avis de Conformité est parti avec le zoom par campagne (PORTEE-1, §591) — rien d’autre ne l’a remplacé', !/_pilAvertCfm|_pilCadreAvert/.test(P));
 
   /* ── ③ CHAQUE VUE OUVRE SUR SON EN-TÊTE ── */
   const pos = sansCom(fnDe(S.pil, 'function _pecViewPostes(E){'));

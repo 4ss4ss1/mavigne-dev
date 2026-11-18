@@ -644,3 +644,4 @@
 | 588 | 588. ★★★ MOTS-6 — AUJOURD’HUI, LA VUE CAVE ALLÉGÉE : LES SIX CARTES GARDÉES, MOINS DE MOTS DANS CHACUNE (17… | `docs/claude/chantiers-580-629.md` |
 | 589 | 589. ★★★ MOTS-7 — AUJOURD’HUI, LA VUE ÉCONOMIE ALLÉGÉE, ET CDDCDI-1 RÉGULARISÉ (17/11 — `src/cockpit-vue.js… | `docs/claude/chantiers-580-629.md` |
 | 590 | 590. ★★★ MOTS-8 — PILOTAGE › TRAVAUX ALLÉGÉ SUR PLACE : L’ONGLET RESTE, SES CARTES AUSSI (17/11 — `src/pilo… | `docs/claude/chantiers-580-629.md` |
+| 591 | 591. ★★★ PORTEE-1 — « VOUS REGARDEZ » NE RESTE QUE LÀ OÙ IL CHANGE L’ÉCRAN : LA CAMPAGNE SE CHOISIT À LA PA… | `docs/claude/chantiers-580-629.md` |

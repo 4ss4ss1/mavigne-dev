@@ -22,14 +22,17 @@ function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw n
 function variable(src, nom) { const m = new RegExp('var ' + nom + '\\s*=').exec(src); if (!m) throw new Error('introuvable : ' + nom); return src.slice(m.index, src.indexOf(';', m.index) + 1); }
 let ok = 0, ko = 0;
 const t = (nom, cond) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom); } };
-// Une prévision de cinq jours à partir de demain minuit : sec, calme, 18 °C, 70 % ; le 2e jour, 35 % d'humidité de 9 h à 16 h ;
+// Une prévision de cinq jours à partir de demain minuit : sec, calme, 18 °C, 70 % ; le 2e jour, 35 % d'humidité de 11 h à 14 h ;
+// ⚠️ PORTEE-1 (§591, 18/11) : c'était 9 h-16 h — en fin novembre le soleil se couche vers 16 h 50, il ne restait AUCUN créneau
+//   ce jour-là (1 h le matin, moins d'une heure le soir) et le harnais rougissait selon la DATE DU JOUR, sur le code publié aussi.
+//   11 h-14 h laisse un créneau en toute saison : la règle jouée (l'hygrométrie exclut ses heures) ne change pas.
 // le 3e jour, de la pluie 14 h-16 h (6 mm/h).
 function prevision() {
   const d0 = new Date(); d0.setDate(d0.getDate() + 1); d0.setHours(0, 0, 0, 0);
   const time = [], temp = [], precip = [], wind = [], hum = [], pp = [];
   for (let k = 0; k < 5 * 24; k++) { const d = new Date(d0.getTime() + k * 3600000); const j = Math.floor(k / 24), h = d.getHours();
     time.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(h).padStart(2, '0') + ':00');
-    temp.push(18); wind.push(8); pp.push(5); hum.push(j === 1 && h >= 9 && h < 16 ? 35 : 70); precip.push(j === 2 && h >= 14 && h < 16 ? 6 : 0); }
+    temp.push(18); wind.push(8); pp.push(5); hum.push(j === 1 && h >= 11 && h < 14 ? 35 : 70); precip.push(j === 2 && h >= 14 && h < 16 ? 6 : 0); }
   return { time, temp, precip, wind, hum, pp };
 }
 function monde(S, soirF) {
@@ -48,7 +51,7 @@ function jouer(S) {
   const nuit = J[0].heures.filter((x) => x.h === 2)[0], midi = J[0].heures.filter((x) => x.h === 12)[0];
   t('① la frise du 1er jour : la nuit en « nuit », midi en « bon créneau »', nuit && nuit.cl === 'nuit' && midi && midi.cl === 'ok');
   const h2 = J[1].heures.filter((x) => x.h === 12)[0];
-  t('② le 2e jour : l’hygrométrie sous 50 % (9 h-16 h) exclut le milieu de journée — la case « sec », le créneau ailleurs', h2 && h2.cl === 'sec' && J[1].start != null && (J[1].end <= 9 || J[1].start >= 16));
+  t('② le 2e jour : l’hygrométrie sous 50 % (11 h-14 h) exclut le milieu de journée — la case « sec », le créneau ailleurs', h2 && h2.cl === 'sec' && J[1].start != null && (J[1].end <= 11 || J[1].start >= 14));
   t('③ la pluie d’après : le créneau du 2e jour voit les 12 mm du 3e jour dans ses 72 h, et leur jour', J[1].apresMm === 12 && /\d/.test(J[1].apresJour));
   const p3 = J[2].heures.filter((x) => x.h === 15)[0];
   t('③ le 3e jour : la pluie en « pluie »', p3 && p3.cl === 'pluie');

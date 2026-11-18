@@ -67,6 +67,11 @@
    "date": "2026-11-17",
    "motif": "Pilotage › Travaux",
    "hausses": []
+  },
+  {
+   "date": "2026-11-18",
+   "motif": "PORTEE-1 (§591) : « Vous regardez » ne reste que sur Économie › Le détail ; une ligne de la campagne sur Travaux, L'équipe & le matériel et Décider ; le bandeau de Travaux en deux tuiles de la campagne",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -266,7 +271,7 @@
    "Pilotage › Travaux": {
     "mots": 65,
     "p15": 0,
-    "avant": 7,
+    "avant": 8,
     "lex": 2
    },
    "Pilotage › L’équipe & le matériel": {
@@ -276,7 +281,7 @@
     "lex": 6
    },
    "Pilotage › Décider": {
-    "mots": 377,
+    "mots": 378,
     "p15": 2,
     "avant": 16,
     "lex": 5
@@ -554,7 +559,7 @@
     "lex": 6
    },
    "Pilotage › Décider": {
-    "mots": 377,
+    "mots": 378,
     "p15": 2,
     "avant": 16,
     "lex": 5

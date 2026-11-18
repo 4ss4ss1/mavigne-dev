@@ -13,7 +13,7 @@
 
    ══ CE QU'IL TIENT ══ (les fonctions sont EXÉCUTÉES sur les vrais fichiers)
      A. pilotage.js/_pilCk2Per : la campagne que lit Aujourd'hui (_pilSaison), ses dates avec les mots de la barre
-        (_pilPorteeBornes), la piste seulement dedans, « meme » quand la barre montre déjà cette campagne ; branché au modèle.
+        (_pilPorteeBornes), la piste seulement dedans, « meme » qui ne se pose plus (PORTEE-1, §591) ; branché au modèle.
      B. cockpit-vue.js/majResume : sous chaque chiffre, sa référence (fin prévue et objectif ; coût à la fin et budget), le
         trait selon l'état, le « i » ; pluriels ; sans objectif posé ni économie ; la ponctuation collée aux boutons.
      C. htmlTete : la date, la campagne lue (nom échappé, dates déjà échappées, piste), la phrase.
@@ -59,7 +59,7 @@ function vueBac(S) {
 function perBac(S, sa, camp, auj) {
   const code = ['var window = { _pilSaison: () => SA }; var _PIL_SCOPE = { camp: CAMP }; function _pilAnAuj(){ return AUJ; }',
     morceau(S.pil, 'function _pilEsc(s){', '\n'), morceau(S.pil, 'function _pilDfr(s){', '\n'), morceau(S.pil, 'function _pilAnnOrd(y){', '\n'),
-    morceau(S.pil, 'function _pilPorteeBornes(d0,d1){', '\n}\n'), morceau(S.pil, 'function _pilCk2Per(){', '\n}\n'),
+    morceau(S.pil, 'function _pilPorteeBornes(d0,d1,fem){', '\n}\n'), morceau(S.pil, 'function _pilCk2Per(){', '\n}\n'),
     'this.__per = _pilCk2Per(); this.__bornes = _pilPorteeBornes;'].join('\n');
   const ctx = { Math, Number, String, Date, isNaN, SA: sa, CAMP: camp, AUJ: auj }; vm.createContext(ctx); vm.runInContext(code, ctx); return ctx;
 }
@@ -80,11 +80,13 @@ function suite(S) {
     T('A1 le nom et les dates de la campagne lue, avec les mots de la barre (« du 5 oct. au 5 mars · 19ᵉ jour sur 152 »)',
       p && p.nom === 'Hiver 2026–2027' && p.bornesHtml === a.__bornes('2026-10-05', '2027-03-05') && p.bornesHtml === 'du 5 oct. au 5 mars \u00b7 19\u1d49 jour sur 152');
     T('A2 la piste : la part écoulée, dedans (19 / 152 = 12,5 %)', p.pct === 12.5 && p.meme === false);
-    T('A3 la barre regarde déjà cette campagne : « meme »', perBac(S, SA, 'Hiver 2026–2027', '2026-10-23').__per.meme === true);
+    // PORTEE-1 (§591) : « Vous regardez » ne montre plus de campagne — la ligne d'Aujourd'hui garde toujours ses dates.
+    T('A3 la barre ne montre plus de campagne : « meme » ne se pose plus (PORTEE-1)', perBac(S, SA, 'Hiver 2026–2027', '2026-10-23').__per.meme === false);
     const autre = perBac(S, SA, 'Printemps 2027', '2026-10-23').__per;
     T('A4 la barre sur une autre campagne : Aujourd’hui garde la sienne (_pilSaison), sans « meme »', autre.nom === 'Hiver 2026–2027' && autre.meme === false);
     const av = perBac(S, SA, null, '2026-10-01').__per, ap = perBac(S, SA, null, '2027-04-01').__per;
-    T('A5 à venir ou terminée : les mots de la barre, pas de piste', /à venir/.test(av.bornesHtml) && av.pct === null && /terminé/.test(ap.bornesHtml) && ap.pct === null);
+    T('A5 à venir ou terminée : les mots de la barre, pas de piste ; « terminée » au féminin, et la fin dite (PORTEE-1 : le bilan)', /à venir/.test(av.bornesHtml) && av.pct === null && av.finie === false
+      && /terminée$/.test(ap.bornesHtml) && ap.pct === null && ap.finie === true && ap.fin === '2027-03-05');
     T('A6 sans campagne : rien ; sans dates : le nom seul', perBac(S, null, null, '2026-10-23').__per === null
       && (x => x.nom === 'Hiver' && x.bornesHtml === '' && x.pct === null)(perBac(S, { nom: 'Hiver' }, null, '2026-10-23').__per));
     T('A7 branché au modèle, par typeof (les harnais qui extraient le modèle seul ne l’ont pas)', pilNu.includes("_ckV.per=(typeof _pilCk2Per==='function')?_pilCk2Per():null;"));
@@ -201,12 +203,14 @@ function suite(S) {
   }
   // I. l'accompagnement
   {
-    T('I1 la fiche MV_AIDE du Pilotage : la bascule en haut à droite, les références, l’exception d’Aujourd’hui',
+    // PORTEE-1 (§591) : Aujourd'hui n'est plus une exception — tout le Pilotage lit la campagne de la pastille ; une campagne passée
+    //   s'y lit en bilan. L'aide et le guide le disent à la place de l'ancienne exception.
+    T('I1 la fiche MV_AIDE du Pilotage : la bascule en haut à droite, les références, le bilan d’une campagne passée',
       S.uti.includes('en haut à droite du cadre, la bascule <b>Terrain · Cave · Économie</b>') && S.uti.includes('le <b>coût à la fin</b> et le <b>budget</b> pour l’écart au budget')
-      && S.uti.includes('<b>Aujourd’hui</b> fait exception : il lit toujours la campagne en cours') && S.uti.includes("['La vue Cave', \": la bascule, en haut à droite du cadre, passe à trois vues"));
-    T('I2 le guide : la campagne lue, les références, Aujourd’hui parmi les écrans qui gardent leur cadre, l’atterrissage juste',
+      && S.uti.includes('« consultée » : Aujourd’hui et Travaux en font le bilan') && S.uti.includes("['La vue Cave', \": la bascule, en haut à droite du cadre, passe à trois vues"));
+    T('I2 le guide : la campagne lue, les références, le bilan d’une campagne passée, l’atterrissage juste',
       S.guide.includes('la campagne que lisent les chiffres de la page') && S.guide.includes('le <b>coût à la fin</b> et le <b>budget</b> sous l\'écart au budget')
-      && S.guide.includes("<b>Aujourd'hui</b> lit toujours la campagne en cours") && S.guide.includes("corrigé de la cadence mesurée de l'équipe dès 40 % du travail fait") && !S.guide.includes(', à la cadence\n  mesurée de l\'équipe.'));
+      && S.guide.includes("« consultée » : Aujourd'hui et Travaux en font le bilan") && S.guide.includes("corrigé de la cadence mesurée de l'équipe dès 40 % du travail fait") && !S.guide.includes(', à la cadence\n  mesurée de l\'équipe.'));
     const iw = S.uti.indexOf('export const WHATS_NEW = ['), jw = S.uti.indexOf('\n];', iw);
     const WN = vm.runInNewContext('(' + S.uti.slice(S.uti.indexOf('[', iw), jw + 2) + ')'), APP = (S.uti.match(/export const APP_VERSION = '([^']+)'/) || [])[1], w = WN.find(b => b.v === '10.10') || {};   // GABARIT-1 (§455) : lue à sa version — un lot suivant prépend la sienne
     T('I3 la nouveauté (exécutée) de la version 10.10 : pour l’admin, pastille sur la phrase', !!APP && Array.isArray(w.items) && w.items.length === 1 && w.items[0].niv === 1
@@ -231,14 +235,14 @@ if (CONTRE) {
     ['la bascule redescend sous la phrase', 'vue', "  $('#ck-cadre-tete').innerHTML = htmlCadreTete();", "  void 0;"],
     ['la sous-ligne reste visible', 'css', '#page-pilotage:has(#ck-cadre-tete) .pil-souslig{display:none}\n', ''],
     ['la ligne de repère répète la barre', 'css', '@media (min-width:701px){.ck2 .ck-per.meme .ck-per-d{display:none}}\n', ''],
-    ['la marque « meme » jamais posée', 'pil', 'meme:(_PIL_SCOPE.camp===sa.nom)', 'meme:false'],
-    ['les dates écrites autrement que la barre', 'pil', 'r.bornesHtml=_pilPorteeBornes(d0,d1);', "r.bornesHtml=d0+' – '+d1;"],
+    ['la fin de la campagne n’est plus dite (PORTEE-1)', 'pil', 'r.fin=d1; r.finie=(!isNaN(b) && !isNaN(o) && o>b);', 'r.fin=null; r.finie=false;'],
+    ['les dates écrites autrement que la barre', 'pil', 'r.bornesHtml=_pilPorteeBornes(d0,d1,1);', "r.bornesHtml=d0+' – '+d1;"],
     ['la piste hors de la campagne', 'pil', 'b>=a && o>=a && o<=b) r.pct=', 'b>=a) r.pct='],
     ['les fiches à titre ignorées', 'vue', "if (f && typeof f === 'object') {", 'if (false) {'],
     ['le point de la Cave décroché du mot', 'vue', '<span class="ck-b-lab">Cave', 'Cave<span class="ck-b-lab">'],
     ['la roue sans panneau', 'vue', "{ const g = document.getElementById('pil-gear'); if (g) g.click(); return; }", '{ return; }'],
     ['le budget mène nulle part', 'vue', "  if (S.mode !== 'eco') choisirMode('eco');\n  const v = $('#ck-ever');", "  const v = $('#ck-ever');"],
-    ['l’aide pas à jour', 'uti', '<b>Aujourd’hui</b> fait exception : il lit toujours la campagne en cours, et la nomme sous sa date.', ''],
+    ['l’aide pas à jour', 'uti', '« consultée » : Aujourd’hui et Travaux en font le bilan', '« consultée »'],
     ['le guide pas à jour', 'guide', 'la campagne que lisent les chiffres de la page', ''],
     ['l’atterrissage du guide redevenu faux', 'guide', "compté au barème et\n  corrigé de la cadence mesurée de l'équipe dès 40 % du travail fait — avant, l'écart déjà constaté est reporté tel quel.", "à la cadence\n  mesurée de l'équipe."],
     ['une couleur écrite en dur', 'css', '.ck2 .ck-fig-t.ko{color:var(--danger-texte)}', '.ck2 .ck-fig-t.ko{color:#C2381B}'],

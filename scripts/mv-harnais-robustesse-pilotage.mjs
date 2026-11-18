@@ -178,7 +178,7 @@ for (const [lib, d] of [['vide', {}], ['fixe', domaineFixe()]]) {
   if (lib === 'fixe') {
     // Le harnais ne vaut que si les données ARRIVENT aux écrans : un rendu vide est toujours propre.
     const hAvc = rendre('avc'), hEqu = rendre('equ'), hArc = rendre('arc');
-    T('A · base fixe : la campagne lit le vignoble (2 parcelles, 1,52 ha) et le barème', /2 parcelles · 1,52\u00a0?\s?ha|2 parcelles · 1,52 ha/.test(hAvc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')) && /de barème sur /.test(hAvc));   // MOTS-8 (§590) : la tuile Travaux dit son barème au survol (son titre)
+    T('A · base fixe : la campagne lit le vignoble (2 parcelles, 1,52 ha) et le barème', /2 parcelles · 1,52\u00a0?\s?ha|2 parcelles · 1,52 ha/.test(hAvc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')) && /\d\u00a0% fait/.test(hAvc) && /Équipe au pic/.test(hAvc));   // PORTEE-1 (§591) : la tuile Travaux est partie — le barème se lit dans la phrase (« N % fait »), l'équipe au pic dans le bandeau
     T('A · base fixe : l\u2019équipe lit les fiches et le matériel', /Victor/.test(hEqu) && /Enjambeur/.test(hEqu));
     T('A · base fixe : les archives lisent les périodes', /Printemps 2026/.test(hArc));
   }

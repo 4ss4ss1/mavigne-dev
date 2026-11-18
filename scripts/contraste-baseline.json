@@ -9,8 +9,8 @@
   },
   "code": {
     "clair": {
-      "mesurees": 1033,
-      "nonResoluble": 399,
+      "mesurees": 1030,
+      "nonResoluble": 402,
       "fondInconnu": 446,
       "sous": {
         "src/app.js": 4,
@@ -26,9 +26,9 @@
       }
     },
     "sombre": {
-      "mesurees": 1033,
-      "nonResoluble": 395,
-      "fondInconnu": 453,
+      "mesurees": 1030,
+      "nonResoluble": 399,
+      "fondInconnu": 452,
       "sous": {
         "src/app.js": 6,
         "src/cave.js": 14,

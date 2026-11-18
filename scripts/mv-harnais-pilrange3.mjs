@@ -41,7 +41,7 @@ function jouer(S) {
   t('③ dans la carte, la jauge perd son cadre (pas une carte dans la carte)', P.includes("+'.pil-panel .pil-gauge-in{background:none;border:0;"));
   t('③ « Afficher dans cet onglet » : plus de « Jauge de saison », le donut s’appelle « La charge par tâche »', /avc:\[\['avc_bar','Avancement'\],\['avc_pie','La charge par tâche'\],/.test(P) && !/Jauge de saison/.test(P));
   t('④ l’onglet s’appelle « Travaux » : menu, intitulé, barre latérale, recherche, cockpit', /\['avc','raisin','Travaux'\]/.test(P) && /avc:'Travaux — /.test(P) && /\['avc', 'Travaux'\]/.test(S.coq) && /'camp', 'Travaux'\)/.test(S.vue));   // DEMO-5 (§500) : le chapitre « Travaux » de la visite guidée est parti avec elle
-  t('④ la barre « Vous regardez » garde « La campagne » (ce qu’on regarde, pas l’onglet)', /B\('camp','La campagne'\)/.test(P));
+  t('④ « La campagne » se dit à la pastille du haut et sur la ligne de Travaux — plus dans « Vous regardez » (PORTEE-1, §591)', !/B\('camp'/.test(P) && /\(cons\?'La campagne consult\\u00e9e':'La campagne'\)/.test(P));
   t('④ l’aide et le guide disent « Travaux », et la différence donut / temps de l’équipe', S.utils.includes("['Travaux', \"(l’ancien « La campagne ») s’ouvre sur une phrase") && /Aujourd'hui · Travaux ·/.test(S.guide) && /<b>La charge par tâche<\/b> \(le donut\)/.test(S.guide));
   t('⑤ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange3.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange3.mjs --contre'") > 0);
 }

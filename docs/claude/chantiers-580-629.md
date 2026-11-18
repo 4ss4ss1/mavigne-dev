@@ -501,3 +501,57 @@ Gestes rejoués à l’écran (téléphone et ordinateur) : une tâche se dépli
 **Les trois cliquets rendus, lancés en dernier** (§587) : `npm run test:mots` (référence regravée : Travaux 104 → 65, 113 → 65), `npm run test:ux`, `npm run test:gabarit` — verts (le cliquet du gabarit a vu un `<small>` à 10,8 px — le nom de la campagne dans « Où va le temps » — : sa taille est posée, 12 px).
 
 **NON vérifié** : un vrai téléphone ; le thème sombre ; une campagne zoomée dans « Vous regardez » (la tuile « Équipe au pic ») ; un domaine sans planning (le repli sur le rythme des quatre semaines) ; un domaine en surcharge (la ligne orange « Surcharge ») ; la carte Leaflet (les tuiles du fond ne se chargent pas hors ligne ici). **Reste à faire** dans « ★ MOINS DE TEXTE » : L’équipe & le matériel, Décider, Conformité sur place ; le lot « Vous regardez » (590e) ; la suite du plan (§28).
+
+## 591. ★★★ PORTEE-1 — « VOUS REGARDEZ » NE RESTE QUE LÀ OÙ IL CHANGE L’ÉCRAN : LA CAMPAGNE SE CHOISIT À LA PASTILLE (18/11 — `src/pilotage.js` · `src/cockpit-vue.js` · `src/app.js` · `src/pilotage.css` · `src/utils.js` · `src/whats-new.js` · `index.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-portee1.mjs`)
+
+**La demande.** « suite » après MOTS-8 : le lot suivant du plan (§28, « ★ RANGEMENT ADMIN ») — « Vous regardez » sur Économie et Archives seulement, et le désaccord laissé ouvert au §590e (le bandeau de Travaux comptait l’exercice, les cartes la campagne). Maquette d’abord, en captures de l’appli et du prototype qui tourne : `docs/maquettes/maquette-vous-regardez-v1.html` (neuf vues, téléphone et ordinateur, Avant / Après). Nico (18/11) : « Go » — les quatre choix recommandés.
+
+### 591a. Mesuré avant de proposer (démo au 27/10, chaque onglet lu dans les trois positions, puis une campagne passée)
+
+| Onglet | Ce que « Vous regardez » changeait |
+|---|---|
+| Aujourd’hui, Décider, Archives | rien |
+| Travaux | le bandeau (l’exercice : 1 869 h « prévu sur l’exercice », 58 k€ sortis) et « Le temps de l’équipe » — au-dessus d’un Avancement de la campagne (1 123 h) |
+| L’équipe & le matériel | la carte Capacité |
+| Économie | les mots « exercice ↔ année vigne » (Le détail lit l’année) |
+| Conformité | un avertissement, sur « La campagne » |
+
+Et « La campagne » doublait le choix de la campagne de toute l’appli (la pastille de la Vigne). Une campagne passée consultée (Printemps 2026, close le 23/10) : la pastille restait verte, « Vous regardez » disait « Exercice 2026–2027 · 88ᵉ jour », Travaux annonçait « 0 % fait, fin prévue 14 déc. », Aujourd’hui « 35 jours de retard, 154 934 € au-dessus du budget, coût à la fin 187 743 € ».
+
+### 591b. Ce qui change
+
+- **Une seule question : quelle campagne ?** La pastille du haut du Pilotage devient un bouton (`data-pilsaison`, `aria-haspopup`) qui ouvre **le menu de la Vigne**, ancré sous elle (`_seasonMenuToggle(e, ancre)` dans `app.js` ; `_seasonMenuClose` relâche toutes les pastilles ouvertes). Le choix vaut pour tout le Pilotage et pour la Vigne (`_switchSaison`). Le menu tient en une ligne : « La campagne active s’ouvre par défaut. » (« saison » est hors du lexique, `index.html`).
+- **La ligne d’écran** (`_pilCrumbHtml`) : sur **Économie › Le détail**, « Vous regardez » et le seul choix de l’**année** (l’exercice ou l’année vigne, ‹ › — `_pilCrumbAnnee`) ; sur **Travaux, L’équipe & le matériel, Décider**, la campagne, ses dates et le jour (`_pilCrumbCampagne`, `_pilPorteeJour` ; au téléphone, le jour seul) ; ailleurs, rien. Archives n’a pas de ligne : elle ne lisait rien de la barre (mesuré).
+- **Le bandeau de Travaux** : deux tuiles de la **campagne** — « Équipe au pic » (`_pilPicPortee(_pilSaisonNom())`, la définition unique du pic ; « l’équipe suffit », « +N à prévoir » ou « pic passé ») et « Budget » (l’engagé face au budget, `_pecData`, les chiffres de la tuile Budget d’Aujourd’hui). La tuile « Travaux » part : ses heures sont dans la phrase et dans Avancement (choix 1 de la maquette). Les chiffres de l’**année** restent là où l’année est le sujet : le renfort dans Personnel, le budget dans Économie.
+- **Une campagne passée** : la pastille passe à l’ambre (`.consult`, « · consultée » ; au téléphone le nom seul, et la ligne dit « consultée · terminée le 23 oct. »). Travaux dit « 0 % fait, campagne terminée le 23 oct. » (`_pilTvPhrase`). Aujourd’hui en fait le bilan (choix 2) : « Campagne terminée le 23 oct., 122 125 € au-dessus du budget », repères « fait · engagé · budget » (`majResume`) ; la carte de fin dit « Fin de la campagne · 23 oct. · 0 % fait · Terminée », sans frise, objectif ni « Simuler un renfort » (`majVerdict`, `.ck-v-finie`). ★ « Finie » se lit sur la **fin de la campagne** (`_pilCk2Per` : `fin`, `finie`), jamais sur l’objectif, que l’administrateur déplace. « terminée » au féminin pour une campagne (`_pilPorteeBornes(d0,d1,1)`).
+- **« ≈ » quitte le Pilotage** (choix 4, hors de la police — §590g) : « environ » (les trajets, « Il manque environ… ») ; rien sur les bouteilles, dont l’étiquette dit déjà « probable ». « Avancement » reste (choix 4).
+
+### 591c. Ce qui part (mesuré : personne d’autre ne le lisait)
+
+Le **zoom par campagne** et tout ce qui le servait : « La campagne » dans la barre, sa campagne par défaut (`_pilPorteeCampDefaut`, `_pilPorteePeriodes`, `_pilPorteePeriode`), sa liste (`_pilPorteePopHtml`, `#pil-ptpop`), la frise et ses puces (`_pilAnFriseCadre`, `data-etpc`, et leur CSS `.pil-anfr*`, `.pil-anchip*`, `.pil-ptbtn`, `.pil-ptcamp`), l’alias `window._PIL_ETPSEL` (une seule occurrence dans le paquet construit : sa définition), l’avertissement de la Conformité (`_pilAvertCfm`, `_pilCadreAvert`), les photos de l’année (`_pilPhotosData`, `_pilPhotoEffAn`, `_pilPhotoBudAn`) et leur mémo (`_pilExoData`, que le preflight a trouvé sans appelant). `_PIL_SCOPE.camp` reste dans l’état mais ne se pose plus : `_pilScopeLoad` oublie une campagne mémorisée par une version d’avant ; ses lectures valent `null` et retombent sur le cadre de l’année. `pilotage.js` : 983 647 → 967 928 octets.
+
+### 591d. Mesuré après (build, démo au 27/10)
+
+- `npm run test:mots` vert ; référence regravée (Décider 377 → 378 mots : sa ligne de la campagne) ; les autres écrans ne bougent pas au compte du cliquet.
+- Prototype rejoué à l’écran, téléphone et ordinateur : la pastille ouvre le menu sous elle ; Printemps 2026 choisi → pastille ambrée, ligne, phrase et carte de fin en bilan ; aucune erreur de page.
+- Captures de la démo regravées (la pastille et la ligne d’écran changent) : `r-ger-pilotage`, `r-ger-echeances`, `r-ger-renfort`, `r-ger-cout`, `r-ger-conformite`, `pilotage-auj-pc`, `cout-pc`, `renfort-pc`, `pilotage-auj-apres-pc` (et leurs vignettes).
+- Cliquets regravés, pour des raisons écrites : **TYPO** (`cockpit-vue.js` 181 → 191 ko, au-delà des +5 % — la référence datait de TETE-4C, les lots MOTS l’avaient déjà fait monter à 189 ; loin du plafond de 1 024 ko, pas de découpage) ; **CONTRASTE** (1 033 → 1 030 paires : les règles de la liste et des puces sont parties avec elles).
+
+### 591e. Harnais
+
+`scripts/mv-harnais-portee1.mjs` (25 assertions, 36 contre-épreuves) : la pastille et son menu ancré ; la ligne d’écran jouée sur les huit vues ; la ligne de la campagne et sa forme consultée ; « Vous regardez » sans campagne ; la campagne mémorisée oubliée, le cadre gardé ; le bandeau joué (deux tuiles, le pic de LA campagne, « +N à prévoir ») ; la phrase et la tête du cockpit sur une campagne finie ; la carte de fin ; l’ambre ; ce qui est parti ; « ≈ » ; l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adaptés** : `pilrange2a` (la barre ne choisit plus que l’année ; la liste et la campagne par défaut parties), `tete4c` (le bouton du téléphone dit l’année ; plus de liste), `annee` (le budget et le renfort de l’année se lisent dans leurs cartes), `pil-coherence` (plus de photo de l’année à prorater), `mots8` (la forme de la tuile reste ; le bandeau de l’année est remplacé), `mots2` (l’avis de Conformité est parti), `pilrange2b` (la tuile Budget de la campagne mène à Économie), `pilrange3` (« La campagne » à la pastille et sur la ligne), `pilrange4b` (le guide), `autete1` (« meme » ne se pose plus ; la fin de la campagne dite ; l’aide dit le bilan au lieu de l’exception d’Aujourd’hui), `etats1` (l’aide), `robustesse-pilotage` (le barème se lit dans la phrase). ★ `fenetre2` rougissait **sur le code publié aussi**, selon la date du jour : sa prévision d’essai mettait l’air sec de 9 h à 16 h le 2ᵉ jour ; fin novembre le soleil se couche vers 16 h 50 et il ne restait aucun créneau — l’air sec passe à 11 h-14 h, la règle jouée ne change pas.
+
+### 591f. Restes, à leur lot
+
+- « ≈ » reste dans la Cave, le Cuvier et la Réserve (13 au compte du cliquet SUBSET) : au lot de la Cave rangée.
+- « ᵉ » (U+1D49) est hors de la police lui aussi (dette du cliquet SUBSET, d’avant ce lot) : « 4ᵉ jour sur 128 » le dessine dans une police de repli, comme la barre avant elle.
+- L’avertissement du Paramétrage « Vous regardez X… » (`_zoomAilleurs`) ne peut plus s’allumer (la campagne zoomée n’existe plus) : à retirer au lot qui touche le Paramétrage.
+- **Vu en passant** : sur la démo, ouvrir Conformité met une écriture de la configuration du domaine en attente quelques secondes plus tard — **aussi sur le code publié** (mesuré). Ouvrir un onglet ne devrait rien écrire : à chercher à part.
+
+### 591g. Leçons
+
+- ⚠️ **La pastille du Pilotage ne montrait pas la consultation** : depuis TETE-4C, `body .mod-header .hv2-saison-pill` la repeint en gris avec `!important` ; la marque `.consult` ne gagnait pas. Il faut la reprendre au même niveau (`pilotage.css`).
+- ⚠️ **Une campagne « finie » se lit sur SA fin**, pas sur l’objectif : le prototype comparait l’objectif à aujourd’hui ; un objectif avancé par l’administrateur aurait fait dire « terminée » à une campagne en cours.
+- ⚠️ `index.html`, `app.js`, `CLAUDE.md` et le journal se modifient par l’outil d’édition (le garde de confidentialité refuse le shell sur eux) ; la version affichée se vérifie dans le navigateur (la page servie, comptée) — le cinquième affichage est `boot.js?v=`.
