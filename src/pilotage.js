@@ -102,7 +102,7 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  collapsed:{tension:1,conso:1,trx:1,echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -129,9 +129,8 @@ function _pilMigrShow(st){
   }
   return st;
 }
-// Les deux onglets composites portent un intertitre par moitie. Sans ce test,
-// masquer tous les indicateurs d'une moitie laisserait son titre orphelin.
-function _pilAnyShow(ids){ for(var i=0;i<ids.length;i++){ if(_pilShow(ids[i])) return true; } return false; }
+// MOTS-9 (§592) : _pilAnyShow (l'intertitre d'une moitié sans carte) est parti — _pilTabEqu ne pose « Personnel » ou
+//   « Matériel » que si l'une de ses cartes est rendue.
 // ⚠️ ON NE REPOSE QUE LA DISPOSITION. `show` (les indicateurs choisis), `pie`,
 //   `bar` et `sub` sont des choix de CONTENU : ils survivent. Seul `collapsed`,
 //   dont la signification a change, repart du defaut.
@@ -162,7 +161,7 @@ function _pilSaveState(st){ try{ localStorage.setItem(_pilUserKey(), JSON.string
 var _PIL_STATE = null;
 var _PIL_TAB = 'auj';
 // 5 onglets VISIBLES (regroupement : Personnel+Materiel -> Equipe ; Economie+Conformite -> Eco & conformite).
-// Les fonctions de rendu internes (_pilTabPrs/_pilTabMat/_pilTabEco/_pilTabCfm) restent inchangees.
+// Les fonctions de rendu internes (_pilTabEqu/_pilTabEco/_pilTabCfm) restent inchangees.   (MOTS-9 : _pilTabEqu remplace _pilTabPrs et _pilTabMat)
 // La barre suit la progression d'une campagne : ou j'en suis -> ce qui vient ->
 // ce que je decide -> avec qui -> ce que ca coute. « Decider » etait enterre dans
 // le menu Outils au motif qu'il servait peu ; c'est la seule page ou l'on arbitre
@@ -1033,9 +1032,9 @@ function _pilPanelEquipe(d){
   // ③ « a passer en Inactif » n'est plus une phrase a retenir : c'est un bouton.
   if(_nF>0) rows+=_pilEmptyGo(_nF+' contrat'+(_nF>1?'s terminés':' terminé')+' : '+(_nF>1?'ces fiches restent':'cette fiche reste')+' à passer en Inactif.','equipe','Réglages \u203a Équipe');
   return _pilTile('equipe','#5B9B3A','Équipe',
-    _pilStat(_nColl>0?_nPers:d.membres.length, _nColl>0?' personnes':' actifs', null),
-    'au '+_pilDfr(_pilRefDate())+(_sub.length?(' \u00b7 '+_sub.join(' \u00b7 ')):''),
-    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.equipe');
+    _pilStat(_nColl>0?_nPers:d.membres.length, '', null),   // MOTS-9 (§592) : « Équipe 4 » — « actifs » est hors du lexique
+    _sub.join(' \u00b7 '),   // MOTS-9 (§592) : « au 27 oct. » partait chaque jour — c'est aujourd'hui
+    null, '<div class="pil-ip-list">'+rows+'</div><div class="pil-tv-act">'+_pilTvBtn('equipe','Ouvrir l\u2019\u00e9quipe')+'</div>', 'pil.equipe');
 }
 function _pilPanelTracteur(d){
   var s=_PIL_STATE.sub||{};
@@ -1057,9 +1056,11 @@ function _pilPanelTracteur(d){
   //   vient verifier sans deplier. Il fallait ouvrir la carte pour la voir.
   var _pr=null;
   (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (_pr===null || t.revReste<_pr.revReste)) _pr=t; });
-  var _cad = _pr ? ((_pr.revReste<0?'révision dépassée de '+_pilNum(-_pr.revReste):'prochaine révision dans '+_pilNum(_pr.revReste))+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
+  var _cad = _pr ? ((_pr.revReste<0?'révision dépassée de '+_pilNum(-_pr.revReste):'révision dans '+_pilNum(_pr.revReste))+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
                  : 'aucune échéance de révision renseignée';
-  return _pilTile('tracteur','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
+  // ★ MOTS-9 (§592) : « Tracteurs », et un bouton vers l'entretien (Tracteur › Entretien), là où l'on agit.
+  return _pilTile('tracteur','#4A9FC8','Tracteurs', _pilStat(n,'', d.nRepar?('🔧 '+d.nRepar):null), _cad, null,
+    '<div class="pil-ip-list">'+rows+'</div><div class="pil-tv-act">'+_pilTvBtn('entretien','Ouvrir l\u2019entretien')+'</div>', 'pil.tracteur');
 }
 function _pilPanelPresences(d){
   var s=_PIL_STATE.sub||{};
@@ -1075,14 +1076,16 @@ function _pilPanelPresences(d){
     else if(p.etat==='maladie'){ lab='Maladie'; col='var(--rouge)'; }
     else { lab=(p.motif||'Absent'); col='var(--rouge)'; }
     return '<div class="pil-li"><span class="pil-av" style="background:'+c+'">'+_pilEsc((p.nom||'?').charAt(0).toUpperCase())+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(p.nom||'—')+'</div><div class="pil-li-s" style="color:'+col+';font-weight:600">'+_pilEsc(lab)+'</div></div></div>';
-  }).join('') || '<div class="pil-empty">Toute l\'équipe est présente aujourd\'hui</div>';
+  }).join('');   // MOTS-9 (§592) : personne d'absent — la pastille « au complet » le dit ; « Toute l'équipe est présente » partait en double
   // ① Le cadre dit CE QUI EST COMPTE et QUAND — sans ca, « 6/12 » se compare a
   //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
-  var _abs=list.length;
-  return _pilTile('presences','#C9A84C','Présences du jour',
-    (d.jourTravaille===false)?_pilStat('\u2014','',null):_pilStat((d.presentFiches!=null?d.presentFiches:(d.nPresent||0))+'/'+(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length)),' présents',null),
-    (d.jourTravaille===false)?'pas de travail prévu aujourd\u2019hui au planning':'au champ, aujourd\u2019hui \u00b7 hors bureau'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
-    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
+  // ★ MOTS-9 (§592) : « 4/4 présents » et une pastille (au complet, ou combien manquent) ; « au champ, aujourd'hui · hors bureau »
+  //   dit ce qui est compté : c'est dans le « i » (pil.presences), pas sous chaque chiffre.
+  var _pN=(d.presentFiches!=null?d.presentFiches:(d.nPresent||0)), _vN=(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length)), _man=Math.max(0,_vN-_pN);
+  return _pilTile('presences','#C9A84C','Présents',   // MOTS-9 (§592) : le mot du lexique (§580c)
+    (d.jourTravaille===false)?_pilStat('\u2014','',null):(_pilStat(_pN+'/'+_vN,'',null)+(_man?_pilPhPl(_man+' absent'+(_man>1?'s':''),'or'):_pilPhPl('au complet','ok'))),
+    (d.jourTravaille===false)?'pas de travail prévu aujourd\u2019hui au planning':'',
+    null, (rows?'<div class="pil-ip-list">'+rows+'</div>':'')+'<div class="pil-tv-act">'+_pilTvBtn('planning','Ouvrir le planning')+'</div>', 'pil.presences');
 }
 function _pilPanelPhyto(d){
   var rows = d.traits.slice(0,6).map(function(t){
@@ -4586,31 +4589,8 @@ function _pilTensData(d){
 }
 function _pilTensFmtEc(ec){ return ec==null?'—':((ec>0?'+':'')+Math.round(ec)+' %'); }
 // ── Le chiffre du bandeau ──
-// ── La carte de « La décision du jour » ──
-function _pilCardTension(d){
-  var T=_pilTensData(d);
-  if(!T||!T.rows.length) return '';
-  var mx=0; T.rows.forEach(function(r){ mx=Math.max(mx,r.f,r.p); });
-  mx=Math.max(10,Math.ceil(mx/10)*10);
-  var w=function(v){ return Math.max(0,Math.min(100,v/mx*100)).toFixed(2)+'%'; };
-  var rows=T.rows.map(function(r){
-    var cls=r.niv==='rouge'?'b':(r.niv==='orange'?'o':'v');
-    var sem=(r.sm>T.L.maxMoy+1e-4)?('<span class="pil-tens-sem">semaine à '+_pilNum(r.sm)+' h'+(r.niv==='rouge'?' — au-delà de '+T.L.maxHebdo+' h':'')+'</span>'):'';
-    return '<div class="pil-tens-r"><span class="n">'+_pilEsc(r.nom)+sem+'</span>'
-      +'<span class="k"><i class="'+cls+'" style="width:'+w(r.f)+'"></i>'+(r.p>0?'<u style="left:'+w(r.p)+'"></u>':'')+'</span>'
-      +'<span class="v"><b>'+_pilNum(r.f)+'</b> h<span>'+_pilTensFmtEc(r.ec)+'</span></span></div>';
-  }).join('');
-  // ALIGN-1 (§236) : cette carte est devenue le DÉTAIL (rangée .pil-dec2) ; le verdict et sa pastille
-  //   vivent dans la tuile _pilTuileTension, en haut.
-  return '<div class="pil-tile2 pil-det"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">Tension de l’équipe — détail</span></div>'
-    +'<div class="pil-t2b"><div class="pil-big">Les 14 derniers jours</div>'
-    +'<div class="pil-t2s">14 derniers jours \u00b7 travail effectif face au planning prévu \u00b7 semaine au-delà de '+T.L.maxMoy+' h à surveiller</div>'
-    +'<div class="pil-tens">'+rows+'</div>'
-    +'<div class="pil-tens-r pil-tens-ax"><span></span><span class="pil-trx-ax"><span>0</span><span>'+(mx/2)+'</span><span>'+mx+' h</span></span><span></span></div>'
-    +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="m"></i>prévu au planning</span></div>'
-    +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="planning">Planning \u203A</button></div>'
-    +'</div></div>';
-}
+// ── La tension : ★ MOTS-9 (§592) — carte repliée de L'équipe & le matériel, _pilPanelTension (l'ancien « détail »,
+//   _pilCardTension, ouvert en grand sous trois titres, est parti).
 
 // ════════════════════════════════════════════════════════════════════════
 // GNR-M (§213) — LE TRACTEUR SE PROJETTE SUR LES TRAVAUX EN COURS
@@ -4886,116 +4866,8 @@ function _pilGmTraitementOption(T){
   var h=T.domaine*hha;
   return {nom:act.nom, h:h, l:h*lh, fen:String(fen.label||'')+' '+fen.start+'h\u2192'+fen.end+'h', nNu:nNu, src:(c&&c.ok)?'mesure':'reglage', hhaSrc:(M?('cadence mesurée sur '+M.n+' traitement'+(M.n>1?'s':'')):'barème')};
 }
-// ── Les cartes du tracteur (Équipe & matériel › Matériel, PIL-RANGE-1b §441) ──
-function _pilCkTracteur(d){
-  var T=_pilGmTravaux(), H='', nCote=0;   // GNR-2 (§256) : nCote = les cartes qui se projettent sur les travaux (révision, cuve)
-  var trNom={}; (d.tracs||[]).forEach(function(t){ trNom[t.id]=t.nom; });
-  // ① Les travaux en cours
-  if(T.jobs.length){
-    var dom=T.domaine>0?T.domaine:1, hT=0, lT=0, nSansH=0, nSess=0, nAm=0;
-    var rows=T.jobs.map(function(j){
-      if(j.h!=null) hT+=j.h; else nSansH++;
-      if(j.l!=null) lT+=j.l;
-      if(j.kind==='session') nSess++; else nAm++;
-      var w=function(v){ return Math.max(0,Math.min(100,v/dom*100)).toFixed(2)+'%'; };
-      var sub=_pilEsc(trNom[j.tid]||'tracteur non choisi')+' \u00b7 ';
-      if(j.kind==='amendement') sub+='apport du '+_pilDfr(j.debut)+' \u00b7 '+j.nSel+' parcelle'+(j.nSel>1?'s':'')+' choisie'+(j.nSel>1?'s':'')+(j.lance?'':' \u00b7 session pas encore lancée');
-      else sub+='lancé le '+_pilDfr(j.debut)+(j.nSkip?(' \u00b7 '+j.nSkip+' désactivée'+(j.nSkip>1?'s':'')):'');
-      var dorm=(j.dormJ!=null&&j.dormJ>_PIL_GM_DORMANT_J)?'<span class="pil-trx-dorm">aucune parcelle cochée depuis '+j.dormJ+' j</span>':'';
-      return '<div class="pil-trx-job"><span class="pil-trx-nm"><b>'+_pilGmLibJob(j)+(j.sel?' <span class="pil-trx-tag">sélection</span>':'')+'</b><span>'+sub+'</span>'+dorm+'</span>'
-        +'<span class="pil-trx-trkc"><span class="pil-trx-trk"><i style="left:0;width:'+w(j.faitHa)+'" class="f"></i><i style="left:'+w(j.faitHa)+';width:'+w(j.resteHa)+'" class="r"></i></span>'
-        +'<span class="pil-trx-ha">'+_pilGmFr(j.resteHa,2)+' ha à faire sur '+_pilGmFr(j.perHa,2)+' ha</span></span>'
-        +'<span class="pil-trx-num">'+(j.h!=null?'<b>'+_pilGmFr(j.h)+'</b> h':'—')+'</span>'
-        +'<span class="pil-trx-num">'+(j.l!=null?'<b>'+_pilNum(j.l)+'</b> L':'—')+'</span></div>';
-    }).join('');
-    var quoi=[]; if(nSess) quoi.push(nSess+' session'+(nSess>1?'s':'')+' lancée'+(nSess>1?'s':'')); if(nAm) quoi.push(nAm+' apport'+(nAm>1?'s':'')+' d’amendement');
-    var cad=quoi.join(' + ')+' \u00b7 heures au barème, litres à la consommation de chaque tracteur'+(nSansH?(' \u00b7 '+nSansH+' sans barème, non compté'+(nSansH>1?'s':'')):'');
-    H+='<div class="pil-tile2 pil-trx-wide"><div class="pil-t2h"><span class="ic">'+_pilIco('tracteur')+'</span><span class="t">Travaux tracteur en cours</span>'+_mvInfoBtn('pil.trx')+'</div>'
-      +'<div class="pil-t2b"><div class="pil-big">'+_pilGmFr(hT)+' h \u00b7 '+_pilNum(lT)+' L pour finir</div>'
-      +'<div class="pil-t2s">'+cad+'</div>'
-      +'<div class="pil-trx-job pil-trx-hd"><span>Travail</span><span class="pil-trx-trkc">Reste à faire \u00b7 échelle : le domaine</span><span class="pil-trx-num">Heures</span><span class="pil-trx-num">Litres</span></div>'
-      +rows
-      +'<div class="pil-trx-job pil-trx-axl"><span></span><span class="pil-trx-trkc pil-trx-ax"><span>0</span><span>'+_pilGmFr(dom,2)+' ha</span></span><span></span><span></span></div>'
-      +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="r"></i>reste à faire</span><span><i class="h"></i>hors du travail (désactivée, non choisie)</span></div>'
-      +'</div></div>';
-  }
-  // ② La révision
-  var R=_pilGmRevision(d,T);
-  if(R){
-    var t=R.t, it=R.it, rs=it.reste, big, col='var(--texte)', bigDate=false;   // ★ COMPT-7 (§489) : l'entretien le plus pressant
-    var nomIt=it.rev?'Révision':_pilEsc(it.nom), dIt=it.pd?_pilEsc(_pilGmDateAn(it.pd)):'';
-    if(rs!=null&&rs<=0){ big=it.rev?('Révision dépassée de '+_pilNum(-rs)+' h'):(nomIt+'\u00a0: dépassé de '+_pilNum(-rs)+' h'); col='var(--rouge)'; }
-    else if(it.jours!=null&&it.jours<0){ big=nomIt+'\u00a0: date dépassée ('+dIt+')'; col='var(--rouge)'; bigDate=true; }
-    else if(R.dans){ big=(it.rev?'Atteinte pendant : ':nomIt+' atteint pendant : ')+_pilGmLibJob(R.dans.job); col='var(--orange)'; }
-    else if(it.jours!=null&&it.jours<=14){ big=nomIt+' le '+dIt; col='var(--orange)'; bigDate=true; }
-    else big=it.rev?'Pas atteinte par les travaux en cours':(nomIt+'\u00a0: pas atteint par les travaux en cours');
-    var axMax=Math.max(10, Math.ceil(Math.max(rs>0?rs:0, R.tot)*1.15/10)*10);
-    var cols=['var(--terre)','var(--or)','var(--vert-med)'], seg='';
-    R.seq.forEach(function(j,k){ seg+='<i style="width:'+(j.h/axMax*100).toFixed(2)+'%;background:'+cols[k%3]+'" title="'+_pilEsc(_pilTnom(j.nom))+' \u00b7 '+_pilGmFr(j.h)+' h"></i>'; });
-    if(rs>0) seg+='<u style="left:'+Math.min(100,rs/axMax*100).toFixed(2)+'%"></u>';
-    var ry=_pilGmRythme(t.id,d.refDate), rep='';
-    if(ry&&rs>0) rep='<div class="pil-t2s">Repère : au rythme mesuré de ce tracteur ('+_pilGmFr(ry)+' h par jour ouvré, 4 dernières semaines), environ '+Math.ceil(rs/ry)+' jour'+(Math.ceil(rs/ry)>1?'s':'')+' ouvré'+(Math.ceil(rs/ry)>1?'s':'')+'.</div>';
-    var leg=R.seq.map(function(j,k){ return '<span><i style="background:'+cols[k%3]+'"></i>'+_pilGmLibJob(j)+' \u00b7 '+_pilGmFr(j.h)+' h</span>'; }).join('');
-    nCote++;
-    H+='<div class="pil-tile2 pil-trx-rev"><div class="pil-t2h"><span class="ic">'+_pilIco('cle')+'</span><span class="t">'+nomIt+' \u00b7 '+_pilEsc(t.nom||'Tracteur')+'</span>'+_mvInfoBtn('pil.trxrev')+'</div>'
-      +'<div class="pil-t2b"><div class="pil-big" style="color:'+col+'">'+big+'</div>'
-      +'<div class="pil-t2s">'+(rs>0?_pilNum(rs)+' h avant '+(it.rev?'la révision':'cet entretien')+' \u00b7 ':'')+_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.dans?(' \u00b7 à '+Math.round(R.dans.pc*100)+' % de ce travail'):'')+(R.sansBareme?(' \u00b7 '+R.sansBareme+' travail sans barème'):'')+'</div>'
-      +'<div class="pil-trx-carnet">'+seg+'</div>'
-      +'<div class="pil-trx-ax"><span>0</span><span>'+(axMax/2)+'</span><span>'+axMax+' h</span></div>'
-      +(leg?'<div class="pil-trx-leg">'+leg+'</div>':'')
-      +rep
-      +((dIt&&!bigDate)?'<div class="pil-t2s">\u00c0 la date\u00a0: le '+dIt+'</div>':'')
-      +((R.aussi&&R.aussi.length)?'<div class="pil-t2s">Aussi\u00a0: '+R.aussi.map(_pilGmRevTxt).join(' \u00b7 ')+'</div>':'')
-      +'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="entretien">Tracteur \u203A Entretien \u203A</button></div>'
-      +'</div></div>';
-  }
-  // ③ La cuve
-  var g=d.gnr;
-  if(g&&g.capacite){
-    var cap=Number(g.capacite)||0, niv=Number(g.niveau)||0, seuil=Number(g.seuil)||0;
-    var avecL=T.jobs.filter(function(j){ return j.l!=null; }), sansL=T.jobs.length-avecL.length;
-    if(avecL.length||niv<=seuil){
-      // ★ L'ECHELLE : la capacite ecrasait tout (410 L sur 1 500 = un quart de barre,
-      //   un travail de 5 L = un trait). Elle part de zero et va un peu au-dessus du
-      //   niveau du jour (ou du seuil), arrondie : la meme pour toutes les lignes.
-      var m=Math.max(niv,seuil,1)*1.1, pas=m<=200?50:(m<=600?100:(m<=1500?250:500));
-      var axG=Math.min(cap>0?cap:Infinity, Math.ceil(m/pas)*pas);
-      var x=function(v){ return (Math.max(0,Math.min(axG,v))/axG*100).toFixed(2)+'%'; };
-      var w2=function(a,b){ return (Math.abs(Math.max(0,Math.min(axG,a))-Math.max(0,Math.min(axG,b)))/axG*100).toFixed(2)+'%'; };
-      var u='<u style="left:'+x(seuil)+'"></u>', lignes='', n=niv;
-      var ligne=function(lib,de,a,cls,val,tot){ lignes+='<div class="pil-trx-cs'+(tot?' tot':'')+'"><span class="l">'+lib+'</span><span class="k"><i class="'+cls+'" style="left:'+x(Math.min(de,a))+';width:'+w2(de,a)+'"></i>'+u+'</span><span class="v">'+val+'</span></div>'; };
-      ligne('Aujourd’hui',0,niv,'n',_pilNum(niv)+' L');
-      avecL.forEach(function(j){ ligne('\u2212 '+_pilGmLibJob(j),n,n-j.l,'m','\u2212'+_pilNum(j.l)); n-=j.l; });
-      var apres=n, bas=apres<seuil;
-      if(avecL.length) ligne('Après les travaux',0,Math.max(0,apres),bas?'b':'o',_pilNum(apres)+' L',true);
-      // TRAIT-CUVE (§221) : la ligne « et si » du traitement conseille, en pointille.
-      var opt=_pilGmTraitementOption(T), apresT=null;
-      if(opt){ apresT=apres-opt.l; lignes+='<div class="pil-trx-cs option"><span class="l">\u2212 '+_pilEsc(_pilTnom(opt.nom))+' (conseillé)</span><span class="k"><i class="m" style="left:'+x(Math.min(apres,apresT))+';width:'+w2(apres,apresT)+'"></i>'+u+'</span><span class="v">\u2212'+_pilNum(opt.l)+'</span></div>'
-        +'<div class="pil-trx-cs tot option"><span class="l">Avec ce traitement</span><span class="k"><i class="'+(apresT<seuil?'b':'o')+'" style="left:0;width:'+w2(0,Math.max(0,apresT))+'"></i>'+u+'</span><span class="v">'+_pilNum(apresT)+' L</span></div>'; }
-      // GNR-2 (§256) : le chiffre en grand, la phrase à côté en plus petit (le patron du Renfort, .rf2-v). La phrase
-      //   entière en grand passait sur trois lignes dans une demi-colonne de téléphone (capture de Nico, 06/10).
-      var bigN=_pilNum(avecL.length?apres:niv)+' L', bigP=avecL.length?'après les travaux en cours':'sous le seuil';
-      var mes=avecL.some(function(j){ return j.src==='mesure'; }), reg=avecL.some(function(j){ return j.src==='reglage'; });
-      var srcTxt=mes&&reg?'conso mesurée, réglage pour un tracteur sans mesure':(mes?'conso mesurée de chaque tracteur':'conso du réglage ('+_pilGmFr(T.cfgLh)+' L/h)');
-      nCote++;
-      H+='<div class="pil-tile2 pil-trx-cuve"><div class="pil-t2h"><span class="ic">'+_pilIco('carburant')+'</span><span class="t">Gasoil après les travaux</span>'+_mvInfoBtn('pil.trxgnr')+'</div>'
-        +'<div class="pil-t2b"><div class="pil-trx-v"><span class="pil-big" style="color:'+((bas||niv<=seuil)?'var(--orange)':'var(--vert-med)')+'">'+bigN+'</span><span class="pil-trx-vu">'+bigP+'</span></div>'
-        +'<div class="pil-t2s">'+_pilNum(niv)+' L sur '+_pilNum(cap)+' \u00b7 seuil '+_pilNum(seuil)+' L'+(avecL.length?(' \u00b7 '+srcTxt):'')+(sansL?(' \u00b7 '+sansL+' travail sans barème, non compté'):'')
-        +(opt?(' \u00b7 pointillé : '+_pilEsc(_pilTnom(opt.nom))+' conseillé ('+opt.nNu+' parcelle'+(opt.nNu>1?'s':'')+' à nu ou presque, fenêtre '+_pilEsc(opt.fen)+'), '+_pilGmFr(opt.h)+' h sur le domaine ('+opt.hhaSrc+'), pas encore lancé'):'')+'</div>'
-        +'<div class="pil-trx-casc">'+lignes+'</div>'
-        +'<div class="pil-trx-cs"><span></span><span class="pil-trx-ax"><span>0</span><span>'+_pilNum(axG/2)+'</span><span>'+_pilNum(axG)+' L</span></span><span></span></div>'
-        +((bas||niv<=seuil)?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="entretien">Tracteur \u203A Entretien \u203A</button></div>':'')
-        +'</div></div>';
-    }
-  }
-  // GNR-2 (§256) : le bloc a SA grille (styles.css), il ne partage plus `.pil-dec` avec la décision du jour — la règle
-  //   « par deux sous 600 px » d'ALIGN-1 (§236) visait les quatre tuiles et tassait la cuve en demi-colonne. Une carte par
-  //   ligne jusqu'à 1 023 px ; au-delà, les travaux à gauche (deux tiers), la cuve à droite, la révision dessous sur
-  //   toute la largeur. La classe dit combien de cartes accompagnent les travaux ; sans travaux, révision et cuve vont
-  //   par deux ; une carte seule prend toute la largeur.
-  var cls='pil-trx'+(T.jobs.length&&nCote?' pil-trx-cote'+nCote:(nCote===2?' pil-trx-paire':''));
-  return H?('<div class="'+cls+'">'+H+'</div>'):'';
-}
+// ── Les cartes du tracteur : ★ MOTS-9 (§592) — l'ancienne section « Pour finir les travaux tracteur en cours » (trois
+//   grandes cartes, _pilCkTracteur) se lit désormais dans _pilTrxParts / _pilPanelTrx et la carte de la cuve.
 // ── ③ Matériel : la consommation mesurée, tracteur par tracteur ──
 // ★ PRO-1 (§269) — Nico, capture du 08/10 : « ne fait pas pro du tout ». Trois lignes identiques « pas assez de pleins :
 //   réglage 6,0 L/h utilisé », chacune sur trois lignes de texte sous un tiret seul, et des graduations 0-3-6-9-12
@@ -5005,13 +4877,13 @@ function _pilCkTracteur(d){
 //   Sans aucun intervalle noté nulle part, ni piste ni échelle : il n'y aurait rien à y lire.
 function _pilPanelConso(d){
   var tr=(d.tracs||[]); if(!tr.length) return '';
-  var cfgLh=_ecoCfg().conso, L=0, H=0, Hc=0, mx=12, nMes=0, nIv=0;
+  var cfgLh=_ecoCfg().conso, L=0, H=0, Hc=0, mx=12, nIv=0;
   var C=tr.map(function(t){ var c=_pilGmConso(t.id); c.nom=t.nom; c.iv.forEach(function(v){ if(!v.ecarte&&v.lh>mx) mx=v.lh; }); return c; });
   if(cfgLh>mx) mx=cfgLh;
   mx=Math.ceil(mx/3)*3;
   var pc=function(v){ return (Math.max(0,Math.min(v,mx))/mx*100).toFixed(1)+'%'; };
   var pl=function(n,s){ return n+' '+s+(n>1?'s':''); };
-  C.forEach(function(c){ if(c.ok){ L+=c.L; H+=c.H; Hc+=c.Hc; nMes++; } nIv+=c.iv.length; });
+  C.forEach(function(c){ if(c.ok){ L+=c.L; H+=c.H; Hc+=c.Hc; } nIv+=c.iv.length; });
   var regl=cfgLh>0?'<line x1="'+pc(cfgLh)+'" x2="'+pc(cfgLh)+'" y1="1" y2="23" class="g"/>':'';
   var rows=C.map(function(c){
     var dots=c.iv.map(function(v){
@@ -5027,16 +4899,17 @@ function _pilPanelConso(d){
       +'<span class="pil-cso-v">'+val+'</span></li>';
   }).join('');
   var ax=''; for(var k=0;k<=mx+1e-9;k+=mx/4) ax+='<span style="left:'+pc(k)+'">'+_pilGmFr(k,k%1?1:0)+(k>=mx-1e-9?'\u00a0L/h':'')+'</span>';
-  var msg=nMes?'':('<p class="pil-cso-msg">Aucun tracteur n\u2019a encore assez de pleins notés avec leurs litres pour être mesuré : il faut au moins '
-    +_PIL_GM_MIN_IV+' intervalles plein \u2192 plein et '+_PIL_GM_MIN_H+' heures notées entre eux. D\u2019ici là, les calculs de carburant prennent le réglage du Tracteur, '+_pilGmFr(cfgLh)+'\u00a0L/h.</p>');
-  var body='<div class="pil-cso'+(nIv?'':' compact')+'">'+msg+'<ul class="pil-cso-l">'+rows+'</ul>'
+  // ★ MOTS-9 (§592) : le paragraphe de 36 mots (« Aucun tracteur n'a encore assez de pleins… », .pil-cso-msg) est dans le « i »
+  //   (pil.conso) ; sans mesure, le chiffre de la carte est le réglage, et sa pastille le dit.
+  var body='<div class="pil-cso'+(nIv?'':' compact')+'"><ul class="pil-cso-l">'+rows+'</ul>'
     +'<div class="pil-cso-axr" aria-hidden="true"><span></span><span class="pil-cso-ax">'+ax+'</span><span></span></div>'
     +'<div class="pil-trx-leg"><span><i class="d"></i>un intervalle plein \u2192 plein</span><span><i class="m"></i>moyenne pondérée</span><span><i class="g"></i>réglage actuel</span></div></div>';
   var flotte=H>0?L/H:null;
-  return _pilTile('conso','#B85A1A','Consommation mesurée',
-    _pilStat(flotte!=null?_pilGmFr(flotte):'—', flotte!=null?' L/h':'', null),
-    flotte!=null?('litres des pleins \u00f7 heures notées entre eux \u00b7 campagne \u00b7 '+Math.round(Hc/H*100)+' % des heures chronométrées'):('pas encore mesurée \u00b7 réglage '+_pilGmFr(cfgLh)+' L/h utilisé'),
-    null, body, 'pil.conso');
+  // ★ MOTS-9 (§592) : sans mesure, le chiffre est le réglage — celui que prennent tous les calculs de carburant — et il le dit.
+  return _pilTile('conso','#B85A1A','Consommation',
+    _pilStat(_pilGmFr(flotte!=null?flotte:cfgLh), ' L/h', null)+(flotte!=null?_pilPhPl('mesur\u00e9e','ok'):_pilPhPl('r\u00e9glage','')),
+    flotte!=null?(Math.round(Hc/H*100)+' % des heures chronométrées'):'pas encore mesurée',
+    null, body+'<div class="pil-tv-act">'+_pilTvBtn('entretien','Ouvrir l\u2019entretien')+'</div>', 'pil.conso');
 }
 
 // ── Onglet AUJOURD'HUI (cockpit) ──
@@ -5620,7 +5493,7 @@ function _pilTabAuj(d){
   //   ⚠️ Rien ne change à l'écran : même squelette, même modèle (_pilCk2Modele), même montage.
   // ★★ PIL-RANGE-1b (§441) : l'ancien ordre est RETIRÉ (il n'était plus affiché depuis REF-1, 07/10), avec le rendu de
   //   secours de cockpit.js (_ckAuj et ses aides) — la moitié de cockpit.js qui nourrit le cockpit v2 reste. Sa carte du
-  //   tracteur (GNR-M §213, GNR-2 §256) est relogée dans Équipe & matériel › Matériel (_pilTabMat), choix de Nico (« A »).
+  //   tracteur (GNR-M §213, GNR-2 §256) est relogée dans Équipe & matériel › Matériel (_pilTabMat, puis MOTS-9 : _pilPanelTrx), choix de Nico (« A »).
   //   Si le cockpit v2 manque ou lève : un message, jamais un écran blanc (règle AUJ-1).
   if(typeof window._ck2Squelette==='function'&&typeof window._ck2Monter==='function'){
     try{ var _V=_pilCk2Modele(d,m); _V.eco=_pilCk2Eco(d,_V); setTimeout(function(){ try{ window._ck2Monter(_V); _pilStickyH(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabAuj#ck2m'); } },0);   // VIF-1 : la hauteur du fil de portée posée aussi sur Aujourd'hui
@@ -5954,21 +5827,24 @@ function _pilPanelAnRenfort(){
   if(!C.enCours){
     return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', _pilStat('\u2014',''),
       (C.cadre==='vig'?'ann\u00e9e close':'exercice clos')+' \u00b7 plus de renfort \u00e0 d\u00e9cider', null,
-      '<div class="pil-empty">Ce cadre est termin\u00e9 : il n\u2019y a plus de renfort \u00e0 d\u00e9cider. Les effectifs de l\u2019\u00e9poque restent dans les Archives.'
+      '<div class="pil-empty">Ce cadre est termin\u00e9 : il n\u2019y a plus de renfort \u00e0 d\u00e9cider. L\u2019\u00e9quipe de l\u2019\u00e9poque reste dans les Archives.'
       +'<div class="pil-anr-go"><button type="button" class="pil-diag-go ghost" data-pgo="arc">Archives \u203a</button></div></div>', 'pil.an.renfort');
   }
   if(!R || !R.ok){
     return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', _pilStat('\u2014',''), 'aucune semaine dat\u00e9e dans ce cadre', null,
       _pilEmptyGo('Datez vos p\u00e9riodes : les besoins en personnes, semaine par semaine, en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne'), 'pil.an.renfort');
   }
-  var F=R.fen, src=' \u00b7 d\u2019apr\u00e8s le bar\u00e8me et le planning des personnes sous contrat', stat, sub;
+  var F=R.fen, stat, sub;   // MOTS-9 (§592) : « d'après le barème et le planning des personnes sous contrat » — dans le « i »
+  // ★ MOTS-9 (§592) : la ligne d'écran dit « La campagne » ; ce renfort compte L'ANNÉE (le cadre d'Économie › Le détail) — il l'écrit.
+  var _cadL=(C&&C.court)?((C.cadre==='vig'?'ann\u00e9e vigne ':'exercice ')+C.court+' \u00b7 '):'';
   if(F.length){
     var f0=F[0];
-    stat=_pilStat('+'+f0.n, ' personne'+(f0.n>1?'s':'')+' '+(f0.a<=C.auj?'d\u00e8s cette semaine':('d\u00e8s le '+_pilAnDfrJM(f0.a))));
-    sub=(F[1] ? ('puis '+(F[1].plat?'':'jusqu\u2019\u00e0 ')+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]) : ('jusqu\u2019au '+_pilDfr(f0.b)))+src;
+    // ★ MOTS-9 (§592) : « +2 pers. » et la pastille orange de Travaux ; dès quand, puis jusqu'à quand, sous le chiffre ; la source dans le « i ».
+    stat=_pilStat('+'+f0.n, ' pers.')+_pilPhPl('\u00e0 pr\u00e9voir','or');
+    sub=_cadL+(f0.a<=C.auj?'d\u00e8s cette semaine':('d\u00e8s le '+_pilAnDfrJM(f0.a)))+(F[1] ? (' \u00b7 puis '+(F[1].plat?'':'jusqu\u2019\u00e0 ')+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]) : (' \u00b7 jusqu\u2019au '+_pilDfr(f0.b)));
   } else {
-    stat=_pilStat('0',' renfort \u00e0 pr\u00e9voir');
-    sub='l\u2019\u00e9quipe pr\u00e9vue suffit'+(R.finCouv?(' jusqu\u2019au '+_pilDfr(R.finCouv)):'')+src;
+    stat=_pilStat('0','')+_pilPhPl('l\u2019\u00e9quipe suffit','ok');
+    sub=_cadL+(R.finCouv?('jusqu\u2019au '+_pilDfr(R.finCouv)):'');
   }
   var body='';
   if(F.length){
@@ -5979,9 +5855,7 @@ function _pilPanelAnRenfort(){
         +'<span class="s">'+_pilEsc(f.noms.join(', '))+(f.noms.length?' \u00b7 ':'')+f.sem+' semaine'+(f.sem>1?'s':'')+'</span></div>';
     });
     body+='</div>';
-  } else {
-    body+='<div class="pil-ann">Aucune semaine \u00e0 venir o\u00f9 l\u2019\u00e9quipe pr\u00e9vue reste court d\u2019une demi-personne ou plus.</div>';
-  }
+  }   // MOTS-9 (§592) : sans semaine courte, la pastille « l'équipe suffit » le dit — la phrase de 15 mots partait en double
   if(R.trouFin){
     body+='<div class="pil-anc-av">'+_mvIcon('info',16)+'<span>Rien n\u2019est dat\u00e9 apr\u00e8s le '+_pilEsc(_pilDfr(R.finCouv))
       +((C.cadre==='vig' && !R.vend)?' \u2014 les vendanges de ce cycle non plus':'')
@@ -5991,12 +5865,11 @@ function _pilPanelAnRenfort(){
   body+='<div class="pil-anh">Personnes n\u00e9cessaires, semaine par semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-anr"></div>';
   window._mvGraphSuivre('#pil-g-anr', function(lg){ return _pilAnRenfortSvg(R,lg); }, {max:1800});
   body+='<div class="pil-anb-leg"><span><em style="background:var(--vert-med)"></em>couvert par l\u2019\u00e9quipe</span>'
-    +'<span><em class="pil-anr-h"></em>renfort \u00e0 trouver</span>'
+    +'<span><em class="pil-anr-h"></em>renfort \u00e0 pr\u00e9voir</span>'
     +'<span><em style="background:transparent;border-top:2px solid var(--texte);height:0;border-radius:0"></em>ce que l\u2019\u00e9quipe peut faire, d\u2019apr\u00e8s le planning</span>'
     +'<span><em style="background:var(--gris)"></em>semaines pass\u00e9es</span></div>';
-  body+='<div class="pil-anr-go"><span>Combien recruter, quand, et ce que co\u00fbte de ne rien faire :</span>'
-    +'<button type="button" class="pil-diag-go" data-diag="renfort">D\u00e9cider \u203a Le renfort \u203a</button></div>';
-  return _pilTile('anrenfort','#C9A84C','Le renfort \u00e0 pr\u00e9voir', stat, sub, null, body, 'pil.an.renfort');
+  body+='<div class="pil-tv-act">'+_pilTvBtn('renfort','Simuler un renfort')+'</div>';
+  return _pilTile('anrenfort','#C9A84C','Renfort', stat, sub, null, body, 'pil.an.renfort');
 }
 // Semaine par semaine, sur tout le cadre. L'echelle suit les semaines A VENIR ;
 // une semaine passee qui la depasse (la vendange) est coupee, son chiffre au-dessus.
@@ -6128,6 +6001,9 @@ function _pilTvGo(cible){
       return;
     }
     if(cible==='tracbar'){ window._pilGo('tracact'); return; }
+    // ★ MOTS-9 (§592) : L'équipe & le matériel — Réglages › Équipe, Tracteur › Entretien, Décider › le renfort (les chemins de _pilGo).
+    if(cible==='equipe'||cible==='entretien'||cible==='renfort'){ window._pilGo(cible); return; }
+    if(cible==='tracteur'){ if(window.goTo) window.goTo('tracteur'); return; }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTvGo'); }
 }
 // Le détail d'une ligne d'avancement, au toucher : la fenêtre prévue (celle de la frise), ce que dit le journal, l'écart au
@@ -6161,9 +6037,9 @@ function _pilPanelCapacite(d){
   //   qui n'a pas encore date ses periodes tombait sur la seule carte de
   //   l'onglet incapable de dire ce qu'elle montre. Trouve par le harnais, qui
   //   exige les trois etages sur CHAQUE appel, pas seulement sur le plus frequent.
-  if(!PP.ok && !cd){ return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'),
+  if(!PP.ok && !cd){ return _pilTile('capacite','#C9A84C','\u00c9quipe au pic', _pilStat(present,' à la vigne'),   // MOTS-9 (§592) : le même nom dans tous les cas
     'présence du jour \u00b7 le pic ne peut pas être calculé', null,
-    _pilEmptyGo('Sans dates de campagne, l\'effectif nécessaire la semaine du pic ne se calcule pas : il n\'y a aucune fenêtre sur laquelle chercher ce pic.','saisons','Réglages \u203A Campagne'), 'pil.capacite'); }
+    _pilEmptyGo('Sans dates de campagne, l\'équipe nécessaire la semaine du pic ne se calcule pas : il n\'y a aucune fenêtre sur laquelle chercher ce pic.','saisons','Réglages \u203A Campagne'), 'pil.capacite'); }
   // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
   //   MEME UNITE. AVANT : `manque = PP.pic - d.presentChamp`.
   //     · PP.pic  = le besoin de la SEMAINE DU PIC, quelque part dans l'exercice,
@@ -6187,89 +6063,225 @@ function _pilPanelCapacite(d){
   // ★ `dispo`, pas `head` : voir _pilDispoSem. `corps` (headMax) s'affiche a
   //   cote, SOUS SON PROPRE NOM — personne ne travaille a 34,4 ; ce jour-la il y
   //   a 45 personnes dans les rangs, ou il n'y en a aucune.
-  var req=S.pic||0, prevu=S.dispo||0, manque=fini?0:(S.manque||0), corps=S.corps||0;
-  var pCouv=req>0?Math.min(prevu/req*100,100):100;
+  var req=S.pic||0, prevu=S.dispo||0, manque=fini?0:(S.manque||0);
   var cadre=_pilCadreLbl(PP), sem=S.picW?_pilSemLabO(S.picW.o0):'';
-  var body='<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,13px);margin-bottom:3px"><span>Disponible '+(sem?_pilEsc(sem):'la semaine du pic')+'</span><b>'+_pilEtpFmt(prevu)+' pers.</b></div>'
-    +'<div class="pil-gbar"><i style="width:'+pCouv.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
-    +(corps>0.5?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">soit <b>'+_pilNb(corps)+'</b> personne'+(corps>1.5?'s':'')+' dans les rangs au plus fort de la semaine \u2014 le reste part en week-end, en congé ou en temps partiel.</div>'):'')
-    +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,13px);margin:11px 0 3px"><span>Nécessaire cette semaine-là · pic sur '+_pilEsc(cadre)+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' pers.</b></div>'
-    +'<div class="pil-gbar"><i style="width:100%;background:var(--orange)"></i></div>'
-    +'<div class="pil-li-s" style="margin-top:10px">'+(fini
-        ? ('Toutes les semaines de '+_pilEsc(cadre)+' sont derrière : il n\'y a plus de pic à armer. Le chiffre ci-dessus est celui du pic <b>déjà passé</b>.')
-        : (manque>0.1?('Il manque environ <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-là. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge à venir sur '+_pilEsc(cadre)+'.'))+'</div>'
-    // ★ LE PIC DEJA PASSE NE DISPARAIT PAS, IL CHANGE DE STATUT. Le retirer
-    //   ferait mentir la frise de « L'annee », qui le montre toujours ; le
-    //   laisser en tete faisait croire a un arbitrage. Il est dit, date, et
-    //   nomme pour ce qu'il est.
-    +((PP.passe&&A&&PP.picW&&A.picW&&PP.picW.o0!==A.picW.o0)?('<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Pic de '+_pilEsc(cadre)+' : <b>'+_pilEtpFmt(PP.pic||0)+'</b> pers., '+_pilEsc(_pilSemLabO(PP.picW.o0))+' \u2014 <b>déjà passé</b>.</div>'):'')
-    // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
-    //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
-    //   n'apprend rien, et le faire en silence donne un chiffre faux.
-    // ★ TROIS PHRASES DEVIENNENT DEUX LIGNES DE CADRE + UNE FICHE.
-    //   Ce qui CADRE reste : « autre date », « autre fenetre » — sans elles on
-    //   soustrait deux grandeurs qui n'ont ni la meme date ni la meme unite,
-    //   la faute exacte de §33. Ce qui EXPLIQUE (hors bureau, hors absents,
-    //   equipe collective a son effectif, le pic peut tomber dans onze mois)
-    //   part dans MV_INFO['pil.capacite'] : ca se lit une fois, pas cent.
-    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ \u2014 <b>autre date</b> que le pic.</div>'
-    +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. \u2014 <b>autre fen\u00eatre</b> que le pic.</div>'):'');
+  // ★ MOTS-9 (§592) — LE CORPS : deux barres SUR LA MÊME ÉCHELLE. Avant, chacune était pleine (le disponible plafonné au besoin,
+  //   le besoin toujours à 100 %) : on ne voyait pas l'écart. « soit N personnes dans les rangs », « Aujourd'hui… autre date »,
+  //   « Moyenne… autre fenêtre », « Effectif suffisant… » : le « i » (pil.capacite) et la pastille du titre les disent.
+  var mxC=Math.max(prevu,req,0.1);
+  var barre=function(lib,v,c){ return '<div class="pil-eq-cap"><span>'+lib+'</span><span class="pil-tv-br"><i style="width:'+Math.min(100,v/mxC*100).toFixed(1)+'%;background:'+c+'"></i></span><b>'+_pilEtpFmt(v)+' pers.</b></div>'; };
+  var body=barre('Disponible',prevu,'var(--vert-med)')+barre('N\u00e9cessaire',req,'var(--orange)')
+    +(fini?('<div class="pil-li-s" style="margin-top:8px">Toutes les semaines de '+_pilEsc(cadre)+' sont derri\u00e8re : le chiffre est celui du pic <b>d\u00e9j\u00e0 pass\u00e9</b>.</div>')
+      :(manque>0.1?('<div class="pil-li-s" style="margin-top:8px">Il manque environ <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-l\u00e0.</div>'):''))
+    +((PP.passe&&A&&PP.picW&&A.picW&&PP.picW.o0!==A.picW.o0)?('<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Pic de '+_pilEsc(cadre)+' : <b>'+_pilEtpFmt(PP.pic||0)+'</b> pers., '+_pilEsc(_pilSemLabO(PP.picW.o0))+' \u2014 <b>déjà passé</b>.</div>'):'');
   // ★ La pastille quitte le corps pour l'EN-TETE : elle doit etre joignable
   //   sans deplier, comme le chiffre qu'elle explique. Et le cadre quitte le
   //   TITRE pour la ligne de cadre — un titre n'est pas l'endroit ou l'on ecrit
   //   sur quelle fenetre un chiffre a ete calcule.
-  var sub=(!PP.ok?'pic sur ':(fini?'pic passé sur ':'pic à venir sur '))+cadre+(sem?(' \u00b7 '+sem):'');
-  return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
+  // ★ MOTS-9 (§592) : le nom, le chiffre et la pastille de la tuile « Équipe au pic » de Travaux (les mêmes : _pilPicPortee) ; la
+  //   campagne est sur la ligne d'écran, la semaine du pic reste sous le chiffre.
+  var sub=sem||(cadre?('pic sur '+cadre):'');
+  var pl=fini?_pilPhPl('pic pass\u00e9',''):(manque>0.05?_pilPhPl('+'+_pilUn(manque)+' \u00e0 pr\u00e9voir','or'):_pilPhPl('l\u2019\u00e9quipe suffit','ok'));
+  body+='<div class="pil-tv-act">'+(manque>0.05&&!fini?_pilTvBtn('renfort','Simuler un renfort'):_pilTvBtn('planning','Ouvrir le planning'))+'</div>';
+  return _pilTile('capacite','#C9A84C','\u00c9quipe au pic', _pilStat(_pilEtpFmt(req),' pers.')+pl, sub, null, body, 'pil.capacite');
 }
-function _pilTabPrs(d){
-  var H='<div class="pil-panels">';
-  if(_pilShow('prs_equipe')) H+=_pilPanelEquipe(d);
-  if(_pilShow('prs_presences')) H+=_pilPanelPresences(d);
-  if(_pilShow('prs_capacite')) H+=_pilPanelCapacite(d);
-  H+='</div>';
-  // PRO-1 (§269) : la tension par personne vivait dans l'ancien Aujourd'hui ; la reprise de la maquette (REF-1) l'avait
-  //   retirée de tout l'écran, et « Voir le détail » du cockpit ne menait nulle part. Elle vit ici, avec les présences.
-  var _tc=_pilShow('auj_tension')?_pilCardTension(d):'';
-  if(_tc) H+='<div class="pil-tension-det" id="pil-tension-det">'+_tc+'</div>';
-  return H;
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ MOTS-9 (§592) — L'ÉQUIPE & LE MATÉRIEL ALLÉGÉS SUR PLACE. Même règle que Travaux (§590) : toutes les cartes restent, à
+//   leur place, repliées ; chacune tient en un titre, un chiffre, une barre ou une couleur ; la méthode derrière le « i », le
+//   détail au toucher, un bouton « Ouvrir » vers le module où l'on agit (règle ①). Rien ne se recalcule (règle ②) : les
+//   mêmes fonctions qu'avant, les mots et les nombres du cockpit pour la phrase. Maquette validée :
+//   docs/maquettes/maquette-equipe-materiel-v1.html.
+//   ★ La section « Pour finir les travaux tracteur en cours » (trois grandes cartes, chacune son grand titre-phrase) devient
+//   UNE carte repliée, « Travaux tracteur en cours » ; le gasoil après les travaux rejoint la carte de la cuve : « 255 L »
+//   s'écrivait trois fois (la tuile, « Gasoil après les travaux », son graphique).
+function _pilTabEqu(d){
+  var P='', M='', X=null;
+  if(_pilShow('prs_equipe')) P+=_pilPanelEquipe(d);
+  if(_pilShow('prs_presences')) P+=_pilPanelPresences(d);
+  if(_pilShow('prs_capacite')) P+=_pilPanelCapacite(d);
+  if(_pilShow('auj_tension')) P+=_pilPanelTension(d);
+  if(_pilShow('an_frise')) P+=_pilPanelAnRenfort();   // PIL-RANGE-2b : le renfort de l'année, venu de L'année
+  try{ X=_pilTrxParts(d); }catch(e){ X=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabEqu#trx'); }
+  if(_pilShow('mat_tracteur')) M+=_pilPanelTracteur(d);
+  if(_pilShow('mat_gnr')) M+=_pilPanelGnr(d,X);
+  if(_pilShow('mat_conso')) M+=_pilPanelConso(d);
+  if(_pilShow('mat_travaux')) M+=_pilPanelTrx(d,X);
+  // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC, sans même la phrase qui dit comment rallumer les tuiles.
+  if(!P && !M) return '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 activez-les via \u00ab Choisir les indicateurs \u00bb.</div>';
+  return '<div class="pil-tv pil-eq">'
+    +(P?'<div class="pil-sec-h">Personnel</div><div class="pil-panels">'+P+'</div>':'')
+    +(M?'<div class="pil-sec-h">Mat\u00e9riel</div><div class="pil-panels">'+M+'</div>':'')
+    +'</div>';
+}
+// La phrase du haut : l'équipe du jour, puis ce qui presse. Les mots et les nombres du cockpit (la tuile Équipe et sa tension,
+//   _pilCk2Modele) : « 4/4 présents », « 2 personnes au seuil », « 1 au-delà du maximum » ; la cuve sous le seuil ; une révision
+//   dépassée. Rien qui presse : la phrase s'arrête à l'équipe.
+function _pilEqPhrase(d){
+  var p=[];
+  if(d.jourTravaille===false) p.push('<b>pas de travail pr\u00e9vu aujourd\u2019hui</b>');
+  else {
+    var pN=(d.presentFiches!=null?d.presentFiches:(d.nPresent||0)), vN=(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length));
+    p.push('<b>'+pN+'/'+vN+' pr\u00e9sents</b>');
+  }
+  var TS=null; try{ TS=_pilTensData(d); }catch(eT){ TS=null; if(window._mvAvale) window._mvAvale(eT,'pilotage.js/_pilEqPhrase#tension'); }
+  if(TS && TS.rows && TS.rows.length){
+    if(TS.nRouge) p.push('<b class="ko">'+TS.nRouge+' au-del\u00e0 du maximum</b>');
+    else if(TS.nSeuil) p.push('<b class="or">'+TS.nSeuil+' personne'+(TS.nSeuil>1?'s':'')+' au seuil</b>');
+    else p.push('personne au seuil');
+  }
+  var g=d.gnr;
+  if(g && g.capacite && (Number(g.niveau)||0)<=(Number(g.seuil)||0)) p.push('<b class="or">cuve GNR sous le seuil</b>');
+  if((d.tracs||[]).some(function(t){ return t.revReste!=null && t.revReste<0; })) p.push('<b class="ko">r\u00e9vision d\u00e9pass\u00e9e</b>');
+  return '<span class="pil-tv-ph">'+p.join(', ')+'</span>';
+}
+// La tension, en carte repliée : combien au seuil (le chiffre du cockpit), et la ligne de chacun au toucher. « Tension de l'équipe
+//   — détail / Les 14 derniers jours / 14 derniers jours · … » : trois titres pour un, et une phrase de méthode — dans le « i ».
+function _pilPanelTension(d){
+  var T=_pilTensData(d);
+  if(!T||!T.rows.length) return '';
+  var mx=0; T.rows.forEach(function(r){ mx=Math.max(mx,r.f,r.p); });
+  mx=Math.max(10,Math.ceil(mx/10)*10);
+  var w=function(v){ return Math.max(0,Math.min(100,v/mx*100)).toFixed(2)+'%'; };
+  var rows=T.rows.map(function(r){
+    var cls=r.niv==='rouge'?'b':(r.niv==='orange'?'o':'v');
+    var sem=(r.sm>T.L.maxMoy+1e-4)?('<span class="pil-tens-sem">semaine \u00e0 '+_pilNum(r.sm)+' h'+(r.niv==='rouge'?' \u2014 au-del\u00e0 de '+T.L.maxHebdo+' h':'')+'</span>'):'';
+    return '<div class="pil-tens-r"><span class="n">'+_pilEsc(r.nom)+sem+'</span>'
+      +'<span class="k"><i class="'+cls+'" style="width:'+w(r.f)+'"></i>'+(r.p>0?'<u style="left:'+w(r.p)+'"></u>':'')+'</span>'
+      +'<span class="v"><b>'+_pilNum(r.f)+'</b> h<span>'+_pilTensFmtEc(r.ec)+'</span></span></div>';
+  }).join('');
+  var body='<div class="pil-tens">'+rows+'</div>'
+    +'<div class="pil-tens-r pil-tens-ax"><span></span><span class="pil-trx-ax"><span>0</span><span>'+(mx/2)+'</span><span>'+mx+' h</span></span><span></span></div>'
+    +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="m"></i>pr\u00e9vu au planning</span></div>'
+    +'<div class="pil-tv-act">'+_pilTvBtn('planning','Ouvrir le planning')+'</div>';
+  return _pilTile('tension','#C9A84C','Tension', _pilStat(String(T.nSeuil),' au seuil',null)+(T.nRouge?_pilPhPl(T.nRouge+' au-del\u00e0 du maximum','or'):''),
+    '14 derniers jours, face au planning', null, body, 'pil.tens');   // MOTS-9 : « pil.tens » — l'ancienne fiche « pil.tension » de l'ancien Aujourd'hui est retirée (PIL-RANGE-1b, épinglé)
+}
+// Les morceaux de l'ancienne section « Pour finir les travaux tracteur en cours » (GNR-M §213, GNR-2 §256, PIL-RANGE-1b §441).
+//   Calculs inchangés : les travaux en cours (_pilGmTravaux), l'entretien le plus pressant dans ces travaux (_pilGmRevision), la
+//   cascade de la cuve. La carte « Travaux tracteur en cours » prend les deux premiers ; la carte de la cuve, le troisième — et
+//   seulement quand un travail a des litres à compter (sinon la cascade redisait le niveau du jour).
+function _pilTrxParts(d){
+  var T=_pilGmTravaux(), out={ jobs:null, rev:null, cuve:null };
+  var trNom={}; (d.tracs||[]).forEach(function(t){ trNom[t.id]=t.nom; });
+  // ① Les travaux en cours
+  if(T.jobs.length){
+    var dom=T.domaine>0?T.domaine:1, hT=0, lT=0, nSansH=0, nSess=0, nAm=0;
+    var rows=T.jobs.map(function(j){
+      if(j.h!=null) hT+=j.h; else nSansH++;
+      if(j.l!=null) lT+=j.l;
+      if(j.kind==='session') nSess++; else nAm++;
+      var w=function(v){ return Math.max(0,Math.min(100,v/dom*100)).toFixed(2)+'%'; };
+      var sub=_pilEsc(trNom[j.tid]||'tracteur non choisi')+' \u00b7 ';
+      if(j.kind==='amendement') sub+='apport du '+_pilDfr(j.debut)+' \u00b7 '+j.nSel+' parcelle'+(j.nSel>1?'s':'')+' choisie'+(j.nSel>1?'s':'')+(j.lance?'':' \u00b7 session pas encore lanc\u00e9e');
+      else sub+='lanc\u00e9 le '+_pilDfr(j.debut)+(j.nSkip?(' \u00b7 '+j.nSkip+' d\u00e9sactiv\u00e9e'+(j.nSkip>1?'s':'')):'');
+      var dorm=(j.dormJ!=null&&j.dormJ>_PIL_GM_DORMANT_J)?'<span class="pil-trx-dorm">aucune parcelle coch\u00e9e depuis '+j.dormJ+' j</span>':'';
+      return '<div class="pil-trx-job"><span class="pil-trx-nm"><b>'+_pilGmLibJob(j)+(j.sel?' <span class="pil-trx-tag">s\u00e9lection</span>':'')+'</b><span>'+sub+'</span>'+dorm+'</span>'
+        +'<span class="pil-trx-trkc"><span class="pil-trx-trk"><i style="left:0;width:'+w(j.faitHa)+'" class="f"></i><i style="left:'+w(j.faitHa)+';width:'+w(j.resteHa)+'" class="r"></i></span>'
+        +'<span class="pil-trx-ha">'+_pilGmFr(j.resteHa,2)+' ha \u00e0 faire sur '+_pilGmFr(j.perHa,2)+' ha</span></span>'
+        +'<span class="pil-trx-num">'+(j.h!=null?'<b>'+_pilGmFr(j.h)+'</b> h':'\u2014')+'</span>'
+        +'<span class="pil-trx-num">'+(j.l!=null?'<b>'+_pilNum(j.l)+'</b> L':'\u2014')+'</span></div>';
+    }).join('');
+    out.jobs={ n:T.jobs.length, hT:hT, lT:lT, nSansH:nSansH, nSess:nSess, nAm:nAm,
+      html:'<div class="pil-trx-job pil-trx-hd"><span>Travail</span><span class="pil-trx-trkc">Reste \u00e0 faire</span><span class="pil-trx-num">Heures</span><span class="pil-trx-num">Litres</span></div>'
+        +rows
+        +'<div class="pil-trx-leg"><span><i class="f"></i>fait</span><span><i class="r"></i>reste</span></div>' };
+  }
+  // ② L'entretien le plus pressant, dans ces travaux (COMPT-7, §489)
+  var R=_pilGmRevision(d,T);
+  if(R){
+    var t=R.t, it=R.it, rs=it.reste, etat, cls, etatDate=false;   // etatDate : la pastille dit déjà la date
+    var nomIt=it.rev?'R\u00e9vision':_pilEsc(it.nom), dIt=it.pd?_pilEsc(_pilGmDateAn(it.pd)):'';
+    if(rs!=null&&rs<=0){ etat='d\u00e9pass\u00e9e de '+_pilNum(-rs)+' h'; cls='ko'; }
+    else if(it.jours!=null&&it.jours<0){ etat='date d\u00e9pass\u00e9e'; cls='ko'; }
+    else if(R.dans){ etat='atteinte pendant : '+_pilGmLibJob(R.dans.job); cls='or'; }
+    else if(it.jours!=null&&it.jours<=14){ etat='le '+dIt; cls='or'; etatDate=true; }
+    else { etat='pas atteinte'; cls='ok'; }
+    var axMax=Math.max(10, Math.ceil(Math.max(rs>0?rs:0, R.tot)*1.15/10)*10);
+    var cols=['var(--terre)','var(--or)','var(--vert-med)'], seg='';
+    R.seq.forEach(function(j,k){ seg+='<i style="width:'+(j.h/axMax*100).toFixed(2)+'%;background:'+cols[k%3]+'" title="'+_pilEsc(_pilTnom(j.nom))+' \u00b7 '+_pilGmFr(j.h)+' h"></i>'; });
+    if(rs>0) seg+='<u style="left:'+Math.min(100,rs/axMax*100).toFixed(2)+'%"></u>';
+    // Le repère en jours (le rythme mesuré du tracteur, 4 semaines) tient dans la ligne ; la légende des travaux, quand il y en a plusieurs.
+    var ry=_pilGmRythme(t.id,d.refDate), nJ=(ry&&rs>0)?Math.ceil(rs/ry):0;
+    var leg=R.seq.length>1?R.seq.map(function(j,k){ return '<span><i style="background:'+cols[k%3]+'"></i>'+_pilGmLibJob(j)+' \u00b7 '+_pilGmFr(j.h)+' h</span>'; }).join(''):'';
+    out.rev={ titre:nomIt+' \u00b7 '+_pilEsc(t.nom||'Tracteur'), etat:etat, cls:cls,
+      // Un travail sans barème n'a pas d'heures à compter : il se dit à part, jamais « 0,0 h en cours » seul.
+      html:'<div class="pil-t2s">'+(rs>0?_pilNum(rs)+' h avant '+(it.rev?'la r\u00e9vision':'cet entretien')+' \u00b7 ':'')
+          +((R.tot>0||!R.sansBareme)?(_pilGmFr(R.tot)+' h en cours sur ce tracteur'+(R.sansBareme?' \u00b7 ':'')):'')+(R.sansBareme?(R.sansBareme+' sans bar\u00e8me'):'')+(R.dans?(' \u00b7 \u00e0 '+Math.round(R.dans.pc*100)+' % de ce travail'):'')
+          +(nJ?(' \u00b7 environ '+nJ+' jour'+(nJ>1?'s':'')+' ouvr\u00e9'+(nJ>1?'s':'')):'')+'</div>'
+        +'<div class="pil-trx-carnet">'+seg+'</div>'
+        +'<div class="pil-trx-ax"><span>0</span><span>'+(axMax/2)+'</span><span>'+axMax+' h</span></div>'
+        +(leg?'<div class="pil-trx-leg">'+leg+'</div>':'')
+        +((dIt&&!etatDate)?'<div class="pil-t2s">\u00c0 la date\u00a0: le '+dIt+'</div>':'')
+        +((R.aussi&&R.aussi.length)?'<div class="pil-t2s">Aussi\u00a0: '+R.aussi.map(_pilGmRevTxt).join(' \u00b7 ')+'</div>':'') };
+  }
+  // ③ La cuve après les travaux
+  var g=d.gnr;
+  if(g&&g.capacite){
+    var cap=Number(g.capacite)||0, niv=Number(g.niveau)||0, seuil=Number(g.seuil)||0;
+    var avecL=T.jobs.filter(function(j){ return j.l!=null; });
+    if(avecL.length){
+      // ★ L'ECHELLE (GNR-2) : elle part de zéro et va un peu au-dessus du niveau du jour (ou du seuil), arrondie.
+      var m=Math.max(niv,seuil,1)*1.1, pas=m<=200?50:(m<=600?100:(m<=1500?250:500));
+      var axG=Math.min(cap>0?cap:Infinity, Math.ceil(m/pas)*pas);
+      var x=function(v){ return (Math.max(0,Math.min(axG,v))/axG*100).toFixed(2)+'%'; };
+      var w2=function(a,b){ return (Math.abs(Math.max(0,Math.min(axG,a))-Math.max(0,Math.min(axG,b)))/axG*100).toFixed(2)+'%'; };
+      var u='<u style="left:'+x(seuil)+'"></u>', lignes='', n=niv;
+      var ligne=function(lib,de,a,cl,val,tot){ lignes+='<div class="pil-trx-cs'+(tot?' tot':'')+'"><span class="l">'+lib+'</span><span class="k"><i class="'+cl+'" style="left:'+x(Math.min(de,a))+';width:'+w2(de,a)+'"></i>'+u+'</span><span class="v">'+val+'</span></div>'; };
+      avecL.forEach(function(j){ ligne('\u2212 '+_pilGmLibJob(j),n,n-j.l,'m','\u2212'+_pilNum(j.l)); n-=j.l; });
+      var apres=n, bas=apres<seuil;
+      ligne('Apr\u00e8s les travaux',0,Math.max(0,apres),bas?'b':'o',_pilNum(apres)+' L',true);
+      // TRAIT-CUVE (§221) : la ligne « et si » du traitement conseillé, en pointillé.
+      var opt=_pilGmTraitementOption(T);
+      if(opt){ var apresT=apres-opt.l; lignes+='<div class="pil-trx-cs option"><span class="l">\u2212 '+_pilEsc(_pilTnom(opt.nom))+' (conseill\u00e9)</span><span class="k"><i class="m" style="left:'+x(Math.min(apres,apresT))+';width:'+w2(apres,apresT)+'"></i>'+u+'</span><span class="v">\u2212'+_pilNum(opt.l)+'</span></div>'
+        +'<div class="pil-trx-cs tot option"><span class="l">Avec ce traitement</span><span class="k"><i class="'+(apresT<seuil?'b':'o')+'" style="left:0;width:'+w2(0,Math.max(0,apresT))+'"></i>'+u+'</span><span class="v">'+_pilNum(apresT)+' L</span></div>'; }
+      var mes=avecL.some(function(j){ return j.src==='mesure'; }), reg=avecL.some(function(j){ return j.src==='reglage'; });
+      // Le pointillé dit pourquoi il est là (TRAIT-CUVE §221) : les parcelles à nu, la fenêtre, les heures et leur source.
+      out.cuve={ apres:apres, bas:bas, src:mes&&reg?'conso mesur\u00e9e, r\u00e9glage sans mesure':(mes?'conso mesur\u00e9e':'conso du r\u00e9glage'),
+        html:'<div class="pil-trx-casc">'+lignes+'</div>'
+          +'<div class="pil-trx-cs"><span></span><span class="pil-trx-ax"><span>0</span><span>'+_pilNum(axG/2)+'</span><span>'+_pilNum(axG)+' L</span></span><span></span></div>'
+          +(opt?('<div class="pil-t2s">En pointill\u00e9\u00a0: '+opt.nNu+' parcelle'+(opt.nNu>1?'s':'')+' \u00e0 nu ou presque, fen\u00eatre '+_pilEsc(opt.fen)+', '+_pilGmFr(opt.h)+' h sur le domaine ('+opt.hhaSrc+')</div>'):'') };
+    }
+  }
+  return out;
+}
+// Les travaux du tracteur en cours, en carte repliée : combien, et ce qu'il faut pour les finir ; au toucher, chaque travail et
+//   l'entretien qui tombe dedans (sa pastille monte sur le chiffre quand elle n'est pas verte).
+function _pilPanelTrx(d,X){
+  if(!X || (!X.jobs && !X.rev)) return '';
+  var Jb=X.jobs, Rv=X.rev, stat, sub;
+  if(Jb){
+    stat=_pilStat(Jb.n, ' en cours', null);
+    // Les heures et les litres de ce qui a un barème ; « N sans barème » à part — jamais « reste 0,0 h · 0 L » pour un travail qu'on ne sait pas compter.
+    sub=((Jb.n>Jb.nSansH)?('reste '+_pilGmFr(Jb.hT)+' h \u00b7 '+_pilNum(Jb.lT)+' L'):'')+(Jb.nSansH?(((Jb.n>Jb.nSansH)?' \u00b7 ':'')+Jb.nSansH+' sans bar\u00e8me'):'');
+  } else { stat=_pilStat('0', ' en cours', null); sub='aucune session lanc\u00e9e'; }
+  if(Rv && Rv.cls!=='ok') stat+=_pilPhPl(Rv.titre.split(' \u00b7 ')[0]+' '+Rv.etat, Rv.cls==='ko'?'ko':'or');
+  var body=(Jb?Jb.html:'')
+    +(Rv?('<div class="pil-tv-fh">'+Rv.titre+_pilPhPl(Rv.etat,Rv.cls)+'</div>'+Rv.html):'')
+    +'<div class="pil-tv-act">'+_pilTvBtn('tracteur','Ouvrir le tracteur')+'</div>';
+  return _pilTile('trx','#4A9FC8','Travaux tracteur en cours', stat, sub, null, body, 'pil.trx');
 }
 
 // ── Onglet MATÉRIEL ──
-function _pilPanelGnr(d){
+function _pilPanelGnr(d,X){
   var g=d.gnr;
   // ③ « Cuve GNR a renseigner (Tracteur › Entretien) » etait du TEXTE MORT : il
   //   fallait lire, retenir, sortir du module et retrouver l'onglet. C'est un
   //   bouton, et il ouvre l'ecran directement.
-  if(!g||!g.capacite){ return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat('—',''), 'aucune cuve renseignée',
+  if(!g||!g.capacite){ return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat('\u2014',''), 'aucune cuve renseignée',
     null, _pilEmptyGo('Sans capacité de cuve, le niveau ne se calcule pas et le carburant reste à zéro dans tous les budgets.','entretien','Tracteur \u203a Entretien'), 'pil.gnr'); }
-  var niveau=Number(g.niveau)||0, cap=Number(g.capacite)||1, pc=Math.round(niveau/cap*100), low=niveau<=(Number(g.seuil)||0);
+  var niveau=Number(g.niveau)||0, cap=Number(g.capacite)||1, seuil=Number(g.seuil)||0, pc=Math.round(niveau/cap*100), low=niveau<=seuil;
   var col=low?'var(--rouge)':(pc<=40?'var(--orange)':'var(--vert-med)');
-  // ★ LE GROS CHIFFRE DU CORPS DOUBLONNAIT CELUI DE L'EN-TETE : « 42 % » en
-  //   haut, « 840 L » juste dessous, deux fois la meme grandeur a deux echelles.
-  //   L'en-tete porte desormais les litres — ce qu'on lit pour decider d'un
-  //   plein — et le pourcentage passe en unite. Le corps garde la jauge.
-  var body='<div class="pil-gbar" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i></div>'
-    +(low?_pilEmptyGo('Le niveau est sous votre seuil d\u2019alerte : prévoyez un plein avant la prochaine session.','entretien','Tracteur \u203a Entretien'):'');
-  return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L sur '+_pilNum(cap), low?'bas':null),
-    'soit '+pc+' % \u00b7 niveau calculé, pas mesuré', pc, body, 'pil.gnr');
+  // ★★ MOTS-9 (§592) — « 255 L » S'ÉCRIVAIT TROIS FOIS : cette tuile, « Gasoil après les travaux » et son graphique. Il s'écrit
+  //   une fois, ici, avec « sous le seuil » en pastille et le seuil posé sur la barre. Ce que les travaux en cours prendront à
+  //   la cuve (la cascade de _pilTrxParts) se lit dans le corps, seulement quand un travail a des litres à compter.
+  //   « soit 26 % · niveau calculé, pas mesuré » : le « i » (pil.gnr).
+  var body='<div class="pil-gbar pil-eq-gb" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i>'
+    +(seuil>0?'<u style="left:'+Math.min(100,seuil/cap*100).toFixed(1)+'%" title="seuil '+_pilNum(seuil)+' L"></u>':'')+'</div>'
+    +((X&&X.cuve)?('<div class="pil-tv-fh">Après les travaux en cours<small>'+X.cuve.src+'</small></div>'+X.cuve.html):'')
+    +'<div class="pil-tv-act">'+_pilTvBtn('entretien','Ouvrir l\u2019entretien')+'</div>';
+  return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L',null)+(low?_pilPhPl('sous le seuil','or'):''),
+    'seuil '+_pilNum(seuil)+' L \u00b7 cuve de '+_pilNum(cap)+' L', null, body, 'pil.gnr');
 }
-function _pilTabMat(d){
-  var H='<div class="pil-panels">';
-  if(_pilShow('mat_tracteur')) H+=_pilPanelTracteur(d);
-  if(_pilShow('mat_gnr')) H+=_pilPanelGnr(d);
-  if(_pilShow('mat_conso')) H+=_pilPanelConso(d);
-  H+='</div>';
-  // ★★ PIL-RANGE-1b (§441) — LA CARTE DU TRACTEUR REVIENT ICI (GNR-M §213, GNR-2 §256). Elle vivait dans l'ancien
-  //   Aujourd'hui et ne s'affichait plus depuis REF-1 (07/10) ; Nico a choisi de la reloger (« A », maquette validée
-  //   « go » le 23/10). Calculs inchangés : travaux tracteur en cours, gasoil après les travaux, révision pendant les
-  //   travaux. Rien à dire (aucun travail, révision et cuve non concernées) : rien n'est affiché, pas même le titre.
-  if(_pilShow('mat_travaux')){
-    var _trx=''; try{ _trx=_pilCkTracteur(d)||''; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabMat#trx'); }
-    if(_trx) H+='<div class="pil-sec-h">Pour finir les travaux tracteur en cours</div>'+_trx;
-  }
-  return H;
-}
-
 // ── L'onglet Pilotage › Cave a ete RAMENE dans la Cave (lot CAVE-3, §96) :
 //   Aujourd'hui (verdict + agenda), Le millesime › La ligne de vie (tuiles,
 //   face a N-1) et › Les courbes, La Reserve › Futs (le parc). Ici ne reste
@@ -11061,7 +11073,8 @@ var _PIL_PERSO_DEFS={
   auj:[['auj_cave','La Cave \u2014 la vue de la bascule Terrain / Cave / Économie'],['auj_cave_sv','Les points de cave dans « À savoir »']],
   // MOTS-8 (§590) : les noms des cartes de Travaux
   avc:[['avc_bar','Avancement'],['avc_pie','La charge par tâche'],['avc_temps','Le temps de l\'équipe'],['avc_echeances','Échéances'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['auj_tension','La tension par personne'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation mesurée'],['mat_travaux','Pour finir les travaux tracteur en cours'],['an_frise','Le renfort \u00e0 pr\u00e9voir']],
+  // MOTS-9 (§592) : les noms des cartes de L'équipe & le matériel (en commentaire au-dessus : la ligne doit finir par « ]], »)
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présents'],['prs_capacite','Équipe au pic'],['auj_tension','Tension'],['an_frise','Renfort'],['mat_tracteur','Tracteurs'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation'],['mat_travaux','Travaux tracteur en cours']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
   cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Le registre de l’année (vérifié avant l’export)'],['cfm_dre','Délai de rentrée (DRE)']]
@@ -11448,7 +11461,7 @@ function _pilSkeleton(d,tab){
     +'<div class="mv-ecran-d"><span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span></div></div>'
     +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
     // ★ MOTS-8 (§590) : sur Travaux, la sous-ligne porte la phrase du jour (_pilTvPhrase), posée par _pilFillContent.
-    +'<div class="pil-souslig'+(tab==='avc'?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+(tab==='avc'?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
+    +'<div class="pil-souslig'+((tab==='avc'||tab==='equ')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
     +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
     +(_pilPhotosIci(tab)?('<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'):'')
@@ -11780,7 +11793,7 @@ function _pilPhotosHtml(){
     return _pilFlag(g, l.length+' chose'+(l.length>1?'s':'')+' \u00e0 compl\u00e9ter \u2014 touchez pour voir');
   }
   // ÉQUIPE AU PIC — le pic de la campagne lue (_pilPicPortee, la définition unique) : celui des semaines qui restent d'abord
-  //   (on ne renforce pas pour une semaine faite), le pic passé s'il n'en reste aucune. La carte « Capacité vs charge » lit le même.
+  //   (on ne renforce pas pour une semaine faite), le pic passé s'il n'en reste aucune. La carte « Équipe au pic » de L'équipe & le matériel lit le même.
   var PP=null; try{ PP=_pilPicPortee(_pilSaisonNom()); }catch(eP){ PP=null; if(window._mvAvale) window._mvAvale(eP,'pilotage.js/_pilPhotosHtml#pic'); }
   var fE=drap('effectif'), pEff;
   if(PP && PP.ok){
@@ -11937,9 +11950,11 @@ window._pilGo = function(cible){
       return;
     }
     // Cible INTERNE (PRO-1, §269) : « Voir le détail » de la tension du cockpit — la carte par personne, dans L'équipe.
+    // ★ MOTS-9 (§592) : la tension est une carte repliée (« Tension ») — on la déplie, puis on la montre.
     if(cible==='tension'){
-      if(_PIL_TAB!=='equ'){ _PIL_TAB='equ'; _pilSaveTab('equ'); renderPilotage(); }
-      setTimeout(function(){ _pilFlash(document.getElementById('pil-tension-det')); }, 260);
+      if(_PIL_STATE && _PIL_STATE.collapsed) _PIL_STATE.collapsed.tension=0;
+      if(_PIL_TAB!=='equ'){ _PIL_TAB='equ'; _pilSaveTab('equ'); renderPilotage(); } else _pilFillContent(_pilData());
+      setTimeout(function(){ _pilFlash(document.querySelector('#pil-content .pil-tile[data-pid="tension"]')); }, 260);
       return;
     }
     // Cible INTERNE (INACTION-1, §218) : Décider, ou vit le simulateur de renfort.
@@ -12589,13 +12604,9 @@ function _pilFillContent(d){
     var _ph=document.getElementById('pil-souslig-t'); if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);
   }
   else if(tab==='equ'){
-    var _hEqu=
-        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite','an_frise','auj_tension'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d)
-          +(_pilShow('an_frise')?'<div class="pil-panels">'+_pilPanelAnRenfort()+'</div>':''):'')   // PIL-RANGE-2b : le renfort, venu de L'annee
-      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso','mat_travaux'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
-    // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
-    // sans meme la phrase qui dit comment rallumer les tuiles.
-    host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
+    // ★ MOTS-9 (§592) : l'onglet tient dans _pilTabEqu ; la phrase du haut (l'équipe du jour, ce qui presse) prend la sous-ligne.
+    host.innerHTML=_pilTabEqu(d);
+    var _phE=document.getElementById('pil-souslig-t'); if(_phE) _phE.innerHTML=_pilEqPhrase(d);
   }
   else if(tab==='sim') host.innerHTML=_pilTabSim(d);
   else if(tab==='eco') host.innerHTML=_pilTabEco(d);

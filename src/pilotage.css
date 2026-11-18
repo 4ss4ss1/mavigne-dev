@@ -171,3 +171,22 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 /* ★ PORTEE-1 (§591) : la carte « Fin prévue » d'une campagne finie — sa fin, ce qui est fait ; ni frise, ni objectif, ni renfort à simuler */
 #ck-verdict.ck-v-finie .ck-frise,#ck-verdict.ck-v-finie .ck-v-act{display:none}
 #ck-verdict .ck-etat.fini{background:var(--survol);color:var(--texte-med)}
+
+/* ★★★ MOTS-9 (§592) — L'ÉQUIPE & LE MATÉRIEL ALLÉGÉS SUR PLACE : la règle de Travaux (§590), portée par .pil-tv ; ce qui est propre
+   à l'onglet est sous .pil-eq. La phrase du haut prend la couleur d'attention pour « au seuil » et la cuve sous le seuil. */
+#page-pilotage .pil-tv-ph b.or{color:var(--attention-texte)}
+#page-pilotage .pil-tv-pl.ko{background:var(--danger-doux)}
+#page-pilotage .pil-tv-pl.ko::before{background:var(--danger)}
+#page-pilotage .pil-eq .pil-th-l2 .pil-th-stat{vertical-align:middle}
+#page-pilotage .pil-eq .pil-th-l2 .pil-tv-pl{margin-left:var(--e-2,8px);vertical-align:middle;font-size:var(--pt-micro,12px)}
+#page-pilotage .pil-eq .pil-tv-fh .pil-tv-pl{margin-left:auto;font-weight:var(--fw-reg,400)}
+/* la cuve : le seuil posé sur la barre */
+#page-pilotage .pil-eq .pil-eq-gb{position:relative;overflow:visible}
+#page-pilotage .pil-eq .pil-eq-gb u{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--texte);border-radius:1px}
+/* les travaux du tracteur, dans la carte : la grille de la ligne reste celle de GNR-2, sans l'axe du domaine */
+#page-pilotage .pil-eq .pil-tbody .pil-trx-job{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto auto}
+#page-pilotage .pil-eq .pil-tbody .pil-t2s{margin:var(--e-1,4px) 0}
+/* « Équipe au pic » : le disponible et le nécessaire, deux barres sur la même échelle */
+#page-pilotage .pil-eq-cap{display:grid;grid-template-columns:7em minmax(0,1fr) auto;align-items:center;gap:var(--e-3,12px);min-height:32px;font-size:var(--pt-txt,13px);color:var(--texte-med)}
+#page-pilotage .pil-eq-cap b{font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap}
+#page-pilotage .pil-eq-cap .pil-tv-br{height:8px}

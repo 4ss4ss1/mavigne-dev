@@ -44,11 +44,13 @@ function jouer(S) {
   t('⑥ un entretien loin, sans couleur, ne fait pas de carte', A.rev({ tracs: [{ id: 't1', revReste: 400, ents: [{ nom: 'Vidange', reste: 500, rouge: false, orange: false }] }] }, T) === null);
   t('⑦ le texte de chacun : « Filtre le 5 nov. 2026 », « révision dépassée de 12 h », « date dépassée »',
     A.txt({ rev: false, nom: 'Filtre', reste: null, pd: '2026-11-05', jours: 7 }) === 'Filtre le 5 nov. 2026' && A.txt({ rev: true, reste: -12 }) === 'r\u00e9vision d\u00e9pass\u00e9e de 12 h' && A.txt({ rev: false, nom: 'Courroie', reste: 30, pd: '2026-10-20', jours: -9 }) === 'Courroie dans 30 h ou date d\u00e9pass\u00e9e');
-  const a = S.pil.indexOf('  // ② La révision\n'), b = S.pil.indexOf('  // ③ La cuve', a), carte = a > 0 && b > a ? S.pil.slice(a, b) : '';
+  // MOTS-9 (§592) : la révision n’est plus une grande carte ; c’est un morceau de _pilTrxParts, lu DANS la carte « Travaux tracteur
+  //   en cours » (son titre « Révision · NH », sa pastille). La date sous la carte, sauf quand la pastille la dit déjà.
+  const a = S.pil.indexOf("  // ② L'entretien le plus pressant, dans ces travaux"), b = S.pil.indexOf('  // ③ La cuve', a), carte = a > 0 && b > a ? S.pil.slice(a, b) : '';
   t('⑧ la carte lit l’entretien choisi, plus revReste ; son titre le nomme ; la date et « aussi » sous la carte',
-    carte && !carte.includes('revReste') && carte.includes("var t=R.t, it=R.it, rs=it.reste,") && carte.includes("<span class=\"t\">'+nomIt+' \\u00b7 '") && carte.includes('R.aussi.map(_pilGmRevTxt)') && carte.includes("(dIt&&!bigDate)"));
+    carte && !carte.includes('revReste') && carte.includes("var t=R.t, it=R.it, rs=it.reste,") && carte.includes("titre:nomIt+' \\u00b7 '+_pilEsc(t.nom||'Tracteur')") && carte.includes('R.aussi.map(_pilGmRevTxt)') && carte.includes("((dIt&&!etatDate)?") && carte.includes("etat='le '+dIt; cls='or'; etatDate=true;"));
   t('⑨ _pilData lit les entretiens, compteur.js expose leur échéance ; l’info de la carte le dit ; la liste joue ce fichier et sa contre-épreuve',
-    S.pil.includes(', ents:_ents };') && S.cpt.includes('window._trEntEtat=_trEntEtat;') && S.utils.includes("'pil.trxrev': { t: 'L\u2019entretien le plus pressant") && S.liste.indexOf("mv-harnais-compt7.mjs'") > 0 && S.liste.indexOf("mv-harnais-compt7.mjs --contre'") > 0);
+    S.pil.includes(', ents:_ents };') && S.cpt.includes('window._trEntEtat=_trEntEtat;') && S.utils.includes("'<b>La révision dans ces travaux</b> (au toucher) : la carte prend, pour chaque tracteur, l’entretien le plus pressant") && !S.utils.includes("'pil.trxrev':")   /* MOTS-9 : la fiche vit dans pil.trx */ && S.liste.indexOf("mv-harnais-compt7.mjs'") > 0 && S.liste.indexOf("mv-harnais-compt7.mjs --contre'") > 0);
 }
 if (!CONTRE) {
   try { jouer(S0); } catch (e) { ko++; console.log('  \x1b[31m✗\x1b[0m plantage : ' + (e && e.stack || e)); }
@@ -65,6 +67,7 @@ if (!CONTRE) {
     ['un entretien lointain fait une carte', m('pil', 'proche:!!(e.rouge||e.orange||e.depasse)', 'proche:true')],
     ['le rang ne passe plus avant les heures', m('pil', '  if(a.rang!==b.rang) return a.rang-b.rang;\n', '')],
     ['la carte relit revReste', m('pil', 'var t=R.t, it=R.it, rs=it.reste,', 'var t=R.t, it=R.it, rs=t.revReste,')],
+    ['la date disparaît quand un travail atteint l’entretien (MOTS-9)', m('pil', "((dIt&&!etatDate)?", "((dIt&&cls!=='or')?")],
     ['_pilData oublie les entretiens', m('pil', ', ents:_ents };', ' };')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-compt7.mjs'").join("mv-harnais-comptW.mjs'") })],
   ];

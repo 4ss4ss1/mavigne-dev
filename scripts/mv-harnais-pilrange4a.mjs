@@ -38,10 +38,11 @@ function jouer(S) {
   t('② la table et les défauts ont les mêmes clés (aucune case purgée au chargement, aucun défaut orphelin)', purgees.length === 0 && orphelins.length === 0, 'purgées : ' + purgees.join(', ') + ' · orphelins : ' + orphelins.join(', '));
   const c = {}; vm.createContext(c); vm.runInContext('var _PIL_ST_V=' + ((/var _PIL_ST_V = (\d+);/.exec(P) || [])[1] || '4') + ';\n' + dft + '\n' + corps(P, '_pilCloneDefault') + '\n' + corps(P, '_pilNormalize'), c);
   const n = c._pilNormalize({ show: { mat_travaux: 0, auj_tension: 0, auj_marge: 0 }, v: 4 });
-  t('③ une case décochée reste décochée au chargement (« Pour finir les travaux tracteur en cours », la tension)', n && n.show.mat_travaux === 0 && n.show.auj_tension === 0, JSON.stringify(n && { mt: n.show.mat_travaux, at: n.show.auj_tension }));
+  t('③ une case décochée reste décochée au chargement (« Travaux tracteur en cours », la tension)', n && n.show.mat_travaux === 0 && n.show.auj_tension === 0, JSON.stringify(n && { mt: n.show.mat_travaux, at: n.show.auj_tension }));
   t('③ une ancienne clé morte mémorisée disparaît sans bruit', n && !('auj_marge' in n.show));
   t('④ Aujourd’hui ne propose que la vue Cave et ses points dans « À savoir »', JSON.stringify(defs.auj) === JSON.stringify(['auj_cave', 'auj_cave_sv']), JSON.stringify(defs.auj));
-  t('④ la tension par personne se règle dans Équipe, et réveille la partie Personnel', (defs.equ || []).includes('auj_tension') && /_pilAnyShow\(\['prs_equipe','prs_presences','prs_capacite','an_frise','auj_tension'\]\)/.test(P));
+  // MOTS-9 (§592) : _pilTabEqu pose la carte « Tension » dans Personnel ; l’intertitre paraît dès qu’une carte y est.
+  t('④ la tension par personne se règle dans Équipe, et réveille la partie Personnel', (defs.equ || []).includes('auj_tension') && /if\(_pilShow\('auj_tension'\)\) P\+=_pilPanelTension\(d\);/.test(corps(P, '_pilTabEqu')) && /\+\(P\?'<div class="pil-sec-h">Personnel<\/div>/.test(corps(P, '_pilTabEqu')));
   t('④ la protection restante se règle dans Conformité, où elle s’affiche', (defs.cfm || []).includes('auj_traiter') && /_pilShow\('auj_traiter'\)/.test(corps(P, '_pilTabCfm')));
   t('⑤ la nouveauté le dit (10.03, niv 1)', /\{ v: '10\.03', d: '[^']*', items: \[\s*\{ niv: 1, pour: \['admin'\], emoji: 'engrenage', titre: 'Pilotage : « Afficher dans cet onglet » ne propose que ce qui sert'/.test(S.utils));
   t('⑥ la liste des harnais joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-pilrange4a.mjs'") > 0 && S.liste.indexOf("mv-harnais-pilrange4a.mjs --contre'") > 0);
@@ -56,8 +57,8 @@ if (!CONTRE) {
     ['une case morte revient sur Aujourd’hui', (S) => R(S, 'pil', "  auj:[['auj_cave',", "  auj:[['auj_marge','Marge sur objectif'],['auj_cave',")],
     ['« mat_travaux » quitte les défauts', (S) => R(S, 'pil', "mat_conso:1, mat_travaux:1,", 'mat_conso:1,')],
     ['un défaut sans case', (S) => R(S, 'pil', "    auj_cave:1, auj_cave_sv:1, auj_traiter:1, auj_tension:1,", "    auj_cave:1, auj_cave_sv:1, auj_traiter:1, auj_tension:1, auj_plan:1,")],
-    ['la tension revient dans Aujourd’hui', (S) => R(R(S, 'pil', "['auj_tension','La tension par personne'],", ''), 'pil', "  auj:[['auj_cave',", "  auj:[['auj_tension','Tension équipe'],['auj_cave',")],
-    ['la tension seule ne réveille plus Personnel', (S) => R(S, 'pil', "'an_frise','auj_tension'])?", "'an_frise'])?")],
+    ['la tension revient dans Aujourd’hui', (S) => R(R(S, 'pil', "['auj_tension','Tension'],", ''), 'pil', "  auj:[['auj_cave',", "  auj:[['auj_tension','Tension équipe'],['auj_cave',")],
+    ['la tension seule ne réveille plus Personnel', (S) => R(S, 'pil', "  if(_pilShow('auj_tension')) P+=_pilPanelTension(d);", "  if(_pilShow('auj_tension')) M+=_pilPanelTension(d);")],
     ['la protection quitte Conformité', (S) => R(S, 'pil', "cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],", 'cfm:[')],
     ['la normalisation garde tout (les clés mortes reviennent)', (S) => R(S, 'pil', "Object.keys(d).forEach(function(k){ o[k]=", "Object.keys(Object.assign({},cur||{},d)).forEach(function(k){ o[k]=")],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-pilrange4a.mjs'").join("mv-harnais-pilrangeW.mjs'") })],

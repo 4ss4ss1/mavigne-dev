@@ -32,7 +32,8 @@ function jouer(S) {
   t('① case « Le budget de l’année » décochée : les avis seuls', /var an=_pilShow\('an_budget'\);/.test(vueS) && /if\(!an && avis\) H\+=avis;/.test(vueS));
   t('① posés dans la Synthèse, pas dans les autres sous-vues', /else body=_pecViewSynthese\(E,TL\);/.test(corps(P, '_pilTabEco')) && !/_pilAnAvisHtml|_pilPanelAnBudget/.test(corps(P, '_pilTabEco')));
   // ② le renfort dans Personnel
-  t('② le renfort dans Équipe & matériel › Personnel, sous sa case an_frise', /_pilAnyShow\(\['prs_equipe','prs_presences','prs_capacite','an_frise'(,'auj_tension')?\]\)/.test(P)   /* PIL-RANGE-4a : la tension réveille aussi Personnel */ && /\(_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)\+'<\/div>':''\)/.test(P));
+  // MOTS-9 (§592) : _pilTabEqu pose la carte dans la liste de Personnel ; l’intertitre « Personnel » paraît dès qu’une carte y est.
+  t('② le renfort dans Équipe & matériel › Personnel, sous sa case an_frise', /if\(_pilShow\('an_frise'\)\) P\+=_pilPanelAnRenfort\(\);/.test(corps(P, '_pilTabEqu')) && /\+\(P\?'<div class="pil-sec-h">Personnel<\/div>/.test(corps(P, '_pilTabEqu')));
   // ③ l'onglet mémorisé
   const mem = { v: null };
   const c2 = { localStorage: { getItem: () => mem.v }, _pilTabKey: () => 'k', _PIL_TAB_ROUE: 'roue' };
@@ -45,7 +46,7 @@ function jouer(S) {
   const c3 = {}; vm.createContext(c3); vm.runInContext(corps(P, '_pilPhotosIci'), c3);
   t('④ les photos restent sur La campagne (plus sur L’année)', c3._pilPhotosIci('avc') === true && c3._pilPhotosIci('an') === false && c3._pilPhotosIci('eco') === false);
   t('④ aucune photo ne mène plus à « an » (Équipe au pic → equ, Budget → eco)', !/_pilPhotoHtml\([^\n]*'an'[,)]/.test(P) && /pBud=_pilPhotoHtml\('Budget',_pilNb\(dep\),[^\n]*,'eco',fB,'budget',/.test(P)   /* PORTEE-1 (§591) : le bandeau lit la campagne — deux tuiles, plus « Travaux » */);
-  t('④ les cases : Économie gagne « Le budget de l’année », Équipe « Le renfort à prévoir », plus de liste « an »', /eco:\[\['an_budget',/.test(P) && /\['an_frise','Le renfort \\u00e0 pr\\u00e9voir'\]\],\n  eco:/.test(P) && !/\n  an: \[\['an_budget'/.test(P) && /tab==='eco'\|\|tab==='cfm'\);/.test(P));
+  t('④ les cases : Économie gagne « Le budget de l’année », Équipe « Le renfort à prévoir », plus de liste « an »', /eco:\[\['an_budget',/.test(P) && /\n  equ:\[[^\n]*\['an_frise','Renfort'\][^\n]*\n  eco:/.test(P)   /* MOTS-9 (§592) : le nom de la carte */ && !/\n  an: \[\['an_budget'/.test(P) && /tab==='eco'\|\|tab==='cfm'\);/.test(P));
   t('④ « an_cadres » mène à Économie › Synthèse, et fait clignoter les avis (ou la barre)', /_PIL_TAB='eco'; _pilSaveTab\('eco'\); _PEC_SUB='syn'/.test(P) && /getElementById\('pil-an-cadres'\)\|\|document\.getElementById\('pil-crumb'\)/.test(P));
   // ⑤ les autres portes
   t('⑤ la coquille ne propose plus L’année ; le cockpit et les tutos y mènent à Économie', !/\['an', 'L’année'\]/.test(S.coq) && /an: 'eco' \}/.test(S.vue));   // DEMO-5 (§500) : _MVT_PILTAB (annee:'eco') est parti avec la visite guidée
@@ -63,7 +64,7 @@ if (!CONTRE) {
     ['le budget s’affiche même décoché', (S) => R(S, 'pil', "  var an=_pilShow('an_budget');", "  var an=true;")],
     ['les avis se perdent quand le budget est décoché', (S) => R(S, 'pil', "  if(!an && avis) H+=avis;\n", "")],
     ['les avis et le budget sur toutes les sous-vues', (S) => R(S, 'pil', "else body=_pecViewSynthese(E,TL);", "else body=_pecViewSynthese(E,TL);\n  body=_pilAnAvisHtml()+body;")],
-    ['le renfort quitte Personnel', (S) => R(S, 'pil', "+(_pilShow('an_frise')?'<div class=\"pil-panels\">'+_pilPanelAnRenfort()+'</div>':'')", "")],
+    ['le renfort quitte Personnel', (S) => R(S, 'pil', "  if(_pilShow('an_frise')) P+=_pilPanelAnRenfort();", "  if(_pilShow('an_frise')) M+=_pilPanelAnRenfort();")],
     ['les photos reviennent sur « an »', (S) => R(S, 'pil', "function _pilPhotosIci(tab){ return tab==='avc'; }", "function _pilPhotosIci(tab){ return tab==='an' || tab==='avc' || tab==='eco'; }")],
     ['la photo Budget mène encore à « an »', (S) => R(S, 'pil', "'engag\\u00e9 \\u00b7 budget '+_pilNb(bud)+'\\u00a0\\u20ac','eco',fB,'budget',", "'engag\\u00e9 \\u00b7 budget '+_pilNb(bud)+'\\u00a0\\u20ac','an',fB,'budget',")],   // PORTEE-1 (§591) : l'ancre suit la tuile de la campagne
     ['« an_cadres » cherche encore L’année', (S) => R(S, 'pil', "_PIL_TAB='eco'; _pilSaveTab('eco'); _PEC_SUB='syn'", "_PIL_TAB='an'; _pilSaveTab('an'); _PEC_SUB='syn'")],

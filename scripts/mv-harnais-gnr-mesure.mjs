@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // PIL-RANGE-1b (§441) : « Alertes matériel » de l'ancien Aujourd'hui (_pilCkAlertes) est retiré ; les cartes du tracteur (_pilCkTracteur)
 //   sont relogées dans Équipe & matériel › Matériel (_pilTabMat). Les machines immobilisées sont dans « À savoir » du cockpit v2.
+// ★ MOTS-9 (§592) : _pilCkTracteur est parti. Le rendu joué ici est celui de L'équipe & le matériel : la carte « Travaux
+//   tracteur en cours » (_pilPanelTrx) et la carte Cuve GNR (_pilPanelGnr), toutes deux nourries par _pilTrxParts — les
+//   calculs (①②③⑥) sont les mêmes fonctions, inchangées.
 /* ─────────────────────────────────────────────────────────────────────────
    HARNAIS GNR-M (§213) — LE TRACTEUR SUR LES TRAVAUX EN COURS, LA CONSO MESURÉE
    Lancer :  node scripts/mv-harnais-gnr-mesure.mjs            (scénarios)
@@ -130,8 +133,12 @@ function charger(src, o = {}) {
   ctx.window = ctx;
   vm.createContext(ctx);
   const code = [icoTable(src), corps(src, '_pilEsc'), corps(src, '_pilNum'), corps(src, '_pilTnom'), corps(src, '_pilDfr'),
-    corps(src, '_pilStat'), corps(src, '_pilIco'), corps(src, '_pilIcoFor'), corps(src, '_pilTile'), corps(src, '_ecoCfg'), bloc(src)].join('\n');
+    corps(src, '_pilStat'), corps(src, '_pilIco'), corps(src, '_pilIcoFor'), corps(src, '_pilTile'), corps(src, '_ecoCfg'),
+    corps(src, '_pilPhPl'), corps(src, '_pilTvBtn'), corps(src, '_pilEmptyGo'), corps(src, '_pilTrxParts'), corps(src, '_pilPanelTrx'), corps(src, '_pilPanelGnr'),
+    bloc(src)].join('\n');
   vm.runInContext(code, ctx, { filename: 'gnrm-extrait.js' });
+  // MOTS-9 : le rendu des deux cartes, tel que _pilTabEqu le pose (les morceaux calculés une fois, pour les deux).
+  ctx._rendu = d => { const P = ctx._pilTrxParts(d); return ctx._pilPanelTrx(d, P) + ctx._pilPanelGnr(d, P); };
   return { ctx, W };
 }
 
@@ -193,27 +200,31 @@ function scenarios(src, journal) {
     t('③ loin (> 120 h) et hors des travaux : aucune carte', X._pilGmRevision({ tracs: [{ id: 't1', nom: 'NH', revReste: 400 }] }, T) === null);
     const R3 = X._pilGmRevision({ tracs: [{ id: 't1', nom: 'NH', revReste: 3 }] }, T);
     t('③ un travail sans barème est compté à part', R3 && R3.sansBareme === 1 && proche(R3.tot, 2.6), R3 && JSON.stringify([R3.sansBareme, R3.tot]));
+    // MOTS-9 (§592) : la carte le dit — les heures comptées, puis « 1 sans barème » ; jamais « 0,0 h » seul.
+    const H3 = X._rendu({ tracs: [{ id: 't1', nom: 'NH', revReste: 3 }], refDate: '2026-06-16' });
+    t('③ … et la carte le dit : « 2,6 h en cours sur ce tracteur · 1 sans barème »', H3.includes('2,6 h en cours sur ce tracteur \u00b7 1 sans barème'), H3.slice(H3.indexOf('avant la'), H3.indexOf('avant la') + 160));
 
     // ④ LE RENDU
-    const H = X._pilCkTracteur(d);
+    const H = X._rendu(d);
     const nRows = (H.match(/class="pil-trx-job"/g) || []).length;
     t('④ une ligne par travail en cours (5)', nRows === 5, nRows);
-    t('④ cartes : travaux, révision, gasoil après les travaux (plus deux « Cuve GNR » l’une sous l’autre, PIL-RANGE-1b)', H.includes('Travaux tracteur en cours') && H.includes('Révision · Bobard') && H.includes('Gasoil après les travaux') && !H.includes('>Cuve GNR<'));
+    // MOTS-9 : la révision est DANS la carte des travaux, l’après-travaux dans la carte de la cuve — une seule « Cuve GNR ».
+    t('④ cartes : les travaux et leur révision, la cuve et son après-travaux (une seule « Cuve GNR »)', H.includes('Travaux tracteur en cours') && H.includes('Révision · Bobard') && H.includes('Après les travaux en cours') && (H.match(/>Cuve GNR</g) || []).length === 1);
     t('④ la session oubliée est signalée, une seule', (H.match(/aucune parcelle cochée depuis/g) || []).length === 1);
     const apres = 410 - (1.6 * 6) - 46.8 - (2.6 * 120 / 15.6) - (0.75 * 6);
-    // GNR-2 (§256) : le chiffre en grand (.pil-big), la phrase à côté (.pil-trx-vu) — on lit les deux, collés, dans cet ordre.
-    t('④ la cuve après les travaux = 410 − Σ litres (' + Math.round(apres) + ' L), en grand, la phrase à côté', H.includes('>' + Math.round(apres).toLocaleString('fr-FR') + ' L</span><span class="pil-trx-vu">après les travaux en cours</span>'));
-    t('④ le travail sans barème est dit, pas compté', H.includes('1 travail sans barème, non compté'));
+    // MOTS-9 : la ligne « Après les travaux » de la cascade, dans la carte de la cuve — écrite une fois.
+    t('④ la cuve après les travaux = 410 − Σ litres (' + Math.round(apres) + ' L), sur la ligne « Après les travaux », une fois', H.includes('<span class="l">Après les travaux</span>') && H.includes('<span class="v">' + _n(apres) + ' L</span>') && H.split(_n(apres) + ' L<').length === 2);
+    t('④ le travail sans barème est dit, pas compté', H.includes(' \u00b7 1 sans barème</div>'));
     // TRAIT-CUVE (§221) : le traitement conseille, en pointille
     const lT = 2.6 * (2 / 1.5) * 6, apT = apres - lT;
-    t('⑥ traitement conseillé : 2 parcelles à nu + fenêtre demain → pointillé, domaine × cadence MESURÉE (2 h chrono ÷ 1,5 ha = 1,33 h/ha, pas le barème 1,3) × 6 L/h (−21 L)', H.includes('(conseillé)') && H.includes('\u2212' + _n(lT)) && H.includes(_n(apT) + ' L') && H.includes('Avec ce traitement') && H.includes('fenêtre demain 6h\u219211h') && H.includes('cadence mesurée sur 2 traitements'), H.slice(H.indexOf('Après les travaux'), H.indexOf('Après les travaux') + 400));
+    t('⑥ traitement conseillé : 2 parcelles à nu + fenêtre demain → pointillé, domaine × cadence MESURÉE (2 h chrono ÷ 1,5 ha = 1,33 h/ha, pas le barème 1,3) × 6 L/h (−21 L)', H.includes('(conseillé)') && H.includes('\u2212' + _n(lT)) && H.includes(_n(apT) + ' L') && H.includes('Avec ce traitement') && H.includes('2 parcelles à nu ou presque, fenêtre demain 6h\u219211h') && H.includes('cadence mesurée sur 2 traitements'), H.slice(H.indexOf('Après les travaux'), H.indexOf('Après les travaux') + 400));
     const M = X._pilGmHhaMesure('Traitement');
     t('⑥ cadence mesurée : minutes chronométrées ÷ hectares chronométrés (la parcelle C, sans chrono, ne compte pas)', M && proche(M.hha, 2 / 1.5) && M.n === 2 && proche(M.ha, 1.5));
-    t('⑥ moins de 0,5 ha chronométré : pas de mesure, le barème reprend', X._pilGmHhaMesure('Griffage') === null && (() => { const Y = charger(src).ctx; Y.SESSIONS.splice(Y.SESSIONS.findIndex(x => x.id === 'H6'), 1); Y.SESSIONS.splice(Y.SESSIONS.findIndex(x => x.id === 'H7'), 1); return Y._pilCkTracteur(d).includes('(barème)'); })());
-    t('⑥ interrupteur éteint (CONFIG.features.trait_cuve absent) : pas de pointillé', !charger(src, { flag: false }).ctx._pilCkTracteur(d).includes('(conseillé)'));
-    t('⑥ rien à nu : pas de pointillé', !charger(src, { prot: { n: 5, nu: [], bientot: [] } }).ctx._pilCkTracteur(d).includes('(conseillé)'));
-    t('⑥ aucune fenêtre dans les 5 jours : pas de pointillé', !charger(src, { days: [{ label: 'demain', start: null }] }).ctx._pilCkTracteur(d).includes('(conseillé)'));
-    t('⑥ traitement déjà lancé : il est dans les travaux, pas en pointillé', (() => { const Y = charger(src).ctx; Y.SESSIONS.push({ id: 'ST', activite: 'Traitement', statut: 'En cours', date: '2026-06-16', tracteurId: 't2', parcellesFaites: [] }); const h = Y._pilCkTracteur(d); return !h.includes('(conseillé)') && (h.match(/class="pil-trx-job"/g) || []).length === 6; })());
+    t('⑥ moins de 0,5 ha chronométré : pas de mesure, le barème reprend', X._pilGmHhaMesure('Griffage') === null && (() => { const Y = charger(src).ctx; Y.SESSIONS.splice(Y.SESSIONS.findIndex(x => x.id === 'H6'), 1); Y.SESSIONS.splice(Y.SESSIONS.findIndex(x => x.id === 'H7'), 1); return Y._rendu(d).includes('(barème)'); })());
+    t('⑥ interrupteur éteint (CONFIG.features.trait_cuve absent) : pas de pointillé', !charger(src, { flag: false }).ctx._rendu(d).includes('(conseillé)'));
+    t('⑥ rien à nu : pas de pointillé', !charger(src, { prot: { n: 5, nu: [], bientot: [] } }).ctx._rendu(d).includes('(conseillé)'));
+    t('⑥ aucune fenêtre dans les 5 jours : pas de pointillé', !charger(src, { days: [{ label: 'demain', start: null }] }).ctx._rendu(d).includes('(conseillé)'));
+    t('⑥ traitement déjà lancé : il est dans les travaux, pas en pointillé', (() => { const Y = charger(src).ctx; Y.SESSIONS.push({ id: 'ST', activite: 'Traitement', statut: 'En cours', date: '2026-06-16', tracteurId: 't2', parcellesFaites: [] }); const h = Y._rendu(d); return !h.includes('(conseillé)') && (h.match(/class="pil-trx-job"/g) || []).length === 6; })());
     t('④ cascade : échelle arrondie au-dessus du niveau du jour (410 L → 500 L), pas la capacité', H.includes('<span>500 L</span>') && !H.includes('<span>1 500 L</span>'));
     t('④ aucun undefined / NaN', !/undefined|NaN/.test(H));
     const bal = (o, f) => (H.match(new RegExp('<' + o + '[ >]', 'g')) || []).length === (H.match(new RegExp('</' + o + '>', 'g')) || []).length;
@@ -222,12 +233,13 @@ function scenarios(src, journal) {
     const larg = [...H.matchAll(/(?:width|left):(-?[\d.]+)%/g)].map(m => +m[1]);
     t('④ largeurs et positions entre 0 et 100 %', larg.length > 0 && larg.every(v => v >= 0 && v <= 100), JSON.stringify(larg.filter(v => v < 0 || v > 100)));
     X.SESSIONS.length = 0; X.INTRANTS.fertil.length = 0;
-    const A2 = X._pilCkTracteur({ tracs: [{ id: 't1', nom: 'NH', revReste: 400 }], gnr: { capacite: 1500, niveau: 900, seuil: 300 } });
-    t('④ rien en cours, cuve haute : aucune carte (Matériel n’affiche pas le bloc)', A2 === '');
-    t('④ relogé : Équipe & matériel › Matériel pose les cartes sous la case mat_travaux, avec leur titre', /_pilShow\('mat_travaux'\)/.test(src) && /_trx=_pilCkTracteur\(d\)/.test(src) && src.includes("['mat_travaux','Pour finir les travaux tracteur en cours']"));
-    const A3 = X._pilCkTracteur({ tracs: [], gnr: { capacite: 1500, niveau: 250, seuil: 300 } });
-    t('④ sans travail, une cuve sous le seuil garde sa carte', A3.includes('>250 L</span><span class="pil-trx-vu">sous le seuil</span>') && !A3.includes('Rien à signaler'));
-    t('④ l’échelle suit le seuil quand il dépasse le niveau (300 L → 400 L)', A3.includes('<span>400 L</span>'));
+    const dA2 = { tracs: [{ id: 't1', nom: 'NH', revReste: 400 }], gnr: { capacite: 1500, niveau: 900, seuil: 300 } }, P2 = X._pilTrxParts(dA2);
+    t('④ rien en cours, cuve haute : pas de carte des travaux, la cuve sans cascade', X._pilPanelTrx(dA2, P2) === '' && !/pil-trx-casc/.test(X._pilPanelGnr(dA2, P2)));
+    t('④ relogé : L’équipe & le matériel pose la carte sous la case mat_travaux, avec son nom', /if\(_pilShow\('mat_travaux'\)\) M\+=_pilPanelTrx\(d,X\);/.test(src) && /X=_pilTrxParts\(d\);/.test(src) && src.includes("['mat_travaux','Travaux tracteur en cours']"));
+    const A3 = X._rendu({ tracs: [], gnr: { capacite: 1500, niveau: 250, seuil: 300 } });
+    const A4 = charger(src).ctx._rendu(Object.assign({}, d, { gnr: { capacite: 1500, niveau: 250, seuil: 300 } }));
+    t('④ l’échelle suit le seuil quand il dépasse le niveau (300 L → 400 L)', A4.includes('<span>400 L</span>') && /pil-trx-casc/.test(A4));
+    t('④ sans travail, une cuve sous le seuil : 250 L et la pastille, sans cascade', A3.includes('<b>250</b> L</span><span class="pil-tv-pl or">sous le seuil</span>') && !/pil-trx-casc/.test(A3) && !A3.includes('Rien à signaler'));
     // la conso se calcule sur ENTRETIENS + SESSIONS : on recharge le monde pour la tuile
     const C2 = charger(src);
     const P = C2.ctx._pilPanelConso({ tracs: [{ id: 't1', nom: 'NH' }, { id: 't2', nom: 'Bobard' }] });
@@ -265,6 +277,8 @@ const DEFAUTS = [
   ['l’interrupteur ne retient plus rien', "if(F.trait_cuve!==true) return null;", ''],
   ['le traitement conseillé s’affiche même sans parcelle à nu', 'var nNu=P.nu.length+P.bientot.length; if(!nNu) return null;', 'var nNu=P.nu.length+P.bientot.length;'],
   ['le traitement conseillé ignore qu’il est déjà lancé', "if(T.jobs.some(function(j){ return j.kind==='session'&&j.nom===act.nom; })) return null;", ''],
+  ['le pointillé ne dit plus pourquoi il est là (MOTS-9)', "+(opt?('<div class=\"pil-t2s\">En pointill", "+(false?('<div class=\"pil-t2s\">En pointill"],
+  ['la révision tait le travail sans barème (MOTS-9)', "+(R.sansBareme?(R.sansBareme+' sans bar", "+(false?(R.sansBareme+' sans bar"],
   ['les arrachées comptent dans le domaine', "var actives=parcs.filter(function(p){ return p&&p.statut!=='Arrachee'; });", 'var actives=parcs.filter(function(p){ return !!p; });'],
 ];
 let rougit = 0;

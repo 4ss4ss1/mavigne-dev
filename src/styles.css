@@ -2288,27 +2288,10 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-inaction.ok{border-color:var(--vert-med);}
 .pil-alert .when{margin-left:auto;font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap;}
 /* — GNR-M (§213) : le tracteur se projette sur les travaux en cours — */
-/* GNR-2 (§256, 06/10) : le bloc tracteur a SA grille. Il partageait `.pil-dec` avec la décision du jour ; ALIGN-1 (§236)
-   y a posé « par deux sous 600 px » pour les quatre tuiles, et la cuve, tassée dans une demi-colonne, perdait ses barres,
-   son échelle (« 0625125 L ») et le bout de ses litres (capture de Nico, 06/10). Une carte par ligne jusqu'à 1 023 px ;
-   à partir de 1 024 px, les travaux à gauche (deux tiers), la cuve à droite (choix de Nico). ★ La révision, quand elle
-   s'ajoute, passe DESSOUS, sur toute la largeur : posée sous la cuve, elle étirait la carte des travaux à la hauteur des
-   deux cartes de droite — ~300 px vides dans la carte de gauche, vu au rendu (Chromium, 1 280 px). Classes posées par
-   _pilCkTracteur : pil-trx-cote1 / pil-trx-cote2 (les travaux + une ou deux cartes), pil-trx-paire (révision + cuve,
-   sans travaux). Une carte seule prend toute la largeur. */
-.pil-trx{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--e-4,16px);margin-bottom:var(--e-4,16px);align-items:stretch;}
-@media (max-width:600px){.pil-trx{gap:var(--e-3,12px);}}
-@media (min-width:1024px){
-  .pil-trx.pil-trx-cote1,.pil-trx.pil-trx-cote2{grid-template-columns:minmax(0,2fr) minmax(0,1fr);}
-  .pil-trx-cote1>.pil-trx-wide{grid-column:1;grid-row:1;}
-  .pil-trx-cote2>.pil-trx-wide{grid-column:1;grid-row:1;}
-  .pil-trx-cote2>.pil-trx-cuve{grid-column:2;grid-row:1;}
-  .pil-trx-cote2>.pil-trx-rev{grid-column:1/-1;grid-row:2;}
-  .pil-trx.pil-trx-paire{grid-template-columns:repeat(2,minmax(0,1fr));}
-}
+/* MOTS-9 (§592) : la grille de la section « Pour finir les travaux tracteur en cours » (.pil-trx, cote1/cote2/paire), le grand
+   chiffre de la cuve (.pil-trx-v/-vu) et .pil-trx-axl sont partis avec la section — ses trois cartes sont une carte repliée de L'équipe & le matériel (pilotage.css, .pil-eq). */
 .pil-trx-job{display:grid;grid-template-columns:minmax(140px,1.1fr) 2fr 64px 64px;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);color:var(--texte-doux);}
 .pil-trx-hd{font-size:var(--pt-nano,9.5px);letter-spacing:0;text-transform:none;font-weight:600;border-top:0;margin-top:12px;padding-bottom:4px;}
-.pil-trx-axl{border-top:0;padding-top:0;}
 .pil-trx-nm{min-width:0;}
 .pil-trx-nm b{display:block;font-size:var(--pt-base,14px);color:var(--texte);font-weight:600;}
 .pil-trx-nm span{display:block;}
@@ -2336,9 +2319,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-trx-leg i.g{background:none;border-left:2px dashed var(--orange);width:0;height:12px;}
 .pil-trx-go{margin-top:12px;}
 .pil-trx-casc{margin-top:8px;}
-/* GNR-2 : le chiffre de la cuve en grand, sa phrase à côté — même patron que le Renfort (.rf2-v / .rf2-vu). */
-.pil-trx-v{display:flex;gap:var(--e-1,4px) var(--e-3,12px);align-items:baseline;flex-wrap:wrap;}
-.pil-trx-vu{font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);}
 .pil-trx-cs{display:grid;grid-template-columns:minmax(96px,min(40%,176px)) minmax(0,1fr) 56px;gap:8px;align-items:center;padding:4px 0;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
 .pil-trx-cs .l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pil-trx-cs.tot .l,.pil-trx-cs.tot .v{color:var(--texte);font-weight:600;}
@@ -8695,7 +8675,6 @@ html .ck-agr-voile{ background:var(--voile); }
 
 /* La consommation mesurée : une ligne par tracteur, l'échelle sous la piste */
 .pil-cso{display:flex;flex-direction:column}
-.pil-cso-msg{margin:0 0 8px;font-size:var(--pt-txt,13px);line-height:1.5;color:var(--texte-med)}
 .pil-cso-l{list-style:none;margin:0;padding:0}
 .pil-cso-r,.pil-cso-axr{display:grid;grid-template-columns:minmax(88px,150px) minmax(0,1fr) minmax(104px,auto);align-items:center;gap:4px 16px}
 .pil-cso-r{padding:8px 0;border-top:1px solid var(--ligne,#ECE6DA)}
@@ -8724,8 +8703,6 @@ html .ck-agr-voile{ background:var(--voile); }
   .pil-cso-axr{grid-template-columns:minmax(0,1fr)}
   .pil-cso-axr>span:not(.pil-cso-ax){display:none}
 }
-/* La tension par personne, rangée sous les présences dans L'équipe & le matériel */
-.pil-tension-det{margin-top:16px}
 
 [data-taille="large"] .ck-gt{grid-template-columns:minmax(260px,4.3fr) minmax(0,6.8fr) minmax(280px,3.7fr)}
 [data-taille="moyen"] .ck-gt{grid-template-columns:minmax(0,1fr) minmax(280px,340px)}

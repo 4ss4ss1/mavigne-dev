@@ -555,3 +555,56 @@ Le **zoom par campagne** et tout ce qui le servait : « La campagne » dans la b
 - ⚠️ **La pastille du Pilotage ne montrait pas la consultation** : depuis TETE-4C, `body .mod-header .hv2-saison-pill` la repeint en gris avec `!important` ; la marque `.consult` ne gagnait pas. Il faut la reprendre au même niveau (`pilotage.css`).
 - ⚠️ **Une campagne « finie » se lit sur SA fin**, pas sur l’objectif : le prototype comparait l’objectif à aujourd’hui ; un objectif avancé par l’administrateur aurait fait dire « terminée » à une campagne en cours.
 - ⚠️ `index.html`, `app.js`, `CLAUDE.md` et le journal se modifient par l’outil d’édition (le garde de confidentialité refuse le shell sur eux) ; la version affichée se vérifie dans le navigateur (la page servie, comptée) — le cinquième affichage est `boot.js?v=`.
+
+## 592. ★★★ MOTS-9 — PILOTAGE › L’ÉQUIPE & LE MATÉRIEL ALLÉGÉ SUR PLACE : LES MÊMES CARTES, MOINS DE MOTS (18/11 — `src/pilotage.js` · `src/pilotage.css` · `src/styles.css` · `src/utils.js` · `src/whats-new.js` · `index.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-mots9.mjs`)
+
+**La demande.** « suite » après PORTEE-1 : le lot suivant du plan (§28, « ★ RANGEMENT ADMIN », décision du 17/11) — L’équipe & le matériel reste dans le Pilotage et s’allège sur place, comme Travaux (§590). Maquette d’abord, en captures de l’appli et du prototype qui tourne : `docs/maquettes/maquette-equipe-materiel-v1.html` (téléphone et ordinateur, Avant / Après, chaque carte ouverte). Nico (18/11) : « Go avec tes recommandations. » — ① les trois grandes cartes du tracteur en **une** carte ; ② « Tracteurs » = le nombre de tracteurs, la révision la plus proche dessous, une révision dépassée dans la phrase du haut ; ③ « Renfort » et « Équipe au pic » gardés tous les deux, le renfort écrit son année.
+
+### 592a. Mesuré avant de proposer (démo au 27/10, cliquet des mots sur le build)
+
+- **254 mots au téléphone, 259 sur ordinateur** ; 3 phrases de 15 mots et plus ; 6 mots hors lexique (« actifs », « présences », « au champ », « à trouver », « pour finir »…). Hauteur : 2 976 px au téléphone, 2 132 px sur ordinateur.
+- La section « **Pour finir les travaux tracteur en cours** » : trois grandes cartes ouvertes (les travaux, la révision, « Gasoil après les travaux »), chacune son grand titre-phrase. **« 255 L » s’écrivait trois fois** (la tuile Cuve GNR, le grand chiffre de « Gasoil après les travaux », son graphique).
+- La **tension** : une carte ouverte en grand sous trois titres (« Tension de l’équipe — détail », « Les 14 derniers jours », « 14 derniers jours · … ») et une phrase de méthode.
+- « Consommation mesurée » : un paragraphe de 36 mots à demeure quand rien n’est mesuré, et un tiret pour chiffre.
+
+### 592b. Ce qui change
+
+- **Une phrase en haut** (`_pilEqPhrase`, à la place du sous-titre, comme Travaux) : les présents du jour, la tension, la cuve sous le seuil, une révision dépassée — les mots et les nombres du cockpit (« 4/4 présents », « 2 personnes au seuil », « 1 au-delà du maximum »). Rien qui presse : la phrase s’arrête à l’équipe.
+- **Toutes les cartes restent, repliées, à leur place** (`_pilTabEqu` remplace `_pilTabPrs` et `_pilTabMat`) ; chacune tient en un titre, un chiffre, une pastille ; le détail au toucher ; un bouton « Ouvrir » vers le module où l’on agit (`_pilTvBtn` → `_pilTvGo` : l’équipe, l’entretien et le renfort par les chemins de `_pilGo`, le tracteur et le planning par `goTo`).
+  - **Personnel** : « Équipe » (le nombre ; la composition au toucher), « Présents » (« 4/4 » et « au complet » / « N absent(s) »), « Équipe au pic » (le nom, le chiffre et la pastille de la tuile de Travaux — `_pilPicPortee` ; au toucher, le disponible et le nécessaire sur **la même échelle**), « Tension » (`_pilPanelTension` : le chiffre du cockpit « N au seuil », la pastille « N au-delà du maximum », une ligne par personne au toucher), « Renfort » (son année écrite : « exercice 2026–2027 · jusqu’au 28 févr. »).
+  - **Matériel** : « Tracteurs » (le nombre, « révision dans 18 h · New Holland » dessous), « Cuve GNR » (le niveau en chiffre, « sous le seuil » en pastille, **le seuil posé sur la barre** ; au toucher, la cascade « Après les travaux en cours », seulement quand un travail a des litres à compter), « Consommation » (le chiffre mesuré, ou le réglage — celui que prennent tous les calculs de carburant — avec sa pastille), « **Travaux tracteur en cours** » (`_pilPanelTrx` : « N en cours », « reste X h · Y L » ; au toucher, chaque travail et l’entretien qui tombe dedans, dont la pastille monte sur le chiffre quand elle n’est pas verte).
+- **Les morceaux de l’ancienne section** sont calculés UNE fois (`_pilTrxParts`) pour la carte des travaux et la cuve : mêmes calculs qu’avant (`_pilGmTravaux`, `_pilGmRevision`, la cascade GNR-2). « 255 L » s’écrit une fois.
+- **La méthode passe dans le « i »** : `pil.tens` (neuve — pas `pil.tension`, fiche de l’ancien Aujourd’hui retirée au §441 et épinglée absente par `pilrange1`), `pil.trxrev` fondue dans `pil.trx`, `pil.trxgnr` dans `pil.gnr`, le paragraphe de 36 mots dans `pil.conso`. Titres des fiches renommés comme leurs cartes. `MV_AIDE` : une ligne « L’équipe & le matériel se lit d’un coup d’œil ».
+- Les cases « Afficher dans cet onglet » prennent les noms des cartes (mêmes clés : les choix mémorisés restent) ; tension, consommation et travaux arrivent repliés.
+
+### 592c. Vu en route, corrigé dans le lot
+
+- **« reste 0,0 h · 0 L »** pour un travail sans barème (la démo : un griffage lancé, sans barème) — la carte dit « 1 sans barème », jamais un zéro qu’on ne sait pas compter ; la révision de même (« 0,0 h en cours sur ce tracteur » → « 1 sans barème »).
+- **La date de l’entretien** se perdait quand un travail l’atteignait (la pastille ne la disait pas) : elle reste sous la carte, sauf quand la pastille la dit déjà (`etatDate`).
+- **Le pointillé du traitement conseillé** (TRAIT-CUVE §221) gardait ses lignes mais avait perdu leur raison : « En pointillé : » les parcelles à nu ou presque, la fenêtre, les heures sur le domaine et leur source (barème ou cadence mesurée) reviennent sous la cascade.
+
+### 592d. Ce qui part (mesuré : personne d’autre ne le lisait)
+
+`_pilTabPrs`, `_pilTabMat`, `_pilCardTension`, `_pilCkTracteur`, `_pilAnyShow` (le preflight l’a trouvée sans appelant) ; les fiches `pil.trxrev`, `pil.trxgnr` ; dans `styles.css`, la grille de l’ancien bloc (`.pil-trx`, `-cote1`, `-cote2`, `-paire`), `.pil-tension-det`, `.pil-trx-v`, `.pil-trx-vu`, `.pil-trx-axl`, `.pil-cso-msg` (1 040 380 → 1 038 586 octets). Le reste du style des cartes allégées vit dans `pilotage.css` (bloc MOTS-9, sous `.pil-eq`).
+
+### 592e. Mesuré après (build, démo au 27/10)
+
+- Cliquet des mots : **254 → 64 mots au téléphone, 259 → 64 sur ordinateur** ; phrases de 15 mots 3 → 0 ; hors lexique 6 → 0. ★ « Mots avant le premier grand chiffre » au téléphone **5 → 11** (la phrase du haut, validée sur la maquette ; sous l’objectif de 15) — hausse acceptée par écrit dans la référence ; sur ordinateur 11 → 0.
+- Hauteur : **2 976 → 1 401 px** au téléphone, **2 132 → 918 px** sur ordinateur. Aucune erreur de page, chaque carte ouverte une à une (téléphone, ordinateur).
+
+### 592f. Harnais
+
+`scripts/mv-harnais-mots9.mjs` (26 assertions, 32 contre-épreuves) : l’ordre des cartes et les intertitres ; la phrase (les mots du cockpit, la cuve, la révision, « au-delà du maximum » plutôt que « au seuil ») ; chaque carte jouée (titre, chiffre, pastille, bouton) ; « 255 L » une fois ; le seuil sur la barre ; « reste 0,0 h » jamais ; les replis par défaut ; « Voir le détail » du cockpit déplie la tension ; ce qui est parti ; l’aide, le guide, l’annonce, le service worker, la maquette, la liste.
+
+**Harnais adaptés** : `gnr2` (**réécrit** — la grille qu’il tenait est partie ; il tient ce qui reste de sa raison : la cascade garde sa barre sur le plus petit téléphone, la ligne d’un travail rétrécit, la grille morte ne revient pas), `gnr-mesure` (le rendu joué est celui des deux cartes ; la carte dit le sans-barème ; le pointillé dit pourquoi), `tension` (la carte repliée), `pilrange1` (`_pilTabEqu`), `pilrange2b`, `pilrange4a` (★ une ligne de `_PIL_PERSO_DEFS` doit finir par `]],` : un commentaire en bout de ligne la rendait invisible au harnais — il est passé au-dessus), `annee`, `mots3`, `mots8` (le mutant de l’aide visait la première phrase « « Ouvrir » mène au module… », désormais celle de L’équipe), `portee1` (la phrase « Il manque environ… » est partie ; les versions « au moins »), `compt1` (« révision dans »), `compt7` (la révision est un morceau de `_pilTrxParts` ; la date gardée), `pro1`.
+
+### 592g. Restes, à leur lot
+
+- « Équipe au pic » ouverte dit « Disponible 10 pers. » la semaine du pic, sur la démo où l’équipe compte 4 personnes : le même chiffre qu’avant le lot (`_pilDispoSem`, règle ②) — **pas vérifié** ici s’il est juste ; à regarder à part.
+- Les restes du §591f ne bougent pas : « ≈ » de la Cave, l’avis `_zoomAilleurs` du Paramétrage, l’écriture de la configuration à l’ouverture de Conformité.
+
+### 592h. Leçons
+
+- ⚠️ **Une ligne de table « à cases » se lit à la regex** (`pilrange4a`) : un commentaire en bout de ligne la fait disparaître du harnais, et ses neuf clés passent pour des défauts orphelins. Le commentaire va au-dessus.
+- ⚠️ **Rejouer la démo carte par carte**, ouverte : le zéro d’un travail sans barème ne se voit qu’ouvert, sur une donnée réelle — aucun harnais ne l’avait.
+- ⚠️ **Une clé de fiche retirée reste retirée** : reprendre `pil.tension` pour une carte neuve aurait fait mentir l’épinglage du §441. Un nom neuf (`pil.tens`).

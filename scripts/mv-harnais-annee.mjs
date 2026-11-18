@@ -92,16 +92,17 @@ function verifier(PIL, UTI) {
   // PIL-RANGE-2b (§444) : l'onglet L'année est rangé — avis et budget en tête de la Synthèse d'Économie (_pilAnEcoHtml),
   //   renfort dans Équipe & matériel › Personnel ; un onglet « an » mémorisé migre vers Économie.
   const tab = corps(NC, '_pecViewSynthese');   // MOTS-1 (§582) : l'année est une des trois tuiles repliées de la Synthèse (_pilAnEcoHtml n'existe plus)
-  t('③ L’année rangée : avis et budget dans la Synthèse d’Économie (une tuile repliée), renfort dans Personnel, « an » migre vers « eco »', /_pilAnAvisHtml\(\)/.test(tab) && /_pilPanelAnBudget\(avis\)/.test(tab) && /else body=_pecViewSynthese\(E,TL\);/.test(NC) && /_pilShow\('an_frise'\)\?'<div class="pil-panels">'\+_pilPanelAnRenfort\(\)/.test(NC) && /an:'eco'/.test(NC) && !/function _pilTabAn\(/.test(NC));
+  t('③ L’année rangée : avis et budget dans la Synthèse d’Économie (une tuile repliée), renfort dans Personnel, « an » migre vers « eco »', /_pilAnAvisHtml\(\)/.test(tab) && /_pilPanelAnBudget\(avis\)/.test(tab) && /else body=_pecViewSynthese\(E,TL\);/.test(NC) && /if\(_pilShow\('an_frise'\)\) P\+=_pilPanelAnRenfort\(\);/.test(corps(NC, '_pilTabEqu')) && /an:'eco'/.test(NC) && !/function _pilTabAn\(/.test(NC));
   t('③ « Deux façons de compter » et la frise du pic ont quitté le module', !/function _pilDeuxCadresHtml\(/.test(NC) && !/function _pilPanelEtp\(/.test(NC) && !/function _pilFriseAnneeSvg\(/.test(NC));
   // PORTEE-1 (§591) : le bandeau de Travaux lit la CAMPAGNE (mv-harnais-portee1) ; les chiffres de l'ANNÉE vivent là où l'année
   //   est le sujet — le budget du cadre dans la tuile d'Économie, le renfort de l'année dans Personnel. Ce sont eux qu'on garde ici.
   t('③ le budget du cadre se lit dans sa carte (Économie), le renfort de l\'année dans la sienne (Personnel)', /B=_pilAnBudgetData\(\);/.test(corps(NC, '_pilPanelAnBudget')) && /R=_pilAnRenfortData\(\);/.test(corps(NC, '_pilPanelAnRenfort')));
   t('③ le renfort de l\'année lit les fenêtres de manque, pas le pic', /var F=R\.fen,/.test(corps(NC, '_pilPanelAnRenfort')) && !/function _pilPhotoEffAn\(/.test(NC));
   t('③ la ligne de l\'année nomme le cadre (plus X.debut, qui n\'existe pas) — PORTEE-1 : sur Économie › Le détail', /_pilAnCadre\(\)/.test(corps(NC, '_pilCrumbAnnee')) && !/X\.debut/.test(corps(NC, '_pilCrumbAnnee')));
-  t('③ la carte du renfort mène à Décider par un BOUTON', /<button type="button" class="pil-diag-go" data-diag="renfort">/.test(corps(NC, '_pilPanelAnRenfort')));
+  // MOTS-9 (§592) : le bouton est celui des cartes allégées (« Simuler un renfort », _pilTvBtn → _pilTvGo → _pilGo('renfort')).
+  t('③ la carte du renfort mène à Décider par un BOUTON', /_pilTvBtn\('renfort','Simuler un renfort'\)/.test(corps(NC, '_pilPanelAnRenfort')) && /cible==='renfort'\)\{ window\._pilGo\(cible\)/.test(corps(NC, '_pilTvGo')));
   t('③ les sélecteurs passent par la portée (la barre : data-portee → _pilPorteeChoisir → _pilCadreSet ; les flèches : data-anrecul → _pilReculSet)', /\[data-portee\]/.test(NC) && /\[data-anrecul\]/.test(NC) && /_pilCadreSet\(m==='vig'\?'vig':'exo'\)/.test(NC) && /_pilReculSet\(/.test(NC));
-  t('③ « an_cadres » n\'est plus un indicateur, « an_frise » porte le renfort', !/\['an_cadres',/.test(NC) && /\['an_frise','Le renfort/.test(NC));
+  t('③ « an_cadres » n\'est plus un indicateur, « an_frise » porte le renfort', !/\['an_cadres',/.test(NC) && /\['an_frise','Renfort'\]/.test(NC));
   t('③ l\'ancre du constat « vendange à cheval » existe toujours', /id="pil-an-cadres"/.test(NC) && /cible:'an_cadres'/.test(NC));
   // ④ les fiches
   const cles = ['pil.cadres', 'pil.an.budget', 'pil.an.renfort'];
@@ -120,8 +121,8 @@ if (CONTRE) {
     ['« Deux façons de compter » revient', 'P', 'function _pilAnAvisHtml(){', "function _pilDeuxCadresHtml(ann){ return ''; }\nfunction _pilAnAvisHtml(){"],
     ['le fil d\'Ariane relit X.debut', 'P', 'CA=_pilAnCadre();', 'CA=null; var X={}; X.debut;'],
     ['les amendements prévus sans mois', 'P', 'byM[_kp].achP+=', 'byM[_kp].achX+='],
-    ['le bouton vers Décider retiré', 'P', '<button type="button" class="pil-diag-go" data-diag="renfort">', '<button type="button" class="pil-diag-go" data-diag="rien">'],
-    ['le renfort de l\'année revient au pic', 'P', 'var F=R.fen, src=', 'var F=R.pic, src='],
+    ['le bouton vers Décider retiré', 'P', "_pilTvBtn('renfort','Simuler un renfort')+'</div>';\n  return _pilTile('anrenfort'", "_pilTvBtn('rien','Simuler un renfort')+'</div>';\n  return _pilTile('anrenfort'"],
+    ['le renfort de l\'année revient au pic', 'P', 'var F=R.fen, stat', 'var F=R.pic, stat'],
     ['la fiche du renfort disparue', 'U', "'pil.an.renfort': { t:", "'pil.an.renfortX': { t:"],
   ];
   let ok = 0;

@@ -72,6 +72,13 @@
    "date": "2026-11-18",
    "motif": "PORTEE-1 (§591) : « Vous regardez » ne reste que sur Économie › Le détail ; une ligne de la campagne sur Travaux, L'équipe & le matériel et Décider ; le bandeau de Travaux en deux tuiles de la campagne",
    "hausses": []
+  },
+  {
+   "date": "2026-11-18",
+   "motif": "hausse acceptée — MOTS-9 (§592) : L'équipe & le matériel allégé sur place (254 → 64 mots au téléphone) ; au téléphone, la phrase du haut (présents, tension, cuve — validée sur la maquette) passe avant le premier grand chiffre : 5 → 11 mots, sous l'objectif de 15",
+   "hausses": [
+    "Pilotage › L’équipe & le matériel › téléphone › avant : 5 → 11"
+   ]
   }
  ],
  "mesures": {
@@ -275,10 +282,10 @@
     "lex": 2
    },
    "Pilotage › L’équipe & le matériel": {
-    "mots": 254,
-    "p15": 3,
-    "avant": 5,
-    "lex": 6
+    "mots": 64,
+    "p15": 0,
+    "avant": 11,
+    "lex": 0
    },
    "Pilotage › Décider": {
     "mots": 378,
@@ -553,10 +560,10 @@
     "lex": 2
    },
    "Pilotage › L’équipe & le matériel": {
-    "mots": 259,
-    "p15": 3,
-    "avant": 11,
-    "lex": 6
+    "mots": 64,
+    "p15": 0,
+    "avant": 0,
+    "lex": 0
    },
    "Pilotage › Décider": {
     "mots": 378,

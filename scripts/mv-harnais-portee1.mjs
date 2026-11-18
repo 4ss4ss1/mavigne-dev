@@ -163,7 +163,9 @@ function suite(S) {
   const reste = partis.filter((k) => P.includes(k));
   T('⑤ le zoom par campagne est parti : ses puces, sa liste, son alias _PIL_ETPSEL, l’avertissement de la Conformité', reste.length === 0, reste.join(', '));
   T('⑤ « ≈ » quitte le Pilotage (U+2248 hors de la police) : « environ », ou rien quand l’étiquette dit déjà « probable »',
-    !/\\u2248|≈/.test(P) && P.includes("(nH?'environ\\u00a0'+_dzMin(moy):'\\u2014')") && P.includes("(manque>0.1?('Il manque environ <b"));
+    // MOTS-9 (§592) : la phrase « Il manque environ N personnes cette semaine-là… » de « Équipe au pic » est partie (le chiffre
+    //   et la pastille la disent) ; elle ne revient pas avec « ≈ ».
+    !/\\u2248|≈/.test(P) && P.includes("(nH?'environ\\u00a0'+_dzMin(moy):'\\u2014')") && !/Il manque \\u2248|Il manque ≈/.test(P));
 
   // ⑥ l'aide, le guide, l'annonce, les versions, la maquette, la liste
   T('⑥ l’aide : « Choisir la campagne » (la pastille), « Chaque écran dit ce qu’il compte », la fiche « i » de Le détail',
@@ -174,8 +176,10 @@ function suite(S) {
   const iW = S.wn.indexOf("{ v: '11.19'");
   T('⑥ l’annonce 11.19, pour l’administrateur seulement', iW > 0 && iW < S.wn.indexOf("{ v: '11.18'") && S.wn.slice(iW, S.wn.indexOf("{ v: '11.18'")).includes("pour: ['admin']")
     && S.wn.includes("titre: 'Pilotage\\u00a0: la campagne se choisit à la pastille du haut'"));
-  T('⑥ les versions : APP 11.19 (et l’affichage), SW 12.10 qui dit le lot', /APP_VERSION = '11\.19'/.test(S.uti) && S.idx.includes('Ma Vigne v11.19')
-    && S.sw.includes("const CACHE_NAME   = 'mavigne-v12.10';") && S.sw.includes('// v12.10 (18/11/2026) — PORTEE-1 (§591)'));
+  // MOTS-9 (§592) : les lots suivants montent les versions — 11.19 au moins, partout la même ; le changelog du SW garde la ligne du lot.
+  const appV = (S.uti.match(/APP_VERSION = '([\d.]+)'/) || [])[1] || '0';
+  T('⑥ les versions : APP 11.19 au moins (et l’affichage), le SW dit le lot', Number(appV) >= 11.19 && S.idx.includes('Ma Vigne v' + appV)
+    && /const CACHE_NAME   = 'mavigne-v12\.\d+';/.test(S.sw) && S.sw.includes('// v12.10 (18/11/2026) — PORTEE-1 (§591)'));
   T('⑥ la maquette est rangée et citée', S.maq.length > 100000 && S.maq.includes('Vous regardez') && S.maq.includes('Choisir une campagne') && S.lm.includes('maquette-vous-regardez-v1.html'));
   T('⑥ la liste joue ce fichier et ses contre-épreuves', S.liste.includes("['node scripts/mv-harnais-portee1.mjs']") && S.liste.includes("['node scripts/mv-harnais-portee1.mjs --contre']"));
   return out;

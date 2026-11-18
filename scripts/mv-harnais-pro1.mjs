@@ -20,7 +20,9 @@ function conso(S, cas) {
     _pilGmFr: (v, d) => (Number(v) || 0).toFixed(d == null ? 1 : d).replace('.', ','),
     _pilEsc: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'),
     _pilStat: (v, u) => '<span class="st">' + v + u + '</span>', _pilTile: (id, c, t, st, sub, x, body) => '<div class="tuile">' + st + '<p>' + sub + '</p>' + body + '</div>',
-    _pilGmConso: tid => JSON.parse(JSON.stringify(cas[tid])) };
+    _pilGmConso: tid => JSON.parse(JSON.stringify(cas[tid])),
+    // MOTS-9 (§592) : la carte porte une pastille (mesurée / réglage) et un bouton vers l’entretien.
+    _pilPhPl: (t, c) => '<span class="pl ' + (c || '') + '">' + t + '</span>', _pilTvBtn: (c, l) => '<button data-tvgo="' + c + '">' + l + '</button>' };
   vm.createContext(ctx); vm.runInContext(fnDe(S.pil, 'function _pilPanelConso(d){'), ctx);
   return ctx._pilPanelConso({ tracs: Object.keys(cas).map(id => ({ id, nom: id.toUpperCase() })) });
 }
@@ -40,7 +42,8 @@ function jouer(S) {
   T('l’objectif se règle (plus de message de démonstration)', !S.vue.includes('data-toast=') && S.vue.includes('data-fn="objectif"')
     && S.pil.includes('window._pilObjectifRegler=function(iso){') && S.pil.includes('if(!_pilObjectifSet(iso)) return false;'));
   T('« Voir le détail » mène à la tension par personne, qui existe dans L’équipe', S.vue.includes('data-fn="tension"')
-    && S.pil.includes("if(cible==='tension'){") && /function _pilTabPrs\(d\)\{[\s\S]*?_pilCardTension\(d\)[\s\S]*?id="pil-tension-det"/.test(S.pil));
+    // MOTS-9 (§592) : la tension est la carte repliée « Tension » de L’équipe ; « Voir le détail » la déplie et la fait clignoter.
+    && S.pil.includes("if(cible==='tension'){") && fnDe(S.pil, 'function _pilTabEqu(d){').includes('P+=_pilPanelTension(d);') && S.pil.includes("_PIL_STATE.collapsed.tension=0;") && S.pil.includes(".pil-tile[data-pid=\"tension\"]"));
   T('la protection restante vit dans Conformité', /function _pilTabCfm\(d\)\{[^]*?_pilProtCarte\(\)/.test(S.pil.slice(S.pil.indexOf('function _pilTabCfm(d){'), S.pil.indexOf('function _pilTabCfm(d){') + 900)));
   // ③ Le modèle : la tâche du moment lue avec la période et les tâches, par le même appel que la tuile
   const mod = fnDe(S.pil, 'function _pilCk2Modele(d, m){');
@@ -68,7 +71,9 @@ function jouer(S) {
   T('un dépliage fait à la main tient malgré la reconstruction de la barre', S.coq.includes('if (manuel !== null) return manuel;') && S.coq.includes('if (garder) manuel = !!on;'));
   // ⑧ La consommation mesurée, exécutée
   const P0 = conso(S, { a: VIDE, b: VIDE, c: VIDE });
-  T('sans aucun plein mesurable : une phrase, et ni piste ni échelle', P0.includes('pil-cso-msg') && P0.includes('pil-cso compact') && (P0.match(/pil-cso-r sans/g) || []).length === 3);
+  // MOTS-9 (§592) : la phrase (36 mots) est dans le « i » ; sans mesure, le chiffre de la carte est le réglage, et il le dit.
+  T('sans aucun plein mesurable : le réglage en chiffre, « réglage » en pastille, ni piste ni échelle', !P0.includes('pil-cso-msg') && P0.includes('<span class="st">6,0 L/h</span><span class="pl ">réglage</span>')
+    && P0.includes('<p>pas encore mesurée</p>') && P0.includes('pil-cso compact') && (P0.match(/pil-cso-r sans/g) || []).length === 3);
   T('plus la ligne trois fois répétée « pas assez de pleins : réglage … utilisé »', !/pas assez de pleins : réglage/.test(P0));
   const mes = { iv: [{ d: '2026-09-20', l: 60, h: 8, lh: 7.5 }, { d: '2026-10-01', l: 70, h: 9, lh: 7.78 }], L: 130, H: 17, Hc: 12, nOk: 2, nEc: 0, nSans: 0, lh: 130 / 17, ok: true };
   const P1 = conso(S, { a: mes, b: VIDE });
@@ -101,7 +106,8 @@ if (CONTRE) {
     ['Ctrl K repropose « Simuler »', 'coq', "['sim', 'Décider']", "['sim', 'Simuler']"],
     ['l’échelle de la consommation répartie à la largeur du texte', 'pil', "ax+='<span style=\"left:'+pc(k)+'\">'", "ax+='<span>'"],
     ['le coût de l’heure redevient brut (quatorze décimales)', 'vue', "const tauxH = v => Number(v || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 })", "const tauxH = v => String(v"],   // AUJ-7 : la note de la main-d'œuvre passe par tauxH
-    ['la tension par personne quitte L’équipe', 'pil', "if(_tc) H+='<div class=\"pil-tension-det\" id=\"pil-tension-det\">'+_tc+'</div>';", ''],
+    ['la tension par personne quitte L’équipe', 'pil', "  if(_pilShow('auj_tension')) P+=_pilPanelTension(d);\n", ''],
+    ['« Voir le détail » ne déplie plus la tension', 'pil', "_PIL_STATE.collapsed.tension=0;", ''],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

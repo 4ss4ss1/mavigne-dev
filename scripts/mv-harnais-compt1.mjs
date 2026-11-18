@@ -95,7 +95,7 @@ function jouer(S) {
     S.tr.includes("var _k=(typeof _trCompteur==='function')?_trCompteur(t):null, comp=_k?") && S.tr.includes("sub=(reste<0?'R\\u00e9vision d\\u00e9pass\\u00e9e de '+_gnrNum(-reste)+' h'"));
   t('⑤ l’accueil, le rapport de saison et le Pilotage lisent l’estimé ; plus de « dans −n h » au rapport, à la liste et à la tuile',
     S.app.includes('window._trCompteur(tc)') && S.app.includes("(reste<0?'r\\u00e9vision d\\u00e9pass\\u00e9e de '+(-reste)+' h'") && S.pil.includes('window._trCompteur(t)')
-    && S.pil.includes("(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))") && S.pil.includes("(_pr.revReste<0?'révision dépassée de '+_pilNum(-_pr.revReste):'prochaine révision dans '+_pilNum(_pr.revReste))"));
+    && S.pil.includes("(t.revReste<0?'Révision dépassée de '+_pilNum(-t.revReste):'Révision dans '+_pilNum(t.revReste))") && S.pil.includes("(_pr.revReste<0?'révision dépassée de '+_pilNum(-_pr.revReste):'révision dans '+_pilNum(_pr.revReste))"));   // MOTS-9 (§592) : « révision dans … » sous « Tracteurs »
   t('⑤ la feuille d’index.html : douze touches, « Valider » éteint au départ, « Pas devant le tracteur »',
     (S.html.match(/onclick="_relTouche\(/g) || []).length === 12 && S.html.includes('id="rel-ok" onclick="_relValider()" disabled') && S.html.includes('onclick="_relPlusTard()">Pas devant le tracteur</button>'));
   const ex = (JSON.parse(S.couv).exempts) || {};

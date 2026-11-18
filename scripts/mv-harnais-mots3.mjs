@@ -103,7 +103,8 @@ function suite(S) {
   const att = sansCom(fnDe(S.pil, 'function _pecBandeAttente(E){'));
   T('④ la bande des heures sans validation mène au Journal, et le montant ne se coupe pas', /'<button class="pil-diag-go ghost" data-diag="journal">Journal ›<\/button>'\);/.test(att) && /<span style="white-space:nowrap">· '\+_pilEsc\(_ecoEur\(E\.reAttE\)\)\+'<\/span>'/.test(att));
   T('④ … la porte connaît le Journal', /^  journal:   \['journal',null,null\],/m.test(S.pil));
-  const def = ligne(S.pil, '  collapsed:{echeances:1,'), ico = ligne(S.pil, "  ift:'pulverisateur',dre:'goutte',");
+  // MOTS-9 (§592) : la ligne des défauts commence désormais par les tuiles de L'équipe & le matériel (tension, conso, trx).
+  const def = ligne(S.pil, '  collapsed:{'), ico = ligne(S.pil, "  ift:'pulverisateur',dre:'goutte',");
   T('④ les trois tuiles arrivent repliées (un état déjà mémorisé prend le défaut pour une clé neuve)', /ecotemps:1,ecoecart:1,ecotab:1,/.test(def) && /o\[k\]=\(cur&&cur\[k\]!==undefined\)\?\(cur\[k\]\?1:0\):d\[k\];/.test(S.pil));
   T('④ … et ont leur icône', /ecotemps:'balance',ecoecart:'graphique',ecotab:'liste'\};/.test(ico));
   T('④ le style : deux colonnes dès 881 px, la liste à 1,5 pour 1 ; une tuile seule prend la largeur ; quatre chiffres deux par deux', /'@media\(min-width:881px\)\{\.pec-g2\{grid-template-columns:1fr 1fr\}\.pec-g2\.pec-g21\{grid-template-columns:minmax\(0,1\.5fr\) minmax\(0,1fr\)\}\}'/.test(S.pil) && /'\.pil-panels\.pec-p1\{grid-template-columns:1fr\}'/.test(S.pil) && /'\.pec-kpis\.pec-k2\{grid-template-columns:1fr 1fr\}'/.test(S.pil));

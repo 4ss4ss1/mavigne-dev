@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.20', d: '2026-11-18', items: [   // MOTS-9 (§592) : Pilotage › L'équipe & le matériel allégé sur place — toutes les cartes restent, repliées
+    { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Pilotage, L’équipe et le matériel\u00a0: les mêmes cartes, moins de mots',
+      desc: "L’onglet garde toutes ses cartes, à leur place. En haut, une phrase\u00a0: les présents du jour, les personnes au seuil, la cuve sous le seuil. Chaque carte arrive repliée\u00a0: un titre, un chiffre, une pastille\u00a0; touchez-la pour son détail, son bouton «\u00a0Ouvrir\u00a0» mène au planning, à l’équipe ou à l’entretien. «\u00a0Capacité vs charge\u00a0» s’appelle «\u00a0Équipe au pic\u00a0», comme dans Travaux. Les trois grandes cartes des travaux du tracteur n’en font plus qu’une, et le gasoil après les travaux se lit dans la carte de la cuve. Aucun calcul ne change." }
+  ] },
   { v: '11.19', d: '2026-11-18', items: [   // PORTEE-1 (§591) : « Vous regardez » ne reste que sur Économie › Le détail — la campagne se choisit à la pastille
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Pilotage\u00a0: la campagne se choisit à la pastille du haut',
       desc: "La pastille de la campagne, en haut du Pilotage, ouvre maintenant le même menu que dans la Vigne\u00a0: une seule façon de changer de campagne. La ligne «\u00a0Vous regardez\u00a0» ne reste que sur Économie › Le détail, pour choisir l’exercice ou l’année vigne. Travaux, L’équipe & le matériel et Décider rappellent les dates de la campagne et le jour où vous en êtes. Le haut de Travaux montre deux chiffres de la campagne, les mêmes qu’Aujourd’hui\u00a0: l’équipe au pic et le budget. Une campagne passée met la pastille en ambre\u00a0; Aujourd’hui et Travaux en font le bilan au lieu d’une fin prévue." }

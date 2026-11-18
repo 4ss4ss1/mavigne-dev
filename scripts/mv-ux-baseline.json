@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-11-16",
- "base": "d37e055",
+ "date": "2026-11-18",
+ "base": "8a12a5a",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -396,6 +396,15 @@
     "pilotage › ordinateur › c44 : 41 → 37",
     "pilotage › ordinateur › t12 : 56 → 51"
    ]
+  },
+  {
+   "date": "2026-11-18",
+   "base": "8a12a5a",
+   "motif": "MOTS-9 (§592) : L'équipe & le matériel allégé — moins de cibles sous 44 px au Pilotage sur ordinateur",
+   "hausses": [],
+   "baisses": [
+    "pilotage › ordinateur › c44 : 37 → 32"
+   ]
   }
  ],
  "mesures": {
@@ -499,8 +508,8 @@
    "pilotage": {
     "cibles": 68,
     "c24": 0,
-    "c44": 35,
-    "textes": 203,
+    "c44": 36,
+    "textes": 202,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
@@ -619,10 +628,10 @@
     "hauteur": 1309
    },
    "pilotage": {
-    "cibles": 75,
+    "cibles": 70,
     "c24": 0,
-    "c44": 37,
-    "textes": 219,
+    "c44": 32,
+    "textes": 210,
     "t11": 0,
     "t12": 51,
     "chrome": 164,

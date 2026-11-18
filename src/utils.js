@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.19';
+export const APP_VERSION = '11.20';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2975,10 +2975,11 @@ var MV_AIDE = {
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une bulle s’ouvre juste à côté et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Une explication longue commence par l’essentiel : « Lire la suite » déplie le reste dans la même bulle. Touchez ailleurs pour la refermer. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       ['La protection restante', ": sa propre carte, sous la décision du jour : combien de parcelles sont à nu et, pour les 5 plus urgentes, les jours de protection qui restent, d’après le dernier traitement du registre, trois rémanences par mode d’action et la pluie tombée depuis (un contact est à nu dès 20 mm, réglable, Réglages › Pilotage › Conformité). Le bouton montre les autres parcelles. La pousse n’est pas comptée."],
       ['Le coût de l’inaction', ": sous la marge, ce que le retard ajoute en heures et en euros si personne n’est ajouté, d’après le simulateur de renfort. Un modèle, pas une mesure ; le bouton mène à Décider."],
-      ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. La carte du jour donne le verdict et la personne la plus chargée ; la carte du dessous, une ligne par personne. Le bouton ouvre le Planning."],
+      ['L’équipe & le matériel se lit d’un coup d’œil', " : une phrase en haut — les présents du jour, les personnes au seuil, la cuve sous le seuil, une révision dépassée — puis les cartes, repliées : un titre, un chiffre, une pastille. Touchez-en une pour son détail ; son bouton « Ouvrir » mène au module où l’on agit : le planning, l’équipe, l’entretien, le tracteur, Décider."],
+      ['La tension de l’équipe', ": le travail effectif de chacun sur 14 jours, face à ce que le planning prévoyait — jamais face au contrat. Au seuil : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. Aujourd’hui en donne le compte ; dans L’équipe & le matériel, la carte « Tension » le redit et, touchée, montre une ligne par personne. Le bouton ouvre le Planning."],
       ['La tâche prioritaire', ": la priorité du moment fixée par l’administrateur ; sans elle, la seule tâche dans ses dates de travaux. Quand plusieurs tâches se chevauchent, la carte ne choisit pas. L’administrateur y trouve toujours un bouton pour fixer la priorité. Le nombre d’heures ne décide jamais."],
       ['Les petites courbes', ": à côté d’un chiffre du haut, elles montrent ses 14 derniers jours en écart à sa référence, le pointillé. La charge restante et le budget les tiennent d’une photo prise chaque jour à la première ouverture par un administrateur, une fois les données arrivées (60 jours gardés) ; un jour sans ouverture est un trou. La bande va de −30 % à +30 %, la même pour toutes : deux courbes côte à côte se comparent d’un coup d’œil. Le « i » dit ce que chaque point mesure."],
-      ['Les alertes matériel se lisent sur les travaux en cours', ": chaque session tracteur lancée doit couvrir tout le domaine (l’amendement, ses parcelles choisies). Aujourd’hui montre ce qui reste à faire, en heures et en litres, place la prochaine <b>révision</b> dans ces travaux et dit ce qu’il restera dans la <b>cuve</b> une fois tout fini. Un travail terminé disparaît. La consommation de chaque tracteur, mesurée sur vos pleins, est dans L’équipe & le matériel."],
+      ['Les alertes matériel se lisent sur les travaux en cours', ": chaque session tracteur lancée doit couvrir tout le domaine (l’amendement, ses parcelles choisies). Dans L’équipe & le matériel, « Travaux tracteur en cours » dit ce qui reste à faire, en heures et en litres, et la prochaine <b>révision</b> dans ces travaux ; ce qu’il restera dans la <b>cuve</b> une fois tout fini se lit dans « Cuve GNR ». Un travail terminé disparaît. La consommation de chaque tracteur, mesurée sur vos pleins, est dans « Consommation »."],
       ['« Agrandir »', "sur un graphique ouvre le même dessin en grand, à la largeur de l’écran. Les barres d’avancement ont un seul code de couleur : vert fini, doré en cours, orange quand la fenêtre du travail est passée sans qu’il soit fini."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
@@ -3196,7 +3197,7 @@ export const MV_INFO = {
   ] },
 
 
-  'pil.capacite': { t: 'Capacité au pic', p: [
+  'pil.capacite': { t: 'Équipe au pic', p: [
     'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
     'Cette carte montre le <b>pic à venir</b> : la semaine la plus chargée parmi celles qui ne sont pas encore finies. Sur un exercice, le pic est presque toujours la <b>vendange</b> — consultée en septembre, elle est derrière, et on ne recrute pas pour une semaine faite. Le pic de l\u2019exercice reste écrit en bas de la carte, daté et marqué <b>déjà passé</b> ; « Le renfort à prévoir » (Équipe & matériel), lui, le montre toujours en grand, c\u2019est son rôle.',
     'Le <b>nécessaire</b> vient du barème h/ha du domaine appliqué à la <b>surface totale</b> concernée par la tâche — pas à ce qui reste à faire. Il ne baisse donc pas à mesure que le travail avance : c\u2019est un besoin de planification, pas un reste à faire.',
@@ -3616,13 +3617,19 @@ export const MV_INFO = {
     'Le <b>bureau</b> est compté ici, mais <b>pas</b> dans la capacité à la vigne : il ne travaille pas les rangs. C\u2019est pour ça que les deux chiffres diffèrent.'
   ] },
 
-  'pil.presences': { t: 'Présences du jour', p: [
+  'pil.presences': { t: 'Présents', p: [
     'Le compte est celui des personnes <b>au champ aujourd\u2019hui</b> : hors bureau, hors absents. Une équipe collective compte pour son effectif réel. Une personne que le planning ne prévoit pas ce jour-là (week-end, jour sans heures au modèle) n\u2019est comptée ni présente ni absente ; un jour où personne n\u2019est prévu, la carte le dit.',
     'La source est le <b>planning</b>, jamais le journal. Le journal dit qui a travaillé sur quoi ; il ne dit pas combien d\u2019heures ni qui était là.',
     '<b>Ce chiffre ne se compare ni au pic ni à la moyenne</b> affichés ailleurs sur cet écran : ce sont d\u2019autres fenêtres. Le pic peut tomber dans onze mois.'
   ] },
 
-  'pil.tracteur': { t: 'Parc tracteur', p: [
+  // ★ MOTS-9 (§592) : la tension, carte repliée de L’équipe & le matériel — la phrase de méthode de l’ancienne carte, ici.
+  'pil.tens': { t: 'Tension', p: [
+    'Le travail <b>fait</b> par chacun sur les <b>14 derniers jours</b>, face à ce que le <b>planning</b> prévoyait — jamais face au contrat. La source est le planning (les heures saisies et prévues), pas le journal.',
+    '<b>Au seuil</b> : plus de 10 % au-dessus du prévu, ou une semaine au-delà de la moyenne autorisée. <b>Au-delà du maximum</b> : une semaine au-delà du maximum hebdomadaire. Les deux se règlent dans le Planning (les limites légales).',
+    'Chaque ligne : la barre du fait, le trait du prévu, l’écart en pour cent ; la semaine la plus chargée s’écrit quand elle dépasse la moyenne autorisée. Le bureau et les équipes collectives ne sont pas comptés.'
+  ] },
+  'pil.tracteur': { t: 'Tracteurs', p: [
     'Le compte inclut les machines de traitement, signalées « pulvé ».',
     'Les heures avant révision partent du <b>dernier relevé</b> du compteur, plus les heures notées par les sessions depuis (chrono, sinon barème), corrigées par l\u2019écart appris à chaque relevé — la route et le ralenti tournent au cadran sans être notés. Une session oubliée n\u2019avance pas l\u2019estimation : l\u2019échéance paraît plus loin qu\u2019elle n\u2019est, jusqu\u2019au prochain relevé, que Ma Vigne demande une fois par jour.',
     'Une machine <b>en réparation</b> reste dans le parc et dans le compte — elle existe toujours, elle n\u2019est simplement pas disponible. Le nombre en orange à côté du total dit combien.'
@@ -3632,7 +3639,11 @@ export const MV_INFO = {
     'Le niveau est <b>calculé, pas mesuré</b> : appoints de cuve saisis, moins les <b>pleins</b> faits dans les machines. Il n\u2019y a pas de jauge connectée à la cuve. Un plein oublié le fait dériver — pas une session non saisie, qui ne touche jamais le niveau.',
     'Le <b>seuil bas</b> est celui que vous avez réglé dans Tracteur \u203a Entretien, pas une valeur du logiciel.',
     'Le prix au litre est la <b>moyenne pondérée des appoints</b>, arrêtée <b>à la date de chaque plein</b> : un plein de mars ne se valorise pas au prix moyen incluant les livraisons de septembre. Sans aucun appoint, le carburant reste à <b>zéro</b> dans tous les coûts — pas «\u202fà peu près\u202f», à zéro.',
-    'Ces mêmes pleins <b>sont</b> le coût carburant du Pilotage. Un plein non noté n\u2019est pas seulement un niveau de cuve faux : c\u2019est du carburant absent de vos coûts.'
+    'Ces mêmes pleins <b>sont</b> le coût carburant du Pilotage. Un plein non noté n\u2019est pas seulement un niveau de cuve faux : c\u2019est du carburant absent de vos coûts.',
+    '<b>Après les travaux en cours</b> (au toucher, quand un travail a des litres à compter) : le niveau de la cuve, moins les litres qu’il faut pour <b>finir les travaux en cours</b>, travail par travail. La dernière ligne est ce qu’il restera, face à votre seuil (le trait).',
+    'L’échelle part de zéro et va un peu au-dessus du niveau du jour (ou du seuil s’il est plus haut), arrondie : la <b>même pour toutes les lignes</b>. La capacité de la cuve est écrite au-dessus, en clair.',
+    'La consommation est celle du <b>tracteur</b>, pas celle du travail : un griffage et un rognage faits avec la même machine sont comptés au même litre par heure.',
+    'La ligne <b>« conseillé »</b>, en pointillé, n’apparaît que si la protection restante compte des parcelles à nu (ou qui le seront d’ici deux jours) et qu’une fenêtre de traitement existe dans les cinq jours : le traitement de tout le domaine, à la <b>cadence mesurée</b> de l’activité de pulvérisation sur vos propres traitements chronométrés — elle porte votre façon de faire, 4, 6 ou 8 rangs par passage — ou, faute de chrono, à son barème h/ha ; à la consommation de son tracteur. Rien n’est lancé ni compté. Cette ligne est pour l’instant éteinte : elle sera allumée à la belle saison.'
   ] },
 
 
@@ -3667,24 +3678,16 @@ export const MV_INFO = {
     '<b>L’amendement fait exception</b> : ses parcelles sont choisies dans l’apport (Phyto › Fertilisation). Ce qui reste = les parcelles de l’apport qui attendent encore. Il compte dès la création de l’apport, session lancée ou non.',
     'Heures = surface restante × <b>barème h/ha</b> de l’activité. Litres = ces heures × la <b>consommation mesurée</b> du tracteur de la session (sinon son tracteur par défaut) ; le réglage du Tracteur sert tant que la mesure manque. Un travail sans barème affiche un tiret : il n’est pas compté à zéro.',
     'Un travail terminé <b>disparaît</b> : session passée « Terminé », seule à la dernière parcelle ou à la main. Une session oubliée « En cours » compte quand même : elle est signalée quand aucune parcelle n’a été cochée depuis 21 jours.',
-    'Il n’y a pas d’heures de tracteur au planning : le planning porte des heures par personne, jamais une machine. Un travail pas encore lancé n’est donc pas compté.'
-  ] },
-
-  'pil.trxrev': { t: 'L’entretien le plus pressant, dans les travaux en cours', p: [
-    'La carte prend, pour chaque tracteur, l’entretien le plus pressant : la <b>révision</b> (ses heures, et la date de son intervalle) ou un <b>autre entretien</b> réglé dans le Tracteur (vidange, filtres, graissage…). D’abord ce qui est dépassé, aux heures ou à la date ; puis ce qui sera atteint pendant les travaux en cours, ou dû dans les 14 jours ; puis ce qui approche. Les autres en vue sont dits en dessous.',
+    'Il n’y a pas d’heures de tracteur au planning : le planning porte des heures par personne, jamais une machine. Un travail pas encore lancé n’est donc pas compté.',
+    '<b>La révision dans ces travaux</b> (au toucher) : la carte prend, pour chaque tracteur, l’entretien le plus pressant : la <b>révision</b> (ses heures, et la date de son intervalle) ou un <b>autre entretien</b> réglé dans le Tracteur (vidange, filtres, graissage…). D’abord ce qui est dépassé, aux heures ou à la date ; puis ce qui sera atteint pendant les travaux en cours, ou dû dans les 14 jours ; puis ce qui approche. Les autres en vue sont dits en dessous.',
     'Les heures avant la révision (révision moins le compteur estimé : le dernier relevé, plus les heures notées depuis), face aux heures des <b>travaux en cours</b> sur ce tracteur, mis bout à bout dans l’ordre où ils ont été lancés. Le trait rouge tombe dans le travail pendant lequel la révision sera atteinte.',
-    'Le repère en jours vient du <b>rythme mesuré</b> du tracteur : ses heures notées sur les 4 dernières semaines, divisées par les jours ouvrés. Ce n’est pas une date promise.',
+    'Les « environ N jours ouvrés » viennent du <b>rythme mesuré</b> du tracteur : ses heures notées sur les 4 dernières semaines, divisées par les jours ouvrés. Ce n’est pas une date promise.',
     'L’ordre réel des travaux peut différer. Entre deux relevés, le compteur n’avance qu’avec les sessions saisies : une session oubliée rend l’échéance plus lointaine qu’elle n’est, jusqu’au prochain relevé.'
   ] },
 
-  'pil.trxgnr': { t: 'Gasoil après les travaux', p: [
-    'Le niveau de la cuve, moins les litres qu’il faut pour <b>finir les travaux en cours</b>, travail par travail. La barre en bas est ce qu’il restera, face à votre seuil (le pointillé).',
-    'L’échelle part de zéro et va un peu au-dessus du niveau du jour (ou du seuil s’il est plus haut), arrondie : la <b>même pour toutes les lignes</b>. La capacité de la cuve est écrite au-dessus, en clair.',
-    'La consommation est celle du <b>tracteur</b>, pas celle du travail : un griffage et un rognage faits avec la même machine sont comptés au même litre par heure.',
-    'La ligne <b>« conseillé »</b>, en pointillé, n’apparaît que si la protection restante compte des parcelles à nu (ou qui le seront d’ici deux jours) et qu’une fenêtre de traitement existe dans les cinq jours : le traitement de tout le domaine, à la <b>cadence mesurée</b> de l’activité de pulvérisation sur vos propres traitements chronométrés — elle porte votre façon de faire, 4, 6 ou 8 rangs par passage — ou, faute de chrono, à son barème h/ha ; à la consommation de son tracteur. Rien n’est lancé ni compté. Cette ligne est pour l’instant éteinte : elle sera allumée à la belle saison.'
-  ] },
 
-  'pil.conso': { t: 'Consommation mesurée', p: [
+
+  'pil.conso': { t: 'Consommation', p: [
     'Pour chaque tracteur : <b>litres des pleins ÷ heures notées entre ces pleins</b>. Le plein n°2 rembourse ce qui a brûlé depuis le plein n°1 : ses litres se comptent face aux heures notées depuis le jour du plein précédent jusqu’au sien. Le premier plein de la campagne sert de départ.',
     'Les heures viennent des sessions, parcelle par parcelle : la durée <b>chronométrée</b> quand elle existe, sinon la surface × le barème. La part chronométrée est affichée : c’est la fiabilité du chiffre.',
     'La moyenne est <b>pondérée</b> : un plein après 24 heures de travail pèse plus qu’un plein après 4 heures. Chaque point est un intervalle, sa taille dit ses heures.',
@@ -3730,7 +3733,7 @@ export const MV_INFO = {
     'Fermage, amortissements, assurances et frais généraux n’y sont pas : <b>ce n’est pas un compte de résultat</b>.'
   ] },
 
-  'pil.an.renfort': { t: 'Le renfort à prévoir', p: [
+  'pil.an.renfort': { t: 'Renfort', p: [
     'Une <b>photo du jour</b> : avec l’équipe prévue au planning — contrats, horaires de chacun, congés —, combien de personnes manqueront, et quand, pour que les travaux tiennent dans leur fenêtre au barème.',
     'Chaque semaine compare le <b>besoin</b> (les heures de barème de la semaine, ramenées à une personne) à <b>ce que l’équipe peut faire</b> la même semaine. Une semaine où il manque une demi-personne ou plus ouvre une ligne ; les semaines qui se suivent font une seule ligne, avec le manque le plus fort.',
     'L’échelle suit les semaines à venir. Les semaines passées restent en gris ; la vendange, si elle dépasse, est coupée net avec son chiffre.',

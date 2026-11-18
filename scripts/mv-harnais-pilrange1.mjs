@@ -13,6 +13,10 @@
    2. v2 absent ou qui lève → un message, jamais un écran blanc, l'erreur avalée ; plus aucun ancien cockpit appelé ;
    3. _pilTabMat : les cartes du tracteur sous leur titre quand il y a quelque chose à dire, rien (pas même le titre) sinon,
       rien si la case « mat_travaux » est décochée, l'erreur avalée sans perdre les trois panneaux ;
+      ★ MOTS-9 (§592) : _pilTabMat et _pilCkTracteur sont partis ; c'est _pilTabEqu qui est joué. La section est UNE carte
+      repliée (« Travaux tracteur en cours », _pilPanelTrx), posée après les trois panneaux ; l'après-travaux est dans la
+      carte de la cuve. Même contrat : rien quand il n'y a rien à dire, rien si la case est décochée, l'erreur des
+      morceaux (_pilTrxParts) avalée sans perdre les panneaux ; l'intertitre « Matériel » seulement s'il y a des cartes ;
    et lit sur le texte : les fonctions retirées n'existent plus, celles que le v2 lit existent encore, la case est dans
    « Afficher dans cet onglet », les neuf fiches « i » de l'ancien écran sont parties, la liste joue ce fichier.
    ─────────────────────────────────────────────────────── */
@@ -55,14 +59,17 @@ function monterAuj(S, o) {
   vm.createContext(ctx); vm.runInContext(corps(S.pil, '_pilTabAuj'), ctx);
   return { html: ctx._pilTabAuj({}), a, timers };
 }
+// MOTS-9 : _pilTabEqu, les panneaux doublés. _pilTrxParts calcule les morceaux UNE fois pour la carte des travaux et la cuve.
 function monterMat(S, o) {
   const a = {}; const compte = (n) => { a[n] = (a[n] || 0) + 1; };
   const show = Object.assign({ mat_tracteur: true, mat_gnr: true, mat_conso: true, mat_travaux: true }, o.show || {});
   const ctx = { window: { _mvAvale: (e, ou) => compte('_mvAvale:' + ou) }, _pilShow: (k) => !!show[k],
-    _pilPanelTracteur: () => '<i>PARC</i>', _pilPanelGnr: () => '<i>CUVE</i>', _pilPanelConso: () => '<i>CONSO</i>',
-    _pilCkTracteur: () => { compte('_pilCkTracteur'); if (o.leve) throw new Error('panne'); return o.cartes || ''; } };
-  vm.createContext(ctx); vm.runInContext(corps(S.pil, '_pilTabMat'), ctx);
-  return { html: ctx._pilTabMat({}), a };
+    _pilPanelEquipe: () => '', _pilPanelPresences: () => '', _pilPanelCapacite: () => '', _pilPanelTension: () => '', _pilPanelAnRenfort: () => '',
+    _pilPanelTracteur: () => '<i>PARC</i>', _pilPanelGnr: (d, X) => '<i>CUVE' + (X && X.c ? '+APRES' : '') + '</i>', _pilPanelConso: () => '<i>CONSO</i>',
+    _pilTrxParts: () => { compte('_pilTrxParts'); if (o.leve) throw new Error('panne'); return { c: o.cartes || '' }; },
+    _pilPanelTrx: (d, X) => { compte('_pilPanelTrx'); return X && X.c ? '<i>' + X.c + '</i>' : ''; } };
+  vm.createContext(ctx); vm.runInContext(corps(S.pil, '_pilTabEqu'), ctx);
+  return { html: ctx._pilTabEqu({}), a };
 }
 
 let ok = 0, ko = 0;
@@ -82,16 +89,18 @@ function jouer(S) {
   t('② v2 qui lève : le message, l’erreur avalée', /pas pu s(\\u2019|’)afficher/.test(C.html) && C.a['_mvAvale:pilotage.js/_pilTabAuj#ck2'] === 1, JSON.stringify(C.a));
   t('② plus aucun ancien cockpit appelé, dans aucun cas', !A.a._ckAuj && !B.a._ckAuj && !C.a._ckAuj);
   // ③ la carte du tracteur relogée
-  const M = sur(() => monterMat(S, { cartes: '<div class="pil-trx">CARTES</div>' }));
-  t('③ Matériel : les trois panneaux, puis le titre et les cartes du tracteur', /PARC[\s\S]*CUVE[\s\S]*CONSO[\s\S]*Pour finir les travaux tracteur en cours[\s\S]*CARTES/.test(M.html), M.html.slice(0, 200));
+  const M = sur(() => monterMat(S, { cartes: 'TRAVAUX' }));
+  t('③ Matériel : l’intertitre, les trois panneaux, puis la carte des travaux du tracteur ; la cuve reçoit les mêmes morceaux', /Mat(?:\u00e9|é)riel<\/div>[\s\S]*PARC[\s\S]*CUVE\+APRES[\s\S]*CONSO[\s\S]*TRAVAUX/.test(M.html) && M.a._pilTrxParts === 1, M.html.slice(0, 200) || JSON.stringify(M.a));
   const M0 = sur(() => monterMat(S, { cartes: '' }));
-  t('③ rien à dire : ni cartes ni titre', M0.a._pilCkTracteur === 1 && !/Pour finir les travaux/.test(M0.html) && /CONSO/.test(M0.html));
-  const Mx = sur(() => monterMat(S, { cartes: 'X', show: { mat_travaux: false } }));
-  t('③ case « Pour finir les travaux tracteur en cours » décochée : rien n’est calculé', !Mx.a._pilCkTracteur && !/Pour finir/.test(Mx.html));
+  t('③ rien à dire : pas de carte des travaux, les trois panneaux restent', M0.a._pilPanelTrx === 1 && !/TRAVAUX/.test(M0.html) && /CONSO/.test(M0.html));
+  const Mx = sur(() => monterMat(S, { cartes: 'TRAVAUX', show: { mat_travaux: false } }));
+  t('③ case « Travaux tracteur en cours » décochée : la carte n’est pas posée', !Mx.a._pilPanelTrx && !/TRAVAUX/.test(Mx.html) && /CONSO/.test(Mx.html));
   const Me = sur(() => monterMat(S, { leve: true }));
-  t('③ une erreur des cartes est avalée, les trois panneaux restent', Me.a['_mvAvale:pilotage.js/_pilTabMat#trx'] === 1 && /PARC[\s\S]*CONSO/.test(Me.html), JSON.stringify(Me.a));
-  t('③ la case est dans « Afficher dans cet onglet » et réveille la section Matériel', S.pil.includes("['mat_travaux','Pour finir les travaux tracteur en cours']") && S.pil.includes("_pilAnyShow(['mat_tracteur','mat_gnr','mat_conso','mat_travaux'])"));
-  t('③ la carte de la cuve a son propre titre : « Gasoil après les travaux »', /<span class="t">Gasoil après les travaux<\/span>'\+_mvInfoBtn\('pil\.trxgnr'\)/.test(corps(S.pil, '_pilCkTracteur')));
+  t('③ une erreur des morceaux est avalée, les trois panneaux restent', Me.a['_mvAvale:pilotage.js/_pilTabEqu#trx'] === 1 && /PARC[\s\S]*CUVE<[\s\S]*CONSO/.test(Me.html), JSON.stringify(Me.a));
+  const M9 = sur(() => monterMat(S, { show: { mat_tracteur: false, mat_gnr: false, mat_conso: false, mat_travaux: false } }));
+  t('③ rien à afficher : ni intertitre « Matériel », ni écran blanc', !/Mat(?:\u00e9|é)riel/.test(M9.html) && /pil-empty/.test(M9.html), M9.html.slice(0, 120));
+  t('③ la case est dans « Afficher dans cet onglet », sous le nom de la carte', S.pil.includes("['mat_travaux','Travaux tracteur en cours']"));
+  t('③ l’après-travaux vit dans la carte de la cuve, sous « Après les travaux en cours »', /<div class="pil-tv-fh">Après les travaux en cours<small>'\+X\.cuve\.src\+'<\/small><\/div>'\+X\.cuve\.html/.test(corps(S.pil, '_pilPanelGnr')));
   // ④ ce qui est retiré, ce qui reste
   const encore = RETIREES_PIL.filter((n) => defini(S.pil, n)).concat(RETIREES_CK.filter((n) => defini(S.ck, n)));
   t('④ les 41 fonctions retirées n’existent plus (Pilotage et cockpit.js)', encore.length === 0, encore.join(', '));
@@ -118,10 +127,11 @@ if (!CONTRE) {
     ['l’ancien cockpit revient en repli', (S) => R(S, 'pil', REPLI, "  return (typeof window._ckAuj==='function')?window._ckAuj({}):'';\n}")],
     ['le repli redevient un écran blanc', (S) => R(S, 'pil', REPLI, "  return '';\n}")],
     ['la photo du jour n’est plus écrite', (S) => R(S, 'pil', 'try{ _pilPhotoEcrire(d); }', 'try{ }')],
-    ['la case « mat_travaux » n’est plus lue', (S) => R(S, 'pil', "if(_pilShow('mat_travaux')){", 'if(true){')],
-    ['le titre s’affiche même sans carte', (S) => R(S, 'pil', "if(_trx) H+='<div class=\"pil-sec-h\">Pour finir", "H+='<div class=\"pil-sec-h\">Pour finir")],
-    ['une erreur des cartes n’est plus avalée', (S) => R(S, 'pil', "try{ _trx=_pilCkTracteur(d)||''; }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabMat#trx'); }", "_trx=_pilCkTracteur(d)||'';")],
-    ['la cuve reprend le titre « Cuve GNR »', (S) => R(S, 'pil', '<span class="t">Gasoil après les travaux</span>', '<span class="t">Cuve GNR</span>')],
+    ['la case « mat_travaux » n’est plus lue', (S) => R(S, 'pil', "if(_pilShow('mat_travaux')) M+=_pilPanelTrx(d,X);", 'M+=_pilPanelTrx(d,X);')],
+    ['l’intertitre « Matériel » s’affiche même sans carte', (S) => R(S, 'pil', "+(M?'<div class=\"pil-sec-h\">Mat\\u00e9riel</div>", "+('<div class=\"pil-sec-h\">Mat\\u00e9riel</div>")],
+    ['une erreur des morceaux n’est plus avalée', (S) => R(S, 'pil', "try{ X=_pilTrxParts(d); }catch(e){ X=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTabEqu#trx'); }", 'X=_pilTrxParts(d);')],
+    ['l’après-travaux reprend le titre « Gasoil après les travaux »', (S) => R(S, 'pil', '<div class="pil-tv-fh">Après les travaux en cours<small>', '<div class="pil-tv-fh">Gasoil après les travaux<small>')],
+    ['la cuve ne reçoit plus les morceaux', (S) => R(S, 'pil', "if(_pilShow('mat_gnr')) M+=_pilPanelGnr(d,X);", "if(_pilShow('mat_gnr')) M+=_pilPanelGnr(d,null);")],
     ['une fonction retirée revient', (S) => Object.assign({}, S, { ck: S.ck + '\nwindow._ckAuj = function(o){ return \'\'; };\n' })],
     ['cockpit.js perd une lecture du v2', (S) => R(S, 'ck', 'window._ckFilDonnees = function(', 'window._ckFilDonneesX = function(')],
     ['une fiche « i » de l’ancien écran revient', (S) => Object.assign({}, S, { utils: S.utils.replace("'pil.trx':", "'pil.marge': { t: 'x', p: ['x'] },\n  'pil.trx':") })],

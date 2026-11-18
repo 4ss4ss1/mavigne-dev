@@ -91,7 +91,8 @@ function suite(S) {
   });
   T('② … la MÊME fin prévue qu’Aujourd’hui (_pilMargeCalc, une fois par rendu), posée à la place du sous-titre', P.includes("var _mAvc=null; try{ _mAvc=_pilMargeCalc(d); }") && P.includes("host.innerHTML=_pilTabAvc(d,_mAvc);")
     && P.includes("var _ph=document.getElementById('pil-souslig-t'); if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);")
-    && P.includes(`+'<div class="pil-souslig'+(tab==='avc'?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+(tab==='avc'?'':_pilEsc(_pilTabLabel(tab)))+'</span>'`));
+    // MOTS-9 (§592) : L’équipe & le matériel prend la même ligne (sa phrase, _pilEqPhrase).
+    && P.includes(`+'<div class="pil-souslig'+((tab==='avc'||tab==='equ')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'`));
   // ③ le bandeau — ★ PORTEE-1 (§591) : ses tuiles de l'ANNÉE (Travaux, Renfort, Budget sorti) ont laissé la place à deux tuiles de la
   //   CAMPAGNE (l'équipe au pic, le budget engagé), jouées par mv-harnais-portee1. Ce qui reste de MOTS-8 : la forme de la tuile.
   let B = null;
@@ -163,7 +164,7 @@ function suite(S) {
   T('⑦ ce qui se déplie se touche sur 44 px ; le point d’une tuile a sa zone de toucher', /\.mvk-det > summary \.mvk-ligne\{min-height:44px\}/.test(S.pcss) && /\.pil-tv-e > summary\{[^}]*min-height:44px/.test(S.pcss) && /\.pil-tv-tu \.pil-flag::after\{content:"";position:absolute;inset:-18px\}/.test(S.pcss));
   T('⑦ au téléphone, les trois tuiles tiennent de front, un filet entre elles (le bloc GABARIT-1 les empilait)', /@media \(max-width:760px\)\{[\s\S]*#page-pilotage \.pil-photos\.pil-tv-tu\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/.test(S.pcss)
     && S.pcss.includes('#page-pilotage .pil-photos.pil-tv-tu > .pil-photo + .pil-photo{border-top:0 !important;border-left:var(--bw,1px) solid var(--ligne,#E7E6E2) !important}'));
-  T('⑦ l’aide du Pilotage dit la phrase, les tuiles, la couleur, le toucher et les boutons', /« La campagne »\) s’ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.uti) && /une couleur par tâche, la même partout dans l’onglet/.test(S.uti) && /« Ouvrir » mène au module où l’on agit/.test(S.uti));
+  T('⑦ l’aide du Pilotage dit la phrase, les tuiles, la couleur, le toucher et les boutons', /« La campagne »\) s’ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.uti) && /une couleur par tâche, la même partout dans l’onglet/.test(S.uti) && /Chaque carte a son bouton : « Ouvrir » mène au module où l’on agit/.test(S.uti));
   T('⑦ le guide aussi', /Travaux s'ouvre sur une phrase : ce qui est fait, et la fin prévue/.test(S.guide) && /<b>équipe au pic<\/b>/.test(S.guide) /* PORTEE-1 (§591) : « Renfort » est parti avec les tuiles de l'année */ && /[Uu]ne couleur par tâche, la même partout dans l'onglet/.test(S.guide));
   const wn = S.wn.slice(S.wn.indexOf("  { v: '11.18',"), S.wn.indexOf("  { v: '11.17',"));
   T('⑦ l’annonce 11.18 : pour l’admin, sans « & », et dit « Aucun calcul ne change »', wn.length > 200 && /pour: \['admin'\], emoji: '[a-z]+', titre: 'Pilotage, onglet Travaux\\u00a0: les mêmes cartes, moins de mots'/.test(wn) && !/titre: '[^']*&/.test(wn) && /Aucun calcul ne change/.test(wn));
@@ -199,7 +200,7 @@ if (!CONTRE) {
     ['la phrase ne colore plus un retard', sur('pil', "var cl=(m.marge==null)?'':(m.marge<0?' ko':(m.marge>0?' ok':''));", "var cl='';")],
     ['la phrase écrit le 1er comme « 1 »', sur('pil', "(dt.getDate()===1?'1er':dt.getDate())", "dt.getDate()")],
     ['la phrase ne dit plus quand l’équipe ne suffit pas', sur('pil', "else if(m && m.capa && m.capa.ok===false) h+=", "else if(false) h+=")],
-    ['le sous-titre-question revient sur Travaux', sur('pil', "(tab==='avc'?'':_pilEsc(_pilTabLabel(tab)))", "_pilEsc(_pilTabLabel(tab))")],
+    ['le sous-titre-question revient sur Travaux', sur('pil', "((tab==='avc'||tab==='equ')?'':_pilEsc(_pilTabLabel(tab)))", "_pilEsc(_pilTabLabel(tab))")],
     ['la phrase ne se pose plus', sur('pil', "if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);", "")],
     ['« voir le détail » revient sur les tuiles', sur('pil', "+'<span class=\"s\">'+sous+'</span></button>';", "+'<span class=\"s\">'+sous+'</span><span class=\"go\">voir le d\\u00e9tail \\u203A</span></button>';")],
     ['le « ! » revient écrit dans le point', sur('pil', `aria-label="'+_pilEsc(titre)+'"></span>';`, `aria-label="'+_pilEsc(titre)+'">!</span>';`)],
@@ -224,7 +225,8 @@ if (!CONTRE) {
     ['la feuille n’est plus importée', sur('app', "import './pilotage.css';", "")],
     ['une ligne qui se déplie ne se touche plus sur 44 px', sur('pcss', '.mvk-det > summary .mvk-ligne{min-height:44px}', '.mvk-det > summary .mvk-ligne{min-height:24px}')],
     ['au téléphone, le bandeau se réempile', sur('pcss', '#page-pilotage .pil-photos.pil-tv-tu > .pil-photo + .pil-photo{border-top:0 !important;', '#page-pilotage .pil-photos.pil-tv-tu > .pil-photo + .pil-photo{border-top:1px !important;')],
-    ['l’aide ne dit pas les boutons', sur('uti', '« Ouvrir » mène au module où l’on agit', '« Ouvrir » ouvre')],
+    // MOTS-9 (§592) : l’aide de L’équipe & le matériel dit aussi « Ouvrir » mène au module… — le mutant vise la ligne de Travaux.
+    ['l’aide ne dit pas les boutons', sur('uti', 'Chaque carte a son bouton : « Ouvrir » mène au module où l’on agit', 'Chaque carte a son bouton : « Ouvrir » ouvre')],
     ['le guide ne dit pas la phrase', sur('guide', "Travaux s'ouvre sur une phrase : ce qui est fait, et la fin prévue", "Travaux s'ouvre sur un sous-titre")],
     ['l’annonce est montrée à tout le monde', (S) => { const i = S.wn.indexOf("titre: 'Pilotage, onglet Travaux"); if (i < 0) throw new Error('motif absent : annonce'); const j = S.wn.lastIndexOf("pour: ['admin']", i); return { ...S, wn: S.wn.slice(0, j) + "pour: ['tous']" + S.wn.slice(j + 15) }; }],
     ['le service worker ne dit pas le lot', sur('sw', '// v12.09 (17/11/2026) — MOTS-8 (§590)', '// v12.09 (17/11/2026) — divers')],
