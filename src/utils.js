@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.21';
+export const APP_VERSION = '11.22';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2996,7 +2996,8 @@ var MV_AIDE = {
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
-      ['Décider', "— trois cartes, trois simulations : rien ne s’y enregistre. <b>La tournée du jour</b> suit l’ordre de la tournée que l’administrateur a choisie pour le travail (roue crantée de la Vigne › Tournées) ; ses tris sont un essai à l’écran. <b>Qui fait quoi</b> répartit l’équipe entre les priorités, et <b>le renfort</b> dit combien de saisonniers, et quand — aux heures du planning, sans heures sup, avec « Et sans renfort ? » pour comparer."],
+      // MOTS-10 (§594) : Décider se lit comme Travaux et L'équipe — la phrase, puis les trois cartes repliées.
+      ['Décider se lit d’un coup d’œil', " : une phrase en haut — le travail, où l’équipe sera ce soir, la fin prévue, le renfort — puis trois cartes repliées : un titre, un chiffre, une pastille (tient, déborde, l’équipe suffit). Touchez-en une pour simuler : rien ne s’y enregistre. <b>La tournée du jour</b> suit la tournée choisie pour le travail (roue crantée de la Vigne › Tournées) ; ses tris sont un essai. <b>Qui fait quoi</b> répartit l’équipe entre les priorités — « Ouvrir la priorité du moment » la fixe. <b>Renfort</b> dit combien de saisonniers, et quand, aux heures du planning, sans heures sup."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
       ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
       ['Le rendement de la tournée', ": sous le résultat, la part du temps de l’équipe passée sur les parcelles face aux trajets, le coût de l’équipe et le revient à l’hectare. La même tournée « au plus proche » est calculée à côté, pour comparer ; un bouton prend cet ordre."],
@@ -3297,7 +3298,9 @@ export const MV_INFO = {
     '<b>L\u2019équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning. Congés, récup, arrêts, absences et jours de formation sont retirés — on ne compte que ceux qui seront dans les rangs ; une absence sur une partie de la journée ne retire que ses heures. Une équipe collective compte son effectif du jour. Sans équipe affectée : tout le monde au champ.',
     '<b>Le travail par jour</b> : les heures prévues au planning, jour par jour et personne par personne. La coupure ne se retire pas du travail : elle allonge la présence.',
     '<b>Les trajets</b> : calculés entre chaque parcelle et la suivante, à vol d\u2019oiseau — à pied jusqu\u2019à 300 m (4 km/h), au-delà en camion (5 min + 25 km/h), 5 min pour une parcelle sans position. La case Trajets règle ces cinq valeurs.',
-    '<b>La fin</b> : la tournée se déroule jour après jour avec l\u2019équipe du planning, puis se compare à la fenêtre de chaque travail coché. « Il faudrait N personnes » sort de la même simulation, relancée avec N personnes de plus.'
+    '<b>La fin</b> : la tournée se déroule jour après jour avec l\u2019équipe du planning, puis se compare à la fenêtre de chaque travail coché. « Il faudrait N personnes » sort de la même simulation, relancée avec N personnes de plus.',
+    // MOTS-10 (§594) : les deux consignes de la carte, sorties de l'écran (21 et 23 mots).
+    '<b>L\u2019ordre de passage</b> : les tris sont un essai, rien n\u2019est enregistré ici. La tournée que suit l\u2019équipe se règle dans la roue crantée de la Vigne — « Créer une tournée » y mène. Pour ranger à la main : la double flèche prend une parcelle, une fente dorée la repose ; « bloc » déplace toute une commune.'
   ] },
 
   'pil.quifait': { t: 'Qui fait quoi', p: [

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.22', d: '2026-11-18', items: [   // MOTS-10 (§594) : Pilotage › Décider allégé sur place — une phrase, trois cartes repliées
+    { niv: 0, pour: ['admin'], emoji: 'curseurs', titre: 'Pilotage, Décider\u00a0: une phrase, trois cartes repliées',
+      desc: "En haut de Décider, une phrase\u00a0: le travail, où l’équipe sera ce soir, la fin prévue, et si l’équipe suffit. La tournée du jour, Qui fait quoi et le Renfort arrivent repliées\u00a0: un chiffre et une pastille (tient, déborde, l’équipe suffit)\u00a0; touchez-en une pour simuler, avec les mêmes boutons qu’avant. Sous Qui fait quoi, «\u00a0Ouvrir la priorité du moment\u00a0» mène là où l’on fixe qui fait quoi. «\u00a0Simuler un renfort\u00a0» ouvre maintenant la carte du renfort. Aucun calcul ne change." }
+  ] },
   { v: '11.21', d: '2026-11-18', items: [   // DEBORD-1 (§593) : plus rien ne déborde — la bulle rouge du Pilotage, et vingt autres débordements, à toutes les largeurs
     { niv: 1, pour: ['admin'], emoji: 'oeil', titre: 'Des écrans qui ne débordent plus',
       desc: "La pastille rouge du Pilotage («\u00a02 cuves demandent un contrôle\u00a0») ne déborde plus sur la ligne d’en dessous. Sur téléphone, tablette et ordinateur, plus rien ne sort de sa carte ni ne s’écrit sur un autre texte\u00a0: la bande et le tableau des cuves de la Cave, la semaine de la Cave, l’Entretien du Tracteur, le Journal, le Planning de l’année, la carte de Décider, les Stades, les courbes du Millésime." }

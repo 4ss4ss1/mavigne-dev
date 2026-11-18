@@ -43,7 +43,7 @@ function jouer(S) {
     && S.pil.includes('window._pilObjectifRegler=function(iso){') && S.pil.includes('if(!_pilObjectifSet(iso)) return false;'));
   T('« Voir le détail » mène à la tension par personne, qui existe dans L’équipe', S.vue.includes('data-fn="tension"')
     // MOTS-9 (§592) : la tension est la carte repliée « Tension » de L’équipe ; « Voir le détail » la déplie et la fait clignoter.
-    && S.pil.includes("if(cible==='tension'){") && fnDe(S.pil, 'function _pilTabEqu(d){').includes('P+=_pilPanelTension(d);') && S.pil.includes("_PIL_STATE.collapsed.tension=0;") && S.pil.includes(".pil-tile[data-pid=\"tension\"]"));
+    && S.pil.includes("if(cible==='tension'){") && fnDe(S.pil, 'function _pilTabEqu(d){').includes('P+=_pilPanelTension(d);') && S.pil.includes("_pilDeplier('tension');") && S.pil.includes(".pil-tile[data-pid=\"tension\"]"));
   T('la protection restante vit dans Conformité', /function _pilTabCfm\(d\)\{[^]*?_pilProtCarte\(\)/.test(S.pil.slice(S.pil.indexOf('function _pilTabCfm(d){'), S.pil.indexOf('function _pilTabCfm(d){') + 900)));
   // ③ Le modèle : la tâche du moment lue avec la période et les tâches, par le même appel que la tuile
   const mod = fnDe(S.pil, 'function _pilCk2Modele(d, m){');
@@ -107,7 +107,8 @@ if (CONTRE) {
     ['l’échelle de la consommation répartie à la largeur du texte', 'pil', "ax+='<span style=\"left:'+pc(k)+'\">'", "ax+='<span>'"],
     ['le coût de l’heure redevient brut (quatorze décimales)', 'vue', "const tauxH = v => Number(v || 0).toLocaleString('fr-FR', { maximumFractionDigits: 2 })", "const tauxH = v => String(v"],   // AUJ-7 : la note de la main-d'œuvre passe par tauxH
     ['la tension par personne quitte L’équipe', 'pil', "  if(_pilShow('auj_tension')) P+=_pilPanelTension(d);\n", ''],
-    ['« Voir le détail » ne déplie plus la tension', 'pil', "_PIL_STATE.collapsed.tension=0;", ''],
+    // MOTS-10 (§594) : la tension se déplie par _pilDeplier (ouverte ET enregistrée : renderPilotage relit l'état mémorisé).
+    ['« Voir le détail » ne déplie plus la tension', 'pil', "_pilDeplier('tension');", ''],
   ];
   let manques = 0;
   DEF.forEach(([nom, f, a, b]) => {

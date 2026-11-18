@@ -46,7 +46,9 @@ function charger(src, o = {}) {
     _ecoRate: () => (o.sansTaux ? 0 : 18),
     _opNNNames: () => (o.nn || ['P1', 'P3', 'P2']), _opActTodo: () => [P1, P2, P3],
     _opCanEdit: () => o.edit !== false,
-    _mvInfoBtn: k => '<button class="mv-i" data-info="' + k + '">i</button>' };
+    _mvInfoBtn: k => '<button class="mv-i" data-info="' + k + '">i</button>',
+    // MOTS-10 (§594) : la pastille (pilotage.js/_pilPhPl), copiée telle quelle
+    _pilPhPl: (txt, cls) => '<span class="pil-tv-pl' + (cls ? ' ' + cls : '') + '">' + txt + '</span>' };
   ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext([corps(src, 'function _dzHop('), corps(src, 'function _dzSimuler('), corps(src, 'function _dzMin('), corps(src, 'function _dzPl('),
     corps(src, 'function _opFmtHa('), corps(src, 'function _ecoEur('), bloc(src)].join('\n'), ctx, { filename: 'tournee-extrait.js' });
@@ -91,7 +93,8 @@ function scenarios(src, journal) {
     const Xs = charger(src, { sansTaux: true }), Cs = C0(Xs, rows), Hs = Xs._dzRendementHtml(Cs);
     t('sans aucun taux lisible : coût et revient en tiret, jamais 0 €', Xs._dzRendement(Cs).A.cout === null && Hs.includes('<b>—</b><span>coût') && !Hs.includes('<b>0 €</b>') && Hs.includes('réservés à l’administrateur'));
     const Xi = charger(src, { nn: ['P1', 'P2', 'P3'] }), Ci = C0(Xi, rows), Hi = Xi._dzRendementHtml(Ci);
-    t('ordre déjà « au plus proche » : dit, pas de tableau', Hi.includes('déjà celui « au plus proche »') && !Hi.includes('<table'));
+    // MOTS-10 (§594) : la phrase « L’ordre actuel est déjà celui « au plus proche » » est devenue la pastille du titre.
+    t('ordre déjà « au plus proche » : dit (la pastille du titre), pas de tableau', Hi.includes('déjà au plus proche') && Hi.includes('pil-tv-pl ok') && !Hi.includes('<table'));
     const Xe = charger(src, { edit: false }), He = Xe._dzRendementHtml(C0(Xe, rows));
     t('lecture seule : la comparaison reste, le bouton disparaît', He.includes('<table') && !He.includes('data-op="sort"'));
     t('branché sous le résultat de la tournée', /return h\+_dzRendementHtml\(C\);/.test(src));

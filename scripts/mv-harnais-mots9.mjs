@@ -70,7 +70,8 @@ function suite(S) {
       && !/Personnel/.test(hb) && /Matériel/.test(hb) && /pil-empty/.test(hc), h];
   });
   T('① l’onglet est rendu par _pilTabEqu, sa phrase prend la sous-ligne (comme Travaux)', P.includes("    host.innerHTML=_pilTabEqu(d);\n    var _phE=document.getElementById('pil-souslig-t'); if(_phE) _phE.innerHTML=_pilEqPhrase(d);")
-    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
+    // MOTS-10 (§594) : Décider (« sim ») prend aussi la sous-ligne pour sa phrase.
+    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
 
   // ② la phrase
   const ph = (d, tens) => texte(monter(S, ['_pilEqPhrase'], { _pilTensData: () => tens })._pilEqPhrase(d));
@@ -143,7 +144,7 @@ function suite(S) {
     P.includes("try{ X=_pilTrxParts(d); }") && P.includes("if(_pilShow('mat_gnr')) M+=_pilPanelGnr(d,X);") && P.includes("if(_pilShow('mat_travaux')) M+=_pilPanelTrx(d,X);")
     && S.pil.includes("    if(avecL.length){\n      // ★ L'ECHELLE (GNR-2)"));
   T('⑤ repliées par défaut : la tension, la consommation, les travaux du tracteur (avec les autres)', /collapsed:\{tension:1,conso:1,trx:1,echeances:1,/.test(P));
-  T('⑤ « Voir le détail » du cockpit déplie la tension et la montre', P.includes("if(_PIL_STATE && _PIL_STATE.collapsed) _PIL_STATE.collapsed.tension=0;")
+  T('⑤ « Voir le détail » du cockpit déplie la tension et la montre', P.includes("_pilDeplier('tension');")
     && P.includes("_pilFlash(document.querySelector('#pil-content .pil-tile[data-pid=\"tension\"]'))") && !/pil-tension-det/.test(P));
   const partis = ['_pilTabPrs(', '_pilTabMat(', '_pilCardTension(', '_pilCkTracteur(', '_pilAnyShow(', 'Gasoil apr', 'Pour finir les travaux tracteur', 'pil-trx-cote', 'Capacité vs charge', "'Parc tracteur'", "'Consommation mesurée'"];
   const reste = partis.filter((k) => P.includes(k));
@@ -204,9 +205,10 @@ if (!CONTRE) {
     ['« actifs » revient', sur('pil', "_pilStat(_nColl>0?_nPers:d.membres.length, '', null),", "_pilStat(_nColl>0?_nPers:d.membres.length, ' actifs', null),")],
     ['le paragraphe de 36 mots revient', sur('pil', "<div class=\"pil-cso'+(nIv?'':' compact')+'\"><ul class=\"pil-cso-l\">", "<div class=\"pil-cso'+(nIv?'':' compact')+'\"><p class=\"pil-cso-msg\">Aucun tracteur n\\u2019a encore assez de pleins.</p><ul class=\"pil-cso-l\">")],
     ['« reste 0,0 h · 0 L » revient pour un travail sans barème', sur('pil', "sub=((Jb.n>Jb.nSansH)?('reste '", "sub=((true)?('reste '")],
-    ['« Ouvrir l’entretien » mène ailleurs', sur('pil', "    if(cible==='equipe'||cible==='entretien'||cible==='renfort'){ window._pilGo(cible); return; }", "    if(cible==='equipe'||cible==='renfort'){ window._pilGo(cible); return; }")],
+    ['« Ouvrir l’entretien » mène ailleurs', sur('pil', "    if(cible==='equipe'||cible==='entretien'||cible==='renfort'||cible==='priorite'){ window._pilGo(cible); return; }", "    if(cible==='equipe'||cible==='renfort'||cible==='priorite'){ window._pilGo(cible); return; }")],
     ['la consommation s’ouvre d’office', sur('pil', "  collapsed:{tension:1,conso:1,trx:1,", "  collapsed:{tension:1,trx:1,")],
-    ['« Voir le détail » ne déplie plus la tension', sur('pil', "if(_PIL_STATE && _PIL_STATE.collapsed) _PIL_STATE.collapsed.tension=0;", "")],
+    // MOTS-10 (§594) : _pilDeplier remplace l'écriture directe (elle ne survivait pas à renderPilotage).
+    ['« Voir le détail » ne déplie plus la tension', sur('pil', "      _pilDeplier('tension');", "")],
     ['les trois grandes cartes reviennent', (S) => ({ ...S, pil: S.pil + "\nfunction _pilCkTracteur(d){ return '<div class=\"pil-tile2\">Gasoil après les travaux</div>'; }" })],
     ['la fiche de la révision redevient à part', (S) => ({ ...S, uti: S.uti.replace("  'pil.tens': { t:", "  'pil.trxrev': { t: 'x', p: [] },\n  'pil.tens': { t:") })],
     ['l’aide ne dit pas la carte « Tension »', sur('uti', 'la carte « Tension » le redit et, touchée, montre une ligne par personne', 'la carte du dessous montre une ligne par personne')],

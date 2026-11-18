@@ -390,26 +390,32 @@
   </ul>
 
   <h3>{ic:curseurs} Décider</h3>
-  <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>. Il tient en trois cartes :
-  la tournée du jour, qui fait quoi, et le renfort.</p>
+  <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>. Il se lit d'un coup d'œil :
+  une phrase en haut — « Palissage : ce soir à La Combotte, fin prévue 3 nov., l'équipe suffit » —, puis
+  trois cartes <b>repliées</b> : la tournée du jour, qui fait quoi, et le renfort. Chacune dit son chiffre
+  et sa pastille (<b>tient</b>, <b>déborde</b>, <b>l'équipe suffit</b>) ; on la touche pour simuler.</p>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:crayon}</span><div>Cet onglet s'appelait
   <b>Simuler</b>. Ses trois cartes sont des simulations : rien n'y est enregistré. La tournée que suit
   l'équipe se règle dans la roue crantée de la Vigne › <b>Tournées</b> ; Décider la suit, et ses tris
   restent un essai à l'écran.</div></div>
   <ul class="dot">
-    <li><b>La tournée du jour — jusqu'où ?</b> Où l'équipe sera le soir, combien de jours il faut pour
-    finir, et si ça tient dans la fenêtre du travail — sinon, combien de personnes il faudrait en plus,
+    <li><b>La tournée du jour</b> : où l'équipe sera ce soir, combien de jours il faut et la fin prévue,
+    et si ça tient dans la fenêtre du travail — sinon, combien de personnes il faudrait en plus,
     avec un bouton qui l'essaie. Dessous, la carte et l'ordre de passage, rangé <b>jour par jour</b>.
     L'ordre est celui de la tournée du travail, réglée dans la roue crantée de la Vigne ;
     « Modifier la tournée » y mène. Les tris de la carte sont un essai : rien ne part chez l'équipe.</li>
-    <li><b>Le rendement de la tournée</b>, juste sous le résultat : la part du temps de l'équipe passée sur
+    <li><b>Le rendement</b>, juste sous le résultat : la part du temps de l'équipe passée sur
     les parcelles face aux trajets (à pied, en camion), le coût de l'équipe pour la tournée et le revient à
     l'hectare — la main-d'œuvre seule. La même tournée est recalculée « au plus proche » pour comparer les
-    jours, les trajets et les euros à l'hectare ; un bouton prend cet ordre.</li>
+    jours, les trajets et les euros à l'hectare ; un bouton prend cet ordre. Si l'ordre l'est déjà, la
+    pastille « déjà au plus proche » le dit.</li>
     <li><b>Qui fait quoi</b> : chaque travail en priorité, avec son équipe affectée et sa date de fin.
     Les boutons + et − déplacent une personne, la date suit. Même jour, même planning et même calcul
-    que la tournée : les deux cartes donnent la même date.</li>
-    <li><b>Combien de saisonniers, et quand</b> : la carte répond d'office, en <b>calendrier</b> —
+    que la tournée : les deux cartes donnent la même date. « Ouvrir la priorité du moment » mène là où
+    l'on fixe qui fait quoi (administrateur).</li>
+    <li><b>Renfort — combien de saisonniers, et quand</b> : repliée, « 0 » et « l'équipe suffit », ou
+    le nombre de saisonniers, leur coût et « à prévoir ». « Simuler un renfort », depuis Aujourd'hui ou
+    L'équipe &amp; le matériel, l'ouvre directement. Ouverte, elle répond d'office, en <b>calendrier</b> —
     « du 2 novembre au 12 mars : 2 saisonniers, pour la taille » —, avec les heures et le coût de chaque
     période. Elle se calcule aux <b>heures prévues au planning</b>, sans aucune heure sup : le renfort sert
     justement à ne pas en faire. Un saisonnier en TESA suit l'horaire de l'équipe ; en CDD, 35&nbsp;h fixes.</li>
@@ -429,7 +435,8 @@
 
   <h3>{ic:equipe} D'où viennent les valeurs de la tournée</h3>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>Rien n'est à régler
-  pour commencer.</b> Chaque case dit d'où vient sa valeur. En toucher une passe l'écran en
+  pour commencer.</b> Les cases sont <b>lues au planning</b> ; touchée, une case dit la valeur du
+  planning, et la phrase du haut finit par « simulation ». En toucher une passe l'écran en
   <b>simulation</b>, où rien n'est enregistré ; « Valeurs réelles » revient au planning.</div></div>
   <ul class="dot">
     <li><b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, la seule tâche dans

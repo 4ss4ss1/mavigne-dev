@@ -84,6 +84,11 @@
    "date": "2026-11-18",
    "motif": "DEBORD-1 (§593) : la Cave et les courbes suivent la largeur de leur carte (en-têtes et colonnes de contexte repliés), « &middot; » devient « · », un seul « Agrandir » sur la carte de Décider",
    "hausses": []
+  },
+  {
+   "date": "2026-11-18",
+   "motif": "MOTS-10 (§594) : Pilotage › Décider allégé sur place — 377 → 45 mots, phrases longues 2 → 0, hors lexique 5 → 0",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -293,10 +298,10 @@
     "lex": 0
    },
    "Pilotage › Décider": {
-    "mots": 377,
-    "p15": 2,
-    "avant": 16,
-    "lex": 5
+    "mots": 45,
+    "p15": 0,
+    "avant": 14,
+    "lex": 0
    },
    "Pilotage › Économie › Synthèse": {
     "mots": 63,
@@ -571,10 +576,10 @@
     "lex": 0
    },
    "Pilotage › Décider": {
-    "mots": 377,
-    "p15": 2,
-    "avant": 16,
-    "lex": 5
+    "mots": 45,
+    "p15": 0,
+    "avant": 0,
+    "lex": 0
    },
    "Pilotage › Économie › Synthèse": {
     "mots": 63,

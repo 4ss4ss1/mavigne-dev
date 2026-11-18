@@ -64,6 +64,8 @@ const TENU = [
   ['⑫ la règle : six sortes de débordement, la contre-épreuve qui en pose une de chaque', 'regle', "['texte collé au bord', '<div style=\"border:1px solid #ccc;padding:0;width:240px;min-height:48px;background:#fff\">", null],
   ['⑫ … les écrans lus dans mv-mots-rendu.mjs, sept largeurs, deux cuves en alerte', 'regle', "(opt('--largeurs') || '360,390,412,768,1024,1280,1366')", null],
   ['⑫ … l’état posé', 'regle', "lm.temp_c=31; n++;", null],
+  // MOTS-10 (§594) : la CI a rougi sur « 0 € » d'un tableau qui défile de côté (Économie › Le détail, 390 px, 2 px du bord).
+  ['⑫ … un texte dans un tableau qui défile de côté n’est pas « collé au bord » (le bord est celui du défilement)', 'regle', "if (/(auto|scroll)/.test(ca.overflowX) && a.scrollWidth > a.clientWidth + 1) { sc6 = true; break; } }", null],
   ['⑫ … npm run test:debord', 'pkg', '"test:debord": "node scripts/mv-debord-rendu.mjs",', null],
   ['⑫ … un job de la CI', 'ci', '        run: npm run test:debord', null],
   ['⑬ l’annonce 11.21 et le service worker qui dit le lot', 'wn', "{ v: '11.21', d: '2026-11-18', items: [   // DEBORD-1 (§593)", null],

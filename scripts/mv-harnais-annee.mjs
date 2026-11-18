@@ -100,7 +100,7 @@ function verifier(PIL, UTI) {
   t('③ le renfort de l\'année lit les fenêtres de manque, pas le pic', /var F=R\.fen,/.test(corps(NC, '_pilPanelAnRenfort')) && !/function _pilPhotoEffAn\(/.test(NC));
   t('③ la ligne de l\'année nomme le cadre (plus X.debut, qui n\'existe pas) — PORTEE-1 : sur Économie › Le détail', /_pilAnCadre\(\)/.test(corps(NC, '_pilCrumbAnnee')) && !/X\.debut/.test(corps(NC, '_pilCrumbAnnee')));
   // MOTS-9 (§592) : le bouton est celui des cartes allégées (« Simuler un renfort », _pilTvBtn → _pilTvGo → _pilGo('renfort')).
-  t('③ la carte du renfort mène à Décider par un BOUTON', /_pilTvBtn\('renfort','Simuler un renfort'\)/.test(corps(NC, '_pilPanelAnRenfort')) && /cible==='renfort'\)\{ window\._pilGo\(cible\)/.test(corps(NC, '_pilTvGo')));
+  t('③ la carte du renfort mène à Décider par un BOUTON', /_pilTvBtn\('renfort','Simuler un renfort'\)/.test(corps(NC, '_pilPanelAnRenfort')) && /cible==='renfort'(?:\|\|cible==='priorite')?\)\{ window\._pilGo\(cible\)/.test(corps(NC, '_pilTvGo')));
   t('③ les sélecteurs passent par la portée (la barre : data-portee → _pilPorteeChoisir → _pilCadreSet ; les flèches : data-anrecul → _pilReculSet)', /\[data-portee\]/.test(NC) && /\[data-anrecul\]/.test(NC) && /_pilCadreSet\(m==='vig'\?'vig':'exo'\)/.test(NC) && /_pilReculSet\(/.test(NC));
   t('③ « an_cadres » n\'est plus un indicateur, « an_frise » porte le renfort', !/\['an_cadres',/.test(NC) && /\['an_frise','Renfort'\]/.test(NC));
   t('③ l\'ancre du constat « vendange à cheval » existe toujours', /id="pil-an-cadres"/.test(NC) && /cible:'an_cadres'/.test(NC));

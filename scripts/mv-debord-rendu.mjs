@@ -65,6 +65,10 @@ const DEFAUTS = [
 ];
 
 // LE RELEVÉ D’UN ÉCRAN (exécuté dans le navigateur).
+// MOTS-10 (§594) — LA CONTRE-ÉPREUVE INVERSE : un tableau qui défile de côté dans une carte bordée, son texte au ras du bord. Ce n'est
+//   PAS un débordement (le bord est celui du défilement) : la règle ne doit pas le trouver. Sans elle, la CI rougissait au gré de la
+//   largeur des colonnes (« 0 € », Économie › Le détail, 390 px, 18/11).
+const PAS_DEFAUT = '<div style="border:1px solid #ccc;padding:0;width:240px;min-height:48px;background:#fff"><div style="overflow-x:auto"><div style="width:600px">Ce tableau défile de côté et continue plus loin</div></div></div>';
 const DEBORD = () => {
   const pg = document.querySelector('.page.active'); if (!pg) return { absente: true };
   const out = []; const transp = (c) => !c || c === 'transparent' || /rgba\([^)]*,\s*0\)$/.test(c);
@@ -109,6 +113,11 @@ const DEBORD = () => {
     const ell6 = (e) => { for (let k = 0; k < 4 && e; k++, e = e.parentElement) if (getComputedStyle(e).textOverflow === 'ellipsis') return true; return false; };
     while (tw6.nextNode()) { const t = tw6.currentNode; if (!t.nodeValue.trim()) continue; const el = t.parentElement; if (!el || exclu(el) || !vis(el) || ell6(el)) continue;
       let b = el; while (b && b !== document.body && !peint(b)) b = b.parentElement; if (!b || b === document.body || b === pg) continue;
+      // ★ MOTS-10 (§594) : un texte dans un tableau qui DÉFILE DE CÔTÉ (entre lui et la carte, un défilement qui déborde) touche le
+      //   bord du défilement, pas celui de la carte : la suite du tableau est derrière. Sur la CI (18/11), « 0 € » d'Économie › Le
+      //   détail tombait à 2 px du bord à 390 px ; ici, à 8 px — la largeur des colonnes varie d'un Chromium à l'autre.
+      let sc6 = false; for (let a = el; a && a !== b; a = a.parentElement) { const ca = getComputedStyle(a); if (/(auto|scroll)/.test(ca.overflowX) && a.scrollWidth > a.clientWidth + 1) { sc6 = true; break; } }
+      if (sc6) continue;
       const cs = getComputedStyle(b); const bord = (s) => parseFloat(cs['border' + s + 'Width']) > 0 && cs['border' + s + 'Style'] !== 'none' && !transp(cs['border' + s + 'Color']);
       if (!bord('Left') && !bord('Right')) continue; if (/^(TD|TH|TR|TABLE|INPUT|SELECT|TEXTAREA)$/.test(b.tagName)) continue;
       const R = b.getBoundingClientRect(); if (R.height < 40 || R.width < 120 || /^app-|^page-/.test(b.id || '')) continue;   // une pastille, un bouton : leur dessin est serré exprès
@@ -168,6 +177,7 @@ await new Promise((ok) => srv.on('listening', ok));
 const U = 'http://localhost:' + srv.address().port;
 const exe = process.env.MV_CHROMIUM || '';
 const nav = await playwright.chromium.launch({ headless: true, ...(exe ? { executablePath: exe, args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--no-zygote'] } : {}) });
+let chromeV = ''; try { chromeV = nav.version(); } catch (e) { chromeV = ''; }   // MOTS-10 (§594) : dit avec quel navigateur la règle a mesuré
 const pose = async (page) => { let avant = -1;
   for (let k = 0; k < 15; k++) { await page.waitForTimeout(200); const n = await page.evaluate(() => { const p = document.querySelector('.page.active'); return p ? p.innerText.length : -1; }); if (n === avant && k >= 1) return; avant = n; } };
 
@@ -209,7 +219,7 @@ async function relever(w) {
       if (rate) { erreurs.push(w + ' px › ' + cle + ' : ' + rate); continue; }
       await page.evaluate(() => window.scrollTo(0, 0)); await pose(page); await menage();
       if (CONTRE) await page.evaluate((defs) => { const p = document.querySelector('.page.active'); const h = p.querySelector('.ck-page') || p;
-        defs.forEach(([, html]) => { const d = document.createElement('div'); d.className = 'mv-contre'; d.style.cssText = 'margin:16px;max-width:300px'; d.innerHTML = html; h.prepend(d); }); }, DEFAUTS);
+        defs.forEach(([, html]) => { const d = document.createElement('div'); d.className = 'mv-contre'; d.style.cssText = 'margin:16px;max-width:300px'; d.innerHTML = html; h.prepend(d); }); }, DEFAUTS.concat([['', PAS_DEFAUT]]));
       const m = await page.evaluate(DEBORD);
       if (m.absente) { erreurs.push(w + ' px › ' + cle + ' : aucune page active'); continue; }
       nbEcrans++;
@@ -222,7 +232,7 @@ const file = LARG_JOUEES.slice();
 await Promise.all(Array.from({ length: Math.min(PAR, file.length) }, async () => { while (file.length) await relever(file.shift()); }));
 await nav.close(); srv.close();
 
-console.log('\n\x1b[1mMA VIGNE — La règle des débordements, mesurée sur le build\x1b[0m  (' + nbEcrans + ' écrans relevés à ' + LARG_JOUEES.join(', ') + ' px, horloge au 27/10/2026 9 h, deux cuves en alerte)');
+console.log('\n\x1b[1mMA VIGNE — La règle des débordements, mesurée sur le build\x1b[0m  (' + nbEcrans + ' écrans relevés à ' + LARG_JOUEES.join(', ') + ' px, horloge au 27/10/2026 9 h, deux cuves en alerte' + (chromeV ? ', Chromium ' + chromeV : '') + ')');
 let ko = 0;
 const t = (nom, cond, det) => { if (cond) console.log('  \x1b[32m✓\x1b[0m ' + nom); else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };
 t('les écrans ont été relevés, sans erreur de page ni onglet introuvable', nbEcrans === LARG_JOUEES.length * ECRANS_JOUES.length && !erreurs.length, erreurs.slice(0, 6).join(' · '));
@@ -230,6 +240,8 @@ t('l’état est posé : deux cuves en alerte', nbAlerte === 2, 'cuves passées 
 if (CONTRE) {
   const sortes = DEFAUTS.map(([s]) => s);
   sortes.forEach((s) => t('contre-épreuve : « ' + s + ' » est trouvé', trouves.some((x) => x.type === s), 'pas trouvé'));
+  t('contre-épreuve inverse : un tableau qui défile de côté, texte au ras du bord, n’est pas trouvé', !trouves.some((x) => /défile de côté/.test(x.txt || '')),
+    trouves.filter((x) => /défile de côté/.test(x.txt || '')).map((x) => x.type).join(', '));
   const n = sortes.filter((s) => trouves.some((x) => x.type === s)).length;
   console.log('\n' + (ko ? '\x1b[31mROUGE\x1b[0m' : '\x1b[32mVERT\x1b[0m') + ' — ' + n + '/' + sortes.length + ' défauts posés sont trouvés');
   process.exit(ko ? 1 : 0);
@@ -239,5 +251,23 @@ t('aucun débordement (texte hors de sa boîte, boîte hors de sa carte, fond so
   trouves.length + ' : ' + Object.entries(parType).map(([k, n]) => n + ' ' + k).join(', '));
 trouves.slice(0, 40).forEach((x) => console.log('      ' + x.largeur + ' px · ' + x.ecran + ' · ' + x.type + ' (' + x.dx + ' px) · ' + x.boite + (x.dans ? ' / ' + x.dans : '') + ' · « ' + x.txt + ' »'));
 if (trouves.length > 40) console.log('      … et ' + (trouves.length - 40) + ' de plus');
+// ★ MOTS-10 (§594) : SUR LA CI, CE QUI EST TROUVÉ SE LIT SANS OUVRIR LE JOURNAL. Le 18/11, le job a rougi sur une PR qui ne
+//   touchait que ci.yml, et la machine de Claude (Chromium de Playwright, polices réduites à celles de la CI) restait verte : le
+//   détail n'était que dans le journal de l'étape. Une annotation par trouvaille (les dix premières) et un tableau dans le résumé
+//   du job : l'écran, la largeur, la sorte, le texte — visibles sur la page du run.
+if (process.env.GITHUB_ACTIONS) {
+  const esc = (v) => String(v == null ? '' : v).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  erreurs.slice(0, 10).forEach((e) => console.log('::error title=Débordements — relevé incomplet::' + esc(e)));
+  trouves.slice(0, 10).forEach((x) => console.log('::error title=Débordement ' + x.largeur + ' px::' + esc(x.ecran + ' · ' + x.type + ' (' + x.dx + ' px) · ' + x.boite + (x.dans ? ' / ' + x.dans : '') + ' · « ' + x.txt + ' »')));
+  const res = process.env.GITHUB_STEP_SUMMARY;
+  if (res) {
+    const cel = (v) => String(v == null ? '' : v).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    let md = '### Débordements — ' + (ko ? '❌ ' + ko + ' échec(s)' : '✅ aucun') + ' · ' + nbEcrans + ' écrans relevés' + (chromeV ? ' · Chromium ' + chromeV : '') + '\n\n';
+    if (erreurs.length) md += '**Relevé incomplet** : ' + erreurs.slice(0, 10).map(cel).join(' · ') + '\n\n';
+    if (trouves.length) md += '| largeur | écran | sorte | écart | boîte | texte |\n|---|---|---|---|---|---|\n'
+      + trouves.slice(0, 60).map((x) => '| ' + x.largeur + ' px | ' + cel(x.ecran) + ' | ' + cel(x.type) + ' | ' + x.dx + ' px | ' + cel(x.boite + (x.dans ? ' / ' + x.dans : '')) + ' | « ' + cel(x.txt) + ' » |').join('\n') + '\n';
+    try { fs.appendFileSync(res, md + '\n'); } catch (e) { console.log('résumé du job non écrit : ' + e.message); }
+  }
+}
 console.log('\n' + (ko ? '\x1b[31mROUGE\x1b[0m' : '\x1b[32mVERT\x1b[0m') + ' — ' + (ko ? ko + ' échec(s)' : 'aucun débordement'));
 process.exit(ko ? 1 : 0);

@@ -1745,6 +1745,9 @@ function choisirMode(m) {
 function choisirOnglet(k) {
   // Les onglets de la maquette sont ceux du Pilotage : on y va pour de vrai.
   const M = { camp: 'avc', equ: 'equ', sim: 'sim', eco: 'eco', conf: 'cfm', dec: 'equ', an: 'eco' };
+  // ★ MOTS-10 (§594) : « sim » n'est porté que par « Simuler un renfort » (la carte Fin prévue, « À savoir ») — la carte Renfort de
+  //   Décider arrive repliée : _pilGo la déplie et la montre. Avant, on atterrissait sur la tournée.
+  if (k === 'sim' && typeof window._pilGo === 'function') { window._pilGo('renfort'); return; }
   if (typeof window._pilSetTab === 'function') window._pilSetTab(M[k] || k);
 }
 

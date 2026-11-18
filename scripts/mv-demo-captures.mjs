@@ -58,7 +58,8 @@ const ECRANS = [
   S('r-ger-equipes', 'tel', 'gerant', "goTo('home'); setTimeout(function(){ var b=document.querySelector('[data-tuto=\"home.eqj\"]'); if(b) b.click(); }, 400);", { attente: 2200 }),
   S('r-ger-pilotage', 'tel', 'gerant', "goTo('pilotage'); _pilSetTab('auj');", { attente: 2600 }),
   S('r-ger-echeances', 'tel', 'gerant', "goTo('pilotage'); _pilSetTab('avc');", { attente: 2400, centre: '.pil-tile[data-pid=\"echeances\"]', vise: ['.pil-tile[data-pid=\"echeances\"]'] }),
-  S('r-ger-renfort', 'tel', 'gerant', "goTo('pilotage'); _pilSetTab('sim');", { attente: 2400, centre: '.pil-tile[data-pid=\"renfort\"]', vise: ['.pil-tile[data-pid=\"renfort\"]'] }),
+  // MOTS-10 (§594) : la carte Renfort de Décider arrive repliée — la démo l'ouvre comme « Simuler un renfort » (_pilGo).
+  S('r-ger-renfort', 'tel', 'gerant', "goTo('pilotage'); _pilGo('renfort');", { attente: 2400, centre: '.pil-tile[data-pid=\"renfort\"]', vise: ['.pil-tile[data-pid=\"renfort\"]'] }),
   S('r-ger-cout', 'tel', 'gerant', "__ecoTaux(); goTo('pilotage'); _pilSetTab('eco'); setTimeout(function(){ __clic('Parcelles', '.page.active'); }, 900);", { attente: 3000 }),
   S('r-ger-conformite', 'tel', 'gerant', "goTo('pilotage'); _pilSetTab('cfm');", { attente: 2400 }),
   S('r-ger-journal', 'tel', 'gerant', "goTo('journal');"),
@@ -71,7 +72,7 @@ const ECRANS = [
   S('aide-tutos', 'tel', 'gerant', "goTo('home'); setTimeout(function(){ if(window.openAide) openAide(); }, 400);"),
   S('pilotage-auj-pc', 'pc', 'gerant', "goTo('pilotage'); _pilSetTab('auj');", { attente: 2800 }),
   S('cout-pc', 'pc', 'gerant', "__ecoTaux(); goTo('pilotage'); _pilSetTab('eco'); setTimeout(function(){ __clic('Parcelles', '.page.active'); }, 900);", { attente: 3200 }),
-  S('renfort-pc', 'pc', 'gerant', "goTo('pilotage'); _pilSetTab('sim');", { attente: 2600 }),
+  S('renfort-pc', 'pc', 'gerant', "goTo('pilotage'); _pilGo('renfort');", { attente: 2600 }),
   S('journal-pc', 'pc', 'gerant', "goTo('journal');"),
   S('planning-pc', 'pc', 'gerant', "goTo('planning');"),
   S('cave-pc', 'pc', 'gerant', "goTo('cave'); selectCaveSection('aujourdhui');", { attente: 2400 }),

@@ -102,7 +102,10 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{tension:1,conso:1,trx:1,echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  // ★ MOTS-10 (§594) : la tournée du jour arrive REPLIÉE elle aussi (DZ-1 §162 la laissait seule ouverte) — la phrase du haut et son
+  //   en-tête disent jusqu'où et quand ; on l'ouvre pour essayer. Clé jamais gravée chez les clients (_pilNormalize ne garde que
+  //   les clés des défauts) : le défaut s'applique à tous dès le chargement, sans monter _PIL_ST_V.
+  collapsed:{tension:1,conso:1,trx:1,echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1,ordrepassage:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -2148,22 +2151,25 @@ function _dzRep(){
 }
 function _dzRepFin(R){ var f=R.taches.filter(function(x){ return !x.arret&&x.fin; }).map(function(x){ return x.fin; }).sort(); return f.length?f[f.length-1]:null; }
 function _dzRepSim(){ var S=_PIL_SIM||{rep:{}}; return Object.keys(S.rep).some(function(k){ return S.rep[k]; }); }
+// MOTS-10 (§594) : « 3 nov. fin prévue » et la même pastille que la tournée ; « au champ » (hors lexique) → « présents ».
 function _dzStatRep(R){
   if(!R.taches.length) return _pilStat('\u2014',' rien \u00e0 r\u00e9partir');
-  if(R.taches.some(function(x){ return x.arret; })) return _pilStat('\u2014',' un travail ne finit pas');
-  var fin=_dzRepFin(R);
-  return _pilStat(fin?_dzJc(fin):'\u2014',' fin '+(R.taches.length>1?'des '+R.taches.length+' travaux':'du travail'));
+  if(R.taches.some(function(x){ return x.arret; })) return _pilStat('\u2014','')+_pilPhPl('un travail ne finit pas','ko');
+  var fin=_dzRepFin(R), ko=R.taches.some(function(x){ return !x.rien&&!x.ok; });
+  return _pilStat(fin?_dzJc(fin):'\u2014',' fin pr\u00e9vue'+(R.taches.length>1?' des '+R.taches.length+' travaux':''))+(fin?_pilPhPl(ko?'d\u00e9borde':'tient',ko?'ko':'ok'):'');
 }
-function _dzSubRep(R){ return (R.mode==='prio'?_dzPl(R.taches.length,'priorit\u00e9'):'aucune priorit\u00e9')+' \u00b7 '+_dzPers(R.nJour)+' pers. au champ le '+_dzJ(R.ref)+(_dzRepSim()?' \u00b7 simulation':''); }
+function _dzSubRep(R){ return (R.mode==='prio'?_dzPl(R.taches.length,'priorit\u00e9'):'aucune priorit\u00e9')+' \u00b7 '+_dzPers(R.nJour)+' pr\u00e9sents le '+_dzJc(R.ref)+(_dzRepSim()?' \u00b7 simulation':''); }
 function _dzRepHtml(R){
   if(!R.taches.length) return '<div class="pil-empty">Aucun travail ouvert \u00e0 r\u00e9partir.</div>';
   var voir=_pilShow('sim_ordre'), prio=(R.mode==='prio');
-  var h='<div class="pil-dz-note">\u00c0 partir du <b>'+_dzJ(R.ref)+'</b> \u2014 m\u00eame jour, m\u00eame planning, m\u00eames trajets que la tourn\u00e9e.</div><div class="pil-dz-rep">';
+  // MOTS-10 (§594) : « À partir du … — même jour, même planning, mêmes trajets que la tournée » : le jour est dans l'en-tête, la
+  //   méthode dans le « i » (pil.quifait).
+  var h='<div class="pil-dz-rep">';
   R.taches.forEach(function(x,i){
     var sub, d=x.delta||0;
     if(x.equipe){ var ab=x.e0.abs.filter(function(a){ return a.motif!=='hors contrat'&&a.motif!=='pas au planning'; }).map(function(a){ return [a.nom,' (',a.motif,')'].join(''); });
       sub=x.e0.pers.map(function(p){ return p.nom; }).join(', ')+(ab.length?' \u00b7 '+ab.join(', '):''); }
-    else sub=prio?'toute l\u2019\u00e9quipe au champ ce jour-l\u00e0':'part \u00e9gale de l\u2019\u00e9quipe du jour';
+    else sub=prio?'toute l\u2019\u00e9quipe':'part \u00e9gale';
     var tag=x.rien?'<span class="pil-dz-tag ok">rien \u00e0 faire</span>':(x.arret?'<span class="pil-dz-tag gr">\u00e0 l\u2019arr\u00eat</span>'
       :(x.ok?'<span class="pil-dz-tag ok">tient'+(x.f?' \u00b7 '+_dzJc(x.f.fin):'')+'</span>':'<span class="pil-dz-tag ko">d\u00e9borde'+(x.f?' \u00b7 fen\u00eatre '+_dzJc(x.f.fin):'')+'</span>'));
     h+='<div class="pil-dz-rt"><div class="l1"><div class="nm">'+(prio?'<span class="st">'+_mvIcon('etoile',16)+'</span> ':'')+_pilEsc(_opTNom(x.t))
@@ -2178,16 +2184,21 @@ function _dzRepHtml(R){
     h+='<div class="pil-dz-lib">'+(R.vide?'Une priorit\u00e9 sans \u00e9quipe affect\u00e9e prend toute l\u2019\u00e9quipe du jour.'
       :(R.libres.length?'Sans priorit\u00e9 ce jour-l\u00e0\u00a0: <b>'+_pilEsc(R.libres.join(', '))+'</b>':'Toute l\u2019\u00e9quipe du jour est affect\u00e9e.'))
       +((!R.vide&&place>R.nLib)?' \u00b7 <b>+'+_dzPl(Math.round(place-R.nLib),'renfort')+'</b> au-del\u00e0':'')+'</div>';
-  } else h+='<div class="pil-dz-lib">Aucune priorit\u00e9 diffus\u00e9e\u00a0: les <b>'+_dzPers(R.nJour)+' personnes</b> au champ ce jour-l\u00e0 sont r\u00e9parties \u00e9galement. <b>Vigne \u203a Priorit\u00e9 du moment</b> fixe qui fait quoi.</div>';
+  } else h+='<div class="pil-dz-lib">Sans priorit\u00e9\u00a0: les <b>'+_dzPers(R.nJour)+' pr\u00e9sents</b>, \u00e0 parts \u00e9gales.</div>';
+  // MOTS-10 (§594) : le bilan « 3 nov. travail fini » redisait l'en-tête et la ligne du travail : il ne reste que pour plusieurs
+  //   travaux (la fin du dernier) ou un travail sans personne. « + ajoute une personne… » (19 mots) est dans le « i ».
   var bloq=R.taches.some(function(x){ return x.arret; }), fin=_dzRepFin(R);
-  h+='<div class="pil-dz-bil"><b>'+((bloq||!fin)?'\u2014':_dzJ(fin))+'</b><span>'+(bloq?'un travail sans personne ne finit pas':(R.taches.length>1?'les '+R.taches.length+' travaux finis':'travail fini'))+'</span></div>';
+  if(bloq||R.taches.length>1) h+='<div class="pil-dz-bil"><b>'+((bloq||!fin)?'\u2014':_dzJ(fin))+'</b><span>'+(bloq?'un travail sans personne ne finit pas':'les '+R.taches.length+' travaux finis')+'</span></div>';
   if(_dzRepSim()) h+='<div class="pil-dz-reset"><span>Simulation \u2014 rien n\u2019est enregistr\u00e9.</span><button data-sim="reset">\u21ba '+(prio?'Affectation diffus\u00e9e':'R\u00e9partition \u00e9gale')+'</button></div>';
-  return h+'<div class="pil-dz-note">+ ajoute une personne \u00e0 ce travail\u00a0: d\u2019abord quelqu\u2019un sans priorit\u00e9 ce jour-l\u00e0, puis un renfort. \u2212 en retire une.</div>';
+  // Règle ① : qui fait quoi se fixe dans la Vigne (la priorité du moment, administrateur) — un bouton, sous la carte.
+  if(_opCanEdit()) h+='<div class="pil-tv-act">'+_pilTvBtn('priorite','Ouvrir la priorit\u00e9 du moment')+'</div>';
+  return h;
 }
 function _pilSimRefresh(){
   var el=document.getElementById('pil-sim-body'); if(!el||!_PIL_OP_DATA) return;
   var R=_dzRep(); el.innerHTML=_dzRepHtml(R);
   _dzMajEntete('simulateur',_dzStatRep(R),_dzSubRep(R));
+  _pilDcPhraseMaj();   // MOTS-10 (§594) : la phrase du haut suit la tournée et « Qui fait quoi » (_pilOpRefresh finit ici)
 }
 function _pilSimAction(act,ti){
   if(!_PIL_SIM) _PIL_SIM={rep:{}};
@@ -2205,7 +2216,7 @@ function _pilPanelSimulateur(d){
   // La tournée a posé le jour et l'équipe ; masquée, on les calcule ici.
   if(!_pilShow('sim_ordre')||!_DZ_LAST){ _opInit(d); _dzCalc(); }
   var R=_dzRep();
-  return _pilTile('simulateur','#C9A84C','Qui fait quoi \u2014 r\u00e9partir l\u2019\u00e9quipe',_dzStatRep(R),_dzSubRep(R),null,'<div id="pil-sim-body">'+_dzRepHtml(R)+'</div>','pil.quifait');
+  return _pilTile('simulateur','#C9A84C','Qui fait quoi',_dzStatRep(R),_dzSubRep(R),null,'<div id="pil-sim-body">'+_dzRepHtml(R)+'</div>','pil.quifait');
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -2361,7 +2372,6 @@ function _opOrdMap(){ return (typeof window._mvOrdreMap==='function') ? window._
 function _opSavedTask(t){ var e=_opOrdMap()[t]; return (e&&Array.isArray(e.ordre)&&e.ordre.length)?e.ordre.slice():null; }
 function _opSavedLegacy(){ var a=(window.CONFIG||{}).ordre_passage; return (Array.isArray(a)&&a.length)?a.slice():null; }
 function _opSavedSeed(){ var ts=(_PIL_OP&&_PIL_OP.tasks)||[]; for(var i=0;i<ts.length;i++){ var s=_opSavedTask(ts[i]); if(s) return s; } return _opSavedLegacy(); }
-function _opDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); return m?(m[3]+'/'+m[2]):''; }
 function _opEnsureOrder(actTodo){ if(_PIL_OP.order) return; var saved=_opSavedSeed(); _PIL_OP.order=(saved&&saved.length)?saved.slice():_opNNNames(actTodo); }
 function _opParcelles(){
   var act=_opActTodo(), byName={}; act.forEach(function(p){ byName[p.nom]=p; });
@@ -2372,16 +2382,8 @@ function _opParcelles(){
   _PIL_OP.order=out.map(function(p){return p.nom;});
   return out.map(function(p){ return { p:p, nom:p.nom, s:parseFloat(p.surface)||0, reste:Math.round(_opParcResteM(p)*10)/10, pct:_opParcPctM(p), geo:_opGeoOK(p), emos:_opParcTaskNb(p) }; });
 }
-// Ce qui est REELLEMENT diffuse, tout en bas de l'ecran de rangement.
-function _opDiffusHtml(){
-  var m=_opOrdMap();
-  var ks=Object.keys(m).filter(function(k){ var e=m[k]; return e&&Array.isArray(e.ordre)&&e.ordre.length; });
-  var box='font-size:var(--pt-micro,12px);color:var(--texte-doux);border:1px solid var(--gris-clair);border-radius:9px;padding:7px 11px;margin-bottom:8px;';
-  if(!ks.length) return '<div style="'+box+'background:rgba(127,127,127,.05)">Aucune tourn\u00e9e diffus\u00e9e pour l\u2019instant \u2014 l\u2019\u00e9quipe voit ses parcelles dans l\u2019ordre habituel.</div>';
-  return '<div style="'+box+'background:rgba(201,168,76,.07)">'+_mvIcon('boussole',16)+' Diffus\u00e9 \u00e0 l\u2019\u00e9quipe pour : <b style="color:var(--texte)">'
-    +ks.map(function(k){ var e=m[k], dd=_opDateFr(e.date); return _pilEsc(_opTNom(k))+(dd?(' \u00b7 '+dd):''); }).join(' &nbsp;|&nbsp; ')
-    +'</b><div style="margin-top:3px">Chacun voit la tourn\u00e9e du travail qu\u2019il a \u00e0 l\u2019\u00e9cran, \u00e0 sa prochaine ouverture de l\u2019application.</div></div>';
-}
+// MOTS-10 (§594) : _opDiffusHtml (« Aucune tournée diffusée pour l'instant… », « Diffusé à l'équipe pour : … ») est partie — elle
+//   redisait la ligne de la tournée de l'équipe (_dzTriHtml, lue sur _mvTourneeDe), qui seule fait foi depuis TRN-1 (§330).
 
 // ════════════════════════════════════════════════════════════════════
 // ★★★ DZ-1 (§162) — DÉCIDER : LA TOURNÉE DU JOUR ET « QUI FAIT QUOI »,
@@ -2664,14 +2666,21 @@ function _dzCalc(){
   _DZ_LAST={ctx:ctx,ref:ref,H:H,rows:rows,hops:hops,sim:sim,e0:e0,jPlan:eP.J,coupPlan:eP.coup,ver:ver,sp:sp,startPt:sp?sp.p:null,traj:traj,km:km};
   return _DZ_LAST;
 }
+// MOTS-10 (§594) : « 6 jours · fin prévue 3 nov. » et la pastille du verdict (tient, déborde, ne finit pas) — « pour finir » est
+//   hors du lexique (§580c). Aucune pastille quand aucun travail coché n'a de fenêtre : rien à quoi se comparer.
 function _dzStatTour(C){
   if(!C.rows.length) return _pilStat('\u2713',' rien \u00e0 faire');
   if(!C.sim.days.length) return _pilStat('\u2014',' personne au planning');
-  var n=C.sim.days.length, fin=C.sim.days[n-1].iso, ko=C.sim.bloque||C.ver.some(function(v){ return !v.ok; });
-  return _pilStat(n,(n>1?' jours':' jour')+' pour finir \u00b7 '+_dzJ(fin),ko?'d\u00e9borde':null);
+  var n=C.sim.days.length, fin=C.sim.days[n-1].iso;
+  return _pilStat(n,(n>1?' jours':' jour')+' \u00b7 fin pr\u00e9vue '+_dzJc(fin))+_dzPlTour(C);
+}
+function _dzPlTour(C){
+  if(C.sim.bloque) return _pilPhPl('ne finit pas','ko');
+  if(!C.ver.length) return '';
+  return C.ver.some(function(v){ return !v.ok; })?_pilPhPl('d\u00e9borde','ko'):_pilPhPl('tient','ok');
 }
 function _dzSubTour(C){
-  return (_PIL_OP.tasks||[]).map(_opTNom).join(' + ')+' \u00b7 d\u00e8s le '+_dzJ(C.ref.iso)+' \u00b7 '+_dzPers(C.e0.n)+' pers. \u00d7 '+_dzHj(C.e0.J)+' \u00b7 '+(_dzMod()?'simulation':'planning');
+  return (_PIL_OP.tasks||[]).map(_opTNom).join(' + ')+' \u00b7 d\u00e8s le '+_dzJc(C.ref.iso)+' \u00b7 '+_dzPers(C.e0.n)+' pers. \u00d7 '+_dzHj(C.e0.J)+(_dzMod()?' \u00b7 simulation':'');
 }
 function _dzMajEntete(id,stat,sub){
   var t=document.querySelector('.pil-tile[data-pid="'+id+'"]'); if(!t) return;
@@ -2712,20 +2721,26 @@ function _dzTravauxHtml(edit){
   var nA=autres.length-(OP._autres?0:autresOn.length);
   if(autres.length&&(OP._autres||nA>0)) h+='<button class="pil-dz-more" data-op="autres">'+(OP._autres?'moins':'autres travaux ('+nA+')')+'</button>';
   h+='</div>';
-  if(!its.length&&OP.tSrc==='charge') h+='<div class="pil-dz-note">Aucune priorit\u00e9 diffus\u00e9e\u00a0: c\u2019est le travail qui a le plus d\u2019heures restantes. <b>Vigne \u203a Priorit\u00e9 du moment</b> la fixe pour toute l\u2019\u00e9quipe.</div>';
-  if(!its.length&&OP.tSrc==='dates') h+='<div class="pil-dz-note">Aucune priorit\u00e9 fix\u00e9e\u00a0: c\u2019est la seule t\u00e2che dans ses dates de travaux. <b>Vigne \u203a Priorit\u00e9 du moment</b> la fixe pour toute l\u2019\u00e9quipe.</div>';
-  if(!its.length&&OP.tSrc==='choix') h+='<div class="pil-dz-note">'+OP.tasks.length+' t\u00e2ches sont dans leurs dates en m\u00eame temps\u00a0: toutes coch\u00e9es, l\u2019application ne choisit pas. <b>Vigne \u203a Priorit\u00e9 du moment</b> fixe la priorit\u00e9.</div>';
-  if(!its.length&&OP.tSrc==='prochaine') h+='<div class="pil-dz-note">Aucune t\u00e2che dans ses dates aujourd\u2019hui\u00a0: c\u2019est la prochaine qui est coch\u00e9e.</div>';
-  if((OP.tasks||[]).length>1) h+='<div class="pil-dz-note">'+OP.tasks.length+' travaux coch\u00e9s\u00a0: faits sur chaque parcelle avant de passer \u00e0 la suivante.</div>';
+  // MOTS-10 (§594) : pourquoi ce travail est coché, en une ligne ; le chemin de la priorité est dans le « i » (pil.tournee) et sous
+  //   « Qui fait quoi » (« Ouvrir la priorité du moment »). « restantes » était hors du lexique.
+  if(!its.length&&OP.tSrc==='charge') h+='<div class="pil-dz-note">Sans priorit\u00e9\u00a0: le travail qui a le plus d\u2019heures \u00e0 faire.</div>';
+  if(!its.length&&OP.tSrc==='dates') h+='<div class="pil-dz-note">Sans priorit\u00e9\u00a0: la seule t\u00e2che dans ses dates.</div>';
+  if(!its.length&&OP.tSrc==='choix') h+='<div class="pil-dz-note">'+OP.tasks.length+' t\u00e2ches dans leurs dates\u00a0: toutes coch\u00e9es.</div>';
+  if(!its.length&&OP.tSrc==='prochaine') h+='<div class="pil-dz-note">Aucune t\u00e2che dans ses dates\u00a0: la prochaine.</div>';
+  if((OP.tasks||[]).length>1) h+='<div class="pil-dz-note">'+OP.tasks.length+' travaux\u00a0: tous faits sur une parcelle avant la suivante.</div>';
   return h;
 }
+// MOTS-10 (§594) : « toute l'équipe au champ » (hors lexique) ne disait rien de plus que le chiffre ; restent l'équipe affectée à la
+//   priorité, une équipe collective, les absents — ce qui explique le chiffre.
 function _dzEqSrc(C){
-  var b=C.ctx.base, e=C.e0;
-  var src=(b.src==='prio')?'affect\u00e9e \u00e0 la priorit\u00e9':'toute l\u2019\u00e9quipe au champ';
+  var b=C.ctx.base, e=C.e0, out=[];
+  if(b.src==='prio') out.push('affect\u00e9e \u00e0 la priorit\u00e9');
   var coll=e.pers.filter(function(p){ return p.n>1; }).map(function(p){ return ['dont',p.nom,'\u00d7'+p.n].join(' '); });
   var abs=e.abs.filter(function(a){ return a.motif!=='hors contrat'&&a.motif!=='pas au planning'; }).map(function(a){ return [a.nom,a.motif].join(' '); });
   if(abs.length>2) abs=abs.slice(0,2).concat(['+'+(abs.length-2)]);
-  return src+(coll.length?' \u00b7 '+coll.join(', '):'')+(abs.length?' \u00b7 '+abs.join(', '):'');
+  if(coll.length) out.push(coll.join(', '));
+  if(abs.length) out.push(abs.join(', '));
+  return out.join(' \u00b7 ');
 }
 function _dzReglagesHtml(C){
   var OP=_PIL_OP, e=C.e0, mod=_dzMod(), eqMod=_dzEqMod(), jMod=OP.J!=null, cMod=OP.coup!=null, hMod=_dzHMod();
@@ -2736,13 +2751,13 @@ function _dzReglagesHtml(C){
     +'<span class="src'+(eqMod?' mod':'')+'">'+_pilEsc(eqMod?'modifi\u00e9e \u2014 simulation':_dzEqSrc(C))+'</span></button>';
   h+='<div class="pil-dz-set'+(jMod?' mod':'')+'"><span class="k">'+_mvIcon('chrono',16)+'Travail</span>'
     +'<span class="v"><b>'+_dzHj(e.J)+'</b><span class="pil-dz-stp"><button data-op="stp" data-k="jour" data-d="-0.5" aria-label="Journ\u00e9e plus courte"'+(e.J<=1?' disabled':'')+'>\u2212</button><button data-op="stp" data-k="jour" data-d="0.5" aria-label="Journ\u00e9e plus longue"'+(e.J>=12?' disabled':'')+'>+</button></span></span>'
-    +'<span class="src'+(jMod?' mod':'')+'">'+(jMod?'modifi\u00e9 \u2014 planning\u00a0: '+_dzHj(C.jPlan):'planning de '+_DZ_JL[_dzDt(C.ref.iso).getDay()]+' \u00b7 par personne')+'</span></div>';
+    +'<span class="src'+(jMod?' mod':'')+'">'+(jMod?'modifi\u00e9 \u2014 planning\u00a0: '+_dzHj(C.jPlan):'')+'</span></div>';
   h+='<div class="pil-dz-set'+(cMod?' mod':'')+'"><span class="k">'+_mvIcon('repas',16)+'Coupure</span>'
     +'<span class="v"><b>'+_dzMin(e.coup)+'</b><span class="pil-dz-stp"><button data-op="stp" data-k="coup" data-d="-15" aria-label="Coupure plus courte"'+(e.coup<=0?' disabled':'')+'>\u2212</button><button data-op="stp" data-k="coup" data-d="15" aria-label="Coupure plus longue"'+(e.coup>=180?' disabled':'')+'>+</button></span></span>'
-    +'<span class="src'+(cMod?' mod':'')+'">'+(cMod?'modifi\u00e9e \u2014 planning\u00a0: '+_dzMin(C.coupPlan):(e.coup?'planning \u00b7 allonge la pr\u00e9sence':'journ\u00e9e continue au planning'))+'</span></div>';
+    +'<span class="src'+(cMod?' mod':'')+'">'+(cMod?'modifi\u00e9e \u2014 planning\u00a0: '+_dzMin(C.coupPlan):'')+'</span></div>';
   h+='<button class="pil-dz-set'+(hMod?' mod':'')+'" data-op="sheet" data-k="trajet"><span class="k">'+_mvIcon('route',16)+'Trajets</span>'
     +'<span class="v"><b>'+(nH?'environ\u00a0'+_dzMin(moy):'\u2014')+'</b><span class="pil-dz-go">\u203a</span></span>'
-    +'<span class="src'+(hMod?' mod':'')+'">'+(hMod?'r\u00e8gle modifi\u00e9e \u2014 simulation':(nH?'par d\u00e9placement \u00b7 calcul\u00e9s sur les distances'+(sansG?' ('+sansG+' sans position)':''):'une seule parcelle'))+'</span></button>';
+    +'<span class="src'+(hMod?' mod':'')+'">'+(hMod?'r\u00e8gle modifi\u00e9e \u2014 simulation':(nH?(sansG?sansG+' sans position':''):'une seule parcelle'))+'</span></button>';
   h+='</div>';
   if(mod) h+='<div class="pil-dz-reset"><span>Simulation \u2014 rien n\u2019est enregistr\u00e9.</span><button data-op="reset">\u21ba Valeurs r\u00e9elles</button></div>';
   return h;
@@ -2826,15 +2841,15 @@ function _dzRendementHtml(C){
   var w=function(h){ return Math.max(0,Math.min(100,h/U*100)).toFixed(2)+'%'; };
   var uH=Math.max(0,A.used-A.traj/60);
   var tr=[]; if(A.pied>0) tr.push(_dzMin(A.pied)+' à pied'); if(A.cam>0) tr.push(_dzMin(A.cam)+' en camion'); if(A.gps>0) tr.push(_dzMin(A.gps)+' estimées sans GPS');
-  var h='<div class="pil-dz-rdt"><div class="pil-dz-lbl">Rendement de la tournée'+_mvInfoBtn('pil.dzrdt')+'</div>'
+  // MOTS-10 (§594) : « L’ordre actuel est déjà celui « au plus proche ». » (9 mots) → la pastille du titre.
+  var h='<div class="pil-dz-rdt"><div class="pil-dz-lbl">Rendement'+_mvInfoBtn('pil.dzrdt')+(R.same?'<span class="r">'+_pilPhPl('déjà au plus proche','ok')+'</span>':'')+'</div>'
     +'<div class="pil-dz-rdt-bar" aria-hidden="true"><i class="u" style="width:'+w(uH)+'"></i><i class="p" style="width:'+w(A.pied/60)+'"></i><i class="c" style="width:'+w(A.cam/60)+'"></i><i class="g" style="width:'+w(A.gps/60)+'"></i></div>'
-    +'<div class="pil-dz-note"><b>'+_dzRdtPc(A.utile)+'</b> du temps de l’équipe sur les parcelles'+(tr.length?(' \u00b7 trajets : '+tr.join(', ')):' \u00b7 aucun trajet')+'</div>'
-    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+(A.cout!=null?_ecoEur(A.cout):'—')+'</b><span>coût de l’équipe, tournée</span></div>'
-    +'<div class="pil-dz-kpi"><b>'+(A.eurHa!=null?_ecoEur(A.eurHa):'—')+'</b><span>revient à l’hectare</span></div>'
+    +'<div class="pil-dz-note"><b>'+_dzRdtPc(A.utile)+'</b> du temps sur les parcelles'+(tr.length?(' \u00b7 trajets : '+tr.join(', ')):' \u00b7 aucun trajet')+'</div>'
+    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+(A.cout!=null?_ecoEur(A.cout):'—')+'</b><span>coût de la tournée</span></div>'
+    +'<div class="pil-dz-kpi"><b>'+(A.eurHa!=null?_ecoEur(A.eurHa):'—')+'</b><span>à l’hectare</span></div>'
     +'<div class="pil-dz-kpi"><b>'+_opFmtHa(A.surf)+'</b><span>sur la tournée</span></div></div>'
     +((A.cout==null)?'<div class="pil-dz-note">Le coût demande les taux horaires de l’équipe, réservés à l’administrateur.</div>':(A.nSans?('<div class="pil-dz-note">Taux moyen pour '+_dzPl(A.nSans,'personne')+' sans taux propre.</div>'):''));
-  if(R.same) h+='<div class="pil-dz-note">L’ordre actuel est déjà celui « au plus proche ».</div>';
-  else if(R.B){
+  if(R.B){
     var B=R.B, best=function(a,b,low){ return (a!=null&&b!=null&&(low?a<b-1e-9:a>b+1e-9)); };
     var row=function(lib,X,Y){ return '<tr><td>'+lib+'</td><td'+(best(X.jours,Y.jours,true)?' class="mieux"':'')+'>'+X.jours+'</td>'
       +'<td'+(best(X.traj,Y.traj,true)?' class="mieux"':'')+'>'+_dzMin(X.traj)+'</td>'
@@ -2848,27 +2863,32 @@ function _dzRendementHtml(C){
 }
 function _dzResultatHtml(C){
   var sim=C.sim, rows=C.rows;
-  if(!sim.days.length) return '<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>Personne de cette \u00e9quipe n\u2019est au planning dans les mois qui viennent. Ajoutez quelqu\u2019un dans la case \u00c9quipe.</div></div>';
+  if(!sim.days.length) return '<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>Personne de cette \u00e9quipe au planning\u00a0: ajoutez quelqu\u2019un dans la case \u00c9quipe.</div></div>';
   var d1=sim.days[0], si=d1.parcs.length?d1.parcs[d1.parcs.length-1]:0, st=rows[si], n=sim.days.length, last=sim.days[n-1];
   var reste=Math.max(0,sim.per[si].h0-(d1.done[si]||0));
-  var sub=(n<2)?'<b>termin\u00e9e</b> \u2014 tout est fini ce soir':((reste<0.05)?'<b>termin\u00e9e</b> \u2014 la suivante le '+_dzJ(sim.days[1].iso):'en cours \u2014 il restera <b>'+_opFmtH(reste)+'</b>, reprise le '+_dzJ(sim.days[1].iso));
-  var h='<div class="pil-dz-hero"><div class="k">'+_dzJ(d1.iso)+' \u2014 le soir, l\u2019\u00e9quipe est \u00e0</div>'
+  // MOTS-10 (§594) : « mar. 27 oct. — le soir, l'équipe est à » → « Ce soir » (ou « mer. 28 oct., le soir ») ; les trois chiffres
+  //   du jour gardent leur place, en deux mots chacun. La fin reste ICI, sous les réglages : au téléphone, l'en-tête de la carte est
+  //   loin quand on touche − ou +, et c'est elle qui répond.
+  var sub=(n<2)?'<b>tout est fini</b>':((reste<0.05)?'<b>finie</b> \u00b7 suite le '+_dzJc(sim.days[1].iso):'reste <b>'+_opFmtH(reste)+'</b> \u00b7 reprise le '+_dzJc(sim.days[1].iso));
+  var h='<div class="pil-dz-hero"><div class="k">'+(d1.iso===_dzAuj()?'Ce soir':_dzJ(d1.iso)+', le soir')+'</div>'
     +'<div class="stop">'+_mvIcon('epingle',20)+_pilEsc(st.nom)+'</div><div class="sub">'+sub+'</div>'
-    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+_opFmtHa(d1.surf)+'</b><span>faits le 1er jour</span></div>'
+    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+_opFmtHa(d1.surf)+'</b><span>faits</span></div>'
     +'<div class="pil-dz-kpi"><b>'+_opFmtH(d1.work)+'</b><span>de travail</span></div>'
-    +'<div class="pil-dz-kpi"><b>'+_dzMin(d1.traj)+'</b><span>de trajets</span></div></div>'
-    +'<div class="pil-dz-fin"><div class="l1"><b>'+_dzPl(n,'jour')+'</b><span>pour finir \u2192 <b>'+_dzJ(last.iso)+'</b></span></div>';
+    +'<div class="pil-dz-kpi"><b>'+_dzMin(d1.traj)+'</b><span>de trajet</span></div></div>'
+    +'<div class="pil-dz-fin"><div class="l1"><b>'+_dzPl(n,'jour')+'</b><span>fin pr\u00e9vue <b>'+_dzJ(last.iso)+'</b></span></div>';
   var tot=rows.reduce(function(a,r){ return a+r.reste; },0), suite=_dzSuiteTxt(sim);
-  h+='<div class="pil-dz-note">'+_opFmtH(tot)+' \u00e0 faire sur '+_dzPl(rows.length,'parcelle')+(suite?' \u00b7 '+suite:'')+'</div>';
+  h+='<div class="pil-dz-note">reste '+_opFmtH(tot)+' sur '+_dzPl(rows.length,'parcelle')+(suite?' \u00b7 '+suite:'')+'</div>';
   if(sim.bloque) h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div><b>La tourn\u00e9e ne se termine pas</b> \u2014 '+_dzPt('l\u2019\u00e9quipe n\u2019est plus au planning apr\u00e8s le '+_dzJc(last.iso))+'</div></div>';
   else {
     var multi=C.ver.length>1, renf=_pilShow('sim_cout');
     C.ver.forEach(function(v){
       var nom=multi?'<b>'+_pilEsc(_opTNom(v.t))+'</b> \u00b7 ':'';
       if(v.passee) h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>'+nom+_dzPt('la fen\u00eatre s\u2019est ferm\u00e9e le '+_dzJc(v.f.fin))+'</div></div>';
-      else if(v.ok) h+='<div class="pil-dz-verd ok">'+_mvIcon('check',16)+'<div>'+nom+'<b>tient dans la fen\u00eatre</b> \u2014 fini le '+_dzJc(v.fin)+', fen\u00eatre jusqu\u2019au '+_dzJc(v.f.fin)+' ('+_dzPl(v.jr,'jour travaill\u00e9','jours travaill\u00e9s')+' d\u2019ici l\u00e0).</div></div>';
-      else h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>'+nom+'<b>d\u00e9borde de '+_dzPl(v.over,'jour')+'</b> \u2014 '+_dzPt('la fen\u00eatre ferme le '+_dzJc(v.f.fin))
-        +(v.besoin?'<br>Il faudrait <b>'+_dzPl(v.besoin,'personne')+' de plus</b> chaque jour, trajets compris.':'<br>M\u00eame avec quarante personnes de plus, \u00e7a ne tient pas.')
+      // MOTS-10 (§594) : « tient dans la fenêtre — fini le 3 nov., fenêtre jusqu'au 28 févr. (89 jours travaillés d'ici là) » : la
+      //   fin est juste au-dessus ; reste la pastille et la limite de la fenêtre.
+      else if(v.ok) h+='<div class="pil-dz-vl">'+nom+_pilPhPl('tient \u00b7 fen\u00eatre jusqu\u2019au '+_dzJc(v.f.fin),'ok')+'</div>';
+      else h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>'+nom+'<b>d\u00e9borde de '+_dzPl(v.over,'jour')+'</b> \u2014 '+_dzPt('fen\u00eatre jusqu\u2019au '+_dzJc(v.f.fin))
+        +(v.besoin?'<br>Il faudrait <b>+'+_dzPl(v.besoin,'personne')+'</b> chaque jour.':'<br>M\u00eame avec quarante personnes de plus, \u00e7a ne tient pas.')
         +'<div class="act">'+(v.besoin?'<button data-op="essai" data-r="'+v.besoin+'">Essayer +'+v.besoin+'</button>':'')+(renf?'<button data-op="renfort">Voir le renfort \u203a</button>':'')+'</div></div></div>';
     });
   }
@@ -2877,11 +2897,11 @@ function _dzResultatHtml(C){
   return h+_dzRendementHtml(C);
 }
 function _dzTriHtml(C,edit){
-  if(!edit) return '<div class="pil-dz-note pil-dz-ro">'+_mvIcon('cadenas',16)+' Tourn\u00e9e d\u00e9finie par l\u2019administrateur \u2014 lecture seule. Vos parcelles s\u2019affichent dans cet ordre, avec leur num\u00e9ro, dans Vigne.</div>';
+  if(!edit) return '<div class="pil-dz-note pil-dz-ro">'+_mvIcon('cadenas',16)+' Lecture seule\u00a0: l\u2019administrateur r\u00e8gle la tourn\u00e9e.</div>';
   var act=_opActTodo(), st=C.startPt, cur=C.rows.map(function(r){ return r.nom; }).join('|');
   function chip(mode,lab,on){ return '<button class="pil-dz-sort'+(on?' on':'')+'" data-op="sort" data-mode="'+mode+'">'+lab+'</button>'; }
   var nnO=_opNNNames(act), kmN=st?_opFmtM(_opRouteLen(nnO.map(_opParcByNom).filter(Boolean),st)):'';
-  var h='<div class="pil-dz-lbl">L\u2019ordre de passage<span class="r">puis ajuste au \u21c5</span></div><div class="pil-dz-sorts">';
+  var h='<div class="pil-dz-lbl">L\u2019ordre de passage</div><div class="pil-dz-sorts">';
   h+=chip('nn',_mvIcon('boussole',16)+'Au plus proche'+(kmN?' <small>\u00b7 '+kmN+'</small>':''),nnO.join('|')===cur);
   if(_opHasCom()){ var co=_opComNames(act), kmC=st?_opFmtM(_opRouteLen(co.map(_opParcByNom).filter(Boolean),st)):''; h+=chip('com',_mvIcon('bureau',16)+'Par commune'+(kmC?' <small>\u00b7 '+kmC+'</small>':''),co.join('|')===cur); }
   h+=chip('dom','Ordre du domaine')+chip('surfD','Grandes d\u2019abord')+chip('avc','Moins avanc\u00e9es')+chip('rev','\u21c5 Inverser')+'</div>';
@@ -2891,11 +2911,14 @@ function _dzTriHtml(C,edit){
   // ★ TRN-1 (§330) — la tournée se règle dans la roue crantée de la Vigne (Nico, 14/10) : Décider la SUIT et ne l'écrit
   //   plus. Les tris ci-dessus restent un essai à l'écran ; rien ne part chez l'équipe d'ici.
   var trn=null; (_PIL_OP.tasks||[]).some(function(t){ trn=(typeof window._mvTourneeDe==='function')?window._mvTourneeDe(t):null; return !!trn; });
-  var trnM=trn?/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(trn.date||'')):null, trnD=trnM?(trnM[3]+'/'+trnM[2]):'';
-  h+='<div class="pil-dz-save"><span class="pil-dz-trn">'+_mvIcon('route',16)+(trn?('Tourn\u00e9e \u00ab\u00a0'+_pilEsc(trn.nom)+'\u00a0\u00bb'+(trnD?(' \u00b7 r\u00e9gl\u00e9e le '+trnD):'')):'Aucune tourn\u00e9e pour ce travail')+'</span>'
+  // MOTS-10 (§594) : « Aucune tournée pour ce travail », puis « Aucune tournée diffusée pour l'instant — l'équipe voit ses parcelles
+  //   dans l'ordre habituel » disaient deux fois la même chose : une ligne, celle de la tournée que l'équipe suit (_mvTourneeDe),
+  //   avec le bouton qui l'ouvre dans la Vigne. « Les tris ci-dessus sont un essai… roue crantée de la Vigne » (21 mots) → le « i ».
+  var trnD=(trn&&/^\d{4}-\d{2}-\d{2}$/.test(String(trn.date||'')))?_dzJc(trn.date):'';
+  h+='<div class="pil-dz-save"><span class="pil-dz-trn">'+_mvIcon('route',16)+'Tourn\u00e9e de l\u2019\u00e9quipe\u00a0: '+(trn?('<b>\u00ab\u00a0'+_pilEsc(trn.nom)+'\u00a0\u00bb</b>'+(trnD?(' \u00b7 '+trnD):'')):'aucune')+'</span>'
     +(_opCanEdit()?'<button class="go" data-op="trn">'+_mvIcon('crayon',16)+(trn?'Modifier la tourn\u00e9e':'Cr\u00e9er une tourn\u00e9e')+'</button>':'')+'</div>'
-    +'<p class="pil-dz-essai">Les tris ci-dessus sont un essai\u00a0: rien n\u2019est enregistr\u00e9 ici. La tourn\u00e9e se r\u00e8gle dans la roue crant\u00e9e de la Vigne.</p>';
-  return h+'<div class="pil-dz-dif">'+_opDiffusHtml()+'</div>';
+    +'<p class="pil-dz-essai">Ici, un essai\u00a0: rien n\u2019est enregistr\u00e9.</p>';
+  return h;
 }
 function _dzSlot(i){ return '<button class="pil-dz-slot" data-op="drop" data-i="'+i+'"><i></i><span>\u21b3 INS\u00c9RER ICI</span><i></i></button>'; }
 // DEBORD-1 (§593) : le nom dans son <span class="nmt"> (c'est lui qui finit en « … ») ; « J3→J4 » et « · N travaux » restent entiers à côté.
@@ -2923,7 +2946,7 @@ function _dzListeHtml(C,edit){
   var runs={}; if(edit&&hasCom) _opRuns(rows).forEach(function(r){ if(r.com&&r.names.length>1) runs[r.i0]=r; });
   sim.days.forEach(function(d,k){
     h+='<div class="pil-dz-dh'+(k?' nx':'')+'"><span class="j">J'+(k+1)+'</span><span class="t">'+_dzJ(d.iso)+' <small>\u00b7 '+_dzPers(d.n)+' pers. \u00b7 '+_dzHj(d.J)+'</small></span><span class="m">'+_opFmtHa(d.surf)+'</span></div>';
-    if(d.reprise!=null){ var rp=rows[d.reprise]; h+='<div class="pil-dz-cont">reprise\u00a0: '+_pilEsc(rp.nom)+' \u2014 '+_opFmtH(d.done[d.reprise]||0)+' ce jour-l\u00e0'+(sim.per[d.reprise].d1===k?', termin\u00e9e':'')+'</div>'; }
+    if(d.reprise!=null){ var rp=rows[d.reprise]; h+='<div class="pil-dz-cont">reprise\u00a0: '+_pilEsc(rp.nom)+' \u00b7 '+_opFmtH(d.done[d.reprise]||0)+(sim.per[d.reprise].d1===k?' \u00b7 termin\u00e9e':'')+'</div>'; }
     rows.forEach(function(r,i){
       if(!sim.per[i]||sim.per[i].d0!==k) return;
       if(runs[i]) h+='<div class="pil-dz-run"><span>'+_pilEsc(runs[i].com)+' \u00b7 '+runs[i].names.length+'</span><i></i><button data-op="pickr" data-i="'+i+'">\u21c5 bloc</button></div>';
@@ -2938,7 +2961,8 @@ function _dzListeHtml(C,edit){
     jamais.forEach(function(i){ h+=_dzRowHtml(rows[i],i,null,false,edit,hasCom); });
   }
   h+='</div>';
-  if(edit) h+='<div class="pil-dz-note">Pour ranger\u00a0: <b>\u21c5</b> prend la parcelle en main, une <b>fente dor\u00e9e</b> la repose'+(hasCom?' \u2014 <b>\u21c5 bloc</b> d\u00e9place toute une commune':'')+'. <b>Enregistrer</b> la diffuse \u00e0 l\u2019\u00e9quipe, dans Vigne.</div>';
+  // MOTS-10 (§594) : « Enregistrer la diffuse à l'équipe » parlait d'un bouton parti avec TRN-1 (§330) : ici, rien ne s'enregistre.
+  if(edit) h+='<div class="pil-dz-note"><b>\u21c5</b> prend une parcelle, une <b>fente dor\u00e9e</b> la repose'+(hasCom?'\u00a0; <b>\u21c5 bloc</b>\u00a0: toute une commune':'')+'.</div>';
   return h;
 }
 
@@ -2970,7 +2994,7 @@ function _opMapSvg(seqRows,w){
   var dist=_opRouteLen(todoGeo,startPt);
   return '<div style="position:relative;background:radial-gradient(130% 100% at 30% 0%,#1f2a1c,#161d14);border:1px solid var(--gris-clair);border-radius:12px;overflow:hidden;margin-bottom:11px">'
     +window._mvGraphSvg(gc,'Tourn\u00e9e hors ligne : '+todoGeo.length+' parcelles \u00e0 faire, trajet d\u2019environ '+_opFmtM(dist)+'.',svg)
-    +'<div style="position:absolute;right:9px;top:8px;font-size:var(--pt-micro,12px);font-weight:600;color:#C9A84C;background:rgba(20,17,13,.6);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>'
+    +'<div style="position:absolute;right:9px;top:8px;font-size:var(--pt-micro,12px);font-weight:600;color:#C9A84C;background:rgba(20,17,13,.6);padding:3px 8px;border-radius:8px">trajet environ '+_opFmtM(dist)+'</div>'
     +'<div style="position:absolute;left:9px;bottom:7px;font-size:var(--pt-lbl,12px);color:#A79E8C;background:rgba(20,17,13,.55);padding:2px 7px;border-radius:8px">\uD83D\uDFE2 d\u00e9part \u00b7 \uD83D\uDFE1 \u00e0 faire \u00b7 \u26AB fait</div></div>';
 }
 
@@ -3239,7 +3263,7 @@ function _opInit(d){
 function _pilPanelOrdrePassage(d){
   _opInit(d);
   var C=_dzCalc();
-  return _pilTile('ordrepassage','#C9A84C','La tourn\u00e9e du jour \u2014 jusqu\u2019o\u00f9\u00a0?',_dzStatTour(C),_dzSubTour(C),null,'<div id="pil-op-body">'+_opBodyC(C)+'</div>','pil.tournee');
+  return _pilTile('ordrepassage','#C9A84C','La tourn\u00e9e du jour',_dzStatTour(C),_dzSubTour(C),null,'<div id="pil-op-body">'+_opBodyC(C)+'</div>','pil.tournee');
 }
 
 
@@ -4027,10 +4051,11 @@ window._rfChoix=function(cle,v){
 function _pilPanelRenfort(d){
   _RF_D=d;
   // RENF-2 (§224) : la tuile redit le calendrier — l'effectif le plus haut et son coût, ou « l'équipe suffit ».
+  // MOTS-10 (§594) : la pastille de L'équipe & le matériel (« à prévoir », « l'équipe suffit ») ; l'intérieur suit le lot du renfort.
   var corps=_rfBody(d), stat=_pilStat('\u2014',''), Q=_RF_RES;
-  if(Q && Q.ok) stat=Q.pointe ? _pilStat(Q.pointe,' saisonnier'+(Q.pointe>1?'s':'')+' \u00b7 '+_ecoEur(Q.cout)) : _pilStat('0',' renfort \u00b7 l\u2019\u00e9quipe suffit');
-  return _pilTile('renfort','#C9A84C','Renfort \u2014 combien, et quand', stat,
-    'ce qu\u2019il reste \u00e0 faire, aux heures du planning, sans heures sup', null,
+  if(Q && Q.ok) stat=Q.pointe ? _pilStat(Q.pointe,' saisonnier'+(Q.pointe>1?'s':'')+' \u00b7 '+_ecoEur(Q.cout))+_pilPhPl('\u00e0 pr\u00e9voir','or') : _pilStat('0','')+_pilPhPl('l\u2019\u00e9quipe suffit','ok');
+  return _pilTile('renfort','#C9A84C','Renfort', stat,
+    'aux heures du planning, sans heures sup', null,
     '<div id="pil-rf-body">'+corps+'</div>');
 }
 
@@ -4044,15 +4069,39 @@ function _rfRefresh(){
   }
 }
 
+// ★ MOTS-10 (§594) : Décider allégé SUR PLACE — la règle de Travaux (§590) : une phrase en haut (_pilDcPhrase), les trois cartes
+//   repliées (un titre, un chiffre, une pastille), le détail au toucher, un bouton vers le module où l'on agit. Les simulateurs
+//   et leurs calculs ne bougent pas : seuls leurs mots, et ce qui se redisait d'un bloc à l'autre.
 function _pilTabSim(d){
-  var H='<div class="pil-panels">';
+  var H='';
   if(_pilShow('sim_ordre')) H+=_pilPanelOrdrePassage(d);
   if(_pilShow('sim_etsi')) H+=_pilPanelSimulateur(d);
   if(_pilShow('sim_cout')) H+=_pilPanelRenfort(d);
-
-  H+='</div>';
-  return H;
+  if(!H) return '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 activez-les via \u00ab Choisir les indicateurs \u00bb.</div>';
+  return '<div class="pil-tv pil-dc"><div class="pil-panels">'+H+'</div></div>';
 }
+// La phrase du haut : le travail, jusqu'où ce soir, la fin prévue, le renfort. Les nombres des trois cartes, lus sur LEURS calculs
+//   (_DZ_LAST pour la tournée, _DZ_REP_LAST pour « Qui fait quoi », _RF_RES pour le renfort) : aucun calcul de plus. Elle suit les
+//   essais (le jour choisi, une personne de plus) et le dit : « simulation ».
+function _pilDcPhrase(){
+  var p=[], C=_pilShow('sim_ordre')?_DZ_LAST:null, R=_pilShow('sim_etsi')?_DZ_REP_LAST:null, Q=_pilShow('sim_cout')?_RF_RES:null;
+  var nom=(_PIL_OP&&_PIL_OP.tasks||[]).map(_opTNom).join(' + ');
+  if(C&&C.rows&&C.rows.length&&C.sim&&C.sim.days.length){
+    var d1=C.sim.days[0], si=d1.parcs.length?d1.parcs[d1.parcs.length-1]:0, st=C.rows[si], fin=C.sim.days[C.sim.days.length-1].iso;
+    var ko=C.ver.some(function(v){ return !v.ok; });
+    p.push('<b>'+_pilEsc(nom)+'</b> : '+(C.ref.iso===_dzAuj()?'ce soir':'le '+_dzJc(C.ref.iso))+' \u00e0 <b>'+_pilEsc(st.nom)+'</b>');
+    if(C.sim.bloque) p.push('<b class="ko">ne finit pas</b>');
+    else p.push('fin pr\u00e9vue <b'+(ko?' class="ko"':'')+'>'+_dzJc(fin)+'</b>'+(ko?' \u00b7 <b class="ko">d\u00e9borde</b>':''));
+  } else if(C&&C.rows&&!C.rows.length&&nom) p.push('<b>'+_pilEsc(nom)+'</b> : rien \u00e0 faire');
+  else if(R&&R.taches.length){
+    var fR=_dzRepFin(R), kR=R.taches.some(function(x){ return !x.rien&&!x.ok; });
+    if(fR) p.push('fin pr\u00e9vue <b'+(kR?' class="ko"':'')+'>'+_dzJc(fR)+'</b>');
+  }
+  if(Q&&Q.ok) p.push(Q.pointe?'<b class="or">'+_dzPl(Q.pointe,'saisonnier')+' \u00e0 pr\u00e9voir</b>':'l\u2019\u00e9quipe suffit');
+  if((_PIL_OP&&_dzMod())||_dzRepSim()) p.push('simulation');
+  return p.length?'<span class="pil-tv-ph">'+p.join(', ')+'</span>':_pilEsc(_pilTabLabel('sim'));
+}
+function _pilDcPhraseMaj(){ if(_PIL_TAB!=='sim') return; var el=document.getElementById('pil-souslig-t'); if(el) el.innerHTML=_pilDcPhrase(); }
 
 
 
@@ -6006,7 +6055,8 @@ function _pilTvGo(cible){
     }
     if(cible==='tracbar'){ window._pilGo('tracact'); return; }
     // ★ MOTS-9 (§592) : L'équipe & le matériel — Réglages › Équipe, Tracteur › Entretien, Décider › le renfort (les chemins de _pilGo).
-    if(cible==='equipe'||cible==='entretien'||cible==='renfort'){ window._pilGo(cible); return; }
+    // ★ MOTS-10 (§594) : Décider › Qui fait quoi — la priorité du moment (l'éditeur de la Vigne, PRIO-1 §235).
+    if(cible==='equipe'||cible==='entretien'||cible==='renfort'||cible==='priorite'){ window._pilGo(cible); return; }
     if(cible==='tracteur'){ if(window.goTo) window.goTo('tracteur'); return; }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTvGo'); }
 }
@@ -11465,7 +11515,7 @@ function _pilSkeleton(d,tab){
     +'<div class="mv-ecran-d"><span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span></div></div>'
     +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
     // ★ MOTS-8 (§590) : sur Travaux, la sous-ligne porte la phrase du jour (_pilTvPhrase), posée par _pilFillContent.
-    +'<div class="pil-souslig'+((tab==='avc'||tab==='equ')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
+    +'<div class="pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
     +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
     +(_pilPhotosIci(tab)?('<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'):'')
@@ -11926,6 +11976,27 @@ function _pilFlash(el){
 // Ouvre la page, bascule sur le bon onglet, fait defiler jusqu'au bloc, et le
 // fait clignoter une seconde. Sans le clignotement, on arrive sur un ecran
 // dense sans savoir ce qu'on venait y faire.
+// Une carte qu'un raccourci vient montrer : ouverte, et ENREGISTRÉE ouverte (le geste du toucher, _pilBindContent) — renderPilotage
+//   relit l'état mémorisé, un simple `collapsed[id]=0` ne survivait pas au changement d'onglet. Avant le premier rendu du module
+//   (un lien qui arrive pendant que le Pilotage se charge), l'état n'est pas encore lu : on le lit ici.
+// Montre une carte qu'on vient d'ouvrir : son haut JUSTE SOUS les barres collantes (l'en-tête, la ligne d'écran, les onglets — la
+//   mesure de cockpit-vue.js/colleHaut, sans .pil-tabsbar : les onglets vivent dans l'en-tête depuis TETE-4C), puis un clignotement. _pilFlash centre : la carte du renfort ouverte est plus
+//   haute que l'écran, son titre passait sous les barres (vu sur la capture de la démo, ordinateur).
+function _pilVersCarte(t){
+  if(!t) return;
+  try{
+    var bas=0;
+    document.querySelectorAll('#page-pilotage .mod-header, #page-pilotage .pil-portee').forEach(function(el){
+      var cs=getComputedStyle(el), h=el.getBoundingClientRect().height;
+      if(h&&(cs.position==='sticky'||cs.position==='fixed')) bas=Math.max(bas,(parseFloat(cs.top)||0)+h);
+    });
+    t.style.scrollMarginTop=(Math.round(bas)+12)+'px';
+    t.scrollIntoView({behavior:'smooth',block:'start'});
+    t.style.transition='box-shadow .25s'; t.style.boxShadow='0 0 0 3px var(--or)';
+    setTimeout(function(){ t.style.boxShadow=''; }, 1400);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilVersCarte'); }
+}
+function _pilDeplier(id){ if(!_PIL_STATE) _PIL_STATE=_pilLoadState(); if(!_PIL_STATE) return; if(!_PIL_STATE.collapsed) _PIL_STATE.collapsed={}; if(_PIL_STATE.collapsed[id]){ _PIL_STATE.collapsed[id]=0; _pilSaveState(_PIL_STATE); } }
 window._pilGo = function(cible){
   try{
     // Cible INTERNE : on ne quitte pas le module, on change de niveau.
@@ -11955,14 +12026,22 @@ window._pilGo = function(cible){
     }
     // Cible INTERNE (PRO-1, §269) : « Voir le détail » de la tension du cockpit — la carte par personne, dans L'équipe.
     // ★ MOTS-9 (§592) : la tension est une carte repliée (« Tension ») — on la déplie, puis on la montre.
+    // ★ MOTS-10 (§594) : _pilDeplier ENREGISTRE la carte ouverte — renderPilotage relit l'état mémorisé : venant d'un autre onglet
+    //   (« Voir le détail » d'Aujourd'hui), la carte repartait repliée (mesuré : ouverte = false).
     if(cible==='tension'){
-      if(_PIL_STATE && _PIL_STATE.collapsed) _PIL_STATE.collapsed.tension=0;
+      _pilDeplier('tension');
       if(_PIL_TAB!=='equ'){ _PIL_TAB='equ'; _pilSaveTab('equ'); renderPilotage(); } else _pilFillContent(_pilData());
       setTimeout(function(){ _pilFlash(document.querySelector('#pil-content .pil-tile[data-pid="tension"]')); }, 260);
       return;
     }
     // Cible INTERNE (INACTION-1, §218) : Décider, ou vit le simulateur de renfort.
-    if(cible==='renfort'){ if(_PIL_TAB!=='sim'){ _PIL_TAB='sim'; _pilSaveTab('sim'); renderPilotage(); } return; }
+    // ★ MOTS-10 (§594) : la carte arrive repliée — « Simuler un renfort » ne la dépliait pas : on atterrissait sur la tournée.
+    if(cible==='renfort'){
+      _pilDeplier('renfort');
+      if(_PIL_TAB!=='sim'){ _PIL_TAB='sim'; _pilSaveTab('sim'); renderPilotage(); } else _pilFillContent(_pilData());
+      setTimeout(function(){ _pilVersCarte(document.querySelector('#pil-content .pil-tile[data-pid="renfort"]')); }, 260);
+      return;
+    }
     // Cible INTERNE : l'Exercice de l'Economie, sur l'axe atelier.
     if(cible==='exercice'){
       var _ch=false;
@@ -12374,7 +12453,7 @@ function _pilSimEcoCard(admin){
       +'<span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">'+unite+'</span></span></div>';
   }
   var note = admin
-    ? 'Ces valeurs chiffrent le <b style="color:var(--texte)">surco\u00fbt de retard</b> par parcelle (onglet \u00c9co &amp; conformit\u00e9) et la courbe <b style="color:var(--texte)">\u00ab Renfort : combien, et quand \u00bb</b> (onglet D\u00e9cider). Elles ne touchent \u00e0 aucune paie : le retard est <b style="color:var(--texte)">mod\u00e9lis\u00e9, jamais pay\u00e9</b>. Vide = valeur par d\u00e9faut.'
+    ? 'Ces valeurs chiffrent le <b style="color:var(--texte)">surco\u00fbt de retard</b> par parcelle (onglet \u00c9co &amp; conformit\u00e9) et la carte <b style="color:var(--texte)">\u00ab Renfort \u00bb</b> (onglet D\u00e9cider). Elles ne touchent \u00e0 aucune paie : le retard est <b style="color:var(--texte)">mod\u00e9lis\u00e9, jamais pay\u00e9</b>. Vide = valeur par d\u00e9faut.'
     : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut modifier ces valeurs. Elles chiffrent le surco\u00fbt de retard par parcelle et le simulateur de renfort. Elles ne touchent \u00e0 aucune paie.';
   return '<div style="'+cardCss+'">'
     +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDF9B\uFE0F Simulation \u00e9conomique</div>'
@@ -12612,7 +12691,11 @@ function _pilFillContent(d){
     host.innerHTML=_pilTabEqu(d);
     var _phE=document.getElementById('pil-souslig-t'); if(_phE) _phE.innerHTML=_pilEqPhrase(d);
   }
-  else if(tab==='sim') host.innerHTML=_pilTabSim(d);
+  else if(tab==='sim'){
+    // ★ MOTS-10 (§594) : la phrase du haut se lit APRÈS les trois cartes — elle reprend leurs calculs, elle n'en refait aucun.
+    host.innerHTML=_pilTabSim(d);
+    _pilDcPhraseMaj();
+  }
   else if(tab==='eco') host.innerHTML=_pilTabEco(d);
   else if(tab==='cfm') host.innerHTML=_pilTabCfm(d);
   else if(tab==='arc') host.innerHTML=_pilTabArc(d);

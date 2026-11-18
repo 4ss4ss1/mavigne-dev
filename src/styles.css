@@ -5690,7 +5690,6 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .pil-dz-pill.ok{color:var(--vert-tx,var(--vert-med));}
 .pil-dz-pill.mod{color:var(--orange-tx,var(--orange));}
 .pil-dz-pill.no{color:var(--texte-doux);font-weight:600;}
-.pil-dz-dif{margin-top:var(--e-2,8px);}
 .pil-dz-days{display:flex;flex-direction:column;gap:var(--e-2,8px);margin-top:var(--e-3,12px);}
 .pil-dz-dh{position:sticky;top:56px;z-index:5;display:flex;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-2,8px);padding:var(--e-1,4px) var(--e-2,8px);border:1px solid var(--gris-clair);border-radius:var(--dz-rs);background:var(--bg-card);box-shadow:var(--shadow-sm,0 1px 2px rgba(40,30,15,0.05),0 2px 8px rgba(40,30,15,0.07));}
 .pil-dz-dh .j{flex:none;padding:2px 8px;border-radius:var(--dz-rs);background:var(--or-pale);color:var(--or-tx,var(--terre));font-size:var(--pt-lbl,10.5px);font-weight:600;letter-spacing:.6px;}

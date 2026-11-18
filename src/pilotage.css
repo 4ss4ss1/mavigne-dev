@@ -177,8 +177,8 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 #page-pilotage .pil-tv-ph b.or{color:var(--attention-texte)}
 #page-pilotage .pil-tv-pl.ko{background:var(--danger-doux)}
 #page-pilotage .pil-tv-pl.ko::before{background:var(--danger)}
-#page-pilotage .pil-eq .pil-th-l2 .pil-th-stat{vertical-align:middle}
-#page-pilotage .pil-eq .pil-th-l2 .pil-tv-pl{margin-left:var(--e-2,8px);vertical-align:middle;font-size:var(--pt-micro,12px)}
+#page-pilotage .pil-eq .pil-th-l2 .pil-th-stat,#page-pilotage .pil-dc .pil-th-l2 .pil-th-stat{vertical-align:middle}
+#page-pilotage .pil-eq .pil-th-l2 .pil-tv-pl,#page-pilotage .pil-dc .pil-th-l2 .pil-tv-pl{margin-left:var(--e-2,8px);vertical-align:middle;font-size:var(--pt-micro,12px)}
 #page-pilotage .pil-eq .pil-tv-fh .pil-tv-pl{margin-left:auto;font-weight:var(--fw-reg,400)}
 /* la cuve : le seuil posé sur la barre */
 #page-pilotage .pil-eq .pil-eq-gb{position:relative;overflow:visible}
@@ -190,3 +190,17 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 #page-pilotage .pil-eq-cap{display:grid;grid-template-columns:7em minmax(0,1fr) auto;align-items:center;gap:var(--e-3,12px);min-height:32px;font-size:var(--pt-txt,13px);color:var(--texte-med)}
 #page-pilotage .pil-eq-cap b{font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap}
 #page-pilotage .pil-eq-cap .pil-tv-br{height:8px}
+
+/* ★★★ MOTS-10 (§594) — DÉCIDER ALLÉGÉ SUR PLACE : la règle de Travaux (§590), portée par .pil-tv ; ce qui est propre à l'onglet est
+   sous .pil-dc. Les simulateurs gardent leurs styles (styles.css, DZ-1 §162) : seuls leurs mots changent, et ce qui se redisait. */
+/* la ligne sous une case de « La journée de l'équipe » ne parle plus que d'une modification ou d'une absence : vide, elle se tait */
+#page-pilotage .pil-dc .pil-dz-set .src:empty{display:none}
+/* le verdict qui tient : une pastille (« tient · fenêtre jusqu'au 28 févr. »), le nom du travail devant quand il y en a plusieurs */
+#page-pilotage .pil-dz-vl{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-2,8px);margin-top:var(--e-2,8px);font-size:var(--pt-txt,13px)}
+#page-pilotage .pil-dz-vl .pil-tv-pl{white-space:normal;line-height:1.25;padding-top:2px;padding-bottom:2px}
+/* « déjà au plus proche » : la pastille du titre « Rendement » */
+#page-pilotage .pil-dz-lbl .r .pil-tv-pl{font-weight:var(--fw-med,500)}
+/* « Tournée de l'équipe : aucune » et son bouton, sur une ligne ; « Ici, un essai » dessous */
+#page-pilotage .pil-dc .pil-dz-trn b{font-weight:var(--fw-semi,600);color:var(--texte)}
+/* « Ouvrir la priorité du moment » : sous « Qui fait quoi », comme les boutons des autres onglets */
+#page-pilotage .pil-dc .pil-dz-rep + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-lib + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-bil + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-reset + .pil-tv-act{margin-top:var(--e-3,12px)}
