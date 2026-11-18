@@ -987,6 +987,19 @@ function _emhCommit(m,H,msg){
   window._mvHistMirror(m);
   window.saveData('membres',msg||'\u{1F4C7} Historique mis \u00e0 jour');
 }
+// ★★ CHAINE-1 (§596) — UNE EMBAUCHE QUI SUIT LA PRÉCÉDENTE SANS UN JOUR DE COUPURE NE REMET PAS LE COMPTEUR À ZÉRO.
+//   Ce que la ligne de l'embauche en dit, lu sur la vraie règle (utils.js : _mvSuitSansCoupure, _mvAnnuType) — la même que le
+//   compteur du Planning (_planInContract) et le relevé. Rien si elle suit une coupure (l'encart de la coupure le dit).
+function _emhSuite(P,d,m){
+  if(typeof window._mvSuitSansCoupure!=='function'||!Array.isArray(P))return '';
+  for(var j=1;j<P.length;j++){
+    if(String(P[j].debut||'')!==String(d||''))continue;
+    if(!window._mvSuitSansCoupure(P[j-1],P[j]))return '';
+    var a=window._mvAnnuType(P[j-1].type), b=window._mvAnnuType(P[j].type||(j===P.length-1?(m&&m.type_contrat):''));
+    return '\u00a0\u00b7 '+(a===b?'sans coupure\u00a0: m\u00eame compteur':'sans coupure, mais pay\u00e9 \u00e0 l\u2019heure d\u2019un c\u00f4t\u00e9\u00a0: compteur \u00e0 part');
+  }
+  return '';
+}
 var _EMH_LBL={ embauche:{i:'document',n:'Embauche'}, renouvellement:{i:'rotation',n:'Renouvellement'},
                fin:{i:'\u23F9',n:'Fin de contrat'}, taux:{i:'euro',n:'Changement de taux'} };
 
@@ -1064,7 +1077,9 @@ function _emhHistHtml(m,P,adm){
     var pi=inP(e.d);
     if(prev!==null&&pi>=0&&prev>=0&&pi<prev){
       var n=_emhJours(P[pi].fin,P[prev].debut)-1;
-      h+='<div class="emh-gap"><div class="emh-gap-t">'+_mvIcon('secateur',16)+' Coupure de '+n+' jour'+(n>1?'s':'')
+      // ★ CHAINE-1 (§596) : pas de coupure, pas d'encart — l'ancien « Coupure de 0 jour… compteur soldé » se contredisait.
+      //   La ligne de l'embauche dit qu'il suit sans coupure (_emhSuite).
+      if(n>0)h+='<div class="emh-gap"><div class="emh-gap-t">'+_mvIcon('secateur',16)+' Coupure de '+n+' jour'+(n>1?'s':'')
         +'\u00a0\u2014 du '+_emhFmt(P[pi].fin)+' au '+_emhFmt(P[prev].debut)+'</div>'
         +'<div class="emh-gap-s">Le compteur du contrat pr\u00e9c\u00e9dent est <b>sold\u00e9</b>\u00a0: pay\u00e9, donc \u00e0 z\u00e9ro. '
         +'Le nouveau repart de sa date de d\u00e9but, sans d\u00fb ni indu.</div></div>';
@@ -1074,7 +1089,8 @@ function _emhHistHtml(m,P,adm){
     var sub='';
     if(e.t==='embauche')            sub=(e.type?_escHtml(e.type):'type non renseign\u00e9')+'\u00a0\u00b7 '
                                        +(e.fin?('fin pr\u00e9vue le '+_emhFmt(e.fin)):'sans terme')
-                                       +'\u00a0\u00b7 grille '+_escHtml(e.grille||'standard');
+                                       +'\u00a0\u00b7 grille '+_escHtml(e.grille||'standard')
+                                       +_emhSuite(P,e.d,m);
     else if(e.t==='renouvellement') sub='fin repouss\u00e9e au '+_emhFmt(e.fin)+'\u00a0\u2014 toujours le m\u00eame contrat';
     else if(e.t==='fin')            sub='fin r\u00e9elle\u00a0\u00b7 le compteur est sold\u00e9';
     else                            sub=String(Math.round(e.v*100)/100).replace('.',',')+'\u00a0\u20AC/h\u00a0\u00b7 visible des seuls administrateurs';
@@ -2751,7 +2767,7 @@ function _emhPick(nom){
   var nomA=_escAttr(nom);
   var O=[
     ['embauche','\u{1F4C4}','Embauche', ouvert
-      ?'Cl\u00f4t le contrat en cours et en ouvre un nouveau, avec son propre compteur.'
+      ?'Cl\u00f4t le contrat en cours et en ouvre un nouveau. Sans un jour de coupure (un CDD qui devient CDI), le m\u00eame compteur continue.'
       :'Ouvre un contrat. Son compteur d\u2019heures d\u00e9marre \u00e0 sa date de d\u00e9but.','var(--terre)',true],
     ['renouvellement','\u{1F504}','Renouvellement', ouvert
       ?'Repousse la fin sans couper\u00a0: <b>un seul contrat, un seul compteur</b>.'
@@ -2850,8 +2866,23 @@ function _emhEff(){
   if(apres.length>avant.length){
     var lav=avant.length?avant[avant.length-1]:null;
     var chg=lav&&la&&(lav.grille||'standard')!==(la.grille||'standard');
+    // ★★ CHAINE-1 (§596) : sans un jour de coupure, le compteur continue — seuls les papiers changent (règle de Nico, 12/08 et 18/11).
+    //   Simulé sur la vraie règle (_mvSuitSansCoupure, _mvAnnuType), comme le reste de cet encart.
+    var suit=!!(lav&&la&&String(la.debut||'')===String(e.d||'')&&typeof window._mvSuitSansCoupure==='function'&&window._mvSuitSansCoupure(lav,la));
+    var memeRegime=suit&&window._mvAnnuType(lav.type)===window._mvAnnuType(la.type);
+    if(suit&&memeRegime){
+      box.className='emh-eff good';
+      box.innerHTML='<b>Sans coupure\u00a0: le m\u00eame compteur continue.</b> Seuls les papiers changent'
+        +((lav.type&&la.type&&lav.type!==la.type)?(' ('+_escHtml(lav.type)+' \u2192 '+_escHtml(la.type)+')'):'')+'. '
+        +'Le planning, les heures d\u00e9j\u00e0 faites et le mois du changement restent comme ils sont.'
+        +(chg?('<br><br>La grille passe de <b>'+_escHtml(lav.grille||'standard')+'</b> \u00e0 <b>'+_escHtml(la.grille||'standard')
+          +'</b>. Elle ne s\u2019applique qu\u2019\u00e0 partir du '+_emhFmt(la.debut)+'\u00a0\u2014 les mois d\u00e9j\u00e0 \u00e9coul\u00e9s gardent l\u2019ancienne.'):'');
+      return;
+    }
     box.className='emh-eff warn';
-    box.innerHTML='\u26A0\uFE0F <b>Nouveau contrat.</b> Vous en aurez '+apres.length+'. Le compteur du pr\u00e9c\u00e9dent est '
+    box.innerHTML='\u26A0\uFE0F <b>Nouveau contrat.</b> Vous en aurez '+apres.length+'. '
+      +(suit?'Sans coupure, mais l\u2019un des deux est pay\u00e9 \u00e0 l\u2019heure\u00a0: deux compteurs. ':'')
+      +'Le compteur du pr\u00e9c\u00e9dent est '
       +'<b>sold\u00e9</b> \u00e0 sa date de fin\u00a0; celui-ci d\u00e9marre le <b>'+_emhFmt(la.debut)+'</b>, sans d\u00fb ni indu. '
       +'Le pr\u00e9c\u00e9dent reste lisible, et son relev\u00e9 reste imprimable.'
       +(chg?('<br><br>La grille passe de <b>'+_escHtml(lav.grille||'standard')+'</b> \u00e0 <b>'+_escHtml(la.grille||'standard')

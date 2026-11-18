@@ -121,6 +121,7 @@ var PLAN_MOIS_C=['Janv','Févr','Mars','Avr','Mai','Juin','Juil','Août','Sept',
 window._mvCaveJour=function(nom,iso){ return CAVE[nom+'|'+iso]||''; };
 window._planSurAnnee=function(y,fn){ return fn(); };
 function _planInContract(){ return true; }
+function _planJourSaisissable(){ return true; }   // CHAINE-1 (§596)
 function _planChampPersRange(m,dt){ var k=m.nom+'|'+dt.getDate(); return (k in HJ)?HJ[k]:7; }
 function _planRetardBornes(){ return {pl:7,t0:'08:00',t1:'16:00',continu:false}; }
 function _planCoupureH(){ return '12:00'; }

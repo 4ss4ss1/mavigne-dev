@@ -47,7 +47,7 @@ function reserve(S) {
 function planning(S, ENT, keys) {
   const msgs = [];
   const ctx = { PLANNING_ENTRIES: ENT, planMonth: 9, isAdmin: () => true, _planSelKeys: () => keys, _planSelParse: (k) => ({ nom: k.split('|')[0], d: +k.split('|')[1] }), _pEntYear: (n) => ENT[n],
-    _planInContract: () => true, _planPlanned: () => 7, _planPlId: (m) => m.nom, _pEntDay: (n, m, d) => ENT[n][m] && ENT[n][m][d], _pEntPose: (n, m, d, o) => { (ENT[n][m] = ENT[n][m] || {})[d] = o; return true; },
+    _planInContract: () => true, _planJourSaisissable: () => true, _planPlanned: () => 7, _planPlId: (m) => m.nom, _pEntDay: (n, m, d) => ENT[n][m] && ENT[n][m][d], _pEntPose: (n, m, d, o) => { (ENT[n][m] = ENT[n][m] || {})[d] = o; return true; },
     planSelClear() {}, _pl2Refresh() {} };
   ctx.window = { MEMBRES: [{ nom: 'Jean' }], fbSaveToast: (o, m) => msgs.push(m), showToastAnnuler: (m, f) => { ctx.dernier = { m, f }; } };
   vm.createContext(ctx); vm.runInContext(['function planSelAction(', 'function _planInstantane(', 'function _planRemettre(', 'function _planApplySimple('].map((d) => fonction(S.pla, d)).join('\n') + '\nthis.agir = planSelAction;', ctx);

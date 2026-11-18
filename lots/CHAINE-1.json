@@ -1,0 +1,46 @@
+{
+  "lot": "CHAINE-1",
+  "section": "§596",
+  "base": "b9f452750bc9bd9fd04dc63867454e88060f80bb",
+  "inclut": [],
+  "date": "2026-11-18",
+  "tutos": {
+    "ok": true,
+    "empreinte": "55b55efbb5d638ffea7f18cce0ecab09303e812018cb3db08ca54b7e1cb8d8a5",
+    "date": "2026-11-18T20:30:04.402Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "cave"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "16471d8552a69baf176fdd51cbb1509b3b98c757caa37e19355a1fb88f7a71cf",
+    "CLAUDE.md": "020cbf7ce37fca8024841795216867aa9023fe09562d26254b498150fa4bd9d0",
+    "docs/claude/INDEX.md": "93260e3d412a5cd974a8eebf6a7777268c55f8cc6cb9dfcdd93df5640e23e61f",
+    "docs/claude/chantiers-580-629.md": "14314b474391229425e4cb8061dd2f37915f1eb2268008d1592ea5a17be9e4a2",
+    "docs/claude/journal.md": "221fd9072d2b92818412fe63e0a53a17618699910431839cfcfce382f0022974",
+    "guide/10-planning.html": "a101315cf5022f5ba5379d5fd79a70a70d45094bf8dd7e34247903eb4888413d",
+    "guide/12-reglages.html": "cedb2e275e1022f415e61d8d3f5671d384ecebd8313e9abe34f1991976ff550a",
+    "index.html": "b59a777529a8bbd51adc08219c51ae852c4f1957f0e653164ce730220b86053d",
+    "public/sw.js": "6c90dadf9bba309555cc14f6b651556bff01bf53d9cb2dd86ef274673ea7e445",
+    "scripts/harnais-claude-md.mjs": "7d830e64d2fca2e7690e17fc4c410e99418cd47f791eb60771b674ca950f158b",
+    "scripts/mv-harnais-annuler1.mjs": "c95ed9d078fcb2876cfcd6089470c5ff19a8ca87981447a2fcba345a69e69c5e",
+    "scripts/mv-harnais-cddcdi1.mjs": "64e87128cccd10dc4186943e57bc6570af5a4261757084ee8f7392ecc1ef7d68",
+    "scripts/mv-harnais-effectif-periode.mjs": "94e45acf1ce635c9c1e356e5da5b7f83cc8ac39d2d8dbb65cc8595486940e565",
+    "scripts/mv-harnais-frais1.mjs": "c6d6e8d20104399de5f644d671e7212bfb5d719db6165d4c9ab07127e89e3fa8",
+    "scripts/mv-harnais-jcave1.mjs": "c4aa4e2571c62e4366702d95f5cdc83887e9e071efef172aeb73a270a6c17df9",
+    "scripts/mv-harnais-liste.mjs": "2ab208739f42e9d85de04b9d8f75cf59c805946f2a4d10aeccc777b2563b0aa1",
+    "scripts/mv-harnais-retard.mjs": "76259a01002235c62fd93ab7eff4fe088d1b730d2ff1568160295f937eb1ebaf",
+    "src/planning.js": "ba8b4f7938ca6bb564010326a1da1053d069862d3740f5d8e0e1e123514bb568",
+    "src/reglages.js": "355b574884e7fa596f72a59b3d67f00c24cdd6877a472171316c3b0a6826ed07",
+    "src/styles.css": "9785db58f09d4fd36598e4c32a945f9f83218043323afe4f616c88954de71bbc",
+    "src/utils.js": "40f357fecf47eb578599496939c95aa159b541702191c93f4ecefbef795e1985",
+    "src/whats-new.js": "f27a16deb644870dae72e4e871f8ea9bc96e255cdeeda3f698e1af67f1e4b1c6",
+    "scripts/mv-harnais-chaine1.mjs": "3e7781adb503b4c29d9caf76dd028f2a3457988d953675438907d0f3512498e7"
+  }
+}

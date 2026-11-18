@@ -170,11 +170,12 @@ function jouer(S) {
     && /match \/tenants\/\{tenant\}\/frais\/\{filename\} \{\s*allow read:\s*if !isDemoAccount\(\) && \(isTenantAdmin\(tenant\) \|\| isGtAdmin\(\)\);\s*allow create: if !isDemoAccount\(\)\s*&& isTenantAdmin\(tenant\)\s*&& request\.resource\.size <= 1 \* 1024 \* 1024\s*&& request\.resource\.contentType\.matches\('image\/\.\*'\);\s*allow update: if false;/.test(S.st));
   t('⑤ la fenêtre se range (AJOUR-1 : FORMULAIRE) ; la feuille pose ses styles sans fond de bouton (les pièces .mvbtn)',
     /ovPlanFrais: \['FORMULAIRE'/.test(S.aj) && /\.frs-ph\{/.test(S.css) && !/\.mvbtn[^{]*\{[^}]*background/.test(S.css));
-  const vMatch = /export const APP_VERSION = '([\d.]+)'/.exec(S.uti), v = vMatch ? vMatch[1] : '?';
-  t('⑤ l’aide (cinq onglets, « Les frais à rembourser »), le « i » des km, le guide, l’annonce en tête (' + v + ')',
+  // ★ CHAINE-1 (§596) : l’annonce de FRAIS-1 n’est plus EN TÊTE dès le lot suivant — on la cherche à SA version (11.23), et la
+  //   ligne de son service worker là où elle est (plus forcément la deuxième). « En tête » rougissait au premier lot d’après.
+  t('⑤ l’aide (cinq onglets, « Les frais à rembourser »), le « i » des km, le guide, l’annonce (11.23)',
     /'La fiche d’un salarié', "cinq onglets/.test(S.uti) && /\['Les frais à rembourser',/.test(S.uti) && /'plan\.frais\.km': \{ t:/.test(S.uti) && /_mvInfoBtn\('plan\.frais\.km'\)/.test(S.fr)
-    && /<h3>\{ic:recu\} Les frais à rembourser<\/h3>/.test(S.guide) && new RegExp("export const WHATS_NEW = \\[\\n  \\{ v: '" + v.replace('.', '\\.') + "'[^\\n]*FRAIS-1").test(S.wn)
-    && /\/\/ v[\d.]+ \(18\/11\/2026\) — FRAIS-1 \(§595\)/.test(S.sw.split('\n')[1] || ''));
+    && /<h3>\{ic:recu\} Les frais à rembourser<\/h3>/.test(S.guide) && /\n  \{ v: '11\.23'[^\n]*FRAIS-1/.test(S.wn)
+    && /\n\/\/ v12\.14 \(18\/11\/2026\) — FRAIS-1 \(§595\)/.test(S.sw));
   t('⑤ la maquette v2 et sa ligne au LISEZMOI ; la liste joue ce fichier (et sa contre-épreuve)',
     /<title>Ma Vigne — Frais à rembourser, maquette v2<\/title>/.test(S.maq) && /maquette-frais-v2\.html/.test(S.lm)
     && S.liste.indexOf("mv-harnais-frais1.mjs'") > 0 && S.liste.indexOf("mv-harnais-frais1.mjs --contre'") > 0);

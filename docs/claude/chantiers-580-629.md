@@ -799,3 +799,51 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Sur ordinateur, la fiche d’un salarié est une colonne** : une grille qui suit la largeur de l’écran (`@media`) s’y écrase. Régler la mise en page d’un volet sur **sa** largeur (`container-type:inline-size`, `@container`).
 - ⚠️ **Une ligne qu’on supprime avec sa photo** : la photo ne part du serveur qu’une fois l’« Annuler » passé — sinon Annuler remet une ligne qui pointe vers un fichier effacé.
 - ⚠️ **Toucher `src/firebase.js` fait rejouer tous les tutos** (TUTO-10, §425 : `TOUS_FICHIERS`) — à compter dans le temps du lot.
+
+## 596. ★★★ CHAINE-1 — UN CDD QUI DEVIENT CDI SANS COUPURE : UN SEUL COMPTEUR, ET DES JOURS QUI SE MODIFIENT (18/11 — `src/utils.js` · `src/planning.js` · `src/reglages.js` · `src/styles.css` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `guide/12-reglages.html` · `scripts/mv-harnais-chaine1.mjs` (neuf) · `scripts/mv-harnais-cddcdi1.mjs` · `scripts/mv-harnais-retard.mjs` · `scripts/mv-harnais-annuler1.mjs` · `scripts/mv-harnais-jcave1.mjs` · `scripts/mv-harnais-effectif-periode.mjs` · `scripts/mv-harnais-frais1.mjs` · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs`)
+
+**La demande**, mot pour mot (18/11, au soir) : *« quand je ne veux pas être bloqué sur des modifications quand un salarié passe d'un CDD à un CDI, je ne peux plus modifier la période là sur le planning où il était en CDD. De même que lorsque un CDD et un CDI s'enchaînent, le mois est compté comme un mois standard. Là, c'est juste une formalité au niveau des papiers, mais d'un point de vue du planning, ça ne change strictement rien. Au niveau du comptage d'heures, ça ne change strictement rien. Il ne faut pas être bloqué là-dessus. »* Reformulée, puis « go avec tes recommandations » sur les deux questions posées (ci-dessous).
+
+### 596a. Le constat, dans le code
+
+- La règle existait depuis le 12/08 (§33, lot 2) : *deux contrats qui se touchent n'en font qu'un*. **Seule la présence la suivait** (`_mvContrats` fusionne). Le compteur — `_planInContract`, ~35 appels : plafond, congés, heures sup, grille, maxima — ne lisait que le couple `debut_contrat`/`fin_contrat`, donc **le CDI seul** : le compteur repartait de zéro à la date du CDI, le mois du changement devenait un mois partiel, le CDD sortait en carte « Compteur soldé ». Le relevé, lui, disait déjà « se poursuit sans interruption · même compteur » (§38) : **le document disait la règle, le calcul ne la faisait pas.**
+- CDDCDI-1 (§589, la veille) avait rendu les jours du CDD visibles **en lecture seule** — d'où « je ne peux plus modifier ».
+- Mesuré dans l'appli entière (Node, `mv-app-node`), un CDD du 1er mars au 31 août puis un CDI le 1er septembre : **539,5 h** au compteur de l'année avant, **1 333 h** après — exactement celles d'un CDI depuis mars. Un CDD jusqu'au 15 novembre puis un CDI le 16 : **167,5 h** avant (le CDI seul), 1 333 h après.
+- Vu en route : l'historique de Réglages dessinait « **Coupure de 0 jour** — le compteur du contrat précédent est soldé » entre un CDD et un CDI contigus (`_emhJours(fin, début) − 1 = 0`) : il se contredisait.
+
+### 596b. Les deux décisions (posées en question, « go avec tes recommandations »)
+
+1. **Un contrat séparé par une coupure** (un saisonnier réembauché) garde son compteur à part, soldé — mais **ses jours se modifient** comme les autres. Écrire une case de planning ne mélange aucun compteur : chacun se recalcule sur ses propres dates (`_planSurContrat`).
+2. **Un contrat payé à l'heure** (`MV_HORS_ANNU` : TESA, saisonnier, extra) suivi d'un CDI sans coupure **ne verse pas** ses heures, déjà payées, dans le compteur annuel du CDI : deux chaînes.
+
+### 596c. Ce qui change
+
+- **`window._mvChaines(m)`** (utils.js, à côté de `_mvContrats`) : les périodes de `_mvPeriodes`, regroupées en **chaînes** — contiguës (fin + 1 jour ≥ début suivant ; un chevauchement aussi : une embauche posée avant la fin prévue du contrat d'avant) **et** de même régime (`_mvAnnuType`, la même lecture que `_mvAnnualise` : type inconnu = CDI ; pour la dernière période, `type_contrat` en repli). Rend `{debut, fin, annu, debuts, types}`. Avec `_mvSuitSansCoupure(a, b)` et `_mvAnnuType(type)`.
+- **`_planInContract`** garde le couple du contrat en cours (la paie), mais son **début** recule au début de la chaîne : `_planDebutCompteur(mbr)`. Chemin court sans journal ni contrats précédents (comportement d'avant, à l'octet). La réponse est **gardée par fiche** (`WeakMap`), tant que le journal, les contrats et le couple sont les mêmes objets, de même longueur — le journal est toujours **remplacé**, jamais modifié sur place (`_emhCommit`, `_mvHistGrille`, vérifié par grep) ; le harnais joue un journal remplacé seul, sans toucher au couple.
+- **`_planJourSaisissable(mbr, m, d)`** = `_planInContract || _planJourCouvert` : la question de toute case qu'on coche, qu'on ouvre ou qu'on écrit — la case (`_pl2Cell`), la ligne, la colonne, « tout cocher », les statistiques de la sélection, les trois applications (`_planApplyHeures`, `_planApplyAbs`, `_planApplySimple`), l'effectif, l'absence sur une partie de journée, la marque « cave », « Mon planning », la ligne « Σ jour ». **`_planJourArchive` est retiré** (son seul appelant était la ligne « Σ jour ») ; la case `.pl2-cell-ro`, son `title` « lecture seule » et sa règle de style aussi.
+- **`_planCtrDuMois`** (le relevé, borné à un contrat) lit les chaînes : un mois TESA → CDI n'est plus « un seul contrat ».
+- **La fiche › Compteur** : une carte « Compteur soldé » par **chaîne** passée et annualisée — plus de carte pour un CDD suivi sans coupure, aucune pour un TESA.
+- **Le relevé** : « se poursuit sans interruption » dit « même compteur », ou « payé à l'heure avant · compteur à part ».
+- **Réglages › l'historique** : plus d'encart pour une coupure de 0 jour ; la ligne de l'embauche dit « sans coupure : même compteur » (`_emhSuite`) ; l'effet d'une embauche le lendemain d'une fin le dit avant d'enregistrer (« le même compteur continue », CDD → CDI) ; le choix « Embauche » aussi.
+- **L'aide** (`MV_AIDE.planning`, « Un CDD devenu CDI »), **le guide** (`10-planning`, `12-reglages`), **l'annonce** 11.24 (niv 2 aux administrateurs : le compteur de leurs salariés passés de CDD en CDI reprend leurs heures de CDD — un chiffre qui bouge ; niv 0 pour Réglages).
+
+### 596d. Mesuré
+
+- `mv-harnais-chaine1` (appli entière dans Node) : **42 assertions, 10 contre-épreuves** — l'année et le mois du changement d'un CDD devenu CDI **égaux au caractère près** à ceux d'une fiche à un seul contrat (cumul, plafond, reste ; `_planSummary` de novembre) ; une fiche jamais migrée (`contrats[]` + couple) et un CDI posé avant la fin prévue du CDD aussi ; après une coupure ou un TESA, égaux à un CDI depuis septembre (comme avant) ; écrire, cocher la ligne (30 jours d'avril, 15 de juin, pas la coupure), la grille (bouton ordinaire, tiret dans la coupure), la fiche, le relevé, Réglages.
+- `mv-harnais-cddcdi1`, réécrit pour la nouvelle règle : 12 assertions, 9 contre-épreuves.
+- Harnais adaptés (le banc ne connaissait pas `_planJourSaisissable`) : `retard` (+ `_planJourCouvert` simulé : aucun contrat archivé), `annuler1`, `jcave1`.
+- `effectif-periode` charge `_planDebutCompteur` (son banc monte `_planInContract` seul : sans `_mvChaines`, le repli rend le contrat en cours, comme avant). `frais1` cherchait l’annonce de FRAIS-1 **en tête** de `WHATS_NEW` et sa ligne en **deuxième** ligne de `sw.js` : il aurait rougi au premier lot d’après, n’importe lequel. Il la cherche à sa version (11.23, v12.14).
+- La chaîne entière : **796 commandes, 0 rouge** (484 s). Build, puis `test:tutos --concernes` (le tuto « cave », téléphone, ordinateur, panneau, miroir, côte à côte), `test:mots` (vert, aucune hausse), `test:debord --ecran Planning` (21 écrans, 7 largeurs, aucun débordement), `test:ux` (18 vérifications vertes).
+
+### 596e. Ce qui n'a PAS été vérifié
+
+- **Sur les vraies fiches du domaine** : le compteur des salariés passés de CDD en CDI va **monter** (il reprend les heures du CDD) — c'est voulu, et c'est pourquoi l'annonce est en « À vérifier ». Un salarié dont le CDD avait été payé comme un compteur soldé verrait ces heures comptées deux fois : à regarder fiche par fiche.
+- **Le relevé PDF d'un mois d'un contrat séparé par une coupure** : `_planPaieMois` lit `_planInContract` sans le contexte du contrat (`_planSurContrat` ne borne que `_planInContractCtr`) — d'avant ce lot, non touché ; maintenant que ces jours se saisissent, à regarder si un tel relevé est demandé.
+- Le rendu à l'écran (téléphone, ordinateur) de la grille et de l'historique de Réglages n'a été joué que dans Node.
+
+### 596f. Leçons
+
+- ⚠️ **Un harnais qui cherche l’annonce de son lot « en tête » rougit au lot suivant** (`frais1`) : chercher une annonce à SA version, une ligne de changelog par son texte, jamais par sa position.
+- ⚠️ **Un document qui dit la règle n'est pas un calcul qui la fait.** Le relevé écrivait « même compteur » depuis §38 ; le guide aussi (« deux contrats qui se suivent sans un jour de coupure ne font qu'un ») ; le compteur repartait de zéro. Un harnais qui compare **deux fiches** (la chaîne contre un seul contrat) le prouve en une ligne ; aucune lecture ne l'avait vu.
+- ⚠️ **Un affichage en lecture seule peut être la mauvaise réponse à un vrai défaut** (CDDCDI-1) : le passé redevenait visible, mais la cause — un compteur qui ne voyait que le contrat en cours — restait. Demander « que doit-on pouvoir FAIRE de ces jours ? » avant de choisir entre afficher et bloquer.
+- ⚠️ **Outil, dans le bac à sable** : un `\u2013` écrit dans un heredoc ou une chaîne brute Python arrive **déjà converti** en « – » par la couche d'outil ; une ancre qui doit trouver l'échappement en clair dans le source ne correspond plus. Écrire l'échappement par un marqueur (`@@u2013` → `chr(92)+'u'`) ou le lire du fichier (`repr()`).

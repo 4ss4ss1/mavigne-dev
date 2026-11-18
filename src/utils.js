@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.23';
+export const APP_VERSION = '11.24';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2823,7 +2823,7 @@ var MV_AIDE = {
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Une journée écourtée', "par le salarié (personnel, injustifiée, retard) se rattrape d’abord dans la semaine, par les heures en plus — avant les journées du domaine ; le reste se reprend sur la récup et les heures sup du mois, heure pour heure : 1 h manquée = 1 h de récup en moins, prise sur les heures à 50 % d’abord. Ce qu’elles ne couvrent pas est retenu sur le salaire. Écourtée ou décidée par le domaine, elle se reprend de la même façon, mais ce qui manque va au compteur des heures à rattraper, que les prochaines heures sup comblent : jamais de retenue. Une absence sans motif compte comme injustifiée. Un arrêt de travail, une formation, un événement familial, un congé sans solde ou une mise à pied disciplinaire ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
-      ['Un CDD devenu CDI', "garde son passé à l’écran : dans la grille, les jours du contrat précédent restent affichés, en lecture seule — on les lit, on ne les modifie pas. Un jour qu’aucun contrat ne couvre (avant l’embauche, ou entre deux contrats) reste un tiret. Les compteurs ne lisent toujours que le contrat en cours."],
+      ['Un CDD devenu CDI', "sans un jour de coupure ne change que les papiers : un seul compteur, qui continue, et le mois du changement compte comme un mois normal. Les jours du CDD se modifient comme les autres. Après une coupure, le nouveau contrat repart de zéro et l’ancien est soldé, mais ses jours se modifient aussi. Un contrat payé à l’heure (TESA, saisonnier) garde son compte à part, même suivi d’un CDI. Un jour qu’aucun contrat ne couvre reste un tiret."],
       ['Une mise à pied disciplinaire', "se note sur les jours de la sanction : cochez les cases, Absence, motif «\u00a0Mise à pied disciplinaire\u00a0» — toujours des journées entières. Le contrat est suspendu ces jours-là : ils ne sont ni payés ni rattrapés, et ne touchent ni à la récup ni aux heures sup du mois, qui restent dues ou vont en récup comme d’habitude ; le plafond annuel baisse d’autant. Dans Pour la compta, une ligne à son nom donne les heures du planning à retirer et les dates ; le salaire de base dit alors «\u00a0Aucune autre retenue\u00a0». Les collègues voient «\u00a0absent\u00a0», jamais le motif."],
       ['La fiche d’un salarié', "cinq onglets. Résumé : le cadre Pour la compta — une ligne par chose que la compta saisit : salaire de base (une retenue de tant d’heures, ou « Aucune retenue », et pourquoi), heures à payer en trois cases, une par taux — à 25 %, à 50 %, à 100 % —, chacune avec ce qui vient du mois et le mois d’origine des heures prises au compteur, et la majoration seule d’un dimanche ou d’un férié prévu à part dans sa case —, congés payés, arrêt de travail, acompte, et à part un congé sans solde ou une mise à pied à retirer ; « aucun » quand il n’y a rien —, puis ce qui reste au salarié (récup, heures à rattraper) et le mois en heures, qui s’additionne (tout le mois, les jours à venir aux heures du planning), la case « demande à être payé » et où vont les heures sup. Jours : semaine par semaine, prévu et fait côte à côte, ce que chaque absence devient, les heures sup du jour et les alertes de la semaine. Compteur : le temps de récup du solde d’avant au solde d’après, les heures à rattraper, et l’année. Congés et acomptes : le solde de congés et les avances en euros. Frais : ce que le domaine lui rembourse avec la paie (voir « Les frais à rembourser »). Le mois se change sans fermer la fiche, et le bouton Relevé édite le PDF."],
       ['Les frais à rembourser', "dans la fiche d’un salarié, onglet Frais : une phrase dit ce qui part avec la paie du mois, une bande ce qui manque (un ticket sans sa photo, une carte grise). « Ticket » : la photo, le montant, la date, pour quoi (achat pour le domaine, carburant d’un engin, péage ou parking, repas, hébergement, autre), le motif, payé par carte ou en espèces, la TVA si le ticket l’indique. « Trajet » : les km faits pour le travail avec sa voiture, en plus de son trajet habituel, la date, où et pourquoi — le montant se calcule seul. Sa voiture se déclare une fois : la puissance (case P.6 de la carte grise), l’énergie, au nom de qui est la carte grise, sa photo. Les km se paient au barème fiscal publié le 9 avril 2026 (revenus 2025) : selon la puissance et les km de toute l’année, palier par palier, électrique +20 % ; le « i » du compte des km l’explique. Un taux du domaine le remplace s’il est posé dans la roue crantée (bloc Indemnités kilométriques). Un frais part avec la paie du mois affiché ; si ce mois est figé, avec le suivant. Toucher une ligne la modifie ou la supprime ; un mois figé ne se modifie plus. Administrateur seulement : un salarié ne voit pas les frais de ses collègues, ni leurs photos."],
@@ -4988,10 +4988,12 @@ window._mvCibleAnneau = function(map, g){
 //      Il se pose via _planWide(), jamais en dur.
 //   3. « combien d'heures lui doit-on sur CE contrat ? » -> _planInContract
 //      (planning.js) : plafond des 1607 h, conges, grille. Celui-la ne voit QUE
-//      le contrat en cours et NE DOIT PAS changer. Elargir le prorata melangerait
-//      deux contrats en un seul compteur. Un contrat qui se termine SOLDE son
-//      compteur (paye, donc a zero) ; le suivant repart de sa date de debut,
-//      sans du ni indu.
+//      la CHAINE en cours (★ CHAINE-1, §596 : le contrat en cours et ceux qui le
+//      precedent SANS COUPURE, sous le meme regime — _mvChaines ci-dessous). Il
+//      ne lit jamais un contrat separe par une coupure : elargir le prorata a
+//      celui-la melangerait deux compteurs en un. Un contrat qui se termine
+//      SOLDE son compteur (paye, donc a zero) ; le suivant, s'il demarre apres
+//      une coupure, repart de sa date de debut, sans du ni indu.
 // Le couple debut_contrat/fin_contrat garde donc exactement son sens : le contrat
 // EN COURS, celui que lit la paie. m.contrats[] ne porte que les PRECEDENTS.
 // ══════════════════════════════════════════════════════════════════════
@@ -5219,6 +5221,43 @@ window._mvContrats = function(m){
     } else res.push({ debut: c.debut, fin: c.fin });
   }
   return res;
+};
+
+// ★★ CHAINE-1 (§596, 18/11/2026) — DES CONTRATS QUI SE SUIVENT SANS COUPURE N'ONT QU'UN COMPTEUR.
+//   Nico, 18/11 : « quand un CDD et un CDI s'enchainent [...] c'est juste une formalite au niveau des papiers,
+//   mais d'un point de vue du planning, ca ne change strictement rien. Au niveau du comptage d'heures, ca ne
+//   change strictement rien. » C'etait deja la regle du 12/08 (ci-dessus) — mais seule la PRESENCE la suivait
+//   (_mvContrats). Le compteur (_planInContract) ne lisait que le contrat en cours : le jour d'un CDI, il
+//   repartait de zero a sa date, le mois du changement devenait un mois partiel, et le CDD sortait en
+//   « compteur solde » a part. La grille, elle, mettait ses jours en lecture seule (CDDCDI-1, §589).
+//   UNE CHAINE = des periodes CONTIGUES (fin + 1 jour >= debut suivant ; un chevauchement aussi — une embauche
+//   posee avant la fin prevue du contrat d'avant) ET DE MEME REGIME. Le regime est celui de _mvAnnualise : un
+//   contrat paye a l'heure (MV_HORS_ANNU : TESA, saisonnier, extra) ne verse pas ses heures, deja payees, dans
+//   le compteur annuel du CDI qui le suit — decide avec Nico le 18/11. UN jour de coupure = deux chaines.
+//   Un type inconnu vaut 'CDI', comme dans _mvAnnualise ; pour la DERNIERE periode, le type de la fiche
+//   (type_contrat) sert de repli, comme dans _mvAnnualise encore.
+//   Rend [{debut, fin, annu, debuts:[...], types:[...]}] dans l'ordre ; fin '' = ouverte a droite.
+window._mvAnnuType = function(type){ return window.MV_HORS_ANNU.indexOf(type || 'CDI') < 0; };
+// b suit a sans coupure : contigus ou chevauchants. Une date manquante vaut « ouvert » (meme lecture que _mvContrats).
+window._mvSuitSansCoupure = function(a, b){
+  if(!a || !b) return false;
+  if(!a.fin || !b.debut) return true;
+  return String(b.debut) <= window._mvJourApres(a.fin);
+};
+window._mvChaines = function(m){
+  if(!m) return [];
+  var P = window._mvPeriodes(m), out = [], n = P.length;
+  for(var i = 0; i < n; i++){
+    var p = P[i], ty = p.type || (i === n - 1 ? (m.type_contrat || '') : '');
+    var an = window._mvAnnuType(ty), c = out.length ? out[out.length - 1] : null;
+    if(c && c.annu === an && window._mvSuitSansCoupure(c, p)){
+      if(!c.fin || !p.fin) c.fin = '';
+      else if(p.fin > c.fin) c.fin = p.fin;
+      c.debuts.push(p.debut || '');
+      c.types.push(ty);
+    } else out.push({ debut: p.debut || '', fin: p.fin || '', annu: an, debuts: [p.debut || ''], types: [ty] });
+  }
+  return out;
 };
 
 // Le lendemain d'une date ISO. Sert la regle de contiguite ci-dessus : passer par

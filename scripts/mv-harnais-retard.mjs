@@ -63,6 +63,7 @@ const VOULUES = [
   '_planMinOf', '_planAbsT', '_planAbsH', '_planAbsDef', '_planAbsMotif',
   '_planTimingH', '_planRetardFaites', '_planRetardH', '_planRetardVide',
   '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_pl2CellJour', '_planRefH',   // CDDCDI-1 (§589) : _pl2Cell délègue le jour à _pl2CellJour
+  '_planJourSaisissable',   // CHAINE-1 (§596) : la case et _planApplyAbs demandent « ce jour se saisit-il ? »
   '_planDefTiming', '_planRetardBornes', '_planSolid', '_planSolidJour', '_planEstSolid', '_planPlanned',   // ★ BASEAN-1
   '_planFmt', '_planDays',
   // RECUP-1 : _planDayH, _planWorkH et _pl2Cell lisent aussi l'absence sur une partie de journee
@@ -129,6 +130,7 @@ function _pEntYear(nom){ return ENT[nom] || {}; }
 function _pEntEnsure(nom,m){ ENT[nom]=ENT[nom]||{}; ENT[nom][m]=ENT[nom][m]||{}; return ENT[nom][m]; }
 function _planInContract(){ return CONTRAT; }
 function _planInContractRead(){ return CONTRAT; }
+function _planJourCouvert(){ return false; }   // CHAINE-1 (§596) : aucun contrat archivé dans ce banc — hors contrat, c'est hors de tout contrat
 function _planSelParse(k){ var i=k.lastIndexOf('|'); return {nom:k.slice(0,i), d:parseInt(k.slice(i+1),10)}; }
 function _planEffective(plId,m,d,e){ return _planDayH(plId,m,d,e); }
 function _planFerie(){ return null; }

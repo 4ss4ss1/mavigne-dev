@@ -1044,20 +1044,46 @@ function _planInContract(mbr,m,d){
   if(!mbr.debut_contrat&&!mbr.fin_contrat)return true;
   var year=_pY();
   var ds=year+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  if(mbr.debut_contrat&&ds<mbr.debut_contrat)return false;
+  // ★★ CHAINE-1 (§596) : le compteur part du début de la CHAÎNE en cours, pas du seul contrat en cours.
+  var d0=_planDebutCompteur(mbr);
+  if(d0&&ds<d0)return false;
   if(mbr.fin_contrat&&ds>mbr.fin_contrat)return false;
   return true;
+}
+// ★★ CHAINE-1 (§596, 18/11/2026) — UN CDD QUI DEVIENT CDI SANS COUPURE NE REMET PAS LE COMPTEUR À ZÉRO.
+//   Nico : « c'est juste une formalité au niveau des papiers [...] au niveau du comptage d'heures, ça ne change
+//   strictement rien ». Le couple debut_contrat/fin_contrat reste le contrat EN COURS (celui de la paie) ; seul le
+//   DÉBUT du compteur recule jusqu'au premier contrat de la chaîne : ceux qui le précèdent sans un jour de coupure,
+//   sous le même régime (window._mvChaines, utils.js). Le mois du changement redevient un mois entier ; le plafond,
+//   les congés, les heures sup et la grille lisent les deux contrats comme un seul. Un contrat séparé par une
+//   coupure, ou payé à l'heure avant un CDI, n'entre jamais : son compteur reste soldé à part.
+//   Rend la date (ISO) où le compteur s'ouvre ; '' = ouvert à gauche ; repli : debut_contrat, comme avant.
+//   ⚡ Lu à chaque jour de chaque compteur : la réponse se garde par fiche, tant que son journal, ses contrats et
+//   son couple restent les mêmes (le journal est toujours remplacé, jamais modifié sur place — _emhCommit, _mvHistGrille).
+var _planDebutMemo=(typeof WeakMap==='function')?new WeakMap():null;
+function _planDebutCompteur(mbr){
+  var d0=mbr.debut_contrat||'';
+  if(!d0||typeof window._mvChaines!=='function')return d0;
+  var H=mbr.hist,C0=mbr.contrats;
+  if(!(Array.isArray(H)&&H.length>1)&&!(Array.isArray(C0)&&C0.length))return d0;   // un seul contrat : rien à chaîner
+  var k=_planDebutMemo&&_planDebutMemo.get(mbr);
+  if(k&&k.h===H&&k.hn===(H?H.length:-1)&&k.c===C0&&k.cn===(C0?C0.length:-1)&&k.d0===d0&&k.f0===(mbr.fin_contrat||'')&&k.ty===(mbr.type_contrat||''))return k.v;
+  var v=d0,C=window._mvChaines(mbr)||[];
+  for(var i=C.length-1;i>=0;i--){ if(C[i].debuts&&C[i].debuts.indexOf(d0)>=0){ v=C[i].debut||''; break; } }
+  if(_planDebutMemo)_planDebutMemo.set(mbr,{h:H,hn:H?H.length:-1,c:C0,cn:C0?C0.length:-1,d0:d0,f0:mbr.fin_contrat||'',ty:mbr.type_contrat||'',v:v});
+  return v;
 }
 // ══════════════════════════════════════════════════════════════════════
 // LES DEUX PORTAILS — ne jamais confondre le compteur et la mesure
 // ══════════════════════════════════════════════════════════════════════
 // _planInContract (au-dessus) repond a la question 3 : « combien d'heures
-// lui doit-on SUR CE CONTRAT ? ». Il ne voit QUE le contrat en cours, et
-// c'est juste : un contrat qui se termine SOLDE son compteur (paye, donc a
+// lui doit-on SUR CE CONTRAT ? ». Il ne voit QUE la chaine en cours — le
+// contrat en cours et ceux qui le precedent SANS COUPURE (CHAINE-1, §596) —,
+// et c'est juste : un contrat qui se termine SOLDE son compteur (paye, donc a
 // zero) ; le contrat suivant, s'il demarre apres une coupure, se recale sur
 // l'annualisation depuis sa date de debut, sans du ni indu. Ses ~35 points
 // d'appel — plafond des 1607 h, conges, grille, maxima hebdo — NE DOIVENT
-// PAS etre elargis.
+// PAS etre elargis a un contrat separe par une coupure.
 //
 // _planJourCouvert repond a la question 2 : « a-t-il travaille CE JOUR-LA,
 // sous n'importe lequel de ses contrats ? ». C'est la mesure d'une fenetre
@@ -1081,15 +1107,17 @@ function _planJourCouvert(mbr,m,d){
   }
   return false;
 }
-// ★ CDDCDI-1 (17/11/2026) — LE PASSE D'UN CONTRAT ARCHIVE SE VOIT, IL NE SE SAISIT PAS.
-//   _planInContract (compteur) ne lit que le contrat EN COURS : le jour ou un CDD
-//   devient CDI, toute la grille d'avant la date du CDI tombait en « – » (Hors contrat),
-//   alors que la personne etait la, sans coupure. Pour l'AFFICHAGE, la question est
-//   « etait-il la ? » (_planJourCouvert, tous contrats). Les compteurs, plafonds et
-//   ecritures restent sur _planInContract : ils ne bougent pas.
-//   Rend true si le jour est hors du contrat en cours MAIS couvert par un contrat archive.
-function _planJourArchive(mbr,m,d){
-  return !_planInContract(mbr,m,d)&&_planJourCouvert(mbr,m,d);
+// ★ CDDCDI-1 (17/11/2026) avait rendu VISIBLE le passe d'un contrat archive, en lecture seule.
+// ★★ CHAINE-1 (§596, 18/11/2026) — UN JOUR SOUS CONTRAT SE SAISIT, QUEL QUE SOIT LE CONTRAT.
+//   Nico : « je ne peux plus modifier la periode ou il etait en CDD [...] il ne faut pas etre bloque la-dessus ».
+//   Un contrat qui precede sans coupure est desormais DANS la chaine en cours (_planInContract) : ses jours sont des
+//   jours ordinaires. Un contrat separe par une coupure garde son compteur a lui (solde a part, _planSurContrat) ;
+//   ses jours se corrigent pourtant comme les autres — ecrire une case de planning ne melange aucun compteur, chacun
+//   se recalcule sur ses propres dates. Seul un jour qu'AUCUN contrat ne couvre reste « – », et ne se saisit pas.
+//   C'est la question de toute case qu'on coche, qu'on ouvre ou qu'on ecrit ; les compteurs, eux, restent sur
+//   _planInContract.
+function _planJourSaisissable(mbr,m,d){
+  return _planInContract(mbr,m,d)||_planJourCouvert(mbr,m,d);
 }
 // Drapeau de contexte, meme patron que _planCtxYear. Pose UNIQUEMENT par les
 // cinq entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
@@ -3026,7 +3054,7 @@ function _planAbsConstruit(mbr,d,motifId,part,de,a,com){
 }
 function _planApplyAbsPart(nom,d,motifId,de,a,com){
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
-  if(!mbr||!_planInContract(mbr,planMonth,d))return {n:0,err:'Jour hors contrat.'};
+  if(!mbr||!_planJourSaisissable(mbr,planMonth,d))return {n:0,err:'Jour hors contrat.'};
   var r=_planAbsConstruit(mbr,d,motifId,true,de,a,com);
   if(r.err)return {n:0,err:r.err};
   if(!_pEntPose(nom,planMonth,d,r.e))return {n:0,err:'Saisie refus\u00e9e (valeur invalide).'};
@@ -3430,15 +3458,10 @@ function _pl2WiDefault(){
   return 0;
 }
 function _pl2Cell(mbr,plId,d,L){
-  var _ro=false;
-  if(!_planInContract(mbr,planMonth,d)){
-    // CDDCDI-1 : un jour d'un contrat archive s'affiche (lecture seule), il ne devient pas « hors contrat ».
-    if(!_planJourCouvert(mbr,planMonth,d))return{txt:'\u2013',cls:'pl2c-hc',hc:true};
-    _ro=true;
-  }
-  var c=_pl2CellJour(mbr,plId,d,L);
-  if(_ro)c.ro=true;
-  return c;
+  // CHAINE-1 (§596) : un jour couvert par un contrat — en cours ou archivé — est une case ordinaire ; seul un jour
+  //   qu'aucun contrat ne couvre (avant l'embauche, dans une coupure) devient « – ».
+  if(!_planJourSaisissable(mbr,planMonth,d))return{txt:'\u2013',cls:'pl2c-hc',hc:true};
+  return _pl2CellJour(mbr,plId,d,L);
 }
 function _pl2CellJour(mbr,plId,d,L){
   var e=_pEntDay(mbr.nom,planMonth,d);
@@ -3569,8 +3592,7 @@ function _pl2Board(){
         if(_n>1)c.txt=c.txt+'<sup style="font-size:8px;font-weight:700;opacity:.8">\u00d7'+_n+'</sup>';
       }
       if(c.hc){h+='<div class="pl2-cell pl2-cell-hc'+(we?' pl2-we':'')+'"><span class="pl2-chip pl2c-hc">\u2013</span></div>';return;}
-      // MOTS-7 (§589, régularisation) : sa classe à elle (pl2-cell-ro, curseur au repos) — « pleq-ro » est celle de la vue Équipe du salarié.
-      if(c.ro){h+='<div class="pl2-cell pl2-cell-ro'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule"><span class="pl2-chip '+c.cls+'">'+c.txt+'</span></div>';return;}
+      // CHAINE-1 (§596) : plus de case « lecture seule » (CDDCDI-1, §589) — un jour d'un contrat précédent se coche comme les autres.
       var sel=_pl2Sel[mbr.nom+'|'+d]?' pl2-selon':'';
       // ★ JCAVE-1 (§428) : la marque « cave » du jour — une bande au pied de la case : toute la largeur pour la journée,
       //   la moitié gauche pour le matin, la droite pour l'après-midi. Le chiffre ne change pas : les heures restent payées.
@@ -3584,7 +3606,7 @@ function _pl2Board(){
     if(d==null){h+='<div class="pl2-tot">\u00b7</div>';return;}
     var t=0;
     mbrs.forEach(function(mbr){
-      if(!_planInContract(mbr,planMonth,d)&&!_planJourArchive(mbr,planMonth,d))return;
+      if(!_planJourSaisissable(mbr,planMonth,d))return;
       var e=_pEntDay(mbr.nom,planMonth,d);
       t+=_planEffective(_planPlId(mbr),planMonth,d,e)*_planEffN(mbr,planMonth,d);
     });
@@ -3916,14 +3938,14 @@ window._planSelKeys=_planSelKeys;
 function _planRowDays(nom){
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
   if(!mbr)return [];
-  return _pl2DayCols().filter(function(d){return d!=null&&_planInContract(mbr,planMonth,d);});
+  return _pl2DayCols().filter(function(d){return d!=null&&_planJourSaisissable(mbr,planMonth,d);});
 }
 function _planRowFull(nom){
   var ds=_planRowDays(nom);
   return ds.length>0&&ds.every(function(d){return !!_pl2Sel[nom+'|'+d];});
 }
 function _planColFull(d){
-  var ms=_pl2Actifs().filter(function(m){return _planInContract(m,planMonth,d);});
+  var ms=_pl2Actifs().filter(function(m){return _planJourSaisissable(m,planMonth,d);});
   return ms.length>0&&ms.every(function(m){return !!_pl2Sel[m.nom+'|'+d];});
 }
 
@@ -3942,7 +3964,7 @@ function planRowTap(nom){
 }
 function planColTap(d){
   if(!isAdmin())return;
-  var ms=_pl2Actifs().filter(function(m){return _planInContract(m,planMonth,d);}),on=_planColFull(d);
+  var ms=_pl2Actifs().filter(function(m){return _planJourSaisissable(m,planMonth,d);}),on=_planColFull(d);
   ms.forEach(function(m){if(on)delete _pl2Sel[m.nom+'|'+d];else _pl2Sel[m.nom+'|'+d]=true;});
   _pl2SelSync();
 }
@@ -3950,12 +3972,12 @@ function planSelAll(){
   if(!isAdmin())return;
   var ms=_pl2Actifs(),cols=_pl2DayCols(),tot=0,on=0;
   ms.forEach(function(m){cols.forEach(function(d){
-    if(d==null||!_planInContract(m,planMonth,d))return;
+    if(d==null||!_planJourSaisissable(m,planMonth,d))return;
     tot++; if(_pl2Sel[m.nom+'|'+d])on++;
   });});
   var vider=(tot>0&&on===tot);
   ms.forEach(function(m){cols.forEach(function(d){
-    if(d==null||!_planInContract(m,planMonth,d))return;
+    if(d==null||!_planJourSaisissable(m,planMonth,d))return;
     if(vider)delete _pl2Sel[m.nom+'|'+d];else _pl2Sel[m.nom+'|'+d]=true;
   });});
   _pl2SelSync();
@@ -4007,7 +4029,7 @@ function _planSelStats(){
     if(!mbr)return;
     st.n++;
     if(window._mvEstCollectif&&window._mvEstCollectif(mbr))st.coll++;
-    if(_planInContract(mbr,planMonth,p.d)&&_planPlanned(_planPlId(mbr),planMonth,p.d)>0)st.trav++;
+    if(_planJourSaisissable(mbr,planMonth,p.d)&&_planPlanned(_planPlId(mbr),planMonth,p.d)>0)st.trav++;
     if(_pEntDay(p.nom,planMonth,p.d))st.saisis++;
   });
   return st;
@@ -4053,7 +4075,7 @@ function _planApplyHeures(keys,o){
   keys.forEach(function(k){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
-    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    if(!mbr||isNaN(p.d)||!_planJourSaisissable(mbr,planMonth,p.d)){skip++;return;}
     var pl=_planPlanned(_planPlId(mbr),planMonth,p.d);
     var ex=_pEntDay(p.nom,planMonth,p.d);
     if(remp){
@@ -4093,7 +4115,7 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
   keys.forEach(function(k){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
-    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    if(!mbr||isNaN(p.d)||!_planJourSaisissable(mbr,planMonth,p.d)){skip++;return;}
     var e={absent:true,motif:mo.id,comment:(com||'').trim()};
     // ★ LE TIMING DU JOUR SURVIT AU RETARD. Sans lui, un jour supplementaire perdait
     //   sa seule source d'heures a l'enregistrement : l'entree devenait {absent:true}
@@ -4162,7 +4184,7 @@ function _planApplySimple(keys,kind,force){
       if(yb&&yb[planMonth]&&yb[planMonth][p.d]){delete yb[planMonth][p.d];n++;}else skip++;
       return;
     }
-    if(!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    if(!_planJourSaisissable(mbr,planMonth,p.d)){skip++;return;}
     // Sur un geste groupe, un jour de repos n'est pas une cible : on ne cree pas
     // des journees de travail par inadvertance. Sur une case unique, designee a la
     // main, c'est un choix — poser une recup un samedi doit rester possible.
@@ -4259,7 +4281,7 @@ function _planEffApply(v){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
     if(!mbr||!(window._mvEstCollectif&&window._mvEstCollectif(mbr))){skip++;return;}
-    if(isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    if(isNaN(p.d)||!_planJourSaisissable(mbr,planMonth,p.d)){skip++;return;}
     var e=Object.assign({},_pEntDay(p.nom,planMonth,p.d)||{});
     e.effectif=n;
     if(!_pEntPose(p.nom,planMonth,p.d,e)){skip++;return;}
@@ -4290,7 +4312,7 @@ function _pmhNPStats(keys){
   (keys||_planSelKeys()).forEach(function(k){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
-    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d))return;
+    if(!mbr||isNaN(p.d)||!_planJourSaisissable(mbr,planMonth,p.d))return;
     if(_planPlanned(_planPlId(mbr),planMonth,p.d)>0)return;
     np++;
     var ex=_pEntDay(p.nom,planMonth,p.d);
@@ -4513,8 +4535,8 @@ function _planBuildMonHtml(mbr,canEdit){
     var f=_planFerie(planMonth,d);
     var dow=_planDow(planMonth,d);
     var isWeekend=(dow===0||dow===6);
-    // Jours hors contrat
-    if(!_planInContract(mbr,planMonth,d)){
+    // Jours hors contrat (CHAINE-1, §596 : hors de TOUT contrat — un jour d'un contrat précédent est un jour ordinaire)
+    if(!_planJourSaisissable(mbr,planMonth,d)){
       daysHtml+='<div class="plan-day-row" style="border-color:var(--gris-clair);background:var(--bg-app);opacity:0.5;cursor:default">'
         +'<div class="plan-day-num" style="color:var(--gris)"><div class="plan-day-n">'+d+'</div><div class="plan-day-dow">'+PLAN_JOURS[dow]+'</div></div>'
         +'<div class="plan-day-info"><div class="plan-day-label" style="color:var(--gris)">Hors contrat</div></div>'
@@ -4620,11 +4642,14 @@ function _planAnnuCard(mbr,uptoMonth){
   }
   var prevH='';
   if(a.annualise && typeof window._mvPeriodes==='function'){
-    var allCtrs=window._mvPeriodes(mbr)||[];
+    // ★ CHAINE-1 (§596) : un compteur par CHAINE. Un CDD suivi sans coupure d'un CDI n'a plus de carte « soldé » à part :
+    //   ses heures sont dans le compteur en cours. Une chaîne payée à l'heure (TESA, saisonnier) n'a pas de compteur annuel.
+    var allCtrs=(typeof window._mvChaines==='function')?(window._mvChaines(mbr)||[]):(window._mvPeriodes(mbr)||[]);
     var actifDebut=mbr.debut_contrat||'';
     allCtrs.forEach(function(ctr){
       if(!ctr.fin)return;                                    // ouvert a droite = contrat actif
-      if(actifDebut && ctr.debut===actifDebut)return;        // c'est le contrat courant
+      if(actifDebut && (ctr.debuts?ctr.debuts.indexOf(actifDebut)>=0:ctr.debut===actifDebut))return;   // c'est la chaîne en cours
+      if(ctr.annu===false)return;                            // payé à l'heure : aucun compteur annuel à solder
       if(ctr.fin<(yr+'-01-01'))return;                       // terminé avant l'annee
       if(ctr.debut>(yr+'-12-31'))return;                     // commencé après l'annee
       var pa=_planSurContrat(ctr,function(){ return _planAnnu(mbr,11); });
@@ -6021,7 +6046,6 @@ function _planRecupCartes(mbr,dm){
       if(dt.getMonth()!==dm){g+='<span></span>';continue;}
       var ce=_pl2Cell(mbr,plId,d,L);
       g+=ce.hc?'<span class="pl2-chip pl2c-hc">'+ce.txt+'</span>'
-        :ce.ro?'<span class="pl2-chip '+ce.cls+'" title="Contrat pr\u00e9c\u00e9dent \u00b7 lecture seule">'+ce.txt+'</span>'
         :'<button type="button" class="pl2-chip '+ce.cls+'" onclick="planFicheOpenDay('+d+')" aria-label="'+d+' '+PLAN_MOIS[dm]+'">'+ce.txt+'</button>';
     }
   });
@@ -8192,8 +8216,11 @@ function planDeleteAcompte(nom,moisKey,idx){
 // contrat (comportement d'origine, aucun changement) OU si le mois est a cheval
 // sur deux contrats (on montre alors le mois entier plutot que d'en amputer une
 // moitie). Dans les deux cas le releve n'est JAMAIS blanc.
+// ★ CHAINE-1 (§596) : « un contrat » = une CHAINE (_mvChaines) — la meme lecture que le compteur (_planInContract).
+//   _mvContrats fusionnait aussi un contrat paye a l'heure avec le CDI qui le suit sans coupure ; leurs compteurs, eux,
+//   restent separes.
 function _planCtrDuMois(mbr,m){
-  var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):null;
+  var P=(typeof window._mvChaines==='function')?window._mvChaines(mbr):((typeof window._mvContrats==='function')?window._mvContrats(mbr):null);
   if(!P||P.length<2)return null;
   var mm=String(m+1).padStart(2,'0');
   var d0=_pY()+'-'+mm+'-01', d1=_pY()+'-'+mm+'-'+String(_planDays(m)).padStart(2,'0');
@@ -9695,7 +9722,7 @@ function _planCaveCases(){
   var out=[];
   _planSelKeys().forEach(function(k){
     var p=_planSelParse(k),m=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
-    if(!m||isNaN(p.d)||!_planInContract(m,planMonth,p.d))return;
+    if(!m||isNaN(p.d)||!_planJourSaisissable(m,planMonth,p.d))return;
     var iso=_pl2Iso(p.d),dt=new Date(planYear,planMonth,p.d,12),h=0;
     try{ h=Number(_planChampPersRange(m,dt,dt))||0; }catch(e){ h=0; if(window._mvAvale)window._mvAvale(e,'planning.js/_planCaveCases'); }
     out.push({nom:p.nom,d:p.d,iso:iso,mbr:m,h:h,cave:(typeof window._mvCaveJour==='function')?window._mvCaveJour(p.nom,iso):''});
@@ -10037,8 +10064,11 @@ function _plRvContratsHtml(mbr){
       var t = _plRvTrou(P[i - 1].fin, c.debut);
       if(t === null){ /* dates manquantes : on n'affirme rien */ }
       else if(t === 0){
+        // ★ CHAINE-1 (§596) : sans coupure, même compteur — sauf si l'un des deux est payé à l'heure (TESA, saisonnier, extra).
+        var _memeRegime = (typeof window._mvAnnuType !== 'function')
+          || window._mvAnnuType(P[i - 1].type) === window._mvAnnuType(c.type || (i === P.length - 1 ? mbr.type_contrat : ''));
         rows += '<div class="crow cgap"><span class="cl">\u2193 se poursuit sans interruption</span>'
-          + '<span class="cv">m\u00eame compteur</span></div>';
+          + '<span class="cv">' + (_memeRegime ? 'm\u00eame compteur' : 'pay\u00e9 \u00e0 l\u2019heure avant \u00b7 compteur \u00e0 part') + '</span></div>';
       } else {
         coupures++;
         rows += '<div class="crow cgap cbreak"><span class="cl">\u2193 coupure de ' + t + ' jour'

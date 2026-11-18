@@ -838,8 +838,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots6.mjs --contre'],      //   JOUÉS sur le domaine de démo ; le verdict de la Cave en pièces, rien de recalculé ; aucun bouton de geste ; le téléphone, la feuille, l'aide, le guide, l'annonce
   ['node scripts/mv-harnais-mots7.mjs'],               // MOTS-7 (§589) : la vue Économie d'Aujourd'hui allégée — les six cartes toujours là, chacune JOUÉE (le vrai cockpit monté dans Node) ;
   ['node scripts/mv-harnais-mots7.mjs --contre'],      //   les mots du lexique (coût à la fin, dépensé) ; rien de recalculé ; la feuille, l'aide, le guide, l'annonce, la référence des mots
-  ['node scripts/mv-harnais-cddcdi1.mjs'],             // CDDCDI-1 (§589, régularisé dans MOTS-7) : au Planning, le passé d'un contrat archivé se voit (lecture seule), il ne se saisit pas ;
-  ['node scripts/mv-harnais-cddcdi1.mjs --contre'],    //   une coupure reste « – » ; les compteurs ne lisent que le contrat en cours ; la vraie case montée dans Node
+  ['node scripts/mv-harnais-cddcdi1.mjs'],             // CDDCDI-1 (§589) revu par CHAINE-1 (§596) : au Planning, le passé d'un contrat archivé se voit, et il se saisit ;
+  ['node scripts/mv-harnais-cddcdi1.mjs --contre'],    //   une coupure reste « – » ; le compteur ne lit jamais un contrat séparé par une coupure ; la vraie case dans Node
   ['node scripts/mv-harnais-mots8.mjs'],               // MOTS-8 (§590) : Pilotage › Travaux allégé sur place — les cartes toujours là, jouées dans Node (la phrase, les tuiles,
   ['node scripts/mv-harnais-mots8.mjs --contre'],      //   la couleur par tâche, les dates au toucher, l'écart) ; les boutons « Ouvrir » ; le lexique ; la feuille, l'aide, le guide, l'annonce
   ['node scripts/mv-harnais-portee1.mjs'],             // PORTEE-1 (§591) : la campagne à la pastille (le menu de la Vigne), « Vous regardez » sur Économie › Le détail seulement,
@@ -852,6 +852,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots10.mjs --contre'],     //   comprise), « fin prévue », les pastilles, « Ouvrir la priorité du moment », _pilDeplier ; le lexique
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
+  ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne
+  ['node scripts/mv-harnais-chaine1.mjs --contre'],    //   (_mvChaines), le compteur de l'année, la saisie des jours d'un contrat archivé, le relevé, la fiche, Réglages
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement

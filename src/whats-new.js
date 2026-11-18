@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.24', d: '2026-11-18', items: [   // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure — un seul compteur, des jours qui se modifient
+    { niv: 2, pour: ['admin'], emoji: 'calendrier', titre: 'Planning\u00a0: un CDD devenu CDI garde un seul compteur',
+      desc: "Quand un CDD devient CDI sans un jour de coupure, seuls les papiers changent. Le Planning en faisait deux contrats\u00a0: les jours du CDD ne se modifiaient plus, le compteur d’heures repartait de zéro et le mois du changement comptait à moitié. Désormais, les jours du CDD se modifient, le compteur continue et le mois du changement compte comme un mois normal. À vérifier\u00a0: le compteur de vos salariés passés de CDD en CDI reprend leurs heures de CDD. Après une coupure, le nouveau contrat repart toujours de zéro, mais les jours de l’ancien se modifient aussi. Un contrat payé à l’heure (TESA, saisonnier) garde son compte à part." },
+    { niv: 0, pour: ['admin'], emoji: 'document', titre: 'Réglages\u00a0: l’historique dit quand le compteur continue',
+      desc: "Dans l’historique d’un salarié, une embauche qui suit la précédente sans coupure porte «\u00a0sans coupure\u00a0: même compteur\u00a0», et l’encart «\u00a0Coupure de 0 jour\u00a0» a disparu. Avant d’enregistrer une embauche, l’encart de l’effet le dit aussi." },
+  ] },
   { v: '11.23', d: '2026-11-18', items: [   // FRAIS-1 (§595) : les frais à rembourser et les indemnités km, avec la paie
     { niv: 0, pour: ['admin'], emoji: 'recu', titre: 'Planning\u00a0: les frais à rembourser, avec la paie',
       desc: "La fiche d’un salarié gagne un onglet «\u00a0Frais\u00a0»\u00a0: les tickets qu’il a avancés pour le domaine (la photo, le montant, pour quoi, le motif) et les km faits avec sa voiture (les km en plus, où et pourquoi). Les km se paient au barème fiscal, selon la puissance de la voiture et les km de l’année — ou au taux du domaine, s’il est posé dans la roue crantée du Planning. Le total part dans «\u00a0Pour la compta\u00a0», hors salaire, se fige avec le mois, et le relevé gagne une page des frais, tickets en annexe. Administrateur seulement." }

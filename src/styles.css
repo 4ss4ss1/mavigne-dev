@@ -2655,7 +2655,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2-cell{border:none;border-top:1px solid var(--gris-clair);border-left:1px solid rgba(128,118,100,0.10);min-height:50px;display:flex;align-items:center;justify-content:center;padding:3px 1px;position:relative;background:transparent;cursor:pointer;font-family:inherit;}
 .pl2-cell.pl2-we{background:rgba(128,118,100,0.06);}
 .pl2-cell.pl2-tdcol{background:rgba(61,107,39,0.06);}
-.pl2-cell-out,.pl2-cell-hc,.pl2-cell-ro{cursor:default;}
+.pl2-cell-out,.pl2-cell-hc{cursor:default;}
 .pl2-selon{box-shadow:inset 0 0 0 2px var(--plan-acc);background:var(--plan-acc-pale)!important;border-radius:10px;}
 .pl2-chip{min-width:32px;padding:5px 3px;border-radius:9px;font-size:var(--pt-micro,12px);font-weight:600;text-align:center;line-height:1;font-variant-numeric:lining-nums tabular-nums;border:1px solid transparent;position:relative;}
 .pl2c-off{color:var(--gris);font-weight:400;}

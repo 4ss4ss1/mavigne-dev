@@ -70,7 +70,7 @@ const NOMS = [
   // ★ PREPAN-1 (§559) : le repli passe par le report (le modèle du domaine de l’année d’avant, sinon l’intégré)
   '_planTplDefInfo', '_planTplSource', '_planTplReport',
   '_planDays', '_planGetTpl', '_planGetRefH', '_planFmt',
-  '_planInContract', '_planJourCouvert', '_planDansCtr',
+  '_planInContract', '_planDebutCompteur', '_planJourCouvert', '_planDansCtr',   // CHAINE-1 (§596) : le compteur part du début de la chaîne
   '_planInContractRead', '_planInContractCtr', '_planWide',
   '_planMbrs', '_planEntAn', '_planSansDate', '_planCompteSansDate', '_planCouvre',  // PRES-1 (§174) : relais de la regle unique
   '_planMbrsPer', '_planMbrsMois', '_planMbrsAn',
@@ -111,7 +111,7 @@ function makeEnv(opts) {
     'var PLANNING_ENTRIES=' + JSON.stringify(opts.entrees || {}) + ';',
     'var planYear=' + (opts.an != null ? opts.an : 2026) + ';',
     'var planMonth=' + (opts.mois != null ? opts.mois : 7) + ';',
-    'var _planCtxYear=null,_planWideCtx=false,_planCtrCtx=null;',
+    'var _planCtxYear=null,_planWideCtx=false,_planCtrCtx=null,_planDebutMemo=null;',
     'function _escHtml(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}',
     'function _escAttr(x){return _escHtml(x).replace(/"/g,"&quot;");}',
     ...NOMS.map(n => fn(s, n))
