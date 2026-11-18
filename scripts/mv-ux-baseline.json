@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-11-18",
- "base": "8a12a5a",
+ "base": "9fd63cb",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -405,6 +405,15 @@
    "baisses": [
     "pilotage › ordinateur › c44 : 37 → 32"
    ]
+  },
+  {
+   "date": "2026-11-18",
+   "base": "9fd63cb",
+   "motif": "DEBORD-1 (§593) : la Cave sur ordinateur — le tableau des cuves passe en liste dans sa carte étroite, ses en-têtes en 11 px partent",
+   "hausses": [],
+   "baisses": [
+    "cave › ordinateur › t12 : 29 → 17"
+   ]
   }
  ],
  "mesures": {
@@ -479,7 +488,7 @@
     "chrome": 111,
     "chromeDefile": 109,
     "pouce": null,
-    "hauteur": 4034
+    "hauteur": 4023
    },
    "reserve": {
     "cibles": 29,
@@ -565,7 +574,7 @@
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,
-    "hauteur": 2359
+    "hauteur": 2651
    },
    "tracteur": {
     "cibles": 28,
@@ -595,13 +604,13 @@
     "cibles": 60,
     "c24": 0,
     "c44": 7,
-    "textes": 290,
+    "textes": 282,
     "t11": 0,
-    "t12": 29,
+    "t12": 17,
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,
-    "hauteur": 3646
+    "hauteur": 3917
    },
    "reserve": {
     "cibles": 28,

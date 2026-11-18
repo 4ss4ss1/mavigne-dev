@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.11
+// MA VIGNE — Service Worker v12.12
+// v12.12 (18/11/2026) — DEBORD-1 (§593) : plus rien ne déborde — la bulle rouge du Pilotage (« 2 cuves demandent un contrôle ») ne se peint plus sous sa zone de toucher ; la bande de la Cave, le tableau des cuves et la semaine suivent la largeur de leur carte ; le Planning, le Journal, l'Entretien, le Millésime, les Stades, Décider et les Réglages ne sortent plus de leurs cartes ; une règle (npm run test:debord) relève les 46 écrans à sept largeurs.
 // v12.11 (18/11/2026) — MOTS-9 (§592) : Pilotage › L'équipe & le matériel allégé sur place — toutes les cartes restent, à leur place, repliées (un titre, un chiffre, une pastille ; le détail au toucher, un bouton « Ouvrir » vers le planning, l'équipe, l'entretien, le tracteur ou Décider) ; une phrase en haut (les présents, les personnes au seuil, la cuve sous le seuil) ; « Capacité vs charge » devient « Équipe au pic » (le nom de Travaux) ; les trois cartes des travaux du tracteur n'en font qu'une, le gasoil après les travaux passe dans la carte de la cuve (« 255 L » une fois) ; le renfort écrit son année. Aucun calcul ne change.
 // v12.10 (18/11/2026) — PORTEE-1 (§591) : Pilotage — la campagne se choisit à la pastille du haut (le même menu que la Vigne) ; « Vous regardez » ne reste que sur Économie › Le détail (exercice ou année vigne) ; Travaux, L'équipe & le matériel et Décider rappellent les dates de la campagne ; le haut de Travaux montre deux chiffres de la campagne (l'équipe au pic, le budget engagé), les mêmes qu'Aujourd'hui ; une campagne passée consultée met la pastille en ambre et se lit en bilan (Aujourd'hui, Travaux) ; le zoom par campagne et ses puces sont retirés ; « environ » remplace le signe U+2248 dans le Pilotage (hors de la police) ; le menu de la campagne tient en une ligne.
 // v12.09 (17/11/2026) — MOTS-8 (§590) : Pilotage › Travaux allégé sur place — l'onglet reste dans le Pilotage avec toutes ses cartes (décision du 17/11 : un pilote visite tout sans ouvrir les autres modules). En haut, une phrase : ce qui est fait et la fin prévue (la même date qu'Aujourd'hui), à la place du sous-titre ; les trois chiffres prennent la forme des tuiles d'Aujourd'hui (« Effectif » devient « Renfort », le budget « sorti »), la phrase d'avant au survol, au téléphone les trois de front ; « Avancement » : la barre de la campagne, fait · reste · prévu, une ligne par tâche, ses dates au toucher ; une couleur par tâche, la même dans l'avancement, le donut, la frise et l'écart ; les trois cartes repliées montrent un chiffre utile ; un bouton « Ouvrir » par carte (parcelles, planning, carte de la Vigne, activités du tracteur). Les explications passent derrière les « i ». Aucun calcul ne change. Feuille à part : src/pilotage.css. APP 11.18.
@@ -4743,7 +4744,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.11';
+const CACHE_NAME   = 'mavigne-v12.12';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4760,7 +4761,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.11 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.12 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4780,7 +4781,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.11 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.12 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

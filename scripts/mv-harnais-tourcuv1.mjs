@@ -68,7 +68,7 @@ function jouer(S) {
   t('rien à relever : l’écran le dit et mène aux cuves', /Aucune cuve à relever/.test(body.innerHTML) && /class="mvbtn mvbtn-secondaire" onclick="switchVendOng\('cuves'\)">Aller aux cuves/.test(body.innerHTML));
   /* ══ 3. LE STYLE ══ */
   t('le bandeau sombre est parti : la carte reste collée en haut, claire', /\.vt-hd\{position:sticky;top:0;z-index:40;padding:/.test(style) && !/\.vt-hd\{[^}]*--cave/.test(style));
-  t('plus de bouton fait main : ni filtre, ni « Terminer », ni « + »', !/\.vt-fb\{/.test(style) && /\.vt-fin\{flex:1;min-height:var\(--e-9,48px\)\}/.test(style) && /\.vt-fab\{flex:none;min-height:var\(--e-9,48px\)\}/.test(style));
+  t('plus de bouton fait main : ni filtre, ni « Terminer », ni « + »', !/\.vt-fb\{/.test(style) && /\.vt-fin\{flex:1 1 auto;min-width:0;min-height:var\(--e-9,48px\)\}/.test(style) && /\.vt-fab\{flex:0 1 auto;min-width:0;max-width:42%;min-height:var\(--e-9,48px\)\}/.test(style)   /* DEBORD-1 (§593) : les deux rétrécissent */);
   t('le titre long sur ordinateur, court au téléphone', /\.vt-sm\{display:none\}/.test(style) && /@media \(max-width:1023px\)\{\.vt-lg\{display:none\}\.vt-sm\{display:inline\}\}/.test(style));
   /* ══ 4. L'AIDE, LE GUIDE, LA NOUVEAUTÉ ══ */
   t('l’aide et le guide parlent du bouton « Intervention groupée », plus du « + »', !/le bouton \+ en bas à droite de la tournée/.test(S.utils) && /\['L’intervention groupée', "le bouton « Intervention groupée »/.test(S.utils)

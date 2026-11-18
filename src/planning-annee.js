@@ -194,7 +194,8 @@ function _planAnneeGrille(){var E=_paE();if(!E||!E.annee)return null;return E.br
 function _planAnneeJoursEd(v,si,adm,L){var JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
   if(!adm)return _planAnneeJours(v);
   var dl=L?' data-l="'+L+'"':'';
-  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 16px;margin-top:6px">'+v.map(function(x,g){
+  // DEBORD-1 (§593) : « Mercredi − 7 h 00 + » demande ~230 px ; en 210, le « + » sortait de sa colonne (768 px d'écran).
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:0 16px;margin-top:6px">'+v.map(function(x,g){
     var tuP=(si===0&&g===4&&L!=='B')?' data-tuto="plan.annee.pas"':'',tuM=(si===0&&g===4&&L==='B')?' data-tuto="plan.annee.abpas"':'';
     return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)"><span style="flex:1">'+JN[g]+'</span>'
       +'<button class="plan-btn-pdf" data-s="'+si+'" data-g="'+g+'" data-d="-0.5"'+dl+tuM+' aria-label="'+JN[g]+(L?' semaine '+L:'')+' moins 30 min" onclick="planAnneePas(this)">\u2212</button>'
@@ -393,7 +394,9 @@ function _planRenderAnnee(){
   var ferme='repeating-linear-gradient(135deg,var(--gris-clair) 0 4px,transparent 4px 8px)';
   h+='<div data-tuto="plan.annee.frise" style="position:relative;margin-top:14px;padding-top:16px">';
   for(var m=0;m<12;m++){var i0=0;while(i0<N&&J[i0].m!==m)i0++;
-    h+='<span style="position:absolute;top:0;left:'+(i0/N*100)+'%;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding-left:3px;border-left:1px solid var(--gris-clair)">'+PLAN_MOIS_FR[m]+'</span>';}
+    // DEBORD-1 (§593) : au téléphone, un mois fait ~25 px et « janv. » ~30 : les douze noms se chevauchaient. Sous 600 px, un sur trois
+    //   (janv., avr., juil., oct.), le trait de chaque mois reste.
+    h+='<span class="pa-mois'+(m%3?' pa-mois-2':'')+'" style="position:absolute;top:0;left:'+(i0/N*100)+'%;font-size:var(--pt-micro,11px);color:var(--texte-doux);padding-left:3px;border-left:1px solid var(--gris-clair)">'+PLAN_MOIS_FR[m]+'</span>';}
   h+='<div style="position:relative;height:38px;border-radius:8px;overflow:hidden;background:var(--fond-doux,var(--gris-clair))">';
   A.plages.forEach(function(p){var l=p.i0/N*100,wd=(p.i1-p.i0+1)/N*100,st='position:absolute;top:0;bottom:0;left:'+l+'%;width:'+wd+'%;display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:700;overflow:hidden;white-space:nowrap;border-right:1px solid var(--carte,#fff)';
     if(p.ferme){h+='<div style="'+st+';background:'+ferme+';color:var(--texte-doux)" title="'+_escAttr('Ferm\u00e9 \u2014 '+_planAnneePlage(J,p.i0,p.i1))+'"></div>';return;}
@@ -421,13 +424,15 @@ function _planRenderAnnee(){
     var Sw=A.sem[sel],a0=Sw.j[0].i,b0=Sw.j[Sw.j.length-1].i,JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'],JC=['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'],si0=-1;
     Sw.j.forEach(function(x){if(si0<0&&!x.fer)si0=x.s;});var Ssw=A.saisons[si0];
     var diff=!!Ssw&&Sw.j.some(function(x){return !x.fer&&x.h!==Ssw.h[x.g];}),finS=-1;J.forEach(function(x){if(x.s===si0&&!x.ferme&&!x.apart)finS=x.i;});
-    var row='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)';
+    var row='display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)';
     var hv=function(v){return '<b style="min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums;color:'+(v>0?'var(--texte)':'var(--texte-doux)')+'">'+(v>0?_paH(v):'repos')+'</b>';};
     h+='<div data-tuto="plan.annee.semp" style="margin-top:14px;border:1px solid var(--gris-clair);border-radius:10px;padding:12px;display:grid;gap:8px">'
       +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><button class="plan-btn-pdf" data-d="-1" onclick="planAnneeSemaine(this)">Pr\u00e9c\u00e9dente</button>'
       +'<b style="flex:1;text-align:center">Semaine du '+_planAnneePlage(J,a0,b0)+' \u00b7 '+_paH(Sw.h)+(Sw.ferme?' \u00b7 ferm\u00e9e':'')+'</b>'
       +'<button class="plan-btn-pdf" data-tuto="plan.annee.sem" data-d="1" onclick="planAnneeSemaine(this)">Suivante</button></div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 16px">'+Sw.j.map(function(x){
+      // DEBORD-1 (§593) : la ligne d'un jour (le jour, − heures +, l'horaire « 7 h 00 → 15 h 00 ») tenait mal en 230 px : l'horaire sortait de
+      //   sa colonne, sur ordinateur aussi. Les colonnes font 300 px au moins (toute la largeur au téléphone), et la ligne passe à la ligne s'il le faut.
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:0 16px">'+Sw.j.map(function(x){
           return '<div style="'+row+'"><span style="flex:1">'+JC[x.g]+' '+(x.d===1?'1er':x.d)+' '+PLAN_MOIS_FR[x.m]+'</span>'
             +(x.fer?_planAnneeFerieSem(x,A,yr,JN[x.g],adm)   // ★ FERIES-1 (§556) : le férié montre ses heures, se chôme, se travaille
               :'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+JN[x.g]+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>'+hv(x.h)
@@ -440,7 +445,7 @@ function _planRenderAnnee(){
                 +(diff?'<button class="plan-btn-pdf" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Comme la saison</button>':''))+'</div>';
     if(!Sw.ferme&&Ssw)h+='<details open><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Changer le rythme \u00e0 partir d\u2019ici</summary>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0">Les jours r\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\u2019au '+_planAnneeDate(J,finS,true):'')+'\u00a0; la frise en fera une nouvelle saison.</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 16px">'+Ssw.h.map(function(v,g){
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:0 16px">'+Ssw.h.map(function(v,g){   // DEBORD-1 : comme la semaine type
           return '<div style="'+row+'"><span style="flex:1">'+JN[g]+'</span>'
             +'<button class="plan-btn-pdf" data-w="'+sel+'" data-g="'+g+'" data-p="-0.5" aria-label="'+JN[g]+' moins 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">\u2212</button>'+hv(v)
             +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JN[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></div>';}).join('')+'</div></details>';

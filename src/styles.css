@@ -3996,7 +3996,8 @@ td .sdeq-trace{padding:2px 0 0;}
   #page-journal .jitem .jdotcol,#page-journal .jitem .eq-trace,#page-journal .jitem .meteo-snap{display:none;}
   #page-journal .jitem{cursor:pointer;min-height:48px;}
   #page-journal .jitem[aria-selected="true"] .jcard{outline:2px solid var(--accent,#7A2850);outline-offset:-2px;}
-  #page-journal .jitem .jcard-inner .mv-hd > div:first-child{display:flex;align-items:center;gap:var(--e-3,12px);min-width:0;}
+  #page-journal .jitem .jcard-inner .mv-hd{flex-wrap:wrap;row-gap:var(--e-1,4px);}   /* DEBORD-1 (§593) : à 1 024 px la colonne fait 290 px ; le titre rétrécissait à 45 px et « Validé » passait sur « Ébourgeonnage » — le badge et « Équipe » vont à la ligne */
+  #page-journal .jitem .jcard-inner .mv-hd > div:first-child{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);flex:1 1 140px;min-width:0;}
   #page-journal .j-touches{display:block;padding:var(--e-2,8px) 0;font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
   #page-journal .j-touches kbd{display:inline-block;min-width:20px;padding:0 var(--e-1,4px);border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-xs,4px);background:var(--bg-card,#FFFFFF);font-family:inherit;text-align:center;}
   #page-journal .jfx-d{font-size:var(--pt-micro,12px);color:var(--texte-doux,#686660);}
@@ -4293,7 +4294,7 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .phr-table td{padding:var(--e-2,8px) var(--e-3,12px);border-top:1px solid var(--ligne,#E7E6E2);vertical-align:middle;}
 .phr-table td.phr-f,.phr-table th.phr-f{width:4px;padding:0;}
 .phr-table td.phr-ctd{padding:0;}
-.phr-ech-pc{display:flex;gap:2px;}
+.phr-ech-pc{display:flex;flex-wrap:wrap;gap:2px;}   /* DEBORD-1 (§593) : à 1 024 px, les onze stades d'une ligne débordaient du tableau, sous la carte « Ce qui vient » : ils passent à la ligne */
 .phr-ech-pc .phr-e{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid var(--ligne,#E7E6E2);border-radius:var(--r-xs,4px);background:var(--bg-card,#FFFFFF);font:inherit;cursor:pointer;}
 .phr-ech-pc .phr-e em{font-size:var(--pt-nano,11px);font-weight:600;color:var(--texte-doux,#686660);}
 .phr-ech-pc .phr-e span{display:none;}
@@ -5702,7 +5703,8 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 .pil-dz-row.pk{opacity:.45;border-style:dashed;}
 .pil-dz-row .n{flex:none;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--dz-rs);background:var(--gris-clair);color:var(--texte-med,var(--texte));font-size:var(--pt-txt,13px);font-weight:600;}
 .pil-dz-row .c{flex:1;min-width:0;}
-.pil-dz-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);}
+.pil-dz-row .nm{display:flex;align-items:baseline;min-width:0;white-space:nowrap;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);}
+.pil-dz-row .nm .nmt{min-width:0;overflow:hidden;text-overflow:ellipsis;}.pil-dz-row .nm .bd,.pil-dz-row .nm small{flex:none;}   /* DEBORD-1 (§593) : le nom s'abrège, le badge reste entier */
 .pil-dz-row .nm .bd{margin-left:var(--e-1,4px);padding:0 4px;border-radius:var(--dz-rs);background:var(--gris-clair);color:var(--texte-med,var(--texte));font-size:var(--pt-lbl,10.5px);font-weight:600;}
 .pil-dz-row .nm small{font-size:var(--pt-txt,13px);font-weight:500;color:var(--texte-doux);}
 .pil-dz-row .ds{margin-top:2px;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
@@ -7254,10 +7256,14 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-tracteur .ent-resume-card button{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; font-family:var(--font-ui)!important; font-weight:var(--fw-med,500)!important; box-shadow:var(--shadow-xs)!important; }
 #page-tracteur .ent-resume-card button[onclick*="openGnrAppoint"]{ border:0!important; background:var(--accent)!important; color:var(--sur-accent)!important; }
 #page-tracteur .ent-resume-card.has-ano-active{ border-color:var(--danger)!important; }
+#page-tracteur .ent-resume-card:not(:has(> .ent-resume-hd)){ padding:var(--e-3,12px) var(--e-4,16px); }   /* DEBORD-1 (§593) : la cuve, la révision, les autres entretiens et le compteur n'ont pas d'en-tête à marge — leur texte touchait le bord de la carte */
 #page-tracteur .ent-ano-banner{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--danger-doux)!important; color:var(--danger)!important; }
 #page-tracteur #ent-add-btn{ border:0!important; border-radius:var(--r-sm,6px)!important; background:var(--accent)!important; color:var(--sur-accent)!important; font-family:var(--font-ui)!important; font-weight:var(--fw-med,500)!important; box-shadow:var(--shadow-xs),var(--reflet)!important; }
 #page-tracteur #ent-outils-btn{ border:var(--bw) solid var(--ligne-forte)!important; border-radius:var(--r-sm,6px)!important; background:var(--bg-card)!important; color:var(--texte)!important; box-shadow:var(--shadow-xs)!important; }
-@media (min-width:1024px){
+/* DEBORD-1 (§593) : sur ordinateur, la page du Tracteur garde 360 px à droite pour la fiche : l'Entretien n'a que ~550 px à 1 024 px
+   d'écran, ~700 à 1 366. En deux colonnes (400 px + le reste), celle de droite tombait à 106 px et coupait ses boutons. Les deux
+   colonnes à partir de 1 600 px ; en dessous, une seule, de toute la largeur. */
+@media (min-width:1600px){
   #page-tracteur #trac-panel-entretiens{ display:grid; grid-template-columns:var(--l-list,400px) minmax(0,1fr); column-gap:var(--e-4,16px); align-items:start; }
   #page-tracteur #trac-panel-entretiens > *{ grid-column:2; min-width:0; }
   #page-tracteur #trac-panel-entretiens > #ent-gauche{ grid-column:1; grid-row:1 / span 20; position:sticky; top:var(--e-4,16px); display:flex; flex-direction:column; gap:var(--e-3,12px); }
@@ -7392,8 +7398,12 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave #cave-kpis .mvu-kpi-v{ font-family:var(--font-ui)!important; font-size:var(--pt-md,20px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; }
 #page-cave #cave-kpis .mvu-kpi-l{ font-size:var(--pt-micro,12px)!important; letter-spacing:0!important; text-transform:none!important; color:var(--texte-doux)!important; }
 #page-cave .cave-kpis-note i{ background:var(--ligne-forte); }
+/* DEBORD-1 (§593) : au téléphone, une case fait ~85 px — le chiffre et son mot côte à côte débordaient (« 36 t rentrées »). Le mot passe dessous. */
+@media (max-width:599px){ #page-cave #cave-kpis .mvu-kpi{ flex-direction:column; align-items:flex-start; gap:0; min-width:0; padding:var(--e-2,8px) var(--e-3,12px)!important; } #page-cave #cave-kpis .mvu-kpi-l{ line-height:1.25; } }
 #page-cave .mlx-hint{ font-style:normal; font-size:var(--pt-micro,12px); color:var(--texte-doux); }
 /* ★ FIN CAVE-1 */
+/* DEBORD-1 (§593) : Planning › Année, la frise — au téléphone, un nom de mois sur trois (les autres gardent leur trait, vidé de son texte). */
+@media (max-width:599px){ .pa-mois.pa-mois-2{ font-size:0!important; height:12px; } }
 /* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════
    ★★ CAVEAUJ-1 (§434) — CAVE › AUJOURD’HUI AU DESSIN DE LA MAQUETTE VALIDÉE (Nico, 22/10 : « j’aime beaucoup », « go »)
    « Ce qui presse » : une ligne par contenant, un bouton par geste (jeu commun .mvbtn) ; ce qui est fait ; qui est en
@@ -7515,6 +7525,10 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-l, #page-cave .caj-l.plus{ grid-template-rows:none; grid-template-areas:"ico nom acts" "ico meta acts" ". rs rs"; }   /* sur ordinateur, le détail tient : le geste se centre sur le nom et le détail */
   #page-cave .caj-l.plus .caj-acts{ justify-content:normal; flex-wrap:nowrap; margin-top:0; }
   #page-cave .caj-ctas .mvbtn{ flex:none; }
+}
+/* ★ DEBORD-1 (§593) : la semaine (sept jours et leur résumé) suit la largeur de SA carte, comme le tableau des cuves : à 1 024 px
+   d'écran la carte ne faisait que ~330 px et les jours s'écrivaient les uns sur les autres (« lunmamejeuven »). */
+@container (min-width:640px){
   #page-cave .caj-grille{ grid-template-columns:repeat(7,minmax(0,1fr)) calc(var(--e-10,64px) * 2.75); gap:var(--e-2,8px) var(--e-1,4px); }
   #page-cave .caj-js{ text-align:left; padding-left:var(--e-1,4px); }
   #page-cave .caj-jsum{ display:block; padding-left:var(--e-3,12px); }
@@ -7537,6 +7551,8 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-tab > li:first-child, #page-cave .caj-cvh + li{ border-top:0; }
 #page-cave .caj-cvh{ display:none; }
 #page-cave .caj-cvn{ display:flex; flex-direction:column; gap:var(--e-0,2px); min-width:0; }
+#page-cave .caj-cvn .caj-nom{ align-self:flex-start; }
+@media (max-width:1023px){ #ml-fiche{ padding:var(--e-3,12px) var(--e-4,16px); } }   /* DEBORD-1 (§593) : au téléphone, la fiche d'une cuvée (Millésime › Cuvées) n'avait aucune marge — ses marges sont celles de l'ordinateur seulement */   /* DEBORD-1 (§593) : « align-self:center » (pensé pour la grille des gestes) centrait le nom de la cuve au-dessus de sa ligne */
 #page-cave .caj-dens{ grid-column:1 / -1; display:flex; align-items:center; gap:var(--e-3,12px); min-width:0; }
 #page-cave .caj-spark{ display:block; flex:none; width:calc(var(--e-10,64px) + var(--e-6,24px)); height:calc(var(--e-6,24px) + var(--e-1,4px)); overflow:visible; }
 #page-cave .caj-sp-l{ fill:none; stroke:var(--texte-med); stroke-width:1.6; stroke-linejoin:round; stroke-linecap:round; }
@@ -7583,9 +7599,14 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-edt b{ font-weight:var(--fw-semi,600); }
 #page-cave .caj-edt span{ display:block; font-size:var(--pt-micro,12px); color:var(--texte-doux); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #page-cave .caj-plus{ width:100%; margin-top:var(--e-2,8px); }
-@media (min-width:1024px){
-  #page-cave .caj-cv{ grid-template-columns:minmax(0,1.6fr) minmax(0,1.15fr) minmax(0,1.5fr) minmax(0,.95fr) minmax(0,.95fr); }
-  #page-cave .caj-ch{ grid-template-columns:minmax(0,1.5fr) minmax(0,.7fr) minmax(0,1.9fr) minmax(0,1fr) minmax(0,.9fr); }
+/* ★ DEBORD-1 (§593) — LE TABLEAU DES CUVES ET DES CUVÉES SUIT LA LARGEUR DE SA CARTE, PLUS CELLE DE L'ÉCRAN. Il passait en cinq colonnes
+   dès 1 024 px d'écran ; mais la carte du milieu n'y fait que ~410 px (1 280) à ~490 px (1 366), entre le sommaire et « À surveiller » :
+   « 1007 vers aujourd'hui jeu 29 », « il y a 2 j » et « 24 °C par jour » s'écrivaient les uns sur les autres. Une requête de conteneur :
+   le tableau à partir de 640 px de carte, la liste en dessous (celle du téléphone). */
+#page-cave .caj-c{ container-type:inline-size; }
+@container (min-width:640px){
+  #page-cave .caj-cv{ grid-template-columns:minmax(0,1.6fr) minmax(min-content,1.15fr) minmax(0,1.5fr) minmax(0,.95fr) minmax(0,.95fr); }   /* DEBORD-1 : l'état jamais plus étroit que son mot le plus long */
+  #page-cave .caj-ch{ grid-template-columns:minmax(0,1.5fr) minmax(min-content,.7fr) minmax(0,1.9fr) minmax(0,1fr) minmax(0,.9fr); }
   #page-cave .caj-cvh{ display:grid; padding:0 0 var(--e-2,8px); font-size:var(--pt-nano,11px); font-weight:var(--fw-semi,600); color:var(--texte-doux); }
   #page-cave .caj-dens, #page-cave .caj-jau{ grid-column:auto; }
   #page-cave .caj-cvf, #page-cave .caj-chf{ display:contents; }
@@ -7595,6 +7616,10 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-fu{ display:flex; flex-direction:column; font-size:var(--pt-txt,13px); color:var(--texte-med); }
   #page-cave .caj-fu span{ font-size:var(--pt-micro,12px); color:var(--texte-doux); }
   #page-cave .caj-tel{ display:none; }
+  /* DEBORD-1 (§593) : sur ordinateur, la colonne de l'état fait ~70 px ; « Macération · J8 », « Fait le 23 oct. » sortaient de leur pastille et de leur ligne. La pastille passe à la ligne, dans sa colonne. */
+  #page-cave .caj-cv .mvpas, #page-cave .caj-ch .mvpas{ max-width:100%; white-space:normal; line-height:1.2; padding-top:var(--e-0,2px); padding-bottom:var(--e-0,2px); }
+}
+@media (min-width:1024px){
   #page-cave .caj-ed{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--e-4,16px) var(--e-7,32px); align-items:start; }
   #page-cave .caj-ed.repli{ max-height:none; overflow:visible; }
   #page-cave .caj-ed.repli::after{ display:none; }
@@ -9651,7 +9676,7 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
 #page-home .hk-h{ display:flex; align-items:center; gap:var(--e-2,8px); margin:0 0 var(--e-4,16px); min-height:var(--h-badge); }
 #page-home .hk-h > .mv-ic{ color:var(--texte-doux); }
 #page-home .hk-t{ font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); letter-spacing:var(--ls-serre); color:var(--texte); }
-#page-home .hk-chip{ margin-left:auto; }
+#page-home .hk-chip{ margin-left:auto; flex-shrink:1; min-width:0; max-width:100%; white-space:normal; }   /* DEBORD-1 (§593) : à 1 024 px, « Après-vendange 2026-2027 » sortait de la carte de 20 px : la pastille rétrécit et passe à la ligne */
 #page-home .hk-lien{ display:inline-flex; align-items:center; gap:var(--e-1,4px); align-self:flex-start; margin-top:var(--e-3,12px); padding:var(--e-1,4px) var(--e-2,8px); border:0; border-radius:var(--r-sm,6px); background:none; color:var(--texte-med); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); cursor:pointer; }
 #page-home .hk-lien:hover{ background:var(--survol); color:var(--texte); }
 #page-home .hk-lien .mv-ic{ transform:rotate(-90deg); }

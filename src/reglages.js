@@ -1119,7 +1119,8 @@ function _cmpFrise(){
     var chev=(prevFin&&s.debut<=prevFin);
     if(chev) ovl.push(s.nom);
     var col=_cmpCouleur(s);
-    segs+='<div class="cmp-seg'+(chev?' ovl':'')+'" style="left:'+x+'%;width:'+w+'%;background:'+col+'">'
+    // DEBORD-1 (§593) : un segment étroit coupait son nom net (« Après-vendange 2026-2… » sans points) : il finit en « … » et le nom entier est dans la bulle.
+    segs+='<div class="cmp-seg'+(chev?' ovl':'')+'" title="'+_escHtml(s.nom)+'" style="left:'+x+'%;width:'+w+'%;background:'+col+'">'
       +'<b>'+_escHtml(s.nom)+'</b></div>';
     if(!prevFin||s.fin>prevFin) prevFin=s.fin;
   });

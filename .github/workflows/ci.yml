@@ -213,6 +213,41 @@ jobs:
         run: npm run test:mots
 
   # ==========================================================================
+  # ★ DEBORD-1 (§593) — LA REGLE DES DEBORDEMENTS, SUR UNE MACHINE A ELLE.
+  #   Les 46 ecrans de l'admin a sept largeurs (360 a 1 366 px), deux cuves en alerte : une boite qui sort d'une autre,
+  #   un texte coupe, recouvert ou superpose, un fond sous une zone de toucher, un texte colle au bord. UNE REGLE : un
+  #   debordement fait rougir la mise en ligne. Cinq a dix minutes : un job a part, pour ne pas peser sur les mesures.
+  debords:
+    name: Debordements — sept largeurs
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      # --ignore-scripts : sans lui, `prebuild` rejouerait toute la liste des controles ici (CI-1, §514).
+      - name: Build
+        run: npm run build --ignore-scripts
+
+      - name: Chromium pour les mesures
+        run: npx playwright install --with-deps chromium
+
+      - name: Debordements — la regle mesuree sur le build
+        run: npm run test:debord
+
+  # ==========================================================================
   e2e:
     name: E2E — 10 pages, login DOM reel
     runs-on: ubuntu-latest

@@ -846,6 +846,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-portee1.mjs --contre'],    //   la ligne de la campagne, le bandeau de Travaux en deux tuiles de la campagne, une campagne passée en bilan ; le zoom parti
   ['node scripts/mv-harnais-mots9.mjs'],               // MOTS-9 (§592) : Pilotage › L'équipe & le matériel allégés sur place — les neuf cartes repliées, la phrase,
   ['node scripts/mv-harnais-mots9.mjs --contre'],      //   les travaux du tracteur en une carte, le gasoil dans la cuve, « Ouvrir », le lexique ; ce qui est parti
+  ['node scripts/mv-harnais-debord1.mjs'],             // DEBORD-1 (§593) : plus rien ne déborde — la bulle rouge du Pilotage et vingt autres corrections,
+  ['node scripts/mv-harnais-debord1.mjs --contre'],    //   tenues sur le texte ; la règle qui regarde l'écran est npm run test:debord (sa propre étape de la CI)
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement

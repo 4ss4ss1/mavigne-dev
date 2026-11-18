@@ -2898,9 +2898,11 @@ function _dzTriHtml(C,edit){
   return h+'<div class="pil-dz-dif">'+_opDiffusHtml()+'</div>';
 }
 function _dzSlot(i){ return '<button class="pil-dz-slot" data-op="drop" data-i="'+i+'"><i></i><span>\u21b3 INS\u00c9RER ICI</span><i></i></button>'; }
+// DEBORD-1 (§593) : le nom dans son <span class="nmt"> (c'est lui qui finit en « … ») ; « J3→J4 » et « · N travaux » restent entiers à côté.
+//   Avant, le nom, le badge et le nombre partageaient la même ellipse : au téléphone, le badge était coupé en un rectangle gris vide.
 function _dzRowHtml(x,i,pr,pk,edit,hasCom){
   var multi=(_PIL_OP.tasks||[]).length>1, span=(pr&&pr.d0!=null&&pr.d1>pr.d0)?'<span class="bd">J'+(pr.d0+1)+'\u2192J'+(pr.d1+1)+'</span>':'';
-  return '<div class="pil-dz-row'+(pk?' pk':'')+'"><span class="n">'+(i+1)+'</span><div class="c"><div class="nm">'+_pilEsc(x.nom)+span+((multi&&x.emos>1)?' <small>\u00b7 '+x.emos+' travaux</small>':'')+'</div>'
+  return '<div class="pil-dz-row'+(pk?' pk':'')+'"><span class="n">'+(i+1)+'</span><div class="c"><div class="nm"><span class="nmt">'+_pilEsc(x.nom)+'</span>'+span+((multi&&x.emos>1)?' <small>\u00b7 '+x.emos+' travaux</small>':'')+'</div>'
     +'<div class="ds">'+(x.geo?'':'\u25cb sans position \u00b7 ')+((hasCom&&_opCom(x.p))?_pilEsc(_opCom(x.p))+' \u00b7 ':'')+'<b>'+_opFmtHa(x.s)+'</b> \u00b7 '+x.pct+'\u00a0% fait</div></div>'
     +'<div class="r"><b>'+_opFmtH(x.reste)+'</b><span>\u00e0 faire</span></div>'
     +((edit&&!pk)?'<button class="mv" data-op="pick" data-nom="'+_pilEsc(x.nom)+'" aria-label="D\u00e9placer '+_pilEsc(x.nom)+'">'+_mvIcon('hautbas',16)+'</button>':'')+'</div>';
@@ -3061,7 +3063,9 @@ function _opMapHtml(C){
   var rows=C.rows, startPt=C.startPt;
   if(typeof window.L==='undefined'){
     _OP_MAPDATA=null;
-    window._mvGraphSuivre('#pil-g-opmap', function(lg){ return _opMapSvg(rows,lg); });
+    // DEBORD-1 (§593) : la carte a déjà son bouton « Agrandir » (en bas, pil-dz-big) ; celui des graphes (KIT-1) se posait en haut à
+    //   droite, SUR « trajet ~ 4,1 km » — deux « Agrandir » sur la même carte, l'un cachant le trajet.
+    window._mvGraphSuivre('#pil-g-opmap', function(lg){ return _opMapSvg(rows,lg); }, { agrandir:false });
     return '<div class="pil-dz-svg"><div id="pil-g-opmap"></div><button class="pil-dz-big" data-op="fm">'+_mvIcon('carte',16)+'Agrandir</button></div>';
   }
   var todoGeo=rows.filter(function(r){ return r.geo; }), doneGeo=_opDoneGeo();

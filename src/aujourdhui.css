@@ -24,7 +24,10 @@
    chiffre » (npm run test:mots : 13 → 19 sur les trois vues d'Aujourd'hui). Le dessin, lui, n'a pas bougé. */
 .ck2 .ck-res-pl .ck-res-pts{min-height:44px;border-style:solid;border-color:transparent;border-width:0 var(--e-2,8px) var(--e-4,16px);background-clip:padding-box;margin:0 calc(-1 * var(--e-2,8px)) calc(-1 * var(--e-4,16px))}
 .ck2 .ck-res-pl .ck-res-pts::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--attention)}
-.ck2 .ck-res-pl .ck-res-pts.alerte{background:var(--danger-doux)}
+/* ★ DEBORD-1 (§593) : la couleur seule (background-color). Le raccourci « background: » remettait background-clip à border-box :
+   la pastille rouge se peignait SOUS sa bordure transparente (la zone de toucher, 16 px en bas, 8 px de côté) et débordait sur
+   la ligne d'en dessous — « 2 cuves demandent un contrôle en cave » (Nico, 18/11). Une variante ne touche que la couleur. */
+.ck2 .ck-res-pl .ck-res-pts.alerte{background-color:var(--danger-doux)}
 .ck2 .ck-res-pl .ck-res-pts.alerte::before{background:var(--danger)}
 .ck2 .ck-res-rien{font:var(--fw-med,500) var(--pt-micro,12px)/1 var(--font-ui);letter-spacing:0;color:var(--texte-doux)}
 .ck2 .ck-res-rep{flex-basis:100%;display:flex;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-5,20px);font:normal var(--pt-txt,13px)/1.4 var(--font-ui);letter-spacing:0;color:var(--texte-doux)}

@@ -608,3 +608,66 @@ Le **zoom par campagne** et tout ce qui le servait : « La campagne » dans la b
 - ⚠️ **Une ligne de table « à cases » se lit à la regex** (`pilrange4a`) : un commentaire en bout de ligne la fait disparaître du harnais, et ses neuf clés passent pour des défauts orphelins. Le commentaire va au-dessus.
 - ⚠️ **Rejouer la démo carte par carte**, ouverte : le zéro d’un travail sans barème ne se voit qu’ouvert, sur une donnée réelle — aucun harnais ne l’avait.
 - ⚠️ **Une clé de fiche retirée reste retirée** : reprendre `pil.tension` pour une carte neuve aurait fait mentir l’épinglage du §441. Un nom neuf (`pil.tens`).
+
+## 593. ★★★ DEBORD-1 — PLUS RIEN NE DÉBORDE : LA BULLE ROUGE DU PILOTAGE, VINGT AUTRES CORRECTIONS, ET UNE RÈGLE QUI REGARDE L’ÉCRAN (18/11 — `src/aujourdhui.css` · `src/styles.css` · `src/cave.js` · `src/cuvier.js` · `src/planning-annee.js` · `src/pilotage.js` · `src/reglages.js` · `index.html` · `scripts/mv-debord-rendu.mjs` · `.github/workflows/ci.yml` · `scripts/mv-harnais-debord1.mjs`)
+
+**La demande.** Nico (18/11), avec le « suite » qui lance le lot suivant : « fais aussi une vérif des graphismes, exemple la bulle rouge de 2 cuves demandent… qui déborde, il ne faut plus voir ce genre de problème ». Correction, pas refonte : rien ne change de place, aucune maquette.
+
+### 593a. Ce qui a été trouvé (la démo au 27/10, deux cuves passées à 31 °C pour faire naître l’alerte)
+
+Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesurent des mots, des tailles, des contrastes — jamais une boîte qui sort d’une autre. Un relevé écrit pour l’occasion (les 46 écrans du cliquet des mots, à 360, 390, 412, 768, 1 024, 1 280, 1 366 et 1 440 px), puis chaque trouvaille **regardée** en capture :
+
+| Où | Largeur | Le défaut |
+|---|---|---|
+| Pilotage › Aujourd’hui (les trois vues) | ≥ 1 280 | **la bulle rouge** « 2 cuves demandent un contrôle en cave » : `.alerte{background:…}` (le raccourci) remettait `background-clip` à `border-box` ; la pastille se peignait sous sa bordure transparente — la zone de toucher de MOTS-5B (§587), 16 px en bas, 8 de côté — et descendait sur la ligne « fin prévue · coût à la fin » |
+| Cave (les 14 écrans) | 360 | la bande « ≈ 182 hL en cuve · 43 fûts · 7 à faire · 36 t rentrées » : « rentrées » sortait de la carte |
+| Cave › Aujourd’hui | 1 024 – 1 366 | **le tableau des cuves et des cuvées** passait en cinq colonnes dès 1 024 px d’écran, dans une carte de ~410 px (1 280) à ~490 px (1 366) : « 1007 vers aujourd’hui jeu 29 », « il y a 2 j » et « 24 °C par jour » s’écrivaient les uns sur les autres ; les pastilles « Fermentation », « Macération · J8 », « Fait le 23 oct. » sortaient de leur colonne |
+| Cave › Aujourd’hui, la semaine | 1 024 – 1 280 | les sept jours dans ~330 px : « lunmamejeuven », les gestes sur les numéros |
+| Cave › Le Cuvier › Tournée | 360 – 390 | « Intervention groupée » sortait de l’écran, à droite de « Terminer la tournée » |
+| Cave › Le Millésime › Ensemble | 360 | « Encore en cuve » posée sur « Charmes-Combotte » |
+| Cave › Le Millésime › Courbes | 360 – 1 280 | le tableau de la densité coupé par sa carte, ses chiffres collés (« 1007 8,1 ») |
+| Cave › Le Millésime › Cuvées | 360 | la fiche d’une cuvée sans aucune marge ; « 6× Neuf **&amp;middot;** 8× 2025 » en toutes lettres |
+| Planning › Année | toutes | l’horaire « 7 h 00 → 15 h 00 » sortait de sa colonne ; au téléphone, les douze noms de mois se chevauchaient ; à 768, le « + » de la semaine type |
+| Pilotage › Décider | 360 | « J3→J4 » coupé en un rectangle gris vide après « Champ de la Croix… » |
+| Pilotage › Décider, la carte | toutes | **deux « Agrandir »** : celui des graphes (KIT-1) posé SUR « trajet ~ 4,1 km » |
+| Tracteur › Entretien | 390 – 1 366 | la page garde 360 px à droite pour la fiche : en deux colonnes, celle de droite tombait à 106 px (1 024) et coupait « Relever », le crayon, « Ajouter » ; et quatre cartes sans aucune marge intérieure |
+| Vigne › Journal | 1 024 | « Validé » sur « Ébourgeonnage » (le titre rétrécissait à 45 px) |
+| Vigne › Parcelles › Stades | 1 024 | les onze stades d’une ligne sous la carte « Ce qui vient » |
+| Vigne › Accueil | 1 024 | la pastille « Après-vendange 2026-2027 » sortait de sa carte |
+| Réglages › Domaine | 360 – 412 | « Après-vendange 2026-2027 » coupé net dans la frise des campagnes |
+
+### 593b. Les corrections — chacune à sa place, sans changer le dessin
+
+- **La bulle** : `background-color` seule (`aujourdhui.css`). Une variante ne touche que la couleur.
+- **Requêtes de conteneur** là où un composant vit dans une colonne étroite : le tableau des cuves et des cuvées (`#page-cave .caj-c{container-type:inline-size}`, `@container (min-width:640px)`), la semaine de la Cave (la même carte), les colonnes de contexte des courbes (`.pcrb-b`, au-dessous de 640 px). Ils suivaient la largeur de l’ÉCRAN ; leur carte, entre le sommaire et « À surveiller », en a deux fois moins.
+- **L’Entretien du Tracteur** en deux colonnes à partir de 1 600 px seulement (la fiche garde ses 360 px) ; les cartes sans en-tête prennent la marge de la carte (`:not(:has(> .ent-resume-hd))`).
+- **Passer à la ligne plutôt que sortir** : la ligne d’un jour du Planning (et ses colonnes à 300 et 240 px), les stades, l’en-tête d’une carte du Journal, la pastille de l’Accueil, les deux boutons de la tournée (« Intervention groupée » au plus 42 %), la ligne d’une cuvée du Millésime au téléphone (le nom a sa ligne).
+- **Abréger plutôt que couper** : le nom d’une parcelle de Décider dans son `<span class="nmt">` (le badge reste entier), le nom d’une campagne de la frise (`…`, et le nom entier en bulle).
+- Au téléphone, un nom de mois sur trois au Planning ; la bande de la Cave pose le mot sous le chiffre ; la fiche d’une cuvée a sa marge.
+- La carte du trajet garde son seul « Agrandir » (`_mvGraphSuivre(…, { agrandir:false })`).
+- `_caveTonneauxStr` joint par le caractère « · » (plus l’entité, que la fiche échappait) ; le nom d’une cuve n’est plus centré par un `align-self:center` pensé pour une autre grille.
+
+### 593c. La règle — `npm run test:debord` (`scripts/mv-debord-rendu.mjs`)
+
+- Les **46 écrans** du cliquet des mots (la liste est lue dans `mv-mots-rendu.mjs` : un écran ajouté là est regardé ici), à **sept largeurs** (360, 390, 412, 768, 1 024, 1 280, 1 366), horloge au 27/10 9 h, **deux cuves en alerte** (l’état qui fait naître la bulle : la démo seule n’en a pas). 322 relevés.
+- Six sortes, cherchées dans la page active : ① un texte hors de sa boîte peinte, ou coupé net (sans « … ») par une boîte basse ; ② une boîte hors de la boîte qui la contient, ou de l’écran ; ③ un fond peint sous une bordure transparente ; ④ un texte recouvert par une boîte peinte (`elementFromPoint`, la page défilée) ; ⑤ deux textes l’un sur l’autre ; ⑥ un texte collé au bord d’une carte bordée. Ne comptent pas : un défilement horizontal voulu, une liste repliée qui coupe en bas, un texte en « … », une barre fixe au-dessus du contenu, une zone de toucher transparente.
+- **Une règle, pas un cliquet** : un débordement rougit toujours. `-- --contre` pose un défaut de chaque sorte dans Pilotage › Aujourd’hui (6/6 trouvés). `-- --largeurs`, `-- --ecran` pour aller vite pendant un lot.
+- Deux largeurs à la fois (`MV_DEBORD_PAR`, 2 par défaut) : un peu plus de cinq minutes dans le bac à sable (vingt en file). **Un job de la CI à part** (« Débordements — sept largeurs », 25 minutes au plus), pour ne pas peser sur les mesures.
+- Le relevé final : **322 écrans, aucun débordement** ; 1 440 px regardé à part, propre.
+
+### 593d. Harnais
+
+`scripts/mv-harnais-debord1.mjs` (36 assertions, 37 contre-épreuves) : chacune des corrections sur le texte, avec l’ancien texte interdit quand il est connu (le raccourci `background:` sur une variante de la bulle, les deux colonnes de l’Entretien dès 1 024, le tableau des cuves sur l’écran, `minmax(230px…)`, `minmax(210px…)`) ; le branchement de la règle (ses six sortes, ses largeurs, l’état, npm, la CI) ; l’annonce, le service worker, la liste. **Harnais adaptés** : `tourcuv1` (les deux boutons de la tournée rétrécissent), `mots9` (les versions « au moins »). `cave1` a rougi : la règle de la frise du Planning (un `font-size:0`) avait été posée dans le bloc CAVE-1, « par jetons seulement » — elle est sortie du bloc.
+
+### 593e. Restes, à leur lot
+
+- La cellule « décuvée 26/10 » des courbes est en Cormorant (`.pcrb-sec`, `--font-titre`) au milieu de chiffres en Outfit : un choix de police, pas un débordement — au lot de la Cave rangée.
+- Pas regardé par la règle : les fenêtres qui s’ouvrent par-dessus, la fiche d’une personne, le thème sombre, la vue de l’équipe, une largeur entre deux de la liste, 1 600 px et plus (l’Entretien en deux colonnes).
+- La maquette de **Décider** (le lot MOTS suivant) n’est pas faite dans ce lot.
+
+### 593f. Leçons
+
+- ⚠️ **Le raccourci `background:` remet à zéro `background-clip`, `background-origin` et `background-size`.** Une variante qui ne change que la couleur s’écrit `background-color`. La zone de toucher par bordure transparente (MOTS-5B) n’est sûre que si AUCUNE règle ne réécrit `background:` sur l’élément.
+- ⚠️ **Un composant ne connaît pas la largeur de sa colonne.** Une requête `@media (min-width:1024px)` dit « l’écran est large », pas « ma carte est large » : avec un sommaire à gauche et une colonne à droite, la carte du milieu fait 330 à 490 px. Pour un tableau, une semaine, des colonnes de contexte : `container-type:inline-size` sur la carte et `@container`.
+- ⚠️ **1 024 px est la largeur où tout casse** (tablette couchée, petit portable) : la règle la joue toujours.
+- ⚠️ Un relevé de l’écran se trompe facilement : la boîte d’un texte en « … » dépasse sa boîte (la plage ignore l’ellipse), une zone de toucher transparente répond à `elementFromPoint`, une liste repliée cache ses lignes exprès. Chaque exclusion de la règle a été vérifiée en capture.

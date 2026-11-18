@@ -193,7 +193,7 @@ function _caveGroupesL(cuv){
     g[k].parts.push(t.nb+'\u00d7 '+(t.annee>=curY?'Neuf':t.annee)
       +((_caveHorsFormat(L)&&t.ref)?(' \u00b7 '+_escHtml(t.ref)):''));
   });
-  return ks.map(function(k){ return {l:g[k].l, nb:g[k].nb, rep:g[k].parts.join(' &middot; ')}; })
+  return ks.map(function(k){ return {l:g[k].l, nb:g[k].nb, rep:g[k].parts.join(' \u00b7 ')}; })
     .sort(function(a,b){ return a.l-b.l; });
 }
 
@@ -355,7 +355,7 @@ function _caveTonneauxStr(cuv) {
     var l=parseFloat(t&&t.l);   // ★ FUT-CAP : un fut qui n'a pas la contenance du domaine le dit
     return t.nb+'\u00d7 '+(t.annee>=curY?'Neuf':t.annee)
       +((isFinite(l)&&l>0&&l!==_caveFutL())?(' ('+_caveLTxt(l)+'\u00a0L)'):'');
-  }).join(' &middot; ');
+  }).join(' \u00b7 ');   // DEBORD-1 (§593) : le caractère, plus l'entité « &middot; » — la fiche d'une cuvée l'échappait et l'affichait en toutes lettres
 }
 
 function _renderCuvTonneaux() {
@@ -7518,6 +7518,8 @@ function _pcavInjectCss(){
   +'.mlc-pill.elev{background:var(--terre-pale);color:var(--terre-tx,#8A5A38)}'
   +'.mlc-pill.cuve{background:var(--or-pale);color:var(--texte-med)}'
   +'.mlc-dots{flex:none;display:flex;gap:var(--e-1,4px)}'
+  // DEBORD-1 (§593) : à 360 px, le nom (« Charmes-Combotte ») n'avait plus que 60 px et passait sous la pastille. Au téléphone, le nom a sa ligne, la pastille, les points et le chiffre la suivante.
+  +'@media (max-width:599px){.mlg-cl{flex-wrap:wrap;row-gap:var(--e-2,8px)}.mlg-cl .mlg-cn{flex-basis:100%}.mlg-cl .mlg-cf{margin-left:auto}}'
   +'.mlc-d{display:block;width:9px;height:9px;border-radius:50%;box-sizing:border-box;border:1.5px solid var(--ligne-forte)}'
   +'.mlc-d.fait{border:0;background:var(--accent)}'
   +'.mlc-d.enc{border:2px solid var(--accent)}'
@@ -7620,6 +7622,8 @@ function _pcavInjectCss(){
   +'.pcrb-tb td{padding:8px 0;border-bottom:1px solid var(--gris-clair);color:var(--texte-med);white-space:nowrap}'
   +'.pcrb-tb tr:last-child td{border-bottom:none}'
   +'.pcrb-tb .n{text-align:right}'
+  // DEBORD-1 (§593) : à 360 px, trois colonnes sans écart ni retour à la ligne débordaient de la carte (coupées) et collaient leurs chiffres (« 1007 8,1 »). Un écart à gauche des chiffres, et « Fin de FA » passe à la ligne.
+  +'.pcrb-tb th.n,.pcrb-tb td.n{padding-left:var(--e-3,12px)}.pcrb-tb td:nth-child(2){white-space:normal}'
   +'.pcrb-tb i{font-style:normal;color:var(--texte-doux);font-weight:500}'
   +'.pcrb-tb small{color:var(--texte-doux)}'
   +'.pcrb-nm{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--texte)}'
@@ -7656,6 +7660,9 @@ function _pcavInjectCss(){
   +'.pcrb-tb tr[data-on=\'B\']{background:var(--bleu-pale)}'
   +'.pcrb-tb tr[data-on=\'A\'] .pcrb-dot{background:var(--terre)}'
   +'.pcrb-tb tr[data-on=\'B\'] .pcrb-dot{background:var(--bleu)}'
+  // DEBORD-1 (§593) : les trois colonnes de contexte suivent la largeur de LA CARTE, pas celle de l'écran — sur ordinateur, la carte
+  //   de la densité fait ~420 px à 1 024 et 1 280 px d'écran : le tableau à six colonnes sortait de la carte (coupé).
+  +'.pcrb-b{container-type:inline-size}@container (max-width:640px){.pcrb-tb .o{display:none}}'
   +'@media(max-width:600px){'
   /* Les trois colonnes de contexte se replient, elles ne disparaissent pas :
      le cahier de cuverie les porte toutes les neuf. */

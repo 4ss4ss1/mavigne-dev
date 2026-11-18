@@ -1,0 +1,54 @@
+{
+  "lot": "DEBORD-1",
+  "section": "§593",
+  "base": "9fd63cb2235c8cdfc132f7a1d3239d28ae80bdb9",
+  "inclut": [],
+  "date": "2026-11-18",
+  "tutos": {
+    "ok": true,
+    "empreinte": "8a0effcc5628f743fa36f0e3440b1d55f7f88a00878c3395f4b5bfc19c442eb1",
+    "date": "2026-11-18T11:28:29.448Z",
+    "joues": {
+      "téléphone": 7,
+      "ordinateur": 7,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "feries",
+      "unsurdeux"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    ".github/workflows/ci.yml": "e5e33156920187883fe936cfcf38944c8e09a9c670a69cf160ccb85999b496bd",
+    "CLAUDE.md": "ba8dd7c2406c3328cdb5bfa1abfbf3268958b248b4f8c6fba953bb6970255849",
+    "docs/claude/INDEX.md": "210a841bd6762f9848e088bf567b435b141f9de00ad0505b5905eb8d430bcd9f",
+    "docs/claude/chantiers-580-629.md": "becf91d781877263513ccadde33b26ff8b337c02e079d1460fc8afdd13deba5a",
+    "docs/claude/journal.md": "3b6ad41dc8fd968185e938a29ba79e5c2417cf29c25fc0d3654d4d7b2f6a9c87",
+    "index.html": "506f9b21938fe216a1fb720085cc2d1800717d44a58b69f1d3af19650cf65675",
+    "package.json": "24458072fe26e7e18f7f2cfe1cfd188ead401e39296d8d23f6ff920fe0992818",
+    "public/sw.js": "f381fe13eaea4b7304047c657f5f55d527b8b8b34cf44650e4ead034f1411fca",
+    "scripts/harnais-claude-md.mjs": "d992e244801f6833f14484b12e686506db7fadc3d7d2cd6c275bf56850dfdc68",
+    "scripts/mv-harnais-liste.mjs": "a7ef17f11f081fdeae1f6a6743b0d17aaf804a2d2d8ff883fc387f51719e2f36",
+    "scripts/mv-harnais-mots9.mjs": "19b3efe66eed80204aa393089c52db9d91dcd1acaa13d496462640fc4e181262",
+    "scripts/mv-harnais-tourcuv1.mjs": "803badcb03a838725ac93fe496900f1f320e2e4c65256cde2709414c78c5bb95",
+    "scripts/mv-mots-baseline.json": "46adf1c6b30007469102bb2d4706ace72bc6c330b1e71623a43ec20a29cc4067",
+    "scripts/mv-ux-baseline.json": "8eff826a02af4e95129ac91f83ec76ae4dbb736d1552d63a9534bfea3119202b",
+    "src/aujourdhui.css": "64d3303d53a87aaac212a797764c8533ab590cab56ffe8706eb945fc0f6ab1eb",
+    "src/cave.js": "10db02b0f67be335506118413e4d877cfdeb70475d39e7beffacfe5f5fa72cbd",
+    "src/cuvier.js": "157201f1df25e5aec7f4fb6d63edd6e9b6ccefbc685efdfe2b9a49be58169001",
+    "src/pilotage.js": "6401910f717b2a63da13387d84d1d38f709512e7311a877ddf3a1bab4bda9d97",
+    "src/planning-annee.js": "b3d92e63f34e2a308d1bb0d28725f2cec7aae6c4b4c785658080ff303d105c58",
+    "src/reglages.js": "7eeeb9179d65d1c7fd80e8cc6051dc8ff0c16e001435176bef1b7cda2786763d",
+    "src/styles.css": "a48c7dea71b0df7d050f618b99fc2390b68c32232962e36f4809784f6fd239a7",
+    "src/utils.js": "271c689a93131debd9b2a252a1633db6766a764991bfe3fe96c8c4b33523aa0c",
+    "src/whats-new.js": "3191d31a7a80ae6d797dbd5ac5c5f47db0d52e805fdfe23d2bde413653cbcf84",
+    "scripts/mv-debord-rendu.mjs": "80ea5ac8154b92c34b3852faeabda0e89e8d0dd234bb3b5448579754b0796c69",
+    "scripts/mv-harnais-debord1.mjs": "e6c7ac36d53f074e37dcaafc773588cc80222c8296ee79b4ae87360310cb80e6"
+  }
+}

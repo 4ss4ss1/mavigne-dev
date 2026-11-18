@@ -79,6 +79,11 @@
    "hausses": [
     "Pilotage › L’équipe & le matériel › téléphone › avant : 5 → 11"
    ]
+  },
+  {
+   "date": "2026-11-18",
+   "motif": "DEBORD-1 (§593) : la Cave et les courbes suivent la largeur de leur carte (en-têtes et colonnes de contexte repliés), « &middot; » devient « · », un seul « Agrandir » sur la carte de Décider",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -210,7 +215,7 @@
     "lex": null
    },
    "Cave › Le Millésime › Cuvées": {
-    "mots": 184,
+    "mots": 182,
     "p15": 1,
     "avant": 18,
     "lex": null
@@ -288,7 +293,7 @@
     "lex": 0
    },
    "Pilotage › Décider": {
-    "mots": 378,
+    "mots": 377,
     "p15": 2,
     "avant": 16,
     "lex": 5
@@ -416,7 +421,7 @@
     "lex": null
    },
    "Cave › Aujourd’hui": {
-    "mots": 469,
+    "mots": 463,
     "p15": 2,
     "avant": 0,
     "lex": null
@@ -488,13 +493,13 @@
     "lex": null
    },
    "Cave › Le Millésime › Cuvées": {
-    "mots": 181,
+    "mots": 179,
     "p15": 1,
     "avant": 18,
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 769,
+    "mots": 765,
     "p15": 9,
     "avant": 18,
     "lex": null
@@ -566,7 +571,7 @@
     "lex": 0
    },
    "Pilotage › Décider": {
-    "mots": 378,
+    "mots": 377,
     "p15": 2,
     "avant": 16,
     "lex": 5

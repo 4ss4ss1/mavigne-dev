@@ -164,8 +164,10 @@ function suite(S) {
     && S.guide.includes('<li><b>Renfort</b>') && !S.guide.includes('Gasoil après les travaux</b>'));
   const iW = S.wn.indexOf("{ v: '11.20'"), jW = S.wn.indexOf("{ v: '11.19'");
   T('⑦ l’annonce 11.20, pour l’administrateur seulement', iW > 0 && iW < jW && S.wn.slice(iW, jW).includes("pour: ['admin']") && S.wn.slice(iW, jW).includes('Équipe au pic'));
-  T('⑦ les versions : APP 11.20 (et l’affichage), SW 12.11 qui dit le lot', /APP_VERSION = '11\.20'/.test(S.uti) && S.idx.includes('Ma Vigne v11.20') && S.idx.includes('/boot.js?v=11.20"')
-    && S.sw.includes("const CACHE_NAME   = 'mavigne-v12.11';") && S.sw.includes('// v12.11 (18/11/2026) — MOTS-9 (§592)'));
+  // DEBORD-1 (§593) : les lots suivants montent les versions — 11.20 au moins, partout la même ; le changelog du SW garde la ligne du lot.
+  const appV = (S.uti.match(/APP_VERSION = '([\d.]+)'/) || [])[1] || '0';
+  T('⑦ les versions : APP 11.20 au moins (et l’affichage), le SW dit le lot', Number(appV) >= 11.20 && S.idx.includes('Ma Vigne v' + appV) && S.idx.includes('/boot.js?v=' + appV + '"')
+    && /const CACHE_NAME   = 'mavigne-v12\.\d+';/.test(S.sw) && S.sw.includes('// v12.11 (18/11/2026) — MOTS-9 (§592)'));
   T('⑦ la maquette est rangée et citée', S.maq.length > 100000 && S.maq.includes('L’équipe & le matériel') && S.lm.includes('maquette-equipe-materiel-v1.html'));
   T('⑦ la liste joue ce fichier et ses contre-épreuves', S.liste.includes("['node scripts/mv-harnais-mots9.mjs']") && S.liste.includes("['node scripts/mv-harnais-mots9.mjs --contre']"));
   return out;

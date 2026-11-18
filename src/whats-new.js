@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.21', d: '2026-11-18', items: [   // DEBORD-1 (§593) : plus rien ne déborde — la bulle rouge du Pilotage, et vingt autres débordements, à toutes les largeurs
+    { niv: 1, pour: ['admin'], emoji: 'oeil', titre: 'Des écrans qui ne débordent plus',
+      desc: "La pastille rouge du Pilotage («\u00a02 cuves demandent un contrôle\u00a0») ne déborde plus sur la ligne d’en dessous. Sur téléphone, tablette et ordinateur, plus rien ne sort de sa carte ni ne s’écrit sur un autre texte\u00a0: la bande et le tableau des cuves de la Cave, la semaine de la Cave, l’Entretien du Tracteur, le Journal, le Planning de l’année, la carte de Décider, les Stades, les courbes du Millésime." }
+  ] },
   { v: '11.20', d: '2026-11-18', items: [   // MOTS-9 (§592) : Pilotage › L'équipe & le matériel allégé sur place — toutes les cartes restent, repliées
     { niv: 0, pour: ['admin'], emoji: 'equipe', titre: 'Pilotage, L’équipe et le matériel\u00a0: les mêmes cartes, moins de mots',
       desc: "L’onglet garde toutes ses cartes, à leur place. En haut, une phrase\u00a0: les présents du jour, les personnes au seuil, la cuve sous le seuil. Chaque carte arrive repliée\u00a0: un titre, un chiffre, une pastille\u00a0; touchez-la pour son détail, son bouton «\u00a0Ouvrir\u00a0» mène au planning, à l’équipe ou à l’entretien. «\u00a0Capacité vs charge\u00a0» s’appelle «\u00a0Équipe au pic\u00a0», comme dans Travaux. Les trois grandes cartes des travaux du tracteur n’en font plus qu’une, et le gasoil après les travaux se lit dans la carte de la cuve. Aucun calcul ne change." }
