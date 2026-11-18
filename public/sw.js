@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.15
+// MA VIGNE — Service Worker v12.16
+// v12.16 (18/11/2026) — FRAIS-2 (§597) : l'onglet « Frais » de la fiche d'un salarié se voit — il était poussé hors de la barre (423 px d'onglets pour 324 à 402 de place) : « Congés et acomptes » devient « Congés », les onglets de la fiche resserrés (8 px de marge par côté) ; les acomptes passent dans « Frais », sous la liste des frais (l'argent qui passe avec la paie) ; un ancien lien « ac » ouvre « Frais ».
 // v12.15 (18/11/2026) — CHAINE-1 (§596) : un CDD qui devient CDI sans un jour de coupure ne remet plus le compteur à zéro — une seule chaîne de contrats (_mvChaines : contigus et même régime ; un TESA ou un saisonnier payé à l'heure garde son compte) ; le mois du changement redevient un mois entier (_planInContract part du début de la chaîne, _planDebutCompteur) ; les jours d'un contrat archivé se saisissent, coupure ou non (_planJourSaisissable : la case, la ligne, la colonne, la fiche, Mon planning, toutes les écritures) — fin de la lecture seule de CDDCDI-1 ; la fiche n'affiche plus de « compteur soldé » pour un CDD suivi sans coupure ; le relevé dit « compteur à part » après un TESA ; Réglages ne dit plus « Coupure de 0 jour », l'embauche dit « sans coupure : même compteur »
 // v12.14 (18/11/2026) — FRAIS-1 (§595) : les frais à rembourser — un 5e volet « Frais » dans la fiche d'un salarié (Planning › Personnel) : tickets avec leur photo, trajets avec sa voiture (les km en plus et le motif), payés au barème fiscal selon la puissance et les km de l'année (ou un taux du domaine) ; un bloc « Remboursements, hors salaire » dans Pour la compta, figé avec le mois ; une page des frais au relevé, tickets en annexe ; photos dans Storage (tenants/<domaine>/frais, l'admin seul)
 // v12.13 (18/11/2026) — MOTS-10 (§594) : Pilotage › Décider allégé sur place — une phrase en haut (le travail, où l'équipe sera ce soir, la fin prévue, le renfort), les trois cartes repliées (la tournée comprise) avec leur chiffre et leur pastille ; les simulateurs gardent leurs boutons, leurs mots s'allègent ; « Ouvrir la priorité du moment » sous Qui fait quoi ; « Simuler un renfort » et « Voir le détail » ouvrent leur carte (_pilDeplier)
@@ -4747,7 +4748,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.15';
+const CACHE_NAME   = 'mavigne-v12.16';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4764,7 +4765,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.15 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.16 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4784,7 +4785,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.15 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.16 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

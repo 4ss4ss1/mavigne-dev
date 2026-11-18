@@ -854,6 +854,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
   ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne
   ['node scripts/mv-harnais-chaine1.mjs --contre'],    //   (_mvChaines), le compteur de l'année, la saisie des jours d'un contrat archivé, le relevé, la fiche, Réglages
+  ['node scripts/mv-harnais-frais2.mjs'],              // FRAIS-2 (§597) : l'onglet « Frais » se voit (cinq onglets dans 324 px, un budget étalonné), les acomptes
+  ['node scripts/mv-harnais-frais2.mjs --contre'],     //   sortis de « Congés », posés dans « Frais » sous la liste ; l'ancien lien « ac » ; l'aide, le guide, la version
   ['node scripts/mv-harnais-wncoupe1.mjs'],            // WN-COUPE-1 (§469) : WHATS_NEW vit dans src/whats-new.js, utils.js le réexporte et garde 64 ko de marge sous 1024 ko
   ['node scripts/mv-harnais-wncoupe1.mjs --contre'],
   ['node scripts/mv-harnais-qdn1.mjs'],                // QDN-1 (§497) : le grand panneau « La nouvelle Ma Vigne » — rôles, liste complète, échappement, déclenchement

@@ -5840,7 +5840,7 @@ function _pfPaieDonnees(mbr,P){
   if(P.acomptes.length)P.acomptes.forEach(function(a){var dp=(a.date||'').split('-');D.moins.push(['','Acompte vers\u00e9 le '+(dp.length===3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):''),'<b>'+(a.montant||0).toLocaleString('fr-FR')+'\u202f\u20ac</b>']);});
   else D.moins.push(['pf-rien','Acompte','aucun']);
   var cpJ=P.jours.filter(function(x){return x.payeType==='cp';}).map(function(x){return x.d;});
-  // Les dates et les heures : le décompte en jours (ouvrables ou ouvrés) est dans l'onglet Congés et acomptes
+  // Les dates et les heures : le décompte en jours (ouvrables ou ouvrés) est dans l'onglet Congés
   if(cpJ.length)D.info.push(['','Cong\u00e9s pay\u00e9s','le'+(cpJ.length>1?'s ':' ')+cpJ.join(', ')+', <b>'+_planFmt(P.cp)+'</b>']);
   if(P.rec>0.0001)D.info.push(['','R\u00e9cup prise','<b>'+_planFmt(P.rec)+'</b>']);
   if(P.neutres.arret)D.info.push(['','Arr\u00eat de travail','<b>'+_planFmt(P.neutres.arret)+'</b>']);
@@ -5997,8 +5997,7 @@ function _pfConges(mbr,P){
       +(cpJ.length?'<ul class="pf-mv">'+cpJ.map(function(x){return '<li><span class="pf-mv-d">'+PLAN_JOURS[x.w]+' '+x.d+'</span><span class="pf-mv-t">Cong\u00e9 pay\u00e9</span><b>'+_planFmt(x.paye)+'</b></li>';}).join('')+'</ul>'
         :'<p class="pl2-note">Aucun cong\u00e9 pay\u00e9 en '+PLAN_MOIS[P.m].toLowerCase()+'.</p>')
       +'<p class="pl2-note">Le solde de d\u00e9part se r\u00e8gle dans R\u00e9glages, \u00c9quipe. La r\u00e8gle de d\u00e9compte du domaine est dans la roue crant\u00e9e du Planning.</p>'
-    +'</section>'
-    +_planAcomptesCard(mbr,isAdmin());
+    +'</section>';   // ★ FRAIS-2 (§597) : les acomptes sont partis dans l'onglet « Frais » (l'argent qui passe avec la paie)
 }
 function _planRecupCartes(mbr,dm){
   var c=_planCompteur(mbr,dm),r=c.rows[dm],hm=_planHsupTiers(mbr,dm),pay=_planHsupPayable();
@@ -6402,9 +6401,10 @@ function _planFicheRender(){
   if(sub)sub.textContent=(_coll?('\u00c9quipe collective, '+_planEffMax(mbr,planMonth)+' pers.'):((mbr.type_contrat||'CDI')+', planning '+_planPlId(mbr)))+(mbr.statut==='Inactif'?', inactif':'');
   var moisEl=document.getElementById('pf-mois');
   if(moisEl)moisEl.textContent=PLAN_MOIS[planMonth]+' '+planYear;
-  // ★ FICHE-1 : Résumé, Jours, Compteur, Congés et acomptes. Les anciens identifiants
+  // ★ FICHE-1 : Résumé, Jours, Compteur, Congés, Frais. Les anciens identifiants
   //   d'onglet (« mois », « cp », « ac ») se lisent encore : un lien ancien ne tombe pas à vide.
-  var t={mois:'jours',ac:'cp'}[_planFicheTabId]||_planFicheTabId;
+  // ★ FRAIS-2 (§597) : « Congés et acomptes » est devenu « Congés » ; les acomptes (« ac ») vivent dans « Frais ».
+  var t={mois:'jours',ac:'frais'}[_planFicheTabId]||_planFicheTabId;
   if(['resume','jours','hsup','cp','frais'].indexOf(t)<0)t='resume';   // ★ FRAIS-1 (§595) : le volet « Frais »
   _planFicheTabId=t;
   document.querySelectorAll('#ovPlanFiche .pl2-ftab').forEach(function(b){var on=b.getAttribute('data-f')===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
@@ -6417,7 +6417,8 @@ function _planFicheRender(){
   if(t==='resume')h=_pfResume(mbr,P);
   else if(t==='jours')h=_pfJours(mbr,P)+_planLegalCard(mbr);
   else if(t==='hsup')h=_pfCompteur(mbr,P);
-  else if(t==='frais')h=(typeof window._pfFrais==='function')?window._pfFrais(mbr,P):'';   // ★ FRAIS-1 (§595) : planning-frais.js
+  // ★ FRAIS-1 (§595) : planning-frais.js. ★ FRAIS-2 (§597) : les acomptes sous la liste des frais (l'argent de la paie, au même endroit).
+  else if(t==='frais')h=(typeof window._pfFrais==='function')?window._pfFrais(mbr,P,_planAcomptesCard(mbr,isAdmin())):_planAcomptesCard(mbr,isAdmin());
   else h=_pfConges(mbr,P);
   body.innerHTML=h;
   _plGensMarque();   // PLAN-2 (§280)

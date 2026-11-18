@@ -158,7 +158,7 @@ function jouer(S) {
   const pl = sansCom(S.pl), idx = S.idx;
   t('⑤ index.html : l’onglet « Frais » de la fiche et la fenêtre de saisie (ovPlanFrais)', /data-f="frais" onclick="planFicheTab\(&#39;frais&#39;\)">Frais</.test(idx) && /id="ovPlanFrais"[\s\S]{0,600}id="pfr-body"[\s\S]{0,200}id="pfr-foot"/.test(idx));
   t('⑤ planning.js : le volet, « Pour la compta », Figer, le relevé (cadre et page 3), la roue, le contexte de la fiche',
-    /\['resume','jours','hsup','cp','frais'\]/.test(pl) && /t==='frais'\)h=\(typeof window\._pfFrais==='function'\)\?window\._pfFrais\(mbr,P\)/.test(pl)
+    /\['resume','jours','hsup','cp','frais'\]/.test(pl) && /t==='frais'\)h=\(typeof window\._pfFrais==='function'\)\?window\._pfFrais\(mbr,P[,)]/.test(pl)
     && /window\._fraisCompta\(mbr\.nom,_pY\(\),P\.m\)/.test(pl) && /window\._fraisInstantane\(mbr\.nom,_pY\(\),m\)[\s\S]{0,40}if\(fr\)o\.frais=fr;/.test(pl)
     && /window\._fraisReleveCadre\(nom,_pY\(\),m\)/.test(pl) && /FR\.html\?'<section class="pg pg3">'/.test(pl) && /window\._fraisCadreHtml\(\)/.test(pl)
     && /window\._planFicheCtx\s*=/.test(pl) && /window\._fraisFigeTexte\(mbr\.nom,_pY\(\),P\.m\)/.test(pl));
@@ -201,7 +201,7 @@ if (!CONTRE) {
     ['une ligne abîmée (sans id) entre dans le calcul', 'fr', ".filter(function (l) { return l && typeof l === 'object' && l.id; })", ".filter(function (l) { return true; })"],
     ['supprimer un frais ne propose plus « Annuler »', 'fr', "  window.showToastAnnuler(dit, function () {", "  _frFini(dit); if (0) window.showToastAnnuler(dit, function () {"],
     ['la photo d’un frais supprimé part du serveur tout de suite', 'fr', "if (l.photo && l.photo.path) _frPlusTard(", "if (l.photo && l.photo.path) window.fbFraisPhotoSuppr(l.photo.path), _frPlusTard("],
-    ['la fiche ne rend plus le volet', 'pl', "else if(t==='frais')h=(typeof window._pfFrais==='function')?window._pfFrais(mbr,P):'';", ''],
+    ['la fiche ne rend plus le volet', 'pl', "else if(t==='frais')h=(typeof window._pfFrais==='function')?window._pfFrais(mbr,P,_planAcomptesCard(mbr,isAdmin())):_planAcomptesCard(mbr,isAdmin());", ''],   // FRAIS-2 (§597) : la ligne porte les acomptes
     ['Figer ne fige plus les frais', 'pl', 'if(fr)o.frais=fr;', ''],
     ['le relevé perd sa page des frais', 'pl', "+(FR.html?'<section class=\"pg pg3\">'+tete(3)+FR.html+pied()+'</section>':'')", ''],
     ['un salarié lit les photos des frais', 'st', 'allow read:   if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());\n      allow create: if !isDemoAccount()\n                    && isTenantAdmin(tenant)', 'allow read:   if !isDemoAccount() && (isTenantMember(tenant) || isGtAdmin());\n      allow create: if !isDemoAccount()\n                    && isTenantAdmin(tenant)'],

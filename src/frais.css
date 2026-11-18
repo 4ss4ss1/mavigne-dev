@@ -94,3 +94,8 @@ button.frs-li{cursor:pointer}
 /* ── La roue du Planning : le taux du domaine ── */
 .plan-card.frs-cadre{flex-direction:column;align-items:stretch;gap:var(--e-2,8px)}
 .frs-or{color:var(--attention-texte,#975600)}
+
+/* ★ FRAIS-2 (§597) — LES CINQ ONGLETS DE LA FICHE (Résumé, Jours, Compteur, Congés, Frais) TIENNENT SUR UNE LIGNE DÈS 360 PX.
+   « Frais » était poussé hors de la barre (FRAIS-1) : 423 px d'onglets pour 324 à 402 de place. Mesuré : 191 px de texte ;
+   « Congés » au lieu de « Congés et acomptes », et 8 px de marge par côté au lieu de 14. */
+#ovPlanFiche .pl2-ftabs .mvu-tab{padding-left:var(--e-2,8px);padding-right:var(--e-2,8px)}

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.25', d: '2026-11-18', items: [   // FRAIS-2 (§597) : l'onglet « Frais » se voit ; les acomptes y passent
+    { niv: 0, pour: ['admin'], emoji: 'recu', titre: 'Planning\u00a0: l’onglet «\u00a0Frais\u00a0» se voit, les acomptes y passent',
+      desc: "Dans la fiche d’un salarié, l’onglet «\u00a0Frais\u00a0» était poussé hors de l’écran. Les cinq onglets tiennent maintenant sur une ligne, au téléphone comme sur ordinateur\u00a0: «\u00a0Congés et acomptes\u00a0» devient «\u00a0Congés\u00a0», et les acomptes passent dans «\u00a0Frais\u00a0», sous la liste des frais\u00a0: tout l’argent qui passe avec la paie au même endroit." },
+  ] },
   { v: '11.24', d: '2026-11-18', items: [   // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure — un seul compteur, des jours qui se modifient
     { niv: 2, pour: ['admin'], emoji: 'calendrier', titre: 'Planning\u00a0: un CDD devenu CDI garde un seul compteur',
       desc: "Quand un CDD devient CDI sans un jour de coupure, seuls les papiers changent. Le Planning en faisait deux contrats\u00a0: les jours du CDD ne se modifiaient plus, le compteur d’heures repartait de zéro et le mois du changement comptait à moitié. Désormais, les jours du CDD se modifient, le compteur continue et le mois du changement compte comme un mois normal. À vérifier\u00a0: le compteur de vos salariés passés de CDD en CDI reprend leurs heures de CDD. Après une coupure, le nouveau contrat repart toujours de zéro, mais les jours de l’ancien se modifient aussi. Un contrat payé à l’heure (TESA, saisonnier) garde son compte à part." },

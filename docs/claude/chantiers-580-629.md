@@ -847,3 +847,40 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Un document qui dit la règle n'est pas un calcul qui la fait.** Le relevé écrivait « même compteur » depuis §38 ; le guide aussi (« deux contrats qui se suivent sans un jour de coupure ne font qu'un ») ; le compteur repartait de zéro. Un harnais qui compare **deux fiches** (la chaîne contre un seul contrat) le prouve en une ligne ; aucune lecture ne l'avait vu.
 - ⚠️ **Un affichage en lecture seule peut être la mauvaise réponse à un vrai défaut** (CDDCDI-1) : le passé redevenait visible, mais la cause — un compteur qui ne voyait que le contrat en cours — restait. Demander « que doit-on pouvoir FAIRE de ces jours ? » avant de choisir entre afficher et bloquer.
 - ⚠️ **Outil, dans le bac à sable** : un `\u2013` écrit dans un heredoc ou une chaîne brute Python arrive **déjà converti** en « – » par la couche d'outil ; une ancre qui doit trouver l'échappement en clair dans le source ne correspond plus. Écrire l'échappement par un marqueur (`@@u2013` → `chr(92)+'u'`) ou le lire du fichier (`repr()`).
+
+## 597. ★★★ FRAIS-2 — L’ONGLET « FRAIS » SE VOIT : CINQ ONGLETS SUR UNE LIGNE, LES ACOMPTES PASSENT DANS « FRAIS » (18/11 — `index.html` · `src/planning.js` · `src/planning-frais.js` · `src/frais.css` · `src/utils.js` · `src/whats-new.js` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-frais2.mjs` (neuf) · `scripts/mv-harnais-frais1.mjs` · `scripts/mv-harnais-liste.mjs`)
+
+**La demande.** Nico (18/11), FRAIS-1 en ligne : « il n’y a pas frais ». L’onglet existait, poussé hors de la barre de la fiche. Proposé : « Congés et acomptes » devient « Congés », les onglets se resserrent. Nico : « acomptes va avec frais alors, pas avec congé ». Reformulé (« Congés » ne garde que les congés ; les acomptes passent dans « Frais », sous la liste des frais ; « Frais » reste court), « oui ».
+
+### 597a. Mesuré avant (l’appli construite, la fiche de Jean)
+
+- La barre des onglets de la fiche défile de côté (`overflow-x:auto`) : **423 px d’onglets** pour **324 px** de place à 360 px, **354** à 390 px, **402** dans la colonne de la fiche sur ordinateur (1 366 et 1 536 px). « Frais » commençait à 382 px au téléphone (hors de l’écran), à 1 300 px pour une barre qui finit à 1 338 sur ordinateur (« Frai »).
+- 191 px de texte en tout (Résumé 42, Jours 29, Compteur 54, Congés et acomptes 108, Frais 26), 14 px de marge de chaque côté de chaque onglet (`.mvu-tab`, styles.css).
+- ⚠️ Les captures de FRAIS-1 le montraient (la barre s’arrêtait sur « Congés et acomptes ») et le tuto `frais` allait au bout : son moteur fait défiler la cible jusqu’à elle. Personne ne l’a vu avant Nico.
+
+### 597b. Ce qui change
+
+- **« Congés et acomptes » devient « Congés »** (`index.html`) ; **les onglets de la fiche ont 8 px de marge par côté** au lieu de 14 (`#ovPlanFiche .pl2-ftabs .mvu-tab`, dans `src/frais.css` : `styles.css` est à son plafond).
+- **Les acomptes passent dans « Frais »** : `_pfConges` ne pose plus `_planAcomptesCard` ; la branche `frais` de `_planFicheRender` la donne à `_pfFrais(mbr, P, apres)`, qui la pose **dans la colonne de la liste, sous les frais**, avant « Sa voiture » et « Km payés » (sur ordinateur, la colonne de gauche). Sans `planning-frais.js`, l’onglet montrerait les acomptes seuls.
+- **Un ancien lien « ac »** (l’identifiant des acomptes d’avant FICHE-1) ouvre « Frais » (`{mois:'jours',ac:'frais'}`).
+- `MV_AIDE.planning` : « Congés : le solde de congés et les jours pris. Frais : … et sous la liste les acomptes » ; la fiche « Les frais à rembourser » dit les acomptes, « Annuler » après une suppression, et « les salariés ne voient ni les frais ni leurs photos » (elle disait « un salarié ne voit pas les frais de ses collègues », comme le guide de FRAIS-1 avant sa correction). Le guide : « Congés », les acomptes dans « Frais », « dans l’onglet Frais de sa fiche » sous Compteur & acomptes. L’annonce 11.25 (admin).
+
+### 597c. Mesuré après (l’appli construite)
+
+- La barre : **324 / 324 px à 360 px, 354 / 354 à 390, 402 / 402 sur ordinateur (1 366 et 1 536)** — plus rien ne défile, « Frais » entier (289 → 339 px à 360). Les onglets grandissent pour remplir la barre (`flex:1 0 auto`).
+- Joué (téléphone et ordinateur, clair et sombre, aucune erreur de page) : « Frais » de Jean — les quatre frais, puis « Acomptes sur salaire » (300 €), puis la voiture ; « Ajouter un acompte » depuis « Frais » (150 € le 16/11, enregistré, l’onglet reste « Frais ») ; « Congés » sans acomptes ; `planFicheTab('ac')` ouvre « Frais ».
+
+### 597d. Harnais
+
+`scripts/mv-harnais-frais2.mjs` (10 assertions, 12 contre-épreuves) : les cinq onglets dans l’ordre et sous leurs noms ; **un budget de largeur**, étalonné sur la mesure du 18/11 (lettres × 6,4 px + par onglet deux marges et deux bords + écarts et marge de la barre ≤ 324 px) — un libellé rallongé, un sixième onglet ou des marges élargies rougissent ; les acomptes hors de « Congés », dans « Frais », sous la liste et dans sa colonne (le module joué dans un bac à sable) ; l’ancien lien « ac » ; l’aide, le guide, l’annonce, le service worker. ⚠️ Il ne mesure pas l’écran : le budget est une estimation tirée d’une mesure. `frais1` : la ligne de la branche `frais` porte maintenant les acomptes (son assertion et sa contre-épreuve suivent).
+
+### 597e. Restes
+
+- Le budget tient à 360 px ; un téléphone de 320 px (très rare aujourd’hui) ferait encore défiler la barre.
+- La règle des débordements (`test:debord`) ne regarde pas la fiche d’une personne (en-tête de `mv-debord-rendu.mjs`) — c’est pour ça que le budget vit dans un harnais.
+
+### 597f. Leçons
+
+- ⚠️ **Une barre d’onglets qui défile cache ses derniers onglets sans rien dire.** À chaque onglet ajouté, mesurer la barre à 360 px (`scrollWidth` contre `clientWidth`), pas seulement regarder l’onglet ouvert.
+- ⚠️ **Un tuto qui va au bout ne prouve pas qu’on voit le bouton** : le moteur fait défiler jusqu’à la cible.
+- ⚠️ **Une capture se lit en entier** : celle de FRAIS-1 montrait une barre arrêtée sur « Congés et acomptes ».

@@ -1,0 +1,40 @@
+{
+  "lot": "FRAIS-2",
+  "section": "§597",
+  "base": "fb6d7b804bba79e3448597504f1a0f8dc4dbbb71",
+  "inclut": [],
+  "date": "2026-11-18",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f7abcff209e11c3cd7322ed506853123419f05f985f4f6ca02a091dced769fe3",
+    "date": "2026-11-18T21:34:49.141Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "frais"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    ".mv-base": "f590709839123f5a396060e5bae0820e6b53e9b17c46e910aaa0307800dc9d5a",
+    "CLAUDE.md": "1b2178afd3502defcf4ed26c110fc16f7122ddca1c8797b25d78144a39b3cc34",
+    "docs/claude/INDEX.md": "01264fb3f61fda899fbda1eebdf8468ea74b5a902c075040f07d91557dbf1a5f",
+    "docs/claude/chantiers-580-629.md": "542d7e17a915a155ea36eeed46c0ee32c3645cb314f9c356e3a46621aaa7be7f",
+    "docs/claude/journal.md": "ff7c93b4d1ca4cf3b33ba1f6248b2cebd92aeddc41b4c80b2dcde4a80c2451e0",
+    "guide/10-planning.html": "e3091184180d1e1dc42a5e139e94ec514e20cecc784e0abeeb184cfd1b0d8061",
+    "index.html": "f4db1363ae0d4e3726197af26f3d794b9b01ba6cf715fa17e0b33f99eab11972",
+    "public/sw.js": "2cc14dff00a914e9b05e313f7aa79c84364156888f47ea948834ff14ca59c9e3",
+    "scripts/harnais-claude-md.mjs": "4ec09b399d90bcb8c4bb58583c063c6cad1d6a0a306805a07777753454bd67a3",
+    "scripts/mv-harnais-frais1.mjs": "1789d677185784e5728ea852a90ae39ce9c20ae63b981031c6078c7fbfa20ae7",
+    "scripts/mv-harnais-liste.mjs": "9d6a9c12c806fe8062eebaed8d54645f1343483d481e72c6cad1080b2a80603c",
+    "src/frais.css": "cf07eb4aa3091d7d1b4f65b95ded527fe7a51a9139902095f3f870e623f116e0",
+    "src/planning-frais.js": "92f15ec8679bc5a97db78e71aa55ca077e9f8358e8378a3f05ace04e3e0e93ac",
+    "src/planning.js": "f3d8a3b6c8029fceba5ac930b6062575e43354b161ed820f5a42f37bcbcd8e71",
+    "src/utils.js": "5d56ab6f4e9a40d1b01c9c76d75dd4eee199431bd18d9c88965340d496d106e2",
+    "src/whats-new.js": "053f7d649b690e136fa17f1846e2e784025305de9ebb993502ca08e2e635e0d9",
+    "scripts/mv-harnais-frais2.mjs": "855358e2de43f483509f2e911b1e33eb1f08a0806fe43d79006757b819d8b90b"
+  }
+}

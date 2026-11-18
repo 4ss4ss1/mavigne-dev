@@ -166,7 +166,8 @@ function _frAnneeHtml(nom, F, cle) {
   return h + '</section>';
 }
 // Le volet, pour le mois P.m de l'année affichée.
-function _pfFrais(mbr, P) {
+// ★ FRAIS-2 (§597) : `apres` — ce que la fiche pose sous la liste des frais (les acomptes du mois, planning.js).
+function _pfFrais(mbr, P, apres) {
   var nom = mbr.nom, y = (typeof window._pY === 'function') ? window._pY() : new Date().getFullYear(), cle = _frCle(y, P.m);
   var F = _fraisLire(nom), t = _fraisMois(nom, cle), mois = _frMoisNom(cle), h = '<div class="frs">';
   if (t.fige) h += '<p class="frs-ph" data-tuto="plan.frais.phrase">' + _frIco('cadenas', 16) + ' <span>' + mois.charAt(0).toUpperCase() + mois.slice(1) + ' figé : <b>' + _frEur(t.tot) + '</b> partis avec la paie.</span></p>';
@@ -183,7 +184,7 @@ function _pfFrais(mbr, P) {
     + '<button type="button" class="mvbtn mvbtn-principal mvbtn-bureau" onclick="openPlanFrais(\'trajet\')">' + _frIco('ajout', 18) + '<span>Trajet</span></button></div>';
   if (cible !== cle) h += '<p class="frs-sous">Un frais saisi maintenant part avec la paie de ' + _frMoisNom(cible) + '.</p>';
   h += '<div class="frs-g"><div class="frs-liste"><h4 class="frs-grp">' + mois.charAt(0).toUpperCase() + mois.slice(1) + ' <span>' + t.lignes.length + '</span></h4>'
-    + (t.lignes.length ? '<ul class="frs-l">' + t.lignes.map(function (l) { return _frLigneHtml(nom, l, t); }).join('') + '</ul>' : '<p class="frs-vide">Aucun frais ce mois-ci.</p>') + '</div>'
+    + (t.lignes.length ? '<ul class="frs-l">' + t.lignes.map(function (l) { return _frLigneHtml(nom, l, t); }).join('') + '</ul>' : '<p class="frs-vide">Aucun frais ce mois-ci.</p>') + (apres || '') + '</div>'
     + '<div class="frs-cote">' + _frVoitureHtml(F) + _frAnneeHtml(nom, F, cle) + '</div></div>';
   return h + '</div>';
 }
