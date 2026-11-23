@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.25';
+export const APP_VERSION = '11.26';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2091,10 +2091,49 @@ export function setThemeMode(mode) {
   try { localStorage.setItem('mavigne_theme', mode); } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/setThemeMode'); }
   applyTheme(mode);
 }
+// ════ MANIF-1 (§600) — LA BARRE D'ÉTAT DU TÉLÉPHONE SUIT L'ÉCRAN ════
+// Le manifest lance l'appli sur un écran NOIR (background_color, theme_color : sw.js et
+// public/manifest.json), qui enchaîne sur #splash-screen, noir lui aussi — choix de Nico le
+// 23/11, « Noir, sans flash ». La balise theme-color d'index.html part donc noire. Dès que le
+// splash s'efface (il finit toujours par style.display='none', souvent après un fondu par
+// style.opacity), la barre prend le fond du thème : clair, sombre, ou celui du téléphone en
+// « Auto ». Avant : #0F1319 en dur, le bleu nuit de l'ancienne charte au-dessus d'une appli claire.
+// ⚠ Les couleurs recopient --bg-app de charte.css (clair, sombre) : une balise meta ne lit pas
+//   une variable CSS. Une charte qui change de fond change aussi ces deux lignes.
+// ★ On REGARDE au lieu d'appeler : #splash-screen se cache en six endroits (app.js, tutos.js,
+//   boot.js), et data-theme se pose aussi dans app.js (§59c). Un observateur sur chacun suffit.
+export const MV_BARRE = { splash: '#000000', clair: '#F0EEE9', sombre: '#0D0D0C' };
+export function _mvBarreCouleur(splashVisible, theme, osSombre) {
+  if (splashVisible) return MV_BARRE.splash;
+  var sombre = theme === 'dark' || (theme !== 'light' && !!osSombre);
+  return sombre ? MV_BARRE.sombre : MV_BARRE.clair;
+}
+export function _mvBarreEtat() {
+  var m = document.querySelector('meta[name="theme-color"]'); if (!m) return;
+  var sp = document.getElementById('splash-screen');
+  var vu = !!(sp && sp.isConnected && sp.style.display !== 'none' && sp.style.opacity !== '0');
+  var os = false;
+  try { os = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/_mvBarreEtat'); }
+  var c = _mvBarreCouleur(vu, document.documentElement.getAttribute('data-theme'), os);
+  if (m.getAttribute('content') !== c) m.setAttribute('content', c);
+}
+var _mvBarreSuivie = false;
+function _mvBarreSuivre() {
+  if (_mvBarreSuivie || typeof MutationObserver === 'undefined') { _mvBarreEtat(); return; }
+  _mvBarreSuivie = true;
+  var sp = document.getElementById('splash-screen');
+  if (sp) new MutationObserver(_mvBarreEtat).observe(sp, { attributes: true, attributeFilter: ['style'] });
+  new MutationObserver(_mvBarreEtat).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  try { if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', _mvBarreEtat); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/_mvBarreSuivre'); }
+  _mvBarreEtat();
+}
 export function initTheme() {
   var saved = 'auto';
   try { saved = localStorage.getItem('mavigne_theme') || 'auto'; } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/initTheme'); }
   applyTheme(saved);
+  _mvBarreSuivre();   // MANIF-1 : la barre d'état noire pendant le splash, puis le fond du thème
   // Écouter les changements système en mode Auto
   if(window.matchMedia) {
     window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function() {

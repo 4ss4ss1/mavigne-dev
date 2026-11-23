@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.26', d: '2026-11-23', items: [   // MANIF-1 (§600) : ouverture sans éclair, barre d'état au thème, icône non rognée
+    { niv: 0, pour: ['tous'], emoji: 'raisin', titre: 'L’appli installée s’ouvre sans éclair, son icône n’est plus rognée',
+      desc: "Sur Android, l’appli installée s’ouvrait sur un écran bleu nuit avant le démarrage noir. Elle s’ouvre maintenant sur du noir, d’un seul tenant, puis la barre du haut du téléphone prend la couleur de l’appli, claire ou sombre selon le thème, au lieu de rester bleu nuit. L’icône de l’écran d’accueil n’est plus coupée sur les bords : le raisin et les lettres tiennent dans le rond. Le téléphone peut demander une fois d’accepter la nouvelle icône." },
+  ] },
   { v: '11.25', d: '2026-11-18', items: [   // FRAIS-2 (§597) : l'onglet « Frais » se voit ; les acomptes y passent
     { niv: 0, pour: ['admin'], emoji: 'recu', titre: 'Planning\u00a0: l’onglet «\u00a0Frais\u00a0» se voit, les acomptes y passent',
       desc: "Dans la fiche d’un salarié, l’onglet «\u00a0Frais\u00a0» était poussé hors de l’écran. Les cinq onglets tiennent maintenant sur une ligne, au téléphone comme sur ordinateur\u00a0: «\u00a0Congés et acomptes\u00a0» devient «\u00a0Congés\u00a0», et les acomptes passent dans «\u00a0Frais\u00a0», sous la liste des frais\u00a0: tout l’argent qui passe avec la paie au même endroit." },

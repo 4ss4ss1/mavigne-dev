@@ -967,3 +967,42 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Une page de vente se relit contre le code, pas contre la page de vente d’avant** : logiciel-vigne disait « jamais une portion » huit jours après que l’appli a appris la surface traitée.
 - ★ **Un dessin d’écran vaut mieux qu’une capture périmée** : la fenêtre « avant l’export » reprend les libellés de `registre.js`, et elle ne vieillit pas avec la charte.
 - ★ **Le texte visible d’une FAQ et son JSON-LD se comparent par script** : deux copies écrites à la main finissent toujours par diverger.
+
+## 600. ★★ MANIF-1 — L’APPLI INSTALLÉE S’OUVRE SANS ÉCLAIR, SA BARRE D’ÉTAT SUIT LE THÈME, SON ICÔNE N’EST PLUS ROGNÉE (23/11 — APP 11.26, SW 12.17 — `public/manifest.json` · `public/sw.js` · `public/icon-maskable-192.png` (neuve) · `public/icon-maskable-512.png` (neuve) · `index.html` · `src/utils.js` · `src/whats-new.js`)
+
+**La demande.** Le lot C du plan validé le 23/11 (§598d) : le manifest seul, sans la TWA (Play Store à 5 clients). Nico avait dit « oui » à un écran de lancement clair `#F0EEE9`. **En lisant le code, deux choses ont changé la réponse** — dites à Nico avant de rien livrer :
+
+### 600a. Ce que le code a montré
+
+- ⚠️⚠️ **Le manifest d’une appli installée n’est PAS `public/manifest.json`** : `sw.js` intercepte `/manifest.json` et sert le sien (son `start_url` porte le tenant ; voir le commentaire au-dessus du gestionnaire). Le fichier statique ne sert qu’avant l’installation du SW. **Les deux se tiennent à la main, champ par champ** — l’écrire seul dans le statique n’aurait rien changé chez les clients.
+- ⚠️⚠️ **Le plan disait « `id: "/"`, l’identité actuelle des applis installées » : c’était FAUX.** Sans `id`, l’identité d’une appli installée est son `start_url` — ici `https://mavigneapp.fr/?tenant=<slug>`, figé à l’installation. `id: "/"` aurait changé l’identité de toutes les applis déjà installées, et Chrome ne les aurait plus mises à jour. **Aucun `id`** : c’est écrit dans `sw.js`, au-dessus du manifest.
+- ⚠️ **L’écran de démarrage de l’appli (`#splash-screen`) est NOIR** (`#000`, logo, Cormorant — et le rideau de mise à jour MAJ-2 le reprend). Un lancement Android clair aurait fait, à chaque ouverture, clair → noir → appli claire. Question posée à Nico avec une image (l’icône d’aujourd’hui rognée, fond clair, fond noir, les deux enchaînements) : **« Noir, sans flash »** (23/11).
+- **L’icône** : le SW déclarait les icônes transparentes `any maskable`. Android les rognait au cercle — le T en haut à droite et le G en bas à gauche coupés. Le logo est un trait (raisins sans remplissage) : lisible sur fond clair, pas sur noir → icône **sur fond clair**.
+- **La barre d’état** : `<meta name="theme-color" content="#0F1319">` en dur — le bleu nuit de l’ancienne charte, au-dessus d’une appli claire ; rien ne la changeait avec le thème.
+
+### 600b. Ce qui change
+
+- **Les deux manifests** (statique et SW) : `background_color` et `theme_color` `#000000` ; `lang: "fr"`, `scope` explicite (la même valeur que celle déduite du `start_url` : rien ne bouge) ; les icônes `any` (les transparentes) **et** deux icônes `maskable` à part, `icon-maskable-192.png` / `-512.png` : fond `#F0EEE9`, logo à 56 % de la largeur (le point opaque le plus éloigné du centre à 0,38 de la taille — la zone sûre est un cercle de 0,40). **Pas d’`id`.**
+- **`index.html`** : la balise `theme-color` part **noire** (comme le splash) ; un commentaire renvoie à `_mvBarreEtat`.
+- **`utils.js`** — `MV_BARRE` (noir, clair `#F0EEE9`, sombre `#0D0D0C` : les `--bg-app` de `charte.css`, recopiés car une balise meta ne lit pas une variable CSS), `_mvBarreCouleur` (pure), `_mvBarreEtat` (pose la couleur), `_mvBarreSuivre` appelée par `initTheme` : **on regarde au lieu d’appeler** — un observateur sur le `style` de `#splash-screen` (il se cache en six endroits : app.js, tutos.js, boot.js), un sur `data-theme` de `<html>` (posé par `applyTheme` et par app.js §59c), et le changement clair/sombre du téléphone pour « Auto ».
+- **`WHATS_NEW` 11.26** : un item `niv 0`, `pour: ['tous']` — l’ouverture sans éclair, la barre au thème, l’icône entière, et que le téléphone peut demander une fois d’accepter la nouvelle icône.
+- **Versions** : APP 11.25 → 11.26 (cinq porteurs d’`index.html` : quatre affichages et `boot.js?v=`), SW 12.16 → 12.17 (en-tête, `CACHE_NAME`, deux `console.log`, ligne de journal).
+
+### 600c. Mesuré
+
+- `npm run check` complet (`mv-lanceur --continuer`, 2 à la fois) : **798 commandes, 0 rouge**, 528 s ; `mv-harnais-theme` 7 vertes ; `mv-whatsnew-check` vert ; `WHATS_NEW` exécuté dans Node (11.26, `niv 0`, `tous`) ; l’aiguillage des tutos : **aucun tuto ne touche ce lot**.
+- **Dans Chrome sans tête, l’appli construite** (Vite, servie depuis `dist`, SW bloqué, 390 × 844), la balise relevée tous les dixièmes de seconde : téléphone en clair — `#000000` pendant le splash, `#F0EEE9` à l’instant où il se cache (3,2 s) ; téléphone en sombre — `#000000`, puis `#0D0D0C` ; puis le thème choisi dans l’appli : sombre `#0D0D0C`, clair `#F0EEE9`, Auto = le téléphone. Aucune erreur de page.
+- Les icônes relues : 512 et 192 px, RVB, fond `#F0EEE9` au coin.
+
+### 600d. Ce qui reste
+
+- **À faire chez Nico** : `npm run build && firebase deploy` (pas `--only hosting` : `index.html` et le SW changent). Sur un Android où l’appli est installée : la rouvrir deux fois (le SW 12.17 prend la main, puis Chrome relit le manifest) ; Chrome met l’appli installée à jour **à son rythme** (au plus une fois par jour au lancement) et **peut demander une fois d’accepter la nouvelle icône**. Une installation neuve a tout de suite l’icône entière et le lancement noir.
+- **Play Store (TWA)** : à 5 clients (Nico, 23/11). Au moment de la TWA, l’`id` se tranchera là — le `start_url` porte le tenant.
+- **Lot D** : `docs/geo-kit.md` (fiches annuaires B2B, message de demande d’avis).
+- **Non touché, vu en route** : l’écran de connexion (`#login-screen`) et l’onboarding gardent leur dégradé sombre `#1A1F2E → #0F1319` de l’ancienne charte ; l’écran « Connexion instable » de `boot.js` aussi. Hors de ce lot.
+
+### 600e. Leçons
+
+- ⚠️⚠️ **Avant de toucher un manifest, chercher qui le SERT** : ici le SW, pas le fichier. Et avant de poser un `id`, lire le `start_url` que voient les applis déjà installées.
+- ⚠️ **Un « oui » donné sur une prémisse fausse se redemande** : « l’appli est claire » oubliait le splash noir. Une image, une question, trois options — et la réponse a changé.
+- ★ **Une couleur qui dépend de six endroits se règle par observation** : un `MutationObserver` sur l’attribut qui change, plutôt qu’un appel ajouté dans chacun des six.

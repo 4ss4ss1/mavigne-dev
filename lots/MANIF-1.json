@@ -1,0 +1,26 @@
+{
+  "lot": "MANIF-1",
+  "section": "§600",
+  "base": "00d618337c43f2d9e49caa84a827ec352b789a7b",
+  "inclut": [],
+  "date": "2026-11-23",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "daaf99f205e099648c1703cf44322ef75c766a1184c371184fbe2d196b6ba694",
+    "CLAUDE.md": "336c19a24b48a19b226ada61653b51ab5df00ed5e9a9ac74fcfd5ea47ef9a501",
+    "docs/claude/INDEX.md": "36a15dd2b42a1c8cd057db07316e11db70b571b1cf6ee380d5dd2676bdbce574",
+    "docs/claude/chantiers-580-629.md": "e6e2f59ebaa1d08c4ff2a5f5c1ed5ab20f31266c80fd4307b4f3c24ab1791d30",
+    "docs/claude/journal.md": "d5b332ec936c24c9e4b35d72dfbb1793e1b4758a5f05dd429cfcb72f21951e35",
+    "index.html": "e6b5cef989e3219d03b96ad3a4dda0747183ddf81dade38f61f40e674d37932c",
+    "public/manifest.json": "5adfd66d59819c7d1573f90927dddbbf46b8af105c8b4c6909849eb7fd51f531",
+    "public/sw.js": "0a59e9f5d7512ad4cd3a61317f88257d252fc3cfd4e644888d0e84bcabc7c1eb",
+    "scripts/harnais-claude-md.mjs": "bd43f73269aa87e00ee90d9803ab3c446deabec641f16beab2c200cc68e5e357",
+    "src/utils.js": "0a6fe7bc60b80e64514fc92ad7f8b4a8599fe970d6cf01331d3450f7932101c8",
+    "src/whats-new.js": "6aef809f0f6521bf5aacf0d37e360cad4b5b603b08b2fb3093341cb206c04b8b",
+    "public/icon-maskable-192.png": "6fe441e2182c96c1a5cb8a1a4d6cec4cbfd61ff01ad9d7a11040c943c8727b29",
+    "public/icon-maskable-512.png": "3c850c3853cd3977aa6f1ff054e081806fd0e1c9cc251c967cb00b1f6050f3de"
+  }
+}

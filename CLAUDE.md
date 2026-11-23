@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 novembre 2026 (GEO-2)** — **TROIS PAGES « CAS D’USAGE » : LE REGISTRE 2027, LE TEMPS DE TRAVAIL, LA GESTION D’ÉQUIPE (§599)**. Base `fab695e` (« geo1 »). Pas de bump (APP 11.25, SW 12.16). L’étape 3 du plan SEO/IA : `registre-phytosanitaire-2027.html`, `suivi-temps-travail-vigne.html`, `gestion-equipe-viticole.html`, sur le gabarit de logiciel-vigne — un chapô qui répond, un tableau factuel, cinq questions et leur `FAQPage`, la formule et le prix ; le registre validé en aperçu (« go »), les deux autres sur son modèle. Chaque phrase relue contre le code, le guide ou l’arrêté du 24/12/2025. Maillage (logiciel-vigne, pieds, « À lire aussi »), trois 301, `llms.txt`. Corrigé sur logiciel-vigne : « jamais une portion » était faux depuis REG27-1A. **À faire chez Nico : `npm run site` avant le commit.** Leçon : une page de vente se relit contre le code, pas contre la page de vente d’avant.
+> Dernière consolidation : **23 novembre 2026 (MANIF-1)** — **L’APPLI INSTALLÉE S’OUVRE SANS ÉCLAIR, SA BARRE D’ÉTAT SUIT LE THÈME, SON ICÔNE N’EST PLUS ROGNÉE (§600)**. Base `00d6183` (« geo2 »). **APP 11.26, SW 12.17.** Le lot C du plan SEO/IA, sans la TWA. Le code a corrigé le plan : le manifest d’une appli installée est celui que **sert `sw.js`** (les deux se tiennent à la main) ; **pas d’`id`** (l’identité d’une appli installée est son `start_url` avec le tenant — `id: "/"` aurait coupé ses mises à jour) ; le splash de l’appli est noir, donc lancement **noir** (choix de Nico, « Noir, sans flash »). Icônes `maskable` à part sur fond clair, la barre d’état noire pendant le splash puis au fond du thème (`_mvBarreEtat`, observateurs). `npm run check` : 798 commandes, 0 rouge ; la barre relevée dans Chrome. Leçon : avant de toucher un manifest, chercher qui le sert.
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
 > ★★★ **Depuis le 27/09 (§189), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
@@ -762,6 +762,7 @@ mavigne/
 │   ├── mise-en-route.html  (formulaire d'installation client — noindex, JAMAIS dans sitemap.xml ;
 │   │                        ★ ENVOIE désormais ses réponses en base, §27f)
 │   ├── cgu.html · dpa.html · confidentialite.html · mentions-legales.html
+│   ├── icon-maskable-192.png · icon-maskable-512.png (MANIF-1, §600 : fond clair, logo dans la zone sûre)
 │   └── robots.txt · sitemap.xml · llms.txt (GEO-1, §598 : le résumé pour les IA, tarifs de la page en ligne)
 ├── functions/              ← index.js (backups), claims.js, ephy.js,
 │                              ★ leads.js (submitLead + submitMiseEnRoute)
@@ -2275,7 +2276,8 @@ Nico (13/11) : côté admin, « ce n’est pas rangé », « une surcharge d’i
 
 ### ★ GEO-1 (23/11, §598) — Google et les IA : ce qui reste
 - **À faire chez Nico, GEO-1 déployé** : `npm run site` → `npm run build` → `firebase deploy --only hosting` ; ouvrir `https://mavigneapp.fr/llms.txt` et `/robots.txt` (le nouveau groupe) ; Search Console › Sitemaps : renvoyer `sitemap.xml` ; l’outil de test des résultats enrichis sur logiciel-vigne (l’adresse de l’éditeur).
-- **Le plan validé le 23/11 (§598d)** : ~~lot B, trois pages « cas d’usage »~~ — **fait, GEO-2 (§599)** ; lot C, le manifest seul (maskable, `id: "/"`, `#F0EEE9`, bump APP + SW) ; lot D, `docs/geo-kit.md`. **Play Store (TWA) : à 5 clients**, confirmé par Nico le 23/11 — `assetlinks.json` et Bubblewrap à ce moment-là (`.well-known/` passe déjà Vite et Firebase, testé).
+- **Le plan validé le 23/11 (§598d)** : ~~lot B, trois pages « cas d’usage »~~ — **fait, GEO-2 (§599)** ; ~~lot C, le manifest seul~~ — **fait, MANIF-1 (§600)** : icônes `maskable` sur fond clair, lancement **noir** (pas `#F0EEE9` : le splash de l’appli est noir, choix de Nico « Noir, sans flash »), **pas d’`id`** (le plan disait `id: "/"` : faux, voir §600a), barre d’état au thème ; lot D, `docs/geo-kit.md`. **Play Store (TWA) : à 5 clients**, confirmé par Nico le 23/11 — `assetlinks.json` et Bubblewrap à ce moment-là (`.well-known/` passe déjà Vite et Firebase, testé) ; l’`id` se tranchera là. ⚠️ **Le manifest d’une appli installée est celui que sert `sw.js`** : tout champ se change dans les deux.
+- **À faire chez Nico, MANIF-1 déployé** : `npm run build && firebase deploy` ; rouvrir deux fois l’appli installée sur un Android ; Chrome met l’icône à jour à son rythme et peut demander une fois de l’accepter.
 - **Tarifs** : `llms.txt` et les pages recopient la page en ligne (décision du 23/11). Les décisions du 06/11 (tarif annuel, options payantes) ne sont **pas** en ligne : le jour où elles le sont, `llms.txt`, le JSON-LD et la FAQ de logiciel-vigne changent dans le même lot.
 - ~~**Écart vu en route** : logiciel-vigne disait « jamais une portion »~~ — **corrigé, GEO-2 (§599)**.
 - **À faire chez Nico, GEO-2 déployé** : `npm run site` **avant le commit** (sinon le `--check` du build et de la CI rougit), `npm run build` → `firebase deploy --only hosting` ; les trois pages au téléphone ; Search Console : renvoyer `sitemap.xml`, demander l’indexation des trois adresses.
