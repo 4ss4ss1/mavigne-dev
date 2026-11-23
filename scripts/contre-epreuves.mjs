@@ -64,7 +64,7 @@ ce('le mouvement réduit n’est plus respecté',
 ce('le pied de page repasse dans <main>',
    s => s.replace('</main>\n\n<!-- ═══════════════ PIED', '<!-- ═══════════════ PIED').replace('</footer>', '</footer>\n</main>'));
 ce('un lien non chiffré apparaît',
-   s => s.replace('href="mailto:ngdevpro@gmail.com"', 'href="http://mavigneapp.fr/contact"'));
+   s => s.replace('href="mailto:contact@mavigneapp.fr"', 'href="http://mavigneapp.fr/contact"'));
 ce('les cases perdent leur état accessible',
    s => s.replace('role="checkbox" aria-checked="true"', ''));
 ce('un prix change de valeur',

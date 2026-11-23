@@ -1006,3 +1006,83 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️⚠️ **Avant de toucher un manifest, chercher qui le SERT** : ici le SW, pas le fichier. Et avant de poser un `id`, lire le `start_url` que voient les applis déjà installées.
 - ⚠️ **Un « oui » donné sur une prémisse fausse se redemande** : « l’appli est claire » oubliait le splash noir. Une image, une question, trois options — et la réponse a changé.
 - ★ **Une couleur qui dépend de six endroits se règle par observation** : un `MutationObserver` sur l’attribut qui change, plutôt qu’un appel ajouté dans chacun des six.
+
+## 601. ★ GEO-3 — LE KIT DE DIFFUSION : ANNUAIRES DE LOGICIELS ET DEMANDE D’AVIS GOOGLE (23/11 — `docs/geo-kit.md` (neuf) · `scripts/harnais-claude-md.mjs`)
+
+**La demande.** L’étape 5 du plan (§598d), dernier lot du chantier SEO/IA : les textes prêts à copier-coller pour les signaux extérieurs — fiches des annuaires B2B (Appvizer, Capterra, G2 : description courte de 150 caractères, description longue, fonctionnalités, mots-clés) et un message aux clients pour un avis Google qui cite naturellement leurs usages. Nico : « suite » (23/11).
+
+### 601a. Vérifié avant d’écrire
+
+- **Les règles des avis Google** : rien en échange d’un avis ; pas de tri des clients avant de demander (solliciter sélectivement les avis positifs est interdit) ; le lien officiel se prend sur la fiche, « Voir les avis » puis « Recevoir plus d’avis » (aide Google, réponse 16816815).
+- ⚠️ **L’éligibilité de la fiche Google** : seules les entreprises qui rencontrent leurs clients en personne y ont droit ; une activité seulement en ligne non (aide Google, réponse 13763036). Le kit ne l’affirme pas pour GUERETTECH : **si** Nico se déplace dans les domaines, fiche en zone desservie, adresse masquée ; sinon, les avis passent par les annuaires.
+- **Chaque chiffre et chaque fonction** repris de la page en ligne, de `llms.txt` et des trois pages « cas d’usage » (tarifs du 31/10, décision du 23/11). Les longueurs **comptées par script** : 144 et 90 caractères (FR), 132 (EN), longue FR 2 296.
+
+### 601b. Ce que contient `docs/geo-kit.md`
+
+1. **La fiche d’identité** à recopier à l’identique partout (nom, éditeur, ville, site, contact, SIRET déjà public, déploiement, hébergement, logo transparent) et une phrase d’une ligne.
+2. **Les fiches annuaires** : deux descriptions courtes, une longue (avec ce que comprend chaque formule, pour ne pas laisser croire que 29 € ouvrent tout), les fonctionnalités, les champs « prix » (pas de version gratuite : une démo libre), catégorie et public, **une version anglaise** (G2), les visuels (captures PC entières, PC et téléphone ensemble, logo à fond transparent — préférences de Nico).
+3. **Les mots-clés**, chacun relié à la page du site qui y répond.
+4. **La demande d’avis** : les règles (aucune contrepartie, le même message à tous, jamais d’avis écrit par Nico ni de texte rédigé pour le client), le message WhatsApp/SMS (vouvoiement et tutoiement), l’e-mail, et l’après (répondre à chaque avis, une seule relance, le bon moment). Le message **propose des sujets** (les heures, les parcelles, le registre, la cave) et **demande aussi ce qui manque** — un avis franc, pas un avis dicté.
+
+### 601c. Ce qui reste
+
+- Chez Nico : créer les comptes éditeur des annuaires, la fiche Google si elle est éligible, envoyer le message à **tous** les clients.
+- **Garde** : un lot qui change un tarif ou une fonction relit aussi `docs/geo-kit.md` (avec `llms.txt`, le JSON-LD de logiciel-vigne et les trois pages).
+- Le chantier SEO/IA est bouclé : GEO-1 (§598), GEO-2 (§599), MANIF-1 (§600), GEO-3 (§601) ; la TWA à 5 clients.
+
+### 601d. Leçon
+
+- ⚠️ **Un kit de demande d’avis se vérifie contre les règles de la plateforme avant d’être écrit** : « demander aux clients contents » est le premier réflexe, et c’est précisément ce que Google interdit.
+
+## 602. ★ GEO-4 — LES ANNUAIRES, CASE PAR CASE : APPVIZER À PART, G2 ET CAPTERRA EN UN SEUL FORMULAIRE (23/11 — `docs/geo-kit.md` · `docs/annuaires/` (neuf : 3 images + 8 captures) · `scripts/harnais-claude-md.mjs`)
+
+**La demande.** Nico : « Fais-moi le tuto simple à 100 % pour remplir mes fiches sur Advisor, Captera et G2 » — Advisor = Appvizer (sa réponse). Le tuto lui-même est dans la conversation ; le lot range dans le kit ce qui manquait pour le suivre.
+
+### 602a. Vérifié avant d’écrire (23/11/2026)
+
+- ⚠️ **G2 possède Capterra, GetApp et Software Advice** (accord du 29/01/2026, vente conclue en février). Le bouton « Get Your Product Listed » de capterra.com/vendors mène à `g2.com/add_product_requests/new` (lu le 23/11) : **un seul formulaire**, Capterra, GetApp et Software Advice en cases à cocher (source secondaire, blastra.io). La connexion demande **LinkedIn ou une adresse e-mail professionnelle** : la Gmail de Nico n’en est pas une → LinkedIn. G2 vérifie en 3 à 5 jours ouvrés, puis la fiche se réclame (1 à 3 jours).
+- **Le contenu G2 se remplit en anglais** (documentation G2, « Product Information ») ; les versions locales (capterra.fr) passent par *International Markets*. G2 conseille une description différente par site, sans l’imposer.
+- **Appvizer** (centre d’aide) : inscription gratuite sur `appvizer.fr/partenaires/inscription`, accord sous 24 h ; publiée après relecture si titre de 20 à 60 caractères, description d’au moins 500, une fonctionnalité au moins ; **un texte copié d’ailleurs est pénalisé** ; troisième personne, ni superlatif, ni lien, ni téléphone ; l’essai gratuit seulement dans le bouton d’action ; logo 128 × 128 sous 30 Ko, image principale 1366 × 360, au moins six captures du même format, légendes de 216 caractères au plus. Appvizer vend aussi des clics vers le site des éditeurs : rien à payer pour la fiche.
+- **Les catégories existent** : Appvizer « Établissement vinicole » (+ Gestion de fermes, Gestion des temps, Planning RH) ; G2 « Vineyard Management » et « Winery Management ».
+- **Chaque fait des textes** repris de `llms.txt`, de la FAQ de logiciel-vigne (mise en route : parcellaire PAC/Telepac ou KML, comptes, barème, formation) et du kit ; les longueurs **comptées par script** (titre 58, introduction 291, description 3 063 sans les signes de mise en forme, légendes 118 à 163).
+
+### 602b. Ce qui change dans le kit
+
+1. **§1** : le logo des annuaires est `docs/annuaires/ma-vigne-logo-512.png`, le logo GT **à fond transparent** (préférence de Nico) détouré de sa photo de profil Facebook — lettres olive, lisibles sur fond blanc. `public/icon-512.png` reste l’icône de l’appli : ses lettres jaunes disparaissent sur le blanc des annuaires.
+2. **§2.7** : les fichiers de `docs/annuaires/` et les **huit captures** (1600 × 1000, la démo « Domaine des Grandes Vignes », horloge au 27/10/2026 : aucun vrai salarié ni vrai domaine), leurs légendes en français et en anglais, et comment les refaire (`mv-demo-captures.mjs --sortie … --sans-page`, trois écrans PC ajoutés le temps de la prise, sans toucher au script).
+3. **§2.8 Appvizer** : bouton d’action, titre, catégories, introduction, description structurée (titres, gras, listes, et « ce que Ma Vigne ne fait pas » : français seulement, ni badgeuse ni géolocalisation, ni comptabilité ni paie), trois points forts, fonctionnalités, éditions.
+4. **§2.9 G2 et Capterra** : le formulaire unique, la connexion, chaque case en anglais (dont la présentation de l’éditeur, 261 caractères), les formules et l’essai, les cases Capterra/GetApp/Software Advice, le français par *International Markets*.
+
+### 602c. Ce qui reste
+
+- Chez Nico : remplir G2 (Capterra coché), puis Appvizer, avec le tuto ; vérifier capterra.fr quelques jours après la réclamation de la fiche.
+- **Garde** (s’ajoute à celle de §601) : un écran montré dans `docs/annuaires/captures/` qui change → refaire sa capture.
+
+### 602d. Leçon
+
+- ⚠️ **Un annuaire se vérifie le jour où on le remplit** : le kit de GEO-3, écrit le matin même, comptait Capterra et G2 comme deux comptes ; depuis la fusion, Capterra n’a plus de formulaire à lui.
+
+## 603. ★ GEO-5 — LES ANNUAIRES REMPLIS POUR DE VRAI, ET L’ADRESSE contact@mavigneapp.fr (23/11 au soir — `docs/geo-kit.md` · `public/llms.txt` · `public/logiciel-vigne.html` · 3 pages « cas d’usage » · `public/essai.html` · `public/demarrage.html` · `public/mise-en-route.html` · `guide/_layout.html` · `guide/14-depannage.html` · `scripts/contre-epreuves.mjs`)
+
+**La demande.** Nico, perdu dans les formulaires : « il faut que tu fasses ». Fait avec lui dans le navigateur de l’appli Claude (il tapait ses mots de passe et ses codes), puis : « oui » pour consigner le tout et remplacer la Gmail par contact@ « sur le site et dans llms.txt ».
+
+### 603a. Ce qui a été fait le soir du 23/11 (hors dépôt)
+
+- **G2** (Capterra, GetApp, Software Advice cochés) : demande envoyée par Nico, connexion LinkedIn. G2 prévient que l’accès administrateur peut être refusé sans adresse pro → à la validation, compte avec contact@ et nouvelle demande depuis la fiche.
+- **Appvizer** : vérifié dans le navigateur — `partenaires/inscription` en **404**, espace éditeur **blanc** (`client-config.js` en 502). Le site vit désormais de bannières, de mentions et de clics payés par les éditeurs. On attend.
+- **contact@mavigneapp.fr** : domaine acheté chez OVH le 31/05/2026 ; pas de compte Zimbra offert rattaché → Zimbra Starter payé (3,60 € HT/an). Organisation « Ma Vigne », domaine ajouté en **configuration recommandée** (MX vers Zimbra, SPF `~all` ; A et TXT Firebase/Google intacts, vérifié par DNS public), compte créé (Nico a tapé le mot de passe), **transfert vers la Gmail** avec copie gardée.
+- **La Fabrique du Net** : fiche créée et complétée (identité, éditeur, cibles, tarification, 4 cas d’usage) ; secteurs et fonctionnalités laissés vides plutôt que faux. **Gratuit = ni Google ni IA, pas de lien** ; Vitrine 69 € HT/mois, indexation acquise après résiliation — décision de Nico.
+
+### 603b. Ce qui change dans le dépôt
+
+1. **`docs/geo-kit.md`** : §1 e-mail = contact@ ; §2.8 encadré « Appvizer en panne » ; §2.9 l’état de la demande G2 ; **§2.10 La Fabrique du Net** (offres, saisie complète, accroche 90 car., description 1 674 car., présentation éditeur 479 car.).
+2. **contact@ remplace la Gmail** sur les pages de vente et d’aide : `llms.txt`, `logiciel-vigne.html` (JSON-LD et liens), les 3 pages « cas d’usage », `essai.html`, `demarrage.html`, `mise-en-route.html` (dont la variable `DEST` des courriels préparés), et les sources du guide (`guide/_layout.html`, `guide/14-depannage.html`). `scripts/contre-epreuves.mjs` suit (sa mutation visait le lien mailto).
+3. **Pas touchés, exprès** : l’appli (`index.html`, `src/*`), `firestore.rules`, `storage.rules`, `functions/*`, les harnais — la Gmail y est l’**identité admin** ; les documents juridiques (mentions légales, CGU, confidentialité, DPA) — décision à part. `public/guide.html` et `public/sitemap.xml` sont **dérivés** : Nico les régénère avec `npm run site`.
+
+### 603c. Vérifié
+
+- Remplacement compté fichier par fichier ; plus aucune Gmail dans les pages modifiées. `build-guide --check` à jour après régénération locale ; `mv-sitemap --check` vert après `node scripts/mv-sitemap.mjs` (sitemap remis comme livré) ; `contre-epreuves` et `harnais-parcours-prospect` : **mêmes résultats que la base** (rouges déjà présents, hors liste de contrôle) ; confidentialité verte.
+
+### 603d. Leçon
+
+- ⚠️ **Une adresse e-mail n’est pas qu’un contact** : la Gmail est aussi l’identité admin dans les règles, les fonctions et l’appli. Remplacer « partout » aurait fermé la console GT à Nico. Toujours lister les occurrences et trier : vitrine / juridique / identité.

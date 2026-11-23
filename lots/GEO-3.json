@@ -1,0 +1,17 @@
+{
+  "lot": "GEO-3",
+  "section": "§601",
+  "base": "6fa8fd412ef3d6d1f67a7a5f0e94f62d28c7bf91",
+  "inclut": [],
+  "date": "2026-11-23",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "edf2b9678679ed02453c444a8b7b3bb6e319a9a55ce3d3a9abbe26086e668e71",
+    "CLAUDE.md": "ba66cb702aa6a63c8b943742ad7c7cb1e10a91bd3898ac05330894c5f442331f",
+    "docs/claude/INDEX.md": "fe8d718b735240f130a4298d010302696a4e6ffec152ea477a8c72ced243d64e",
+    "docs/claude/chantiers-580-629.md": "2401f5b8475f26932ff5bb7fb0a0501a9748a79928f5b5d03c7de7a31f8b1278",
+    "docs/claude/journal.md": "7417fe378bb30dd80a9a79aa0a2db99738ef3b757dbdb77f25573e82b1e4b024",
+    "scripts/harnais-claude-md.mjs": "3d348e5a08cd394dce0be837d0783e83012de876a28ac5ba2231c0399f6ae0e8",
+    "docs/geo-kit.md": "0270ef2b94f52fea1f4d38cc267ea842b4deca226c99ff879ce4be76fdcc2930"
+  }
+}

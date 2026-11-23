@@ -1,0 +1,41 @@
+{
+  "lot": "GEO-5",
+  "section": "§603",
+  "base": "6fa8fd412ef3d6d1f67a7a5f0e94f62d28c7bf91",
+  "inclut": [
+    "GEO-4"
+  ],
+  "date": "2026-11-23",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "253a74fb2f6c16dac59f6b4c08d9b36d9cd399ce30dafac96cdb9639753de3a9",
+    "CLAUDE.md": "d0732027e02bfcb1173f11c6bcff2fdcf0128d5dc4c3f8afd2308cd4eecfaa95",
+    "docs/claude/INDEX.md": "7a5ed2c092a198c31def406dcbfce411930106928b0e181c977644e2e5e90fdd",
+    "docs/claude/chantiers-580-629.md": "f53f1926a1b3a0b5b09b72e384ede2272c8caf8505aef7bc2aeb68ad07ecffc4",
+    "docs/claude/journal.md": "e28a9b69073bb6487246abf9d5686ed7928441c643af8ed82a2019c97ec83f54",
+    "guide/14-depannage.html": "7beeed60198f0548a51b43a10f156c68e1732314171172ef00e7adf39d99a4fc",
+    "guide/_layout.html": "b95de44ee434f738e978ffeac39cc64ff8fb0981a8ab7d5e86c7c53b4fad605d",
+    "public/demarrage.html": "0d7f38dace79b6f2d974c769e9f445a0810618a8f9e245b3247356e653f58097",
+    "public/essai.html": "006990482be29b4d322e2259d7e098fac8e9e42df0abda6ed1b1a6692b976adc",
+    "public/gestion-equipe-viticole.html": "12551423c347ae26436d439d48db78371e553ecf1be828da5f0930292441040e",
+    "public/llms.txt": "f6187a43a024bbf40afb8e0a3a3cd801ff38314c635f18dff477b5744a6a4ff8",
+    "public/logiciel-vigne.html": "35e6dc562a0bd4f153863466d7cbaa293e7fdfbae28732d635c19e7b4a0bf064",
+    "public/mise-en-route.html": "38e0fcee9301f6aa40679e8f273986da9a62477fcda86301ccedba44bdaf9537",
+    "public/registre-phytosanitaire-2027.html": "5041b87141a74ea2d5a638db4b18e0191f412c5ab320f2f1e970870e6bb14c18",
+    "public/suivi-temps-travail-vigne.html": "14eead6e5cc34c5ea9caaa21985d151c5b2694bda7b22616da1dc51c24a05974",
+    "scripts/contre-epreuves.mjs": "c9f946f2b1b0d968c51965adfa0d65e1fc288e979603a79f8419b32bc68faad3",
+    "scripts/harnais-claude-md.mjs": "b1df80855a0383c6f158408e580388a5ec93de62673c32b7bf98608d67a14a25",
+    "docs/annuaires/captures/01-accueil-priorite-du-jour.png": "9644f7adfb47989f0d880f61365677adf9339e7bbe05b0d683fb9d11b5d06baa",
+    "docs/annuaires/captures/02-parcelles-du-jour.png": "adf9b819fa701d78b6f508a79adb91a9275b0fe76e9fcccabbf2d01d2db3cad8",
+    "docs/annuaires/captures/03-registre-phytosanitaire.png": "9a8f29f3c996935121a12d3dad077cdb6a15a88f265af50b38a7d774729ef0d7",
+    "docs/annuaires/captures/04-planning-heures-equipe.png": "7c5383e87166b08cb5ae6478922ca3984d2c0ad3c72a02d6227ac2e3f98149a6",
+    "docs/annuaires/captures/05-pilotage-aujourdhui.png": "7ac4664f90d4a03c80398d19bda8554dae8f0af791cedf697386410f7ae3c57e",
+    "docs/annuaires/captures/06-cout-par-parcelle.png": "a62bac22c34052496f148e3a655c4c282f73e7d24846176c552c98128c4ac4c5",
+    "docs/annuaires/captures/07-simulation-renfort.png": "1b3882d4a9bb7645dd8757948e72498f8d96cdd808a9fbbdafcb2e822ecc160d",
+    "docs/annuaires/captures/08-cave-aujourdhui.png": "94e61f5d848392ffc6b7c501b784a1b9f572c53f0c4f9828b27bd2f74b6b1457",
+    "docs/annuaires/ma-vigne-bandeau-appvizer-1366x360.png": "350f705414a4bc68cec054db27b2ca3c6367a9b7faef429ad6baa5aa3520d132",
+    "docs/annuaires/ma-vigne-logo-128.png": "9068bd215832aafa6a278508c4d70b64265141a689714d7f9b498a53a8cd4190",
+    "docs/annuaires/ma-vigne-logo-512.png": "4e7be8ce91610d84c5d67eb8db1b29ccc51fb396e7047b935eaccead1010a520",
+    "docs/geo-kit.md": "6a37e5d0eb005d1ebb4da73f26c7878202cd3e4e5ac6a1b4c4cac2536acdc7bc"
+  }
+}

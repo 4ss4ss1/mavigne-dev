@@ -487,7 +487,7 @@
   <footer>
     <span class="nom">Nicolas Guéret</span>
     GUERETTECH — Ma Vigne · 68 rue Henri Challand, 21700 Nuits-Saint-Georges<br>
-    06 99 42 48 59 · <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> · <a href="https://mavigneapp.fr">mavigneapp.fr</a><br>
+    06 99 42 48 59 · <a href="mailto:contact@mavigneapp.fr">contact@mavigneapp.fr</a> · <a href="https://mavigneapp.fr">mavigneapp.fr</a><br>
     Vos réponses ne servent qu'à préparer votre installation.
     <a href="/confidentialite.html">Confidentialité</a>
   </footer>
@@ -498,7 +498,7 @@
 (function(){
   'use strict';
 
-  var DEST = 'ngdevpro@gmail.com';
+  var DEST = 'contact@mavigneapp.fr';
   var CLE  = 'mv_mise_en_route_v1';
 
   var $  = function(s){ return document.querySelector(s); };
@@ -660,12 +660,12 @@
     function manuel(){
       $('#recap').focus();
       $('#recap').select();
-      dire('Le texte est sélectionné ci-dessous. Copiez-le, puis collez-le dans un message à ngdevpro@gmail.com.', 'att');
+      dire('Le texte est sélectionné ci-dessous. Copiez-le, puis collez-le dans un message à contact@mavigneapp.fr.', 'att');
     }
 
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(corps).then(function(){
-        dire('Copié. Collez le texte dans un message à ngdevpro@gmail.com, et joignez-y votre fichier parcellaire et vos listes.', 'ok');
+        dire('Copié. Collez le texte dans un message à contact@mavigneapp.fr, et joignez-y votre fichier parcellaire et vos listes.', 'ok');
       }).catch(manuel);
     }else{
       manuel();
@@ -734,7 +734,7 @@
       $('#recap').classList.add('on');
       $('#recap').focus();
       $('#recap').select();
-      dire('L\u2019envoi n\u2019a pas abouti \u2014 rien n\u2019est perdu. Vos r\u00e9ponses sont s\u00e9lectionn\u00e9es ci-dessous : copiez-les et envoyez-les \u00e0 ngdevpro@gmail.com.', 'att');
+      dire('L\u2019envoi n\u2019a pas abouti \u2014 rien n\u2019est perdu. Vos r\u00e9ponses sont s\u00e9lectionn\u00e9es ci-dessous : copiez-les et envoyez-les \u00e0 contact@mavigneapp.fr.', 'att');
     }
   });
 

@@ -1,0 +1,30 @@
+{
+  "lot": "GEO-4",
+  "section": "§602",
+  "base": "6fa8fd412ef3d6d1f67a7a5f0e94f62d28c7bf91",
+  "inclut": [
+    "GEO-3"
+  ],
+  "date": "2026-11-23",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "961076adc11ddd7a3a28caf75ffe890965bd6e7e49f292785ff21b361a0b4c9b",
+    "CLAUDE.md": "f2b361f16e524d6d913cca907e3b6419a85da6c2b1a266b183496283b289d06c",
+    "docs/claude/INDEX.md": "9a327b5461f94c58f7a278e96b2f0b7c1ee4b9724b190d7a6bae9c23d1651659",
+    "docs/claude/chantiers-580-629.md": "5db3e793982ed8ca0a75803f75bf06adcc4caa186f3a187ec22bf402907d5237",
+    "docs/claude/journal.md": "2bce36a24a2e85cff92864133691977972289e993fffce3b4901ba64e55c6a3e",
+    "scripts/harnais-claude-md.mjs": "5cc4a9a453eaabfdfcacbd2ab277de3b00d7a908475cdf6c4977ff920e00bb6e",
+    "docs/annuaires/captures/01-accueil-priorite-du-jour.png": "9644f7adfb47989f0d880f61365677adf9339e7bbe05b0d683fb9d11b5d06baa",
+    "docs/annuaires/captures/02-parcelles-du-jour.png": "adf9b819fa701d78b6f508a79adb91a9275b0fe76e9fcccabbf2d01d2db3cad8",
+    "docs/annuaires/captures/03-registre-phytosanitaire.png": "9a8f29f3c996935121a12d3dad077cdb6a15a88f265af50b38a7d774729ef0d7",
+    "docs/annuaires/captures/04-planning-heures-equipe.png": "7c5383e87166b08cb5ae6478922ca3984d2c0ad3c72a02d6227ac2e3f98149a6",
+    "docs/annuaires/captures/05-pilotage-aujourdhui.png": "7ac4664f90d4a03c80398d19bda8554dae8f0af791cedf697386410f7ae3c57e",
+    "docs/annuaires/captures/06-cout-par-parcelle.png": "a62bac22c34052496f148e3a655c4c282f73e7d24846176c552c98128c4ac4c5",
+    "docs/annuaires/captures/07-simulation-renfort.png": "1b3882d4a9bb7645dd8757948e72498f8d96cdd808a9fbbdafcb2e822ecc160d",
+    "docs/annuaires/captures/08-cave-aujourdhui.png": "94e61f5d848392ffc6b7c501b784a1b9f572c53f0c4f9828b27bd2f74b6b1457",
+    "docs/annuaires/ma-vigne-bandeau-appvizer-1366x360.png": "350f705414a4bc68cec054db27b2ca3c6367a9b7faef429ad6baa5aa3520d132",
+    "docs/annuaires/ma-vigne-logo-128.png": "9068bd215832aafa6a278508c4d70b64265141a689714d7f9b498a53a8cd4190",
+    "docs/annuaires/ma-vigne-logo-512.png": "4e7be8ce91610d84c5d67eb8db1b29ccc51fb396e7047b935eaccead1010a520",
+    "docs/geo-kit.md": "09061bde3043f4a22b8058617b37bf35a856ed64e39729b7eef4105dc3e4b5e8"
+  }
+}
