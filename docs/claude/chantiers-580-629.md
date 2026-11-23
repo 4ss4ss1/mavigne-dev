@@ -884,3 +884,47 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Une barre d’onglets qui défile cache ses derniers onglets sans rien dire.** À chaque onglet ajouté, mesurer la barre à 360 px (`scrollWidth` contre `clientWidth`), pas seulement regarder l’onglet ouvert.
 - ⚠️ **Un tuto qui va au bout ne prouve pas qu’on voit le bouton** : le moteur fait défiler jusqu’à la cible.
 - ⚠️ **Une capture se lit en entier** : celle de FRAIS-1 montrait une barre arrêtée sur « Congés et acomptes ».
+
+## 598. ★★ GEO-1 — LE SITE SE PRÉSENTE AUX MOTEURS ET AUX IA : `llms.txt`, LES ROBOTS D’IA NOMMÉS, UN SITEMAP QUI AJOUTE SEUL LES PAGES NEUVES (23/11 — `public/llms.txt` (neuf) · `public/robots.txt` · `public/logiciel-vigne.html` · `scripts/mv-sitemap.mjs` · `scripts/harnais-claude-md.mjs`)
+
+**La demande.** Nico (23/11) : que Ma Vigne remonte sur Google et soit citée par ChatGPT, Gemini, Perplexity et Claude sur des requêtes métier (temps de travail dans les vignes, registre phyto 2027, gestion d’équipe) ; en cinq étapes — audit, fondations techniques, trois pages « cas d’usage », préparation Play Store (TWA), kit de diffusion externe. Reformulé, confirmé (« Oui »). Audit puis plan livrés ; Nico a tranché : **Play Store : on attend 5 clients** (le backlog le disait déjà) ; **tarifs : ceux de la page en ligne** (pas les décisions du 06/11, tarif annuel et options payantes, jamais intégrées) ; **écran de lancement clair `#F0EEE9` : oui** (pour le lot du manifest).
+
+### 598a. Mesuré avant (audit du 23/11, base `a6ea9ff`)
+
+- **`/` est l’appli** (écran d’accueil en JS, `noindex`). La page d’accueil réelle pour Google et les IA est `logiciel-vigne.html` (301 depuis `/logiciel-vigne`). Pages indexables : logiciel-vigne, essai, guide, demarrage, mentions légales, confidentialité ; `demo.html` et `mise-en-route.html` en `noindex`.
+- **Chaque page porte son style et son en-tête/pied** : pas de gabarit commun. Adresses en `.html`, et `mv-sitemap.mjs` l’exige (R4 compare `<loc>` au canonical, le nom de fichier sort du `<loc>`).
+- **robots.txt** : `User-agent: *` / `Allow: /` — **tous les robots d’IA étaient déjà autorisés**.
+- **Sitemap** : 6 adresses ; le script **redatait** mais **n’ajoutait pas** : une page neuve rougissait le `--check` jusqu’à une écriture à la main.
+- **logiciel-vigne** : balises complètes (title, description, canonical, OpenGraph 1200×630, Twitter) ; JSON-LD valide — `SoftwareApplication` (`BusinessApplication`, « Web (PWA), Android, iOS », 3 formules + 3 mises en route, éditeur), `FAQPage` de 8 questions. **Ce que l’étape 2 demandait existait déjà.**
+- ⚠️ **Écart de tarifs** : la page en ligne (commit du 31/10) n’a pas les décisions du 06/11 (tarif annuel affiché, création des contours sans KML/Telepac et reprise des données en options payantes). Nico garde les tarifs en ligne (23/11).
+- **`llms.txt` absent.** Vérifié avant de le promettre : Google range `llms.txt` parmi les choses inutiles pour ses fonctions d’IA, et John Mueller a écrit qu’aucun système d’IA ne l’utilise (juin 2025). **Il coûte peu, on le pose ; l’effet viendra des pages, du JSON-LD et des avis.**
+- **PWA** : le service worker met l’appli en cache (hors ligne ✓), `start_url` et `standalone` ✓. Manquent : une icône maskable (l’actuelle est sur fond transparent, le dessin va de 27 à 482 px sur 512 : Android la rognerait), `id`, `scope`, `lang`. Couleurs `#0F1319` (l’ancienne charte) alors que l’appli est claire.
+- **`.well-known/assetlinks.json`** : absent. **Testé** : Vite 5 copie `public/.well-known/` dans `dist/`, et le `listFiles` de firebase-tools 14.27.0 (glob 10.4.1) garde `.well-known/assetlinks.json` **malgré** `"**/.*"` dans `ignore` (le motif vise un dernier segment qui commence par un point, pas un fichier rangé dans un dossier à point). **firebase.json n’a pas à changer pour la TWA.**
+- **Play Console** : un compte **personnel** créé après le 13/11/2023 doit tenir un test fermé de 12 testeurs inscrits 14 jours d’affilée avant la production ; un compte **organisation** (D-U-N-S) en est décrit comme exempté — déduction des sources secondaires, Google ne l’écrit pas.
+- **Registre 2027, vérifié aux sources** : règlement d’exécution (UE) 2023/564 modifié par (UE) 2025/2203, arrêté du 24/12/2025 (JO du 31/12) ; de 2027 à 2029, conversion au format électronique avant le 31 janvier de l’année suivante ; dès 2030, sous 30 jours ; les utilisations d’avant 2027 peuvent ne pas être converties.
+
+### 598b. Ce qui change
+
+- **`public/llms.txt`** (neuf, format llmstxt.org) : ce qu’est Ma Vigne, pour qui, les modules, le temps de travail (le rang validé part au journal, aux heures et sur la carte ; heures de référence du barème de la convention ramenées à la densité ; cadence réelle et fin annoncée), le registre et l’échéance de 2027 (dates vérifiées), le terrain (PWA, hors réseau), **les tarifs de la page en ligne** (tableau des trois formules, mises en route, 60 €/h, 293 B, essai 15 jours), les données, l’éditeur (GUERETTECH, EI, Nuits-Saint-Georges, SIRET public des mentions légales), les pages principales. **Chaque phrase reprend la page en ligne, le guide ou les mentions légales** ; le fichier dit qu’en cas d’écart, la page fait foi.
+- **`public/robots.txt`** : un groupe qui nomme GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended → `Allow: /`. Noms vérifiés aux documentations (Anthropic, Perplexity). ⚠️ Écrit dans le fichier : **un robot nommé ne lit plus le groupe `*`** (RFC 9309) — une interdiction ajoutée un jour sous `*` doit être recopiée dans ce groupe.
+- **`scripts/mv-sitemap.mjs`** : sans `--check`, une page indexable absente du sitemap et de `HORS_SITEMAP` est **ajoutée** à la fin (lastmod depuis git, sinon aujourd’hui ; `monthly`, `0.8`, constante `PAGE_NEUVE`) — **à condition que son canonical vaille `https://mavigneapp.fr/<fichier>`**, sinon rien n’est écrit et la ligne est rouge. En `--check`, la page absente rougit toujours, et le message nomme `npm run site`. La sortie reste 0 en écriture (un R1 réécrit n’est plus vrai ; une page refusée rougit au `--check` du build).
+- **`public/logiciel-vigne.html`** : `publisher.address` dans le JSON-LD (`PostalAddress` : Nuits-Saint-Georges, 21700, Côte-d’Or, FR) — la même entité que `llms.txt` et les mentions légales. Rien d’autre ; la FAQ reste alignée sur les tarifs en ligne.
+- **Pas de bump** : pages de `public/` hors `SHELL_STATIC`, scripts et doc.
+
+### 598c. Mesuré après
+
+- `node scripts/mv-sitemap.mjs --check` : 14 vert, 0 rouge sur la base du lot.
+- Le script éprouvé sur deux pages jetables : `test-geo.html` (canonical juste) **ajoutée** (`2026-11-23`, `monthly`, `0.8`), `test-geo-faux.html` (canonical vers une autre adresse) **refusée**, en rouge ; `--check` ensuite : 16 vert ; relancé : « rien à réécrire » (idempotent). Les deux pages retirées, le sitemap restauré.
+- JSON-LD de logiciel-vigne relu par `json.loads` : valide, l’adresse en place.
+
+### 598d. Ce qui reste (le plan validé)
+
+- **Lot B (étape 3)** — trois pages « cas d’usage », **une d’abord** (registre 2027) pour valider le ton : `suivi-temps-travail-vigne.html`, `registre-phytosanitaire-2027.html`, `gestion-equipe-viticole.html` ; style, en-tête et pied de logiciel-vigne ; réponse dès le premier paragraphe ; tableau fonctions / compatibilité / tarifs en ligne ; FAQ de 4-5 questions + `FAQPage` ; 301 sans `.html` dans `firebase.json` ; liens depuis le pied de page et les sections de logiciel-vigne ; `llms.txt` complété ; `npm run site` les ajoute au sitemap. **Chaque fonction citée se vérifie dans le code** — ⚠️ la page en ligne dit encore « surface de la parcelle, jamais une portion » alors que REG27-1A (§572) saisit la surface traitée : à vérifier avant d’écrire la page registre, et à corriger sur logiciel-vigne.
+- **Lot C (manifest)** — sans la TWA : icônes maskable 192/512 sur fond plein, `id: "/"` (l’identité actuelle des applis installées), `scope`, `lang`, couleurs `#F0EEE9` (la balise `theme-color` de `index.html` suit → bump APP + SW). `assetlinks.json` et Bubblewrap : **à 5 clients**.
+- **Lot D (étape 5)** — `docs/geo-kit.md` : fiches annuaires B2B, message de demande d’avis Google.
+
+### 598e. Leçons
+
+- ⚠️ **Avant d’autoriser un robot, lire ce que dit déjà `*`** : l’« autorisation des IA » demandée était acquise ; la nommer est de la lisibilité, pas un effet. Et nommer un robot le **sort** du groupe `*`.
+- ⚠️ **Une promesse sur un fichier pour les IA se vérifie comme une autre** : `llms.txt` n’est lu par aucun grand moteur selon Google. On le pose sans le vendre.
+- ★ **Un doute sur ce que Firebase déploie se teste avec le code de Firebase**, pas avec un fil de forum : le `listFiles` du paquet, la même version de glob, un `dist/` jetable.

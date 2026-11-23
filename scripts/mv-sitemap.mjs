@@ -30,9 +30,21 @@
 //      l'indexation (`index,follow`) et qu'aucun sitemap ne cite est un choix,
 //      pas un oubli : alors il s'ecrit.
 //
+//  ★★ GEO-1 (§598, 23/11/2026) — UNE PAGE NEUVE ENTRE TOUTE SEULE.
+//  Avant, le script ne savait que redater : une page publique neuve rougissait
+//  le `--check` jusqu'a ce que quelqu'un ecrive son <url> A LA MAIN — ce que
+//  Nico ne fait plus depuis le 29/09. Desormais, SANS --check, une page
+//  indexable absente du sitemap et absente de HORS_SITEMAP y est AJOUTEE
+//  (lastmod depuis git, sinon aujourd'hui ; changefreq et priority de
+//  PAGE_NEUVE). ⚠️ A UNE CONDITION : son canonical doit valoir l'adresse que le
+//  sitemap va ecrire (https://mavigneapp.fr/<fichier>). Sinon on n'ajoute RIEN
+//  et on le dit — ecrire un <loc> qui contredit la page, c'est mentir a Google
+//  deux fois (R4 le rougirait au passage suivant). En --check, rien ne change :
+//  la page absente rougit, et le message nomme la commande qui l'ajoute.
+//
 //  Usage :
 //    node scripts/mv-sitemap.mjs --check   # controle (CI) — exit 1 si derive
-//    node scripts/mv-sitemap.mjs           # reecrit les lastmod depuis git
+//    node scripts/mv-sitemap.mjs           # reecrit les lastmod depuis git, ajoute les pages neuves
 //    npm run site                          # guide + sitemap, en une commande (29/09)
 //  LECTURE SEULE en --check. Vit dans scripts/ -> jamais deploye, aucun bump.
 // ============================================================================
@@ -52,6 +64,11 @@ const CHECK  = process.argv.includes('--check');
 // Quelques jours ne coutent rien : Google recrawle de lui-meme. Deux mois lui
 // disent que la page est morte — c'etait le defaut trouve (40 a 70 jours).
 const SEUIL_JOURS = 30;
+
+// ── Ce que recoit une page publique NEUVE, ajoutee par ce script (GEO-1) ────
+// Le domaine des <loc> : celui des pages deja citees (canonical aligne, R4).
+const DOMAINE = 'https://mavigneapp.fr/';
+const PAGE_NEUVE = { changefreq: 'monthly', priority: '0.8' };
 
 // ── Sait-on seulement dater ? ────────────────────────────────────────────────
 // En clone superficiel, git ne PEUT PAS repondre. On le dit, et on se tait.
@@ -147,10 +164,25 @@ for (const e of entrees) {
 
 // ── R2 : aucune page indexable orpheline ────────────────────────────────────
 const cites = new Set(entrees.map(e => e.fichier));
+const aAjouter = [];   // GEO-1 : les pages neuves, ajoutees hors --check
+const canonicalDe = f => (/<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i
+  .exec(fs.readFileSync(path.join(PUBLIC, f), 'utf8')) || [])[1];
 for (const f of indexable) {
   if (cites.has(f)) continue;
   if (HORS_SITEMAP[f]) { dit(true, f + ' \u2014 hors sitemap, assume : ' + HORS_SITEMAP[f]); continue; }
-  dit(false, f + ' \u2014 indexable, ni dans le sitemap ni dans HORS_SITEMAP (choisir, puis l\u2019ecrire)');
+  if (CHECK) {
+    dit(false, f + ' \u2014 indexable, ni dans le sitemap ni dans HORS_SITEMAP '
+      + '(npm run site l\u2019ajoute ; ou HORS_SITEMAP, avec sa raison)');
+    continue;
+  }
+  const loc = DOMAINE + f, c = canonicalDe(f);
+  if (c !== loc) {
+    dit(false, f + ' \u2014 page neuve NON ajoutee : canonical ' + (c || 'absent')
+      + ' \u2260 ' + loc + ' (corriger la page, puis relancer)');
+    continue;
+  }
+  aAjouter.push({ fichier: f, loc });
+  dit(true, f + ' \u2014 page neuve, ajoutee au sitemap (priorite ' + PAGE_NEUVE.priority + ')');
 }
 
 // ── R3 : rien dans HORS_SITEMAP ne doit se retrouver dans le sitemap ────────
@@ -182,8 +214,26 @@ if (!CHECK) {
                                              '<lastmod>' + e.attendu + '</lastmod>'));
     n++;
   }
-  if (n) { fs.writeFileSync(SITEMAP, xml); console.log('\n  \u2192 ' + n + ' lastmod remis \u00e0 jour dans public/sitemap.xml'); }
+  // GEO-1 : les pages neuves, a la fin, sur le gabarit des entrees existantes.
+  for (const p of aAjouter) {
+    const lm = dateGit('public/' + p.fichier) || aujourdhui();
+    const bloc = '  <url>\n'
+      + '    <loc>' + p.loc + '</loc>\n'
+      + '    <lastmod>' + lm + '</lastmod>\n'
+      + '    <changefreq>' + PAGE_NEUVE.changefreq + '</changefreq>\n'
+      + '    <priority>' + PAGE_NEUVE.priority + '</priority>\n'
+      + '  </url>\n';
+    xml = xml.replace(/<\/urlset>/, bloc + '</urlset>');
+  }
+  if (n || aAjouter.length) {
+    fs.writeFileSync(SITEMAP, xml);
+    if (n) console.log('\n  \u2192 ' + n + ' lastmod remis \u00e0 jour dans public/sitemap.xml');
+    if (aAjouter.length) console.log('  \u2192 ' + aAjouter.length + ' page(s) neuve(s) ajout\u00e9e(s) : '
+      + aAjouter.map(p => p.fichier).join(', '));
+  }
   else console.log('\n  \u2192 rien \u00e0 r\u00e9\u00e9crire');
+  // exit 0 comme avant GEO-1 : un R1 rouge vient d'etre reecrit, il n'est plus vrai.
+  // Une page neuve refusee (canonical) reste rouge au --check du build : c'est lui qui bloque.
   process.exit(0);
 }
 

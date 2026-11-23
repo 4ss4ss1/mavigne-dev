@@ -1,0 +1,89 @@
+# Ma Vigne
+
+> Ma Vigne est un logiciel de gestion viticole pour les domaines viticoles français : parcelles et travaux à la tâche, journal de l'équipe, temps de travail, registre phytosanitaire prêt pour l'échéance du 1er janvier 2027, matériel et GNR, cave, planning et pilotage des coûts par parcelle. C'est une application web installable (PWA) qui fonctionne sur téléphone et ordinateur, y compris sans réseau dans les rangs. Elle est éditée par GUERETTECH (Nuits-Saint-Georges, Côte-d'Or) et écrite par Nicolas Guéret, chef de culture en Côte de Nuits.
+
+Ce fichier résume ce que fait Ma Vigne, pour qui, et à quel prix. Les chiffres et les fonctions ci-dessous sont ceux de la page de présentation en ligne ; en cas d'écart, la page fait foi.
+
+## Pour qui
+
+- Domaines viticoles, du petit domaine familial à celui qui fait travailler une équipe complète, avec ou sans cave.
+- Le gérant ou le chef de culture voit tout le domaine ; l'ouvrier ne voit sur son téléphone que ses parcelles du jour et une coche (ni coûts, ni heures des autres, ni réglages) ; le tractoriste et le maître de chai ont leurs propres écrans.
+- Utilisée tous les jours sur des domaines bourguignons.
+
+## Ce que fait Ma Vigne
+
+### La vigne
+- **Parcelles et travaux à la tâche** : avancement en surface réelle (une parcelle de 2 ha ne pèse pas comme une de 20 ares), validation depuis le rang en un geste, tâche prioritaire posée par l'administrateur et affichée sur le téléphone de toute l'équipe.
+- **Temps de travail** : le rang validé part au journal, aux heures de chacun et sur la carte, sans ressaisie le soir. Les heures de référence de chaque tâche viennent du barème de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine. L'accueil donne la charge qui reste en heures, la cadence réelle des quatre dernières semaines et la date de fin qu'elle annonce.
+- **Journal de l'équipe** : chaque geste daté et attribué ; une équipe entière tient en une seule entrée.
+- **Météo par parcelle** : modèle AROME de Météo-France, secteur par secteur ; risque de gel, de pluie, fenêtres de traitement.
+
+### Traitements et registre phytosanitaire
+- Produits choisis dans le catalogue officiel E-Phy de l'ANSES.
+- Une saisie écrit le registre, pose le délai de rentrée sur les parcelles traitées, décompte le stock et ajoute le cuivre au cumul glissant de sept ans, parcelle par parcelle.
+- DAR, délai de rentrée, ZNT, cahier de fertilisation.
+- Export du registre au format électronique structuré (CSV), une ligne par produit et par parcelle.
+
+### Matériel
+- Sessions de tracteur, entretiens, GNR, révisions, historique des réparations.
+
+### La cave
+- **Le Cuvier** : de la vendange à la cuve, caisses pesées, état du raisin, rendement contrôlé au passage ; densités, températures, pigeages et remontages.
+- **Le Chai** : cuvées en élevage, rappels d'ouillage, analyses labo, projection de la fin de malo sur les analyses du domaine, mise en bouteille.
+- **La Réserve** : stock des produits, achats, inventaires, parc à fûts, bilan matière.
+
+### Le bureau
+- **Planning et heures** : équipe, annualisation, heures supplémentaires, congés, acomptes, absences, récapitulatif annuel en PDF.
+- **Pilotage** : coût par parcelle en euros et à l'hectare, sur l'équipe qui y est réellement passée ; prévision du besoin en personnes semaine par semaine et simulation d'un renfort.
+- **Réglages et documents** : barème, contrats, utilisateurs, sauvegarde complète, documents prêts à imprimer.
+
+## Registre phytosanitaire numérique : l'échéance de 2027
+
+- Le règlement d'exécution (UE) 2023/564, modifié par le règlement (UE) 2025/2203, et l'arrêté français du 24 décembre 2025 imposent d'enregistrer l'utilisation des produits phytopharmaceutiques dans un format électronique lisible par une machine, à partir du 1er janvier 2027.
+- De 2027 à 2029, ce qui n'est pas saisi directement au format électronique doit y être converti avant le 31 janvier de l'année suivante ; à partir de 2030, dans les trente jours qui suivent le traitement.
+- Le texte n'impose aucun logiciel. Ma Vigne écrit le registre au moment du traitement et l'exporte au format électronique structuré.
+
+## Sur le terrain
+
+- Application web installable (PWA) sur l'écran d'accueil d'un téléphone Android, d'un iPhone (par Safari) ou d'un ordinateur, sans passer par un magasin d'applications.
+- Sans réseau dans les rangs : les validations attendent sur le téléphone et repartent seules au retour du réseau. Un compteur indique ce qui attend.
+
+## Tarifs
+
+Un prix par domaine, pas par utilisateur. TVA non applicable (article 293 B du CGI) : les montants affichés sont ceux qui sont payés.
+
+| Formule | Abonnement | Utilisateurs | Contenu | Mise en route (une seule fois) |
+|---|---|---|---|---|
+| Essentiel | 29 € / mois | jusqu'à 3 | Parcelles et travaux, journal, météo par parcelle, réglages du domaine | 490 €, 10 h d'accompagnement |
+| Vigneron | 49 € / mois | jusqu'à 10 | Tout Essentiel + matériel et carburant, traitements et registre réglementaire | 690 €, 15 h d'accompagnement |
+| Domaine | 79 € / mois | illimités | Tout Vigneron + planning, heures et annualisation, pilotage et coûts par parcelle, Cuvier et Chai, La Réserve | 990 €, 20 h d'accompagnement |
+
+- La mise en route comprend l'import du parcellaire (export PAC / Telepac ou fichier KML), la création des comptes, le paramétrage du barème et des périodes, et la formation de l'équipe. Au-delà des heures comprises : 60 € de l'heure, annoncés et acceptés avant d'être engagés.
+- Sans durée d'engagement : résiliable par écrit avec trente jours de préavis. Ni frais de dossier, ni coût par utilisateur, ni option obligatoire. Aucun paiement en ligne : tout démarre par un échange.
+- Démo libre, sans compte ni inscription. Essai gratuit de 15 jours sur les parcelles du domaine, sans carte bancaire ; si le domaine continue, tout ce qui a été posé pendant l'essai est conservé.
+
+## Données
+
+- Chaque domaine dispose d'un espace isolé, hébergé en Europe (Google Cloud).
+- Sauvegarde complète téléchargeable à tout moment depuis les réglages : JSON pour la reprise, registre phyto en CSV, documents en PDF.
+- Contrat de sous-traitance RGPD signé avant la création des comptes des salariés.
+
+## Éditeur
+
+- GUERETTECH, entreprise individuelle de Nicolas Guéret, Nuits-Saint-Georges (21700, Côte-d'Or, France). SIRET 982 148 116 00022.
+- Contact : ngdevpro@gmail.com · 06 99 42 48 59.
+
+## Pages principales
+
+- [Présentation, fonctions et tarifs](https://mavigneapp.fr/logiciel-vigne.html) : la page de référence de Ma Vigne.
+- [Demander un essai de 15 jours](https://mavigneapp.fr/essai.html) : formulaire de demande d'essai sur les parcelles du domaine.
+- [La démo](https://mavigneapp.fr/demo.html) : les vrais écrans de l'application, vus par le gérant, l'ouvrier, le tractoriste et le maître de chai.
+- [Guide complet](https://mavigneapp.fr/guide.html) : documentation de chaque module et réponses aux questions fréquentes.
+- [Démarrage rapide](https://mavigneapp.fr/demarrage.html) : prendre en main l'application, fiches pratiques par rôle.
+
+## Optional
+
+- [Mentions légales](https://mavigneapp.fr/mentions-legales.html)
+- [Politique de confidentialité](https://mavigneapp.fr/confidentialite.html)
+- [Conditions générales](https://mavigneapp.fr/cgu.html)
+- [Contrat de sous-traitance des données (DPA)](https://mavigneapp.fr/dpa.html)

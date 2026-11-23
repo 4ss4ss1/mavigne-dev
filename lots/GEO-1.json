@@ -1,0 +1,20 @@
+{
+  "lot": "GEO-1",
+  "section": "§598",
+  "base": "a6ea9ff8b9d844036e9ffa7b7fecdf1b7b566dfa",
+  "inclut": [],
+  "date": "2026-11-23",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "e9492d4ed6bfa894323ed53e60832b8e39953375ff6d6e5390490963528959a9",
+    "CLAUDE.md": "c2c7a5f97626274520b91ed3a8eaf288db01a233e809bc1a7c5c875cd4c02e8b",
+    "docs/claude/INDEX.md": "aae8d8aa745fe7bc685ebc197f33ac4acd8f7b1c30ce78374e8808fa94270bd0",
+    "docs/claude/chantiers-580-629.md": "c5c9d3e85f02f24c2d19b033bc20b006689093ed591a293aab991e3309704c6a",
+    "docs/claude/journal.md": "ca62d5cc1f69ecdc5424bdcc61ce197495821b1310deae848906d1a290fe020b",
+    "public/logiciel-vigne.html": "39dc810fc7115464101862c00d3fd40f4649ca9e2fa01c74859cbb03ab77b49c",
+    "public/robots.txt": "28d7dc4348575f4b2ca4eacfec0aae631b66e2db39a68ed102a39cd9d698bc72",
+    "scripts/harnais-claude-md.mjs": "1d93832a5bb822e500170727ebaec85ebe6087cefcbfd021b605cc86b048da3b",
+    "scripts/mv-sitemap.mjs": "acaa7fc854f1bdd82644bf6628044dcee4565007d3b242b7ab58c73d5dd043e8",
+    "public/llms.txt": "d86997b32b5499900a99c1f4337a7fecf09ca23c609aede57734e5b03ff49aa8"
+  }
+}

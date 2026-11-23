@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **18 novembre 2026 (FRAIS-2)** — **L’ONGLET « FRAIS » SE VOIT : CINQ ONGLETS SUR UNE LIGNE, LES ACOMPTES PASSENT DANS « FRAIS » (§597)**. Base `fb6d7b8` (« chaine1 »). APP 11.24 → 11.25, SW 12.15 → 12.16. Nico, FRAIS-1 en ligne : « il n’y a pas frais » — l’onglet existait, poussé hors de la barre de la fiche (423 px d’onglets pour 324 à 402 de place ; les captures de FRAIS-1 le montraient, le tuto allait au bout parce que son moteur fait défiler jusqu’à la cible). Décidé avec lui : **« Congés et acomptes » devient « Congés »**, **les acomptes passent dans « Frais »**, sous la liste des frais, dans sa colonne (« acomptes va avec frais ») ; les onglets de la fiche à 8 px de marge par côté (`frais.css`). Mesuré : plus rien ne défile, de 360 px à l’ordinateur. Un ancien lien « ac » ouvre « Frais ». Harnais `frais2` (10 assertions, 12 contre-épreuves) avec **un budget de largeur** étalonné sur la mesure ; `frais1` suit la branche qui porte les acomptes. Leçon : une barre d’onglets qui défile cache ses derniers onglets — à chaque onglet ajouté, la mesurer à 360 px.
+> Dernière consolidation : **23 novembre 2026 (GEO-1)** — **LE SITE SE PRÉSENTE AUX MOTEURS ET AUX IA : `llms.txt`, LES ROBOTS D’IA NOMMÉS, UN SITEMAP QUI AJOUTE SEUL LES PAGES NEUVES (§598)**. Base `a6ea9ff` (« frais2 »). Pas de bump (APP 11.25, SW 12.16). Nico veut que Ma Vigne remonte sur Google et soit citée par les IA sur des requêtes métier ; audit puis plan en cinq étapes, tranché le 23/11 : Play Store à 5 clients, tarifs de la page en ligne, écran de lancement clair. Ce lot pose les fondations : **`public/llms.txt`** (neuf, chaque phrase reprise de la page en ligne, du guide ou des mentions légales), **`robots.txt`** qui nomme les robots d’OpenAI, d’Anthropic, de Perplexity, de Google et d’Apple (ils étaient déjà autorisés par `*` : c’est de la lisibilité — et un robot nommé ne lit plus `*`), **`mv-sitemap.mjs`** qui ajoute une page publique neuve au sitemap sans `--check` si son canonical est juste, l’adresse de l’éditeur dans le JSON-LD de logiciel-vigne. Testé : `.well-known/` passe Vite et le `listFiles` de firebase-tools malgré `**/.*`. Leçon : avant d’« autoriser » un robot, lire ce que dit déjà `*`.
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
 > ★★★ **Depuis le 27/09 (§189), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
@@ -335,7 +335,9 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 > ★★ **PUBLIER UNE PAGE DU SITE : `npm run site` AVANT `npm run build`** (29/09). Dès qu'un lot touche
 > `guide/*.html` **ou** une page de `public/` (`logiciel-vigne`, `essai`, `demarrage`, mentions…),
 > cette commande régénère `guide.html` **et** remet à jour les `<lastmod>` de `sitemap.xml` — sans
-> commit intermédiaire. **À rappeler à Nico en fin de livraison, avec la séquence** : `npm run site`
+> commit intermédiaire. ★ Depuis GEO-1 (§598), elle **ajoute aussi une page publique neuve** au sitemap,
+> si son canonical vaut `https://mavigneapp.fr/<fichier>` (sinon rouge, rien d'écrit). Une page de
+> `public/` qui change de tarif ou de fonction → relire aussi `public/llms.txt`, qui recopie la page. **À rappeler à Nico en fin de livraison, avec la séquence** : `npm run site`
 > → `npm run build` → `firebase deploy --only hosting`. ⚠️ **Ne jamais livrer `public/sitemap.xml`**
 > (dérivé, comme `guide.html`) : on livre la source, on nomme la commande. Un `lastmod` périmé ment à
 > Google (§27d). Après le déploiement : Search Console › Inspection de l'URL › demander l'indexation.
@@ -758,7 +760,7 @@ mavigne/
 │   ├── mise-en-route.html  (formulaire d'installation client — noindex, JAMAIS dans sitemap.xml ;
 │   │                        ★ ENVOIE désormais ses réponses en base, §27f)
 │   ├── cgu.html · dpa.html · confidentialite.html · mentions-legales.html
-│   └── robots.txt · sitemap.xml
+│   └── robots.txt · sitemap.xml · llms.txt (GEO-1, §598 : le résumé pour les IA, tarifs de la page en ligne)
 ├── functions/              ← index.js (backups), claims.js, ephy.js,
 │                              ★ leads.js (submitLead + submitMiseEnRoute)
 ├── scripts/                ← inject-precache.mjs (IDEMPOTENT), preflight.mjs (C1→C22),
@@ -2268,6 +2270,12 @@ Nico (13/11) : côté admin, « ce n’est pas rangé », « une surcharge d’i
 - **À vérifier chez Nico, CHAINE-1 déployé** — Planning › Personnel › un salarié passé de CDD en CDI sans coupure : son compteur de l'année reprend ses heures de CDD (il **monte**, c'est voulu) ; plus de carte « Compteur soldé » pour le CDD ; le mois du changement en mois entier ; dans la grille, un jour du CDD se coche et s'enregistre. Si son CDD avait déjà été **payé** comme un compteur soldé, ces heures ne doivent pas l'être deux fois : à regarder fiche par fiche. Réglages › Équipe › sa fiche : l'embauche du CDI dit « sans coupure : même compteur », plus de « Coupure de 0 jour ».
 - **Ouvert** : le relevé PDF d'un mois couvert par un contrat **séparé par une coupure** — `_planPaieMois` lit `_planInContract` sans le contexte du contrat (d'avant ce lot) ; ces jours se saisissent désormais : à regarder si un tel relevé est demandé.
 - **Non vérifié** : la grille et l'historique de Réglages à l'écran (joués dans Node seulement).
+
+### ★ GEO-1 (23/11, §598) — Google et les IA : ce qui reste
+- **À faire chez Nico, GEO-1 déployé** : `npm run site` → `npm run build` → `firebase deploy --only hosting` ; ouvrir `https://mavigneapp.fr/llms.txt` et `/robots.txt` (le nouveau groupe) ; Search Console › Sitemaps : renvoyer `sitemap.xml` ; l’outil de test des résultats enrichis sur logiciel-vigne (l’adresse de l’éditeur).
+- **Le plan validé le 23/11 (§598d)** : lot B, trois pages « cas d’usage » (registre 2027 d’abord, pour le ton ; puis temps de travail, gestion d’équipe) ; lot C, le manifest seul (maskable, `id: "/"`, `#F0EEE9`, bump APP + SW) ; lot D, `docs/geo-kit.md`. **Play Store (TWA) : à 5 clients**, confirmé par Nico le 23/11 — `assetlinks.json` et Bubblewrap à ce moment-là (`.well-known/` passe déjà Vite et Firebase, testé).
+- **Tarifs** : `llms.txt` et les pages recopient la page en ligne (décision du 23/11). Les décisions du 06/11 (tarif annuel, options payantes) ne sont **pas** en ligne : le jour où elles le sont, `llms.txt`, le JSON-LD et la FAQ de logiciel-vigne changent dans le même lot.
+- **Écart vu en route** : logiciel-vigne dit « surface de la parcelle, jamais une portion » ; REG27-1A (§572) saisit la surface traitée parcelle par parcelle — à vérifier, puis corriger avec le lot B.
 
 ## 29. Synchronisation de la mémoire
 

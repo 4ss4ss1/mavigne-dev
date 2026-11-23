@@ -6,4 +6,23 @@
 User-agent: *
 Allow: /
 
+# Moteurs de réponse et assistants IA — GEO-1 (§598, 23/11/2026).
+# Ils étaient DÉJÀ autorisés par le groupe « * » ci-dessus : les nommer ne change rien à leurs
+# droits. C'est écrit pour que le choix se lise d'un coup d'œil (OpenAI, Anthropic, Perplexity,
+# Google, Apple : indexation, recherche et pages ouvertes à la demande d'un utilisateur).
+# ⚠️⚠️ PIÈGE : un robot nommé dans un groupe NE LIT PLUS le groupe « * » (RFC 9309, le groupe le
+# plus précis l'emporte). Toute interdiction ajoutée un jour sous « * » doit être RECOPIÉE ici,
+# sinon ces robots-là ne la verront pas.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+
 Sitemap: https://mavigneapp.fr/sitemap.xml
