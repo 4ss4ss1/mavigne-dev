@@ -14,7 +14,7 @@ Ce fichier résume ce que fait Ma Vigne, pour qui, et à quel prix. Les chiffres
 
 ### La vigne
 - **Parcelles et travaux à la tâche** : avancement en surface réelle (une parcelle de 2 ha ne pèse pas comme une de 20 ares), validation depuis le rang en un geste, tâche prioritaire posée par l'administrateur et affichée sur le téléphone de toute l'équipe.
-- **Temps de travail** : le rang validé part au journal, aux heures de chacun et sur la carte, sans ressaisie le soir. Les heures de référence de chaque tâche viennent du barème de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine. L'accueil donne la charge qui reste en heures, la cadence réelle des quatre dernières semaines et la date de fin qu'elle annonce.
+- **Temps de travail** : le rang validé part au journal, aux heures de chacun et sur la carte, sans ressaisie le soir. Les heures de référence de chaque tâche viennent du barème de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine. Avec la formule Domaine, les heures de chaque salarié au planning se partagent chaque jour entre les parcelles validées, au prorata du barème : temps réel par parcelle et par tâche, face au barème. Pas de badgeuse ni de suivi GPS.
 - **Journal de l'équipe** : chaque geste daté et attribué ; une équipe entière tient en une seule entrée.
 - **Météo par parcelle** : modèle AROME de Météo-France, secteur par secteur ; risque de gel, de pluie, fenêtres de traitement.
 
@@ -76,6 +76,9 @@ Un prix par domaine, pas par utilisateur. TVA non applicable (article 293 B du C
 ## Pages principales
 
 - [Présentation, fonctions et tarifs](https://mavigneapp.fr/logiciel-vigne.html) : la page de référence de Ma Vigne.
+- [Registre phytosanitaire 2027](https://mavigneapp.fr/registre-phytosanitaire-2027.html) : ce que dit l'arrêté du 24 décembre 2025 (dates, contenu exigé), et où chaque information du registre se saisit dans Ma Vigne.
+- [Suivi du temps de travail dans les vignes](https://mavigneapp.fr/suivi-temps-travail-vigne.html) : les heures de l'équipe au planning, le temps par parcelle et par tâche face au barème, le relevé mensuel pour la compta.
+- [Gestion d'équipe viticole](https://mavigneapp.fr/gestion-equipe-viticole.html) : tâche prioritaire, équipes du jour, validation dans le rang, journal, planning, rôles et renfort.
 - [Demander un essai de 15 jours](https://mavigneapp.fr/essai.html) : formulaire de demande d'essai sur les parcelles du domaine.
 - [La démo](https://mavigneapp.fr/demo.html) : les vrais écrans de l'application, vus par le gérant, l'ouvrier, le tractoriste et le maître de chai.
 - [Guide complet](https://mavigneapp.fr/guide.html) : documentation de chaque module et réponses aux questions fréquentes.

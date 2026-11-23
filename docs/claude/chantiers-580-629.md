@@ -928,3 +928,42 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Avant d’autoriser un robot, lire ce que dit déjà `*`** : l’« autorisation des IA » demandée était acquise ; la nommer est de la lisibilité, pas un effet. Et nommer un robot le **sort** du groupe `*`.
 - ⚠️ **Une promesse sur un fichier pour les IA se vérifie comme une autre** : `llms.txt` n’est lu par aucun grand moteur selon Google. On le pose sans le vendre.
 - ★ **Un doute sur ce que Firebase déploie se teste avec le code de Firebase**, pas avec un fil de forum : le `listFiles` du paquet, la même version de glob, un `dist/` jetable.
+
+## 599. ★★ GEO-2 — TROIS PAGES « CAS D’USAGE » : LE REGISTRE 2027, LE TEMPS DE TRAVAIL, LA GESTION D’ÉQUIPE (23/11 — `public/registre-phytosanitaire-2027.html` (neuve) · `public/suivi-temps-travail-vigne.html` (neuve) · `public/gestion-equipe-viticole.html` (neuve) · `public/logiciel-vigne.html` · `public/llms.txt` · `firebase.json` · `scripts/harnais-claude-md.mjs`)
+
+**La demande.** Étape 3 du plan validé le 23/11 (§598d) : trois pages ciblées, une réponse dès le premier paragraphe, un tableau factuel (fonctions, compatibilité, tarifs), une FAQ de 4 à 5 questions et son `FAQPage`, le maillage avec la page d’accueil. La page registre d’abord, livrée en aperçu autonome pour le ton ; Nico : « go » (23/11) — les deux autres sur le même modèle, puis les trois en un lot.
+
+### 599a. Vérifié avant d’écrire
+
+- **Le texte** (arrêté du 24 décembre 2025, relu sur AIDA/INERIS) : contenu en vigueur au 1er janvier 2026 (art. 7) ; conversion au format électronique avant le 31 janvier de l’année suivante jusqu’en 2029, sous trente jours dès 2030 (art. 4) ; utilisations d’avant 2027 sans conversion (art. 4, al. 3) ; sur demande explicite d’un contrôleur avant l’échéance, sous dix jours ouvrables, la date la plus proche (art. 5) ; conservation cinq ans au moins (art. 3) ; annexe I : obligatoire / sous condition / facultatif.
+- **L’appli, dans le code et le guide** : le registre (REG27-1A §572, REG27-1B §573, REG27-2 §575 — les colonnes de `MV_PHY_CSV_COLS`, les huit points et le verdict de `_regPoints`/`_regVerdict`, repris mot pour mot dans le dessin de la fenêtre) ; qui saisit un traitement (administrateur et tractoriste, `isTractoriste() || isAdmin()`) ; l’export réservé à l’administrateur ; le temps par parcelle (PAR-1 §198 : la journée partagée entre les parcelles validées, au prorata du barème ; TV-1 §172 : « Temps réel contre barème » ; journées de cave et conduite retirées) ; les heures sup (guide Planning : à la semaine, 8 h à 25 %, puis 50 %) ; les rôles (guide 02) ; les formules (guide 03 : Planning et Pilotage en Domaine seulement) ; le renfort (guide Pilotage : réponse en calendrier, « Choisir moi-même la période »).
+- ⚠️ **Écarté** : `mv-shot-phyto-mobile.png` (capture du 06/09, l’ancienne charte sombre) — elle ne montre plus l’appli. La fenêtre « avant l’export » est **dessinée en HTML**, données de démonstration annoncées sous la carte.
+- ⚠️ **Corrigé en route sur logiciel-vigne** : « L’application enregistre une parcelle entière, jamais une portion » était faux depuis REG27-1A (§572) ; la pastille « Surface (ha) » devient « Surface traitée (ha) ».
+
+### 599b. Ce qui change
+
+- **Trois pages** sur le gabarit de logiciel-vigne (sa charte, sa barre, son panneau au téléphone, son pied) : fil d’Ariane, sur-titre, `h1`, un **chapô qui répond** (l’obligation ou le besoin, ce que fait Ma Vigne, la formule et le prix), une carte à droite sur ordinateur (les échéances ; un exemple chiffré du partage de la journée, barème fictif annoncé ; qui voit quoi), une bande de quatre faits, un **tableau** (exigence → Ma Vigne ; question → où c’est compté, avec la formule en pastille ; décision → ce que l’équipe voit), les étapes, un encadré franc (« Ce que je ne vous dirai pas », « Ce que Ma Vigne ne fait pas »), les formules concernées avec la mise en route, **cinq questions** et leur `FAQPage` (le texte visible et le JSON-LD sont identiques, vérifié par script), l’essai, « À lire aussi » vers les deux autres.
+- **JSON-LD de chaque page** : `WebPage` (sur `SoftwareApplication` Ma Vigne), `BreadcrumbList`, `FAQPage`.
+- **Les trois pages partagent le même bloc `<style>`** (la charte de logiciel-vigne, plus les tableaux qui s’empilent au téléphone, la fenêtre dessinée, les étapes, l’exemple chiffré) et le même script (menu, apparition, `?still`).
+- **Maillage** : logiciel-vigne — un lien sous l’encadré du registre, une ligne « En détail » sous « Trois lieux », les trois pages dans le pied ; les trois pages — le pied (avec « Présentation ») et « À lire aussi ».
+- **`firebase.json`** : trois 301 depuis l’adresse sans `.html`, comme `/logiciel-vigne`.
+- **`llms.txt`** : les trois pages dans « Pages principales » ; la ligne Temps de travail dit le partage de la journée et la formule Domaine (la « cadence des quatre dernières semaines » de logiciel-vigne retirée : le guide dit quinze jours pour la carte du jour).
+- **Pas de bump** (pages de `public/` hors `SHELL_STATIC`, `firebase.json`, doc). **Le sitemap** : `npm run site` ajoute les trois pages (GEO-1) — testé : ajoutées à `0.8`, `--check` vert ensuite, fichier restauré (dérivé, non livré).
+
+### 599c. Mesuré
+
+- Les trois pages au navigateur (Chrome sans tête, servies depuis `public/`), téléphone 390 px et ordinateur 1 440 px : aucune erreur de page, aucun débordement horizontal (`scrollWidth` = largeur), aucun élément qui sort de l’écran ; les six graisses chargées. Lues sur capture, défauts corrigés : le « 1er » en exposant cassé dans le sur-titre en capitales, la légende de tableau rognée (passée en texte lu seulement), une coche verte devant « Sans Planning ni Pilotage » (retirée), l’espace de « À lire aussi ».
+- Balises équilibrées, ancres du menu toutes présentes, aucun caractère hors des polices auto-hébergées, JSON-LD des quatre pages relu par `json.loads`.
+- `mv-sitemap --check` : rouge sur les trois pages tant que `npm run site` n’a pas tourné (attendu), vert après. `preflight`, `lint-vocabulaire`, `mv-harnais-subset`, `mv-harnais-icones`, `mv-harnais-demo`, `mv-claude-index --check` : verts.
+
+### 599d. Ce qui reste
+
+- **À faire chez Nico** : `npm run site` **avant le commit** (le `--check` du build et de la CI rougit sans), puis `npm run build` → `firebase deploy --only hosting` ; ouvrir les trois pages au téléphone ; Search Console : renvoyer `sitemap.xml`, demander l’indexation des trois adresses.
+- **Lot C** (manifest seul : maskable, `id: "/"`, `#F0EEE9`, bump APP + SW) et **lot D** (`docs/geo-kit.md`) — §598d.
+- **À surveiller** : chaque page recopie des tarifs et des fonctions ; un lot qui touche le registre, le planning, les formules ou les prix relit aussi ces trois pages et `llms.txt`.
+
+### 599e. Leçons
+
+- ⚠️ **Une page de vente se relit contre le code, pas contre la page de vente d’avant** : logiciel-vigne disait « jamais une portion » huit jours après que l’appli a appris la surface traitée.
+- ★ **Un dessin d’écran vaut mieux qu’une capture périmée** : la fenêtre « avant l’export » reprend les libellés de `registre.js`, et elle ne vieillit pas avec la charte.
+- ★ **Le texte visible d’une FAQ et son JSON-LD se comparent par script** : deux copies écrites à la main finissent toujours par diverger.

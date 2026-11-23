@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivi du temps de travail dans les vignes : heures, parcelles, tâches | Ma Vigne</title>
+<meta name="description" content="Les heures de l’équipe, le temps passé par parcelle et par tâche, face au barème : comment Ma Vigne calcule le temps des travaux viticoles sans badgeuse ni ressaisie. Formule Domaine, 79 € par mois.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://mavigneapp.fr/suivi-temps-travail-vigne.html">
+<link rel="icon" href="/icon-192.png">
+<meta name="theme-color" content="#F0EEE9">
+<meta name="author" content="Nicolas Guéret — GUERETTECH">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Ma Vigne">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://mavigneapp.fr/suivi-temps-travail-vigne.html">
+<meta property="og:title" content="Le temps passé dans chaque parcelle, sans rien ressaisir le soir">
+<meta property="og:description" content="Heures de l’équipe au planning, temps par parcelle et par tâche face au barème, relevé mensuel pour la compta : le temps de travail d’un domaine viticole dans Ma Vigne.">
+<meta property="og:image" content="https://mavigneapp.fr/og-mavigne.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ma Vigne — application de gestion viticole">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Le temps passé dans chaque parcelle, sans rien ressaisir le soir">
+<meta name="twitter:description" content="Heures de l’équipe au planning, temps par parcelle et par tâche face au barème, relevé mensuel pour la compta : le temps de travail d’un domaine viticole dans Ma Vigne.">
+<meta name="twitter:image" content="https://mavigneapp.fr/og-mavigne.png">
+<link rel="preload" href="/fonts/cormorant-garamond-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/outfit-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://mavigneapp.fr/suivi-temps-travail-vigne.html",
+      "url": "https://mavigneapp.fr/suivi-temps-travail-vigne.html",
+      "name": "Suivi du temps de travail dans les vignes : heures, parcelles, tâches",
+      "inLanguage": "fr",
+      "about": {
+        "@type": "SoftwareApplication",
+        "name": "Ma Vigne",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web (PWA), Android, iOS",
+        "url": "https://mavigneapp.fr/logiciel-vigne.html"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "GUERETTECH",
+        "url": "https://mavigneapp.fr/logiciel-vigne.html"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Ma Vigne",
+          "item": "https://mavigneapp.fr/logiciel-vigne.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Temps de travail dans les vignes",
+          "item": "https://mavigneapp.fr/suivi-temps-travail-vigne.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Mes ouvriers doivent-ils pointer ou lancer un chrono ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Ils touchent « Valider » sur la parcelle quand elle est finie ; « Début » est facultatif. Leurs heures viennent du planning que tient l’administrateur, à la minute, avec des modèles de semaine. Un import de pointages en CSV est possible si vous en avez déjà."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Comment Ma Vigne sait-elle combien de temps on a passé sur une parcelle ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chaque jour, les heures de chacun au planning se partagent entre les parcelles validées ce jour-là, au prorata de leur barème. Une journée sans validation n’est pas perdue : ses heures attendent la prochaine validation de la personne. Les journées de cave et la conduite du tracteur sont retirées du calcul."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Et si je valide les parcelles pour toute l’équipe ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les heures de ceux qui ne sont pas nommés sur une validation vont à toutes les parcelles validées par le domaine ce jour-là. Quand deux équipes travaillent sur des chantiers différents, l’administrateur les pose le matin dans « Équipes du jour » : chacune garde ses parcelles."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Les heures supplémentaires suivent-elles ma convention ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Par défaut, les repères sont ceux de la convention nationale Production agricole et CUMA (IDCC 7024), et ils se règlent pour une autre convention. Les heures sup se comptent à la semaine, du lundi au dimanche : les huit premières à 25 %, les suivantes à 50 %. Le relevé les déclare en heures brutes avec leur taux."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quelle formule faut-il pour suivre le temps de travail ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "La formule Domaine (79 € par mois pour tout le domaine) : elle comprend le planning, les heures, l’annualisation, le temps réel par parcelle et le coût par parcelle. Les formules Essentiel et Vigneron suivent l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<style>
+/* ── la charte de l'appli, reprise de logiciel-vigne.html (clair) ── */
+:root{
+  color-scheme:light;
+  --font-ui:Outfit,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--font-titre:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --bg-app:#F0EEE9;--bg-card:#FFFFFF;--bg-doux:#F7F5F1;--texte:#1B1A18;--texte-med:#55534E;--texte-doux:#686660;--ligne:#E7E6E2;--ligne-forte:#CDCAC2;
+  --accent:#7A2850;--accent-survol:#6A2145;--accent-texte:#7A2850;--accent-doux:rgba(122,40,80,.11);--anneau:rgba(122,40,80,.42);
+  --ok:#237A47;--ok-doux:rgba(35,122,71,.15);--attention:#A15C00;--attention-doux:rgba(161,92,0,.15);--rouge:#A0291E;--rouge-pale:#FAEAE8;
+  --shadow-sm:0 1px 2px rgba(20,18,14,.05),0 1px 3px rgba(20,18,14,.04);--shadow-md:0 6px 16px -4px rgba(20,18,14,.12),0 2px 4px -2px rgba(20,18,14,.06);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-full:999px;
+  --pt-xxl:32px;--pt-xl:28px;--pt-lg:24px;--pt-md:20px;--pt-sm:16px;--pt-base:14px;--pt-txt:13px;--pt-micro:12px;--pt-nano:11px;
+  --marge:clamp(20px,6vw,96px);--e:cubic-bezier(.16,1,.3,1);--e2:cubic-bezier(.33,1,.68,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg-app);color:var(--texte);font:300 17px/1.5 var(--font-ui);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--anneau);outline-offset:3px;border-radius:4px}
+.num{font-variant-numeric:tabular-nums}
+sup{font-size:.6em;line-height:0}
+
+/* barre flottante (logiciel-vigne) */
+.barre{position:fixed;z-index:40;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:28px;
+  width:max-content;max-width:calc(100% - 24px);padding:8px 8px 8px 16px;border-radius:16px;background:color-mix(in srgb,var(--bg-app) 76%,transparent);
+  -webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 0 0 1px color-mix(in srgb,var(--texte) 9%,transparent)}
+.barre{opacity:0;transition:opacity .75s var(--e2)}.pret .barre{opacity:1}
+.marque{display:inline-flex;align-items:center;gap:10px;text-decoration:none;min-height:44px}
+.marque img{width:30px;height:30px;border-radius:8px;display:block}
+.marque span{font:600 25px/1 var(--font-titre);letter-spacing:-.01em}
+.menu{display:flex;align-items:center;gap:2px}
+.menu a{position:relative;font:400 15px/1 var(--font-ui);text-decoration:none;color:var(--texte-med);padding:14px 12px;border-radius:10px;transition:color .3s var(--e2),background-color .3s var(--e2)}
+.menu a:hover{color:var(--texte);background:color-mix(in srgb,var(--texte) 5%,transparent)}
+.menu a[aria-current="true"]{color:var(--texte)}
+.menu a[aria-current="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:7px;height:1.5px;border-radius:2px;background:var(--accent)}
+.bt-menu{display:none;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:none;font:500 15px/1 var(--font-ui);color:var(--texte);cursor:pointer;transition:background-color .3s var(--e2)}
+.bt-menu:hover{background:color-mix(in srgb,var(--texte) 5%,transparent)}
+.bt-menu:active{transform:translateY(1px)}
+.bt-menu-ico{position:relative;width:18px;height:12px;display:inline-block}
+.bt-menu-ico i{position:absolute;left:0;right:0;height:1.5px;border-radius:2px;background:currentColor;transition:transform .5s var(--e)}
+.bt-menu-ico i:first-child{top:2px}.bt-menu-ico i:last-child{top:9px}
+.menu-ouvert .bt-menu-ico i:first-child{transform:translateY(3.5px) rotate(45deg)}
+.menu-ouvert .bt-menu-ico i:last-child{transform:translateY(-3.5px) rotate(-45deg)}
+.panneau{position:fixed;inset:0;z-index:39;display:flex;flex-direction:column;justify-content:space-between;gap:32px;overflow-y:auto;
+  padding:calc(96px + env(safe-area-inset-top,0px)) var(--marge) calc(28px + env(safe-area-inset-bottom,0px));
+  background:color-mix(in srgb,var(--bg-app) 95%,transparent);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);opacity:0;transition:opacity .35s var(--e2)}
+.panneau[hidden]{display:none}
+.panneau.ouvert{opacity:1}
+.panneau nav{display:flex;flex-direction:column}
+.panneau nav a{font:500 32px/1.1 var(--font-titre);letter-spacing:-.015em;color:var(--texte);text-decoration:none;padding:14px 0;border-bottom:1px solid var(--ligne)}
+.panneau nav a,.panneau-actions{opacity:0;transform:translateY(24px);transition:opacity .5s var(--e2),transform .7s var(--e);transition-delay:calc(var(--k,0) * 55ms)}
+.panneau.ouvert nav a,.panneau.ouvert .panneau-actions{opacity:1;transform:none}
+.panneau-actions{display:grid;gap:10px}
+.panneau-actions .bt{width:100%}
+html.menu-ouvert{overflow:hidden}
+.evitement{position:fixed;left:12px;top:-64px;z-index:60;background:var(--bg-card);color:var(--texte);padding:12px 16px;border-radius:8px;box-shadow:var(--shadow-md);text-decoration:none;font:500 15px/1 var(--font-ui)}
+.evitement:focus{top:12px}
+section[id]{scroll-margin-top:84px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.bt{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:var(--r-md);font:500 16px/1 var(--font-ui);text-decoration:none;white-space:nowrap;transition:background-color .5s var(--e2),box-shadow .5s var(--e2)}
+.bt:active{transform:translateY(1px)}
+.bt-plein{background:var(--accent);color:#fff}.bt-plein:hover{background:var(--accent-survol)}
+.bt-trait{color:var(--texte);background:var(--bg-app);box-shadow:inset 0 0 0 1.5px var(--ligne-forte)}.bt-trait:hover{box-shadow:inset 0 0 0 1.5px var(--texte-doux)}
+.bt-petit{min-height:44px;padding:0 16px;font-size:15px}
+
+/* ── haut de page : la réponse d'abord ── */
+.haut{max-width:1360px;margin:0 auto;padding:calc(120px + env(safe-area-inset-top,0px)) var(--marge) 56px}
+.haut-in{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:56px;align-items:end}
+.echeances{padding:24px 24px 8px}
+.echeances h2{font:600 26px/1.15 var(--font-titre);letter-spacing:-.015em;margin:0 0 6px}
+.echeances .dates{margin:0;gap:0}
+.echeances .dates li{grid-template-columns:96px 1fr}
+.fil{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px;font:400 14px/1.4 var(--font-ui);color:var(--texte-doux)}
+.fil a{color:var(--texte-med);text-decoration:none}.fil a:hover{color:var(--texte);text-decoration:underline;text-underline-offset:3px}
+.fil span[aria-hidden]{color:var(--ligne-forte)}
+.h1-sur{display:flex;align-items:center;gap:14px;font:500 13px/1.2 var(--font-ui);letter-spacing:.28em;text-transform:uppercase;color:var(--accent-texte);margin:0 0 18px}
+.h1-sur::before{content:"";width:36px;height:1px;background:currentColor;flex:none}
+.haut h1{font:500 clamp(42px,5.4vw,80px)/1 var(--font-titre);letter-spacing:-.025em;margin:0 0 .45em;max-width:17ch;text-wrap:balance}
+.chapo{font:300 clamp(17px,1.35vw,19px)/1.6 var(--font-ui);color:var(--texte-med);max-width:66ch;margin:0 0 30px;text-wrap:pretty}
+.chapo b{font-weight:500;color:var(--texte)}
+.lien-demo{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;color:var(--accent-texte);font:500 16px/1 var(--font-ui);text-underline-offset:4px}
+@media (max-width:420px){.h1-sur{letter-spacing:.2em;gap:10px;font-size:12px}.h1-sur::before{width:22px}}
+/* quatre faits posés */
+.bref{border-top:1px solid var(--ligne);border-bottom:1px solid var(--ligne);background:rgba(255,255,255,.8)}
+.bref-in{max-width:1360px;margin:0 auto;padding:28px var(--marge);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 36px}
+.bref b{display:block;font:600 15px/1.3 var(--font-ui);color:var(--texte);margin-bottom:4px}
+.bref span{display:block;font:400 14px/1.5 var(--font-ui);color:var(--texte-med);text-wrap:pretty}
+@media (max-width:980px){.bref-in{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.bref-in{grid-template-columns:1fr;gap:16px;padding:24px var(--marge)}}
+/* apparition douce */
+[data-r]{opacity:0;transform:translateY(12px);filter:blur(4px);transition:opacity .8s var(--e2),transform 1.05s var(--e),filter .8s var(--e2);transition-delay:calc(var(--i,0) * 70ms)}
+[data-r].vu-r{opacity:1;transform:none;filter:none}
+
+/* ── sections ── */
+.section{max-width:1360px;margin:0 auto;padding:clamp(64px,6vw,96px) var(--marge)}
+.section-tete{max-width:46rem;margin-bottom:36px}
+.section-tete h2{font:500 clamp(34px,4vw,56px)/1.04 var(--font-titre);letter-spacing:-.022em;margin:0 0 .4em;text-wrap:balance}
+.section-tete p{font:300 clamp(17px,1.35vw,19px)/1.55 var(--font-ui);color:var(--texte-med);margin:0;max-width:60ch;text-wrap:pretty}
+.deux-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:56px;align-items:start}
+.dates{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:14px}
+.dates li{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:14px 0;border-top:1px solid var(--ligne)}
+.dates b{font:600 20px/1.2 var(--font-titre)}.dates span{color:var(--texte-med);font-size:15.5px;line-height:1.55}
+.franc{background:var(--bg-card);border:1px solid var(--ligne);border-left:3px solid var(--accent);border-radius:12px;padding:16px 18px}
+.franc b{font:600 18px/1.3 var(--font-titre)}.franc p{margin:6px 0 0;color:var(--texte-med);font-size:15.5px;line-height:1.55}
+.carte{background:var(--bg-card);border:1px solid var(--ligne);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm)}
+.carte h3{font:600 26px/1.15 var(--font-titre);letter-spacing:-.015em;margin:0 0 6px}
+.note{color:var(--texte-doux);font-size:var(--pt-micro);line-height:1.5}
+.etiq{display:inline-block;font-size:var(--pt-nano);font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:var(--r-full);background:var(--bg-doux);color:var(--texte-med);border:1px solid var(--ligne);white-space:nowrap}
+.etiq.ok{background:var(--ok-doux);color:var(--ok);border-color:transparent}
+.etiq.att{background:var(--attention-doux);color:var(--attention);border-color:transparent}
+/* contenu exigé : trois familles */
+.familles{display:grid;gap:0}
+.famille{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--ligne)}
+.famille:first-child{border-top:0;padding-top:4px}
+.famille h3{font:600 20px/1.25 var(--font-titre);margin:0}
+.famille ul{margin:0;padding:0 0 0 18px;color:var(--texte-med);font-size:15.5px;line-height:1.6}
+.famille li+li{margin-top:2px}
+.source{margin:16px 0 0;font-size:var(--pt-micro);color:var(--texte-doux);line-height:1.5}
+
+/* le tableau exigence / Ma Vigne */
+.tableau{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg-card);border:1px solid var(--ligne);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden;font-size:15.5px;line-height:1.55}
+.lu{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.tableau th,.tableau td{text-align:left;vertical-align:top;padding:14px 18px;border-top:1px solid var(--ligne)}
+.tableau thead th{border-top:0;background:var(--bg-doux);font:600 var(--pt-micro)/1.3 var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux)}
+.tableau tbody th{font:600 17px/1.35 var(--font-titre);color:var(--texte);width:30%}
+.tableau td{color:var(--texte-med)}
+.tableau td b{color:var(--texte);font-weight:500}
+@media (max-width:720px){
+  .tableau thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tableau,.tableau tbody,.tableau tr,.tableau th,.tableau td{display:block;width:auto}
+  .tableau tr{padding:14px 18px;border-top:1px solid var(--ligne)}
+  .tableau tbody tr:first-child{border-top:0}
+  .tableau tbody th,.tableau td{padding:0;border:0}
+  .tableau tbody th{width:auto;margin-bottom:4px}
+}
+/* la fenêtre « avant l'export », dessinée comme dans l'appli */
+.fen{padding:0;overflow:hidden;position:sticky;top:96px}
+.fen-tete{padding:16px 18px;border-bottom:1px solid var(--ligne);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fen-tete b{font:600 16px/1.3 var(--font-ui)}
+.fen-corps{padding:14px 18px 18px;font-size:var(--pt-base)}
+.verdict{display:flex;align-items:flex-start;gap:10px;font:600 22px/1.2 var(--font-titre);margin:0 0 12px}
+.verdict i{width:10px;height:10px;border-radius:50%;background:var(--attention);flex:none;margin-top:.5em}
+.points{list-style:none;margin:0;padding:0}
+.points li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--ligne)}
+.points li:first-child{border-top:0}
+.points .v{width:20px;height:20px;border-radius:50%;background:var(--ok);flex:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5 7 11.5 12 5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-size:12px;background-position:center;background-repeat:no-repeat}
+.points .t{color:var(--texte-doux)}
+.reprendre{margin:14px 0 0;padding:12px 14px;border:1px solid var(--ligne);border-radius:12px;background:var(--bg-doux)}
+.reprendre .mini-t{font:600 var(--pt-micro)/1.2 var(--font-ui);letter-spacing:.04em;color:var(--texte-doux);margin-bottom:8px}
+.reprendre p{margin:0;font-size:var(--pt-txt);line-height:1.45}
+.reprendre p+p{margin-top:8px;padding-top:8px;border-top:1px solid var(--ligne)}
+.reprendre p b{display:block;font-weight:600;color:var(--texte)}
+.reprendre p span{color:var(--attention)}
+.fen-pied{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.fen-bt{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:var(--r-md);background:var(--accent);color:#fff;font:600 var(--pt-base)/1 var(--font-ui)}
+.colonnes{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.colonnes span{font:500 var(--pt-micro)/1 var(--font-ui);padding:7px 10px;border-radius:999px;background:var(--ok-doux);color:var(--ok)}
+.apres-tab{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:28px}
+.apres-tab p{margin:0;color:var(--texte-med);font-size:16px;line-height:1.6}
+.apres-tab b{display:block;font:600 20px/1.25 var(--font-titre);color:var(--texte);margin-bottom:4px}
+
+/* autour du registre */
+.trois{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.trois .carte p{margin:0;color:var(--texte-med);font-size:15.5px;line-height:1.6}
+.trois .carte .etiq{margin-bottom:12px}
+
+/* tarifs */
+.formules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:stretch;max-width:900px}
+.formule{background:var(--bg-card);border:1px solid var(--ligne);border-radius:18px;padding:28px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
+.formule.mise{border:2px solid var(--accent);box-shadow:var(--shadow-md)}
+.formule h3{font:600 28px/1.1 var(--font-titre);margin:0 0 4px}
+.prix-l{display:flex;align-items:flex-end;gap:10px;margin:16px 0 18px}.prix-l b{font:600 48px/1 var(--font-ui);letter-spacing:-.02em}.prix-l span{color:var(--texte-doux);font-size:13px;line-height:1.3;padding-bottom:4px}
+.formule ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;flex:1;align-content:start}
+.formule li{display:flex;gap:10px;font-size:15.5px}.formule li::before{content:"";width:16px;height:16px;flex:none;margin-top:3px;border-radius:50%;background:var(--ok-doux) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5 7 11.5 12 5' fill='none' stroke='%23237A47' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
+.mer{margin:0;padding-top:14px;border-top:1px solid var(--ligne);color:var(--texte-med);font-size:14px}.mer b{color:var(--texte)}
+.prix-note{margin:24px 0 0;max-width:70ch;color:var(--texte-med);font-size:15.5px;line-height:1.6}
+.prix-note a,.sous-q a{color:var(--accent-texte);font-weight:500}
+
+/* questions */
+.faq-cols{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:56px;align-items:start}
+.faq-cols .section-tete{position:sticky;top:110px;margin-bottom:0}
+.faq-cols .section-tete a{color:var(--accent-texte);font-weight:500}
+.faq{display:grid;gap:10px}
+.faq details{background:var(--bg-card);border:1px solid var(--ligne);border-radius:14px;padding:0 20px;box-shadow:var(--shadow-sm);transition:box-shadow .4s}
+.faq details[open]{box-shadow:var(--shadow-md)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:60px;font:600 19px/1.3 var(--font-titre);padding:14px 0}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";width:12px;height:12px;border-right:2px solid var(--texte-med);border-bottom:2px solid var(--texte-med);transform:rotate(45deg) translateY(-3px);transition:transform .45s var(--e);flex:none}
+.faq details[open] summary::after{transform:rotate(225deg) translateY(-3px)}
+.faq details p{margin:0 0 18px;color:var(--texte-med);font-size:16px;line-height:1.6;animation:ouvrir .5s var(--e2)}
+@keyframes ouvrir{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (max-width:1099px){.faq-cols{display:block}.faq-cols .section-tete{position:static;margin-bottom:32px}}
+
+/* la suite et le pied */
+.suite{max-width:1360px;margin:0 auto;padding:clamp(64px,6vw,96px) var(--marge) clamp(80px,8vw,120px)}
+.suite h2{font:500 clamp(36px,4.4vw,62px)/1.02 var(--font-titre);letter-spacing:-.022em;margin:0 0 .35em;max-width:17ch;text-wrap:balance}
+.suite p{color:var(--texte-med);max-width:52ch;margin:0 0 30px;font-size:clamp(17px,1.35vw,19px);text-wrap:pretty}
+.pied{border-top:1px solid var(--ligne-forte);display:flex;flex-wrap:wrap;gap:18px 36px;justify-content:space-between;align-items:flex-start;
+  padding:30px var(--marge) calc(30px + env(safe-area-inset-bottom,0px));font:400 14px/1.6 var(--font-ui);color:var(--texte-med)}
+.pied .m{display:flex;align-items:center;gap:10px;color:var(--texte);font:600 21px/1 var(--font-titre);margin-bottom:8px}
+.pied .m img{width:26px;height:26px;border-radius:7px}
+.pied nav{display:flex;flex-wrap:wrap;gap:2px 20px}
+.pied a{color:var(--texte-med);text-decoration:none;display:inline-block;padding:6px 0}.pied a:hover{color:var(--texte);text-decoration:underline;text-underline-offset:3px}
+.pied-b{flex-basis:100%;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;padding-top:16px;border-top:1px solid var(--ligne);font-size:var(--pt-micro);color:var(--texte-doux)}
+
+@media (max-width:980px){
+  .deux-col,.haut-in{grid-template-columns:1fr;gap:32px}.fen{position:static}
+  .trois,.formules,.apres-tab{grid-template-columns:1fr}
+  .dates li,.famille{grid-template-columns:1fr;gap:4px}
+}
+@media (max-width:640px){.barre{width:calc(100% - 24px)}}
+@media (prefers-reduced-motion:reduce){
+  [data-r]{transform:none!important;filter:none!important}
+  .panneau nav a,.panneau-actions{transform:none!important}
+}
+@media (max-width:1099px){.menu{display:none}.bt-menu{display:inline-flex}}
+@media (max-width:640px){.bt-essai{display:none}}
+@media (min-width:1100px){.panneau{display:none!important}}
+/* ── commun aux pages « cas d'usage » : les étapes et l'exemple chiffré ── */
+.etapes{list-style:none;margin:0;padding:0;counter-reset:et}
+.etapes li{counter-increment:et;position:relative;padding:16px 0 16px 52px;border-top:1px solid var(--ligne)}
+.etapes li:first-child{border-top:0}
+.etapes li::before{content:counter(et);position:absolute;left:0;top:16px;width:34px;height:34px;border-radius:50%;background:var(--accent-doux);color:var(--accent-texte);display:flex;align-items:center;justify-content:center;font:600 16px/1 var(--font-ui)}
+.etapes b{display:block;font:600 20px/1.25 var(--font-titre);color:var(--texte);margin-bottom:4px}
+.etapes span{display:block;color:var(--texte-med);font-size:15.5px;line-height:1.55}
+.calc{list-style:none;margin:0;padding:0}
+.calc li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-top:1px solid var(--ligne);font-size:15px;color:var(--texte-med)}
+.calc li:first-child{border-top:0}
+.calc li b{color:var(--texte);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.calc li.fin{border-top:2px solid var(--texte);margin-top:4px}
+.calc li.fin span{color:var(--texte);font-weight:500}
+.etiq.dom{background:var(--accent-doux);color:var(--accent-texte);border-color:transparent}
+.voir-aussi{margin:28px 0 0;color:var(--texte-med);font-size:16px;line-height:1.6}
+.voir-aussi a{color:var(--accent-texte);font-weight:500}
+.suite .voir-aussi{margin:28px 0 0;font-size:16px}
+</style>
+</head>
+<body>
+<a class="evitement" href="#contenu">Aller au contenu</a>
+<header class="barre">
+  <a class="marque" href="/logiciel-vigne.html"><img src="/logo-barre.png" alt="" width="30" height="30"><span>Ma Vigne</span></a>
+  <nav class="menu" aria-label="Sections de la page">
+    <a href="#deux-niveaux">Ce qui est compté</a>
+    <a href="#comment">Comment</a>
+    <a href="#questions">Questions</a>
+    <a href="#prix">Tarifs</a>
+  </nav>
+  <a class="bt bt-trait bt-petit bt-essai" href="/essai.html">Demander un essai</a>
+  <button type="button" class="bt-menu" id="bt-menu" aria-expanded="false" aria-controls="panneau"><span class="bt-menu-ico" aria-hidden="true"><i></i><i></i></span><span class="bt-menu-txt">Menu</span></button>
+</header>
+<div class="panneau" id="panneau" hidden>
+  <nav aria-label="Sections de la page">
+    <a href="#deux-niveaux" style="--k:0">Ce qui est compté</a>
+    <a href="#comment" style="--k:1">Comment</a>
+    <a href="#questions" style="--k:2">Questions</a>
+    <a href="#prix" style="--k:3">Tarifs</a>
+    <a href="/logiciel-vigne.html" style="--k:4">Tout Ma Vigne</a>
+  </nav>
+  <div class="panneau-actions" style="--k:5"><a class="bt bt-plein" href="/essai.html">Demander un essai</a><a class="bt bt-trait" href="https://mavigneapp.fr/demo.html">Voir la démo</a></div>
+</div>
+
+<main id="contenu">
+<section class="haut" id="haut" aria-labelledby="titre-haut">
+  <nav class="fil" aria-label="Fil d’Ariane"><a href="/logiciel-vigne.html">Ma Vigne</a><span aria-hidden="true">/</span><span aria-current="page">Temps de travail dans les vignes</span></nav>
+  <div class="haut-in">
+    <div>
+      <p class="h1-sur">Temps de travail · vigne</p>
+      <h1 id="titre-haut">Le temps passé dans chaque parcelle, sans rien ressaisir le soir.</h1>
+      <p class="chapo">Ma Vigne suit le temps de travail d’un domaine viticole à deux niveaux. <b>Les heures de chaque salarié</b> se tiennent dans le planning, à la minute, avec l’annualisation, les heures sup comptées à la semaine et le relevé mensuel pour la compta. <b>Le temps par parcelle et par tâche</b> vient des validations faites dans le rang&nbsp;: les heures du jour se partagent entre les parcelles validées, au prorata du barème, et l’écart au barème s’affiche tâche par tâche. Le suivi complet est dans la formule <b>Domaine, 79&nbsp;€ par mois</b> pour tout le domaine.</p>
+      <div class="actions">
+        <a class="bt bt-plein" href="/essai.html">Demander un essai de 15 jours</a>
+        <a class="lien-demo" href="https://mavigneapp.fr/demo.html">ou voir la démo, sans compte</a>
+      </div>
+    </div>
+    <aside class="carte echeances" aria-labelledby="titre-exemple">
+      <h2 id="titre-exemple">Une journée, deux parcelles</h2>
+      <p class="note" style="font-size:14px;margin:0 0 6px">Exemple chiffré, avec un barème fictif.</p>
+      <ul class="calc">
+        <li><span>Jean et Marie, 7&nbsp;h chacun au planning</span><b>14&nbsp;h</b></li>
+        <li><span>Attachage validé le soir&nbsp;: Les Charmes</span><b>0,30&nbsp;ha</b></li>
+        <li><span>et La Combotte</span><b>0,22&nbsp;ha</b></li>
+        <li><span>Barème de l’exemple, 28&nbsp;h/ha&nbsp;: 8,4&nbsp;h et 6,2&nbsp;h</span><b>14,6&nbsp;h</b></li>
+        <li><span>Les 14&nbsp;h partagées au prorata&nbsp;: Les Charmes</span><b>8,1&nbsp;h</b></li>
+        <li><span>La Combotte</span><b>5,9&nbsp;h</b></li>
+        <li class="fin"><span>Temps réel, face à 28&nbsp;h/ha au barème</span><b>26,9&nbsp;h/ha</b></li>
+      </ul>
+      <p class="note" style="margin:10px 0 14px">Soit 3,8&nbsp;% sous le barème, écrit dans le Pilotage pour ce travail.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="bref" aria-label="Le temps de travail dans Ma Vigne, en bref">
+  <div class="bref-in">
+    <div><b>Pas de badgeuse</b><span>L’ouvrier valide la parcelle finie. Les heures viennent du planning tenu par l’administrateur.</span></div>
+    <div><b>À la minute</b><span>Heures saisies à la minute, coupure déduite, modèles de semaine pour ne rien ressaisir.</span></div>
+    <div><b>Face au barème</b><span>Heures par hectare réelles contre barème, tâche par tâche, avec l’écart.</span></div>
+    <div><b>Pour la compta</b><span>Relevé mensuel en PDF&nbsp;: le mois jour par jour, les heures sup par taux.</span></div>
+  </div>
+</section>
+
+<section class="section" id="deux-niveaux" aria-labelledby="titre-deux">
+  <div class="section-tete" data-r>
+    <h2 id="titre-deux">Ce que Ma Vigne compte, et où.</h2>
+    <p>Les heures du salarié et le temps de la parcelle ne se mesurent pas au même endroit. Ma Vigne les tient séparément, puis les relie.</p>
+  </div>
+  <table class="tableau" data-r style="--i:1">
+    <caption class="lu">Ce que Ma Vigne suit pour le temps de travail, et dans quelle formule.</caption>
+    <thead><tr><th scope="col">Ce que vous voulez savoir</th><th scope="col">Dans Ma Vigne</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Les heures de chacun</th><td>La grille du Planning, à la minute, coupure déjeuner déduite au-delà d’un seuil. Des <b>modèles de semaine</b> évitent de tout ressaisir&nbsp;; un import de pointages en CSV est possible. Prévu, travaillé, écart et ETP, salarié par salarié. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Les heures sup</th><td>Comptées <b>à la semaine</b>, du lundi au dimanche&nbsp;: les huit premières à 25&nbsp;%, les suivantes à 50&nbsp;%. Les heures en plus rattrapent d’abord les heures manquées de la semaine. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">L’annualisation</th><td>Un compteur sur l’année civile, proratisé aux jours sous contrat, avec les plafonds de la convention et une projection de fin d’année. Les TESA et saisonniers payés à l’heure ont leurs heures et leurs jours. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Le relevé pour la compta</th><td>Un PDF par mois&nbsp;: le cadre «&nbsp;Pour la compta&nbsp;», le mois jour par jour, chaque absence avec ce qu’elle devient, les heures sup par taux, le compteur de récup. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Le temps par parcelle</th><td>Les heures du jour de chacun vont aux parcelles <b>validées ce jour-là</b>, au prorata de leur barème. Une journée sans validation attend la suivante. Les journées de cave et la conduite du tracteur sont retirées. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Le temps par tâche</th><td>«&nbsp;Temps réel contre barème&nbsp;»&nbsp;: pour chaque travail, les hectares, les heures, les <b>heures par hectare réelles</b> face au barème, et l’écart. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Le barème</th><td>Les heures de référence de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine, ou vos propres heures par hectare. <span class="etiq">Toutes formules</span></td></tr>
+      <tr><th scope="row">L’avancement</th><td>En surface réelle&nbsp;: une demi-ouvrée finie ne vaut pas un hectare commencé. Heures estimées et restantes par parcelle, fin prévue au rythme des quinze derniers jours. <span class="etiq">Toutes formules</span></td></tr>
+      <tr><th scope="row">Le tracteur</th><td>Sessions parcelle par parcelle. Un chrono facultatif sépare le temps dans les parcelles, le temps hors parcelle et la pause. <span class="etiq">Vigneron et Domaine</span></td></tr>
+      <tr><th scope="row">Le coût</th><td>Le coût par parcelle en euros et à l’hectare, sur l’équipe qui y est réellement passée. <span class="etiq dom">Domaine</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="comment" aria-labelledby="titre-comment">
+  <div class="deux-col">
+    <div>
+      <div class="section-tete" data-r>
+        <h2 id="titre-comment">Comment le temps arrive sur la parcelle.</h2>
+        <p>L’ouvrier n’a qu’un geste à faire. Le reste se calcule avec ce qui est déjà noté.</p>
+      </div>
+      <ol class="etapes" data-r style="--i:1">
+        <li><b>Le matin</b><span>L’administrateur pose la tâche prioritaire et, si deux équipes travaillent sur des chantiers différents, les équipes du jour depuis l’Accueil.</span></li>
+        <li><b>Dans le rang</b><span>L’ouvrier touche «&nbsp;Valider&nbsp;» sur la parcelle finie. Le bandeau Équipe garde qui travaille. Sans réseau, la validation attend sur le téléphone et part seule au retour du réseau.</span></li>
+        <li><b>Le soir</b><span>Les heures du planning de chacun se partagent entre les parcelles validées, au prorata du barème. Le Pilotage montre les heures par hectare réelles face au barème, et le coût de chaque parcelle.</span></li>
+      </ol>
+    </div>
+    <div class="franc" data-r style="--i:2"><b>Ce que Ma Vigne ne fait pas</b><p>Pas de badgeuse et pas de suivi GPS&nbsp;: aucun trajet n’est enregistré, la position n’est lue que quand on la demande pour trier les parcelles. Le chrono du tracteur mesure le temps passé dans les parcelles pour budgéter les travaux&nbsp;; il ne justifie pas la journée de travail. Une limite assumée&nbsp;: quelqu’un qui passe plusieurs jours seul sur une parcelle pendant que d’autres valident voit ses heures partir sur les parcelles des autres, sauf si les équipes du jour sont posées.</p></div>
+  </div>
+</section>
+
+<section class="section" id="prix" aria-labelledby="titre-prix">
+  <div class="section-tete" data-r>
+    <h2 id="titre-prix">Le temps de travail est dans la formule Domaine.</h2>
+    <p>Un prix par domaine, pas par utilisateur. Les formules Essentiel (29&nbsp;€) et Vigneron (49&nbsp;€) suivent l’avancement et le barème, sans les heures de l’équipe.</p>
+  </div>
+  <div class="formules">
+    <article class="formule mise" data-r><h3>Domaine</h3><p class="note">Utilisateurs illimités</p><div class="prix-l"><b class="num">79&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Planning, heures et annualisation</li><li>Relevé d’heures mensuel pour la compta</li><li>Temps réel par parcelle et par tâche, face au barème</li><li>Pilotage et coûts par parcelle</li><li>Tout Vigneron&nbsp;: tracteur, traitements et registre</li><li>Cuvier, Chai et La Réserve</li></ul><p class="mer">Mise en route <b>990&nbsp;€</b> une seule fois · 20&nbsp;h d’accompagnement</p></article>
+    <article class="formule" data-r style="--i:1"><h3>Vigneron</h3><p class="note">Jusqu’à 10 utilisateurs</p><div class="prix-l"><b class="num">49&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Parcelles et travaux, avancement, barème</li><li>Journal de l’équipe</li><li>Tracteur, traitements et registre</li></ul><p class="mer">Mise en route <b>690&nbsp;€</b> une seule fois · 15&nbsp;h d’accompagnement</p></article>
+  </div>
+  <p class="prix-note" data-r>Sans durée d’engagement&nbsp;: résiliable par écrit avec trente jours de préavis. La mise en route comprend l’import du parcellaire, la création des comptes, le paramétrage du barème et des périodes, et la formation de l’équipe. TVA non applicable, article 293 B du CGI. <a href="/logiciel-vigne.html#prix">Toutes les formules et ce qu’elles comprennent</a>.</p>
+</section>
+
+<section class="section" id="questions" aria-labelledby="titre-questions">
+  <div class="faq-cols">
+    <div class="section-tete">
+      <h2 id="titre-questions">Les questions qu’on me pose sur le temps.</h2>
+      <p>Une autre question&nbsp;? Écrivez-moi&nbsp;: <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a>, je réponds moi-même.</p>
+    </div>
+    <div class="faq">
+      <details><summary>Mes ouvriers doivent-ils pointer ou lancer un chrono&nbsp;?</summary><p>Non. Ils touchent « Valider » sur la parcelle quand elle est finie&nbsp;; « Début » est facultatif. Leurs heures viennent du planning que tient l’administrateur, à la minute, avec des modèles de semaine. Un import de pointages en CSV est possible si vous en avez déjà.</p></details>
+      <details><summary>Comment Ma Vigne sait-elle combien de temps on a passé sur une parcelle&nbsp;?</summary><p>Chaque jour, les heures de chacun au planning se partagent entre les parcelles validées ce jour-là, au prorata de leur barème. Une journée sans validation n’est pas perdue&nbsp;: ses heures attendent la prochaine validation de la personne. Les journées de cave et la conduite du tracteur sont retirées du calcul.</p></details>
+      <details><summary>Et si je valide les parcelles pour toute l’équipe&nbsp;?</summary><p>Les heures de ceux qui ne sont pas nommés sur une validation vont à toutes les parcelles validées par le domaine ce jour-là. Quand deux équipes travaillent sur des chantiers différents, l’administrateur les pose le matin dans « Équipes du jour »&nbsp;: chacune garde ses parcelles.</p></details>
+      <details><summary>Les heures supplémentaires suivent-elles ma convention&nbsp;?</summary><p>Par défaut, les repères sont ceux de la convention nationale Production agricole et CUMA (IDCC 7024), et ils se règlent pour une autre convention. Les heures sup se comptent à la semaine, du lundi au dimanche&nbsp;: les huit premières à 25 %, les suivantes à 50 %. Le relevé les déclare en heures brutes avec leur taux.</p></details>
+      <details><summary>Quelle formule faut-il pour suivre le temps de travail&nbsp;?</summary><p>La formule Domaine (79 € par mois pour tout le domaine)&nbsp;: elle comprend le planning, les heures, l’annualisation, le temps réel par parcelle et le coût par parcelle. Les formules Essentiel et Vigneron suivent l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="suite" id="suite" aria-labelledby="titre-suite">
+  <h2 id="titre-suite" data-r>Comptez vous-même, sur vos parcelles.</h2>
+  <p data-r style="--i:1">Quinze jours d’essai sur vos propres parcelles, avec votre barème et vos périodes, sans carte bancaire. Rien ne se paie en ligne&nbsp;: tout démarre par un échange.</p>
+  <div class="actions" data-r style="--i:2"><a class="bt bt-plein" href="/essai.html">Demander un essai de 15 jours</a><a class="bt bt-trait" href="/logiciel-vigne.html">Découvrir tout Ma Vigne</a></div>
+  <p class="voir-aussi" data-r style="--i:3">À lire aussi&nbsp;: <a href="/gestion-equipe-viticole.html">la gestion de l’équipe et le planning</a> · <a href="/registre-phytosanitaire-2027.html">le registre phyto de 2027</a>.</p>
+</section>
+</main>
+
+<footer class="pied">
+  <div><div class="m"><img src="/logo-barre.png" alt="" width="26" height="26" loading="lazy"><span>Ma Vigne</span></div>
+    Application de gestion viticole — GUERETTECH, Nicolas Guéret<br><a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> · <a href="tel:+33699424859">06&nbsp;99&nbsp;42&nbsp;48&nbsp;59</a></div>
+  <nav aria-label="Pied de page"><a href="/logiciel-vigne.html">Présentation</a><a href="/registre-phytosanitaire-2027.html">Registre phyto 2027</a><a href="/suivi-temps-travail-vigne.html">Temps de travail</a><a href="/gestion-equipe-viticole.html">Gestion d’équipe</a><a href="/essai.html">Essai</a><a href="/demarrage.html">Démarrage</a><a href="/guide.html">Guide</a><a href="/mentions-legales.html">Mentions légales</a><a href="/confidentialite.html">Confidentialité</a><a href="/cgu.html">CGU</a></nav>
+  <div class="pied-b"><span>&copy; 2026 GUERETTECH · Tous droits réservés</span><span>Conçue dans les rangs de la Côte de Nuits</span></div>
+</footer>
+
+<script>
+/* La page prête, les blocs qui arrivent, et le menu (repris de logiciel-vigne.html). */
+(()=>{'use strict';
+  requestAnimationFrame(()=>document.body.classList.add('pret'));
+  const tout=[...document.querySelectorAll('[data-r]')];
+  if('IntersectionObserver' in window&&!/[?&]still/.test(location.search)){
+    const rv=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){e.target.classList.add('vu-r');rv.unobserve(e.target);}},{threshold:.15});
+    tout.forEach(e=>rv.observe(e));
+  } else tout.forEach(e=>e.classList.add('vu-r'));
+  const html=document.documentElement,bt=document.getElementById('bt-menu'),pan=document.getElementById('panneau');
+  if(bt&&pan){
+    const txt=bt.querySelector('.bt-menu-txt');
+    const fermer=rendre=>{if(!pan.classList.contains('ouvert'))return;pan.classList.remove('ouvert');html.classList.remove('menu-ouvert');bt.setAttribute('aria-expanded','false');txt.textContent='Menu';
+      setTimeout(()=>{if(!pan.classList.contains('ouvert'))pan.hidden=true;},360);if(rendre)bt.focus();};
+    const ouvrir=()=>{pan.hidden=false;void pan.offsetWidth;pan.classList.add('ouvert');html.classList.add('menu-ouvert');bt.setAttribute('aria-expanded','true');txt.textContent='Fermer';
+      const l=pan.querySelector('a');if(l)l.focus({preventScroll:true});};
+    bt.addEventListener('click',()=>{pan.classList.contains('ouvert')?fermer(false):ouvrir();});
+    pan.addEventListener('click',e=>{if(e.target.closest('a'))fermer(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')fermer(true);});
+    const large=matchMedia('(min-width:1100px)');const surLarge=e=>{if(e.matches)fermer(false);};
+    if(large.addEventListener)large.addEventListener('change',surLarge);
+  }
+  const liens=[...document.querySelectorAll('.menu a[href^="#"]')];
+  if(!liens.length||!('IntersectionObserver' in window))return;
+  const marquer=cle=>liens.forEach(a=>a.setAttribute('aria-current',String(a.getAttribute('href')===cle)));
+  const lu=new IntersectionObserver(es=>{for(const e of es){if(!e.isIntersecting)continue;const t=e.target;marquer(t.dataset.nav||('#'+(t.id||'')));}},{rootMargin:'-42% 0px -52% 0px'});
+  document.querySelectorAll('main > section[id]').forEach(x=>lu.observe(x));
+})();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **23 novembre 2026 (GEO-1)** — **LE SITE SE PRÉSENTE AUX MOTEURS ET AUX IA : `llms.txt`, LES ROBOTS D’IA NOMMÉS, UN SITEMAP QUI AJOUTE SEUL LES PAGES NEUVES (§598)**. Base `a6ea9ff` (« frais2 »). Pas de bump (APP 11.25, SW 12.16). Nico veut que Ma Vigne remonte sur Google et soit citée par les IA sur des requêtes métier ; audit puis plan en cinq étapes, tranché le 23/11 : Play Store à 5 clients, tarifs de la page en ligne, écran de lancement clair. Ce lot pose les fondations : **`public/llms.txt`** (neuf, chaque phrase reprise de la page en ligne, du guide ou des mentions légales), **`robots.txt`** qui nomme les robots d’OpenAI, d’Anthropic, de Perplexity, de Google et d’Apple (ils étaient déjà autorisés par `*` : c’est de la lisibilité — et un robot nommé ne lit plus `*`), **`mv-sitemap.mjs`** qui ajoute une page publique neuve au sitemap sans `--check` si son canonical est juste, l’adresse de l’éditeur dans le JSON-LD de logiciel-vigne. Testé : `.well-known/` passe Vite et le `listFiles` de firebase-tools malgré `**/.*`. Leçon : avant d’« autoriser » un robot, lire ce que dit déjà `*`.
+> Dernière consolidation : **23 novembre 2026 (GEO-2)** — **TROIS PAGES « CAS D’USAGE » : LE REGISTRE 2027, LE TEMPS DE TRAVAIL, LA GESTION D’ÉQUIPE (§599)**. Base `fab695e` (« geo1 »). Pas de bump (APP 11.25, SW 12.16). L’étape 3 du plan SEO/IA : `registre-phytosanitaire-2027.html`, `suivi-temps-travail-vigne.html`, `gestion-equipe-viticole.html`, sur le gabarit de logiciel-vigne — un chapô qui répond, un tableau factuel, cinq questions et leur `FAQPage`, la formule et le prix ; le registre validé en aperçu (« go »), les deux autres sur son modèle. Chaque phrase relue contre le code, le guide ou l’arrêté du 24/12/2025. Maillage (logiciel-vigne, pieds, « À lire aussi »), trois 301, `llms.txt`. Corrigé sur logiciel-vigne : « jamais une portion » était faux depuis REG27-1A. **À faire chez Nico : `npm run site` avant le commit.** Leçon : une page de vente se relit contre le code, pas contre la page de vente d’avant.
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
 > ★★★ **Depuis le 27/09 (§189), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
@@ -757,6 +757,8 @@ mavigne/
 │   ├── sw.js · boot.js · manifest.json · icônes · fonts/
 │   ├── guide.html          GÉNÉRÉ depuis guide/ — ne plus l'éditer à la main (§27d)
 │   ├── demarrage.html · logiciel-vigne.html · essai.html
+│   ├── registre-phytosanitaire-2027.html · suivi-temps-travail-vigne.html · gestion-equipe-viticole.html
+│   │                        (GEO-2, §599 : les pages « cas d’usage », même style et même pied ; elles recopient tarifs et fonctions)
 │   ├── mise-en-route.html  (formulaire d'installation client — noindex, JAMAIS dans sitemap.xml ;
 │   │                        ★ ENVOIE désormais ses réponses en base, §27f)
 │   ├── cgu.html · dpa.html · confidentialite.html · mentions-legales.html
@@ -2273,9 +2275,11 @@ Nico (13/11) : côté admin, « ce n’est pas rangé », « une surcharge d’i
 
 ### ★ GEO-1 (23/11, §598) — Google et les IA : ce qui reste
 - **À faire chez Nico, GEO-1 déployé** : `npm run site` → `npm run build` → `firebase deploy --only hosting` ; ouvrir `https://mavigneapp.fr/llms.txt` et `/robots.txt` (le nouveau groupe) ; Search Console › Sitemaps : renvoyer `sitemap.xml` ; l’outil de test des résultats enrichis sur logiciel-vigne (l’adresse de l’éditeur).
-- **Le plan validé le 23/11 (§598d)** : lot B, trois pages « cas d’usage » (registre 2027 d’abord, pour le ton ; puis temps de travail, gestion d’équipe) ; lot C, le manifest seul (maskable, `id: "/"`, `#F0EEE9`, bump APP + SW) ; lot D, `docs/geo-kit.md`. **Play Store (TWA) : à 5 clients**, confirmé par Nico le 23/11 — `assetlinks.json` et Bubblewrap à ce moment-là (`.well-known/` passe déjà Vite et Firebase, testé).
+- **Le plan validé le 23/11 (§598d)** : ~~lot B, trois pages « cas d’usage »~~ — **fait, GEO-2 (§599)** ; lot C, le manifest seul (maskable, `id: "/"`, `#F0EEE9`, bump APP + SW) ; lot D, `docs/geo-kit.md`. **Play Store (TWA) : à 5 clients**, confirmé par Nico le 23/11 — `assetlinks.json` et Bubblewrap à ce moment-là (`.well-known/` passe déjà Vite et Firebase, testé).
 - **Tarifs** : `llms.txt` et les pages recopient la page en ligne (décision du 23/11). Les décisions du 06/11 (tarif annuel, options payantes) ne sont **pas** en ligne : le jour où elles le sont, `llms.txt`, le JSON-LD et la FAQ de logiciel-vigne changent dans le même lot.
-- **Écart vu en route** : logiciel-vigne dit « surface de la parcelle, jamais une portion » ; REG27-1A (§572) saisit la surface traitée parcelle par parcelle — à vérifier, puis corriger avec le lot B.
+- ~~**Écart vu en route** : logiciel-vigne disait « jamais une portion »~~ — **corrigé, GEO-2 (§599)**.
+- **À faire chez Nico, GEO-2 déployé** : `npm run site` **avant le commit** (sinon le `--check` du build et de la CI rougit), `npm run build` → `firebase deploy --only hosting` ; les trois pages au téléphone ; Search Console : renvoyer `sitemap.xml`, demander l’indexation des trois adresses.
+- **Garde** : un lot qui touche le registre, le planning, les formules ou les prix relit aussi les trois pages « cas d’usage » et `llms.txt`.
 
 ## 29. Synchronisation de la mémoire
 

@@ -1,0 +1,22 @@
+{
+  "lot": "GEO-2",
+  "section": "§599",
+  "base": "fab695e0ae7dff580be3686bf260ae31f967a475",
+  "inclut": [],
+  "date": "2026-11-23",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "a9217047805c86671ce705837ca6bd5e0dfb068bd2a03e617694c44814da75de",
+    "CLAUDE.md": "bf9055d12ba8c52547e9d6e692d15df2a6f6ee0a30d102ad71ac78057954aadb",
+    "docs/claude/INDEX.md": "3df75cd614093eb2d1983d50a06d402e3cea4d5d4226b5472de9dd40c44e56e5",
+    "docs/claude/chantiers-580-629.md": "f851a6022a813f9ef774dbc56c43d9ff749ac6ba53efcde20c3867fdb06838a0",
+    "docs/claude/journal.md": "280b30cd5c69b859a40e207d47cebce4912e0af084c5042f25acc01e88e277e7",
+    "firebase.json": "61f5228d4b8b7cdc736e7e71f9064af4bbc33529cbb79ff65f6d5d113f67fd0e",
+    "public/llms.txt": "a467659e344839876bba0a8d2b9f10ca04b837c4c9ded191ce63796248978881",
+    "public/logiciel-vigne.html": "9fd0fb7ed93b4291541b656370b9e6d501d3de80234596c33c18e86495724330",
+    "scripts/harnais-claude-md.mjs": "824a0219def9836cf8ac5935e1c030d1773f86a3792f8cbb942b61919e88d4ed",
+    "public/gestion-equipe-viticole.html": "90ab33098ee185cc42e6c9859015c9a517ed0c384d1618e6d5290f9865d2dcfd",
+    "public/registre-phytosanitaire-2027.html": "5d8c5500c0945c91968511104b391fecc866d45dbb96aabf95df67a7bcbffef2",
+    "public/suivi-temps-travail-vigne.html": "ed0c5c050b6c542f5239d04bbe09e546188344464042fef8d18afe7db2139c85"
+  }
+}

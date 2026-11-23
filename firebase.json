@@ -12,6 +12,21 @@
         "source": "/logiciel-vigne",
         "destination": "/logiciel-vigne.html",
         "type": 301
+      },
+      {
+        "source": "/registre-phytosanitaire-2027",
+        "destination": "/registre-phytosanitaire-2027.html",
+        "type": 301
+      },
+      {
+        "source": "/suivi-temps-travail-vigne",
+        "destination": "/suivi-temps-travail-vigne.html",
+        "type": 301
+      },
+      {
+        "source": "/gestion-equipe-viticole",
+        "destination": "/gestion-equipe-viticole.html",
+        "type": 301
       }
     ],
     "rewrites": [
