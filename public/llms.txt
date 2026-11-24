@@ -58,14 +58,15 @@ Un prix par domaine, pas par utilisateur. TVA non applicable (article 293 B du C
 | Vigneron | 49 € / mois | jusqu'à 10 | Tout Essentiel + matériel et carburant, traitements et registre réglementaire | 690 €, 15 h d'accompagnement |
 | Domaine | 79 € / mois | illimités | Tout Vigneron + planning, heures et annualisation, pilotage et coûts par parcelle, Cuvier et Chai, La Réserve | 990 €, 20 h d'accompagnement |
 
-- La mise en route comprend l'import du parcellaire (export PAC / Telepac ou fichier KML), la création des comptes, le paramétrage du barème et des périodes, et la formation de l'équipe. Au-delà des heures comprises : 60 € de l'heure, annoncés et acceptés avant d'être engagés.
+- La mise en route comprend l'import de tout le parcellaire (export PAC / Telepac ou fichier KML), la création des comptes, le paramétrage du barème et des périodes (et de l'annualisation en formule Domaine), et la formation de l'équipe. Au-delà des heures comprises : 60 € de l'heure, annoncés et acceptés avant d'être engagés.
 - Sans durée d'engagement : résiliable par écrit avec trente jours de préavis. Ni frais de dossier, ni coût par utilisateur, ni option obligatoire. Aucun paiement en ligne : tout démarre par un échange.
-- Démo libre, sans compte ni inscription. Essai gratuit de 15 jours sur les parcelles du domaine, sans carte bancaire ; si le domaine continue, tout ce qui a été posé pendant l'essai est conservé.
+- Démo libre, sans compte ni inscription. Essai gratuit de 15 jours sur les parcelles du domaine, en conditions réelles, sans carte bancaire (un échantillon de parcelles suffit pour juger) ; si le domaine continue, tout ce qui a été posé pendant l'essai est conservé.
 
 ## Données
 
-- Chaque domaine dispose d'un espace isolé, hébergé en Europe (Google Cloud).
+- Chaque domaine dispose d'un espace isolé, hébergé en Europe (Google Cloud), sauvegardé chaque nuit.
 - Sauvegarde complète téléchargeable à tout moment depuis les réglages : JSON pour la reprise, registre phyto en CSV, documents en PDF.
+- Si l'éditeur cessait son activité : trois mois de préavis, puis 90 jours pour récupérer les données (conditions générales).
 - Contrat de sous-traitance RGPD signé avant la création des comptes des salariés.
 
 ## Éditeur

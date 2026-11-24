@@ -854,6 +854,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots11.mjs --contre'],     //   comprise), les pastilles, le registre en résumé, « Ouvrir les traitements » ; le lexique
   ['node scripts/mv-harnais-mots12.mjs'],              // MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — la phrase de l'onglet (jouée), une ligne par
   ['node scripts/mv-harnais-mots12.mjs --contre'],     //   parcelle et son détail au toucher (joué), « Poser le maximum », la tête, les défauts de Cuvées
+  ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
+  ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
+  ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque
+  ['node scripts/mv-harnais-cuivre7.mjs --contre'],    //   mise à jour : il ne l'était pas) — la fenêtre, ce qui compte, la moyenne, le plafond de la Conformité
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
   ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne

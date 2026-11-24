@@ -659,3 +659,4 @@
 | 603 | 603. ★ GEO-5 — LES ANNUAIRES REMPLIS POUR DE VRAI, ET L’ADRESSE contact@mavigneapp.fr (23/11 au soir — `doc… | `docs/claude/chantiers-580-629.md` |
 | 604 | 604. ★★★ MOTS-11 — PILOTAGE › CONFORMITÉ ALLÉGÉ SUR PLACE : UNE PHRASE, CINQ CARTES REPLIÉES, LA PROTECTION… | `docs/claude/chantiers-580-629.md` |
 | 605 | 605. ★★★ MOTS-12 — CAVE › LE MILLÉSIME, PARCELLES ET CUVÉES ALLÉGÉS : UNE PHRASE, UNE LIGNE PAR PARCELLE (2… | `docs/claude/chantiers-580-629.md` |
+| 606 | 606. ★★ VITRINE-3 — LA PAGE LOGICIEL-VIGNE RESSERRÉE POUR MENER À L’ESSAI : DEUX SECTIONS EN DOUBLE RETIRÉE… | `docs/claude/chantiers-580-629.md` |

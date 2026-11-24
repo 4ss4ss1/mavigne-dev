@@ -393,6 +393,24 @@
   }
   $$('input[name="mod"]').forEach(i=>i.addEventListener('change', syncConds));
 
+  // --- VITRINE-3 (§606) : arrivé par un bouton « Essayer … » de logiciel-vigne (?formule=essentiel|vigneron|domaine) ---
+  //   Les modules de la formule sont cochés d'avance ; le prospect décoche ou ajoute. Les cases cochées partent
+  //   dans la demande (champ « modules ») : Nicolas voit de quelle carte il vient. Une formule inconnue ne coche rien.
+  const FORMULES = {
+    essentiel: { nom: 'Essentiel', mods: ['travaux', 'meteo'] },
+    vigneron:  { nom: 'Vigneron',  mods: ['travaux', 'meteo', 'tracteur', 'phyto'] },
+    domaine:   { nom: 'Domaine',   mods: ['travaux', 'meteo', 'tracteur', 'phyto', 'planning', 'pilotage', 'cave'] }
+  };
+  function cocherFormule(){
+    const f = FORMULES[(new URLSearchParams(location.search).get('formule') || '').toLowerCase()];
+    if(!f) return;
+    $$('input[name="mod"]').forEach(i=>{ if(f.mods.includes(i.value)) i.checked = true; });
+    const h = $('#mods').previousElementSibling;
+    if(h && h.classList.contains('hint')) h.textContent = 'Cochés d\u2019après la formule ' + f.nom + ' \u2014 décochez ou ajoutez ce que vous voulez.';
+    syncConds();
+  }
+  cocherFormule();
+
   // --- Validation légère ---
   function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function validate(){

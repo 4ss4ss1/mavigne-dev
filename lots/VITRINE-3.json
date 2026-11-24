@@ -1,0 +1,23 @@
+{
+  "lot": "VITRINE-3",
+  "section": "§606",
+  "base": "eef4b5a11b8583a538cc5a8e4effb6bea3de2ad8",
+  "inclut": [],
+  "date": "2026-11-24",
+  "tutos": null,
+  "fichiers": {
+    ".mv-base": "a5f44f783137d95044df9bd5fe65e8865293d460d11602ef6ae86bed3243e496",
+    "CLAUDE.md": "c5bb05036679766795e28eab35f1fd8ec2639e497c2865dd3c79815842b4ca37",
+    "docs/claude/INDEX.md": "20eb32b379a3a2f662a0aac5aa0b4bed8c4dd09029def2eb21af1d07376139e9",
+    "docs/claude/chantiers-580-629.md": "9dae21c957af4eba9f130ac9d90ec9383d025e1a6d1e56bd88ae2e5ae2fde141",
+    "docs/claude/journal.md": "300b932b969a4bbc7a2b4e087805d4aea00610f850c5fee14ce4c91a2270d0b5",
+    "public/essai.html": "82c5e2aec8f204267191b0151f5eac48e0a61dae48a0c7f6353f3d4c25a4c29b",
+    "public/llms.txt": "b3506c766ee08d6c65095803c31325c8ad88a8e95009952827e929d9530df2f5",
+    "public/logiciel-vigne.html": "6bdadd70302b5912654629818b9b0f678c1798cbe179574e894075ab71bebd83",
+    "scripts/harnais-claude-md.mjs": "27b62e55b5a0c40e0f7355eb7f3a8527f5cb8273bb5dc31ddb82ea854b16eaf9",
+    "scripts/mv-harnais-liste.mjs": "07f5263e63c24a029f8045713dc71630e91d38cc629cf2c1f7935374859c5dfd",
+    "public/images/nicolas-gueret.webp": "861273985216ec9f6d9dba4e65bc73e78043f04a9d1391cd08521441c9aee85c",
+    "scripts/mv-harnais-cuivre7.mjs": "99f0a541342fcd321d445bf206eb6c78462e57a1e27dce7522626dc0f7173176",
+    "scripts/mv-harnais-vitrine3.mjs": "fd901ed49fddd0777133f5224a6dcd0f5f68cf983c20aa64fb4e4fe5b7ffbd72"
+  }
+}
