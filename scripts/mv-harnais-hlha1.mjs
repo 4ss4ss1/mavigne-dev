@@ -276,10 +276,10 @@ const T = {
   A4: ['une parcelle encore sur pied reste hors du calcul, et sa ligne le dit', A => {
     const r = aoc(A), g = r.de('Gevrey-Chambertin', 'r');
     return g.pied === 1 && Math.abs(g.haPied - 0.55) < 1e-9 && Math.abs(g.ha - 3.5) < 1e-9
-      && sp(r.html).includes('6 parcelles r\u00e9colt\u00e9es \u00b7 1 encore sur pied (0,55 ha), hors du calcul'); }],
+      && sp(r.html).includes('6 parcelles \u00b7 1 encore sur pied (0,55 ha), hors du calcul'); }],   // MOTS-12 (§605) : « 6 parcelles » — les récoltées ; celles sur pied ont leur mention à côté
   A5: ['une parcelle sans surface est écartée des deux côtés, et comptée', A => {
     const r = aoc(A), c = r.de('C\u00f4te de Nuits-Villages', 'r');
-    return c.n === 1 && c.sansSurf === 1 && Math.abs(c.ha - 0.35) < 1e-9 && sp(r.html).includes('1 parcelle r\u00e9colt\u00e9e \u00b7 1 sans surface, hors du calcul'); }],
+    return c.n === 1 && c.sansSurf === 1 && Math.abs(c.ha - 0.35) < 1e-9 && sp(r.html).includes('1 parcelle \u00b7 1 sans surface, hors du calcul'); }],
   A6: ['« Sans appellation » en dernier, avec ce qu’il faut faire', A => {
     const r = aoc(A), last = r.L[r.L.length - 1];
     return last.cle === '' && last.n === 1 && last.max === null && r.html.includes('<b>Sans appellation</b>')

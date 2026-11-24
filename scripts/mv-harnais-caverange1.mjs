@@ -26,7 +26,7 @@ function monter(S, o) {
     _mlCampagne: () => 2026, renderCaveMillesime: () => peint.push('millesime'), renderCaveCuvees: () => peint.push('cuvees'), renderCaveJournal: () => peint.push('journal'),
     renderCaveBouteille: () => peint.push('bouteille'), renderCaveLabo: () => peint.push('labo'), window: {}, _caveMilBarRender: () => peint.push('barre'),
     _caveKpisRender: () => peint.push('bande'), _mvcRenderHeader: () => peint.push('entete'), _caveSaisBanner: () => {},
-    _mlEtat: () => ({ pill: '', ligne: '' }), _escHtml: (x) => String(x), _mlMillesimes: () => [2026, 2025, 2024], _mlTuiles: () => '', _pcavLog: () => {} };
+    _mlEtat: () => ({ pill: '', ligne: '' }), _escHtml: (x) => String(x), _mlMillesimes: () => [2026, 2025, 2024], _mlTuiles: () => '', _pcavLog: () => {}, _mlPhrase: () => '<b>8 parcelles récoltées</b>' };
   vm.createContext(c);
   c._caveMilsDuChai = () => [2026, 2025]; c.CAVE_ELEVAGE = { cuvees: [] };
   vm.runInContext(['_mlMilActif', '_caveSetMill', '_caveMillChoix', '_caveMillNoteHtml', '_caveMillChipsHtml'].map((n) => corps(S.cave, n)).join('\n') + '\nthis.__lire = () => _caveMillFilter;', c);
@@ -36,11 +36,12 @@ function jouer(S) {
   const A = monter(S, { filtre: 'tous', section: 'millesime' });
   t('① « Tous » au Chai : Le Millésime montre la campagne en cours (2026)', A.c._mlMilActif() === 2026);
   const hA = A.c._caveMillChipsHtml();
-  t('① … et la barre le dit, au Millésime', /Le Millésime montre celui de la campagne en cours/.test(hA) && /pour toute la Cave/.test(hA));
+  // MOTS-12 (§605) : l'explication « Le Millésime montre celui de la campagne en cours… » vit dans le « i » de la tête (cave.millesime) ; sa place porte la phrase de l'onglet
+  t('① … le « i » de la tête le dit, et la barre porte la phrase de l’onglet', /'cave\.millesime': \{ t: 'Le millésime regardé'/.test(S.utils) && /Le Millésime montre celui de la <b>campagne en cours<\/b>/.test(S.utils) && /la choisit pour toute la Cave/.test(S.utils) && /ml-ph">.*8 parcelles récoltées/.test(hA) && !/pour toute la Cave/.test(hA));
   A.c._caveSetMill('2025');
   t('② choisir 2025 au Millésime le choisit pour toute la Cave (le même état)', A.c.__lire() === '2025' && A.c._mlMilActif() === 2025);
   t('② … et repeint Le Millésime, la bande et la barre, pas les vues du Chai', A.peint.includes('millesime') && A.peint.includes('bande') && A.peint.includes('barre') && !A.peint.includes('cuvees'));
-  t('② la phrase « Tous » disparaît quand une année est choisie', !/pour toute la Cave/.test(A.c._caveMillChipsHtml()));
+  t('② la phrase de l’onglet reste quand une année est choisie (elle dit l’onglet, pas l’année)', /8 parcelles récoltées/.test(A.c._caveMillChipsHtml()));
   const B = monter(S, { filtre: '2025', section: 'elevage', tab: 'labo' });
   B.c._caveSetMill('tous');
   t('③ « Tous » choisi au Chai repeint l’onglet du Chai à l’écran, sa barre et son en-tête', B.peint.includes('labo') && B.peint.includes('barre') && B.peint.includes('entete') && B.c.__lire() === 'tous');
@@ -61,7 +62,8 @@ if (!CONTRE) {
   const mutants = [
     ['Le Millésime ignore le choix du Chai', (S) => R(S, "function _mlMilActif(){ return (_caveMillFilter && _caveMillFilter!=='tous') ? Number(_caveMillFilter) : _mlCampagne(); }", 'function _mlMilActif(){ return _mlCampagne(); }')],
     ['le Chai repeint au lieu du Millésime', (S) => R(S, "  if(caveSection==='millesime'){ renderCaveMillesime(); if(typeof _caveKpisRender==='function') _caveKpisRender(); _caveMilBarRender(); return; }\n", '')],
-    ['la phrase « Tous » disparaît de la barre', (S) => R(S, "if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') return '<div class=\"mlh-tous\"", "if(false) return '<div class=\"mlh-tous\"")],   // TETE-4B (§578) : la phrase a sa fonction (_caveMillNoteHtml)
+    ['la phrase de l’onglet disparaît de la barre', (S) => R(S, "  return p?'<div class=\"mlh-tous ml-ph\">'+p+'</div>':'';", "  return '';")],   // TETE-4B (§578) : la phrase a sa fonction (_caveMillNoteHtml) ; MOTS-12 : c'est celle de l'onglet
+    ['l’explication quitte le « i » de la tête', (S) => Object.assign({}, S, { utils: S.utils.split('Le Millésime montre celui de la <b>campagne en cours</b>').join('Le Millésime montre la campagne') })],
     ['la barre se montre aussi au Cuvier', (S) => R(S, "var la=(caveSection==='elevage' || caveSection==='millesime');", 'var la=true;')],
     ['le renvoi garde un choix à part', (S) => R(S, 'if(isFinite(_rm)&&_rm>0) _caveMillFilter=String(_rm);', 'if(isFinite(_rm)&&_rm>0) _mlMil=_rm;')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-caverange1.mjs'").join("mv-harnais-caverangeX.mjs'") })],

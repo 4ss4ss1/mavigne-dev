@@ -2638,7 +2638,7 @@ function openCuveeDetail(cuvId,dans,volet){
   if(tEl)tEl.textContent=cuv.nom+(cuv.millesime?' '+cuv.millesime:'');
   // ⚠️ Ecrivait « N tonneaux » en dur : faux des qu'une cuve est logee. Le
   //   libelle est DERIVE, donc juste dans les trois cas (futs / cuve / mixte).
-  if(sEl)sEl.textContent=(_caveContenantsStr(cuv)||'aucun contenant')+' \u00B7 '+_caveVolHl(cuv).toFixed(1)+' hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
+  if(sEl)sEl.textContent=(_caveContenantsStr(cuv)||'aucun contenant')+' \u00B7 '+_mvF1(_caveVolHl(cuv))+'\u00a0hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
   var seuil=_caveSeuilOu(cuv);
   var lMs=cuv.last_ouillage?new Date(cuv.last_ouillage).getTime():0;
   var dSince=lMs?Math.floor((Date.now()-lMs)/86400000):9999;
@@ -4165,10 +4165,13 @@ function _caveMillChoix(){
   ms.sort(function(a,b){ return Number(b)-Number(a); });
   return {act:act, ms:ms};
 }
-// Le Millésime parle d'UN millésime : sur « Tous », il montre la campagne en cours, et la phrase le dit.
+// ★★ MOTS-12 (Le Millésime › Parcelles et Cuvées) — LA PHRASE DE L'ONGLET, JUSTE SOUS LA LIGNE D'ÉCRAN. Elle prend la place de la
+//   phrase d'explication (« Le Millésime montre celui de la campagne en cours… », 18 mots sur les quatre onglets), partie dans le « i »
+//   de la tête (cave.millesime). Ce qui compte, d'un coup d'œil, avant les chiffres : _mlPhrase, qui lit les calculs de l'onglet.
 function _caveMillNoteHtml(){
-  if(typeof caveSection!=='undefined' && caveSection==='millesime' && _caveMillFilter==='tous') return '<div class="mlh-tous" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);margin:4px 0 0">Le Millésime montre celui de la campagne en cours (<b>'+_escHtml(String(_mlCampagne()))+'</b>). Choisir une année la choisit pour toute la Cave.</div>';
-  return '';
+  if(typeof caveSection==='undefined' || caveSection!=='millesime') return '';
+  var p=''; try{ p=_mlPhrase(); }catch(e){ _pcavLog('phrase',e); }
+  return p?'<div class="mlh-tous ml-ph">'+p+'</div>':'';
 }
 function _caveMillChipsHtml(){
   // ★★ CAVE-RANGE-2b (§451) — LE MILLÉSIME REGARDÉ, UNE SEULE FOIS, EN HAUT DE LA CAVE. Il vivait à deux endroits : sous les
@@ -5087,15 +5090,16 @@ function _mlRdtDetail(r){
      +(o.hlHa!=null?(' \u00b7 <b>'+_mvF1(o.hlHa)+' hL/ha</b> sur sa portion'):'')
      +'</span>'+(o.hl>0?('<span class="q">'+_mvF1(o.hl)+' hL</span>'):'')+'</span>';
   });
+  // MOTS-12 : une phrase courte par état — la méthode (le ratio du Cuvier, la fourchette) est dans le « i » (cave.rdt).
   if(d.vol.statut==='mesure'){
-    h+='<span class="mlx-note ok">Volume complet : '+_mvF1(d.vol.hl)+' hL pour '+Math.round(d.vol.kg)
-     +' kg, soit <b>'+Math.round(_vendRendKgHl(d.vol.kg,d.vol.hl*100))+' kg/hL</b>. Le rendement est une mesure.</span>';
+    h+='<span class="mlx-note ok"><b>Mesur\u00e9</b>\u00a0: '+_mvF1(d.vol.hl)+'\u00a0hL pour '+_pcrbCvEnt(Math.round(d.vol.kg))
+     +'\u00a0kg, soit <b>'+Math.round(_vendRendKgHl(d.vol.kg,d.vol.hl*100))+'\u00a0kg/hL</b>.</span>';
   } else if(d.vol.kgKo>0){
-    h+='<span class="mlx-note"><b>'+d.vol.pctOk+' % des kilos ont un volume connu.</b> Les '
-     +Math.round(d.vol.kgKo)+' kg restants sont estim\u00e9s \u00e0 '+_mvF1(d.vol.kgKo/(_vendCfg().ratio_max||140))
-     +'\u2013'+_mvF1(d.vol.kgKo/(_vendCfg().ratio_min||130))+' hL, d\u2019o\u00f9 la fourchette. '
-     +(d.vol.lignes.some(function(l){ return l.src==='attente'; })
-        ?'Le chiffre se figera au retour du client.':'Il se figera au d\u00e9cuvage.')+'</span>';
+    var fo=_mvF1(d.vol.kgKo/(_vendCfg().ratio_max||140))+'\u2013'+_mvF1(d.vol.kgKo/(_vendCfg().ratio_min||130))+'\u00a0hL';
+    h+='<span class="mlx-note">'+(d.vol.pctOk>0
+        ?('<b>'+d.vol.pctOk+'\u00a0% des kilos mesur\u00e9s</b>\u00a0; le reste, '+_pcrbCvEnt(Math.round(d.vol.kgKo))+'\u00a0kg, estim\u00e9 \u00e0 '+fo+'. ')
+        :('<b>Pas encore mesur\u00e9</b>\u00a0: '+fo+' estim\u00e9s pour '+_pcrbCvEnt(Math.round(d.vol.kgKo))+'\u00a0kg. '))
+     +(d.vol.lignes.some(function(l){ return l.src==='attente'; })?'Se fige au retour du client.':'Se fige au d\u00e9cuvage.')+'</span>';
   }
   // Les trois écarts de surface. Aucun n'est absorbé en silence.
   if(d.surf.depasse>0)
@@ -5477,7 +5481,7 @@ function _mlEtat(mil,d){
 }
 function _mlHead(mil,ch,d){
   var e=_mlEtat(mil,d);
-  var h='<div class="mlh"><div class="mlh-t"><div class="mlh-k">Le mill\u00e9sime</div><div class="mlh-an">'+_escHtml(String(mil))+'</div>'
+  var h='<div class="mlh"><div class="mlh-t"><div class="mlh-k">Le mill\u00e9sime'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.millesime'):'')+'</div><div class="mlh-an">'+_escHtml(String(mil))+'</div>'
     +((e.pill||e.ligne)?('<div class="mlh-st">'+(e.pill?('<span class="mlh-pill">'+e.pill+'</span>'):'')+_escHtml(e.ligne)+'</div>'):'')
     +'</div></div>';
   // CAVE-RANGE-2b (§451) : le choix du millésime et sa phrase « Tous » sont dans la barre en haut de la Cave.
@@ -5656,15 +5660,13 @@ function _mlAocRdt(rd,reste,mil){
 function _mlAocHtml(L){
   if(!L||!L.length) return '';
   var h='<section class="pcav-card mlp mla"><div class="mlp-bar"><b class="mla-t">Par appellation</b>'
-    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.aoc'):'')+'</div>'
-    +'<div class="mlx-hint mlp-hint">Ce qui se d\u00e9clare\u00a0: la surface r\u00e9colt\u00e9e et le volume de chaque appellation, couleur par couleur. '
-    +'Le raisin vendu compte, sur toute la surface de sa parcelle.</div>'
+    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.aoc'):'')+'</div>'   // MOTS-12 : le paragraphe vit dans ce « i »
     +'<div class="mlp-h mla-h" aria-hidden="true"><span>Appellation</span><span>Surface</span><span>R\u00e9colt\u00e9</span>'
     +'<span>hL/ha</span><span>Face au maximum</span><span>Volume</span></div>';
   L.forEach(function(x){
     var coul=(x.coul==='r')?'rouge':((x.coul==='b')?'blanc':''), vin=(x.coul==='r')?'r':((x.coul==='b')?'b':'q'), sous=[];
     if(!x.cle) sous.push('\u00e0 rattacher \u00e0 leur appellation (roue crant\u00e9e de la Cave, Appellations)');
-    if(x.n) sous.push(x.n+' parcelle'+(x.n>1?'s':'')+' r\u00e9colt\u00e9e'+(x.n>1?'s':''));
+    if(x.n) sous.push(x.n+' parcelle'+(x.n>1?'s':''));
     if(x.pied) sous.push(x.pied+' encore sur pied ('+window._mvHaT(x.haPied)+'\u00a0ha), hors du calcul');
     if(x.sansSurf) sous.push(x.sansSurf+' sans surface, hors du calcul');
     var ech=(x.max||0)*1.15, w=(x.max&&x.hlHa!=null)?Math.min(100,Math.round(x.hlHa/ech*100)):0;
@@ -5678,7 +5680,7 @@ function _mlAocHtml(L){
       +'<span class="mlp-b">'+((x.max&&x.hlHa!=null)
           ?('<span class="mlx-tr"><span class="mlx-fi" style="width:'+w+'%"></span><span class="mlx-mk" style="left:87%"></span></span>'
             +'<span class="mlp-bt">'+x.pct+'\u00a0%<small>max '+_mvF1(x.max)+((x.maxSrc==='parcelles')?' \u00b7 d\u2019apr\u00e8s ses parcelles':'')+'</small></span>')
-          :('<span class="mlp-bt">'+(!x.cle?'\u2014':(x.maxDiff?'Maximums diff\u00e9rents selon les parcelles':(x.max?('max '+_mvF1(x.max)):'Maximum non renseign\u00e9')))+'</span>'))+'</span>'
+          :('<span class="mlp-bt">'+(!x.cle?'\u2014':(x.maxDiff?'Maximums diff\u00e9rents selon les parcelles':(x.max?('max '+_mvF1(x.max)):'sans maximum')))+'</span>'))+'</span>'
       +'<span class="mlp-t'+((x.statut==='mesure')?' ok':'')+'">'+((x.statut==='mesure')?'mesur\u00e9':((x.statut==='partiel')?(x.pctOk+' % mesur\u00e9')
         :((x.statut==='vide')?(x.pied?'sur pied':'sans surface'):'estim\u00e9')))+'</span></div>';
   });
@@ -5698,14 +5700,12 @@ function _mlRenderParc(){
   var h=aoc+'<section class="pcav-card mlp"><div class="mlp-bar"><div class="mlx-chips mlp-f" role="group" aria-label="Filtrer les parcelles">';
   [['tout','Toutes',rd.length],['dessus','Au-dessus du maximum',nD],['vendu','Vendues',nV],['pied','Encore sur pied',reste.length]].forEach(function(f){
     var on=f[0]===F;
+    if(!on&&f[0]!=='tout'&&!f[2]) return;   // MOTS-12 : un filtre vide ne se montre pas
     h+='<button type="button" class="mlx-chip'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="_mlSetParcF(\''+_escAttr(f[0])+'\')">'+f[1]+' <small>'+f[2]+'</small></button>';
   });
   h+='</div>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.rdt'):'')+'</div>';
-  /* ★ Le plafond est celui du MILLESIME ouvert : le dire ici, sinon poser 45 en
-     2026 aurait l'air de valoir pour 2025. */
-  h+='<div class="mlx-hint mlp-hint">'+(rd.some(function(r){ return r.max; })
-      ? 'Le trait vertical est le maximum de l\u2019appellation pour '+mil+'. Un d\u00e9passement ne bloque rien\u00a0: il se voit.'
-      : 'Aucun maximum d\u2019appellation renseign\u00e9 pour '+mil+'.'+(adm?' Touchez une parcelle pour le poser.':''))+'</div>';
+  /* ★ Le plafond est celui du MILLESIME ouvert : le détail d'une parcelle le dit (« Maximum 2026 »), le « i » explique le trait.
+     MOTS-12 : la phrase d'explication quitte l'écran. */
   if(F==='pied'){
     if(!reste.length) h+='<div class="mlp-vide">Tout est rentr\u00e9.</div>';
     reste.forEach(function(p){
@@ -5719,11 +5719,19 @@ function _mlRenderParc(){
   h+='<div class="mlp-h" aria-hidden="true"><span>Parcelle</span><span>Surface</span><span>R\u00e9colt\u00e9</span>'
     +'<span>hL/ha</span><span>Face au maximum</span><span>Volume</span></div>';
   if(!L.length) h+='<div class="mlp-vide">Aucune parcelle dans ce filtre.</div>';
+  /* ★★ MOTS-12 — UNE PARCELLE TIENT EN UNE LIGNE ; SON DÉTAIL S'OUVRE AU TOUCHER. Le détail (d'où viennent les kilos, la
+     fourchette, les écarts de surface) était ouvert sur chaque ligne : la même phrase six fois. Poser le maximum, qui se
+     faisait en touchant la ligne, devient un bouton du détail. L'ouverture tient d'un dessin à l'autre (_mlParcOuv). */
   L.forEach(function(r){
     var ech=(r.max||0)*1.15, w=r.max?Math.min(100,Math.round((r.hlHa/ech)*100)):0;
-    h+='<button type="button" class="mlp-l'+(r.depasse?' over':'')+'" onclick="_mlSetRdtMax(\''+_escAttr(r.parcelle.nom)+'\','+_escAttr(mil)+')">'
-      +'<span class="mlp-n"><b>'+_escHtml(r.parcelle.nom)+'</b>'+(r.depasse?'<span class="mlx-tag">au-dessus</span>':'')
-        +(r.vendu?'<span class="mlx-tag sold">vendu</span>':'')+_mlRdtDetail(r)+'</span>'
+    var nom=r.parcelle.nom, ouv=!!_mlParcOuv[nom];
+    var dm=r.max?('<span class="mlp-dm">Maximum '+_escHtml(String(mil))+'\u00a0: <b>'+_mvF1(r.max)+'\u00a0hL/ha</b>'
+        +(r.maxSrc==='herite'?' \u00b7 h\u00e9rit\u00e9':(r.maxSrc==='aoc'&&r.maxAoc?(' \u00b7 '+_escHtml(r.maxAoc)):''))+'</span>'):'';
+    var act=adm?('<div class="mlp-da"><button type="button" class="pcav-act" onclick="_mlSetRdtMax(\''+_escAttr(nom)+'\','+_escAttr(mil)+')">'
+        +(r.max?'Changer le maximum':('Poser le maximum '+_escHtml(String(mil))))+'</button></div>'):'';
+    h+='<div class="mlp-r'+(ouv?' open':'')+'"><button type="button" class="mlp-l'+(r.depasse?' over':'')+'" aria-expanded="'+(ouv?'true':'false')+'" onclick="_mlParcDet(this,\''+_escAttr(nom)+'\')">'
+      +'<span class="mlp-n"><b>'+_escHtml(nom)+'</b>'+(r.depasse?'<span class="mlx-tag">au-dessus</span>':'')
+        +(r.vendu?'<span class="mlx-tag sold">vendu</span>':'')+'</span>'
       +'<span class="mlp-s">'+_mvF1(parseFloat(r.parcelle.surface)||0)+'\u00a0ha</span>'
       +'<span class="mlp-k">'+_pcrbCvEnt(r.kg)+'\u00a0kg<small>'+r.caisses+' caisses</small></span>'
       /* ⚠️ Un chiffre net ne sort que s'il est mesure de bout en bout. Sinon c'est
@@ -5731,11 +5739,11 @@ function _mlRenderParc(){
       +'<span class="mlp-v">'+(r.statut==='mesure'?_mvF1(r.hlHa):(_mvF1(r.hlMin)+'\u2013'+_mvF1(r.hlMax)))+'<small>hL/ha</small></span>'
       +'<span class="mlp-b">'+(r.max
           ? ('<span class="mlx-tr"><span class="mlx-fi" style="width:'+w+'%"></span><span class="mlx-mk" style="left:87%"></span></span>'
-            +'<span class="mlp-bt">'+(r.statut==='mesure'?'':'\u2248 ')+r.pct+'\u00a0%<small>max '+_mvF1(r.max)
-            +(r.maxSrc==='herite'?' \u00b7 h\u00e9rit\u00e9':(r.maxSrc==='aoc'&&r.maxAoc?(' \u00b7 '+_escHtml(r.maxAoc)):''))+'</small></span>')
-          : ('<span class="mlp-bt">'+(adm?'Toucher pour poser le maximum':'Maximum non renseign\u00e9')+'</span>'))+'</span>'
+            +'<span class="mlp-bt">'+(r.statut==='mesure'?'':'\u2248 ')+r.pct+'\u00a0%<small>max '+_mvF1(r.max)+'</small></span>')
+          : '<span class="mlp-bt">sans maximum</span>')+'</span>'
       +'<span class="mlp-t'+(r.statut==='mesure'?' ok':'')+'">'
-        +(r.statut==='mesure'?'mesur\u00e9':(r.statut==='partiel'?(r.pctOk+' % mesur\u00e9'):'estim\u00e9'))+'</span></button>';
+        +(r.statut==='mesure'?'mesur\u00e9':(r.statut==='partiel'?(r.pctOk+' % mesur\u00e9'):'estim\u00e9'))+'</span></button>'
+      +'<div class="mlp-d"'+(ouv?'':' hidden')+'>'+_mlRdtDetail(r)+dm+act+'</div></div>';
   });
   return h+'</section>';
 }
@@ -5775,15 +5783,17 @@ function _mlCuvFicheHtml(g,l,o){
   var cv=l.cuveId?(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===l.cuveId; }):null, cu=l.cuvee||null;
   var i=_mlCuvInfo(g,l), ch=l.ch||{};
   var dedans=!!(o&&o.sansRetour);   // CAVE-RANGE-2a : dans la fiche unique, pas de retour ni de lien vers elle-même
-  var h=(dedans?'':'<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>')
+  // MOTS-12 : dans la fiche unique, l'en-tête du Chai dit déjà le nom et l'année — la cuvée n'est plus écrite deux fois ; le « i » passe sur la chaîne.
+  var iB=(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'');
+  var h=dedans?'':('<button type="button" class="mlc-ret" onclick="_mlCuvRetour()">'+_mvIcon('gauche',16)+' Toutes les cuv\u00e9es</button>'
     +'<div class="mlc-fh"><div class="mlc-ft"><h3>'+_escHtml(l.nom)+'</h3><span>'+_escHtml(l.sous||'')+'</span></div>'
-    +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.cuvees'):'')+'</div>';
+    +'<span class="mlc-pill '+g.cle+'">'+i.etat+'</span>'+iB+'</div>');
   /* ★ HLHA-1 (§413) : la surface de la cuve dont la chaine lit les kilos (ch.cuveId — deux cuves dans une
      cuvee : la chaine suit _caveCuveSource), pour le hL/ha sous Entonne et Bouteilles. */
   var S=null; try{ S=_mlCuvSurf(ch.cuveId||l.cuveId,_mlMilActif()); }catch(e){ _pcavLog('cuvSurf',e); }
   var cells=_pcrbCvCellules(ch,l.sorties,l.prelev,l.decuvee&&!(ch.entonneHl!=null&&ch.entonneSrc==='mesure'),MV_CV_FICHE,S?S.ha:null);
   var SP=(S&&cv&&S.cuve===cv.id)?S:null;   // « D'ou vient » ne montre la surface comptee que pour SA cuve
-  h+='<div class="mlc-sec">De la r\u00e9colte \u00e0 la bouteille</div>'
+  h+='<div class="mlc-sec'+(dedans?' mlc-sec1':'')+'">De la r\u00e9colte \u00e0 la bouteille'+(dedans?iB:'')+'</div>'
     +'<div class="pcrb-cv-g mlc-lab"><span>R\u00e9colte</span><span>En cuve</span><span>Entonn\u00e9</span><span>Bouteilles</span></div>'
     +'<div class="pcrb-cv-g mlc-steps">'+cells.map(_pcrbCvCelHtml).join('')+'</div>';
   var par={}, ord=[], ds=[];
@@ -5880,6 +5890,14 @@ function _mlRenderCuv(d){
 }
 function _mlSetCuv(k){ _mlCuvSel=String(k); _mlCuvFiche=true; _mlTab='cuv'; renderCaveMillesime(); }
 function _mlCuvRetour(){ _mlCuvFiche=false; renderCaveMillesime(); }
+var _mlParcOuv={};   // MOTS-12 : les parcelles ouvertes, par nom — l'ouverture tient d'un dessin à l'autre
+function _mlParcDet(b,nom){
+  var r=b&&b.closest?b.closest('.mlp-r'):null; if(!r) return;
+  var o=!r.classList.contains('open');
+  r.classList.toggle('open',o); b.setAttribute('aria-expanded',o?'true':'false');
+  var d=r.querySelector('.mlp-d'); if(d) d.hidden=!o;
+  if(o) _mlParcOuv[nom]=1; else delete _mlParcOuv[nom];
+}
 function _mlSetParcF(f){ _mlParcF=(['tout','dessus','vendu','pied'].indexOf(f)>=0)?f:'tout'; _mlTab='parc'; renderCaveMillesime(); }
 function _pcrbSetVue(k){ _pcrbVue=(['matu','dens','temp','elev'].indexOf(k)>=0)?k:'dens'; renderCaveMillesime(); }
 
@@ -7235,8 +7253,8 @@ function _mlTuiles(ch){
     if(!b.length&&rm.statut!=='mesure') b.push('estim\u00e9 \u2014 tout n\u2019est pas d\u00e9cuv\u00e9');
     sub=b.length?b.join(' \u00b7 '):('sur '+_pcavF1(rm.ha)+' ha r\u00e9ellement r\u00e9colt\u00e9s');
   }
-  return '<div class="pcav-card"><div class="pcav-kg">'
-    +_pcavK('Surface r\u00e9colt\u00e9e',_pcavF1(ch.ha),'ha',(ch.parcelles||0)+' parcelles',1)
+  return '<div class="pcav-card ml-tu"><div class="pcav-kg">'
+    +_pcavK('Surface r\u00e9colt\u00e9e',_pcavF1(ch.ha),'ha',(ch.parcelles||0)+' parcelles')
     +_pcavK('Raisin rentr\u00e9',_pcavF1((ch.kg||0)/1000),'t',ch.kgVendu?('dont '+_pcavInt(ch.kgVendu)+' kg vendus'):'')
     +_pcavK('Rendement moyen', rm.hlHa!=null?((rm.statut==='mesure'&&!rm.approx?'':'\u2248 ')+_pcavF1(rm.hlHa)):'\u2014','hL/ha',sub)
     +_pcavK('Au chai',_pcavF1(ch.hlFut),'hL',(ch.futs||0)+' barriques')
@@ -7560,6 +7578,24 @@ function _pcavInjectCss(){
   +'.mlp-l.over .mlp-bt{color:var(--rouge)}'
   +'.mlp-t.ok{background:var(--terre-pale);color:var(--terre-tx,#8A5A38)}'
   +'.mlp-vide{padding:var(--e-4,16px);font-size:var(--pt-txt,13px);color:var(--texte-doux)}'
+  // ★ MOTS-12 — la phrase de l'onglet (la grammaire de celle du Pilotage), la ligne d'une parcelle et son détail, la ligne des quatre chiffres
+  +'.ml-ph{font:500 var(--pt-sm,17px)/1.3 var(--font-ui,Outfit,sans-serif);color:var(--texte-med);padding:var(--e-1,4px) 0 var(--e-1,4px)}'
+  +'.ml-ph b{font-weight:var(--fw-semi,600);color:var(--texte)}.ml-ph b.ko{color:var(--danger-texte)}.ml-ph b.or{color:var(--attention-texte)}.ml-ph b.ok{color:var(--ok-texte)}'
+  +'.mlp-r{border-top:1px solid var(--gris-clair)}.mlp-r>.mlp-l{border-top:0}'
+  +'.mlp-r .mlp-n b::after{content:"";display:inline-block;width:6px;height:6px;margin:0 2px 3px 8px;border-right:1.5px solid var(--texte-doux);border-bottom:1.5px solid var(--texte-doux);transform:rotate(45deg)}'
+  +'.mlp-r.open .mlp-n b::after{transform:rotate(-135deg);margin-bottom:0}'
+  +'.mlp-d{padding:0 var(--e-4,16px) var(--e-4,16px)}.mlp-d[hidden]{display:none}'
+  +'.mlp-d .mlx-rdsrc{margin-top:0;padding-top:var(--e-1,4px);border-top:0}'
+  +'.mlp-dm{display:block;margin-top:var(--e-2,8px);font-size:var(--pt-micro,11px);color:var(--texte-med)}'
+  +'.mlp-da{margin-top:var(--e-3,12px)}'
+  +'.mlh-k{display:flex;align-items:center;gap:var(--e-2,8px)}'
+  +'.mlc-sec1{display:flex;align-items:center;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}'
+  +'.mlc>.mlc-fiche{display:none}.mlc.fiche>.mlc-fiche{display:block}'   // au téléphone, la liste seule tant qu'aucune cuvée n'est ouverte
+  +'@media (max-width:599px){#page-cave .ml-tu .pcav-kg{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:var(--e-3,12px) var(--e-1,4px)}'
+    +'#page-cave .ml-tu .pcav-k{display:flex;flex-direction:column;border:0;border-left:1px solid var(--gris-clair);border-radius:0;background:none;padding:0 var(--e-2,8px)}'
+    +'#page-cave .ml-tu .pcav-k:first-child{border-left:0}'
+    +'#page-cave .ml-tu .pcav-kv{order:1;margin:0;font-size:var(--pt-sm,17px)}#page-cave .ml-tu .pcav-kv small{font-size:var(--pt-micro,11px)}'
+    +'#page-cave .ml-tu .pcav-kl{order:2;margin-top:var(--e-0,2px);font-weight:500}#page-cave .ml-tu .pcav-ks{display:none}}'
   /* ★ HLHA-1 (§413) : le bloc « Par appellation » prend les cellules de la liste des parcelles (memes colonnes) */
   +'.pcav-card.mla{margin-bottom:var(--e-4,16px)}'
   +'.mla-t{flex:1;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}'
@@ -7610,7 +7646,7 @@ function _pcavInjectCss(){
   +'.mlp-n,.mlp-v,.mlp-s,.mlp-k,.mlp-t,.mlp-b{order:0}'
   +'.mlp-l.s{grid-template-columns:minmax(0,1.6fr) 72px minmax(0,1fr)}'
   +'.mlc{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}'
-  +'.mlc .mlc-liste,.mlc.fiche .mlc-liste,.mlc .mlc-fiche,.mlc.fiche .mlc-fiche{display:block}'
+  +'.mlc .mlc-liste,.mlc.fiche .mlc-liste,.mlc .mlc-fiche,.mlc.fiche .mlc-fiche,.mlc>.mlc-fiche{display:block}'
   +'.mlc-ret{display:none}'
   +'.mlc-cols{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}'
   +'.mlx-chips.pcrb-sel{display:none}'
@@ -8341,6 +8377,46 @@ function _pcrbPose(){
 // ════════════════════════════════════
 
 // ── Économie : config (lecture) ──
+/* ★★ MOTS-12 — LA PHRASE DE L'ONGLET (Parcelles, Cuvées). Elle LIT les calculs de l'onglet (_mlRendements, _mlResteARentrer,
+   _pcrbCvLignes) : aucun chiffre de plus. Le rouge et l'orange disent ce qui demande un geste ; le reste se lit en clair.
+   Ensemble et Courbes n'en ont pas encore (leur lot suit). */
+function _mlPhrase(){
+  if(!window._dataReady) return '';
+  var mil=_mlMilActif(), pl=function(n){ return n>1?'s':''; }, p=[];
+  if(_mlTab==='parc'){
+    var rd=[], reste=[];
+    try{ rd=_mlRendements(mil); }catch(e){ _pcavLog('rdt',e); }
+    try{ reste=_mlResteARentrer(mil); }catch(e){ _pcavLog('reste',e); }
+    if(!rd.length&&!reste.length) return '';
+    var nD=0, nSans=0, nE=0;
+    rd.forEach(function(r){ if(r.depasse) nD++; if(!r.max) nSans++; if(r.statut!=='mesure') nE++; });
+    p.push('<b>'+rd.length+' parcelle'+pl(rd.length)+' r\u00e9colt\u00e9e'+pl(rd.length)+'</b>');
+    if(nD) p.push('<b class="ko">'+nD+' au-dessus du maximum</b>');
+    if(reste.length) p.push('<b class="or">'+reste.length+' encore sur pied</b>');
+    if(nSans) p.push('<b class="or">'+nSans+' sans maximum</b>');
+    if(!nD&&!nSans&&rd.length) p.push('aucune au-dessus du maximum');
+    if(nE) p.push(nE+' estim\u00e9e'+pl(nE));
+    return p.join(', ');
+  }
+  if(_mlTab==='cuv'){
+    var d=null; try{ d=_pcrbCvLignes(mil); }catch(e){ _pcavLog('cvLignes',e); }
+    if(!d) return '';
+    var n={cuve:0,elev:0,btl:0}, nC=0, nMes=0;
+    d.groupes.forEach(function(g){ g.lignes.forEach(function(l){ if(l.simple) return; nC++; if(n[g.cle]!=null) n[g.cle]++; if(l.saisir) nMes++; }); });
+    if(!nC) return '';
+    p.push('<b>'+nC+' cuv\u00e9e'+pl(nC)+'</b>');
+    if(n.cuve) p.push(n.cuve+' encore en cuve');
+    if(n.elev) p.push(n.elev+' en \u00e9levage');
+    if(n.btl) p.push(n.btl+' en bouteille');
+    if(nMes) p.push('<b class="or">'+nMes+' volume'+pl(nMes)+' \u00e0 mesurer</b>');
+    return p.join(', ');
+  }
+  return '';
+}
+function _mlPhrasePose(){
+  var hn=document.getElementById('cave-milnote'); if(!hn) return;
+  var h=_caveMillNoteHtml(); hn.innerHTML=h; hn.style.display=h?'':'none';
+}
 function renderCaveMillesime(){
   _mlInjectCss(); _pcavInjectCss();
   // ★ L'en-tete et la bande #cave-kpis sont ecrits par renderCave (lot CAVE-1).
@@ -8367,6 +8443,7 @@ function renderCaveMillesime(){
   try{ ch=_mlChaine(mil); }catch(e){ _pcavLog('chaine',e); }
   try{ d=_pcrbCvLignes(mil); }catch(e){ _pcavLog('cvLignes',e); }
   if(hd) hd.innerHTML=ch?_mlHead(mil,ch,d):'';
+  _mlPhrasePose();   // MOTS-12 : la phrase suit l'onglet
   if(_mlTab==='crb'){
     var c=null; try{ c=_pcavCtx(); }catch(e){ _pcavLog('ctx',e); }
     body.innerHTML=_caveSaisBanner()+(c?_pcavVueCourbes(c)
@@ -8413,6 +8490,7 @@ window._mlSetRdtMax        = _mlSetRdtMax;
 window._mlSetCuv           = _mlSetCuv;
 window._mlCuvRetour        = _mlCuvRetour;
 window._mlSetParcF         = _mlSetParcF;
+window._mlParcDet          = _mlParcDet;   // MOTS-12
 window._pcrbSetVue         = _pcrbSetVue;
 window._mlRdtSansMax       = _mlRdtSansMax;
 window._mlRdtMoyen         = _mlRdtMoyen;

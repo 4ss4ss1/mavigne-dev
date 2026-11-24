@@ -852,6 +852,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots10.mjs --contre'],     //   comprise), « fin prévue », les pastilles, « Ouvrir la priorité du moment », _pilDeplier ; le lexique
   ['node scripts/mv-harnais-mots11.mjs'],              // MOTS-11 (§604) : Pilotage › Conformité allégé sur place — la phrase, cinq cartes repliées (la protection
   ['node scripts/mv-harnais-mots11.mjs --contre'],     //   comprise), les pastilles, le registre en résumé, « Ouvrir les traitements » ; le lexique
+  ['node scripts/mv-harnais-mots12.mjs'],              // MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — la phrase de l'onglet (jouée), une ligne par
+  ['node scripts/mv-harnais-mots12.mjs --contre'],     //   parcelle et son détail au toucher (joué), « Poser le maximum », la tête, les défauts de Cuvées
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
   ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne

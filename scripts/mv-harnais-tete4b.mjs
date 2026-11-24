@@ -90,7 +90,7 @@ function jouer(S) {
   {
     const ctx = { CAVE_ELEVAGE: { cuvees: [{ millesime: 2025, statut: 'elevage' }, { millesime: 2025, statut: 'elevage' }, { millesime: 2024, statut: 'embouteille' }] },
       _caveMilsDuChai: () => [2024, 2025], _mlMillesimes: () => [2026, 2025], _caveMillFilter: '2025', caveSection: 'elevage', _mlCampagne: () => 2026,
-      _escHtml: (x) => String(x), _escAttr: (x) => String(x) }; vm.createContext(ctx);
+      _escHtml: (x) => String(x), _escAttr: (x) => String(x), _pcavLog: () => {}, _mlPhrase: () => '<b>8 parcelles récoltées</b>' }; vm.createContext(ctx);   // MOTS-12 : la phrase de l'onglet
     vm.runInContext(['function _caveMillChoix(', 'function _caveMillNoteHtml(', 'function _caveMillChipsHtml(', 'function _caveMillBoutonHtml('].map((d) => fonction(S.cav, d)).join('\n'), ctx);
     const b = vm.runInContext('_caveMillBoutonHtml()', ctx), p = vm.runInContext('_caveMillChipsHtml()', ctx);
     const opts = [...b.matchAll(/<option value="([^"]+)"( selected)?>([^<]+)<\/option>/g)].map((m) => m[1] + (m[2] ? '*' : ''));
@@ -99,7 +99,7 @@ function jouer(S) {
     t('③bis les puces (la page sans ligne d’écran) lisent les mêmes années, dans le même ordre', puces.join(' ') === 'tous 2026 2025 2024' && /2025<span class="mvcm-c">2<\/span>/.test(p));
     ctx._caveMillFilter = 'tous'; ctx.caveSection = 'millesime';
     const bT = vm.runInContext('_caveMillBoutonHtml()', ctx), n = vm.runInContext('_caveMillNoteHtml()', ctx);
-    t('③ter sur « Tous », au Millésime : « Tous » choisi dans la liste, et la phrase qui dit quelle année est montrée', /<option value="tous" selected>Tous<\/option>/.test(bT) && /class="mlh-tous"/.test(n) && /<b>2026<\/b>/.test(n) && !/mlh-tous/.test(bT));
+    t('③ter sur « Tous », au Millésime : « Tous » choisi dans la liste, et la phrase de l’onglet à part (MOTS-12 : l’année montrée est dans le « i » de la tête)', /<option value="tous" selected>Tous<\/option>/.test(bT) && /class="mlh-tous ml-ph"/.test(n) && /8 parcelles récoltées/.test(n) && !/mlh-tous/.test(bT));
     ctx._caveMilsDuChai = () => [2025]; ctx._mlMillesimes = () => [2025];
     t('③quater un seul millésime : ni bouton ni puces', vm.runInContext('_caveMillBoutonHtml()', ctx) === '' && vm.runInContext('_caveMillChipsHtml()', ctx) === '');
     t('③quinquies la barre : le bouton (et la phrase) sur la ligne d’écran, les puces ailleurs', /var surLigne=!!\(h\.parentNode && h\.parentNode\.id==='cave-ecran-d'\);\s*\n\s*h\.innerHTML=la\?\(surLigne\?_caveMillBoutonHtml\(\)\+_caveMillNoteHtml\(\):_caveMillChipsHtml\(\)\):'';/.test(S.cav));

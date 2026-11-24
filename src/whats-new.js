@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.28', d: '2026-11-24', items: [   // MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — une phrase, une ligne par parcelle
+    { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Le Millésime\u00a0: une phrase, une ligne par parcelle',
+      desc: "Sous les onglets du Millésime, une phrase dit ce qui compte\u00a0: «\u00a08 parcelles récoltées, 3 sans maximum, 6 estimées\u00a0», «\u00a03 cuvées, 2 encore en cuve, 1 en élevage\u00a0». Dans Parcelles, chaque parcelle tient sur une ligne\u00a0; touchez-la pour son détail (d’où viennent les kilos, le volume, le maximum) et «\u00a0Poser le maximum\u00a0». Au téléphone, les quatre chiffres du millésime sur une ligne, et Cuvées montre la liste seule jusqu’à ce que vous en ouvriez une. Aucun calcul ne change." }
+  ] },
   { v: '11.27', d: '2026-11-23', items: [   // MOTS-11 (§604) : Pilotage › Conformité allégé sur place — une phrase, cinq cartes repliées
     { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'Pilotage, Conformité\u00a0: une phrase, des cartes repliées',
       desc: "En haut de Conformité, une phrase\u00a0: les parcelles à nu et les points à régler — le même nombre que la tuile d’Aujourd’hui. Les cinq cartes arrivent repliées\u00a0: un chiffre et sa pastille (à nu, en vigilance, SIRET manquant, aucune parcelle en délai)\u00a0; touchez-en une pour le détail. La protection devient une carte comme les autres, avec «\u00a0Ouvrir les traitements\u00a0». Le registre montre ce qui manque, puis compte le reste\u00a0: les huit points sont dans «\u00a0Voir les lignes et exporter\u00a0». Aucun calcul ne change." }

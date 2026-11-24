@@ -1,0 +1,38 @@
+{
+  "lot": "MOTS-12",
+  "section": "§605",
+  "base": "d474470e49e7a6193afb5ee7a5428b282e7c940d",
+  "inclut": [],
+  "date": "2026-11-24",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "5222912bad00cf63b6661a323c5fd698dffb8f900f38f5d450fd9dbffff73fa0",
+    "docs/claude/INDEX.md": "45a16a13183748244f556240b6ec84b86ae158d90bb14a2d53a0f7b101c0cbc4",
+    "docs/claude/chantiers-580-629.md": "44e3561e9e413160a7f9ac051323f7ad042b39c0df8fc5f5437615bb1b630e8f",
+    "docs/claude/journal.md": "628c9fcb9b1844a8451c23def639fbcac9032e3671bb39367e99488bebc44158",
+    "docs/maquettes/LISEZMOI.md": "8eb85a0e6ad8062b15b3cedc18566eeda7d0d7b3e1ed9669c877a53e5b0c33b2",
+    "guide/08-cave.html": "d12b1880b72f0d2d412372b8d1daa860b9b94cf7a489b8153a4207d586af8231",
+    "index.html": "e4166bf9dd366e238a677b7afb1c32da97b286e35155dd5729951a23e7a54e85",
+    "public/demo/r-chai-millesime.webp": "1e19cfe244d2083677155e6a5fe4fceb2fd9ccb2503b24d513450d3305863a7f",
+    "public/demo/t-r-chai-millesime.webp": "0e559b70f22bbc7b73d8ae7eb1409409ca5e4fbe033a48aa87a5508a9671009d",
+    "public/guide.html": "9863ba0cf0cf7e17cceac438b2a5eb0e86adf830ee00b355cc4b3309b5e3979d",
+    "public/sw.js": "51c62bf2ec01903ecdd71800bb824ccf8c4b5455762727fa29776ae83de121c4",
+    "scripts/harnais-claude-md.mjs": "a2d6f707545060121f24638293ff8ab8f705849febb4e5bd3447416279bf0f3a",
+    "scripts/mv-harnais-caverange1.mjs": "afa27485eb43ec7360ddffd46ed032d904fe5f2363db6a7a8887acc109aeb7a2",
+    "scripts/mv-harnais-hlha1.mjs": "3b4bf20c27e55799c16e4a64b497cb5cf63341f761dc651026dfe6ed962877f7",
+    "scripts/mv-harnais-liste.mjs": "639a1baf4106eade07963a6808e61f294215d5591ab11a8231b37a0840c62aa3",
+    "scripts/mv-harnais-range1.mjs": "9bd9e3a45c554f6479e057be116d43ca2a4fdb39bf5e891cafd7f68dea2a1da6",
+    "scripts/mv-harnais-rdtmil.mjs": "f8fa5532dcdd81d4ea993f5c37a305e2e69b56dbeffbc1ca9e3896f22489726b",
+    "scripts/mv-harnais-tete4b.mjs": "972285545fe76f8c4c3eb9a7180de720addaad4a089186811f858ccbe92c8c36",
+    "scripts/mv-mots-baseline.json": "4b48125b49790f85ce5f8f528547a15105fe73cb41fb5b3ed0c04062ad109987",
+    "scripts/tutos-couverture.json": "b2a75e00bff5c6ad2e3533a41cf1c3dc9178b53d3726d52145a500a81802f581",
+    "src/cave.js": "7a46ce80fd87f09d11d21ea0ed381a500c2c0eb2ac049af6539ff254367123d3",
+    "src/utils.js": "6db56aa9907b8a0b252467d500eea1a9c88fe9baf74d4a4d2dd8443940d06540",
+    "src/whats-new.js": "8f015b03a06361e6943ccc5c06377efc564c841a0ee9b89f8da88b17656b3275",
+    "docs/maquettes/maquette-millesime-parcelles-v1.html": "808455307f73602b2ffdc3a944111670bb6e982a1fac3e095df606d31590cbaf",
+    "scripts/mv-harnais-mots12.mjs": "695d9299a60602c169457969d8d25ad3a8c36990795d02ea02a092544262c33a"
+  }
+}

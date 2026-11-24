@@ -82,6 +82,7 @@ var window = { logError: function(e){ __logs.push(e); } };
 var CAVE_VENDANGE = { config: {}, recoltes: [], cuves_vinif: [], cuvees: [] };
 var CAVE_ELEVAGE = { cuvees: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
+var _mlParcOuv = {};   /* MOTS-12 (§605) : les parcelles ouvertes */
 var _caveMillFilter = 'tous', _mlParcF = 'tout',   /* CAVE-RANGE-1 (§449) : le millésime regardé est celui de toute la Cave */ _mlCuvSel = null, _mlCuvFiche = false, _pcrbVue = 'dens', _PCRB_ELEV = null;
 function _mlCampagne(){ return 2026; }
 var __timeouts = []; function setTimeout(f){ __timeouts.push(f); }   // CAVE-RANGE-3 (§452) : la fiche unique s'ouvre au tour suivant
@@ -250,7 +251,7 @@ const T = {
     const o = s => t.indexOf(s);
     return o('<b>Vieilles Vignes</b>') < o('<b>En Bertrange</b>') && o('<b>En Bertrange</b>') < o('<b>Les Perri\u00e8res</b>')
       && t.includes("onclick=\"_mlSetRdtMax('Vieilles Vignes',2026)\"") && t.includes('class="mlp-l over"') && sp(t).includes('37,8\u201340,7')
-      && sp(t).includes('\u2248 98 %') && nb(t, /class="mlx-chip[ "]/g) === 4 && t.includes('class="mlp-h"')
+      && sp(t).includes('\u2248 98 %') && nb(t, /class="mlx-chip[ "]/g) === 3 && nb(p, /class="mlx-chip[ "]/g) === 4 && t.includes('class="mlp-h"')   /* MOTS-12 : un filtre vide ne se montre pas (« Encore sur pied 0 ») */
       && nb(d, /class="mlp-l/g) === 1 && d.includes('Vieilles Vignes') && nb(v, /class="mlp-l/g) === 1 && v.includes('En Bertrange')
       && p.includes('En Jouise') && p.includes('encore sur pied') && !p.includes('_mlSetRdtMax'); }],
   B5: ['Cuvées : la liste, la première chaîne ouverte par défaut (une cuvée du Chai dans la fiche unique — CAVE-RANGE-3), la cuvée choisie marquée, les lignes simples sans bouton', A => {

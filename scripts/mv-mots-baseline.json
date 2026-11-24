@@ -94,6 +94,11 @@
    "date": "2026-11-23",
    "motif": "MOTS-11 (§604) : Pilotage › Conformité allégé sur place — 90 → 35 mots, hors lexique 1 → 0 (et Planning › Personnel, ordinateur, 276 → 275 : une baisse trouvée en route, venue d’un lot d’après MOTS-10)",
    "hausses": []
+  },
+  {
+   "date": "2026-11-24",
+   "motif": "MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — Parcelles 506 → 174 mots, phrases longues 9 → 0 ; Cuvées 182 → 88 ; les 18 mots d’explication de la tête quittent aussi Ensemble et Courbes",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -213,27 +218,27 @@
     "lex": null
    },
    "Cave › Le Millésime › Ensemble": {
-    "mots": 199,
-    "p15": 2,
-    "avant": 18,
+    "mots": 171,
+    "p15": 1,
+    "avant": 0,
     "lex": null
    },
    "Cave › Le Millésime › Parcelles": {
-    "mots": 506,
-    "p15": 9,
-    "avant": 18,
+    "mots": 174,
+    "p15": 0,
+    "avant": 5,
     "lex": null
    },
    "Cave › Le Millésime › Cuvées": {
-    "mots": 182,
-    "p15": 1,
-    "avant": 18,
+    "mots": 88,
+    "p15": 0,
+    "avant": 6,
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 327,
-    "p15": 3,
-    "avant": 18,
+    "mots": 299,
+    "p15": 2,
+    "avant": 0,
     "lex": null
    },
    "Réserve › Fûts": {
@@ -491,27 +496,27 @@
     "lex": null
    },
    "Cave › Le Millésime › Ensemble": {
-    "mots": 199,
-    "p15": 2,
-    "avant": 18,
+    "mots": 181,
+    "p15": 1,
+    "avant": 0,
     "lex": null
    },
    "Cave › Le Millésime › Parcelles": {
-    "mots": 522,
-    "p15": 9,
-    "avant": 18,
+    "mots": 200,
+    "p15": 0,
+    "avant": 5,
     "lex": null
    },
    "Cave › Le Millésime › Cuvées": {
-    "mots": 179,
-    "p15": 1,
-    "avant": 18,
+    "mots": 156,
+    "p15": 0,
+    "avant": 6,
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 765,
-    "p15": 9,
-    "avant": 18,
+    "mots": 747,
+    "p15": 8,
+    "avant": 0,
     "lex": null
    },
    "Réserve › Fûts": {

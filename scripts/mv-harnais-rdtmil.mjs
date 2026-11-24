@@ -168,8 +168,9 @@ console.log('\n\u2500\u2500 E. UNE SEULE PORTE D\'ECRITURE, deux appelants \u250
   // ⚠️ C24b : toute valeur posee dans un slot JS de gestionnaire passe par
   //    _escAttr, y compris un nombre. Le cliquet compte, il ne raisonne pas —
   //    et une exception « c'est un entier » se transforme un jour en variable.
+  // MOTS-12 (§605) : le geste est un bouton du detail de la parcelle (nom = r.parcelle.nom), plus la ligne entiere
   t('le bouton du millesime passe bien le millesime, via _escAttr',
-    /_mlSetRdtMax\(\\''\+_escAttr\(r\.parcelle\.nom\)\+'\\','\+_escAttr\(mil\)\+'\)/.test(CAVE));
+    /_mlSetRdtMax\(\\''\+_escAttr\(nom\)\+'\\','\+_escAttr\(mil\)\+'\)/.test(CAVE) && /var nom=r\.parcelle\.nom, ouv=/.test(CAVE));
   t('★ la pose passe par la porte de la Cave, seul ecrivain',
     /function _mlSetRdtMax\(nom,mil,apres\)/.test(CAVE) && !/_pcavPoseRdt/.test(CAVE));
   t('_mlGo sait atterrir sur l\'ecran de pose', /kind==='rdtmax'/.test(CAVE));
@@ -322,7 +323,7 @@ console.log('\n\u2500\u2500 F. le renvoi nomme un CHEMIN, pas un ecran homonyme 
   t('l\'ecran du millesime nomme l\'annee de son plafond',
     /titre:'Rendement maximum '\+m,/.test(CAVE)
     && /appellation pour ce mill\\u00e9sime/.test(CAVE)
-    && /appellation renseign\\u00e9 pour '\+mil/.test(CAVE));
+    && /'<span class="mlp-dm">Maximum '\+_escHtml\(String\(mil\)\)/.test(CAVE) && /\('Poser le maximum '\+_escHtml\(String\(mil\)\)\)/.test(CAVE));   // MOTS-12 : le detail d'une parcelle dit « Maximum 2026 », son bouton « Poser le maximum 2026 »
   t('un plafond herite est annonce comme tel a l\'ecran',
     /maxSrc==='herite'/.test(CAVE));
   t('le guide ne dit plus que le Pilotage ne modifie jamais rien',
