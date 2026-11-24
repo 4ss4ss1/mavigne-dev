@@ -1225,3 +1225,55 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Un mutant qui remplace la première occurrence d’un texte peut toucher une autre fonction** : `return p && p.statut!=='Arrachee';` existe trois fois dans `pilotage.js` ; la contre-épreuve restait verte. Les mutants de `cuivre7` visent la fonction (`dans(fichier, fonction, a, b)`).
 - ⚠️ **Une animation peut être juste et ne jamais se voir** : le doigt et le message du téléphone étaient dessinés, réglés, puis éteints dans la même image par l’écran suivant. Seule la mesure dans le navigateur (l’opacité relevée) l’a montré.
 - ★ **Un cahier des charges collé se relit contre les décisions déjà prises** (§503c, 06/11, 23/11) : trois de ses demandes les contredisaient sans le savoir.
+
+## 607. ★★★ MOTS-13 — CAVE › LE MILLÉSIME, ENSEMBLE ET COURBES ALLÉGÉS : UNE PHRASE, LA MÉTHODE DANS LE « i », NEUF DÉFAUTS D’AFFICHAGE (24/11 — APP 11.29, SW 12.20 — `src/cave.js` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/08-cave.html` · `docs/maquettes/maquette-millesime-courbes-v1.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-mots13.mjs` (neuf) · `crb2`, `range1` suivis · `scripts/mv-harnais-liste.mjs` · `scripts/mv-mots-baseline.json` · la capture `r-chai-millesime` de la démo du site)
+
+### 607a. D’où ça vient, ce qui a été mesuré avant
+
+- Le second lot du Millésime (§605 : « Les années » du plan lu comme Ensemble, dit à Nico, pas contredit). Maquette `maquette-millesime-courbes-v1.html` (Avant / Après, téléphone et ordinateur : Ensemble, le parcours, Densités, Maturités, Températures) ; Nico : « go », avec les trois recommandations — la phrase d’Ensemble et la carte « À surveiller » ensemble ; la méthode des Courbes dans le « i » ; une phrase sur Courbes aussi.
+- **Courbes, la page la plus longue de la Cave sur ordinateur** (les quatre graphes ensemble) : 747 mots, 9 phrases de 15 mots et plus, 2 359 px. Sous chaque graphe une **note jaune de méthode** (`.pcrb-note`) : ≈ 150 mots aux densités (le couloir, l’interpolation, le classement, le seuil de vin sec), ≈ 90 aux températures, ≈ 60 aux maturités et à la malo — le « i » `cave.courbes` en disait déjà presque tout. Au téléphone : Densités 299 mots, Maturités 191, Températures 222, Malo 152.
+- **Ensemble** : 171 mots au téléphone ; le pied du parcours (47 mots) redisait les barres (« 182 hL fermentent encore, 50 hL sont déjà descendus au chai ») puis la méthode. Ni Ensemble ni Courbes n’avaient de phrase sous les onglets depuis §605.
+- **Neuf défauts d’affichage**, vus sur les captures :
+  1. **Le parcours débordait au téléphone** (`_mlFluxSvg`) : la plus grande barre allait jusqu’à `W − 2·PAD`, son chiffre se posait dessus (« 266,3 » sur le brun, « hL » coupé) et le « vendu 33,3 hL » sortait du cadre ;
+  2. son **étage projeté** (« En bouteille · projection 6667 cols ») était écrit crème sur un rectangle à 28 % d’opacité : presque invisible ;
+  3. une fois les barres resserrées, **« En fût »** ne tenait plus dans la sienne ;
+  4. les **milliers collés** (« 35950 kg », « 6667 cols ») ;
+  5. **la légende des maturités collée en un bloc** (« En Bertrange238 g/L… par jourVieilles Vignes226… ») : `.mvmat-*` vit dans `_caveV2InjectCss`, posée par Le Cuvier et Le Chai — pas par Le Millésime, ni par Aujourd’hui qu’on traverse pour y venir ;
+  6. **le graphe des maturités dessiné 28 px plus large que sa boîte** au téléphone : `.pcrb-g` déborde de ses gouttières (`margin:0 −14px; padding:0 14px`), le registre des graphes mesure la largeur PADDING COMPRIS (360) et dessine à 360 dans une boîte de 332 — les derniers points et « Agrandir » coupés, à faire défiler. CRB-2 l’avait corrigé pour le couloir seul (`.crb-g`) ;
+  7. **« jours depuis l’encuvage » recouvrait J8 et J12** (`_crbEnvSvg` : l’unité et les graduations sur la même ligne) ;
+  8. **« décuvée 26/10 »** dans le serif des titres (`.pcrb-sec`) au milieu des chiffres en Outfit ;
+  9. **le choix de la courbe** : quatre gros boutons sur deux lignes au téléphone.
+
+### 607b. Ce qui change
+
+- **La phrase d’Ensemble** : « **2 cuves en fermentation, tout est rentré** » — au-dessus du maximum (rouge), volumes à mesurer et parcelles sur pied (orange), cuves en fermentation ; « tout est rentré » seulement quand rien ne demande un geste ; « Rien à signaler » sinon. ★ **Une liste, deux lecteurs** : ce qu’il y a à surveiller sort de `_mlBlocVeille` dans `_mlVeille(mil,d)` (les éléments, les sur-pied, les cuves en fermentation, `nMes`, `nD`, `rentre`) ; la carte l’écrit, la phrase le compte. La carte « À surveiller » reste, avec ses boutons.
+- **La phrase des Courbes** : « **2 cuves en fermentation, 1 décuvée** » — les comptes de la tête (`_mlEtat` rend maintenant `nElev`, `nBtl`, `dec`) ; « décuvée » seulement à côté des cuves qui fermentent ; puis « 3 cuvées en élevage », « en bouteille ».
+- **Les notes de méthode quittent l’écran** : densités (il reste l’écart, raccourci : « 2 cuves ne figurent pas ici : pas de date d’encuvage, ou moins de deux relevés de densité »), températures (le manque de relevés), maturités (rien), malo (les cuvées absentes, les tracées). `_crbNoteInterp` part (plus appelée). Le « i » `cave.courbes` reçoit ce qu’il ne disait pas : « appuyez sur un graphe » et la même cuve sur les deux graphes ; le seuil de vin sec selon le degré (12° → 994, 14° → 992) ; la fenêtre de 18 à 30 °C et l’alerte de Ce qui presse ; l’axe de dates des maturités, par parcelle ; la cuvée sans date d’entonnage. L’interpolation reste dite à l’écran : le « ~ » de l’étiquette du jour, et le « i ».
+- **Plus court** : le sous-titre des températures (22 → 6 mots), celui des densités ; l’aide des puces (« Touchez-en une seconde pour comparer. », « Une troisième relâche la première. ») ; la légende (« Zone dorée : du minimum au maximum. Pointillé : la médiane. Trait plein, tireté : vos cuves. Bande verte : de 18 à 30 °C. »).
+- **Le parcours** : une colonne de 72 px pour les chiffres (`COL`), les barres s’arrêtent avant ; un étage projeté ou plus étroit que 130 px écrit son nom à côté, en foncé ; `_pcrbCvEnt` pour les kilos et les cols. Le pied ne garde que l’état (« La perte totale se lira quand tout sera décuvé. », les cas sans récolte, la perte finale) ; « Les deux premiers étages sont des kilos convertis… » part dans un « i » neuf, `MV_INFO['cave.flux']`.
+- **Les défauts** : `renderCaveMillesime` pose `_caveV2InjectCss()` (gardée par son id) ; les slots des maturités et de la malo prennent `crb-g` (sans débord) ; `_crbEnvSvg` : `padB` 32 → 46, graduations à `pT+ih+18`, unité à `c.h−6` ; `.pcrb-sec` en `--font-ui` ; `.mlx-chips.pcrb-sel` sur une ligne qui défile au téléphone.
+- **Les mots** : `MV_AIDE` (« Le millésime » : la phrase d’Ensemble, la méthode dans le « i ») ; le guide (`08-cave` : les quatre phrases, le « i » du parcours, la méthode des Courbes dans son « i »). Pas touché : la phrase des maturités « En Bertrange est la plus avancée… » (le graphe et sa légende sont ceux du Cuvier, `cuvier.js/_matLegende`).
+
+### 607c. Mesuré après (build, démo)
+
+- Cliquet des mots (regravé avec `--accepte`) — Courbes : **747 → 284 mots** sur ordinateur (les quatre graphes), phrases de 15 mots et plus **8 → 2** (la légende et l’ordre des maturités) ; **299 → 115** au téléphone (Densités). Ensemble : **171 → 140** au téléphone, 181 → 150 sur ordinateur, 1 → 0 phrase longue. ★ **Hausse voulue, écrite dans la référence** : les mots avant le premier grand chiffre passent de 0 à 6 (Ensemble) et de 0 à 4 (Courbes) — c’est la phrase du haut, comme Parcelles (18 → 5) et Cuvées (18 → 6) au lot d’avant ; objectif ≤ 15. Le relevé de la maquette comptait 9 phrases longues sur Courbes (son propre compteur) ; le cliquet en compte 8.
+- Relevé de la maquette, au téléphone : Maturités 191 → 118, Températures 222 → 89, Malo 152 → 91 ; Courbes sur ordinateur 2 359 → 1 824 px ; Densités au téléphone 1 927 → 1 436 px.
+- Joué dans le navigateur (téléphone, ordinateur), sans erreur de page : les deux phrases ; le « i » du parcours s’ouvre (« De la vigne à la bouteille ») ; toucher une seconde cuve change l’aide ; aucun débordement de la page au téléphone (le choix de la courbe débordait de 2 px dans le premier prototype : corrigé avant la maquette).
+- La chaîne complète : 808 commandes, 0 rouge. `ux`, `gabarit`, `debord` verts sans regraver.
+- La démo du site : `r-chai-millesime` régénérée (la phrase d’Ensemble en haut).
+
+### 607d. Harnais
+
+`scripts/mv-harnais-mots13.mjs` (19 assertions, 26 contre-épreuves) : les deux phrases jouées (les cas rouge, orange, « tout est rentré » refusé quand un volume manque, « Rien à signaler » ; Courbes en fermentation, en élevage, en bouteille) et leur source unique ; le parcours joué à 360 px (barres et « vendu » dans le cadre, étages pâle et étroit en foncé, milliers) ; son pied et son « i » ; les notes de méthode parties et le « i » complété ; les textes courts ; les cinq défauts de style ; l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adaptés** : `crb2` (l’interpolation est dite par le « ~ » de l’étiquette et le « i », plus par une note sous deux graphes), `range1` (la liste « À surveiller » vit dans `_mlVeille`).
+
+### 607e. Restes
+
+- Non vu à l’écran : une parcelle au-dessus du maximum, un volume à mesurer, des parcelles sur pied (Ensemble) ; un millésime tout en élevage (Courbes) — joués par le harnais seulement.
+- Le Millésime est fini (quatre onglets). Suivent dans le plan (§28) : Cave › Aujourd’hui (la bande de la Cave, « 36 t » deux fois sur Le Millésime), Phyto › Registre, la Réserve, le lot de balayage.
+
+### 607f. Leçons
+
+- ⚠️ **Une feuille de style posée par un autre écran n’existe pas pour celui qu’on ouvre en premier** : la légende des maturités était juste au Cuvier, collée au Millésime — selon le chemin pris. Un écran pose lui-même toutes les feuilles des pièces qu’il emprunte.
+- ⚠️ **Un graphe qui déborde « volontairement » de sa gouttière doit être dessiné à la largeur de sa boîte, pas de son cadre** : le registre mesure le cadre. CRB-2 avait corrigé un graphe sur quatre ; les trois autres gardaient le défaut.

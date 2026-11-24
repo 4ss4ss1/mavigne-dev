@@ -99,6 +99,16 @@
    "date": "2026-11-24",
    "motif": "MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — Parcelles 506 → 174 mots, phrases longues 9 → 0 ; Cuvées 182 → 88 ; les 18 mots d’explication de la tête quittent aussi Ensemble et Courbes",
    "hausses": []
+  },
+  {
+   "date": "2026-11-24",
+   "motif": "hausse acceptée — MOTS-13 (§607) : la phrase du haut d’Ensemble et des Courbes, comme Parcelles et Cuvées (MOTS-12) — les mots avant le premier chiffre 0 → 6 et 0 → 4 sont ceux de la phrase (objectif ≤ 15). Dans le même lot : Courbes 747 → 284 mots sur ordinateur, 299 → 115 au téléphone ; Ensemble 171 → 140",
+   "hausses": [
+    "Cave › Le Millésime › Ensemble › téléphone › avant : 0 → 6",
+    "Cave › Le Millésime › Courbes › téléphone › avant : 0 → 4",
+    "Cave › Le Millésime › Ensemble › ordinateur › avant : 0 → 6",
+    "Cave › Le Millésime › Courbes › ordinateur › avant : 0 → 4"
+   ]
   }
  ],
  "mesures": {
@@ -218,9 +228,9 @@
     "lex": null
    },
    "Cave › Le Millésime › Ensemble": {
-    "mots": 171,
-    "p15": 1,
-    "avant": 0,
+    "mots": 140,
+    "p15": 0,
+    "avant": 6,
     "lex": null
    },
    "Cave › Le Millésime › Parcelles": {
@@ -236,9 +246,9 @@
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 299,
-    "p15": 2,
-    "avant": 0,
+    "mots": 115,
+    "p15": 0,
+    "avant": 4,
     "lex": null
    },
    "Réserve › Fûts": {
@@ -496,9 +506,9 @@
     "lex": null
    },
    "Cave › Le Millésime › Ensemble": {
-    "mots": 181,
-    "p15": 1,
-    "avant": 0,
+    "mots": 150,
+    "p15": 0,
+    "avant": 6,
     "lex": null
    },
    "Cave › Le Millésime › Parcelles": {
@@ -514,9 +524,9 @@
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 747,
-    "p15": 8,
-    "avant": 0,
+    "mots": 284,
+    "p15": 2,
+    "avant": 4,
     "lex": null
    },
    "Réserve › Fûts": {

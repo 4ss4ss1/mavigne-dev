@@ -275,10 +275,14 @@ T('les deux barres et le tableau partagent le même marqueur `data-crbn`',
 console.log('\n── 10. CE QUE L’ÉCRAN DIT DE LUI-MÊME (§27a) ──');
 T('★ la pastille du tableau ne prétend plus désigner une couleur de courbe',
   /var _PCRB_COL=\['var\(--gris\)'\];/.test(NU));
-T('l’interpolation est ÉCRITE à l’écran, pas seulement en commentaire',
-  /estim\\u00e9e entre ses|estimée entre ses/.test(NU) && /_crbNoteInterp\(\)/.test(NU));
-T('les deux cartes portent la note d’interpolation',
-  (NU.match(/_crbNoteInterp\(\)/g) || []).length >= 3);
+/* MOTS-13 (§607) : la note d'interpolation quitte le pied des deux graphes (avec les autres notes de méthode) ;
+   l'écran la dit toujours — l'étiquette du jour marque d'un « ~ » une valeur estimée, et le « i » de la carte
+   (cave.courbes) l'explique. */
+const UT = fs.readFileSync(new URL('../src/utils.js', import.meta.url), 'utf8');
+T('l’interpolation est ÉCRITE à l’écran, pas seulement en commentaire : le « ~ » de l’étiquette, et le « i » des courbes',
+  /\(r\.reel \? '' : ' ~'\)/.test(NU) && /'cave\.courbes'[\s\S]{0,1500}estim\\u00e9e entre ses deux relev\\u00e9s voisins/.test(UT));
+T('les deux cartes portent ce « i » (densités, températures)',
+  /'J0 = encuvage', _crbChips\('dens'\)[\s\S]{0,200}'cave\.courbes'\);/.test(NU) && /portant une temp\\u00e9rature\.'\):''\),'cave\.courbes'\);/.test(NU));
 T('le slot du couloir ne déborde plus de ses gouttières',
   /\.pcrb-g\.crb-g\{overflow-x:visible/.test(NU));
 

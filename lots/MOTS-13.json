@@ -1,0 +1,34 @@
+{
+  "lot": "MOTS-13",
+  "section": "§607",
+  "base": "338c153feb09b19cd5b3741fbfe55d02ae98d23f",
+  "inclut": [],
+  "date": "2026-11-24",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "508228f003392b541c9c6dbbd5906893efc0e2a8238532cdb67a7eacbd97d9c9",
+    "docs/claude/INDEX.md": "afaeab5fc1638e9d1dac49ea917f26345d741ed71219007ea97972f0759683ce",
+    "docs/claude/chantiers-580-629.md": "c8604b0668babfdd35e7e495ba1dcfc74c3ba0bb36b64d82314a57527c425005",
+    "docs/claude/journal.md": "b0761d97f4a750e790cf37a2e2cb3fb6e71c79a8343288523861ff539916fa95",
+    "docs/maquettes/LISEZMOI.md": "650edf2713da1bb414f2bde0f4e80ca4c03f09eb32fc66bdd5db78873961c119",
+    "guide/08-cave.html": "8b1f2ff09a2466a0fcd1b3b62693752a5f4319528e49eb16df3ab5d78627c2bf",
+    "index.html": "a911f7ac4fc9d4b3fc5a92b3943e8985a29aa24da6db6f390ea073e0772f0af6",
+    "public/demo/r-chai-millesime.webp": "39cb214b4d1a6f8abc70764f2a27d00fcf4047802bb4eb49359e351ad15079a8",
+    "public/demo/t-r-chai-millesime.webp": "5f1523d1b461bbaf6432fdafe528529575b24e81cfba27d49150323568702a80",
+    "public/guide.html": "36574d03ef2fbea3ab55c2ec30821013d7fa6489d83390fd77de60bface716cb",
+    "public/sw.js": "dd78baa63a1842e1c96e535238bc8e920482c7dc55a2d2405afa053316ec64f0",
+    "scripts/harnais-claude-md.mjs": "7d4663e1fb791a3ec6ebf6a5137de7e5b0958519844c255023b748d1c2c55c9d",
+    "scripts/mv-harnais-crb2.mjs": "bc155e6f3b663f216df67c47cb86184b0d3401618722b0daf9a27a43df601b10",
+    "scripts/mv-harnais-liste.mjs": "6404c2b084f7a4ca4fab7a3bd3421d677fb3be11f0feab429aec95d533a3505e",
+    "scripts/mv-harnais-range1.mjs": "1d6b4644da50d4b3de40af8dcc819ea070f86588ec8a690814e06561b71fa40b",
+    "scripts/mv-mots-baseline.json": "6281c431db9fe3da3c874f79d0ca0faf6b98fb8fbab0f9ef2577a369ffa6f8f4",
+    "src/cave.js": "7589837c5218f5241cdeaedaea52c2c918a714a0f57f06cc97c2ecc69a972b52",
+    "src/utils.js": "46915b12d9901d9893a9c58e9944312d4315702bd0c82908aa1f00a9408fe997",
+    "src/whats-new.js": "11b8c295a58c124754cd0924f3e0703f1bc99900fd07228281d8924d145f4307",
+    "docs/maquettes/maquette-millesime-courbes-v1.html": "6b20465f2322af05f6999fc287f88f3b0fa3911ff29b9f29662b8f7628be22d5",
+    "scripts/mv-harnais-mots13.mjs": "d3c01d69ccffe71605c7c2d4bcbd3a697315fa9cbcd3ca3c333c1dc654e2c740"
+  }
+}

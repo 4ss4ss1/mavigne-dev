@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.29', d: '2026-11-24', items: [   // MOTS-13 (§607) : Cave › Le Millésime, Ensemble et Courbes allégés — une phrase, la méthode dans le « i »
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Le Millésime\u00a0: Ensemble et Courbes plus légers',
+      desc: "Ensemble et Courbes ont leur phrase sous les onglets\u00a0: «\u00a02 cuves en fermentation, tout est rentré\u00a0», «\u00a02 cuves en fermentation, 1 décuvée\u00a0». Sous les graphes des Courbes, les longues notes de méthode laissent la place aux graphes\u00a0: tout est dans le «\u00a0i\u00a0» de chaque carte. Le parcours «\u00a0De la vigne à la bouteille\u00a0» ne déborde plus au téléphone, la légende des maturités se lit ligne par ligne, et le graphe tient dans sa carte. Aucun calcul ne change." }
+  ] },
   { v: '11.28', d: '2026-11-24', items: [   // MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — une phrase, une ligne par parcelle
     { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Le Millésime\u00a0: une phrase, une ligne par parcelle',
       desc: "Sous les onglets du Millésime, une phrase dit ce qui compte\u00a0: «\u00a08 parcelles récoltées, 3 sans maximum, 6 estimées\u00a0», «\u00a03 cuvées, 2 encore en cuve, 1 en élevage\u00a0». Dans Parcelles, chaque parcelle tient sur une ligne\u00a0; touchez-la pour son détail (d’où viennent les kilos, le volume, le maximum) et «\u00a0Poser le maximum\u00a0». Au téléphone, les quatre chiffres du millésime sur une ligne, et Cuvées montre la liste seule jusqu’à ce que vous en ouvriez une. Aucun calcul ne change." }

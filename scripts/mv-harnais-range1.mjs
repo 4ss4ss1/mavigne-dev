@@ -71,7 +71,7 @@ const NC = ['_vendCfg', '_vendPckLegacy', '_vendParts', '_vpPck', '_vpCs', '_vpK
   '_caveNbTonneaux', '_mlRecoltesDe', '_mlMilActif', '_mlMillesimes', '_pcavHasW', '_pcavLog',
   '_pcrbCvEnt', '_pcrbCvNomCuve', '_pcrbCvNomVend', '_pcrbCvParcs', '_pcrbCvParcTxt', '_pcrbCvSous', '_pcrbCvVente',
   '_pcrbCvChaineCuve', '_pcrbCvPleines', '_pcrbCvLignes', '_pcrbCvCellules', '_pcrbCvCelHtml',
-  '_mlJourCourt', '_mlJours', '_mlDatesRec', '_mlEtat', '_mlHead', '_mlCuvInfo', '_mlBlocCuvees', '_mlBlocVeille',
+  '_mlJourCourt', '_mlJours', '_mlDatesRec', '_mlEtat', '_mlHead', '_mlCuvInfo', '_mlBlocCuvees', '_mlVeille', '_mlBlocVeille',   /* MOTS-13 : la liste sort de la carte */
   '_mlBlocReperes', '_mlRenderParc', '_mlCuvFicheHtml', '_mlRenderCuv', '_pcavVueCourbes',
   // ★ HLHA-1 (§413) : le hL/ha des cuvées et le rendement par appellation (vraies fonctions, comme le reste)
   '_mlCuvSurf', '_mlAocRdt', '_mlAocHtml', '_parcCoul', '_matNorm', '_vendAocNorm', '_vendAocList', '_vendAocDe', '_vendAocMax'];
@@ -321,7 +321,7 @@ const MUT = [
   ['_pcrbCvCellules', 'var haut=function(v){ return Math.max(3,Math.round(v/max*Z)); };', 'var haut=function(v){ return Math.max(3,Math.round(v/max*100)); };', 'A9', 'les barres repassent en pourcentage'],
   ['_mlCuvFicheHtml', 'if(l.saisir&&ecrit) h+=', 'if(l.saisir) h+=', 'A4', 'la saisie proposée sans droit d’écriture'],
   ['_mlHead', "try{ h+=_mlTuiles(ch); }catch(e){ _pcavLog('tuiles',e); }", '', 'B1', 'la tête perd ses tuiles'],
-  ['_mlBlocVeille', 'if(!l.saisir) return;', 'return;', 'B2', '« À surveiller » oublie le volume à mesurer'],
+  ['_mlVeille', 'if(!l.saisir) return;', 'return;', 'B2', '« À surveiller » oublie le volume à mesurer'],   // MOTS-13 : la liste vit dans _mlVeille
   ['_mlBlocReperes', 'ev.sort(function(a,b){ return a[0]<b[0]?-1:(a[0]>b[0]?1:0); });', '', 'B3', 'les repères dans le désordre'],
   ['_mlRenderParc', 'L.sort(function(a,b){ return (b.hlHa||0)-(a.hlHa||0); });', 'L.sort(function(a,b){ return (a.hlHa||0)-(b.hlHa||0); });', 'B4', 'les parcelles du plus bas au plus haut'],
   ['_mlRenderParc', "return F==='dessus'?r.depasse:(F==='vendu'?r.vendu:true);", 'return true;', 'B4', 'les filtres ne filtrent plus'],

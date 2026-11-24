@@ -854,6 +854,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots11.mjs --contre'],     //   comprise), les pastilles, le registre en résumé, « Ouvrir les traitements » ; le lexique
   ['node scripts/mv-harnais-mots12.mjs'],              // MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — la phrase de l'onglet (jouée), une ligne par
   ['node scripts/mv-harnais-mots12.mjs --contre'],     //   parcelle et son détail au toucher (joué), « Poser le maximum », la tête, les défauts de Cuvées
+  ['node scripts/mv-harnais-mots13.mjs'],              // MOTS-13 (§607) : Cave › Le Millésime, Ensemble et Courbes allégés — les deux phrases (jouées), le parcours
+  ['node scripts/mv-harnais-mots13.mjs --contre'],     //   (joué), les notes de méthode dans le « i », les neuf défauts d'affichage
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque
