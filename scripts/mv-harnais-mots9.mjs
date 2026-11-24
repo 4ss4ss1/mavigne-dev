@@ -71,7 +71,7 @@ function suite(S) {
   });
   T('① l’onglet est rendu par _pilTabEqu, sa phrase prend la sous-ligne (comme Travaux)', P.includes("    host.innerHTML=_pilTabEqu(d);\n    var _phE=document.getElementById('pil-souslig-t'); if(_phE) _phE.innerHTML=_pilEqPhrase(d);")
     // MOTS-10 (§594) : Décider (« sim ») prend aussi la sous-ligne pour sa phrase.
-    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
+    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
 
   // ② la phrase
   const ph = (d, tens) => texte(monter(S, ['_pilEqPhrase'], { _pilTensData: () => tens })._pilEqPhrase(d));

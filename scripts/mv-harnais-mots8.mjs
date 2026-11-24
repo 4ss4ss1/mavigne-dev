@@ -93,7 +93,7 @@ function suite(S) {
     && P.includes("var _ph=document.getElementById('pil-souslig-t'); if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);")
     // MOTS-9 (§592) : L’équipe & le matériel prend la même ligne (sa phrase, _pilEqPhrase).
     // MOTS-9 (§592) puis MOTS-10 (§594) : L'équipe & le matériel et Décider prennent aussi la sous-ligne pour leur phrase.
-    && P.includes(`+'<div class="pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'`));
+    && P.includes(`+'<div class="pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'`));
   // ③ le bandeau — ★ PORTEE-1 (§591) : ses tuiles de l'ANNÉE (Travaux, Renfort, Budget sorti) ont laissé la place à deux tuiles de la
   //   CAMPAGNE (l'équipe au pic, le budget engagé), jouées par mv-harnais-portee1. Ce qui reste de MOTS-8 : la forme de la tuile.
   let B = null;
@@ -201,7 +201,7 @@ if (!CONTRE) {
     ['la phrase ne colore plus un retard', sur('pil', "var cl=(m.marge==null)?'':(m.marge<0?' ko':(m.marge>0?' ok':''));", "var cl='';")],
     ['la phrase écrit le 1er comme « 1 »', sur('pil', "(dt.getDate()===1?'1er':dt.getDate())", "dt.getDate()")],
     ['la phrase ne dit plus quand l’équipe ne suffit pas', sur('pil', "else if(m && m.capa && m.capa.ok===false) h+=", "else if(false) h+=")],
-    ['le sous-titre-question revient sur Travaux', sur('pil', "((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))", "_pilEsc(_pilTabLabel(tab))")],
+    ['le sous-titre-question revient sur Travaux', sur('pil', "((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'':_pilEsc(_pilTabLabel(tab)))", "_pilEsc(_pilTabLabel(tab))")],
     ['la phrase ne se pose plus', sur('pil', "if(_ph) _ph.innerHTML=_pilTvPhrase(d,_mAvc);", "")],
     ['« voir le détail » revient sur les tuiles', sur('pil', "+'<span class=\"s\">'+sous+'</span></button>';", "+'<span class=\"s\">'+sous+'</span><span class=\"go\">voir le d\\u00e9tail \\u203A</span></button>';")],
     ['le « ! » revient écrit dans le point', sur('pil', `aria-label="'+_pilEsc(titre)+'"></span>';`, `aria-label="'+_pilEsc(titre)+'">!</span>';`)],

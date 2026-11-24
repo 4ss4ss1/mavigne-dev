@@ -1086,3 +1086,49 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 ### 603d. Leçon
 
 - ⚠️ **Une adresse e-mail n’est pas qu’un contact** : la Gmail est aussi l’identité admin dans les règles, les fonctions et l’appli. Remplacer « partout » aurait fermé la console GT à Nico. Toujours lister les occurrences et trier : vitrine / juridique / identité.
+
+## 604. ★★★ MOTS-11 — PILOTAGE › CONFORMITÉ ALLÉGÉ SUR PLACE : UNE PHRASE, CINQ CARTES REPLIÉES, LA PROTECTION COMME LES AUTRES (23/11 — APP 11.27, SW 12.18 — `src/pilotage.js` · `src/pilotage.css` · `src/styles.css` · `src/registre.js` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/11-pilotage.html` · `docs/maquettes/maquette-conformite-v1.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-mots11.mjs` (neuf) · dix harnais suivis · `scripts/mv-harnais-liste.mjs` · la capture `r-ger-conformite` de la démo du site)
+
+### 604a. D’où ça vient, ce qui a été mesuré avant
+
+- Le quatrième des onglets restés dans le Pilotage (décision du 17/11, §28), après Travaux (§592), L’équipe & le matériel (§593) et Décider (§594). Maquette `maquette-conformite-v1.html` (Avant / Après, téléphone et ordinateur, captures de la démo et du prototype) ; Nico : « Go », avec les trois recommandations — la protection repliée comme les autres ; le registre en résumé, les huit points dans la fenêtre d’export ; les réglages de la protection en pied de carte, pas dans le « i ».
+- **L’onglet le plus court (90 mots), mais rien ne disait d’un coup d’œil ce qui est à régler.** Le sous-titre « Conformité — cuivre, IFT et délai de rentrée » oubliait la protection et le registre. La protection (`_pilProtCarte`) était une **grande carte toujours ouverte**, d’un autre dessin que les autres (icône, titre en 22 px, cinq lignes, réglages en ligne) : 1,4 écran au téléphone avant la première carte repliée. Des repères à décoder : « ↑ 2 » sur le cuivre, « — » sur l’IFT sans catalogue, « 0 actif » sur le délai de rentrée, « Conforme » sous chaque barre du cuivre. Le registre ouvert recopiait la fenêtre d’export (218 mots : le verdict, puis les huit points, dont le premier redisait le verdict, puis les délais légaux déjà dans le « i »). « Protection restante » hors du lexique.
+- Mots avant le premier grand chiffre : 9 au téléphone, 15 sur ordinateur. Hauteur au téléphone : 1 213 px.
+
+### 604b. Ce qui change
+
+- **Une phrase en haut** (`_pilCfPhrase`, à la place du sous-titre, comme les trois autres onglets) : « **8 parcelles à nu, 2 points à régler** » — le délai de rentrée en cours d’abord (rouge), les parcelles à nu (rouge) ou à nu d’ici 2 jours (orange), les points à régler (orange) ; « Rien à régler » sinon. ★ **Règle ②** : les points sont **la liste de la tuile Conformité d’Aujourd’hui** (`_pilCfmPoints`, COHER-1 §581) — le même nombre aux deux endroits ; la protection et le délai lisent `_pilProtData` et `_cfmDre`. Aucun calcul de plus. Elle se pose après les cartes (`_pilFillContent`).
+- **Les cinq cartes arrivent repliées** sous `.pil-tv.pil-cf` (la règle des cartes allégées) : un titre, un chiffre, une pastille.
+  - **Protection** (`_pilProtTuile`, `_pilProtTete` ; `_pilProtCarte` part) : « 8 parcelles » et « à nu » (rouge), « 7,02 ha sans protection » dessous ; « à nu d’ici 2 jours » (orange, « sur N parcelles ») ; « protégées » (vert). Le corps garde sa liste et « Et 3 autres » ; **les réglages en pied** (rémanences, mode déduit, pluie) ; « **Ouvrir les traitements** » (règle ① — `_pilTvGo('traitements')` → Phyto › Registre). `prot:1` rejoint les replis par défaut (une clé neuve s’applique sans monter `_PIL_ST_V`, §594).
+  - **Cuivre** : la pastille « N au-dessus du plafond » (rouge), « N en vigilance » (orange), « sous le plafond » (vert) ; sous les barres, « Dépassement · » et « Vigilance · » seulement — plus « Conforme » ligne à ligne ; le pied dit « plafond UE 28 kg/ha de cuivre métal sur 7 ans ».
+  - **IFT** : sans catalogue, « 3 passages » et « catalogue E-Phy absent » (la mention de COHER-1), une phrase dans le corps ; avec, l’écart en pastille (« N % au-dessus de la référence », « sous la référence ») ; la formule part dans le « i ».
+  - **Le registre** : « 10 lignes » et la mention (« SIRET manquant »), ou « prêt pour le contrôle » ; « 3 traitements » dessous.
+  - **Délai de rentrée** : « 0 » et « aucune parcelle en délai », « Toutes les parcelles sont accessibles. » ; en cours, « rentrée interdite » et « Ouvrir les traitements ».
+- **Le registre en résumé** (`registre.js/_regCarte`, règle ③) : les points **à compléter**, tels quels, puis un compte (« Les 5 autres points : en règle · 2 facultatifs à compléter »), puis « Voir les lignes et exporter 2026 » — la fenêtre (`_regOuvrir`, inchangée) garde les huit points. Sans ligne, le verdict seul. Le paragraphe des délais légaux est dans le « i » (`pil.phyto`, REG27-1B).
+- **Les mots** : « Protection des parcelles (fenêtre de traitement) » dans les réglages de l’onglet, « La protection des parcelles » pour le « i » ; `MV_AIDE` : « Conformité se lit d’un coup d’œil » ; le guide (`11-pilotage`) dit la phrase, la carte Protection, le registre en résumé, et la protection « dans l’onglet Conformité ».
+- **Les règles mortes** : `.pil-tile2`, `.pil-t2h` et `.pil-prot-big` (la grande carte, PRO-1 §269) n’étaient plus produites — `gabarit1` l’a dit dans la chaîne (« chaque pièce visée par le bloc est produite par le code ») ; retirées de `styles.css`, partout où elles étaient.
+- **La démo du site** : la capture `r-ger-conformite` (« Le jour du contrôle ») régénérée — elle montrait la grande carte de la protection ; son texte reste juste.
+
+### 604c. Mesuré après (build, démo)
+
+- Cliquet des mots : **90 → 35 mots** (téléphone et ordinateur) ; hors lexique 1 → 0 ; mots avant le premier grand chiffre 9 → 5 au téléphone, 15 → 0 sur ordinateur. Hauteur au téléphone : **1 213 → 844 px** (un écran).
+- Cartes ouvertes : le registre **218 → 57 mots**, le cuivre 137 → 124, l’IFT 63 → 24, le délai de rentrée 24 → 15.
+- Cliquets regravés : les mots (`--motif` du lot ; il a aussi pris une baisse trouvée en route, Planning › Personnel sur ordinateur 276 → 275, venue d’un lot d’après MOTS-10) ; le contraste (`mv-harnais-contraste --baseline`) — une paire mesurée de moins dans `styles.css` (1 030 → 1 029, la règle morte retirée) et un écart de moins en sombre. `ux`, `gabarit`, `debord` verts sans regraver.
+- Joué dans le navigateur (téléphone, ordinateur), sans erreur de page : la phrase lit « 8 parcelles à nu, 2 points à régler » ; « Et 3 autres » montre les huit lignes ; « Ouvrir les traitements » ouvre Phyto sur l’onglet Registre.
+
+### 604d. Harnais
+
+`scripts/mv-harnais-mots11.mjs` (21 assertions, 26 contre-épreuves) : l’onglet et sa règle ; la phrase jouée (à nu, bientôt, le délai, « Rien à régler ») et sa source (la liste d’Aujourd’hui, aucun calcul de plus) ; l’en-tête de la protection joué, sa carte, son repli, son bouton ; les pastilles du cuivre, de l’IFT, du registre, du délai ; le registre en résumé joué ; le lexique ; l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adaptés** : `protection` (l’en-tête par `_pilProtTete`, la carte par `_pilProtTuile`), `pro1` (`_pilProtTuile`), `coher1` et `ift1` (la mention du catalogue en pastille), `mots8`, `mots9`, `mots10` (la sous-ligne porte aussi la phrase de Conformité ; le repli de `mots10` lit `ordrepassage:1` suivi d’une autre clé), `reg27b` (le résumé au lieu des huit points), `pilrange4a` (le libellé de la protection dans les réglages), `pil1` (`.pil-prot-big` n’est plus une pièce recalée).
+
+### 604e. Restes, à leur lot
+
+- Non vu à l’écran (la démo ne les a pas) : l’IFT calculé (catalogue chargé), un délai de rentrée en cours, un cuivre au-dessus du plafond — joués par le harnais seulement.
+- Les lots suivants du plan (§28) : Cave › Le Millésime (deux lots), Cave › Aujourd’hui, Phyto › Registre, la Réserve, le lot de balayage.
+
+### 604f. Leçons
+
+- ⚠️ **Un onglet court n’est pas un onglet lisible** : 90 mots, le moins de tout le Pilotage, mais le sous-titre ne nommait pas deux des cinq sujets, et la seule carte ouverte était la plus longue. La phrase du haut répond à la question qu’on pose en ouvrant l’onglet.
+- ⚠️ **Retirer un dessin, c’est retirer ses règles** : `gabarit1` a trouvé dans la chaîne les trois classes de la grande carte, restées dans le bloc GABARIT-1 et dans deux autres blocs. Après avoir supprimé une fonction qui fabrique du HTML, chercher ses classes dans `styles.css`.
+- ⚠️ **Une carte d’un autre dessin se lit comme une autre famille** : la protection, grande et ouverte, paraissait plus importante que le registre ou le délai de rentrée. Même dessin, même repli : c’est la pastille qui dit l’urgence.

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.27', d: '2026-11-23', items: [   // MOTS-11 (§604) : Pilotage › Conformité allégé sur place — une phrase, cinq cartes repliées
+    { niv: 0, pour: ['admin'], emoji: 'balance', titre: 'Pilotage, Conformité\u00a0: une phrase, des cartes repliées',
+      desc: "En haut de Conformité, une phrase\u00a0: les parcelles à nu et les points à régler — le même nombre que la tuile d’Aujourd’hui. Les cinq cartes arrivent repliées\u00a0: un chiffre et sa pastille (à nu, en vigilance, SIRET manquant, aucune parcelle en délai)\u00a0; touchez-en une pour le détail. La protection devient une carte comme les autres, avec «\u00a0Ouvrir les traitements\u00a0». Le registre montre ce qui manque, puis compte le reste\u00a0: les huit points sont dans «\u00a0Voir les lignes et exporter\u00a0». Aucun calcul ne change." }
+  ] },
   { v: '11.26', d: '2026-11-23', items: [   // MANIF-1 (§600) : ouverture sans éclair, barre d'état au thème, icône non rognée
     { niv: 0, pour: ['tous'], emoji: 'raisin', titre: 'L’appli installée s’ouvre sans éclair, son icône n’est plus rognée',
       desc: "Sur Android, l’appli installée s’ouvrait sur un écran bleu nuit avant le démarrage noir. Elle s’ouvre maintenant sur du noir, d’un seul tenant, puis la barre du haut du téléphone prend la couleur de l’appli, claire ou sombre selon le thème, au lieu de rester bleu nuit. L’icône de l’écran d’accueil n’est plus coupée sur les bords : le raisin et les lettres tiennent dans le rond. Le téléphone peut demander une fois d’accepter la nouvelle icône." },

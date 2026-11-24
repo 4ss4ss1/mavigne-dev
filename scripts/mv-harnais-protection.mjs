@@ -44,7 +44,8 @@ function charger(src, o = {}) {
     _rfSim: (ctx, prof) => { if (!Array.isArray(prof)) throw new Error('signature'); return o.sim || { induit: 214, horsDelai: 2, deborde: false }; },
   };
   ctx.window = ctx; vm.createContext(ctx);
-  vm.runInContext([corps(src, 'function _pilEsc('), corps(src, 'function _pilNum('), corps(src, 'function _pilHa('), corps(src, 'function _pilDfr('), corps(src, 'function _ecoEur('), corps(src, 'function _pilPhotoIso('), bloc(src)].join('\n'), ctx, { filename: 'prot-extrait.js' });
+  // MOTS-11 (§604) : la carte de la protection porte un bouton (_pilTvBtn), un chiffre (_pilStat) et une pastille (_pilPhPl).
+  vm.runInContext([corps(src, 'function _pilEsc('), corps(src, 'function _pilNum('), corps(src, 'function _pilHa('), corps(src, 'function _pilDfr('), corps(src, 'function _ecoEur('), corps(src, 'function _pilPhotoIso('), corps(src, 'function _pilTvBtn('), corps(src, 'function _pilStat('), corps(src, 'function _pilPhPl('), bloc(src)].join('\n'), ctx, { filename: 'prot-extrait.js' });
   return ctx;
 }
 function chargerReg(src) {
@@ -99,12 +100,15 @@ function scenarios(pil, reg, journal, app) {
     t('_pluieLire : réponse vide → null', ctxL._pluieLire(null) === null && ctxL._pluieLire({}) === null);
     t('PLUIE : branché — la carte demande la pluie, le réglage « lessivage » existe', /_pilPluieDemander\(\);\s*var P=_pilProtData\(\)/.test(pil) && /prot_lessivage_mm=_ecoNum\(val\)/.test(reg) && /window\._pluieCharger=_pluieCharger/.test(APP));
     const H = X._pilProtHtml();
-    t('rendu : « 3 parcelles à nu », 1,4 ha, rémanences écrites, « ? » sur le mode déduit, lessivée dite', H.includes('3 parcelles à nu') && H.includes('1,4 ha sans protection') && H.includes('lessivée · 28,5 mm') && H.includes('rémanences 10 / 12 / 14 j') && H.includes('contact ?'));
+    // MOTS-11 (§604) : « 3 parcelles à nu » et « 1,4 ha sans protection » sont passés dans l'en-tête de la carte (_pilProtTete) ; le corps
+    //   garde la liste et, en pied, les rémanences — toujours écrites.
+    const Tt = X._pilProtTete(X._pilProtData()), tt = (Tt.stat + ' ' + Tt.sub).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    t('rendu : « 3 parcelles » et la pastille « à nu », 1,4 ha, rémanences écrites, « ? » sur le mode déduit, lessivée dite', /3 parcelles à nu 1,4 ha sans protection/.test(tt) && Tt.stat.includes('pil-tv-pl ko') && H.includes('lessivée · 28,5 mm') && H.includes('rémanences 10 / 12 / 14 j') && H.includes('contact ?') && H.includes('data-tvgo="traitements"'), tt);
     t('rendu : jamais traitée dite comme telle, aucun undefined / NaN', !/undefined|NaN/.test(H) && (H.match(/<div[ >]/g) || []).length === (H.match(/<\/div>/g) || []).length);
     // jamais traitee
     const X3 = charger(pil); X3.TRAITEMENTS.length = 0; const P3 = X3._pilProtData();
     t('sans aucun traitement : toutes « jamais traitées », toutes à nu', P3.nu.length === 6 && P3.rows.every(r => r.jamais) && X3._pilProtHtml().includes('jamais traitée'));
-    t('branché : la carte « Protection restante » est posée par Conformité (_pilTabCfm)', (() => { const i = pil.indexOf('function _pilTabCfm('); return i >= 0 && pil.slice(i, pil.indexOf('\n}\n', i)).includes('_pilProtCarte()'); })());
+    t('branché : la carte « Protection » est posée par Conformité (_pilTabCfm, MOTS-11 : une carte comme les autres)', (() => { const i = pil.indexOf('function _pilTabCfm('); return i >= 0 && pil.slice(i, pil.indexOf('\n}\n', i)).includes('_pilProtTuile()'); })());
     // le reglage, pour de vrai
     const RG = chargerReg(reg);
     RG._ecoCfgSet('prot', 'penetrant', '11'); RG._ecoCfgSet('prot', 'autre', '99');

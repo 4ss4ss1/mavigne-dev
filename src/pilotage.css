@@ -177,8 +177,8 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 #page-pilotage .pil-tv-ph b.or{color:var(--attention-texte)}
 #page-pilotage .pil-tv-pl.ko{background:var(--danger-doux)}
 #page-pilotage .pil-tv-pl.ko::before{background:var(--danger)}
-#page-pilotage .pil-eq .pil-th-l2 .pil-th-stat,#page-pilotage .pil-dc .pil-th-l2 .pil-th-stat{vertical-align:middle}
-#page-pilotage .pil-eq .pil-th-l2 .pil-tv-pl,#page-pilotage .pil-dc .pil-th-l2 .pil-tv-pl{margin-left:var(--e-2,8px);vertical-align:middle;font-size:var(--pt-micro,12px)}
+#page-pilotage .pil-eq .pil-th-l2 .pil-th-stat,#page-pilotage .pil-dc .pil-th-l2 .pil-th-stat,#page-pilotage .pil-cf .pil-th-l2 .pil-th-stat{vertical-align:middle}
+#page-pilotage .pil-eq .pil-th-l2 .pil-tv-pl,#page-pilotage .pil-dc .pil-th-l2 .pil-tv-pl,#page-pilotage .pil-cf .pil-th-l2 .pil-tv-pl{margin-left:var(--e-2,8px);vertical-align:middle;font-size:var(--pt-micro,12px)}
 #page-pilotage .pil-eq .pil-tv-fh .pil-tv-pl{margin-left:auto;font-weight:var(--fw-reg,400)}
 /* la cuve : le seuil posé sur la barre */
 #page-pilotage .pil-eq .pil-eq-gb{position:relative;overflow:visible}
@@ -204,3 +204,10 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 #page-pilotage .pil-dc .pil-dz-trn b{font-weight:var(--fw-semi,600);color:var(--texte)}
 /* « Ouvrir la priorité du moment » : sous « Qui fait quoi », comme les boutons des autres onglets */
 #page-pilotage .pil-dc .pil-dz-rep + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-lib + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-bil + .pil-tv-act,#page-pilotage .pil-dc .pil-dz-reset + .pil-tv-act{margin-top:var(--e-3,12px)}
+
+/* ★★★ MOTS-11 (§604) — CONFORMITÉ ALLÉGÉ SUR PLACE : la règle de Travaux (§590), portée par .pil-tv ; ce qui est propre à l'onglet est
+   sous .pil-cf. La protection est une carte comme les autres : sa liste garde ses styles (.pil-prot-*), son pied dit les réglages. */
+#page-pilotage .pil-cf .pil-prot{margin-top:0;padding-top:0;border-top:0}
+#page-pilotage .pil-cf .pil-prot-l{margin-top:0}
+#page-pilotage .pil-cf .pil-prot-pied{margin-top:var(--e-3,12px);white-space:normal;line-height:1.5}
+#page-pilotage .pil-cf .pil-prot .pil-tv-act{margin-top:var(--e-3,12px)}

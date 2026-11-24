@@ -89,6 +89,11 @@
    "date": "2026-11-18",
    "motif": "MOTS-10 (§594) : Pilotage › Décider allégé sur place — 377 → 45 mots, phrases longues 2 → 0, hors lexique 5 → 0",
    "hausses": []
+  },
+  {
+   "date": "2026-11-23",
+   "motif": "MOTS-11 (§604) : Pilotage › Conformité allégé sur place — 90 → 35 mots, hors lexique 1 → 0 (et Planning › Personnel, ordinateur, 276 → 275 : une baisse trouvée en route, venue d’un lot d’après MOTS-10)",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -340,10 +345,10 @@
     "lex": 1
    },
    "Pilotage › Conformité": {
-    "mots": 90,
+    "mots": 35,
     "p15": 0,
-    "avant": 9,
-    "lex": 1
+    "avant": 5,
+    "lex": 0
    },
    "Pilotage › Archives": {
     "mots": 37,
@@ -540,7 +545,7 @@
     "lex": null
    },
    "Planning › Personnel": {
-    "mots": 276,
+    "mots": 275,
     "p15": 4,
     "avant": 0,
     "lex": null
@@ -618,10 +623,10 @@
     "lex": 1
    },
    "Pilotage › Conformité": {
-    "mots": 90,
+    "mots": 35,
     "p15": 0,
-    "avant": 15,
-    "lex": 1
+    "avant": 0,
+    "lex": 0
    },
    "Pilotage › Archives": {
     "mots": 37,

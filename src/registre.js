@@ -274,9 +274,16 @@ window._regAller = function (i) {
 // La carte de Pilotage › Conformité : { an, k, V, verdict, corps } — pilotage.js l'habille (_pilPanelPhyto).
 window._regCarte = function () {
   var an = _regAnnee(), fen = _regFenAn(an), V = window._regVerif(fen), vd = window._regVerdict(V);
-  var corps = _regVerdictHtml(V) + (V.nLignes ? _regPointsHtml(V) : '')
-    + ((V.nLignes && isAdmin()) ? '<button type="button" data-reg="ouvrir" class="mvbtn mvbtn-secondaire" style="margin-top:12px" onclick="window._regOuvrir(\'' + _escAttr(fen.k) + '\')"><span>' + (vd.ok ? 'Exporter le registre ' : 'Voir les lignes et exporter ') + Number(an) + '</span></button>' : '')
-    + '<div style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;margin-top:12px">Le registre d’une année se met au format électronique avant le 31 janvier de l’année suivante (sous 30 jours dès 2030)\u00a0; un contrôleur peut le demander sous dix jours ouvrables.</div>';
+  // ★ MOTS-11 (§604) — UN RÉSUMÉ, PAS UNE COPIE (règle ③ du Pilotage) : la carte de Conformité ne redit plus les huit points ni la
+  //   phrase du verdict (« Le SIRET du domaine manque… », redite par le premier point) — elle montre ce qui MANQUE (les points
+  //   « à compléter », tels quels) et compte le reste ; les huit points sont dans la fenêtre « Voir les lignes et exporter »
+  //   (_regOuvrir, inchangée). Le paragraphe des délais légaux est dans le « i » (pil.phyto) depuis REG27-1B.
+  var pts = V.nLignes ? _regPoints(V) : [], dus = pts.filter(function (p) { return p.niv === 'manque'; });
+  var nBon = pts.filter(function (p) { return p.niv === 'ok' || p.niv === 'rien'; }).length, nFac = pts.filter(function (p) { return p.niv === 'conseil'; }).length;
+  var compte = V.nLignes ? '<div data-reg="compte" style="font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.5;padding-top:8px' + (dus.length ? ';border-top:1px solid var(--gris-clair)' : '') + '">'
+    + (dus.length ? 'Les ' + _regPl(nBon, 'autre point', 'autres points') : _regPl(nBon, 'point', 'points')) + '\u00a0: en règle' + (nFac ? ' \u00b7 ' + _regPl(nFac, 'facultatif à compléter', 'facultatifs à compléter') : '') + '</div>' : '';
+  var corps = (V.nLignes ? dus.map(function (p) { return _regPointHtml(p); }).join('') + compte : _regVerdictHtml(V))
+    + ((V.nLignes && isAdmin()) ? '<button type="button" data-reg="ouvrir" class="mvbtn mvbtn-secondaire" style="margin-top:12px" onclick="window._regOuvrir(\'' + _escAttr(fen.k) + '\')"><span>' + (vd.ok ? 'Exporter le registre ' : 'Voir les lignes et exporter ') + Number(an) + '</span></button>' : '');
   return { an: an, k: fen.k, V: V, verdict: vd, corps: corps };
 };
 

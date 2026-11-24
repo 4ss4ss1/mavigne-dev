@@ -59,7 +59,8 @@ if (!CONTRE) {
     ['un défaut sans case', (S) => R(S, 'pil', "    auj_cave:1, auj_cave_sv:1, auj_traiter:1, auj_tension:1,", "    auj_cave:1, auj_cave_sv:1, auj_traiter:1, auj_tension:1, auj_plan:1,")],
     ['la tension revient dans Aujourd’hui', (S) => R(R(S, 'pil', "['auj_tension','Tension'],", ''), 'pil', "  auj:[['auj_cave',", "  auj:[['auj_tension','Tension équipe'],['auj_cave',")],
     ['la tension seule ne réveille plus Personnel', (S) => R(S, 'pil', "  if(_pilShow('auj_tension')) P+=_pilPanelTension(d);", "  if(_pilShow('auj_tension')) M+=_pilPanelTension(d);")],
-    ['la protection quitte Conformité', (S) => R(S, 'pil', "cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],", 'cfm:[')],
+    // MOTS-11 (§604) : l'étiquette dit « Protection des parcelles » (« restante » est hors du lexique)
+    ['la protection quitte Conformité', (S) => R(S, 'pil', "cfm:[['auj_traiter','Protection des parcelles (fenêtre de traitement)'],", 'cfm:[')],
     ['la normalisation garde tout (les clés mortes reviennent)', (S) => R(S, 'pil', "Object.keys(d).forEach(function(k){ o[k]=", "Object.keys(Object.assign({},cur||{},d)).forEach(function(k){ o[k]=")],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-pilrange4a.mjs'").join("mv-harnais-pilrangeW.mjs'") })],
   ];

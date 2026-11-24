@@ -74,7 +74,7 @@ function suite(S) {
     return [h === '<div class="pil-tv pil-dc"><div class="pil-panels">[tournee][quifait][renfort]</div></div>' && /pil-empty/.test(h2), h];
   });
   T('① la phrase prend la sous-ligne, APRÈS les trois cartes (elle lit leurs calculs)', P.includes("    host.innerHTML=_pilTabSim(d);\n    _pilDcPhraseMaj();")
-    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
+    && P.includes("'<div class=\"pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?' pil-tv-souslig':'')+'\"><span id=\"pil-souslig-t\">'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'"));
 
   // ② la phrase
   const PH = (C, R, Q, ex, glob) => {
@@ -153,7 +153,7 @@ function suite(S) {
     && /cible==='priorite'\)\{ window\._pilGo\(cible\)/.test(corps(S.pil, '_pilTvGo')));
 
   // ⑤ repliées, et les raccourcis qui déplient
-  T('⑤ repliées par défaut : la tournée aussi (avec Qui fait quoi et le Renfort)', /collapsed:\{[^}]*simulateur:1,renfort:1,[^}]*ordrepassage:1\}/.test(P));
+  T('⑤ repliées par défaut : la tournée aussi (avec Qui fait quoi et le Renfort)', /collapsed:\{[^}]*simulateur:1,renfort:1,[^}]*ordrepassage:1[,}]/.test(P));
   T('⑤ _pilDeplier ouvre ET enregistre ; la tension et le renfort s’en servent', /function _pilDeplier\(id\)\{[^\n]*_PIL_STATE\.collapsed\[id\]=0; _pilSaveState\(_PIL_STATE\);/.test(P)
     && P.includes("    if(cible==='tension'){\n      _pilDeplier('tension');") && P.includes("    if(cible==='renfort'){\n      _pilDeplier('renfort');")
     && P.includes("_pilVersCarte(document.querySelector('#pil-content .pil-tile[data-pid=\"renfort\"]'));") && /t\.style\.scrollMarginTop=/.test(corps(S.pil, '_pilVersCarte')));
@@ -214,7 +214,7 @@ if (!CONTRE) {
     ['le bilan « travail fini » revient pour un seul travail', sur('pil', "  if(bloq||R.taches.length>1) h+='<div class=\"pil-dz-bil\">", "  if(true) h+='<div class=\"pil-dz-bil\">")],
     ['« Ouvrir la priorité du moment » part', sur('pil', "  if(_opCanEdit()) h+='<div class=\"pil-tv-act\">'+_pilTvBtn('priorite','Ouvrir la priorit\\u00e9 du moment')+'</div>';\n", '')],
     ['le bouton ne mène nulle part', sur('pil', "||cible==='renfort'||cible==='priorite'){ window._pilGo(cible); return; }", "||cible==='renfort'){ window._pilGo(cible); return; }")],
-    ['la tournée arrive ouverte', sur('pil', ',dre:1,ordrepassage:1},', ',dre:1},')],
+    ['la tournée arrive ouverte', sur('pil', ',dre:1,ordrepassage:1,', ',dre:1,')],
     ['_pilDeplier n’enregistre plus', sur('pil', "_PIL_STATE.collapsed[id]=0; _pilSaveState(_PIL_STATE);", "_PIL_STATE.collapsed[id]=0;")],
     ['« Simuler un renfort » ne déplie plus le renfort', sur('pil', "    if(cible==='renfort'){\n      _pilDeplier('renfort');", "    if(cible==='renfort'){")],
     ['le cockpit retombe sur l’onglet sans la carte', sur('vue', "  if (k === 'sim' && typeof window._pilGo === 'function') { window._pilGo('renfort'); return; }\n", '')],

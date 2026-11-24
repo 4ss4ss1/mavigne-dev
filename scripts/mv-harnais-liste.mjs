@@ -850,6 +850,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-debord1.mjs --contre'],    //   tenues sur le texte ; la règle qui regarde l'écran est npm run test:debord (sa propre étape de la CI)
   ['node scripts/mv-harnais-mots10.mjs'],              // MOTS-10 (§594) : Pilotage › Décider allégé sur place — la phrase, les trois cartes repliées (la tournée
   ['node scripts/mv-harnais-mots10.mjs --contre'],     //   comprise), « fin prévue », les pastilles, « Ouvrir la priorité du moment », _pilDeplier ; le lexique
+  ['node scripts/mv-harnais-mots11.mjs'],              // MOTS-11 (§604) : Pilotage › Conformité allégé sur place — la phrase, cinq cartes repliées (la protection
+  ['node scripts/mv-harnais-mots11.mjs --contre'],     //   comprise), les pastilles, le registre en résumé, « Ouvrir les traitements » ; le lexique
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
   ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne

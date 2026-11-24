@@ -101,7 +101,8 @@ function suite(S) {
   T('① … sous garde : une erreur de la liste ne casse pas Aujourd’hui', /try\{ diag=_pilCfmPoints\(\); \}catch\(e\)\{ diag=\[\];/.test(mod));
   T('① … il nomme le premier point et compte les autres', /confN:diag\.length, confTxt:diag\.length\?\(tx\(diag\[0\]\.t\|\|'Un point à régler'\)\+\(diag\.length>1\?\(' · \+'\+\(diag\.length-1\)\):''\)\):'Rien à régler'/.test(mod));
   T('① la tuile du registre écrit la mention que la liste compte', /var V=G\.V, _av=_cfmRegPoint\(V\);/.test(S.pil) && !/_av=!V\.nLignes\?null/.test(S.pil));
-  T('① la tuile de l’IFT écrit la mention que la liste compte', /' en '\+an\+' · '\+_cfmIftPoint\(R\), null,/.test(S.pil) && !/' · catalogue E-Phy absent', null,/.test(S.pil));
+  // MOTS-11 (§604) : la mention est la pastille de la tuile (« 3 passages » et « catalogue E-Phy absent »).
+  T('① la tuile de l’IFT écrit la mention que la liste compte', /_pilPhPl\(_cfmIftPoint\(R\),'or'\)/.test(S.pil) && !/' · catalogue E-Phy absent', null,/.test(S.pil));
   T('① la tuile du cuivre et la liste lisent le même compte (cu.over)', /var sw=cu\.over\?/.test(S.pil) && /if\(cu&&cu\.avail&&cu\.over\) P\.push/.test(S.pil));
   T('① la fiche « i » de la tuile dit ce qu’elle compte', /conformite: 'Ce que l’onglet Conformité signale avant un contrôle/.test(S.vue) && !/documents obligatoires qui demandent une action/.test(S.vue));
 
@@ -190,7 +191,8 @@ if (!CONTRE) {
     ['l’IFT compte sans traitement', sur('pil', "return (R&&R.lignes&&!R.ok)?'catalogue E-Phy absent':null;", "return (R&&!R.ok)?'catalogue E-Phy absent':null;")],
     ['une tuile éteinte compte', sur('pil', "if(_pilShow('mat_phyto') && typeof window._regCarte==='function'){\n    var G=window._regCarte(); pt=", "if(typeof window._regCarte==='function'){\n    var G=window._regCarte(); pt=")],
     ['la tuile du registre reprend sa propre mention', sur('pil', 'var V=G.V, _av=_cfmRegPoint(V);', "var V=G.V, _av=!V.nLignes?null:(!V.siretOk?'SIRET manquant':null);")],
-    ['la tuile de l’IFT reprend sa propre mention', sur('pil', "' · '+_cfmIftPoint(R), null,", "' · catalogue E-Phy absent', null,")],
+    // MOTS-11 (§604) : la mention est la pastille de la tuile
+    ['la tuile de l’IFT reprend sa propre mention', sur('pil', "_pilPhPl(_cfmIftPoint(R),'or')", "_pilPhPl('catalogue E-Phy absent','or')")],
     ['le texte de la tuile ne compte plus les autres points', sur('pil', "+(diag.length>1?(' · +'+(diag.length-1)):'')", '')],
     ['la fiche de la tuile garde l’ancien texte', sur('vue', "conformite: 'Ce que l’onglet Conformité signale avant un contrôle", "conformite: 'Points du registre phyto et des documents obligatoires qui demandent une action de votre part. Ce que l’onglet")],
     ['la projection prolonge de nouveau le rythme', sur('pil', 'var finV=(isFinite(E.projFin) && E.projFin>0) ? Math.max(cum, E.projFin) : null;', 'var finV=cum+pace*Math.max(0,(tEnd-winEnd)/86400000);')],

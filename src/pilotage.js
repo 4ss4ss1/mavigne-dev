@@ -105,7 +105,7 @@ var _PIL_DEFAULT = {
   // ★ MOTS-10 (§594) : la tournée du jour arrive REPLIÉE elle aussi (DZ-1 §162 la laissait seule ouverte) — la phrase du haut et son
   //   en-tête disent jusqu'où et quand ; on l'ouvre pour essayer. Clé jamais gravée chez les clients (_pilNormalize ne garde que
   //   les clés des défauts) : le défaut s'applique à tous dès le chargement, sans monter _PIL_ST_V.
-  collapsed:{tension:1,conso:1,trx:1,echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1,ordrepassage:1},
+  collapsed:{tension:1,conso:1,trx:1,echeances:1,carte:1,anrenfort:1,anbudget:1,ecofin:1,ecorev:1,ecotemps:1,ecoecart:1,ecotab:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1,ordrepassage:1,prot:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -1108,8 +1108,10 @@ function _pilPanelPhyto(d){
   if(G){
     var V=G.V, _av=_cfmRegPoint(V);   // COHER-1 (§581) : la mention que compte la tuile d'Aujourd'hui
     var _liste=d.traits.length?('<details style="margin-top:12px"><summary style="cursor:pointer;font-size:var(--pt-micro,12px);color:var(--texte-doux)">Les derni\u00e8res interventions</summary><div class="pil-ip-list" style="margin-top:8px">'+rows+'</div></details>'):'';
-    return _pilTile('phyto','#5A9FD4','Le registre '+G.an, _pilStat(V.nLignes,' ligne'+(V.nLignes>1?'s':''),_av),
-      V.nLignes?(V.nTrait+' traitement'+(V.nTrait>1?'s':'')+' \u00b7 au format du registre \u00e9lectronique'):('aucun traitement en '+G.an),
+    // MOTS-11 (§604) : « SIRET manquant » en pastille (« prêt pour le contrôle » quand rien ne manque) ; le corps est le RÉSUMÉ de
+    //   registre.js (_regCarte : ce qui manque, puis un compte) — la liste entière des huit points est dans « Voir les lignes et exporter ».
+    return _pilTile('phyto','#5A9FD4','Le registre '+G.an, _pilStat(V.nLignes,' ligne'+(V.nLignes>1?'s':''))+(V.nLignes?(_av?_pilPhPl(_av,'or'):_pilPhPl('pr\u00eat pour le contr\u00f4le','ok')):''),
+      V.nLignes?(V.nTrait+' traitement'+(V.nTrait>1?'s':'')):('aucun traitement en '+G.an),
       null, G.corps+_liste, 'pil.phyto');
   }
   return _pilTile('phyto','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
@@ -4464,21 +4466,28 @@ function _pilPluieDemander(){
 // vivait dans « Traiter ? » et étirait la rangée des quatre tuiles. Les 5 parcelles les plus urgentes ;
 // le bouton montre les autres (_PIL_PROT_TOUT, cible interne `prot_tout` de _pilGo).
 var _PIL_PROT_TOUT=false;
-function _pilProtCarte(){
-  var h=_pilProtHtml(); if(!h) return '';
-  return '<div class="pil-tile2 pil-det"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Protection restante</span>'+_mvInfoBtn('pil.prot')+'</div>'
-    +'<div class="pil-t2b">'+h+'</div></div>';
-}
-function _pilProtHtml(){
+// ★ MOTS-11 (§604) : la protection devient une carte COMME LES AUTRES de Conformité (_pilTile, repliée) — elle était une grande
+//   carte toujours ouverte (.pil-tile2, PRO-1 §269), « Protection restante » (« restante » est hors du lexique, §580c) : « Protection »,
+//   « 8 parcelles » et la pastille « à nu ». Le corps garde la liste et, en pied, ce qui la règle (rémanences, pluie) : des valeurs
+//   RÉGLABLES, pas une méthode — la méthode est dans le « i » (pil.prot). Même calcul (_pilProtData), rien n'est recompté.
+function _pilProtTuile(){
   _pilPluieDemander();
   var P=_pilProtData(); if(!P.n) return '';
-  var tot=P.rows.length, nNu=P.nu.length, nB=P.bientot.length;
-  var big=nNu?(nNu+' parcelle'+(nNu>1?'s':'')+' à nu'):(nB?(nB+' parcelle'+(nB>1?'s':'')+' à nu d’ici 2 jours'):'tout le domaine est protégé');
-  var col=nNu?'var(--rouge)':(nB?'var(--orange)':'var(--vert-med)');
-  var h='<div class="pil-prot">'
-    +'<div class="pil-prot-big" style="color:'+col+'">'+big+'</div>'
-    +'<div class="pil-t2s">'+(nNu?(_pilHa(P.haNu)+' ha sans protection'+(nB?(' · '+nB+' de plus d’ici 2 jours'):'')):(nB?'sur '+tot+' parcelles':tot+' parcelles'))
-    +' · rémanences '+P.cfg.contact+' / '+P.cfg.penetrant+' / '+P.cfg.systemique+' j'+(P.nDed?(' · mode déduit pour '+P.nDed):'')
+  var T=_pilProtTete(P);
+  return _pilTile('prot','#B85A1A','Protection',T.stat,T.sub,null,_pilProtHtml(P),'pil.prot');
+}
+function _pilProtTete(P){
+  var tot=P.rows.length, nNu=P.nu.length, nB=P.bientot.length, pl=function(n){ return n>1?'s':''; };
+  if(nNu) return { stat:_pilStat(nNu,' parcelle'+pl(nNu))+_pilPhPl('à nu','ko'), sub:_pilHa(P.haNu)+' ha sans protection'+(nB?(' · '+nB+' de plus d’ici 2 jours'):'') };
+  if(nB) return { stat:_pilStat(nB,' parcelle'+pl(nB))+_pilPhPl('à nu d’ici 2 jours','or'), sub:'sur '+tot+' parcelles' };
+  return { stat:_pilStat(tot,' parcelle'+pl(tot))+_pilPhPl('protégées','ok'), sub:null };
+}
+function _pilProtHtml(P){
+  if(!P){ _pilPluieDemander(); P=_pilProtData(); }
+  if(!P.n) return '';
+  var tot=P.rows.length;
+  var h='<div class="pil-prot">';
+  var pied='<div class="pil-li-s pil-prot-pied">rémanences '+P.cfg.contact+' / '+P.cfg.penetrant+' / '+P.cfg.systemique+' j'+(P.nDed?(' · mode déduit pour '+P.nDed):'')
     +(P.nPousse?(' · la pousse (stade 16 à 79) : un contact couvre '+Math.round(P.cfg.contact*P.cfg.pousse)+' j, pas '+P.cfg.contact):'')
     +(P.pluieOk?(' · lessivage à '+P.cfg.lessivage+' mm'+(P.nLess?(' : '+P.nLess+' lessivée'+(P.nLess>1?'s':'')):'')+(P.pluieAuj!=null?(' · aujourd’hui '+String(P.pluieAuj).replace('.',',')+' mm'):'')):' · pluie inconnue, les jours seuls')+'</div>';
   var lim=_PIL_PROT_TOUT?tot:5, urg=P.rows.slice(0,lim);
@@ -4487,7 +4496,8 @@ function _pilProtHtml(){
     var txt=r.jamais?'jamais traitée':(r.lessive?('lessivée · '+String(r.pluie).replace('.',',')+' mm'):(r.reste<=0?('à nu depuis '+(-r.reste)+' j'):('encore '+r.reste+' j')));
     var sub=(r.jamais?'':(' · '+_pilDfr(r.date)+' · '+_pilProtLib(r.mode)+(r.deduit?' ?':'')+(r.pousse?' · lu par la pousse':'')+((!r.lessive&&r.pluie!=null)?(' · '+String(r.pluie).replace('.',',')+' mm de pluie'):'')))+(r.fleur?' · en fleur \u2192 le soir':'');
     return '<div class="pil-prot-r"><span class="pil-prot-pt '+c+'"></span><span class="n">'+_pilEsc(r.nom)+'</span><span class="v">'+txt+'<span>'+sub+'</span></span></div>';
-  }).join('')+'</div>'+(tot>5?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="prot_tout">'+(_PIL_PROT_TOUT?'Ne garder que les 5 plus urgentes':('Et '+(tot-5)+' autre'+(tot-5>1?'s':'')+', mieux protégée'+(tot-5>1?'s':'')))+' \u203A</button></div>':'')+'</div>';
+  }).join('')+'</div>'+(tot>5?'<div class="pil-trx-go"><button class="pil-diag-go ghost" data-diag="prot_tout">'+(_PIL_PROT_TOUT?'Ne garder que les 5 plus urgentes':('Et '+(tot-5)+' autre'+(tot-5>1?'s':'')+', mieux protégée'+(tot-5>1?'s':'')))+' \u203A</button></div>':'')
+    +pied+'<div class="pil-tv-act">'+_pilTvBtn('traitements','Ouvrir les traitements')+'</div></div>';
   return h;
 }
 // ════════════════════════════════════════════════════════════════════════
@@ -6058,6 +6068,12 @@ function _pilTvGo(cible){
     // ★ MOTS-10 (§594) : Décider › Qui fait quoi — la priorité du moment (l'éditeur de la Vigne, PRIO-1 §235).
     if(cible==='equipe'||cible==='entretien'||cible==='renfort'||cible==='priorite'){ window._pilGo(cible); return; }
     if(cible==='tracteur'){ if(window.goTo) window.goTo('tracteur'); return; }
+    // ★ MOTS-11 (§604) : Conformité › Protection et Délai de rentrée — les traitements (Phyto, onglet Registre).
+    if(cible==='traitements'){
+      if(window.goTo) window.goTo('phyto');
+      setTimeout(function(){ try{ if(typeof window.switchPhytoTab==='function') window.switchPhytoTab('reg'); }catch(e3){ if(window._mvAvale) window._mvAvale(e3,'pilotage.js/_pilTvGo#traitements'); } }, 240);
+      return;
+    }
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilTvGo'); }
 }
 // Le détail d'une ligne d'avancement, au toucher : la fenêtre prévue (celle de la frise), ce que dit le journal, l'écart au
@@ -10979,14 +10995,16 @@ function _pilIftLigne(q,ref,mal){
 // ce qui est compté 1 ou à vérifier, puis les cinq parcelles les plus hautes (les autres derrière un dépliant).
 function _pilIftTuile(){
   var an=_iftAnnee(), R=_iftCalc(an), ref=R.ref, rv=ref.v;
-  var methode='<div class="pil-li-s" style="margin-top:12px;white-space:normal;line-height:1.5">Dose appliquée ÷ dose homologuée × surface traitée ÷ surface du domaine · le biocontrôle à part</div>';
+  // MOTS-11 (§604) : la formule (« Dose appliquée ÷ dose homologuée × … ») quitte l'écran : le « i » (pil.cfm.ift) la donne en entier.
+  var methode='';
   if(!R.lignes){
     return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('0',''), 'aucun traitement en '+an, null,
-      '<div class="pil-empty">Aucun traitement enregistré en '+an+'. L’IFT se calcule dès le premier, avec la dose du registre et la dose homologuée du catalogue E-Phy.</div>'+methode, 'pil.cfm.ift');
+      '<div class="pil-empty">Aucun traitement en '+an+'\u00a0: l’IFT se calcule dès le premier.</div>', 'pil.cfm.ift');
   }
   if(!R.ok){
-    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat('—',''), R.nPass+' passage'+(R.nPass>1?'s':'')+' en '+an+' · '+_cfmIftPoint(R), null,   // COHER-1 (§581)
-      '<div class="pil-empty">Le catalogue E-Phy n’est pas chargé sur cet appareil\u00a0: sans les doses homologuées, l’IFT ne se calcule pas. Il se charge à la connexion — rouvrez cet onglet une fois en ligne.</div>'+methode, 'pil.cfm.ift');
+    // MOTS-11 (§604) : « — » et « 3 passages en 2026 · catalogue E-Phy absent » → « 3 passages » et la pastille (le mot de COHER-1).
+    return _pilTile('ift','#3D6B27','IFT '+an, _pilStat(R.nPass,' passage'+(R.nPass>1?'s':''))+_pilPhPl(_cfmIftPoint(R),'or'), null, null,   // COHER-1 (§581)
+      '<div class="pil-empty">Sans le catalogue E-Phy, l’IFT ne se calcule pas\u00a0: il se charge à la connexion.</div>', 'pil.cfm.ift');
   }
   // Le chiffre hors biocontrôle est celui de l'en-tête, toujours visible : le détail donne les trois autres.
   //   ⚠️ La mise en page est écrite ici : styles.css est à quelques octets du plafond de 1 024 ko (mv-harnais-typo) ; seuls les
@@ -11015,9 +11033,10 @@ function _pilIftTuile(){
     +'<div class="pil-ip-list">'+top.map(lig).join('')+'</div>';
   if(rest.length) B+='<details class="pil-ift-plus" style="margin-top:4px"><summary style="cursor:pointer;padding:12px 0;font-size:var(--t-texte);font-weight:600;color:var(--texte)">'
     +(rest.length>1?('Les '+rest.length+' autres parcelles'):'L’autre parcelle')+'</summary><div class="pil-ip-list">'+rest.map(lig).join('')+'</div></details>';
-  var warn=(hb!=null&&hb>rv)?('↑ '+Math.round((hb/rv-1)*100)+' %'):null;
-  return _pilTile('ift','#3D6B27','IFT '+an, _pilStat(hb!=null?_iftF(hb):'—',' hors biocontrôle',warn),
-    'biocontrôle '+(R.bio!=null?_iftF(R.bio):'—')+' · référence '+_iftF(rv)+(ref.def?' (par défaut)':''), null, B+methode, 'pil.cfm.ift');
+  // MOTS-11 (§604) : « ↑ 12 % » → la pastille (« 12 % au-dessus de la référence », « sous la référence »).
+  var warn=(hb!=null)?(hb>rv?_pilPhPl(Math.round((hb/rv-1)*100)+' % au-dessus de la référence','ko'):_pilPhPl('sous la référence','ok')):'';
+  return _pilTile('ift','#3D6B27','IFT '+an, _pilStat(hb!=null?_iftF(hb):'—',' hors biocontrôle')+warn,
+    'biocontrôle '+(R.bio!=null?_iftF(R.bio):'—')+' · référence '+_iftF(rv)+(ref.def?' (par défaut)':''), null, B, 'pil.cfm.ift');
 }
 // DRE actif : dernier traitement par parcelle + fenêtre de rentrée encore ouverte.
 function _cfmDre(){
@@ -11053,11 +11072,13 @@ function _cfmDreEnd(ms){
 }
 
 // ── Onglet CONFORMITÉ ──
+// ★ MOTS-11 (§604) : Conformité allégé SUR PLACE — la règle de Travaux (§590) : une phrase en haut (_pilCfPhrase), les cinq
+//   cartes repliées (un titre, un chiffre, une pastille), le détail au toucher ; les calculs ne bougent pas.
 function _pilTabCfm(d){
-  var H='<div class="pil-panels">', any=false;
+  var H='<div class="pil-tv pil-cf"><div class="pil-panels">', any=false;
   // PRO-1 (§269) : la protection restante des parcelles vivait dans l'ancien Aujourd'hui ; REF-1 l'avait fait
   //   disparaître de tout l'écran. Elle rejoint la Conformité, avec le cuivre et le délai de rentrée.
-  if(_pilShow('auj_traiter')){ var _pcar=_pilProtCarte(); if(_pcar){ H+=_pcar; any=true; } }
+  if(_pilShow('auj_traiter')){ var _pcar=_pilProtTuile(); if(_pcar){ H+=_pcar; any=true; } }
   // Cuivre
   if(_pilShow('cfm_cuivre')){
     any=true;
@@ -11069,17 +11090,18 @@ function _pilTabCfm(d){
     } else {
       var crows=cu.rows.map(function(r){
         var col=_cfmCuCol(r.ratio), pct=Math.min(r.ratio*100,100);
-        var st=r.ratio>1?'D\u00e9passement':r.ratio>=0.875?'Vigilance':'Conforme';
+        var st=r.ratio>1?'D\u00e9passement \u00b7 ':r.ratio>=0.875?'Vigilance \u00b7 ':'';   // MOTS-11 : « Conforme » ×6 — la barre verte le dit
         return '<div class="pil-li"><span class="pil-av" style="background:var('+col+');color:#fff;font-size:var(--pt-micro,12px)">Cu</span>'
           +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(r.nom)+' <span style="color:var(--texte-doux);font-weight:500">\u00b7 '+_pilHa(r.surf)+' ha</span></div>'
           +'<div class="pil-gbar" style="margin-top:6px"><i style="width:'+pct.toFixed(0)+'%;background:var('+col+')"></i></div>'
-          +'<div class="pil-li-s" style="color:var('+col+');font-weight:600;margin-top:3px">'+st+' \u00b7 '+(r.ratio*100).toFixed(0)+' % du plafond</div></div>'
+          +'<div class="pil-li-s" style="color:var('+col+');font-weight:600;margin-top:3px">'+st+(r.ratio*100).toFixed(0)+' % du plafond</div></div>'
           +'<div class="pil-li-r" style="color:var('+col+')">'+(Math.round(r.cu*10)/10).toLocaleString('fr-FR')+'<span style="font-size:var(--pt-lbl,12px);font-weight:500;color:var(--texte-doux)"> kg/ha</span></div></div>';
       }).join('');
       var body='<div class="pil-ip-list">'+crows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Cuivre m\u00e9tal</b> sur 7 ans glissants \u00b7 plafond UE <b>28 kg/ha</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
-      var sw=cu.over?(_mvIcon('alerte',16)+' '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
-      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">plafond UE <b>28 kg/ha</b> de cuivre m\u00e9tal sur 7 ans'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
+      // MOTS-11 (§604) : « 8 parcelles ↑ 2 » → la pastille (« 2 en vigilance », « 1 au-dessus du plafond », « sous le plafond »).
+      var sw=cu.over?_pilPhPl(cu.over+' au-dessus du plafond','ko'):(cu.warn?_pilPhPl(cu.warn+' en vigilance','or'):_pilPhPl('sous le plafond','ok'));
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''))+sw, null, null, body);
     }
   }
   // \u2605\u2605 IFT-1 (\u00a7571) : l'IFT r\u00e9el de l'ann\u00e9e remplace le compte des passages \u2014 m\u00eame case \u00e0 cocher (`cfm_ift`), m\u00eame pastille \u00ab i \u00bb.
@@ -11100,7 +11122,8 @@ function _pilTabCfm(d){
     if(dre.none){
       H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9.</div>');
     } else if(!dre.active.length){
-      H+=_pilTile('dre','#5B9B3A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('0',' actif'), 'aucune parcelle en d\u00e9lai', null, '<div class="pil-empty" style="color:var(--vert-med);font-style:normal">\u2705 Aucun d\u00e9lai de rentr\u00e9e en cours \u2014 toutes les parcelles sont accessibles.</div>');
+      // MOTS-11 (§604) : « 0 actif · aucune parcelle en délai », puis « ✅ Aucun délai… — toutes les parcelles sont accessibles » : une fois.
+      H+=_pilTile('dre','#5B9B3A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('0','')+_pilPhPl('aucune parcelle en d\u00e9lai','ok'), null, null, '<div class="pil-empty" style="font-style:normal">Toutes les parcelles sont accessibles.</div>');
     } else {
       var drows=dre.active.map(function(a){
         var urg=a.remainH<=2, col=urg?'--rouge':'--orange';
@@ -11111,11 +11134,27 @@ function _pilTabCfm(d){
       }).join('');
       var body3='<div class="pil-ip-list">'+drows+'</div>'
         +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Ne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.dre')):'')+'</div>';
-      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''),'actif'), null, null, body3);
+      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''))+_pilPhPl('rentr\u00e9e interdite','ko'), null, null, body3+'<div class="pil-tv-act">'+_pilTvBtn('traitements','Ouvrir les traitements')+'</div>');
     }
   }
-  H+='</div>';
+  H+='</div></div>';
   return any ? H : '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 activez-les via \u00ab Choisir les indicateurs \u00bb.</div>';
+}
+// ★ MOTS-11 (§604) — la phrase du haut : ce qui interdit l'accès (le délai de rentrée), les parcelles à nu, et les points à régler —
+//   LA MÊME LISTE que la tuile « Conformité » d'Aujourd'hui (_pilCfmPoints, COHER-1 §581) : les deux écrans disent le même nombre.
+//   Rien à dire : « Rien à régler ». Elle lit les calculs des cartes (_cfmDre, _pilProtData, _pilCfmPoints), sans en refaire.
+function _pilCfPhrase(){
+  var p=[], pl=function(n){ return n>1?'s':''; };
+  if(_pilShow('cfm_dre')){ var dre=_cfmDre(); if(dre&&dre.active&&dre.active.length) p.push('<b class="ko">'+dre.active.length+' parcelle'+pl(dre.active.length)+' en d\u00e9lai de rentr\u00e9e</b>'); }
+  if(_pilShow('auj_traiter')){
+    var P=_pilProtData();
+    if(P&&P.n){ var nNu=P.nu.length, nB=P.bientot.length;
+      if(nNu) p.push('<b class="ko">'+nNu+' parcelle'+pl(nNu)+' \u00e0 nu</b>');
+      else if(nB) p.push('<b class="or">'+nB+' parcelle'+pl(nB)+' \u00e0 nu d\u2019ici 2 jours</b>'); }
+  }
+  var pts=[]; try{ pts=_pilCfmPoints(); }catch(e){ pts=[]; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilCfPhrase'); }
+  if(pts.length) p.push('<b class="or">'+pts.length+' point'+pl(pts.length)+' \u00e0 r\u00e9gler</b>');
+  return '<span class="pil-tv-ph">'+(p.length?p.join(', '):'Rien \u00e0 r\u00e9gler')+'</span>';
 }
 
 
@@ -11131,7 +11170,7 @@ var _PIL_PERSO_DEFS={
   equ:[['prs_equipe','Équipe'],['prs_presences','Présents'],['prs_capacite','Équipe au pic'],['auj_tension','Tension'],['an_frise','Renfort'],['mat_tracteur','Tracteurs'],['mat_gnr','Cuve GNR'],['mat_conso','Consommation'],['mat_travaux','Travaux tracteur en cours']],
   eco:[['an_budget','Le budget de l\'ann\u00e9e']],
   sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
-  cfm:[['auj_traiter','Protection restante (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Le registre de l’année (vérifié avant l’export)'],['cfm_dre','Délai de rentrée (DRE)']]
+  cfm:[['auj_traiter','Protection des parcelles (fenêtre de traitement)'],['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','IFT de l’année (fréquence de traitement)'],['mat_phyto','Le registre de l’année (vérifié avant l’export)'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
@@ -11515,7 +11554,7 @@ function _pilSkeleton(d,tab){
     +'<div class="mv-ecran-d"><span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span></div></div>'
     +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
     // ★ MOTS-8 (§590) : sur Travaux, la sous-ligne porte la phrase du jour (_pilTvPhrase), posée par _pilFillContent.
-    +'<div class="pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ'||tab==='sim')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
+    +'<div class="pil-souslig'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?' pil-tv-souslig':'')+'"><span id="pil-souslig-t">'+((tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'':_pilEsc(_pilTabLabel(tab)))+'</span>'
     +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
     +(_pilPhotosIci(tab)?('<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'):'')
@@ -12006,7 +12045,7 @@ window._pilGo = function(cible){
       setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')||document.getElementById('pil-crumb')); }, 240);
       return;
     }
-    // Cible INTERNE (ALIGN-1, §236) : la carte « Protection restante » montre les 5 parcelles les plus
+    // Cible INTERNE (ALIGN-1, §236) : la carte « Protection » (MOTS-11) montre les 5 parcelles les plus
     //   urgentes ; son bouton déplie les autres, ou les replie.
     if(cible==='prot_tout'){ _PIL_PROT_TOUT=!_PIL_PROT_TOUT; renderPilotage(); return; }
     // Cible INTERNE (PRIO-1, §235) : l'éditeur de la priorité du moment (administrateur), depuis la carte
@@ -12697,7 +12736,11 @@ function _pilFillContent(d){
     _pilDcPhraseMaj();
   }
   else if(tab==='eco') host.innerHTML=_pilTabEco(d);
-  else if(tab==='cfm') host.innerHTML=_pilTabCfm(d);
+  else if(tab==='cfm'){
+    // ★ MOTS-11 (§604) : la phrase du haut, après les cartes (elle lit leurs calculs).
+    host.innerHTML=_pilTabCfm(d);
+    var _phC=document.getElementById('pil-souslig-t'); if(_phC) _phC.innerHTML=_pilCfPhrase();
+  }
   else if(tab==='arc') host.innerHTML=_pilTabArc(d);
   // Les graphes enregistres se dessinent APRES la pose du HTML : c'est la que
   // leur conteneur existe, donc que sa largeur est mesurable.

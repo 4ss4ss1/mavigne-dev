@@ -657,3 +657,4 @@
 | 601 | 601. ★ GEO-3 — LE KIT DE DIFFUSION : ANNUAIRES DE LOGICIELS ET DEMANDE D’AVIS GOOGLE (23/11 — `docs/geo-kit… | `docs/claude/chantiers-580-629.md` |
 | 602 | 602. ★ GEO-4 — LES ANNUAIRES, CASE PAR CASE : APPVIZER À PART, G2 ET CAPTERRA EN UN SEUL FORMULAIRE (23/11 … | `docs/claude/chantiers-580-629.md` |
 | 603 | 603. ★ GEO-5 — LES ANNUAIRES REMPLIS POUR DE VRAI, ET L’ADRESSE contact@mavigneapp.fr (23/11 au soir — `doc… | `docs/claude/chantiers-580-629.md` |
+| 604 | 604. ★★★ MOTS-11 — PILOTAGE › CONFORMITÉ ALLÉGÉ SUR PLACE : UNE PHRASE, CINQ CARTES REPLIÉES, LA PROTECTION… | `docs/claude/chantiers-580-629.md` |

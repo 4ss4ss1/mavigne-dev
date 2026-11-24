@@ -320,7 +320,7 @@
   de la charge sur 14 jours, et l'écart entre le budget consommé et le travail fait. Un jour sans ouverture est un trou.</p>
   <p>Dans la vue <b>Économie</b> d'Aujourd'hui, le <b>coût de l'inaction</b> : ce que le retard ajoute en heures et en euros si personne n'est
   ajouté, d'après le simulateur de renfort de Décider et son hypothèse (+15 % par semaine de retard, réglable). Un modèle,
-  pas une mesure. Sous la décision du jour, dans sa propre carte, la <b>protection restante</b> : combien de parcelles sont à nu, lesquelles
+  pas une mesure. Dans l'onglet <b>Conformité</b>, la carte <b>Protection</b> : combien de parcelles sont à nu, lesquelles
   le seront d'ici deux jours, et pour chacune le dernier traitement et les jours qui restent — d'après trois rémanences par
   mode d'action (Réglages › Pilotage › Conformité : contact 10 j, pénétrant 12 j, systémique 14 j par défaut), et la pluie
   tombée depuis le traitement : un contact est à nu dès 20 mm cumulés (réglable). La pousse n'est pas comptée.</p>
@@ -556,13 +556,19 @@
       litre près ; c'est sa ventilation par parcelle qui reste proportionnelle, faute d'une donnée
       qui dirait quels litres ont brûlé sur quelle parcelle</li>
     </ul></div>
-    <div class="card"><h4>{ic:balance} Conformité</h4><ul class="dot">
-      <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha</li>
+    <div class="card"><h4>{ic:balance} Conformité</h4>
+    <p>En haut, une phrase : « 8 parcelles à nu, 2 points à régler » — les points sont ceux que compte la tuile Conformité
+    d'Aujourd'hui, le même nombre. Les cartes arrivent repliées : un chiffre et sa pastille ; touchez-en une pour le détail.</p>
+    <ul class="dot">
+      <li><b>Protection</b> : les parcelles à nu ; ouverte, lesquelles, depuis quand, les rémanences et la pluie en pied, et
+      « Ouvrir les traitements »</li>
+      <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha — la pastille dit combien sont en vigilance ou au-dessus</li>
       <li><b>IFT de l'année</b> : le domaine hors biocontrôle face à votre référence, le biocontrôle à
       part, l'année d'avant, puis les cinq parcelles les plus hautes — avec les maladies signalées</li>
-      <li><b>Le registre de l'année</b> : relu ligne par ligne avant l'export — ce que le texte exige,
-      ce qui manque, les traitements à reprendre ; les derniers passages derrière un dépliant</li>
-      <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès</li>
+      <li><b>Le registre de l'année</b> : relu ligne par ligne avant l'export — la carte montre ce qui manque, puis un
+      compte (« les 5 autres points : en règle ») ; les huit points et les traitements à reprendre sont dans « Voir les
+      lignes et exporter » ; les derniers passages derrière un dépliant</li>
+      <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès (« aucune parcelle en délai » sinon)</li>
     </ul></div>
   </div>
   <div class="note info"><span class="ni" aria-hidden="true">{ic:cadenas}</span><div>Les coûts s'appuient sur des données

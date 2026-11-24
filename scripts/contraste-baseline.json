@@ -9,9 +9,9 @@
   },
   "code": {
     "clair": {
-      "mesurees": 1030,
+      "mesurees": 1029,
       "nonResoluble": 402,
-      "fondInconnu": 446,
+      "fondInconnu": 445,
       "sous": {
         "src/app.js": 4,
         "src/cave.js": 5,
@@ -26,9 +26,9 @@
       }
     },
     "sombre": {
-      "mesurees": 1030,
+      "mesurees": 1029,
       "nonResoluble": 399,
-      "fondInconnu": 452,
+      "fondInconnu": 451,
       "sous": {
         "src/app.js": 6,
         "src/cave.js": 14,
@@ -40,7 +40,7 @@
         "src/reserve.js": 7,
         "src/tracteur.js": 5,
         "index.html": 9,
-        "src/styles.css": 76
+        "src/styles.css": 75
       }
     }
   },

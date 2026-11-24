@@ -2193,9 +2193,9 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-sw:checked::after{left:16px;}
 .pil-perso-note{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:8px;line-height:1.5;}
 /* — Système de cartes UNIFIÉ (filet or au survol) — */
-.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
-.pil-panel::before,.pil-tile::before,.pil-tile2::before,.pil-gauge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;}
-.pil-panel:hover::before,.pil-tile:hover::before,.pil-tile2:hover::before,.pil-gauge:hover::before{opacity:1;}
+.pil-panel,.pil-tile,.pil-gauge{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+.pil-panel::before,.pil-tile::before,.pil-gauge::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;}
+.pil-panel:hover::before,.pil-tile:hover::before,.pil-gauge:hover::before{opacity:1;}
 /* — Cockpit : verdict + anneau fin — */
 .pil-hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding:24px 26px 20px;}
 .pil-ring{position:relative;width:168px;height:168px;flex:none;margin:0 auto;}
@@ -2237,10 +2237,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-det>.pil-t2b{flex:1;display:flex;flex-direction:column;}
 .pil-det .pil-prot{margin-top:0;padding-top:0;border-top:0;flex:1;display:flex;flex-direction:column;}
 .pil-det .pil-trx-go{margin-top:auto;padding-top:var(--e-3,12px);}
-.pil-t2h{display:flex;align-items:center;gap:10px;padding:14px 16px 0;}
-.pil-t2h .ic{width:30px;height:30px;border-radius:9px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
-.pil-t2h .ic svg{width:16px;height:16px;}
-.pil-t2h .t{font-family:var(--font-ui);font-weight:600;font-size:var(--pt-micro,11px);letter-spacing:0;text-transform:none;color:var(--texte-doux);line-height:1.3;flex:1;}
 .pil-t2b{padding:11px 16px 16px;}
 .pil-t2s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px;line-height:1.45;}
 .pil-big{font-family:var(--font-titre);font-size:25px;font-weight:600;margin:2px 0 2px;color:var(--texte);line-height:1.1;}
@@ -2275,7 +2271,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-tens-r .v span{display:block;}
 .pil-prot{margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair);}
 .pil-prot-k{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:0;text-transform:none;font-size:var(--pt-nano,9.5px);}
-.pil-prot-big{font-family:var(--font-titre);font-size:var(--pt-md,20px);font-weight:600;line-height:1.1;margin:4px 0 2px;}
 .pil-prot-l{margin-top:8px;}
 .pil-prot-r{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid var(--gris-clair);font-size:var(--pt-micro,11px);color:var(--texte-med);}
 .pil-prot-r:first-child{border-top:0;}
@@ -3531,7 +3526,7 @@ td .sdeq-trace{padding:2px 0 0;}
 .hv2-prog-fill{ border-radius:5px; }
 
 /* — Pilotage : finition papier + animations qui manquaient — */
-.pil-panel,.pil-tile,.pil-tile2,.pil-gauge{
+.pil-panel,.pil-tile,.pil-gauge{
   box-shadow:var(--shadow-sm),inset 0 1px 0 var(--sheen);
 }
 .pil-gauge-fill,.pil-kbar i{ transform-origin:left; animation:mvuGrow .7s cubic-bezier(.4,0,.2,1); }
@@ -8513,8 +8508,7 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 #page-pilotage .pil-th-stat b{ font-family:var(--font-ui); font-size:var(--pt-lg,24px); font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-pilotage .pil-th-stat b.warn{ font-size:var(--pt-base,14px); color:var(--attention); }
 #page-pilotage .pil-tbody{ border-top-color:var(--ligne,#E7E6E2); }
-#page-pilotage .pil-t2h .ic{ border-radius:var(--r-sm,6px); background:var(--survol); color:var(--texte-med); }
-#page-pilotage .pil-t2h .t,#page-pilotage .pil-panel-t{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); letter-spacing:0; text-transform:none; color:var(--texte); }
+#page-pilotage .pil-panel-t{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); letter-spacing:0; text-transform:none; color:var(--texte); }
 #page-pilotage .pil-sec-h{ font-family:var(--font-ui); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-pilotage .pil-sec-h::after,#page-pilotage .pil-sec-h::before{ background:var(--ligne,#E7E6E2)!important; }
 #page-pilotage :is(.pil-seg,.pil-anseg){ gap:var(--e-0,2px); padding:var(--e-0,2px); border:0; border-radius:var(--r-sm,6px); background:var(--survol); }
@@ -8541,7 +8535,6 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 #page-pilotage .pil-dz-wrap{ border-color:var(--ligne,#E7E6E2); }
 #page-pilotage .pil-dz-day{ border-color:var(--ligne,#E7E6E2); background:var(--bg-doux); }
 #page-pilotage .pil-dz-day .mid b{ font-family:var(--font-ui); font-weight:var(--fw-semi,600); }
-#page-pilotage .pil-prot-big{ font-family:var(--font-ui); font-weight:var(--fw-semi,600); color:var(--danger); }
 /* ★ FIN PIL-1 */
 
 
@@ -10417,10 +10410,10 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-prot-big, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
 /* 3. LES TITRES */
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct, .pil-t2h .t) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-sec-h { font-size: var(--t-section) !important; font-weight: var(--fw-semi, 600) !important; }
 :is(#page-pilotage, #ovReglPilotage) .rf-t { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 4. LES ÉTIQUETTES (au-dessus d'un chiffre, d'un réglage) */
@@ -10458,7 +10451,7 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 :is(#page-pilotage, #ovReglPilotage) .ck-puce > i { height: var(--jauge-h) !important; border-radius: var(--r-full, 999px) !important; }
 :is(#page-pilotage, #ovReglPilotage) .arc-seg i { height: var(--barre-graph-h) !important; border-radius: var(--r-xs, 4px) !important; }   /* MOTS-4 (§585) : la barre est le trait coloré DANS le bouton */
 /* 11. LES CARTES — un seul habillage, celui d'Aujourd'hui (arrondi 12, filet, sans ombre) ; les blocs intérieurs arrondis à 8 */
-:is(#page-pilotage, #ovReglPilotage) :is(.pil-panel, .pil-tile, .pil-tile2, .pec-card, .pil-anc) { border-radius: var(--r-lg, 12px) !important; box-shadow: none !important; }
+:is(#page-pilotage, #ovReglPilotage) :is(.pil-panel, .pil-tile, .pec-card, .pil-anc) { border-radius: var(--r-lg, 12px) !important; box-shadow: none !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-panel { padding: var(--carte-pad) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pec-mini, .pex-ctrl, .pec-a, .pil-dz-row, .pil-dz-set, .pil-dz-hero, .pil-dz-rt, .pil-dz-rdt, .arcan-y) { border-radius: var(--r-md, 8px) !important; box-shadow: none !important; }
 /* Les trois photos de Travaux : la bande d'Aujourd'hui (une carte, des cases séparées d'un filet) */

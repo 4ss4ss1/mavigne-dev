@@ -65,6 +65,8 @@ function monde(S, o = {}) {
     _pilEsc: (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'),
     _pilHa: (v) => String(v).replace('.', ','), _mvIcon: (n) => '<i data-ic="' + n + '"></i>',
     _pilStat: (n, u, w) => '<span class="pil-th-stat"><b>' + n + '</b>' + (u || '') + (w ? ' <b class="warn">' + w + '</b>' : '') + '</span>',
+    // MOTS-11 (§604) : la pastille de la tuile (pilotage.js/_pilPhPl), copiée telle quelle
+    _pilPhPl: (txt, cls) => '<span class="pil-tv-pl' + (cls ? ' ' + cls : '') + '">' + txt + '</span>',
     _pilTile: (id, dot, title, stat, sub, g, body, info) => '<tile id="' + id + '" info="' + info + '"><h>' + title + '</h>' + stat + '<sub>' + (sub || '') + '</sub>' + body + '</tile>' };
   ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext([fonction(S.pil, 'function _cfmIftRef('), fonction(S.pil, 'function _cfmIftPoint(')   /* COHER-1 (§581) : la mention de la tuile, que compte aussi Aujourd'hui */, bloc(S.pil), fonction(S.pil, 'function _pilIftLigne('), fonction(S.pil, 'function _pilIftTuile(')].join('\n'), ctx, { filename: 'ift-extrait.js' });
@@ -102,9 +104,11 @@ function jouer(S) {
   t('⑨ par parcelle : les cinq plus hautes dans l’ordre, la maladie signalée cette année, le biocontrôle, l’autre derrière le dépliant',
     iB > 0 && iA > iB && iC > iA && H.includes('4 passages · + 0,5 en biocontrôle · 1 produit compté 1 · oïdium signalé') && H.includes('>L’autre parcelle</summary>') && (H.match(/class="pil-li"/g) || []).length === 6);
   const Hr = monde(S, { config: { conformite: { ift_ref: 2.5 } } })._pilIftTuile();
-  t('⑩ au-dessus de la référence réglée (2,5) : l’alerte en tête, l’écart dit', Hr.includes('<b class="warn">↑ 13 %</b>') && Hr.includes('13 % au-dessus de la référence') && Hr.includes('référence 2,5</sub>'));
+  // MOTS-11 (§604) : l'alerte en tête est la pastille rouge « 13 % au-dessus de la référence » (plus « ↑ 13 % »).
+  t('⑩ au-dessus de la référence réglée (2,5) : l’alerte en tête, l’écart dit', Hr.includes('<span class="pil-tv-pl ko">13 % au-dessus de la référence</span>') && Hr.includes('hors biocontrôle\u00a0: 13 % au-dessus de la référence') && Hr.includes('référence 2,5</sub>'));
   const He = monde(S, { ephy: [] })._pilIftTuile(), Hv = monde(S, { trait: [] })._pilIftTuile();
-  t('⑪ sans le catalogue E-Phy : pas de chiffre, la raison ; sans traitement : zéro, et comment il se calculera', He.includes('<b>—</b>') && He.includes('catalogue E-Phy absent') && He.includes('n’est pas chargé') && Hv.includes('aucun traitement en 2026') && Hv.includes('Aucun traitement enregistré en 2026'));
+  // MOTS-11 (§604) : sans catalogue, le chiffre est celui des passages et la pastille dit la raison ; sans traitement, une ligne.
+  t('⑪ sans le catalogue E-Phy : les passages, la raison en pastille ; sans traitement : zéro, et quand il se calculera', /<b>\d+<\/b> passages?/.test(He) && He.includes('<span class="pil-tv-pl or">catalogue E-Phy absent</span>') && He.includes('ne se calcule pas') && Hv.includes('aucun traitement en 2026') && Hv.includes('Aucun traitement en 2026') && Hv.includes('dès le premier'));
   // Les fils : la carte du domaine, la case, l'aide, le réglage, l'annonce, la saisie, le guide, la liste.
   t('⑫ Conformité rend la carte ; la carte du domaine lit le même calcul ; la case et l’étiquette suivent ; plus de passages comptés',
     S.pil.includes("if(_pilShow('cfm_ift')){ any=true; H+=_pilIftTuile(); }") && S.pil.includes("var R=_iftCalc(_iftAnnee()), ift={}; R.rows.forEach(function(q){ ift[q.nom]=q; });")

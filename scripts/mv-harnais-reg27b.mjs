@@ -121,9 +121,13 @@ function jouer(S) {
     Pp.map((p) => p.niv).join() === 'ok,ok,ok,ok,ok,rien,ok,ok' && /dont 1 en partie/.test(Pp[4].s) && /1\u00a0ligne avec une rentrée déclarée/.test(Pp[6].s), Pp.map((p) => p.niv).join());
   // la carte et la fenêtre
   const G = X._regCarte();
-  t('⑧ la carte : l’année civile en cours, le verdict, les huit points, le bouton « Voir les lignes et exporter 2026 », l’échéance',
-    G.an === 2026 && G.k === 'civ2026' && G.corps.includes('data-reg="verdict"') && (G.corps.match(/border-top:1px solid var\(--gris-clair\)/g) || []).length === 8
-    && G.corps.includes('onclick="window._regOuvrir(\'civ2026\')"') && G.corps.includes('Voir les lignes et exporter 2026') && G.corps.includes('avant le 31 janvier'));
+  // MOTS-11 (§604) : la carte de Conformité est un RÉSUMÉ — les points « à compléter », puis un compte ; les huit points, le verdict et
+  //   l'échéance sont dans la fenêtre (⑨, inchangée) et dans le « i » (pil.phyto).
+  const nDus = X._regPoints(G.V).filter((p) => p.niv === 'manque').length;
+  t('⑧ la carte : l’année civile en cours, les points à compléter (pas les huit), un compte, le bouton « Voir les lignes et exporter 2026 »',
+    G.an === 2026 && G.k === 'civ2026' && nDus > 0 && nDus < 8 && (G.corps.match(/align-items:flex-start;gap:12px;padding:8px 0/g) || []).length === nDus
+    && G.corps.includes('data-reg="compte"') && !G.corps.includes('data-reg="verdict"') && !G.corps.includes('avant le 31 janvier')
+    && G.corps.includes('onclick="window._regOuvrir(\'civ2026\')"') && G.corps.includes('Voir les lignes et exporter 2026'), nDus);
   t('⑧ la carte d’un registre complet propose « Exporter le registre » ; sans droit d’administrateur, aucun bouton',
     Xp._regCarte().corps.includes('Exporter le registre 2026') && !monde(S, { admin: false })._regCarte().corps.includes('_regOuvrir'));
   t('⑧ l’année de la carte : la courante dès qu’elle a un traitement, sinon la précédente tant qu’elle en a', monde(S, { trait: [TRAIT()[10]] })._regCarte().an === 2025 && monde(S, { trait: [] })._regCarte().an === 2026);

@@ -44,7 +44,8 @@ function jouer(S) {
   T('« Voir le détail » mène à la tension par personne, qui existe dans L’équipe', S.vue.includes('data-fn="tension"')
     // MOTS-9 (§592) : la tension est la carte repliée « Tension » de L’équipe ; « Voir le détail » la déplie et la fait clignoter.
     && S.pil.includes("if(cible==='tension'){") && fnDe(S.pil, 'function _pilTabEqu(d){').includes('P+=_pilPanelTension(d);') && S.pil.includes("_pilDeplier('tension');") && S.pil.includes(".pil-tile[data-pid=\"tension\"]"));
-  T('la protection restante vit dans Conformité', /function _pilTabCfm\(d\)\{[^]*?_pilProtCarte\(\)/.test(S.pil.slice(S.pil.indexOf('function _pilTabCfm(d){'), S.pil.indexOf('function _pilTabCfm(d){') + 900)));
+  // MOTS-11 (§604) : la protection est une carte comme les autres de Conformité (_pilProtTuile).
+  T('la protection restante vit dans Conformité', /function _pilTabCfm\(d\)\{[^]*?_pilProtTuile\(\)/.test(S.pil.slice(S.pil.indexOf('function _pilTabCfm(d){'), S.pil.indexOf('function _pilTabCfm(d){') + 1100)));
   // ③ Le modèle : la tâche du moment lue avec la période et les tâches, par le même appel que la tuile
   const mod = fnDe(S.pil, 'function _pilCk2Modele(d, m){');
   T('le cockpit lit la tâche du moment par _pilPrioDuJour, jamais par l’appel nu', mod.includes('PP=_pilPrioDuJour(d).M;') && !mod.includes('_mvTacheDuMoment()') && !/tm\.nom\|\|tm\.tache/.test(mod));
