@@ -858,6 +858,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots13.mjs --contre'],     //   (joué), les notes de méthode dans le « i », les neuf défauts d'affichage
   ['node scripts/mv-harnais-mots14.mjs'],              // MOTS-14 (§609) : Cave › Aujourd'hui allégé — le sommaire sans les nombres de la bande (joué), « À surveiller »
   ['node scripts/mv-harnais-mots14.mjs --contre'],     //   qui compte des lignes, la raison seule, le détail d'aujourd'hui et « Derniers gestes » (joués)
+  ['node scripts/mv-harnais-mots15.mjs'],              // MOTS-15 (§610) : Phyto › Registre allégé — la phrase (jouée), une année par bloc (la vraie liste, jouée),
+  ['node scripts/mv-harnais-mots15.mjs --contre'],     //   l'état de la rentrée tant qu'il sert, la fiche, Conformité au plafond réglé (joué)
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

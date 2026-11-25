@@ -14,15 +14,17 @@ function sansVar(s) { let out = '', i = 0; for (;;) { const k = s.indexOf('var(-
 const enDur = b => sansVar(b.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{/g, '')).match(/#[0-9A-Fa-f]{3,8}\b|rgba?\(|(?<![\w.-])(?!0px)\d*\.?\d+(?:px|m?s\b|deg)/g) || [];
 function fiche(S, t) {
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  return new Function('TRAITEMENTS', 'window', 'dreEffectif', '_escHtml', '_fmtDate', fonction(S.tr, 'function _phFicheHtml(i){') + '\nreturn _phFicheHtml(0);')([t], {}, (d) => ({ h: Number(d) || 0, motif: '' }), esc, (d) => 'le ' + String(d).slice(0, 10));
+  // MOTS-15 (§610) : la fiche dit la date du registre (_phDateFr, « 10 janv. 2026 ») — ses aides montent avec elle.
+  const iM = S.tr.indexOf('var _PH_MOIS='), mois = S.tr.slice(iM, S.tr.indexOf(';', iM) + 1);
+  return new Function('TRAITEMENTS', 'window', 'dreEffectif', '_escHtml', '_fmtDate', mois + '\n' + ['function _phJours(', 'function _phHeureFr(', 'function _phDateFr('].map((d) => fonction(S.tr, d)).join('\n') + '\n' + fonction(S.tr, 'function _phFicheHtml(i){') + '\nreturn _phFicheHtml(0);')([t], {}, (d) => ({ h: Number(d) || 0, motif: '' }), esc, (d) => 'le ' + String(d).slice(0, 10));
 }
 function suite(S) {
   const out = []; const T = (n, c) => out.push([n, !!c]); const B = bloc(S.css), dur = enDur(B);
   const recent = new Date(Date.now() - 2 * 36e5).toISOString();
   let a = '', b = ''; try { a = fiche(S, { date: recent, produit: 'Bouillie <RSR>', type: 'Cuivre', amm: '9200417', dose: '4 kg/ha', dar: 21, drae: 24, parcelles: ['Les Seuvrées'], conducteur: 'Paul', cible: 'Mildiou', znt: 5 });
     b = fiche(S, { date: '2026-01-10', produit: 'Soufre', type: 'Soufre', dose: '', dar: 0, drae: 0, parcelles: [] }); } catch (e) { a = 'plantage ' + e.message; }
-  T('les mentions : produit (échappé), type, AMM, date, opérateur, dose', a.includes('Bouillie &lt;RSR&gt;') && !a.includes('Bouillie <RSR>') && a.includes('>Cuivre<') && a.includes('AMM 9200417') && a.includes('le 20') && a.includes('>Paul<') && a.includes('4 kg/ha'));
-  T('les délais depuis la date : réentrée 24 h en cours (alerte rouge), avant récolte 21 j', a.includes('R\u00e9entr\u00e9e interdite jusqu\u2019au') && a.includes('24<small>\u00a0h</small>') && a.includes('en cours') && a.includes('21<small>\u00a0j</small>'));
+  T('les mentions : produit (échappé), type, AMM, date, opérateur, dose', a.includes('Bouillie &lt;RSR&gt;') && !a.includes('Bouillie <RSR>') && a.includes('>Cuivre<') && a.includes('AMM 9200417') && b.includes('>10 janv. 2026<') && a.includes('>Paul<') && a.includes('4 kg/ha'));
+  T('les délais depuis la date : rentrée 24 h en cours (alerte rouge), avant récolte 21 j', a.includes('Rentr\u00e9e interdite jusqu\u2019au') && a.includes('24<small>\u00a0h</small>') && a.includes('en cours') && a.includes('21<small>\u00a0j</small>'));
   T('les parcelles, et pour le registre la ZNT et la cible', a.includes('Les Seuvrées') && a.includes('<span>ZNT</span><b>5\u00a0m</b>') && a.includes('<span>Cible</span><b>Mildiou</b>'));
   T('rien d’inventé : sans délai ni parcelle, des tirets et « non renseignées », pas d’alerte ni de section registre', !b.includes('interdite') && b.includes('Non renseign\u00e9es') && !b.includes('Pour le registre'));
   T('sur ordinateur, toucher choisit ; au téléphone, le détail habituel', S.tr.includes('onclick="_phSel(${idx})" data-pidx="${Number(idx)}"') && S.tr.includes("function _phSel(i){\n  if(!_phDesk()){ openTraitDetail(i); return; }"));

@@ -4144,6 +4144,20 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .ph-etat{margin-top:var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:600;color:var(--texte-doux,#686660);}
 .ph-etat-interdite{color:var(--danger-texte,#BA361A);}
 .ph-etat-libre{color:var(--ok-texte,#217343);}
+/* ★ MOTS-15 — Phyto › Registre : la phrase du haut, une année par bloc (la plus récente ouverte), le cuivre sans la couleur de la rentrée */
+.ph-cu{font-weight:var(--fw-med,500);color:var(--texte-doux,#686660);}
+#page-phyto .ph-ph{margin:0 0 var(--e-3,12px);font:var(--fw-med,500) var(--pt-sm,17px)/1.3 var(--font-ui,Outfit,sans-serif);color:var(--texte-med);}
+#page-phyto .ph-ph b{font-weight:var(--fw-semi,600);color:var(--texte);}
+#page-phyto .ph-ph .mv-i{margin-left:var(--e-1,4px);vertical-align:middle;}
+#page-phyto .ph-ph b.ko{color:var(--danger-texte);} #page-phyto .ph-ph b.or{color:var(--attention-texte);} #page-phyto .ph-ph b.ok{color:var(--ok-texte);}
+#page-phyto:not(.ph-reg-on) #ph-phrase{display:none!important;}
+#page-phyto .ph-an + .ph-an{margin-top:var(--e-2,8px);}
+#page-phyto .ph-an-h{display:flex;align-items:center;gap:var(--e-2,8px);width:100%;min-height:var(--h-row-2,48px);padding:0 var(--e-1,4px);border:0;background:transparent;color:var(--texte-med);font:inherit;font-size:var(--pt-txt,13px);text-align:left;cursor:pointer;}
+#page-phyto .ph-an-h b{font-weight:var(--fw-semi,600);color:var(--texte);font-size:var(--pt-base,14px);}
+#page-phyto .ph-an-h span{flex:1;min-width:0;}
+#page-phyto .ph-an-h .mv-ic{flex:none;color:var(--texte-doux);transition:transform .15s;}
+#page-phyto .ph-an.open .ph-an-h .mv-ic{transform:rotate(180deg);}
+#page-phyto .ph-an-l{padding-top:var(--e-1,4px);}
 /* ★ PHENO-1A (§505) — maquette « niveau au-dessus », partie 1 : noter le stade (la fiche, la fenêtre) et la vue « Stades » de Parcelles.
    Cinq teintes du plus tardif au plus précoce : feuilles, boutons, floraison, grappe, véraison. */
 .dp-pheno{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3,12px);}

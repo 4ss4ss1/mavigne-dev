@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.30';
+export const APP_VERSION = '11.31';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2829,12 +2829,13 @@ var MV_AIDE = {
   phyto: {
     ico: 'eprouvette', titre: 'Phyto', ancre: 'phyto',
     points: [
-      ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, cible, parcelles et surface traitée, opérateur, délais de réentrée et avant récolte, ZNT, rentrées anticipées. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
+      ['Sur un ordinateur', "toucher un traitement le choisit : sa fiche s’ouvre à droite avec les mentions du registre — produit, AMM, type, date, dose, cible, parcelles et surface traitée, opérateur, délais de rentrée et avant récolte, ZNT, rentrées anticipées. « Ouvrir le traitement » mène au détail habituel, pour le modifier. « Saisir un traitement » est un bouton au-dessus de la liste. Dans le Catalogue, toucher un produit ouvre de la même façon sa fiche E-Phy à droite : statut, délai de rentrée, substance, mentions, usages vigne."],
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
       ['Horaires ou stade exigés pour un produit', "sur sa fiche du Catalogue, bloc « Au registre, à chaque traitement » (administrateur) : cochez « horaires » quand l’étiquette les impose, « stade » quand l’emploi du produit y est limité. L’assistant de traitement les demande, et la vérification du registre signale les lignes où ils manquent. Pour un insecticide, les horaires sont toujours exigés."],
       ['Un traitement', "= des produits (chacun avec sa cible, préremplie quand elle est connue), les parcelles cochées, le mode d’application et un conducteur. La surface traitée est celle des parcelles entières : une parcelle traitée en partie se corrige en hectares, à l’étape des parcelles (« Une parcelle traitée en partie ? »)."],   // ★ REG27-1A (§572)
       ['La dose/ha de chaque produit', "se préremplit avec la dose homologuée du catalogue : corrigez-la quand vous traitez à dose réduite. Elle fait le stock de La Réserve et l’IFT du Pilotage (Conformité) — une demi-dose y compte pour moitié."],   // ★ IFT-1 (§571)
       ['Le bouton rond en bas \u00e0 droite', "ouvre un nouveau traitement sur l\u2019onglet Registre, un nouvel amendement sur l\u2019onglet Fertilisation (administrateur)."],
+      ['Le registre', "s’ouvre sur une phrase : « Rentrée libre partout », ou la rentrée interdite et jusqu’à quand ; le cuivre s’y ajoute quand une parcelle approche du plafond sur sept ans (le chiffre de Conformité). Une année par bloc, la plus récente ouverte : sa ligne dit le nombre de traitements et le cuivre de la parcelle la plus chargée. Un traitement dit l’état de la rentrée tant qu’elle est interdite, puis sept jours."],   // ★ MOTS-15 (§610)
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
       ['Une rentrée anticipée', "— revenir dans une parcelle avant la fin du délai, équipé — se déclare après coup, sur la fiche du traitement : « Déclarer une rentrée anticipée », le moment, les parcelles, le motif et les protections portées. Le délai écoulé depuis la fin du traitement se calcule seul et part au registre."],   // ★ REG27-1A (§572)
       ['Le registre des traitements sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027. L’année civile est proposée en tête : c’est l’année du registre. Avant de sortir, le fichier est relu ligne par ligne : s’il manque un numéro d’AMM, une dose, des coordonnées, la liste des traitements à reprendre s’ouvre d’abord — « Exporter quand même » reste possible."],   // ★ REG27-1B (§573)
@@ -3385,7 +3386,7 @@ export const MV_INFO = {
 
   // ══ CONFORMITÉ ══
   'pil.cfm.cuivre': { t: 'Le cuivre sur sept ans', p: [
-    'Le cumul porte sur le <b>cuivre métal</b> — pas sur le poids de bouillie —, sur <b>sept années glissantes</b>, face au plafond européen de <b>28 kg/ha</b> en bio.',
+    'Le cumul porte sur le <b>cuivre métal</b> — pas sur le poids de bouillie —, sur <b>sept années glissantes</b>, face au plafond européen de <b>28 kg/ha</b> en bio (4 kg/ha par an × 7). S’il est réglé autrement dans le Bilan cuivre, c’est ce plafond qui compte, ici comme dans le Registre du Phyto.',
     'Glissant veut dire que le compteur <b>descend</b> quand une vieille année sort de la fenêtre. Une campagne chargée n\u2019est donc pas définitive.',
     '\u26a0\ufe0f <b>Indicatif.</b> Votre organisme certificateur peut appliquer une règle plus stricte, ou compter autrement. Ce chiffre vous alerte ; c\u2019est lui qui fait foi.'
   ] },
@@ -3400,6 +3401,12 @@ export const MV_INFO = {
     '<b>Indicatif.</b> Le calcul officiel (HVE, MAEC) lit les doses de référence publiées chaque année par le ministère : ce chiffre vous situe, il ne remplace pas votre déclaration.'
   ] },
 
+  'phyto.registre': { t: 'Le registre', p: [
+    'La phrase du haut répond à « peut-on y retourner ? » : une <b>rentrée interdite</b> et jusqu’à quand, sinon « libre partout ». Le délai court depuis la fin de l’application.',
+    'Le <b>cuivre</b> n’y paraît que près du plafond (dès 87,5 %) : le cumul de la parcelle la plus chargée sur <b>sept années glissantes</b>, face à 28 kg/ha — le chiffre de Conformité, au Pilotage.',
+    'Une <b>année par bloc</b> — l’année civile, celle du registre et de l’export —, la plus récente ouverte. Sur sa ligne : le nombre de traitements et le cuivre métal de la parcelle la plus chargée cette année-là, face au plafond annuel réglé (4 kg/ha en moyenne).',
+    'Sur un traitement, l’état de la rentrée s’écrit tant qu’elle est interdite, puis <b>sept jours</b> après : au-delà, la parcelle est libre depuis longtemps. Un traitement au cuivre dit sa dose de cuivre métal.'
+  ] },
   'pil.cfm.dre': { t: 'Le délai de rentrée', p: [
     'Le délai est <b>dérivé des phrases de risque CLP</b> du produit : <b>6 h</b> par défaut, <b>24 h</b> ou <b>48 h</b> selon la mention portée par l\u2019étiquette.',
     'Il court à partir de la <b>fin de l\u2019application</b>, pas du début du traitement.',

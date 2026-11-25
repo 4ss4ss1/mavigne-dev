@@ -114,6 +114,11 @@
    "date": "2026-11-25",
    "motif": "MOTS-14 (§609) : Cave › Aujourd’hui allégé — le sommaire sans les nombres de la bande, la raison seule sous le verdict, le détail d’aujourd’hui et Derniers gestes sans redite, la méthode dans le « i »",
    "hausses": []
+  },
+  {
+   "date": "2026-11-25",
+   "motif": "MOTS-15 (§610) : Phyto › Registre allégé — une phrase, une année par bloc, l’état de la rentrée tant qu’il sert, le cuivre de l’année sur sa ligne",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -155,7 +160,7 @@
     "lex": null
    },
    "Phyto › Registre": {
-    "mots": 316,
+    "mots": 80,
     "p15": 0,
     "avant": null,
     "lex": null
@@ -433,9 +438,9 @@
     "lex": null
    },
    "Phyto › Registre": {
-    "mots": 351,
+    "mots": 115,
     "p15": 0,
-    "avant": 33,
+    "avant": 35,
     "lex": null
    },
    "Phyto › Catalogue": {

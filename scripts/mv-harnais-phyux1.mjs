@@ -24,8 +24,8 @@ const t = (nom, cond) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m '
 function monde(S, tr) {
   const ctx = { TRAITEMENTS: tr, window: { _cuPlafond: () => 4 }, _escHtml: (x) => String(x).replace(/</g, '&lt;'), _escAttr: (x) => String(x), dreEffectif: (h) => ({ h: Number(h) || 0 }) };
   const i = S.tr.indexOf('var _PH_MOIS='); const mois = S.tr.slice(i, S.tr.indexOf(';', i) + 1);
-  vm.createContext(ctx); vm.runInContext(mois + '\n' + ['function _phJours(', 'function _phHeureFr(', 'function _phDateFr(', 'function _phQuandFr(', 'function _phEtatRentree(', 'function _phCuivreTxt(', 'function _phEtatHtml('].map((d) => fonction(S.tr, d)).join('\n')
-    + '\nthis.date=_phDateFr; this.etat=_phEtatRentree; this.cu=_phCuivreTxt; this.html=_phEtatHtml;', ctx);
+  vm.createContext(ctx); vm.runInContext(mois + '\n' + ['function _phJours(', 'function _phHeureFr(', 'function _phDateFr(', 'function _phQuandFr(', 'function _phEtatRentree(', 'function _phF1(', 'function _phCuivreCumul(', 'function _phCuivreTxt(', 'function _phCuivreAn(', 'function _phEtatHtml('].map((d) => fonction(S.tr, d)).join('\n')
+    + '\nthis.date=_phDateFr; this.etat=_phEtatRentree; this.cu=_phCuivreTxt; this.cuAn=_phCuivreAn; this.html=_phEtatHtml;', ctx);
   return ctx;
 }
 function jouer(S) {
@@ -36,9 +36,12 @@ function jouer(S) {
   const a = C.etat({ date: '2026-10-25', heureFin: '18:30' }, { drae: 24 }, now), b = C.etat({ date: '2026-09-08' }, { drae: 24 }, now);
   t('② la rentrée : « interdite jusqu’à aujourd’hui 18 h 30 » (fin 18 h 30 + 24 h) ; « libre depuis le 9 sept. » (midi + 24 h)', a.k === 'interdite' && a.txt === 'rentrée interdite jusqu’à aujourd’hui 18 h 30' && b.k === 'libre' && b.txt === 'rentrée libre depuis le 9 sept.');
   t('② sans délai : le biocontrôle le dit ; un autre produit aussi', C.etat({ date: '2026-08-11' }, { drae: 0, type: 'Biocontrôle' }, now).txt === 'biocontrôle, sans délai' && C.etat({ date: '2026-08-11' }, { drae: 0, type: 'Adjuvant' }, now).txt === 'sans délai de rentrée');
-  t('③ le cuivre : sa dose et le cumul de l’année de la parcelle la plus chargée, sur le plafond (2025 ne compte pas)', C.cu(C.TRAITEMENTS[0]) === 'cuivre\u00a0: 1,1 kg Cu/ha · 2,9 sur 4 cette année' && C.cu({ date: '2026-08-11', cuMetal: 0 }) === '');
+  // MOTS-15 (§610) : la ligne d’un traitement dit sa dose ; le cumul de l’année (le même calcul) passe sur la ligne de l’année.
+  t('③ le cuivre : la dose sur le traitement ; sur l’année, le cumul de la parcelle la plus chargée, sur le plafond (2025 ne compte pas)', C.cu(C.TRAITEMENTS[0]) === 'cuivre\u00a0: 1,1 kg Cu/ha' && C.cu({ date: '2026-08-11', cuMetal: 0 }) === ''
+    && C.cuAn('2026', C.TRAITEMENTS.slice(0, 2)) === 'cuivre 2,9 sur 4 kg/ha' && C.cuAn('2025', C.TRAITEMENTS.slice(2)) === 'cuivre 3 sur 4 kg/ha' && C.cuAn('2026', [{ date: '2026-08-11', cuMetal: 0 }]) === '');
   const h = C.html({ k: 'interdite', txt: 'rentrée <b>' }, 'cuivre');
-  t('③ la ligne d’état est échappée, sa classe dit l’état', h === '<div class="ph-etat ph-etat-interdite">rentrée &lt;b> · cuivre</div>' && C.html(null, '') === '');
+  t('③ la ligne d’état est échappée, sa classe dit l’état ; le cuivre à part, sans la couleur de la rentrée (MOTS-15)', h === '<div class="ph-etat"><span class="ph-etat-interdite">rentrée &lt;b></span> · <span class="ph-cu">cuivre</span></div>' && C.html(null, '') === ''
+    && C.html(null, 'cuivre') === '<div class="ph-etat"><span class="ph-cu">cuivre</span></div>');
   t('④ la ligne du registre : la date dite, l’étiquette au jeton nano (12 au téléphone, LISIBLE-1), l’état posé au bout ; plus de badge compté depuis minuit', S.tr.includes('${_escHtml(_phDateFr(t,now))}') && S.tr.includes('font-size:var(--pt-nano,11px);font-weight:700;padding:2px 8px;border-radius:7px;background:${tb}') && S.tr.includes('${_phEtatHtml(_et,_cu)}') && !S.tr.includes('Réentrée \'+draeR'));
   t('④ les couleurs : interdite en danger, libre en vert ; la liste joue ce fichier', S.css.includes('.ph-etat-interdite{color:var(--danger-texte,#BA361A);}') && S.css.includes('.ph-etat-libre{color:var(--ok-texte,#217343);}') && S.liste.indexOf("mv-harnais-phyux1.mjs'") > 0 && S.liste.indexOf("mv-harnais-phyux1.mjs --contre'") > 0);
 }
@@ -54,7 +57,8 @@ if (!CONTRE) {
     ['l’heure de fin oubliée (midi partout)', m('tr', "var hm=String(t.heureFin||t.heureDebut||'12:00').split(':');", "var hm='12:00'.split(':');")],
     ['« interdite » et « libre » inversés', m('tr', "return fin>now ? { k:'interdite'", "return fin<now ? { k:'interdite'")],
     ['le cuivre compte l’année d’avant', m('tr', "return x&&String(x.date||'').slice(0,4)===an&&parseFloat(x.cuMetal)>0", "return x&&parseFloat(x.cuMetal)>0")],
-    ['la ligne d’état n’est plus échappée', m('tr', "'+_escHtml(et.txt+(cu?' \\u00b7 '+cu:''))+'", "'+(et.txt+(cu?' \\u00b7 '+cu:''))+'")],
+    ['la ligne d’état n’est plus échappée', m('tr', "'+_escHtml(et.txt)+'</span>'", "'+et.txt+'</span>'")],
+    ['le cuivre reprend la couleur de la rentrée', m('tr', "(et?' \\u00b7 ':'')+'<span class=\"ph-cu\">'", "(et?' \\u00b7 ':'')+'<span class=\"ph-etat-'+(et?et.k:'')+'\">'")],
     ['la date redevient machine', m('tr', '${_escHtml(_phDateFr(t,now))}', '${_escHtml(t.date)}')],
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-phyux1.mjs'").join("mv-harnais-phyuxZ.mjs'") })],
   ];

@@ -10817,7 +10817,9 @@ function _cfmCuCol(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'
 // Cuivre : cumul métal 7 ans / 28 kg·ha (source unique _cuParcRollSum).
 function _cfmCuivre(){
   if(typeof window._cuParcRollSum!=='function') return { avail:false };
-  var PLAF=28;
+  // ★ MOTS-15 (§610) : le plafond RÉGLÉ (Bilan cuivre : 4 kg/ha par an × 7), plus 28 en dur — le Registre du Phyto le lit
+  //   aussi (_phPhrase) : les deux écrans disent le même chiffre, même plafond changé.
+  var PLAF=(typeof window._cuPlafond7==='function')?window._cuPlafond7():28;
   var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
   var rows=parc.map(function(p){ var cu=window._cuParcRollSum(p.nom)||0; return { nom:p.nom, surf:parseFloat(p.surface)||0, cu:cu, ratio:cu/PLAF }; })
     .filter(function(r){ return r.cu>0; })
@@ -11098,7 +11100,7 @@ function _pilTabCfm(d){
           +'<div class="pil-li-r" style="color:var('+col+')">'+(Math.round(r.cu*10)/10).toLocaleString('fr-FR')+'<span style="font-size:var(--pt-lbl,12px);font-weight:500;color:var(--texte-doux)"> kg/ha</span></div></div>';
       }).join('');
       var body='<div class="pil-ip-list">'+crows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">plafond UE <b>28 kg/ha</b> de cuivre m\u00e9tal sur 7 ans'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">plafond '+(cu.plaf===28?'UE ':'r\u00e9gl\u00e9 ')+'<b>'+cu.plaf+' kg/ha</b> de cuivre m\u00e9tal sur 7 ans'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
       // MOTS-11 (§604) : « 8 parcelles ↑ 2 » → la pastille (« 2 en vigilance », « 1 au-dessus du plafond », « sous le plafond »).
       var sw=cu.over?_pilPhPl(cu.over+' au-dessus du plafond','ko'):(cu.warn?_pilPhPl(cu.warn+' en vigilance','or'):_pilPhPl('sous le plafond','ok'));
       H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''))+sw, null, null, body);

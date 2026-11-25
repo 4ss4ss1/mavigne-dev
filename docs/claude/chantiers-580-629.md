@@ -1365,3 +1365,46 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Un nombre recopié finit par ne plus dire la même chose que l’original** : le sommaire recomptait « à faire » à sa façon et disait 6 sous une bande qui disait 5. Un nombre dit à deux endroits se lit à un seul, ou se lit dans la même fonction.
 - ⚠️ **Un défaut de mise en page peut attendre qu’un autre changement le révèle** : les colonnes de 72 px existaient depuis CAVEAUJ-2 ; il a suffi que la liste commence un jour plus tard pour qu’un nom long tombe dans la dernière. Une grille se règle par la largeur minimale de ses colonnes, pas par leur nombre.
 - ⚠️ **Compter par une expression sur du HTML compte aussi ce qui lui ressemble** : `class="caj-asi` attrapait `caj-asic`. Compter les éléments (`<li class="caj-asi[ "]`), ou mieux la liste avant le rendu.
+
+## 610. ★★★ MOTS-15 — PHYTO › REGISTRE ALLÉGÉ : UNE PHRASE, UNE ANNÉE PAR BLOC, LA RENTRÉE TANT QU’ELLE SERT ; CONFORMITÉ AU PLAFOND RÉGLÉ (25/11 — APP 11.31, SW 12.22 — `src/tracteur.js` · `src/pilotage.js` · `src/styles.css` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `guide/11-pilotage.html` · `public/guide.html` (regénéré) · `docs/maquettes/maquette-phyto-registre-v1.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-mots15.mjs` (neuf) · `phyux1`, `phyto1`, `textea`, `info`, `cuivre7` suivis · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs` · `scripts/mv-mots-baseline.json` · `scripts/mv-ux-baseline.json` · la capture `phyto` de la démo du site · base `a334c11`)
+
+### 610a. D’où ça vient, ce qui a été mesuré avant
+
+- Le plan (§28) après Cave › Aujourd’hui. Maquette `maquette-phyto-registre-v1.html` (Avant / Après, téléphone et ordinateur : le haut de l’écran, toute la liste, un traitement ce matin — simulé —, une année dépliée) ; Nico (25/11) : « go » — les cinq recommandations.
+- **316 mots au téléphone, 351 sur ordinateur, 2 546 px.** Aucune phrase longue : le poids était la répétition. Quinze traitements à la suite depuis 2020, chacun avec sa ligne verte « **rentrée libre depuis le 12 juin 2020** » (15 lignes) — la réponse à une question que personne ne pose plus ; « **4,2 sur 4 cette année** » redit sur chaque traitement au cuivre de l’année (13 fois), **en vert** : `_phEtatHtml` écrivait le cuivre dans la ligne de la rentrée, qui en prenait la couleur — vert même au-dessus de 4. Rien en haut ne disait si l’on pouvait retourner dans les vignes.
+- La fiche (ordinateur) : « **10 Sep** » (`fmtDate`, sans l’année : « 12 Juin » pour 2020 comme pour 2025) et « **Réentrée** » quand la liste dit « rentrée ».
+- ★ **Vu en route** : `_cfmCuivre` (Conformité) écrivait `PLAF=28` en dur, et sa phrase « plafond UE 28 kg/ha » — quand le plafond se règle (Bilan cuivre, `_cuPlafond`, et `_cuPlafond7` qui en dérive depuis le commentaire de `reglages.js` : « une seule notion, deux chiffres »). Le Registre suivant le réglage, les deux écrans auraient dit deux plafonds dès qu’on le change.
+
+### 610b. Ce qui change
+
+- **La phrase** (`_phPhrase`, `#ph-phrase` posé dans `index.html`, caché hors du Registre et sur une liste vide) : « **Rentrée libre partout** », ou « **Rentrée interdite** sur 2 parcelles jusqu’à aujourd’hui 16 h 00 » (les parcelles comptées une fois, la fin la plus tardive, `_phQuandFr`). Le cuivre s’y ajoute **seulement près du plafond** : la parcelle la plus chargée sur sept ans (`_cuParcRollSum`, le chiffre de Conformité) dès 87,5 % (le seuil « Vigilance » de `_cuStatus`), orange, rouge au-delà — « cuivre : 26,8 sur 28 kg/ha en sept ans, Clos du Moulin ». Un « i » neuf, `MV_INFO['phyto.registre']`.
+- **Une année par bloc** (l’année civile : celle du registre, de l’export et du cumul de cuivre de PHY-UX-1), la plus récente ouverte ; sa ligne : « 2025 · 2 traitements · cuivre 4,2 sur 4 kg/ha » (`_phCuivreAn` : le calcul de `_phCuivreTxt` d’avant, sorti dans `_phCuivreCumul`, sur toutes les parcelles de l’année). Déplier / replier (`_phAnBasc`) garde le choix tant que l’écran est ouvert (`_phAnsOuv`). La ligne d’une année fait 48 px (`--h-row-2`) : une cible au doigt — à 32 px, `test:ux` comptait sept cibles de plus sous 44 px.
+- **L’état de la rentrée d’un traitement** (`_phEtatUtile`) : tant qu’elle est interdite, puis **sept jours** après sa fin (`_PH_ETAT_J`) — sans délai, sept jours après le traitement. `_phEtatRentree` rend sa fin (`fin`).
+- **Le cuivre d’un traitement** : sa dose seule (« cuivre : 2 kg Cu/ha »), dans son `<span class="ph-cu">`, gris.
+- **La fiche** : `_phDateFr` (« 10 sept. 2026 ») ; « Rentrée » (l’étiquette et l’alerte).
+- **Conformité** : `PLAF = _cuPlafond7()` ; la phrase dit « plafond UE 28 kg/ha » au plafond européen, « plafond réglé N kg/ha » sinon. Le « i » `pil.cfm.cuivre` le dit.
+- **Les mots** : `MV_AIDE` (« Le registre », « délais de rentrée »), le guide (`07-phyto`, `11-pilotage`), l’annonce 11.31 (administrateur, tractoriste).
+- **Pas touché** : la ligne d’écran (« 15 traitements »), les pastilles d’un traitement (type, dose, DAR), le Catalogue, la Fertilisation, la fenêtre d’un traitement au téléphone, l’assistant de saisie.
+
+### 610c. Mesuré après (build, démo)
+
+- Cliquet des mots (regravé, baisses seulement) : Phyto › Registre **316 → 80** mots au téléphone, **351 → 115** sur ordinateur. Hauteur 2 546 → 1 139 px au téléphone, 2 382 → 1 180 sur ordinateur. « rentrée libre depuis… » 15 → 0 ; « … sur 4 » 13 → 7 (une par année).
+- `test:ux` regravé avec `--accepte` : la page défile désormais de moins de 300 px, la mesure « bandeaux en défilant » du Phyto n’existe plus (la règle du script) ; baisses : actions plus haut que le pouce 4 → 2 (téléphone), textes sous 12 px 16 → 4 (ordinateur). `debord`, `gabarit` verts. Tous les tutos rejoués (téléphone, ordinateur, panneau, miroir) : verts — dont « rentree », qui touche un traitement de la liste.
+- La démo du site : `phyto` régénérée (regardée : la phrase, 2026 ouverte, les années repliées).
+- Joué dans le navigateur (téléphone, ordinateur), sans erreur de page : la phrase et son « i » ; 2025 dépliée puis repliée ; un traitement ajouté ce matin (interdite jusqu’à 16 h, dans la phrase et sur sa ligne) et un il y a trois jours (« libre depuis le 25 oct. ») ; le cuivre de Conformité lu au Pilotage (26,8 kg/ha, Clos du Moulin, « Vigilance · 96 % ») ; aucun débordement au téléphone.
+
+### 610d. Harnais
+
+`scripts/mv-harnais-mots15.mjs` (18 assertions, 28 contre-épreuves) : la phrase jouée (libre et cuivre orange ; interdite ; deux interdites — la fin la plus tardive, les parcelles une fois ; le cuivre muet sous 87,5 %, rouge au-delà, au plafond réglé) ; l’état utile joué (interdite, 3 et 8 jours, sans délai 3 et 30 jours) ; **la vraie `renderPhytoTrac` jouée** (2026 ouverte, 2025 repliée et sa ligne, les lignes muettes, la dose sans « cette année », le choix gardé) et `_phAnBasc` jouée ; la fiche ; `_cfmCuivre` jouée à 21 kg/ha ; la feuille, le « i », l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adaptés** : `phyux1` (③ : la dose sur le traitement, le cumul sur l’année par `_phCuivreAn`, la ligne en deux `<span>` ; un mutant de plus : le cuivre reprend la couleur de la rentrée), `phyto1` (la fiche monte avec `_phDateFr` ; « Rentrée »), `textea` (la liste monte avec ses nouvelles aides et la phrase). Et trois suivis vus par la chaîne : `info` (son corpus lit `tracteur.js`, qui pose la pastille `phyto.registre`), `cuivre7` (le mutant « plafond passé à 30 » vise la nouvelle ligne de `_cfmCuivre`), `tutos-couverture.json` (`_phAnBasc` exempté : déplier une année, rien à apprendre).
+
+### 610e. Restes
+
+- Le plan (§28) : la Réserve, puis le lot de balayage (les phrases isolées de Vigne, Tracteur, Réglages, Planning).
+- La synthèse cuivre (`reglages.js`, `_renderCuivre`) garde son propre décor et ses chiffres « actuel / 28 » de l’assistant de saisie (`_tratCuBudgetHtml`, `phyto.js`) — elle suit déjà `_cuPlafond7`.
+
+### 610f. Leçons
+
+- ⚠️ **Deux textes dans une même ligne prennent la même couleur** : le cuivre, écrit dans la ligne de la rentrée, était vert même au-dessus de 4. Un état coloré a sa balise à lui.
+- ⚠️ **Un plafond réglable écrit en dur à un seul endroit suffit à faire mentir deux écrans** : le commentaire de `reglages.js` l’avait dit pour la vue 7 ans ; Conformité était le cinquième endroit.

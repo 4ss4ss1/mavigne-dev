@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-11-25",
- "base": "015d5c0",
+ "base": "a334c11",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -423,6 +423,19 @@
    "baisses": [
     "cave › ordinateur › t12 : 17 → 16"
    ]
+  },
+  {
+   "date": "2026-11-25",
+   "base": "a334c11",
+   "motif": "hausse acceptée : MOTS-15 (§610) : Phyto › Registre — les années anciennes repliées, la page défile de moins de 300 px : la mesure « en défilant » n’existe plus (la règle du script)",
+   "hausses": [
+    "phyto › téléphone › chromeDefile : 57 → perdue",
+    "phyto › ordinateur › chromeDefile : 155 → perdue"
+   ],
+   "baisses": [
+    "phyto › téléphone › pouce : 4 → 2",
+    "phyto › ordinateur › t12 : 16 → 4"
+   ]
   }
  ],
  "mesures": {
@@ -476,16 +489,16 @@
     "hauteur": 930
    },
    "phyto": {
-    "cibles": 22,
+    "cibles": 18,
     "c24": 0,
     "c44": 4,
-    "textes": 129,
+    "textes": 49,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
-    "chromeDefile": 57,
-    "pouce": 4,
-    "hauteur": 2546
+    "chromeDefile": null,
+    "pouce": 2,
+    "hauteur": 1139
    },
    "cave": {
     "cibles": 60,
@@ -503,7 +516,7 @@
     "cibles": 29,
     "c24": 0,
     "c44": 8,
-    "textes": 94,
+    "textes": 93,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
@@ -598,16 +611,16 @@
     "hauteur": 983
    },
    "phyto": {
-    "cibles": 23,
+    "cibles": 19,
     "c24": 0,
     "c44": 6,
-    "textes": 157,
+    "textes": 77,
     "t11": 0,
-    "t12": 16,
+    "t12": 4,
     "chrome": 164,
-    "chromeDefile": 155,
+    "chromeDefile": null,
     "pouce": null,
-    "hauteur": 2382
+    "hauteur": 1180
    },
    "cave": {
     "cibles": 61,
@@ -651,7 +664,7 @@
     "c44": 32,
     "textes": 210,
     "t11": 0,
-    "t12": 51,
+    "t12": 52,
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.31', d: '2026-11-25', items: [   // MOTS-15 (§610) : Phyto › Registre allégé — une phrase, une année par bloc
+    { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'eprouvette', titre: 'Le registre phyto\u00a0: une phrase, une année par bloc',
+      desc: "Le Registre s\u2019ouvre sur une phrase\u00a0: «\u00a0Rentrée libre partout\u00a0», ou la rentrée interdite et jusqu\u2019à quand. Le cuivre s\u2019y ajoute quand une parcelle approche du plafond sur sept ans. Les traitements se rangent par année, la plus récente ouverte\u00a0; touchez une année pour la déplier. Sur un traitement, l\u2019état de la rentrée s\u2019écrit tant qu\u2019elle est interdite, puis sept jours." },
+  ] },
   { v: '11.30', d: '2026-11-25', items: [   // MOTS-14 (§609) : Cave › Aujourd'hui allégé — chaque chiffre à un seul endroit
     { niv: 0, pour: ['admin'], emoji: 'chrono', titre: 'Cave, Aujourd\u2019hui\u00a0: chaque chiffre à un seul endroit',
       desc: "L\u2019écran d\u2019arrivée de la Cave ne redit plus ses chiffres. Le sommaire laisse «\u00a0À faire\u00a0» et «\u00a0Fûts\u00a0» sans nombre\u00a0: les quatre chiffres juste au-dessus les donnent. Sous le verdict, la raison seule. Dans le calendrier, le détail d\u2019aujourd\u2019hui dit combien de gestes attendent et mène à «\u00a0Ce qui presse\u00a0», où ils se font\u00a0; «\u00a0Derniers gestes\u00a0» commence à hier. La méthode est dans le «\u00a0i\u00a0» de «\u00a0Ce qui presse\u00a0». Et deux comptes du sommaire étaient faux\u00a0: «\u00a0À surveiller\u00a0» comptait deux fois chaque ligne." },

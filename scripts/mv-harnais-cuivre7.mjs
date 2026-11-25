@@ -98,7 +98,8 @@ const MUTANTS = [
   ['un traitement sans parcelle ne vaut pour personne', dans('reg', '_cuTreatParc', 'if(!a||!a.length)return _cuActiveParc().map(function(p){return p.nom;});', 'if(!a||!a.length)return [];')],
   ['la moyenne toujours divisée par 7', dans('reg', '_cuParcRollN', 'if(_cuParcYear(nom,ys[i])>0) return ys.length-i;', 'if(_cuParcYear(nom,ys[i])>0) return 7;')],
   ['l’arrachée remise dans la Conformité', dans('pil', '_cfmCuivre', "return p && p.statut!=='Arrachee';", 'return !!p;')],
-  ['le plafond passé à 30', dans('pil', '_cfmCuivre', 'var PLAF=28;', 'var PLAF=30;')],
+  // MOTS-15 (§610) : Conformité lit le plafond réglé (_cuPlafond7) — le mutant le force à 30 comme avant.
+  ['le plafond passé à 30', dans('pil', '_cfmCuivre', "var PLAF=(typeof window._cuPlafond7==='function')?window._cuPlafond7():28;", 'var PLAF=30;')],
   ['la vigilance à 97 % au lieu de 87,5 %', dans('pil', '_cfmCuivre', 'r.ratio>=0.875 && r.ratio<=1', 'r.ratio>=0.97 && r.ratio<=1')],
 ];
 

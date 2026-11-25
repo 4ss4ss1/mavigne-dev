@@ -37,13 +37,15 @@ function suite(B) {
   const parts = fonction(B.trac, '_phParcParts'), rend = fonction(B.trac, 'renderPhytoTrac');
   // PHY-UX-1 (§502) : la ligne du registre dit sa date et l’état de la rentrée — leurs aides montent avec la carte.
   const iM = B.trac.indexOf('var _PH_MOIS='), mois = B.trac.slice(iM, B.trac.indexOf(';', iM) + 1);
-  const aides = ['_phJours', '_phHeureFr', '_phDateFr', '_phQuandFr', '_phEtatRentree', '_phCuivreTxt', '_phEtatHtml'].map(n => fonction(B.trac, n));
+  // MOTS-15 (§610) : la liste se range par année et dit sa phrase — leurs aides montent aussi (et leurs deux variables).
+  const aides = ['_phJours', '_phHeureFr', '_phDateFr', '_phQuandFr', '_phEtatRentree', '_phEtatUtile', '_phF1', '_phCuivreCumul', '_phCuivreTxt', '_phCuivreAn', '_phPhrase', '_phEtatHtml'].map(n => fonction(B.trac, n));
+  const vars = ['var _PH_ETAT_J=', 'var _phAnsOuv='].map((d) => { const i = B.trac.indexOf(d); return i < 0 ? '' : B.trac.slice(i, B.trac.indexOf(';', i) + 1); });
   const NOMS = ['Les Grandes Vignes', 'Clos du Moulin', 'La Combe', 'Les Chaumes', 'En Champs', 'Le Pré de la Rue', 'Les Crais', 'La Justice', 'Les Seuvrées', 'Aux Corvées'];
-  const el = { innerHTML: '' };
-  const ctx = { window: {}, document: { getElementById: () => el }, _mvIcon: () => '', dreEffectif: () => ({ h: 0 }),
+  const el = { innerHTML: '' }, phr = { innerHTML: '', hidden: true };
+  const ctx = { window: {}, document: { getElementById: (id) => (id === 'ph-phrase' ? phr : el) }, _mvIcon: () => '', dreEffectif: () => ({ h: 0 }),
     _escHtml: s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'), _escAttr: s => String(s), TRAITEMENTS: [], Date, Math, JSON };
   ctx.window.PARCELLES = NOMS.map(nom => ({ nom, statut: 'Actif' }));
-  vm.createContext(ctx); vm.runInContext([mois, ...aides, parts, rend].join('\n'), ctx);
+  vm.createContext(ctx); vm.runInContext([mois, ...vars, ...aides, parts, rend].join('\n'), ctx);
   const p8 = ctx._phParcParts({ parcelles: NOMS.slice(0, 8) }), p2 = ctx._phParcParts({ parcelles: NOMS.slice(0, 2) }), pT = ctx._phParcParts({ parcelles: NOMS });
   T('la liste abrégée en deux morceaux : trois noms, et « +5 » à part', p8.noms === 'Les Grandes Vignes, Clos du Moulin, La Combe' && p8.plus === '+5');
   T('… deux parcelles : les deux noms, pas de « + »', p2.noms === 'Les Grandes Vignes, Clos du Moulin' && p2.plus === '');

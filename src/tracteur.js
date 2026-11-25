@@ -208,12 +208,13 @@ function _phFicheHtml(i){
   var finDar=(dar>0&&!isNaN(d0))?new Date(d0.getTime()+dar*864e5):null, finDre=(dh>0&&dApp&&!isNaN(dApp))?new Date(dApp.getTime()+dh*36e5):null;
   var jour=function(x){ return x.toLocaleDateString('fr-FR',{day:'numeric',month:'long'}); };
   var parcs=Array.isArray(t.parcelles)?t.parcelles:(t.parcelles?[t.parcelles]:[]), op=t.conducteur||t.operateur||'';
-  var tags=[m.type,m.amm?'AMM '+m.amm:'',_fmtDate(t.date),op].filter(Boolean).map(function(x){ return '<span class="trf-tag">'+_escHtml(String(x))+'</span>'; }).join('');
+  // MOTS-15 : la date du registre, « 10 sept. 2026 » — plus « 10 Sep » sans l'année (fmtDate)
+  var tags=[m.type,m.amm?'AMM '+m.amm:'',_phDateFr(t,now),op].filter(Boolean).map(function(x){ return '<span class="trf-tag">'+_escHtml(String(x))+'</span>'; }).join('');
   var h='<div class="trf-hd"><div class="trf-id"><h2 class="trf-t">'+_escHtml(t.produit||'\u2014')+'</h2><div class="trf-tags">'+tags+'</div></div>'
     +'<div class="trf-act"><button type="button" class="trf-btn" data-tuto="phy.ouvrir.pc" onclick="openTraitDetail('+i+')">Ouvrir le traitement</button></div></div>';
-  if(finDre&&finDre>now)h+='<div class="trf-alerte">R\u00e9entr\u00e9e interdite jusqu\u2019au '+_escHtml(jour(finDre))+' \u00e0 '+String(finDre.getHours()).padStart(2,'0')+'\u00a0h\u00a0'+String(finDre.getMinutes()).padStart(2,'0')+(dre.motif?' \u2014 '+_escHtml(dre.motif):'')+'.</div>';
+  if(finDre&&finDre>now)h+='<div class="trf-alerte">Rentr\u00e9e interdite jusqu\u2019au '+_escHtml(jour(finDre))+' \u00e0 '+String(finDre.getHours()).padStart(2,'0')+'\u00a0h\u00a0'+String(finDre.getMinutes()).padStart(2,'0')+(dre.motif?' \u2014 '+_escHtml(dre.motif):'')+'.</div>';
   h+='<div class="trf-kpis"><div class="trf-kpi"><span class="l">Dose</span><span class="v phf-v">'+_escHtml(m.dose?String(m.dose):'\u2014')+'</span></div>'
-    +'<div class="trf-kpi"><span class="l">R\u00e9entr\u00e9e</span><span class="v">'+(dh?dh+'<small>\u00a0h</small>':'\u2014')+'</span><span class="trf-s">'+(finDre?(finDre>now?'en cours':'pass\u00e9e'):'')+'</span></div>'
+    +'<div class="trf-kpi"><span class="l">Rentr\u00e9e</span><span class="v">'+(dh?dh+'<small>\u00a0h</small>':'\u2014')+'</span><span class="trf-s">'+(finDre?(finDre>now?'en cours':'pass\u00e9e'):'')+'</span></div>'
     +'<div class="trf-kpi"><span class="l">Avant r\u00e9colte</span><span class="v">'+(dar?dar+'<small>\u00a0j</small>':'\u2014')+'</span><span class="trf-s">'+(finDar?(finDar>now?'jusqu\u2019au '+_escHtml(jour(finDar)):'pass\u00e9'):'')+'</span></div></div>';
   // ★ REG27-1A (§572) : une parcelle traitée en partie dit ses hectares ; « Pour le registre » ajoute le mode, la surface traitée
   //   et les rentrées anticipées déclarées (elles se déclarent et se corrigent dans « Ouvrir le traitement »).
@@ -255,31 +256,81 @@ function _phEtatRentree(t,m,now){
   var hm=String(t.heureFin||t.heureDebut||'12:00').split(':');
   var app=new Date(t.date+'T'+('0'+(hm[0]||'12')).slice(-2)+':'+('0'+(hm[1]||'00')).slice(-2)+':00'); if(isNaN(app)) return null;
   var fin=new Date(app.getTime()+h*3600000), quand=_phQuandFr(fin,now);
-  return fin>now ? { k:'interdite', txt:'rentr\u00e9e interdite jusqu\u2019\u00e0 '+quand } : { k:'libre', txt:'rentr\u00e9e libre depuis '+quand };
+  return fin>now ? { k:'interdite', txt:'rentr\u00e9e interdite jusqu\u2019\u00e0 '+quand, fin:fin } : { k:'libre', txt:'rentr\u00e9e libre depuis '+quand, fin:fin };
 }
-function _phCuivreTxt(t){
-  var cu=parseFloat(t&&t.cuMetal); if(!(cu>0)) return '';
-  var an=String(t.date||'').slice(0,4), P=Array.isArray(t.parcelles)?t.parcelles:[], cumul=0;
-  P.forEach(function(nom){
+// ★ MOTS-15 — L'ÉTAT DE LA RENTRÉE S'ÉCRIT TANT QU'IL SERT : interdite, puis sept jours après sa fin (ou après le traitement,
+//   sans délai). « Rentrée libre depuis le 12 juin 2020 » répondait à une question que personne ne pose plus.
+var _PH_ETAT_J=7;
+function _phEtatUtile(et,t,now){
+  if(!et) return false;
+  if(et.k==='interdite') return true;
+  if(et.fin) return (now-et.fin)<_PH_ETAT_J*86400000;
+  var d=new Date(String(t&&t.date||'')+'T12:00:00'); return !isNaN(d) && _phJours(d,now)>=-_PH_ETAT_J;
+}
+function _phF1(n){ return String(Math.round(n*10)/10).replace('.',','); }
+// Le cumul de cuivre métal d'une année sur la plus chargée des parcelles données — le calcul de PHY-UX-1 (§502), inchangé.
+function _phCuivreCumul(an,parcs){
+  var cumul=0;
+  (parcs||[]).forEach(function(nom){
     var s=(TRAITEMENTS||[]).filter(function(x){ return x&&String(x.date||'').slice(0,4)===an&&parseFloat(x.cuMetal)>0&&Array.isArray(x.parcelles)&&x.parcelles.indexOf(nom)>=0; })
       .reduce(function(a,x){ return a+parseFloat(x.cuMetal); },0);
     if(s>cumul) cumul=s;
   });
-  var pl=(typeof window._cuPlafond==='function')?window._cuPlafond():4, f=function(n){ return String(Math.round(n*10)/10).replace('.',','); };
-  return 'cuivre\u00a0: '+f(cu)+' kg Cu/ha'+(cumul>0?' \u00b7 '+f(cumul)+' sur '+f(pl)+' cette ann\u00e9e':'');
+  return cumul;
 }
+// ★ MOTS-15 : la ligne d'un traitement dit SA dose ; « 4,2 sur 4 cette année », redit sur chaque ligne de l'année, passe sur la
+//   ligne de l'année (_phCuivreAn) — une fois.
+function _phCuivreTxt(t){
+  var cu=parseFloat(t&&t.cuMetal); if(!(cu>0)) return '';
+  return 'cuivre\u00a0: '+_phF1(cu)+' kg Cu/ha';
+}
+function _phCuivreAn(an,l){
+  var P={}; (l||[]).forEach(function(t){ if(parseFloat(t&&t.cuMetal)>0&&Array.isArray(t.parcelles)) t.parcelles.forEach(function(n){ P[n]=1; }); });
+  var cumul=_phCuivreCumul(an,Object.keys(P)); if(!(cumul>0)) return '';
+  var pl=(typeof window._cuPlafond==='function')?window._cuPlafond():4;
+  return 'cuivre '+_phF1(cumul)+' sur '+_phF1(pl)+' kg/ha';
+}
+// ★ MOTS-15 — LA PHRASE DU HAUT : « peut-on y retourner ? », puis le cuivre s'il approche du plafond sur sept ans — le chiffre
+//   de Conformité (_cuParcRollSum, la parcelle la plus chargée ; vigilance dès 87,5 %, comme _cuStatus).
+function _phPhrase(list,now){
+  var P=[], parcs={}, finMax=null, n=0;
+  (list||[]).forEach(function(t){
+    var m=window._phResolve?window._phResolve(t):{type:t.type||'',drae:t.drae||0};
+    var et=_phEtatRentree(t,m,now); if(!et||et.k!=='interdite') return;
+    n++; (Array.isArray(t.parcelles)?t.parcelles:[]).forEach(function(p){ parcs[p]=1; });
+    if(!finMax||et.fin>finMax) finMax=et.fin;
+  });
+  var np=Object.keys(parcs).length;
+  P.push(n?'<b class="ko">Rentr\u00e9e interdite</b>'+(np?' sur '+np+' parcelle'+(np>1?'s':''):'')+' jusqu\u2019\u00e0 '+_escHtml(_phQuandFr(finMax,now))
+          :'<b class="ok">Rentr\u00e9e libre partout</b>');
+  if(typeof window._cuParcRollSum==='function'){
+    var pl=(typeof window._cuPlafond7==='function')?window._cuPlafond7():28, best=null;
+    (window.PARCELLES||[]).filter(function(p){ return p&&p.statut!=='Arrachee'; }).forEach(function(p){ var x=window._cuParcRollSum(p.nom)||0; if(!best||x>best.s) best={nom:p.nom, s:x}; });
+    if(best&&best.s>=0.875*pl) P.push('<b class="'+(best.s>pl?'ko':'or')+'">cuivre\u00a0: '+_phF1(best.s)+' sur '+pl+' kg/ha en sept ans</b>, '+_escHtml(best.nom));
+  }
+  return P.join(' \u00b7 ');
+}
+// Une année = sa ligne (le nombre de traitements, le cuivre) ; la plus récente ouverte, les autres repliées.
+var _phAnsOuv={};
+window._phAnBasc=function(b){
+  var sec=b&&b.closest?b.closest('.ph-an'):null; if(!sec) return;
+  var ouv=!sec.classList.contains('open'); _phAnsOuv[sec.dataset.an]=ouv;
+  sec.classList.toggle('open',ouv); b.setAttribute('aria-expanded',String(ouv));
+  var l=sec.querySelector('.ph-an-l'); if(l) l.hidden=!ouv;
+};
+// MOTS-15 : le cuivre ne prend plus la couleur de la rentrée (« 4,2 sur 4 » s'écrivait en vert).
 function _phEtatHtml(et,cu){
-  if(et) return '<div class="ph-etat ph-etat-'+_escAttr(et.k)+'">'+_escHtml(et.txt+(cu?' \u00b7 '+cu:''))+'</div>';
-  return cu?'<div class="ph-etat">'+_escHtml(cu)+'</div>':'';
+  if(!et&&!cu) return '';
+  return '<div class="ph-etat">'+(et?'<span class="ph-etat-'+_escAttr(et.k)+'">'+_escHtml(et.txt)+'</span>':'')+(cu?(et?' \u00b7 ':'')+'<span class="ph-cu">'+_escHtml(cu)+'</span>':'')+'</div>';
 }
 function renderPhytoTrac(){
   const el=document.getElementById('traitements-list-trac');if(!el)return;
   const list=[...TRAITEMENTS].sort((a,b)=>b.date.localeCompare(a.date));
-  if(!list.length){el.innerHTML='<div class="empty-state" style="margin-top:40px"><div class="ei">'+_mvIcon('eprouvette',40)+'</div><p>Aucun traitement cette saison</p></div>';if(typeof _phFicheSync==='function')_phFicheSync([]);return;}
+  if(!list.length){ const _ph0=document.getElementById('ph-phrase'); if(_ph0) _ph0.hidden=true; el.innerHTML='<div class="empty-state" style="margin-top:40px"><div class="ei">'+_mvIcon('eprouvette',40)+'</div><p>Aucun traitement cette saison</p></div>';if(typeof _phFicheSync==='function')_phFicheSync([]);return;}
   const now=new Date();
   const TC={'Cuivre':'var(--tag-blue-tx,#1A4A7A)','Soufre':'var(--tag-amber-tx,#7D6608)','Fongicide':'var(--tag-purple-tx,#4A2060)','Insecticide':'var(--tag-red-tx,#A0291E)','Herbicide':'var(--tag-green-tx,#1E3A12)','Biocontrôle':'var(--tag-teal-tx,#2C6E49)'};
   const TB={'Cuivre':'var(--tag-blue-bg,rgba(26,74,122,0.14))','Soufre':'var(--tag-amber-bg,rgba(125,102,8,0.16))','Fongicide':'var(--tag-purple-bg,rgba(90,45,142,0.16))','Insecticide':'var(--tag-red-bg,rgba(160,41,30,0.14))','Herbicide':'var(--tag-green-bg,rgba(30,58,18,0.14))','Biocontrôle':'var(--tag-teal-bg,rgba(44,110,73,0.14))'};
-  el.innerHTML=list.map(t=>{
+  const ligne=t=>{
     const idx=TRAITEMENTS.indexOf(t);
     const m=window._phResolve?window._phResolve(t):{type:t.type||'',amm:t.amm,dar:t.dar,drae:t.drae||0,dose:t.dose};
     const darBase=(m.dar!=null?m.dar:0);
@@ -290,7 +341,7 @@ function renderPhytoTrac(){
       if(reste>0) darBadge='<span class="mvpas mvpas-type mvpas-ambre">DAR '+reste+'j</span>';
     }
     const draeBadge='';   // ★ PHY-UX-1 (§502) : la ligne de l'état de la rentrée remplace le badge « Réentrée nh » (compté depuis minuit)
-    const _et=_phEtatRentree(t,m,now), _cu=_phCuivreTxt(t);
+    const _et0=_phEtatRentree(t,m,now), _et=_phEtatUtile(_et0,t,now)?_et0:null, _cu=_phCuivreTxt(t);
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
     const emj='';
     const parcP=_phParcParts(t), parc=parcP.noms;
@@ -311,7 +362,18 @@ function renderPhytoTrac(){
       ${meta3?`<div class="phyto-row-meta" style="display:flex;gap:12px;font-size:var(--pt-micro,11px);color:var(--texte-doux);align-items:center;min-width:0">${parc?'<span style="display:flex;gap:4px;min-width:0;flex:1 1 auto"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(parc)+'</span>'+(parcP.plus?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(parcP.plus)+'</span>':'')+'</span>':''}${cond?'<span style="flex-shrink:0;white-space:nowrap">'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;flex-shrink:0;color:var(--gris)">›</span></div>`:''}
     ${_phEtatHtml(_et,_cu)}
     </div>`;
+  };
+  // ★ MOTS-15 — UNE ANNÉE PAR BLOC (l'année civile, celle du registre et de l'export) ; la plus récente ouverte.
+  const G=[], ix={};
+  list.forEach(t=>{ const an=String(t.date||'').slice(0,4)||'\u2014'; if(ix[an]==null){ ix[an]=G.length; G.push({an:an,l:[]}); } G[ix[an]].l.push(t); });
+  el.innerHTML=G.map((g,k)=>{
+    const ouv=(_phAnsOuv[g.an]!=null)?_phAnsOuv[g.an]:k===0, n=g.l.length, cu=_phCuivreAn(g.an,g.l);
+    return '<section class="ph-an'+(ouv?' open':'')+'" data-an="'+_escAttr(g.an)+'"><button type="button" class="ph-an-h" aria-expanded="'+ouv+'" onclick="_phAnBasc(this)">'
+      +'<b>'+_escHtml(g.an)+'</b><span>'+n+' traitement'+(n>1?'s':'')+(cu?' \u00b7 '+_escHtml(cu):'')+'</span>'+_mvIcon('chevron',16)+'</button>'
+      +'<div class="ph-an-l"'+(ouv?'':' hidden')+'>'+g.l.map(ligne).join('')+'</div></section>';
   }).join('');
+  const ph=document.getElementById('ph-phrase');
+  if(ph){ ph.innerHTML=_phPhrase(list,now)+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('phyto.registre'):''); ph.hidden=false; }
   // PHYTO-1 (§285) — garde de type : mv-harnais-textea joue renderPhytoTrac seule, hors du module.
   if(typeof _phFicheSync==='function')_phFicheSync(list);
 }
