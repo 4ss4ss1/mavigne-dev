@@ -1,8 +1,8 @@
 {
  "lot": "UX-0",
  "section": "§459",
- "date": "2026-11-18",
- "base": "9fd63cb",
+ "date": "2026-11-25",
+ "base": "015d5c0",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -414,6 +414,15 @@
    "baisses": [
     "cave › ordinateur › t12 : 29 → 17"
    ]
+  },
+  {
+   "date": "2026-11-25",
+   "base": "015d5c0",
+   "motif": "baisse",
+   "hausses": [],
+   "baisses": [
+    "cave › ordinateur › t12 : 17 → 16"
+   ]
   }
  ],
  "mesures": {
@@ -479,16 +488,16 @@
     "hauteur": 2546
    },
    "cave": {
-    "cibles": 59,
+    "cibles": 60,
     "c24": 0,
     "c44": 6,
-    "textes": 270,
+    "textes": 254,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 109,
     "pouce": null,
-    "hauteur": 4023
+    "hauteur": 3773
    },
    "reserve": {
     "cibles": 29,
@@ -601,16 +610,16 @@
     "hauteur": 2382
    },
    "cave": {
-    "cibles": 60,
+    "cibles": 61,
     "c24": 0,
     "c44": 7,
-    "textes": 282,
+    "textes": 266,
     "t11": 0,
-    "t12": 17,
+    "t12": 16,
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,
-    "hauteur": 3917
+    "hauteur": 3716
    },
    "reserve": {
     "cibles": 28,

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.20
+// MA VIGNE — Service Worker v12.21
+// v12.21 (25/11/2026) — MOTS-14 (§609) : Cave › Aujourd'hui allégé — chaque chiffre à un seul endroit : le sommaire sans nombre pour « À faire » et « Fûts » (la bande les donne), « À surveiller » qui comptait chaque ligne deux fois, la raison seule sous le verdict, le détail d'aujourd'hui qui mène à « Ce qui presse » au lieu de redire les gestes, « Derniers gestes » à partir d'hier, la méthode dans le « i »
 // v12.20 (24/11/2026) — MOTS-13 (§607) : Cave › Le Millésime, Ensemble et Courbes allégés — une phrase sous les onglets (« 2 cuves en fermentation, tout est rentré »), les notes de méthode des Courbes dans le « i », le parcours qui ne déborde plus au téléphone, la légende des maturités lisible, le graphe des maturités dans sa carte, l'axe des jours dégagé
 // v12.19 (24/11/2026) — MOTS-12 (§605) : Cave › Le Millésime, Parcelles et Cuvées allégés — une phrase sous les onglets (« 8 parcelles récoltées, 3 sans maximum, 6 estimées »), une ligne par parcelle et son détail au toucher (« Poser le maximum » dedans), les quatre chiffres sur une ligne au téléphone, Cuvées : la liste seule au téléphone, le nom une fois dans la fiche, « 50 hL »
 // v12.18 (23/11/2026) — MOTS-11 (§604) : Pilotage › Conformité allégé sur place — une phrase en haut (les parcelles à nu, les points à régler : le nombre de la tuile d'Aujourd'hui), les cinq cartes repliées avec leur chiffre et leur pastille ; la protection devient une carte comme les autres, avec « Ouvrir les traitements » ; le registre en résumé (ce qui manque, puis un compte)
@@ -4752,7 +4753,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.20';
+const CACHE_NAME   = 'mavigne-v12.21';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4769,7 +4770,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.20 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.21 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4789,7 +4790,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.20 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.21 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

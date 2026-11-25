@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.30', d: '2026-11-25', items: [   // MOTS-14 (§609) : Cave › Aujourd'hui allégé — chaque chiffre à un seul endroit
+    { niv: 0, pour: ['admin'], emoji: 'chrono', titre: 'Cave, Aujourd\u2019hui\u00a0: chaque chiffre à un seul endroit',
+      desc: "L\u2019écran d\u2019arrivée de la Cave ne redit plus ses chiffres. Le sommaire laisse «\u00a0À faire\u00a0» et «\u00a0Fûts\u00a0» sans nombre\u00a0: les quatre chiffres juste au-dessus les donnent. Sous le verdict, la raison seule. Dans le calendrier, le détail d\u2019aujourd\u2019hui dit combien de gestes attendent et mène à «\u00a0Ce qui presse\u00a0», où ils se font\u00a0; «\u00a0Derniers gestes\u00a0» commence à hier. La méthode est dans le «\u00a0i\u00a0» de «\u00a0Ce qui presse\u00a0». Et deux comptes du sommaire étaient faux\u00a0: «\u00a0À surveiller\u00a0» comptait deux fois chaque ligne." },
+  ] },
   { v: '11.29', d: '2026-11-24', items: [   // MOTS-13 (§607) : Cave › Le Millésime, Ensemble et Courbes allégés — une phrase, la méthode dans le « i »
     { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Le Millésime\u00a0: Ensemble et Courbes plus légers',
       desc: "Ensemble et Courbes ont leur phrase sous les onglets\u00a0: «\u00a02 cuves en fermentation, tout est rentré\u00a0», «\u00a02 cuves en fermentation, 1 décuvée\u00a0». Sous les graphes des Courbes, les longues notes de méthode laissent la place aux graphes\u00a0: tout est dans le «\u00a0i\u00a0» de chaque carte. Le parcours «\u00a0De la vigne à la bouteille\u00a0» ne déborde plus au téléphone, la légende des maturités se lit ligne par ligne, et le graphe tient dans sa carte. Aucun calcul ne change." }

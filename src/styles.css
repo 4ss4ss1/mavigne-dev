@@ -7462,8 +7462,6 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-ctas{ display:flex; flex-wrap:wrap; gap:var(--e-2,8px); margin-top:var(--e-4,16px); }
 #page-cave .caj-ctas .mvbtn{ flex:1 1 auto; }
 #page-cave .caj-ctan{ margin-left:calc(var(--e-1,4px) * -1); font-weight:var(--fw-med,500); }   /* « · 2 cuves » à une espace du libellé, pas à huit pixels */
-#page-cave .caj-cadre{ display:flex; gap:var(--e-2,8px); align-items:flex-start; margin:var(--e-4,16px) 0 0; font-size:var(--pt-micro,12px); line-height:var(--lh-ui); color:var(--texte-doux); }
-#page-cave .caj-cadre > i{ flex:none; width:var(--bw-2); height:var(--e-3,12px); margin-top:var(--e-0,2px); border-radius:var(--bw-2); background:var(--ligne-forte); }
 #page-cave .caj-asl{ list-style:none; margin:0; padding:0; }
 #page-cave .caj-asi{ display:grid; grid-template-columns:var(--h-ctl) minmax(0,1fr) auto; gap:var(--e-3,12px); align-items:start; padding:var(--e-3,12px) 0; border-top:var(--bw) solid var(--ligne,#E7E6E2); }
 #page-cave .caj-asi:first-child{ border-top:0; padding-top:0; }
@@ -7504,6 +7502,8 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 #page-cave .caj-x h4{ margin:0 0 var(--e-1,4px); font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); color:var(--texte); }
 #page-cave .caj-x h4 span{ font-weight:var(--fw-med,500); color:var(--texte-doux); }
 #page-cave .caj-x ul{ list-style:none; margin:0; padding:0; }
+#page-cave .caj-xg{ display:flex; align-items:center; gap:var(--e-2,8px); margin:0 0 var(--e-1,4px); font-size:var(--pt-txt,13px); color:var(--texte-med); }
+#page-cave .caj-xg .caj-lien{ margin-left:auto; }
 #page-cave .caj-x li{ display:flex; align-items:baseline; gap:var(--e-2,8px); padding:var(--e-1,4px) 0; font-size:var(--pt-txt,13px); color:var(--texte-med); }
 #page-cave .caj-x li > span{ flex:1; min-width:0; }
 #page-cave .caj-x li b{ font-weight:var(--fw-semi,600); color:var(--texte); }
@@ -7614,7 +7614,10 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
   #page-cave .caj-cv .mvpas, #page-cave .caj-ch .mvpas{ max-width:100%; white-space:normal; line-height:1.2; padding-top:var(--e-0,2px); padding-bottom:var(--e-0,2px); }
 }
 @media (min-width:1024px){
-  #page-cave .caj-ed{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--e-4,16px) var(--e-7,32px); align-items:start; }
+  /* MOTS-14 (§609) : trois colonnes fixes faisaient 72 px à 1024 et 101 px à 1280 — « Gevrey-Chambertin » sortait de la carte
+     quand il tombait dans la dernière. Des colonnes de 120 px au moins : deux à 1024 et 1280, trois dès 1366 (comme avant). */
+  #page-cave .caj-ed{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:var(--e-4,16px) var(--e-7,32px); align-items:start; }
+  #page-cave .caj-edt{ overflow-wrap:anywhere; }
   #page-cave .caj-ed.repli{ max-height:none; overflow:visible; }
   #page-cave .caj-ed.repli::after{ display:none; }
   #page-cave .caj-edg + .caj-edg{ margin-top:0; }

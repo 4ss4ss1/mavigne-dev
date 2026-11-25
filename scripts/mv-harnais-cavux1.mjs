@@ -33,7 +33,8 @@ function monde(S, desk) {
 }
 function jouer(S) {
   const A = monde(S, true); const h = A.ctx.som({ presse: 2, semaine: 5, cuves: 7, futs: 43, veille: 0, releves: 0 });
-  t('① le sommaire : six entrées dans l’ordre, leurs nombres, leurs ancres ; un zéro écrit « 0 »', ['Ce qui presse<b>2</b>', 'À faire<b>5</b>', 'Cuves<b>7</b>', 'Fûts<b>43</b>', 'À surveiller<b>0</b>', 'Relevés du jour<b>0</b>'].every((x, i, a) => h.indexOf(x) > 0 && (i === 0 || h.indexOf(x) > h.indexOf(a[i - 1])))
+  // MOTS-14 (§609) : « À faire » et « Fûts » sans nombre — la bande de la Cave, juste au-dessus, les dit (mots14 le garde)
+  t('① le sommaire : six entrées dans l’ordre, leurs nombres, leurs ancres ; un zéro écrit « 0 »', ['Ce qui presse<b>2</b>', 'À faire</a>', 'Cuves<b>7</b>', 'Fûts</a>', 'À surveiller<b>0</b>', 'Relevés du jour<b>0</b>'].every((x, i, a) => h.indexOf(x) > 0 && (i === 0 || h.indexOf(x) > h.indexOf(a[i - 1])))
     && ['caj-titre', 'caj-semaine', 'caj-cv-t', 'caj-ch-t', 'caj-droite', 'caj-faits'].every((id) => h.includes('href="#' + id + '" class="caj-so" data-vers="' + id + '" onclick="return _aujVers(this.dataset.vers)"')));
   const c = A.ctx.fx(A.ctx._AUJ_G[0]);
   t('② la fiche d’une cuve : son nom, sa raison, sa densité à 20 °C et son dernier relevé, « Relever » en premier, « Autre geste »', c.includes('Cuve 7') && c.includes('raison mesure') && c.includes('994') && c.includes('le 2026-10-26')

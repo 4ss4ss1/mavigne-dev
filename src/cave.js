@@ -6367,7 +6367,7 @@ function _aujVeille(auj, parc){
   cuves.forEach(function(c){
     var x=_aujMaceration(c,auj); if(!x) return;
     L.push({c:'att', ic:'sablier', t:(c.nom||'Cuve')+' \u00b7 mac\u00e9ration plus longue que pr\u00e9vu',
-      s:x.prevu+' jours pr\u00e9vus \u00e0 la cr\u00e9ation de la cuve, '+x.jours+' jours en cuve aujourd\u2019hui.', v:'+'+(x.jours-x.prevu)+'\u00a0j'});
+      s:x.jours+' jours en cuve, '+x.prevu+' pr\u00e9vus.', v:'+'+(x.jours-x.prevu)+'\u00a0j'});   // MOTS-14 : plus court
   });
   cuves.forEach(function(c){
     if(!c||!_vendIsActive(c)) return;
@@ -6375,7 +6375,7 @@ function _aujVeille(auj, parc){
     try{ p=_mlProjFA(c,auj); }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/veille',err:e}); }
     if(!p||p.etat!=='normal'||!p.date||_mlEcartJ(auj,p.date)>3) return;
     L.push({c:'', ic:'flamme', t:(c.nom||'Cuve')+' \u00b7 fin de fermentation proche',
-      s:'Densit\u00e9 '+Math.round(p.d20)+', \u2212'+String(p.pente).replace('.',',')+' par jour\u00a0: vers '+_mlFrJ(p.date)+', \u00e0 '+p.marge+'\u00a0j pr\u00e8s.', v:_mlFrJ(p.date)});
+      s:Math.round(p.d20)+', \u2212'+String(p.pente).replace('.',',')+' par jour, \u00e0 '+p.marge+'\u00a0j pr\u00e8s.', v:_mlFrJ(p.date)});   // MOTS-14 : la date est à droite
   });
   var sd=_mlSansDate(parc);
   sd.forEach(function(x){ L.push({c:'att', ic:_AUJ_ICO.fut||'barrique', t:x.titre, s:x.detail, v:'', go:1}); });
@@ -6410,11 +6410,16 @@ function _aujResume(r){
 function _aujDetail(d, it, auj){
   var h='<div class="caj-x" aria-live="polite"><h4>'+_escHtml(_aujJourLong(d))+(d===auj?' <span>\u00b7 aujourd\u2019hui</span>':'')+'</h4>';
   if(!it.length) return h+'<p>Rien de pr\u00e9vu ce jour-l\u00e0.</p></div>';
+  // ★ MOTS-14 — AUJOURD'HUI, LES GESTES SONT DANS « CE QUI PRESSE » : le détail les comptait une seconde fois, avec une phrase
+  //   pour dire où les faire. Il dit combien et y mène ; il ne garde que ce qui n'est pas un geste (une fin estimée).
+  var nG=0;
+  if(d===auj){ nG=_mlGestes(it).length; it=it.filter(function(x){ return _ML_INFO[x.kind]; }); }
+  if(nG) h+='<p class="caj-xg"><span><b>'+nG+' geste'+(nG>1?'s':'')+'</b> \u00e0 faire</span><button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="_aujVers(\'caj-titre\')">Ce qui presse'+_mvIcon('chevron',16)+'</button></p>';
+  if(!it.length) return h+'</div>';
   h+='<ul>'+it.map(function(x){
     var q=x.kind==='ouillage'?String(x.detail||'')+(/^avanc/.test(String(x.note||''))?' \u00b7 '+x.note:''):(x.kind==='fa'?String(x.detail||'').replace(/^fin de fermentation estim\u00e9e \u00b7 /,''):'');
     return '<li class="k-'+_escAttr(x.kind)+'"><i'+(x.kind==='fa'?' class="est"':'')+'></i><span><b>'+_escHtml((x.kind==='fa'||x.kind==='malo')?(_ML_LBL[x.kind]||x.kind):(_AUJ_VERBE[x.kind]||_ML_LBL[x.kind]||x.kind))+'</b> \u00b7 '+_escHtml(x.titre||'')+'</span>'+(q?'<em>'+_escHtml(q)+'</em>':'')+'</li>';
   }).join('')+'</ul>';
-  if(d===auj) h+='<p>Les gestes du jour se font depuis \u00ab\u00a0Ce qui presse\u00a0\u00bb, en haut de l\u2019\u00e9cran.</p>';
   return h+'</div>';
 }
 // Les quatre semaines en calendrier : un jour = ses gestes ; la colonne de droite résume chaque semaine (ordinateur),
@@ -6680,12 +6685,13 @@ function _aujRecents(auj){
   return ev.slice(0,16);
 }
 function _aujRecentsHtml(auj){
-  var ev=_aujRecents(auj), G=[], idx={};
+  // MOTS-14 : aujourd'hui se lit dans « Déjà fait aujourd'hui », en haut — la carte commence à hier (le Pilotage lit _aujRecents entier)
+  var tous=_aujRecents(auj), ev=tous.filter(function(e){ return e.d!==auj; }), G=[], idx={};
   ev.forEach(function(e){ if(idx[e.d]==null){ idx[e.d]=G.length; G.push({d:e.d, l:[]}); } G[idx[e.d]].l.push(e); });
   function lab(d){ var j=_mlEcartJ(d,auj), t=_aujJourLong(d).split(' '); return j===0?'Aujourd\u2019hui':(j===1?'Hier \u00b7 '+t[0].toLowerCase()+' '+t[1]:t[0]+' '+t[1]); }
   var h='<section class="mvcarte caj-c caj-rec" aria-labelledby="caj-rec-t"><div class="caj-h"><span class="caj-vif" aria-hidden="true"></span><h3 class="caj-t" id="caj-rec-t">Derniers gestes</h3>'
     +'<button type="button" class="mvbtn mvbtn-discret mvbtn-compact caj-lien" onclick="selectCaveSection(\'elevage\');switchCaveOng(\'journal\')">Journal'+_mvIcon('chevron',16)+'</button></div>';
-  if(!G.length) return h+'<p class="caj-vide">Aucun geste ces dix derniers jours.</p></section>';
+  if(!G.length) return h+'<p class="caj-vide">'+(tous.length?'Rien d\u2019autre ces dix derniers jours.':'Aucun geste ces dix derniers jours.')+'</p></section>';
   return h+'<div class="caj-ed'+(_aujTout?'':' repli')+'">'+G.map(function(g){
       return '<div class="caj-edg"><div class="caj-edl">'+_escHtml(lab(g.d))+'</div>'+g.l.map(function(e){
         return '<div class="caj-ede"><span class="caj-edi'+(g.d===auj?' ok':'')+'">'+_mvIcon(g.d===auj?'check':e.ic,16)+'</span><span class="caj-edt"><b>'+_escHtml(e.t)+'</b>'+(e.q?' \u00b7 '+_escHtml(e.q):'')+(e.s?'<span>'+_escHtml(e.s)+'</span>':'')+'</span></div>';
@@ -6701,29 +6707,32 @@ function _aujRender(){
   var parc=_mlParc();
   var v=_mlVerdict(sem,{phase:_mlPhase(), haReste:haR, parc:parc, diag:_mlDiagForts()});   // CAVEPIL-1 (§436)
   var nSu=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendSuivie).length;
-  var nEl=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).length;
   var auj=_mlGestes((sem[0]&&sem[0].items)||[]).filter(function(i){ return i.date===from; });
   var G=_aujGrouper(auj), faits=_aujFaits(from), PL={due:'Prioritaire', warn:'\u00c0 faire', ok:'\u00c0 jour'};
   // ★ CAVE-UX-1 (§494) : les comptes du sommaire et les groupes de la fiche, posés pour renderCaveAujourdhui
   _AUJ_G=G;
-  _AUJ_N={ presse:auj.length, semaine:((sem[0]&&sem[0].items)||[]).filter(function(it){ return it.kind!=='demarrage'&&it.date>=from; }).length, cuves:nSu,
-    futs:(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).reduce(function(a,c){ return a+(_caveNbTonneaux(c)||0); },0), releves:faits.length, veille:0 };
+  // MOTS-14 : « À faire » et « Fûts » n'ont plus de nombre — la bande de la Cave, juste au-dessus, dit les deux (« 5 à faire
+  //   cette semaine », « 43 fûts en vin »), et le sommaire disait 6 quand elle disait 5 (il comptait la fin estimée).
+  _AUJ_N={ presse:auj.length, cuves:nSu, releves:faits.length, veille:0 };
   var etat=auj.length?auj.length+' geste'+(auj.length>1?'s':'')+' \u00b7 '+G.length+' contenant'+(G.length>1?'s':''):(faits.length?'tout est fait':'rien \u00e0 faire');
   var h='<div class="caj-zone"><div class="caj-g"><section class="mvcarte caj-c caj-hero" aria-labelledby="caj-titre">'
-    +'<div class="caj-hh"><span class="caj-hl">'+_mvIcon('eclair',16)+'Ce qui presse</span><span class="mvpas mvpas-statut '+({due:'mvpas-retard', warn:'mvpas-surveiller', ok:'mvpas-fait'})[v.cls]+' caj-etat">'+PL[v.cls]+'</span></div>'
-    +'<h2 class="caj-titre" id="caj-titre">'+_escHtml(v.t)+'</h2><p class="caj-why">'+_escHtml(v.s)+'</p>'
+    +'<div class="caj-hh"><span class="caj-hl">'+_mvIcon('eclair',16)+'Ce qui presse'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span><span class="mvpas mvpas-statut '+({due:'mvpas-retard', warn:'mvpas-surveiller', ok:'mvpas-fait'})[v.cls]+' caj-etat">'+PL[v.cls]+'</span></div>'
+    // MOTS-14 : la raison seule — « Puis : … » redisait la liste et le calendrier juste dessous (le Pilotage garde v.puis)
+    +'<h2 class="caj-titre" id="caj-titre">'+_escHtml(v.t)+'</h2><p class="caj-why">'+_escHtml(v.why||v.s)+'</p>'
     +'<div class="caj-sec"><span>\u00c0 faire aujourd\u2019hui</span><em>'+etat+'</em></div>';
   if(G.length) h+='<ul class="caj-ls">'+G.map(_aujLigne).join('')+'</ul>';
   if(faits.length) h+='<div class="caj-fait" id="caj-faits"><b>D\u00e9j\u00e0 fait aujourd\u2019hui</b>'+faits.map(function(t){ return '<span>'+_mvIcon('check',16)+_escHtml(t)+'</span>'; }).join('')+'</div>';
   if(!auj.length){ var pro=_aujProchain(sem,from); if(pro) h+='<p class="caj-suite">Prochain geste\u00a0: <b>'+_escHtml(pro)+'</b></p>'; }
   h+=_aujEquipe(from);
   var nT=G.filter(function(x){ return x.cuve&&x.G.some(function(i){ return i.kind==='mesure'||i.kind==='alerte'; }); }).length;
-  var _veil=_aujVeille(from,parc); _AUJ_N.veille=(_veil.match(/class="caj-asi/g)||[]).length;
+  // MOTS-14 : une ligne = un <li>. « class="caj-asi » attrapait aussi « caj-asic » (l'icône) : 4 pour deux lignes.
+  var _veil=_aujVeille(from,parc); _AUJ_N.veille=(_veil.match(/<li class="caj-asi[ "]/g)||[]).length;
   h+='<div class="caj-ctas">'
     +(nT?'<button type="button" class="mvbtn mvbtn-principal mvbtn-bureau caj-cta" onclick="selectCaveSection(\'vendange\');switchVendOng(\'tour\')">'+_mvIcon('parcours',18)+'Faire la tourn\u00e9e<span class="caj-ctan">\u00b7 '+nT+' cuve'+(nT>1?'s':'')+'</span></button>':'')
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-bureau caj-cta" onclick="openOvCaveOp()">'+_mvIcon('ajout',18)+'Nouvelle op\u00e9ration</button></div>'
-    +'<p class="caj-cadre"><i></i><span>Calcul\u00e9 sur '+nSu+' cuve'+(nSu>1?'s':'')+' suivie'+(nSu>1?'s':'')+' et '+nEl+' cuv\u00e9e'+(nEl>1?'s':'')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'
-    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></p></section>'+_aujEtat(from,parc)+'</div>'
+    // MOTS-14 : « Calculé sur 3 cuves suivies et 4 cuvées en élevage, avec le seuil d'ouillage… » part — les deux comptes sont
+    //   dans les en-têtes du Cuvier et du Chai, le seuil dans le « i », monté à côté de « Ce qui presse »
+    +'</section>'+_aujEtat(from,parc)+'</div>'
     +'<aside class="caj-dr" id="caj-droite" aria-label="\u00c0 surveiller">'+_veil+'</aside></div>'
     +'<div id="caj-semaine">'+_aujCal(sem,from)+'</div>';
   h+=_aujRecentsHtml(from);
@@ -6739,9 +6748,10 @@ var _AUJ_G=[], _AUJ_N={}, _aujSelK='', _aujRO=null;
 function _aujDesk(){ return !!(window.matchMedia&&window.matchMedia('(min-width: 1024px)').matches); }
 function _aujSommaireHtml(N){
   N=N||{};
-  var E=[['caj-titre','Ce qui presse',N.presse],['caj-semaine','\u00c0 faire',N.semaine],['caj-cv-t','Cuves',N.cuves],['caj-ch-t','F\u00fbts',N.futs],['caj-droite','\u00c0 surveiller',N.veille],['caj-faits','Relev\u00e9s du jour',N.releves]];
+  // MOTS-14 : null = pas de nombre (la bande le dit déjà)
+  var E=[['caj-titre','Ce qui presse',N.presse],['caj-semaine','\u00c0 faire',null],['caj-cv-t','Cuves',N.cuves],['caj-ch-t','F\u00fbts',null],['caj-droite','\u00c0 surveiller',N.veille],['caj-faits','Relev\u00e9s du jour',N.releves]];
   return '<nav class="caj-som" id="caj-som" aria-label="Sommaire de la page">'+E.map(function(e){
-    return '<a href="#'+e[0]+'" class="caj-so" data-vers="'+e[0]+'" onclick="return _aujVers(this.dataset.vers)">'+_escHtml(e[1])+'<b>'+(Number(e[2])||0)+'</b></a>';
+    return '<a href="#'+e[0]+'" class="caj-so" data-vers="'+e[0]+'" onclick="return _aujVers(this.dataset.vers)">'+_escHtml(e[1])+(e[2]===null?'':'<b>'+(Number(e[2])||0)+'</b>')+'</a>';
   }).join('')+'</nav>';
 }
 function _aujVers(id){

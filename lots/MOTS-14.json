@@ -1,0 +1,45 @@
+{
+  "lot": "MOTS-14",
+  "section": "§609",
+  "base": "015d5c03f5a9833008f49782855eed1a445ea572",
+  "inclut": [],
+  "date": "2026-11-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f37f56f5190d72a4131fe26694419447fe10436b8e72f533f2d8ca51250d92e3",
+    "date": "2026-11-25T13:28:46.841Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "229dbe9afac883234505374a03514b62d265e2f2323cad9b3d2128a86739bf60",
+    "docs/claude/INDEX.md": "5f1ba1fc146059ebebc3b1c5606f326cceffd1747fb0578c70b9b1cf13a34c73",
+    "docs/claude/chantiers-580-629.md": "25ea160784d89b6d8843a157a66e4f729866fb7b5ec124ba5ba16a5d6e219ed5",
+    "docs/claude/journal.md": "d6e8b15e7deb77fff81f4d701f7914dac6519f54856e2cac8339e7a30030de01",
+    "docs/maquettes/LISEZMOI.md": "716b9a2991125c01630dc8caa27dd6e62350008dbddc86e23150d1f073633a66",
+    "guide/08-cave.html": "f792c39ab1ba9675fa893d2af423a4748c6662a81006a6578517de163651b53f",
+    "index.html": "4db0c4996d636f0824337ada0447879dd9e202f65c3778dda3736fbc9080d1c3",
+    "public/demo/cave-pc.webp": "6052cd1564cf1e8707a487145a6422adb8326d353db7dac089123f16641ee2ac",
+    "public/demo/r-chai-accueil.webp": "9267ccec5ea0db15bfa3f2bdf19b27077468b25909040fd6a79b54efaebbc7a0",
+    "public/demo/t-cave-pc.webp": "dbc07f4f8444f52e85740034b9a335db29afe17e9cfa5997cea6e2151264565e",
+    "public/demo/t-r-chai-accueil.webp": "66832672de9112de802073dc0bb7d6da123ab81205f8b77ff6382ac68945a0cc",
+    "public/guide.html": "3862e54576a3a4c34e596827800a338cd9c91fe1fb320abe1bdd27c4acafd771",
+    "public/sw.js": "da6bc4b409f58bf4631e4d4e3d0843a5bf0ede2d628f8b4ff450ad91d4cb754e",
+    "scripts/harnais-claude-md.mjs": "1b3b37cac909315959f0b07f4c28fcb957afecee60c5b58de040534e21fd2eef",
+    "scripts/mv-harnais-cavux1.mjs": "125820d6c52e306c79f9c8acfebee15f9e675e8f526bc63f9870b48e81902711",
+    "scripts/mv-harnais-liste.mjs": "3d7b89c80299cf0b74226ccc92bf4b93a89e73316f80b87c609d6a5f75bb4338",
+    "scripts/mv-mots-baseline.json": "4b953590c9caebb0826e86e6fd3924b905933333a7742735c09e3b485f72ed53",
+    "scripts/mv-ux-baseline.json": "a346dc3f52f3808ae877efc478b68393d066c6f47cbae2695529edfb109af180",
+    "src/cave.js": "50c93b22f0f7c16135baceb40b4499f9a0287cc975617376c89b788a7ce6a890",
+    "src/styles.css": "316c6730d9e067cf573b6b0598ecbe0ee7f00708652de7833f374f789cd2ab5b",
+    "src/utils.js": "22a6a2c776258cfcaffa0dc602e8bdc25caf96f455613ea9ef07c71627bafa1b",
+    "src/whats-new.js": "b66e8c3cf2f293280c2301f4bd39f188d2a6ae9354cfd0a5288760a7184b1016",
+    "docs/maquettes/maquette-cave-aujourdhui-v1.html": "6a1d65f983ea01243464260ced8d09e3af3a6c9dcf8f45746ad2fe351fabb042",
+    "scripts/mv-harnais-mots14.mjs": "a7f35badbe6f8da45f0c728b7b38ffe2ac928e183a3a911448e59810c6c60c56"
+  }
+}

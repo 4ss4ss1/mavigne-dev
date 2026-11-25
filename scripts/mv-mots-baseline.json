@@ -109,6 +109,11 @@
     "Cave › Le Millésime › Ensemble › ordinateur › avant : 0 → 6",
     "Cave › Le Millésime › Courbes › ordinateur › avant : 0 → 4"
    ]
+  },
+  {
+   "date": "2026-11-25",
+   "motif": "MOTS-14 (§609) : Cave › Aujourd’hui allégé — le sommaire sans les nombres de la bande, la raison seule sous le verdict, le détail d’aujourd’hui et Derniers gestes sans redite, la méthode dans le « i »",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -168,8 +173,8 @@
     "lex": null
    },
    "Cave › Aujourd’hui": {
-    "mots": 445,
-    "p15": 2,
+    "mots": 378,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -446,8 +451,8 @@
     "lex": null
    },
    "Cave › Aujourd’hui": {
-    "mots": 463,
-    "p15": 2,
+    "mots": 396,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },

@@ -1324,3 +1324,44 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Un découpage commercial qui sépare deux choses que le code tient ensemble est un chantier de code, pas une phrase** : « les heures en Essentiel, le planning en Vigneron » se lisait bien et ne se branchait pas.
 - ★ **Un fichier distribué se fabrique depuis la même source que l’appli** : le modèle lit les colonnes de l’export ; un vigneron qui passe du tableur à Ma Vigne garde les mêmes colonnes, dans le même ordre.
 - ⚠️ **Une règle de ce document peut être déjà fausse dans le dépôt** (le téléphone « absent des pages marketing » y était) : la relire contre le fichier avant de l’opposer à une demande.
+
+## 609. ★★★ MOTS-14 — CAVE › AUJOURD’HUI ALLÉGÉ : CHAQUE CHIFFRE À UN SEUL ENDROIT, DEUX COMPTES FAUX DU SOMMAIRE (25/11 — APP 11.30, SW 12.21 — `src/cave.js` · `src/styles.css` · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/08-cave.html` · `public/guide.html` (regénéré) · `docs/maquettes/maquette-cave-aujourdhui-v1.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-mots14.mjs` (neuf) · `cavux1` suivi · `scripts/mv-harnais-liste.mjs` · `scripts/mv-mots-baseline.json` · les captures `cave-pc` et `r-chai-accueil` de la démo du site · base `015d5c0`)
+
+### 609a. D’où ça vient, ce qui a été mesuré avant
+
+- Le plan (§28) après Le Millésime : Cave › Aujourd’hui, « la bête de course » du maître de chai (refonte CAVE-UX-1, §494 : trois colonnes sur ordinateur, le sommaire au téléphone — pas touchés). Maquette `maquette-cave-aujourdhui-v1.html` (Avant / Après, téléphone et ordinateur : le haut de l’écran, « Ce qui presse », les quatre semaines, « À surveiller », « Derniers gestes ») ; Nico (25/11) : « go, on suit tes recommandations » — les quatre.
+- **445 mots au téléphone, 463 sur ordinateur, 2 phrases de 15 mots et plus, 4 023 px.** La page **redisait ses chiffres** : le sommaire répétait la bande de la Cave (« À faire », « Fûts » — « 5 à faire cette semaine », « 43 fûts en vin » juste au-dessus) ; le détail d’aujourd’hui, dans les quatre semaines, listait une seconde fois les cinq gestes de « Ce qui presse », puis « Les gestes du jour se font depuis « Ce qui presse », en haut de l’écran. » ; « Derniers gestes » répétait « Déjà fait aujourd’hui » (« Relevé de Cuve 3 · 1006 à 23 °C » deux fois). Les deux phrases longues : le verdict suivi de « Puis : 1 cuvée à ouiller · 2 cuvées ont fini leur malo. » (la liste juste dessous) et le pied « Calculé sur 3 cuves suivies et 4 cuvées en élevage, avec le seuil d’ouillage de chaque millésime » (les deux comptes en tête des cartes Cuvier et Chai).
+- ★ **Deux nombres faux dans le sommaire.** « **À faire 6** » quand la bande disait 5 : `_AUJ_N.semaine` comptait les lignes de la semaine sauf le démarrage — la fin de fermentation estimée comprise, que la règle CAVEAUJ-1 (et le « i ») dit ne pas être un geste. « **À surveiller 4** » pour deux lignes : `_veil.match(/class="caj-asi/g)` attrapait aussi l’icône `caj-asic` de chaque ligne.
+
+### 609b. Ce qui change
+
+- **Le sommaire** : « À faire » et « Fûts » **sans nombre** (`_aujSommaireHtml` : `null` = pas de `<b>`) ; `_AUJ_N` ne garde que `presse`, `cuves`, `releves`, `veille`. La bande reste la même sur les quatre onglets (§91). « À surveiller » compte des `<li class="caj-asi…">` : 2.
+- **« Ce qui presse »** : sous le verdict, `v.why` seul — le Pilotage garde ses pastilles (`v.puis`, MOTS-6) ; le pied `caj-cadre` part (et sa feuille de style), le « i » `cave.auj` monte à côté du titre et reçoit un premier paragraphe (sur quoi porte le calcul, où lire la suite).
+- **Le détail d’aujourd’hui** (`_aujDetail`) : « **5 gestes à faire** » et un bouton « Ce qui presse › » (`_aujVers('caj-titre')`) ; la liste ne garde que ce qui n’est pas un geste (`_ML_INFO` : la fin estimée, le démarrage) — pas de liste vide. Un autre jour garde tout son détail.
+- **« Derniers gestes »** commence à hier (`_aujRecentsHtml` filtre `e.d!==auj`) ; « Rien d’autre ces dix derniers jours. » quand seul aujourd’hui a des gestes. `_aujRecents` ne change pas : le Pilotage la lit entière (`recents`). ★ **Sur ordinateur, des colonnes d’au moins 120 px** (`repeat(auto-fill,minmax(120px,1fr))`, `overflow-wrap:anywhere`) : les trois colonnes fixes faisaient 72 px à 1024 et 101 px à 1280 ; en commençant à hier, « Ouillage · Gevrey-Chambertin VV ’25 » tombait dans la troisième et sortait de la carte (`test:debord` rouge à 1024). Deux colonnes à 1024 et 1280, trois dès 1366, comme avant.
+- **« À surveiller »** : « 8 jours en cuve, 7 prévus. » ; « 1007, −7 par jour, à 1 j près. » — la date est à droite, la densité dans la carte du Cuvier.
+- **Pas touché** (recommandation 4, gardée par Nico) : les deux « 36 t » du Millésime — la bande dit la campagne, la tuile « Raisin rentré » le millésime choisi par les puces ; ils ne coïncident que sur le millésime en cours. Ni les tableaux du Cuvier et du Chai, ni « En cave aujourd’hui », ni la fiche du contenant.
+- **Les mots** : `MV_AIDE` « Aujourd’hui », le guide (`08-cave`), l’annonce 11.30 (administrateur).
+
+### 609c. Mesuré après (build, démo)
+
+- Cliquet des mots (regravé, baisses seulement) : **445 → 378** mots au téléphone, **463 → 396** sur ordinateur, phrases longues **2 → 0**. Hauteur 4 023 → 3 773 px au téléphone, 3 917 → 3 716 sur ordinateur ; « Ce qui presse » 930 → 855 px, les quatre semaines 746 → 601 px (téléphone).
+- Joué dans le navigateur (téléphone, ordinateur), sans erreur de page : le « i » de « Ce qui presse » ; aujourd’hui dans le calendrier, puis le 29 (détail entier), puis « Ce qui presse › » qui remonte au verdict ; « À faire » et « Fûts » du sommaire mènent à leur partie ; aucun débordement au téléphone.
+- Tutos concernés : aucun (le panneau côte à côte rejoué, vert). La démo du site : `cave-pc` et `r-chai-accueil` régénérées (regardées : le sommaire sans les deux nombres, la raison seule).
+
+### 609d. Harnais
+
+`scripts/mv-harnais-mots14.mjs` (24 assertions, 27 contre-épreuves) : le sommaire joué (les deux entrées sans nombre, les quatre autres avec, l’ordre) ; « À surveiller » joué sur le vrai balisage de `_aujVeille` avec la vraie ligne de comptage de `_aujRender` (2, pas 4) ; la raison seule et `v.puis` gardé ; le pied parti, le « i » au titre ; le détail d’un jour joué (aujourd’hui, aujourd’hui sans fin estimée, un autre jour, un jour vide) ; « Derniers gestes » joué (hier d’abord, « Rien d’autre », « Aucun geste »), ses colonnes d’au moins 120 px, et `recents` du Pilotage entière ; les deux lignes courtes jouées ; l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adapté** : `cavux1` ① (« À faire » et « Fûts » sans nombre).
+
+### 609e. Restes
+
+- Le plan (§28) : Phyto › Registre, la Réserve, le lot de balayage (les phrases isolées de Vigne, Tracteur, Réglages, Planning).
+- Non vu à l’écran : une macération plus longue que prévu (pas dans la démo du 27/10) — jouée par le harnais seulement.
+
+### 609f. Leçons
+
+- ⚠️ **Un nombre recopié finit par ne plus dire la même chose que l’original** : le sommaire recomptait « à faire » à sa façon et disait 6 sous une bande qui disait 5. Un nombre dit à deux endroits se lit à un seul, ou se lit dans la même fonction.
+- ⚠️ **Un défaut de mise en page peut attendre qu’un autre changement le révèle** : les colonnes de 72 px existaient depuis CAVEAUJ-2 ; il a suffi que la liste commence un jour plus tard pour qu’un nom long tombe dans la dernière. Une grille se règle par la largeur minimale de ses colonnes, pas par leur nombre.
+- ⚠️ **Compter par une expression sur du HTML compte aussi ce qui lui ressemble** : `class="caj-asi` attrapait `caj-asic`. Compter les éléments (`<li class="caj-asi[ "]`), ou mieux la liste avant le rendu.
