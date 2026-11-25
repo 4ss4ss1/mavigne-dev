@@ -1,0 +1,50 @@
+{
+  "lot": "MOTS-16",
+  "section": "§611",
+  "base": "d16a52cf63492293334187d3383134f495b83ebd",
+  "inclut": [],
+  "date": "2026-11-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "82e8757be3064c556df5528b4d215b0db5aa575bc5da87d4125584950214a8e1",
+    "date": "2026-11-25T17:32:38.601Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "intrant"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    "CLAUDE.md": "a02a9b25098f6b6f239992043a8d19d80ccf920be0d559ab0de8ddbc00e0900d",
+    "docs/claude/INDEX.md": "7c0c638a9e183d5ce622befe322879fb6152ffe2b7cdaef31d6ecfe5870092f1",
+    "docs/claude/chantiers-580-629.md": "8afd6e14af5ff857a2fb8cd25b351ccc93d3e1dc30820d20760291a705b05223",
+    "docs/claude/journal.md": "9d33a6af49396a99e3a2e693ff0263aa1bdacc242e0a60e9b0e8de6b387dd00a",
+    "docs/maquettes/LISEZMOI.md": "a4cdc5957d63018fabc75e4b7252ddafeaf1521214a6c0f2d83f6de18451dfb6",
+    "guide/09-reserve.html": "2ff2e3b5315f9f14a31b129255f800014b81d18239b9fca8c200a971b98c80df",
+    "index.html": "b5ad9b66d22e14d67c9dbc72f6937caeccfffa43f100cd238550aebe5c90778b",
+    "public/demo/reserve.webp": "b450232359ea539c5e51f01b1c2a7f0702ccd43b7fd3fd36c46c162de87685ac",
+    "public/demo/t-reserve.webp": "78cad04d5f4dd022182da4188a71e05ef01ae7413bfc1a0dac3bdaac2b738cd0",
+    "public/guide.html": "ab69c46b33f942cf43fdb2e2d3ae1df383bb3202a0e3406b2b9fde5930c70b6c",
+    "public/sw.js": "f3d6623f56459adec8a62eac4c3240b19590d4b0f32719a0d50695be686bec1d",
+    "scripts/harnais-claude-md.mjs": "3c3748b19007e802f60464a67edb6728143ac5c74c487481b79c85b3e76458ae",
+    "scripts/mv-harnais-info.mjs": "90195264ba61bf6cfa476dbe34fbc451a414c569bf93858be84745e027ae48bb",
+    "scripts/mv-harnais-intrant1.mjs": "0dcc1b905c39cba582d659b5f068fe9e1166dcdce8942ad599c77d8a6ee32c3a",
+    "scripts/mv-harnais-liste.mjs": "d7e48a7e97f8de5d3ddb894499a006e329606aa2ca164ad6ce6f285a9fd9fcfd",
+    "scripts/mv-harnais-rsv1.mjs": "1571d21d7cf35e5f10f2360a77c754c9b9763ab6b85d5cdba49b787d33682dd5",
+    "scripts/mv-harnais-rsv3.mjs": "90467183183808df1f3054fdecbd5d8f7adc875fa8e5dece05dd726920f9d090",
+    "scripts/mv-harnais-rsvux1.mjs": "3b00b149f70b82541ecc1207246eb2a9c3cc18172f762654307bd07f7e6ae72f",
+    "scripts/mv-mots-baseline.json": "a9d9b1f88c7ad5549fe8a20051451a57069a751e88f7c827e6025a37b5a2ea39",
+    "scripts/mv-ux-baseline.json": "5bc7cf4d3e95693555508ae932882e07a35143de1ab47e4a201da9486ba74f04",
+    "src/app.js": "5b7560332902afff5c3164439b1e95e1d9b8a3295e72e61e092705aa997f2881",
+    "src/cave.js": "ef3dd80857c5fdc97996e7cd13f84c769edeb575d98d960b17482fe87d9bc2ee",
+    "src/reserve.js": "05f88cfde7f943887b615c3ef2e05eaa881ac53df94af4518a285936cea995a1",
+    "src/utils.js": "03a22790637716bc50646b7d2da2438f1b7420b7d7662fb56b53235a41b72782",
+    "src/whats-new.js": "d66e38be6e742ceef7e9461b9099862b906d858e15744e8605901e7303dd51c3",
+    "docs/maquettes/maquette-reserve-v1.html": "df494b52ab259f1f7f62a522e8336ce833f9ae56e8cf4cdf38ac69face64b02f",
+    "scripts/mv-harnais-mots16.mjs": "876231417d293631549a5bf339b688bdbddb4f4a3411406a91fc0483c3dae4ef"
+  }
+}

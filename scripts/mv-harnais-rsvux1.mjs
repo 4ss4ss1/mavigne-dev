@@ -34,7 +34,8 @@ function jouer(S) {
   t('② les cinq formulaires sont exposés', ['_rsvOpenAchat', '_rsvOpenFut', '_rsvOpenSep', '_rsvOpenInv'].every((f) => new RegExp('window\\.' + f + ' *=').test(S.rsv)) && /window\.openOvCaveOp *=/.test(S.cave));
   const v = fonction(S.cave, 'function _pcavVueParc(');
   t('③ la pyramide passe devant la part des anges', v.indexOf('_pcavPyramide(c)') > 0 && v.indexOf('_pcavPyramide(c)') < v.indexOf('_pcavAngesCard(c)'));
-  t('③ la part des anges vide : une ligne et « Saisir » (le formulaire d’ouillage)', S.cave.includes('<div class="pcav-vide pcav-vide1"><span>Aucun ouillage saisi sur douze mois') && S.cave.includes('onclick="openOvCaveOp()">Saisir</button></div>') && !S.cave.includes('Renseignez le volume total'));
+  // MOTS-16 (§611) : la ligne raccourcie, le pourquoi dans le « i » cave.anges.
+  t('③ la part des anges vide : une ligne et « Saisir » (le formulaire d’ouillage)', S.cave.includes('<div class="pcav-vide pcav-vide1"><span>Aucun ouillage sur douze mois.</span>') && S.cave.includes('onclick="openOvCaveOp()">Saisir</button></div>') && !S.cave.includes('Renseignez le volume total'));
   t('④ au téléphone, le « + » et la feuille ; les rangées de 48 px', S.css.includes('#page-reserve .mvr-fab{display:flex;') && S.css.includes('body.mvr-mvt-ouvert #page-reserve .mvr-mvt{display:block;') && S.css.includes('.mvr-mvt-l{display:flex;flex-direction:column;justify-content:center;width:100%;min-height:48px;'));
   t('⑤ exposées ; la liste joue ce fichier et sa contre-épreuve', S.rsv.includes('window._rsvMvt=_rsvMvt; window._rsvMvtFermer=_rsvMvtFermer; window._rsvMvtVa=_rsvMvtVa;') && S.liste.indexOf("mv-harnais-rsvux1.mjs'") > 0 && S.liste.indexOf("mv-harnais-rsvux1.mjs --contre'") > 0);
 }

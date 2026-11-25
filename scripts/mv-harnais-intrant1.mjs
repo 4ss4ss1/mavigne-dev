@@ -42,7 +42,7 @@ function fonction(src, nom) {
 function decl(src, nom) { const m = new RegExp('var ' + nom.replace('$', '\\$') + '\\s*=[\\s\\S]*?;[^\\n]*\\n').exec(src); if (!m) throw new Error('déclaration introuvable : ' + nom); return m[0]; }
 const FONCTIONS = ['_rid', '_fmt', '_frDate', '_uniqPush', '_invOuv', '_achatsQ', '_consoCuvier', '_conso', '_treatSurface', '_stock', '_nbUnites',
   '_rsvUnitesPour', '_rsvUniteDefaut', '_rsvContLblDe', '_rsvU', '_rsvPrixU', '_rsvPrixUSansPrix', '_eur2', '_consoSrcLbl', '_rsvNegEstime', '_consoCuvierEstime',
-  '_rsvIntrantsHtml', '_rsvOnProdChange', '_rsvNorm', '_rsvEphyOn', '_rsvNpShow', '_rsvEphyReset', '_rsvAteNote', '_rsvNpCatChange', '_rsvCurProd', '_rsvContLbl',
+  '_rsvIntrantsPhrase', '_rsvIntrantsHtml', '_rsvOnProdChange', '_rsvNorm', '_rsvEphyOn', '_rsvNpShow', '_rsvEphyReset', '_rsvAteNote', '_rsvNpCatChange', '_rsvCurProd', '_rsvContLbl',
   '_rsvCond', '_rsvPl', '_rsvContQuoi', '_rsvContTitre', '_rsvContEx', '_rsvUpdContHint', '_rsvSetSaisie', '_rsvCalcQ', '_rsvPrixOuNull', '_rsvSaveAchat',
   '_rsvAteDe', '_rsvPfProd', '_rsvProdRefs', '_rsvPfUnites', '_rsvPfLibelles', '_rsvPfListe', '_rsvOpenProd', '_rsvPfMaj', '_rsvSaveProd', '_rsvDelAchat', '_rsvDelProd'];
 const DECLS = ['_RSV_UNITE_PIECE', '_CATLBL', '_CATCLS', '_CAT2ATE', '_ATELBL', '_ATECOL', '_rsvPfId', '_RSV_UNITES', '_RSV_CATS'];

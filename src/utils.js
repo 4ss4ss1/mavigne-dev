@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.31';
+export const APP_VERSION = '11.32';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2987,8 +2987,8 @@ var MV_AIDE = {
         return _mvAideSections('.mvr-tabs .mvu-tab', 'onglets',
           "C’est la comptabilité matière du domaine, pensée pour le contrôle bio.");
       },
-      ['L’onglet Fûts porte le parc entier', "les fûts vides du magasin et ceux qui sont en vin au chai, additionnés. Ce ne sont pas deux comptabilités : ce sont deux états du même fût."],
-      ['En tête de Fûts', "deux lectures venues de la Cave : d’abord la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée, puis la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime ; sans ouillage saisi, elle tient sur une ligne avec « Saisir ». Au téléphone, le « + » (administrateur) ouvre « Nouveau mouvement » : une entrée (livraison d’intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté) ou un ouillage. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
+      ['L’onglet Fûts s’ouvre sur le parc entier', "en un grand chiffre — les fûts au domaine, en vin et libres : les fûts vides du magasin et ceux qui sont en vin au chai, additionnés. Ce ne sont pas deux comptabilités : ce sont deux états du même fût."],   // ★ MOTS-16 (§611)
+      ['Sous les boutons de Fûts', "deux lectures venues de la Cave : d’abord la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée, puis la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime ; sans ouillage saisi, elle tient sur une ligne avec « Saisir ». Au téléphone, le « + » (administrateur) ouvre « Nouveau mouvement » : une entrée (livraison d’intrants, fûts neufs), une sortie (fûts vendus ou réformés, un intrant recompté) ou un ouillage. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
       ['Entonner, embouteiller ou retirer', "ne change pas le nombre de fûts du domaine. Seuls acheter et se séparer le font."],
       ['La contenance d’un lot', "vide, le lot suit le réglage du domaine (roue crantée de la Cave, bloc Le Chai). Pour un demi-muid, une feuillette ou un fût de 300 L, écrivez sa contenance dans le lot : elle part avec les fûts au décuvage et revient avec eux à la mise en bouteille. Une étiquette la rappelle sur la carte du lot, et l’inventaire PDF l’imprime."],
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],
@@ -2998,6 +2998,7 @@ var MV_AIDE = {
       ['L’unité d’un intrant', "kg ou L pour tous ; la pièce pour les fournitures (vigne, cave, tracteur, général), proposée d’office pour un piquet, une agrafe ou un filtre. À l’achat, « Par sacs » (ou bidons, ou lots) multiplie le nombre par la contenance ; « Au total » prend la quantité telle quelle."],
       ['Corriger une fiche', ": « Modifier » sur la fiche d’un intrant (administrateur) — son nom, son type, son unité, sa contenance. Changer l’unité corrige l’étiquette : les quantités gardent leur nombre (500 kg deviennent 500 pièces). Dans la même fenêtre, « Retirer » enlève un achat mal saisi, et une fiche en trop se supprime tout en bas — sauf si une opération du Cuvier, du Chai ou de la fertilisation s’en sert. « Annuler » rattrape le geste six secondes."],
       ['Le bilan se calcule seul', ": inventaire d’ouverture + achats − consommation. Aucun stock à tenir à la main."],
+      ['L’onglet Intrants', "s’ouvre sur une phrase qui compte les fiches : les stocks négatifs, les stocks cohérents, puis les consommés à activer — un intrant phyto dont aucun traitement n’a encore sa dose chiffrée au registre. Son « i » dit pourquoi, et comment le tenir à la main (Modifier, saisie manuelle)."],   // ★ MOTS-16 (§611)
       ['L’inventaire d’ouverture', "est le point zéro. Sans lui, l’écart constaté ne veut rien dire."],
       ['Un stock négatif', "n’est pas un défaut d’affichage : il manque une facture d’achat, le consommé est surestimé, ou — pour un intrant œno — les adjonctions du Cuvier reposent sur un <b>volume estimé</b>. L’alerte compte ces dernières, pour éviter de chercher une facture qui n’existe pas."],
       ['Créer et modifier', "est réservé à l’administrateur du domaine ; tout le monde peut consulter."]
@@ -3424,6 +3425,23 @@ export const MV_INFO = {
     'Un <b>taux du domaine</b>, posé dans la roue crantée du Planning, remplace le barème : km × taux, sans palier.'
   ] },
 
+  // ★ MOTS-16 (§611) : La Réserve — ce qui quitte l'écran (la façon de compter l'âge, le consommé à activer, le contrôle bio)
+  'rsv.pyramide': { t: 'La pyramide des âges', p: [
+    'Une ligne par <b>année d’achat</b> : la barre pleine, les fûts en vin ; la partie claire, les fûts libres — quel que soit leur âge.',
+    'L’âge se compte en <b>année civile moins année d’achat</b> : la vendange tombe en septembre, donc l’incrément du 1<sup>er</sup> janvier arrive après le millésime.',
+    'Au-delà du nombre de vins réglé dans la Cave, la ligne passe en <b>rouge</b> : ces fûts sont à réformer.'
+  ] },
+  'rsv.conso': { t: 'Le consommé des intrants', p: [
+    'Le stock d’un intrant = l’inventaire d’ouverture + les achats − le <b>consommé</b>. Le consommé se lit selon le produit : les opérations de la Cave (SO<sub>2</sub>), les adjonctions du Cuvier, ou le <b>registre phyto</b> — la dose chiffrée de chaque traitement × la surface traitée.',
+    '<b>« Consommé à activer »</b> : aucun traitement de ce produit n’a encore sa dose chiffrée — ceux saisis avec l’assistant l’ont ; les plus anciens ne la disent qu’en texte. Le stock n’est pas affiché plutôt que faux.',
+    'Pour le tenir à la main : <b>Modifier</b> l’intrant et choisir la saisie manuelle ; le consommé se corrige alors sur sa carte.',
+    'Un stock <b>négatif</b> veut dire que le consommé dépasse les entrées : une facture d’achat manque, ou le consommé est surestimé. Le bilan matière ne ferme pas tant que l’écart n’est pas corrigé.'
+  ] },
+  'rsv.bilan': { t: 'Le bilan matière', p: [
+    '<b>Contrôle bio.</b> Ce tableau restitue l’équilibre entrées / sorties exigé au contrôle documentaire (règlement délégué <b>UE 2021/771, art. 1</b>).',
+    'Les sorties sont dérivées automatiquement : les opérations de la Cave pour l’œnologie, le registre phyto pour les traitements. « À activer » : aucun traitement de ce produit n’a encore sa dose chiffrée (le « i » des Intrants le dit).',
+    'Le PDF du bilan, à présenter au contrôle, porte la mention en entier.'
+  ] },
   'cave.anges': { t: 'La part des anges', p: [
     'Ce que vous remettez en <b>ouillage</b> est exactement ce qui s\u2019est <b>évaporé</b> : c\u2019est une <b>mesure</b>, pas une valeur théorique tirée d\u2019un abaque.',
     'Chaque millésime a sa ligne — <b>on n\u2019ouille pas les fûts d\u2019une année avec le vin d\u2019une autre</b>.',

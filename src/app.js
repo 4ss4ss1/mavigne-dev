@@ -306,7 +306,8 @@ function _mvSk(kind){
   var fcard=function(a,b,c){ return '<div class="mvr-fcard"><span class="mvr-fband mvr-fband-sk"></span>'
       +'<div class="mvr-fin"><div class="mvr-ftop">'+e(a,'18px')+e('44px','16px','8px')+'</div>'
       +'<div class="sk-stack" style="margin-top:9px">'+e(b,'9px')+e(c,'9px')+'</div></div></div>'; };
-  if(kind==='reserve') return '<div class="mvr-kpis">'+mkpi('70%')+mkpi('60%')+mkpi('66%')+'</div>'
+  // ★ MOTS-16 : l'écran s'ouvre sur le parc (un grand chiffre et sa ligne), plus sur trois tuiles — le squelette suit.
+  if(kind==='reserve') return '<div class="mvr-parc sk-stack">'+e('56px','32px','8px')+e('34%','10px')+e('26%','10px')+'</div>'
       +fcard('52%','64%','40%')+fcard('44%','58%','46%');
   // ── Cave › Le Chai (dans #mvc-body-cuv) ──
   var ccuv=function(a,b,c){ return '<div class="mvc-cuv mvsk"><div class="mvc-cuv-head">'

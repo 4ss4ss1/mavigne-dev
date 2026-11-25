@@ -2,7 +2,7 @@
  "lot": "UX-0",
  "section": "§459",
  "date": "2026-11-25",
- "base": "a334c11",
+ "base": "d16a52c",
  "horloge": "2026-10-27T08:00:00Z",
  "chromium": "153.0.8010.12",
  "lire": "cibles et textes : informatif (le total de la page) ; hauteur : informatif ; tout le reste est le cliquet — voir MESURES et GESTES dans scripts/mv-ux-rendu.mjs",
@@ -436,6 +436,19 @@
     "phyto › téléphone › pouce : 4 → 2",
     "phyto › ordinateur › t12 : 16 → 4"
    ]
+  },
+  {
+   "date": "2026-11-25",
+   "base": "d16a52c",
+   "motif": "hausse acceptée : MOTS-16 (§611) : La Réserve › Fûts sans ses trois tuiles et ses notes — la page défile de moins de 300 px sur ordinateur : la mesure « en défilant » n’existe plus (la règle du script). Baisses hors du lot, non attribuées : planning et réglages, textes sous 12 px (−1 chacun)",
+   "hausses": [
+    "reserve › ordinateur › chromeDefile : 155 → perdue"
+   ],
+   "baisses": [
+    "reserve › téléphone › pouce : 4 → 3",
+    "planning › ordinateur › t12 : 3 → 2",
+    "reglages › ordinateur › t12 : 17 → 16"
+   ]
   }
  ],
  "mesures": {
@@ -513,16 +526,16 @@
     "hauteur": 3773
    },
    "reserve": {
-    "cibles": 29,
+    "cibles": 31,
     "c24": 0,
     "c44": 8,
-    "textes": 93,
+    "textes": 86,
     "t11": 0,
     "t12": 0,
     "chrome": 111,
     "chromeDefile": 57,
-    "pouce": 4,
-    "hauteur": 1538
+    "pouce": 3,
+    "hauteur": 1369
    },
    "planning": {
     "cibles": 90,
@@ -635,24 +648,24 @@
     "hauteur": 3716
    },
    "reserve": {
-    "cibles": 28,
+    "cibles": 30,
     "c24": 0,
     "c44": 23,
-    "textes": 94,
+    "textes": 87,
     "t11": 0,
     "t12": 6,
     "chrome": 164,
-    "chromeDefile": 155,
+    "chromeDefile": null,
     "pouce": null,
-    "hauteur": 1271
+    "hauteur": 1153
    },
    "planning": {
     "cibles": 90,
     "c24": 0,
     "c44": 8,
-    "textes": 149,
+    "textes": 148,
     "t11": 0,
-    "t12": 3,
+    "t12": 2,
     "chrome": 164,
     "chromeDefile": 155,
     "pouce": null,
@@ -676,7 +689,7 @@
     "c44": 6,
     "textes": 55,
     "t11": 0,
-    "t12": 17,
+    "t12": 16,
     "chrome": 164,
     "chromeDefile": null,
     "pouce": null,

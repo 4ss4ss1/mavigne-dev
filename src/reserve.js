@@ -364,7 +364,9 @@ function _rsvRenderBody(){
   // Lot CAVE-3/4 : la lecture du parc (etat, pyramide, part des anges,
   // mouvements des douze mois) vient de la Cave — ex-Pilotage › Cave › Le parc —
   // et se rend ICI, en tete de Futs : une seule definition, un seul chez-soi.
-  if(_rsvTab==='futs') b.innerHTML=(typeof window._caveParcHtml==='function'?window._caveParcHtml():'')+_rsvFutsHtml()+(window._rsvMouvHtml?_rsvMouvHtml():'');
+  // ★ MOTS-16 : le parc (55 fûts, 43 en vin, 12 libres) passe en tête — la pyramide et la part des anges viennent après les
+  //   boutons (_rsvFutsHtml les pose) : le premier grand chiffre de l'écran est le parc, plus 75 mots plus bas.
+  if(_rsvTab==='futs') b.innerHTML=_rsvFutsHtml()+(window._rsvMouvHtml?_rsvMouvHtml():'');
   else if(_rsvTab==='intrants') b.innerHTML=_rsvIntrantsHtml();
   else b.innerHTML=_rsvAuditHtml();
 }
@@ -434,11 +436,8 @@ function _rsvFutsHtml(){
   var groups=_futsBySupplier(list);
   var h='';
   h+=(window._rsvParcHtml?_rsvParcHtml():'');
-  h+='<div class="mvr-kpis">'
-    +'<div class="mvr-kpi"><div class="mvr-kv">'+tot+'</div><div class="mvr-kl">Fûts libres</div></div>'
-    +'<div class="mvr-kpi"><div class="mvr-kv">'+_futSuppliersCount()+'</div><div class="mvr-kl">Fournisseurs</div></div>'
-    +'<div class="mvr-kpi"><div class="mvr-kv">'+ys.length+'</div><div class="mvr-kl">Millésimes</div></div>'
-    +'</div>';
+  // ★ MOTS-16 : les trois tuiles (« 12 Fûts libres », « 2 Fournisseurs », « 2 Millésimes ») redisaient le parc juste au-dessus
+  //   (« 12 libres »), la ligne de la liste (« 12 fûts · 2 fournisseurs ») et les puces des millésimes : elles partent.
   if(adm || INTRANTS.futs.length){
     h+='<div class="mvr-btnrow">';
     if(adm) h+='<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenFut()">+ Ajouter des fûts</button>';
@@ -446,6 +445,7 @@ function _rsvFutsHtml(){
     if(adm && INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenSep()">\uD83D\uDCE4 Se séparer de fûts</button>';
     h+='</div>';
   }
+  h+=(typeof window._caveParcHtml==='function'?window._caveParcHtml():'');   // MOTS-16 : la pyramide et la part des anges (cave.js)
   if(!INTRANTS.futs.length){
     h+='<div class="mvr-empty">'+_mvIcon('carton',40)+'<div>Aucun fût enregistré.</div>'+(adm?'<div class="mvr-empty-h">Ajoute ton premier lot pour suivre ton parc de contenants.</div>':'')+'</div>';
     return h;
@@ -676,6 +676,9 @@ function _rsvInjectCss(){
   var st=document.createElement('style');
   st.id='mvr-step-css';
   st.textContent=''
+    // MOTS-16 : la phrase des Intrants
+    +'.mvr-ph{margin:var(--e-2,8px) 0 var(--e-3,12px);font:var(--fw-med,500) var(--pt-sm,17px)/1.3 var(--font-ui,Outfit,sans-serif);color:var(--texte-med)}'
+    +'.mvr-ph b{font-weight:var(--fw-semi,600);color:var(--texte)}.mvr-ph b.ko{color:var(--danger-texte)}.mvr-ph b.ok{color:var(--ok-texte)}.mvr-ph .mv-i,.mvr-exp-t .mv-i{margin-left:var(--e-1,4px);vertical-align:middle}'
     +'.mvr-fstep{display:flex;align-items:center;gap:9px;flex:none}'
     +'.mvr-fstepc{min-width:46px;text-align:center}'
     +'.mvr-fstepv{font-family:var(--font-titre,\'Cormorant Garamond\',Georgia,serif);font-size:var(--pt-xl,28px);font-weight:700;color:var(--terre,#8A5A38);line-height:1;display:block}'
@@ -822,9 +825,21 @@ window._rsvAteDe=_rsvAteDe;
 window._rsvAteLbl=function(k){ return _ATELBL[k]||_ATELBL.gen; };
 window._rsvAteCol=function(k){ return _ATECOL[k]||_ATECOL.gen; };
 window._rsvAteOrdre=function(){ return _ATEORD.slice(); };
+// ★ MOTS-16 — LA PHRASE DES INTRANTS : ce que disent les cartes, compté — les stocks négatifs d'abord (rouge), sinon les stocks
+//   suivis et cohérents (vert), puis les consommés à activer (le registre n'a pas encore de dose chiffrée pour ce produit).
+function _rsvIntrantsPhrase(){
+  var neg=0, ok=0, att=0;
+  INTRANTS.produits.forEach(function(p){ var s=_stock(p); if(p.conso_src==='registre'&&!s.known) att++; else if(s.known&&s.q<0) neg++; else ok++; });
+  var P=[];
+  if(neg) P.push('<b class="ko">'+neg+' stock'+(neg>1?'s':'')+' n\u00e9gatif'+(neg>1?'s':'')+'</b>');
+  if(ok) P.push('<b class="ok">'+ok+' stock'+(ok>1?'s':'')+' coh\u00e9rent'+(ok>1?'s':'')+'</b>');
+  if(att) P.push(att+' consomm\u00e9'+(att>1?'s':'')+' \u00e0 activer');
+  return P.join(' \u00b7 ');
+}
 function _rsvIntrantsHtml(){
   var adm=isAdmin();
   var h='';
+  if(INTRANTS.produits.length) h+='<p class="mvr-ph">'+_rsvIntrantsPhrase()+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('rsv.conso'):'')+'</p>';
   if(adm){
     h+='<div class="mvr-btnrow">'
       +'<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenAchat()">+ Achat</button>'
@@ -835,7 +850,7 @@ function _rsvIntrantsHtml(){
   var neg=INTRANTS.produits.filter(function(p){var s=_stock(p);return s.known&&s.q<0;});
   neg.forEach(function(p){
     var s=_stock(p);
-    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+_escHtml(_rsvU(p.unite,s.q))+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.'+_rsvNegEstime(p)+'</span></div>';
+    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+_escHtml(_rsvU(p.unite,s.q))+').</b> Une facture d\'achat manque, ou le consommé est surestimé.'+_rsvNegEstime(p)+'</span></div>';
   });
   if(!INTRANTS.produits.length){
     h+='<div class="mvr-empty">'+_mvIcon('eprouvette',40)+'<div>Aucun intrant suivi.</div>'+(adm?'<div class="mvr-empty-h">Enregistre un achat pour créer ton premier intrant et démarrer le bilan matière.</div>':'')+'</div>';
@@ -849,7 +864,9 @@ function _rsvIntrantsHtml(){
     h+='<div class="mvr-pcard"><div class="mvr-pband '+(_CATCLS[p.cat]||'')+'"></div><div class="mvr-pin">'
       +'<div class="mvr-ptop"><div class="mvr-pw"><div class="mvr-pnom">'+_escHtml(p.nom)+'</div>'+((p.sub||p.amm)?'<div class="mvr-psub2">'+(p.sub?_escHtml(p.sub):'')+((p.sub&&p.amm)?' \u00b7 ':'')+(p.amm?'AMM '+_escHtml(p.amm):'')+'</div>':'')+'</div><div class="mvr-pcat '+(_CATCLS[p.cat]||'')+'">'+(_CATLBL[p.cat]||p.cat)+'</div></div>';
     if(pending){
-      h+='<div class="mvr-pending">'+_mvIcon('rotation',16)+' <b>Consommé à activer.</b> Entrées : '+_fmt(s.ouv+s.achats)+' '+_escHtml(_rsvU(p.unite,s.ouv+s.achats))+'. Le consommé se calculera depuis le registre une fois les doses structurées (lot suivant), ou passe l\'intrant en saisie manuelle.</div>';
+      // MOTS-16 : « …une fois les doses structurées (lot suivant)… » — un mot de développeur, et faux depuis IFT-1 (§571) : l'assistant
+      //   chiffre la dose de chaque traitement. La ligne dit l'état et les entrées ; le pourquoi et le geste sont dans le « i » (rsv.conso).
+      h+='<div class="mvr-pending">'+_mvIcon('rotation',16)+' <b>Consommé à activer</b> \u00b7 entrées '+_fmt(s.ouv+s.achats)+' '+_escHtml(_rsvU(p.unite,s.ouv+s.achats))+'</div>';
     } else {
       h+='<div class="mvr-pstock" data-tuto="rsv.stock" data-pid="'+_escAttr(p.id)+'"><span class="mvr-psv" style="color:'+stCol+'">'+_fmt(s.q)+'</span><span class="mvr-psu">'+_escHtml(_rsvU(p.unite,s.q))+' en stock</span></div>'
         +(nu!=null&&s.q>=0?'<div class="mvr-punits">\u2248 '+_fmt(nu)+' '+(p.contLbl||'unité')+(nu>1?'s':'')+'</div>':'');
@@ -1371,7 +1388,7 @@ window._rsvSaveInv=_rsvSaveInv;
 
 // ═══════════════════════════ SECTION BILAN / AUDIT ═══════════════════════════
 function _rsvAuditHtml(){
-  var h='<div class="mvr-exp-head"><div class="mvr-exp-t">Bilan matière — Intrants</div>'
+  var h='<div class="mvr-exp-head"><div class="mvr-exp-t">Bilan matière — Intrants'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('rsv.bilan'):'')+'</div>'
     +'<div class="mvr-exp-s">'+_escHtml(window.DOMAINE_NOM||'Domaine')+' \u00B7 arrêté au '+_frDate(_today())+'</div></div>';
   if(!INTRANTS.produits.length){
     h+='<div class="mvr-empty" style="border-radius:0 0 14px 14px">'+_mvIconInline('liste',16)+'<div>Rien à restituer pour l\'instant.</div><div class="mvr-empty-h">Le bilan se remplit dès qu\'un intrant est suivi.</div></div>';
@@ -1387,7 +1404,7 @@ function _rsvAuditHtml(){
     });
     h+='</tbody></table></div>';
   }
-  h+='<div class="mvr-exp-legal"><b>Contrôle bio.</b> Ce tableau restitue l\'équilibre entrées / sorties exigé au contrôle documentaire (règlement délégué <b>UE 2021/771, art. 1</b>). Les sorties sont dérivées automatiquement : opérations Cave pour l\'œno, registre phyto pour les traitements.</div>';
+  // MOTS-16 : la mention du contrôle bio (30 mots) passe dans le « i » du titre (rsv.bilan) ; le PDF du bilan la garde.
   return h;
 }
 

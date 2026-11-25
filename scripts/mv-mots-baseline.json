@@ -119,6 +119,11 @@
    "date": "2026-11-25",
    "motif": "MOTS-15 (§610) : Phyto › Registre allégé — une phrase, une année par bloc, l’état de la rentrée tant qu’il sert, le cuivre de l’année sur sa ligne",
    "hausses": []
+  },
+  {
+   "date": "2026-11-25",
+   "motif": "MOTS-16 (§611) : La Réserve allégée — le parc en tête de Fûts, plus de tuiles ; la phrase des Intrants, « (lot suivant) » retiré ; les notes de méthode dans les « i ». Et Phyto › Registre (ordinateur) : 35 → 32 mots avant le premier chiffre — les lignes d’année à 48 px de MOTS-15, posées après sa gravure",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -262,20 +267,20 @@
     "lex": null
    },
    "Réserve › Fûts": {
-    "mots": 137,
-    "p15": 1,
-    "avant": 75,
+    "mots": 100,
+    "p15": 0,
+    "avant": 0,
     "lex": null
    },
    "Réserve › Intrants": {
-    "mots": 92,
-    "p15": 2,
-    "avant": 76,
+    "mots": 56,
+    "p15": 0,
+    "avant": 40,
     "lex": null
    },
    "Réserve › Bilan matière": {
-    "mots": 60,
-    "p15": 1,
+    "mots": 30,
+    "p15": 0,
     "avant": null,
     "lex": null
    },
@@ -440,7 +445,7 @@
    "Phyto › Registre": {
     "mots": 115,
     "p15": 0,
-    "avant": 35,
+    "avant": 32,
     "lex": null
    },
    "Phyto › Catalogue": {
@@ -540,20 +545,20 @@
     "lex": null
    },
    "Réserve › Fûts": {
-    "mots": 137,
-    "p15": 1,
-    "avant": 75,
+    "mots": 100,
+    "p15": 0,
+    "avant": 0,
     "lex": null
    },
    "Réserve › Intrants": {
-    "mots": 92,
-    "p15": 2,
-    "avant": 76,
+    "mots": 56,
+    "p15": 0,
+    "avant": 40,
     "lex": null
    },
    "Réserve › Bilan matière": {
-    "mots": 60,
-    "p15": 1,
+    "mots": 30,
+    "p15": 0,
     "avant": null,
     "lex": null
    },

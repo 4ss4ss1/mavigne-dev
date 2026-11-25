@@ -1408,3 +1408,45 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 
 - ⚠️ **Deux textes dans une même ligne prennent la même couleur** : le cuivre, écrit dans la ligne de la rentrée, était vert même au-dessus de 4. Un état coloré a sa balise à lui.
 - ⚠️ **Un plafond réglable écrit en dur à un seul endroit suffit à faire mentir deux écrans** : le commentaire de `reglages.js` l’avait dit pour la vue 7 ans ; Conformité était le cinquième endroit.
+
+## 611. ★★★ MOTS-16 — LA RÉSERVE ALLÉGÉE : LE PARC EN TÊTE DE FÛTS, UNE PHRASE POUR LES INTRANTS, « (LOT SUIVANT) » RETIRÉ (25/11 — APP 11.32, SW 12.23 — `src/reserve.js` · `src/cave.js` · `src/app.js` (le squelette) · `src/utils.js` · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/09-reserve.html` · `public/guide.html` (regénéré) · `docs/maquettes/maquette-reserve-v1.html` (neuve) · `docs/maquettes/LISEZMOI.md` · `scripts/mv-harnais-mots16.mjs` (neuf) · `intrant1`, `rsv1`, `rsv3`, `rsvux1`, `info` suivis · `scripts/mv-harnais-liste.mjs` · `scripts/mv-mots-baseline.json` · `scripts/mv-ux-baseline.json` · la capture `reserve` de la démo du site · base `d16a52c`)
+
+### 611a. D’où ça vient, ce qui a été mesuré avant
+
+- Le plan (§28) après Phyto › Registre. Maquette `maquette-reserve-v1.html` (Avant / Après, téléphone et ordinateur : Fûts, Intrants, un stock négatif — simulé —, Bilan matière) ; Nico (25/11) : « go » — les quatre recommandations.
+- **Fûts : 137 mots, 1 phrase longue, 75 mots avant le premier grand chiffre — le pire écran de l’appli sur ce point.** La pyramide des âges (venue de la Cave, `_caveParcHtml`) était posée AVANT le parc ; et l’écran redisait ses chiffres : 55 deux fois (« 55 barriques » sur la pyramide, le parc), 12 libres trois fois (le parc, la tuile « Fûts libres », la puce « Tous »), 2 fournisseurs deux fois (une tuile, la ligne de la liste), 2 millésimes deux fois (une tuile, les puces).
+- **Intrants : 92 mots, 2 phrases longues, 76 mots avant « 13,5 ».** Sur chaque produit phyto, « Consommé à activer. Entrées : 116 kg. Le consommé se calculera depuis le registre une fois les doses structurées **(lot suivant)**, ou passe l’intrant en saisie manuelle. » — un mot de développeur montré à l’utilisateur, et faux depuis IFT-1 (§571) : l’assistant écrit `dose_val` sur chaque traitement ; ce sont les traitements plus anciens (la dose en texte seulement) qui laissent le consommé à activer.
+- **Bilan matière : 60 mots, 1 phrase longue** — la mention du contrôle bio (30 mots) sous le tableau.
+
+### 611b. Ce qui change
+
+- **Fûts** (`_rsvFutsHtml`) : le parc d’abord (« 55 fûts au domaine · 43 en vin · 12 libres »), puis les boutons, **puis** la pyramide et la part des anges (`_caveParcHtml` posée là ; `_rsvRenderBody` ne la met plus devant), puis les puces et la liste. **Les trois tuiles partent** (« Fûts libres », « Fournisseurs », « Millésimes »).
+- **La pyramide** (`_pcavPyramide`, cave.js) : plus de « 55 barriques », plus de note dessous — la façon de compter l’âge passe dans un « i » neuf, `rsv.pyramide`. **La part des anges vide** : « Aucun ouillage sur douze mois. » et « Saisir », le pourquoi dans son « i » (`cave.anges`, déjà écrit).
+- **Intrants** : une phrase (`_rsvIntrantsPhrase`) qui compte les fiches comme elles s’affichent — les stocks négatifs (rouge), les stocks cohérents (vert), les consommés à activer — avec un « i » neuf, `rsv.conso` (le stock, les sources du consommé, ce que veut dire « à activer » et comment le tenir à la main, un stock négatif). Un consommé à activer tient sur une ligne : « **Consommé à activer** · entrées 116 kg ». L’alerte d’un stock négatif garde le chiffre et la cause ; « le bilan ne peut pas fermer » passe dans le « i ».
+- **Bilan matière** : la mention du contrôle bio dans un « i » neuf au titre, `rsv.bilan` ; le PDF du bilan la garde en entier (`mvdoc-lim`).
+- **Le squelette de chargement** (`_mvSk('reserve')`) : un grand chiffre et sa ligne, plus trois tuiles.
+- **Gardé** (recommandation 3) : le mot « à activer » — celui du tableau et du PDF que lit le contrôleur.
+- **Les mots** : `MV_AIDE` (le parc en tête, la phrase des Intrants), le guide (`09-reserve`), l’annonce 11.32 (administrateur).
+
+### 611c. Mesuré après (build, démo)
+
+- Cliquet des mots (regravé, baisses seulement) : Fûts **137 → 100** mots, phrases longues **1 → 0**, mots avant le premier grand chiffre **75 → 0** ; Intrants **92 → 56**, **2 → 0**, **76 → 40** ; Bilan matière **60 → 30**, **1 → 0** (téléphone et ordinateur). Hauteur de Fûts au téléphone 1 538 → 1 369 px. Et Phyto › Registre (ordinateur) : 35 → 32 mots avant le premier chiffre — l’effet des lignes d’année à 48 px de MOTS-15, posées après sa gravure.
+- `test:ux` regravé avec `--accepte` : Fûts, sur ordinateur, défile de moins de 300 px — la mesure « en défilant » n’existe plus (la règle du script) ; baisses : actions plus haut que le pouce 4 → 3 (Réserve, téléphone), et deux hors du lot, non attribuées (textes sous 12 px, planning et réglages, −1 chacun). `debord`, `gabarit` verts. Le tuto « intrant » rejoué (téléphone, ordinateur, panneau, miroir) : vert.
+- Joué dans le navigateur (téléphone, ordinateur), sans erreur de page : les quatre « i » ; le filtre 2026 (6 fûts), « Tout déplier » (2 fournisseurs), « Saisir » de la part des anges (la fenêtre d’opération) ; un stock négatif simulé (la phrase en rouge, l’alerte) ; aucun débordement au téléphone, sur les trois onglets.
+- La démo du site : `reserve` régénérée (regardée : le parc en tête, la pyramide sous les boutons).
+
+### 611d. Harnais
+
+`scripts/mv-harnais-mots16.mjs` (15 assertions, 20 contre-épreuves) : **la vraie `_rsvFutsHtml` jouée** (l’ordre — parc, boutons, pyramide, puces, liste — ; plus de tuiles ; le parc vide aussi) ; `_pcavPyramide` et `_pcavAngesCard` jouées ; **la vraie `_rsvIntrantsHtml` jouée** (la phrase et son « i », la ligne courte, plus de « lot suivant » ; un stock négatif : la phrase en rouge, l’alerte courte ; sans intrant, pas de phrase) ; `_rsvAuditHtml` jouée (le « i » au titre, plus de note ; le PDF garde le règlement) ; les trois « i », l’aide, le guide, l’annonce, les versions, la maquette, la liste.
+
+**Harnais adaptés** : `intrant1` (la phrase monte avec la liste), `rsv1` (plus de bande de tuiles), `rsv3` (le « i » du bilan au lieu de la note), `rsvux1` (la ligne courte de la part des anges), `info` (son corpus lit `reserve.js`, qui pose `rsv.conso` et `rsv.bilan`).
+
+### 611e. Restes
+
+- Le plan (§28) : le lot de balayage — les phrases isolées de Vigne, Tracteur, Réglages et Planning. Puis le chantier « Moins de texte » est fini.
+- Les traitements saisis avant l’IFT n’ont pas `dose_val` : leur consommé reste « à activer ». `registre.js` sait lire la dose du texte (« 8 L/ha ») ; la Réserve ne s’en sert pas — un lot à part (un calcul qui change), si Nico le veut.
+
+### 611f. Leçons
+
+- ⚠️ **Un mot de chantier finit par être lu par l’utilisateur** : « (lot suivant) » était dans une chaîne de l’écran depuis un lot ancien, et ne restait vrai que pour le développeur. Les mots de l’écran ne parlent jamais du code.
+- ⚠️ **Le premier grand chiffre dit l’ordre d’un écran** : une carte venue d’un autre module, posée devant, repoussait le parc de 75 mots. Une carte empruntée se pose après ce que l’écran dit de lui-même.

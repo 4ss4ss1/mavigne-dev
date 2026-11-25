@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.32', d: '2026-11-25', items: [   // MOTS-16 (§611) : La Réserve allégée — le parc en tête, une phrase pour les intrants
+    { niv: 0, pour: ['admin'], emoji: 'carton', titre: 'La Réserve\u00a0: le parc en tête, une phrase pour les intrants',
+      desc: "L\u2019onglet Fûts s\u2019ouvre sur le parc\u00a0: les fûts au domaine, en vin et libres. Les trois cases qui redisaient ces chiffres sont parties\u00a0; la pyramide des âges et la part des anges viennent sous les boutons. L\u2019onglet Intrants dit en une phrase ce qui compte\u00a0: un stock négatif, les stocks cohérents, les consommés à activer. Les notes de méthode sont dans les «\u00a0i\u00a0»\u00a0; le PDF du bilan matière garde la mention du contrôle bio." },
+  ] },
   { v: '11.31', d: '2026-11-25', items: [   // MOTS-15 (§610) : Phyto › Registre allégé — une phrase, une année par bloc
     { niv: 0, pour: ['admin', 'tractoriste'], emoji: 'eprouvette', titre: 'Le registre phyto\u00a0: une phrase, une année par bloc',
       desc: "Le Registre s\u2019ouvre sur une phrase\u00a0: «\u00a0Rentrée libre partout\u00a0», ou la rentrée interdite et jusqu\u2019à quand. Le cuivre s\u2019y ajoute quand une parcelle approche du plafond sur sept ans. Les traitements se rangent par année, la plus récente ouverte\u00a0; touchez une année pour la déplier. Sur un traitement, l\u2019état de la rentrée s\u2019écrit tant qu\u2019elle est interdite, puis sept jours." },

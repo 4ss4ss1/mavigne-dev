@@ -7331,16 +7331,16 @@ function _pcavPyramide(c){
     +'<span><i style="background:#8A5A38"></i>en cours de vie</span>'
     +'<span><i style="background:#A0291E"></i>au-delà de '+p.vie+' vins</span>'
     +'<span><i style="background:#8A5A38;opacity:.28"></i>partie libre, quel que soit l’âge</span></div>';
-  return _pcavCard(_mvIcon('graphique',16),'#B85A1A','Pyramide des âges','<b>'+p.parc+'</b> barriques',
-    '<div class="pcav-pyr">'+rows+leg+'</div>',
-    'L’âge se compte en année civile moins année d’achat : la vendange tombe en septembre, donc l’incrément du 1<sup>er</sup> janvier arrive après le millésime.');
+  // ★ MOTS-16 : « 55 barriques » redisait le parc juste au-dessus (La Réserve › Fûts) ; la façon de compter l'âge passe dans le « i ».
+  return _pcavCard(_mvIcon('graphique',16),'#B85A1A','Pyramide des âges','',
+    '<div class="pcav-pyr">'+rows+leg+'</div>','','rsv.pyramide');
 }
 
 // ── Part des anges : une mesure, avec sa reserve ecrite a l'ecran ────
 function _pcavAngesCard(c){
   var a=c.anges;
   if(!a) return _pcavCard(_mvIcon('sablier',16),'#A0291E','Part des anges','\u2014',
-    '<div class="pcav-vide pcav-vide1"><span>Aucun ouillage saisi sur douze mois\u00a0: au premier, la part des anges se calcule.</span><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" onclick="openOvCaveOp()">Saisir</button></div>','');   // ★ RSV-UX-1 (§495) : une invitation d\u2019une ligne, pas un paragraphe
+    '<div class="pcav-vide pcav-vide1"><span>Aucun ouillage sur douze mois.</span><button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" onclick="openOvCaveOp()">Saisir</button></div>','','cave.anges');   // MOTS-16 : le pourquoi dans le « i »   // ★ RSV-UX-1 (§495) : une invitation d\u2019une ligne, pas un paragraphe
   var rows='';
   a.lignes.forEach(function(x){
     var lbl=(x.mil==='?')?'Sans mill\u00e9sime':x.mil;
