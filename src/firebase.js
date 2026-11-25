@@ -3332,13 +3332,15 @@ window._trialStatus = function () {
 
 // Accès module selon plan + flag produit.
 //   vigne / journal / reglages / accueil : tous les plans
-//   tracteur / phyto                      : vigneron+
-//   planning / pilotage / cave            : domaine
+//   tracteur / phyto / planning           : vigneron+   (★ TARIF-1, §608 : le Planning est descendu de Domaine)
+//   pilotage / cave / reserve             : domaine
 // Overrides par module (cases à cocher de la fiche GT), lus dans CONFIG.features :
 //   features[mod] === true  -> module forcé visible (prime sur la formule)
 //   features[mod] === false -> module forcé masqué
 //   absent / undefined      -> repli sur le mapping de la formule (plan)
-// Formule : essentiel = socle ; vigneron = + tracteur/phyto ; domaine = + planning/pilotage/cave.
+// Formule : essentiel = socle ; vigneron = + tracteur/phyto/planning ; domaine = + pilotage/cave/reserve.
+// ⚠️ Ce tableau a TROIS copies tenues à la main : _FC_PLANDEF (admin-gt.js), FORMULES (public/essai.html) et les
+//    cartes de tarifs du site. mv-harnais-tarif1 les compare à CETTE fonction, exécutée (TARIF-1, §608).
 // Phyto suit Tracteur (pas d'entrée dock propre). Cave visible par défaut dès la formule domaine.
 // ── Restriction PAR MEMBRE (allegement de l'interface) ──────────────────────
 // Un caviste n'a que faire de l'avancement des parcelles ; un ouvrier n'a rien
@@ -3389,7 +3391,7 @@ window._planModule = function (mod) {
       var oPt = ov('tracteur'); if (oPt !== null) return oPt; // phyto suit tracteur
       return pr >= 2;
     }
-    case 'planning': { var oL = ov('planning'); return oL !== null ? oL : (pr >= 3); }
+    case 'planning': { var oL = ov('planning'); return oL !== null ? oL : (pr >= 2); }
     case 'pilotage': { var oI = ov('pilotage'); return oI !== null ? oI : (pr >= 3); }
     case 'cave':     { var oC = ov('cave');     return oC !== null ? oC : (pr >= 3); }
     case 'reserve':  { var oR = ov('reserve');  return oR !== null ? oR : (pr >= 3); }

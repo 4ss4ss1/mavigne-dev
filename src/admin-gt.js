@@ -3544,7 +3544,7 @@ function _fcSecSais(){
 // Socle modules par formule (doit rester aligné sur _canModule côté firebase.js)
 var _FC_PLANDEF = {
   essentiel: { tracteur:false, planning:false, pilotage:false, cave:false, reserve:false },
-  vigneron:  { tracteur:true,  planning:false, pilotage:false, cave:false, reserve:false },
+  vigneron:  { tracteur:true,  planning:true,  pilotage:false, cave:false, reserve:false },   // ★ TARIF-1 (§608) : le Planning en Vigneron
   domaine:   { tracteur:true,  planning:true,  pilotage:true,  cave:true,  reserve:true  }
 };
 var _FC_MODS = [
@@ -3696,7 +3696,7 @@ function _fcSecAbo(){
     +_fcHint('La <b>formule</b> (claim, posée sur tous les membres) reste le socle commercial. Les <b>cases</b> affinent module par module : seuls les <b>écarts</b> à la formule sont enregistrés — changer la formule refait suivre les modules non forcés.')
     +_fcTrialStatusHtml(_FC)
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto · Planning')+opt('domaine','Domaine — + Pilotage · Cave · Réserve')+'</select></div>'
     +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:var(--texte-doux);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:var(--texte-med)">0</b> = convertir en payant.</div></div>'
     +'</div>'
     +_fcRenewHtml()
@@ -5269,9 +5269,12 @@ var _AGT_TY = {
   heures: { lbl:'Heures',       ini:'H', col:'#3B82F6' },
   geste : { lbl:'Geste',        ini:'G', col:'#C4B5FD' }
 };
-var _AGT_INST  = { essentiel:490, vigneron:690, domaine:990 };  // forfait d'installation
-var _AGT_INSTH = { essentiel:10,  vigneron:15,  domaine:20  };  // heures incluses
-var _AGT_TAUXH = 60;                                            // au-dela du volant inclus
+// ★ TARIF-1 (§608, Nico 25/11) : UNE mise en route, la meme pour les trois formules, et une demi-journee de
+//   formation de l'equipe incluse (visio ou sur place). Contours sans KML ni Telepac et reprise des anciennes
+//   donnees : hors forfait, a l'heure, sur devis. Les factures deja emises gardent leur montant (lu dans billing).
+var _AGT_INST  = { essentiel:250, vigneron:250, domaine:250 };  // mise en route
+var _AGT_INST_INCLUS = 'demi-journ\u00e9e de formation incluse';  // libelle de la ligne d'installation
+var _AGT_TAUXH = 60;                                            // au-dela du forfait (contours, reprise, heures)
 var _AGT_ECH_J = 30;                                            // echeance par defaut
 var _agtBizTy  = {};   // slug -> type choisi dans le formulaire
 var _agtBizAn  = null; // annee affichee (null = annee courante)
@@ -5559,7 +5562,7 @@ function _agtBizTodoRows(){
 // ── Tarif reellement facture (lot D, 06/08/2026) ────────────────────────────
 // Un client peut payer moins que le tarif de sa formule, tous les mois, sans
 // que ce soit une remise a ressaisir : un client peut etre en Domaine (79 €) au
-// tarif Vigneron (49 €) au titre de l'offre de lancement. Le tarif remise vit dans
+// tarif Vigneron (49 €) par geste commercial. Le tarif remise vit dans
 // _guerettech/billing.{slug}.abo = {prix, motif, fin} — aucune collection neuve.
 // TOUT ce qui parle d'argent recurrent passe par _agtAboPrix : le revenu, la
 // ligne « abonnement a emettre », le pre-remplissage et le releve de compte.
@@ -5595,7 +5598,7 @@ function agtBizAbo(i){
       window.openPrompt({
         titre:'Motif de la remise',
         sub:'Il appara\u00eet sur le relev\u00e9 de compte et dans le libell\u00e9 des lignes d\u2019abonnement.',
-        valeur:(r&&r.motif)?r.motif:'Offre de lancement', type:'texte', btnLabel:'Enregistrer',
+        valeur:(r&&r.motif)?r.motif:'Tarif remis\u00e9', type:'texte', btnLabel:'Enregistrer',
         cb:function(mo){
           if(!_agtBilling[t.slug]) _agtBilling[t.slug]={};
           _agtBilling[t.slug].abo={ prix:p, motif:String(mo||'').trim()||'Tarif remis\u00e9', fin:'' };
@@ -5646,8 +5649,9 @@ function agtBizCible(i){
   var mt=document.getElementById('agt-biz-mnt'+i);
   var lb=document.getElementById('agt-biz-lib'+i);
   if(r)  r.value=f.ref||'';
-  if(mt) mt.value=String(-Math.round((Number(f.montant)||0)/2*100)/100);
-  if(lb) lb.value='Offre de lancement \u2212 50 % sur '+String(f.libelle||_AGT_TY[_agtFType(f)].lbl).toLowerCase();
+  // TARIF-1 (§608) : plus d'offre de lancement a -50 % proposee d'office ; le montant du geste se saisit.
+  if(mt) mt.value='';
+  if(lb) lb.value='Geste commercial sur '+String(f.libelle||_AGT_TY[_agtFType(f)].lbl).toLowerCase();
 }
 // Select de rattachement, affiche sur la ligne d'un geste orphelin.
 
@@ -5688,9 +5692,9 @@ function _agtBizFill(){
     var ty=_agtBizTy[t.slug]||'abo', plan=_agtPlan(t.slug);
     var mnt, lib;
     var rem=_agtAboRemise(t.slug);
-    if(ty==='inst'){       mnt=_AGT_INST[plan];  lib='Installation '+(_AGT_PLANL[plan]||plan)+' \u2014 '+_AGT_INSTH[plan]+' h incluses'; }
+    if(ty==='inst'){       mnt=_AGT_INST[plan];  lib='Mise en route '+(_AGT_PLANL[plan]||plan)+' \u2014 '+_AGT_INST_INCLUS; }
     else if(ty==='heures'){ mnt=_AGT_TAUXH;      lib='1 h d\u2019accompagnement suppl\u00e9mentaire'; }
-    else if(ty==='geste'){  mnt=-Math.round(_AGT_INST[plan]/2); lib='Offre de lancement \u2212 50 % sur l\u2019installation'; }
+    else if(ty==='geste'){  mnt=''; lib='Geste commercial'; }
     else {                  mnt=_agtAboPrix(t.slug); lib='Abonnement '+moisTxt+(rem?(' \u00b7 '+rem.motif):''); }
 
     var r =document.getElementById('agt-biz-ref'+i);
@@ -5710,7 +5714,7 @@ function _agtBizFill(){
     if(lb) lb.value=lib;
     if(ty==='geste') agtBizCible(i);   // la reference, le montant et le libelle suivent la cible
     if(hi) hi.textContent = (ty==='heures')
-      ? ('Au-del\u00e0 du volant inclus : '+_AGT_TAUXH+' \u20ac/h. Saisissez le total (2 h \u2192 '+(_AGT_TAUXH*2)+' \u20ac).')
+      ? ('Hors forfait : '+_AGT_TAUXH+' \u20ac/h (contours sans KML ni Telepac, reprise des anciennes donn\u00e9es, heures en plus). Saisissez le total (2 h \u2192 '+(_AGT_TAUXH*2)+' \u20ac).')
       : ((ty==='geste')
         ? 'Choisissez la facture \u00e0 remiser : la remise prend son num\u00e9ro et vient en d\u00e9duction du d\u00fb. Pour une remise permanente sur l\u2019abonnement, utilisez plut\u00f4t \u00ab tarif remis\u00e9 \u00bb sur la fiche du client.'
         : ((ty==='abo')

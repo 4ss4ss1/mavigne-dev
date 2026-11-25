@@ -2139,19 +2139,29 @@ aucune raison** de réintroduire un `prompt()`.
 | Formule | Mensuel | Annuel (2 mois offerts) | Contenu | Utilisateurs |
 |---|---|---|---|---|
 | **Essentiel** | 29 € | 290 € | Vigne · Journal · Météo · Réglages · export | ≤ 3 |
-| **Vigneron** | 49 € | 490 € | + Tracteur · Registre phyto · catalogue AMM/DAR | ≤ 10 |
-| **Domaine** | 79 € | 790 € | + Cave Élevage · Planning RH · Pilotage · La Réserve | illimité |
+| **Vigneron** | 49 € | 490 € | + Tracteur · Registre phyto · catalogue AMM/DAR · ★ **Planning RH** (TARIF-1, §608) | ≤ 10 |
+| **Domaine** | 79 € | 790 € | + Cave Élevage · Pilotage · La Réserve | illimité |
+
+★ **TARIF-1 (§608, 25/11) — le Planning est descendu en Vigneron** : un domaine sans cave n'a plus à prendre Domaine pour
+avoir les heures. Une seule ligne dans l'appli (`_planModule`, `planning` : `pr >= 2`) ; la console (`_FC_PLANDEF`), la page d'essai
+(`FORMULES`), les cartes du site, le guide (03), `llms.txt` et le kit des annuaires suivent — `mv-harnais-tarif1` les compare à
+`_planModule` JOUÉE. Aucune donnée à migrer, aucune règle Firestore : le palier ne vit que côté client.
 
 Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes abonnement figés
-`ABO-{ESS|VIG|DOM}-{M|A}`. Support **par e-mail uniquement**.
+`ABO-{ESS|VIG|DOM}-{M|A}`. Support par e-mail, ★ et par téléphone ou WhatsApp depuis TARIF-1 (§608 : le numéro est sur le site).
 
-### ✅ Installation — la grille est TRANCHÉE
+### ✅ Installation — ★ TARIF-1 (§608, Nico 25/11) : UNE mise en route à 250 €, la même pour les trois formules
 
-| Formule | Forfait installation HT | Accompagnement inclus |
-|---|---|---|
-| Essentiel | **490 €** | **10 h** |
-| Vigneron | **690 €** | **15 h** |
-| Domaine | **990 €** | **20 h** |
+- **250 €, une seule fois** : import du parcellaire (Telepac / KML), comptes, barème et périodes, et **une demi-journée de
+  formation** de l'équipe, en visio ou sur place. La console l'écrit « Mise en route <formule> — demi-journée de formation
+  incluse » (`_AGT_INST`, `_AGT_INST_INCLUS` ; `_AGT_INSTH` retiré).
+- **Hors forfait, 60 €/h sur devis** : les contours à créer sans KML ni Telepac, la reprise des anciennes données (décision du
+  06/11, enfin écrite sur le site).
+- Les factures déjà émises gardent leur montant : la console ne lit `_AGT_INST` qu'en créant une ligne.
+- ⚠️ L'ancienne grille (490 / 690 / 990 €, 10 / 15 / 20 h) est **retirée partout** ; elle ne survit que dans l'historique
+  des chantiers et dans les données d'essai des harnais de facturation (`gtfix1`, `gtfix3`), qui jouent des factures passées.
+
+*Ce qui suit est le raisonnement de l'ancienne grille, gardé pour l'histoire.*
 
 - **Au-delà du volant inclus : 60 €/h.**
 - Nouveaux codes : **`INST-ESS` / `INST-VIG` / `INST-DOM`**.
@@ -2164,8 +2174,9 @@ Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes ab
   sens que si l'installation en coûte 9. **C'est ce qui rend le passage à trente clients pensable.**
   ⚠️ Le chiffre reste **théorique** tant qu'une installation à blanc ne l'a pas mesuré.
 
-**Offre de lancement** : −50 % sur l'installation **+** plan Domaine au tarif Vigneron.
-⚠️ **Durée jamais bornée — à trancher**, au plus tard avec le devis le prospect Gironde.
+~~**Offre de lancement** : −50 % sur l'installation **+** plan Domaine au tarif Vigneron.~~ ★ **Retirée (TARIF-1, §608, Nico
+25/11)** : la console ne propose plus le −50 % d'office (un geste commercial se saisit, montant compris) et le motif d'une
+remise d'abonnement par défaut devient « Tarif remisé ». Les remises déjà posées chez un client restent (données).
 
 **Argument ROI en public** : exprimé en **temps, pas en euros**.
 ⚠️⚠️⚠️ **TROIS CHIFFRES CONTRADICTOIRES CIRCULAIENT** — démo **111 h**, brochure **215 h/an pour

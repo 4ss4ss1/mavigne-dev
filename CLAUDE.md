@@ -3,7 +3,7 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 
-> Dernière consolidation : **24 novembre 2026 (MOTS-13)** — **CAVE › LE MILLÉSIME, ENSEMBLE ET COURBES ALLÉGÉS : UNE PHRASE, LA MÉTHODE DANS LE « i », NEUF DÉFAUTS D’AFFICHAGE (§607)**. Base `338c153` (« vitrine3 »). **APP 11.28 → 11.29, SW 12.19 → 12.20.** Le second lot du Millésime, maquette `maquette-millesime-courbes-v1.html` validée (« go ») avec ses trois recommandations. Ensemble : « 2 cuves en fermentation, tout est rentré » — le compte de « À surveiller », sortie de sa carte en `_mlVeille` (une liste, deux lecteurs) ; Courbes : « 2 cuves en fermentation, 1 décuvée » (`_mlEtat`, les comptes de la tête). Les notes de méthode sous les graphes (60 à 150 mots) partent dans le « i » `cave.courbes`, complété ; le pied du parcours dans un « i » neuf (`cave.flux`). Neuf défauts : le parcours qui débordait au téléphone (colonne des chiffres), son étage projeté invisible, « En fût » coupé, les milliers collés ; la légende des maturités collée (sa feuille n’était posée que par le Cuvier) ; le graphe des maturités 28 px plus large que sa boîte ; l’unité de l’axe des jours sur J8 et J12 ; une date en serif ; le choix de la courbe sur deux lignes. Mesuré : Courbes sur ordinateur 747 → 284 mots, 8 → 2 phrases longues ; Densités au téléphone 299 → 115 ; la phrase du haut fait passer les mots avant le premier chiffre de 0 à 6 et 4 (hausse acceptée dans le cliquet). Harnais `mots13` (19 assertions, 26 contre-épreuves) ; `crb2` et `range1` suivis. Leçon : une feuille de style posée par un autre écran n’existe pas pour celui qu’on ouvre en premier.
+> Dernière consolidation : **25 novembre 2026 (TARIF-1)** — **LA GRILLE TARIFAIRE REFAITE ET DITE PAREIL PARTOUT : LE PLANNING EN VIGNERON, UNE MISE EN ROUTE UNIQUE À 250 €, LE TÉLÉPHONE ET WHATSAPP SUR LA PAGE, UN MODÈLE EXCEL GRATUIT DU REGISTRE 2027 (§608)**. Base `71a4311` (« mots13 »). **Pas de bump (APP 11.29, SW 12.20)** : `firebase.js` et `admin-gt.js` sont des modules, le reste est du site, des scripts et de la documentation ; et Nico a voulu le changement « sans bruit » (aucun `WHATS_NEW`). Nico (24/11) colle un cahier des charges en trois parties, demande un avis comparé aux grands du secteur (Isagri, Ok César, Baqio, Vitisoft, Mes Parcelles), puis tranche (25/11) : trois formules gardées, **le Planning (heures, annualisation) passe de Domaine à Vigneron** (une ligne de `_planModule`, `pr >= 2`) ; **250 € de mise en route pour toutes, une demi-journée de formation comprise** ; contours sans KML ni Telepac et reprise des anciennes données **à 60 €/h sur devis** ; **l’offre de lancement retirée** de la console. Le cahier proposait les heures en Essentiel et le planning en Vigneron : **séparés dans le texte, pas dans l’appli** (tout vit dans `planning.js`) — écarté. La formule s’écrivait à **sept endroits** à la main (appli, console ×2, essai, cartes du site ×4, guide, `llms.txt`, kit des annuaires) : `mv-harnais-tarif1` les compare tous à `_planModule` **jouée** (38 assertions, 22/22 contre-épreuves). **Le modèle Excel** (`public/downloads/registre-phyto-2027-mavigneapp.xlsx`) est fabriqué par `scripts/mv-registre-modele.mjs` **depuis `MV_PHY_CSV_COLS`** (26 colonnes : les 18 de l’annexe II puis les 8 de l’export) — le cahier en listait 15, dont deux absentes de l’annexe et une « Horaires » qui en vaut deux ; ZIP écrit à la main, entrées stockées, date fixe : rejoué octet pour octet. Leçon : un tarif écrit à sept endroits n’est cohérent que si un contrôle les relit tous contre l’appli.
 ## 🧭 Mode d'emploi — CE FICHIER EST LE CŒUR : IL SE LIT EN ENTIER
 
 > ★★★ **Depuis le 27/09 (§189), la documentation est scindée.** Ce fichier faisait 23 910 lignes, dont
@@ -573,7 +573,8 @@ seul tour**.
   ⚠️ « **Challand** » avec un C majuscule — faute vécue dans une fiche client.
 - **Téléphone** : **06 99 42 48 59** (`tel:+33699424859`). ⚠️ L'ancien numéro **0622074786
   n'existe plus**. Publié dans les mentions légales et la politique de confidentialité.
-  ⚠️ **Volontairement absent du DPA** (document signé) et des pages marketing.
+  ⚠️ **Volontairement absent du DPA** (document signé). ★ **Sur le site depuis TARIF-1 (§608, demande de Nico)** : pied de page,
+  objections et fin de `logiciel-vigne`, questions des trois pages « cas d’usage », avec WhatsApp (`https://wa.me/33699424859`).
 - **Courriel** : `ngdevpro@gmail.com`. **TVA non applicable, art. 293 B du CGI.**
 - **Double casquette** : développeur unique de Ma Vigne **et** chef d'équipe viticole en Côte de
   Nuits. Différenciateur commercial n°1.
@@ -640,8 +641,9 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
 
 - Ma Vigne n'est **PAS** AppSheet ni du no-code — c'est une **vraie application métier**.
 - Modèle : **installation + personnalisation (forfait)** + **abonnement mensuel par formule**.
-  ★ **La grille d'installation est TRANCHÉE** (§26) : indexée sur la formule, avec des heures
-  d'accompagnement incluses.
+  ★ **TARIF-1 (§608, 25/11) : une mise en route unique de 250 €**, la même pour les trois formules, une demi-journée de
+  formation comprise ; contours sans KML ni Telepac et reprise des anciennes données à 60 €/h sur devis. Le Planning est
+  en Vigneron. Le détail et l'ancienne grille : §26 (`docs/claude/modules.md`).
 - Pas de paiement en self-service : conversion par **MAILTO** + `_fbSetTenantPlan` en fenêtre privée GT.
 - Nico contacte ses clients **personnellement**. Ton direct, chaleureux, concis — jamais corporate.
 - LinkedIn : posts #1 à #3 publiés. Cadence **mardi, tous les 14 jours, 11h30 ou 20h**.
@@ -659,7 +661,8 @@ des fûts et des intrants, récoltes, suivi d'élevage, carnet d'entretien, rég
   l'accompagnement a décroché du code.
 - ★★★ **Et le quatrième, invisible du client : la RAPIDITÉ D'INSTALLATION** (chantier du 09/08
   soir). Un forfait de 20 h incluses tient économiquement si l'installation en coûte 9. C'est ce qui
-  rend le passage à trente clients pensable (§18b, §26).
+  rend le passage à trente clients pensable (§18b, §26). ★ Depuis TARIF-1 (§608), le forfait de 250 € ne promet plus
+  d'heures : une demi-journée de formation. La rapidité d'installation devient la condition pour qu'il ne coûte pas.
 
 ---
 
@@ -1975,7 +1978,7 @@ Les 75 rubriques d’avant (236 points, posées du 11/08 au 21/10) ont été con
 - **« D’où viennent ces heures »** sous chaque tâche du Pilotage — qui, quels jours, ce qui vient de jours d’attente — pour vérifier un chiffre réel sur ses données (proposé le 22/10 avec JCAVE-1, §428). ★ Revu par ECART-1 (§460) sur un domaine fictif : une journée sans validation part sur la prochaine parcelle validée, et l’écart d’une tâche à petit barème s’envole le premier (réparation à +2 592 % dans le harnais).
 - **Les dates impossibles, partout** (PERDATE-1, §427f) : 69 autres champs date lisent encore un 31/09 tapé comme une case vide (message faux ou date effacée, selon l’écran — à voir un par un) ; remonter `_perDateLue` dans utils.js et la brancher écran par écran, avec le refus à l’enregistrement.
 - **L’Accueil Vigne au dessin de la maquette** (ACCV-1 à ACCV-4, §416 à §419, faits) : corriger aussi la date, la parcelle ou la tâche d’une entrée du Journal (§419d) ; les absences et les fins de contrat dans « À savoir » ; « Ta présence est notée » dans « À savoir » ; l’auteur et l’heure du message de priorité ; le seuil du gel (0 °C ou 3 °C, §418b) ; découper `app.js` (l’Accueil à part) ; purger la feuille des règles des blocs retirés, leurs harnais d’abord (§418d).
-- **Le site internet** : la page « logiciel-vigne » est refaite (VITRINE-1, §498), passée en page de présentation (VITRINE-2, §503), puis resserrée pour mener à l’essai (VITRINE-3, §606 : deux sections en double retirées, onglets au téléphone, un essai par formule). Restent : l’en-tête des trois pages GEO-2 à aligner ; les titres de section en formules, à passer en titres simples si Nico le veut ; le « 127 heures par an » que la démo annonce encore « comme le site » ; `harnais-vitrine.mjs` / `contre-epreuves.mjs` décrivent la page d’avant VITRINE-1, hors chaîne (`mv-harnais-vitrine3` garde la page d’aujourd’hui). ⚠️ **Le site promet que le cumul de cuivre sur sept ans est testé avant chaque mise à jour** : `mv-harnais-cuivre7` est ce test — ne pas le sortir de la chaîne.
+- **Le site internet** : la page « logiciel-vigne » est refaite (VITRINE-1, §498), passée en page de présentation (VITRINE-2, §503), puis resserrée pour mener à l’essai (VITRINE-3, §606 : deux sections en double retirées, onglets au téléphone, un essai par formule), puis sa grille refaite (TARIF-1, §608 : Planning en Vigneron, 250 €, téléphone et WhatsApp, modèle Excel du registre). Restent : l’en-tête des trois pages GEO-2 à aligner ; les titres de section en formules, à passer en titres simples si Nico le veut ; le « 127 heures par an » que la démo annonce encore « comme le site » ; `harnais-vitrine.mjs` / `contre-epreuves.mjs` décrivent la page d’avant VITRINE-1, hors chaîne (`mv-harnais-vitrine3` garde la page d’aujourd’hui). ⚠️ **Le site promet que le cumul de cuivre sur sept ans est testé avant chaque mise à jour** : `mv-harnais-cuivre7` est ce test — ne pas le sortir de la chaîne.
 - **Après le déploiement général (QDN-1, §497)** : sortir le bloc QDN de `utils.js` (ou le retirer) quand la présentation n’a plus lieu d’être ; refaire les livrets à la prochaine grande version (générateur hors dépôt, §497d).
 - **Cave** : GESTES-2 (la suite d’une dégustation jusqu’au geste qui la solde, validé, non fait) ; la série cave lot 2 (bâtonnage et rappel, méchage, analyses complètes, mise en bouteille enrichie).
 - **« Pourquoi on le fait »** : POURQUOI-2 (l’admin réécrit les fiches, saisie échappée) ; les fiches manquantes (Cuvier, mise en bouteille, activités du tracteur).

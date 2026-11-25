@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Suivi du temps de travail dans les vignes : heures, parcelles, tâches | Ma Vigne</title>
-<meta name="description" content="Les heures de l’équipe, le temps passé par parcelle et par tâche, face au barème : comment Ma Vigne calcule le temps des travaux viticoles sans badgeuse ni ressaisie. Formule Domaine, 79 € par mois.">
+<meta name="description" content="Les heures de l’équipe, le temps passé par parcelle et par tâche, face au barème : comment Ma Vigne calcule le temps des travaux viticoles sans badgeuse ni ressaisie. Les heures dès la formule Vigneron (49 € par mois), le temps par parcelle avec Domaine (79 €).">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://mavigneapp.fr/suivi-temps-travail-vigne.html">
 <link rel="icon" href="/icon-192.png">
@@ -107,7 +107,7 @@
           "name": "Quelle formule faut-il pour suivre le temps de travail ?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "La formule Domaine (79 € par mois pour tout le domaine) : elle comprend le planning, les heures, l’annualisation, le temps réel par parcelle et le coût par parcelle. Les formules Essentiel et Vigneron suivent l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe."
+            "text": "Les heures de l’équipe sont dans la formule Vigneron (49 € par mois pour tout le domaine) : planning, heures sup, annualisation et relevé mensuel pour la compta. La formule Domaine (79 €) y ajoute le temps réel par parcelle et par tâche, et le coût par parcelle. La formule Essentiel suit l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe."
           }
         }
       ]
@@ -424,10 +424,10 @@ section[id]{scroll-margin-top:84px}
     <caption class="lu">Ce que Ma Vigne suit pour le temps de travail, et dans quelle formule.</caption>
     <thead><tr><th scope="col">Ce que vous voulez savoir</th><th scope="col">Dans Ma Vigne</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Les heures de chacun</th><td>La grille du Planning, à la minute, coupure déjeuner déduite au-delà d’un seuil. Des <b>modèles de semaine</b> évitent de tout ressaisir&nbsp;; un import de pointages en CSV est possible. Prévu, travaillé, écart et ETP, salarié par salarié. <span class="etiq dom">Domaine</span></td></tr>
-      <tr><th scope="row">Les heures sup</th><td>Comptées <b>à la semaine</b>, du lundi au dimanche&nbsp;: les huit premières à 25&nbsp;%, les suivantes à 50&nbsp;%. Les heures en plus rattrapent d’abord les heures manquées de la semaine. <span class="etiq dom">Domaine</span></td></tr>
-      <tr><th scope="row">L’annualisation</th><td>Un compteur sur l’année civile, proratisé aux jours sous contrat, avec les plafonds de la convention et une projection de fin d’année. Les TESA et saisonniers payés à l’heure ont leurs heures et leurs jours. <span class="etiq dom">Domaine</span></td></tr>
-      <tr><th scope="row">Le relevé pour la compta</th><td>Un PDF par mois&nbsp;: le cadre «&nbsp;Pour la compta&nbsp;», le mois jour par jour, chaque absence avec ce qu’elle devient, les heures sup par taux, le compteur de récup. <span class="etiq dom">Domaine</span></td></tr>
+      <tr><th scope="row">Les heures de chacun</th><td>La grille du Planning, à la minute, coupure déjeuner déduite au-delà d’un seuil. Des <b>modèles de semaine</b> évitent de tout ressaisir&nbsp;; un import de pointages en CSV est possible. Prévu, travaillé, écart et ETP, salarié par salarié. <span class="etiq">Vigneron et Domaine</span></td></tr>
+      <tr><th scope="row">Les heures sup</th><td>Comptées <b>à la semaine</b>, du lundi au dimanche&nbsp;: les huit premières à 25&nbsp;%, les suivantes à 50&nbsp;%. Les heures en plus rattrapent d’abord les heures manquées de la semaine. <span class="etiq">Vigneron et Domaine</span></td></tr>
+      <tr><th scope="row">L’annualisation</th><td>Un compteur sur l’année civile, proratisé aux jours sous contrat, avec les plafonds de la convention et une projection de fin d’année. Les TESA et saisonniers payés à l’heure ont leurs heures et leurs jours. <span class="etiq">Vigneron et Domaine</span></td></tr>
+      <tr><th scope="row">Le relevé pour la compta</th><td>Un PDF par mois&nbsp;: le cadre «&nbsp;Pour la compta&nbsp;», le mois jour par jour, chaque absence avec ce qu’elle devient, les heures sup par taux, le compteur de récup. <span class="etiq">Vigneron et Domaine</span></td></tr>
       <tr><th scope="row">Le temps par parcelle</th><td>Les heures du jour de chacun vont aux parcelles <b>validées ce jour-là</b>, au prorata de leur barème. Une journée sans validation attend la suivante. Les journées de cave et la conduite du tracteur sont retirées. <span class="etiq dom">Domaine</span></td></tr>
       <tr><th scope="row">Le temps par tâche</th><td>«&nbsp;Temps réel contre barème&nbsp;»&nbsp;: pour chaque travail, les hectares, les heures, les <b>heures par hectare réelles</b> face au barème, et l’écart. <span class="etiq dom">Domaine</span></td></tr>
       <tr><th scope="row">Le barème</th><td>Les heures de référence de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine, ou vos propres heures par hectare. <span class="etiq">Toutes formules</span></td></tr>
@@ -457,28 +457,28 @@ section[id]{scroll-margin-top:84px}
 
 <section class="section" id="prix" aria-labelledby="titre-prix">
   <div class="section-tete" data-r>
-    <h2 id="titre-prix">Le temps de travail est dans la formule Domaine.</h2>
-    <p>Un prix par domaine, pas par utilisateur. Les formules Essentiel (29&nbsp;€) et Vigneron (49&nbsp;€) suivent l’avancement et le barème, sans les heures de l’équipe.</p>
+    <h2 id="titre-prix">Les heures dès Vigneron, le temps par parcelle avec Domaine.</h2>
+    <p>Un prix par domaine, pas par utilisateur. La formule Essentiel (29&nbsp;€) suit l’avancement et le barème, sans les heures de l’équipe.</p>
   </div>
   <div class="formules">
-    <article class="formule mise" data-r><h3>Domaine</h3><p class="note">Utilisateurs illimités</p><div class="prix-l"><b class="num">79&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Planning, heures et annualisation</li><li>Relevé d’heures mensuel pour la compta</li><li>Temps réel par parcelle et par tâche, face au barème</li><li>Pilotage et coûts par parcelle</li><li>Tout Vigneron&nbsp;: tracteur, traitements et registre</li><li>Cuvier, Chai et La Réserve</li></ul><p class="mer">Mise en route <b>990&nbsp;€</b> une seule fois · 20&nbsp;h d’accompagnement</p></article>
-    <article class="formule" data-r style="--i:1"><h3>Vigneron</h3><p class="note">Jusqu’à 10 utilisateurs</p><div class="prix-l"><b class="num">49&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Parcelles et travaux, avancement, barème</li><li>Journal de l’équipe</li><li>Tracteur, traitements et registre</li></ul><p class="mer">Mise en route <b>690&nbsp;€</b> une seule fois · 15&nbsp;h d’accompagnement</p></article>
+    <article class="formule mise" data-r><h3>Domaine</h3><p class="note">Utilisateurs illimités</p><div class="prix-l"><b class="num">79&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Tout Vigneron&nbsp;: planning, heures, relevé pour la compta</li><li>Temps réel par parcelle et par tâche, face au barème</li><li>Pilotage et coûts par parcelle</li><li>Cuvier, Chai et La Réserve</li></ul><p class="mer">Mise en route <b>250&nbsp;€</b> une seule fois · demi-journée de formation comprise</p></article>
+    <article class="formule" data-r style="--i:1"><h3>Vigneron</h3><p class="note">Jusqu’à 10 utilisateurs</p><div class="prix-l"><b class="num">49&nbsp;€</b><span>/ mois<br>pour tout le domaine</span></div><ul><li>Parcelles et travaux, avancement, barème</li><li>Planning, heures et annualisation</li><li>Relevé d’heures mensuel pour la compta</li><li>Journal de l’équipe</li><li>Tracteur, traitements et registre</li></ul><p class="mer">Mise en route <b>250&nbsp;€</b> une seule fois · demi-journée de formation comprise</p></article>
   </div>
-  <p class="prix-note" data-r>Sans durée d’engagement&nbsp;: résiliable par écrit avec trente jours de préavis. La mise en route comprend l’import du parcellaire, la création des comptes, le paramétrage du barème et des périodes, et la formation de l’équipe. TVA non applicable, article 293 B du CGI. <a href="/logiciel-vigne.html#prix">Toutes les formules et ce qu’elles comprennent</a>.</p>
+  <p class="prix-note" data-r>Sans durée d’engagement&nbsp;: résiliable par écrit avec trente jours de préavis. La mise en route (250&nbsp;€, une seule fois) comprend l’import du parcellaire, la création des comptes, le paramétrage du barème et des périodes, et une demi-journée de formation de l’équipe. TVA non applicable, article 293 B du CGI. <a href="/logiciel-vigne.html#prix">Toutes les formules et ce qu’elles comprennent</a>.</p>
 </section>
 
 <section class="section" id="questions" aria-labelledby="titre-questions">
   <div class="faq-cols">
     <div class="section-tete">
       <h2 id="titre-questions">Les questions qu’on me pose sur le temps.</h2>
-      <p>Une autre question&nbsp;? Écrivez-moi&nbsp;: <a href="mailto:contact@mavigneapp.fr">contact@mavigneapp.fr</a>, je réponds moi-même.</p>
+      <p>Une autre question&nbsp;? Écrivez-moi à <a href="mailto:contact@mavigneapp.fr">contact@mavigneapp.fr</a>, appelez-moi au <a href="tel:+33699424859">06&nbsp;99&nbsp;42&nbsp;48&nbsp;59</a> ou écrivez sur <a href="https://wa.me/33699424859" target="_blank" rel="noopener">WhatsApp</a>&nbsp;: je réponds moi-même.</p>
     </div>
     <div class="faq">
       <details><summary>Mes ouvriers doivent-ils pointer ou lancer un chrono&nbsp;?</summary><p>Non. Ils touchent « Valider » sur la parcelle quand elle est finie&nbsp;; « Début » est facultatif. Leurs heures viennent du planning que tient l’administrateur, à la minute, avec des modèles de semaine. Un import de pointages en CSV est possible si vous en avez déjà.</p></details>
       <details><summary>Comment Ma Vigne sait-elle combien de temps on a passé sur une parcelle&nbsp;?</summary><p>Chaque jour, les heures de chacun au planning se partagent entre les parcelles validées ce jour-là, au prorata de leur barème. Une journée sans validation n’est pas perdue&nbsp;: ses heures attendent la prochaine validation de la personne. Les journées de cave et la conduite du tracteur sont retirées du calcul.</p></details>
       <details><summary>Et si je valide les parcelles pour toute l’équipe&nbsp;?</summary><p>Les heures de ceux qui ne sont pas nommés sur une validation vont à toutes les parcelles validées par le domaine ce jour-là. Quand deux équipes travaillent sur des chantiers différents, l’administrateur les pose le matin dans « Équipes du jour »&nbsp;: chacune garde ses parcelles.</p></details>
       <details><summary>Les heures supplémentaires suivent-elles ma convention&nbsp;?</summary><p>Par défaut, les repères sont ceux de la convention nationale Production agricole et CUMA (IDCC 7024), et ils se règlent pour une autre convention. Les heures sup se comptent à la semaine, du lundi au dimanche&nbsp;: les huit premières à 25 %, les suivantes à 50 %. Le relevé les déclare en heures brutes avec leur taux.</p></details>
-      <details><summary>Quelle formule faut-il pour suivre le temps de travail&nbsp;?</summary><p>La formule Domaine (79 € par mois pour tout le domaine)&nbsp;: elle comprend le planning, les heures, l’annualisation, le temps réel par parcelle et le coût par parcelle. Les formules Essentiel et Vigneron suivent l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe.</p></details>
+      <details><summary>Quelle formule faut-il pour suivre le temps de travail&nbsp;?</summary><p>Les heures de l’équipe sont dans la formule Vigneron (49 € par mois pour tout le domaine)&nbsp;: planning, heures sup, annualisation et relevé mensuel pour la compta. La formule Domaine (79 €) y ajoute le temps réel par parcelle et par tâche, et le coût par parcelle. La formule Essentiel suit l’avancement des travaux et les heures estimées au barème, sans les heures de l’équipe.</p></details>
     </div>
   </div>
 </section>

@@ -13,7 +13,7 @@
    ③ le haut de page : le sous-titre court ; quatre vrais onglets (rôles, aria-controls, un seul choisi, les écrans
       cachés hors de portée du clavier) ; un appui arrête le défilement ; les écrans qu’on ne regarde pas se remettent
       à zéro AVANT celui qu’on regarde ;
-   ④ le bandeau annonce la mise en route ;
+   ④ le bandeau annonce la mise en route et son montant (250 €, TARIF-1 §608) ;
    ⑤ « Qui écrit ce logiciel » : la phrase des tests à la place de l’ancien chiffre faux, le portrait et ses initiales ;
       aucun retour client affiché tant que le bloc est en commentaire ;
    ⑥ la question de la pérennité : même texte à l’écran et dans le JSON-LD ;
@@ -21,6 +21,8 @@
       pas une popularité ;
    ⑧ « Comment ça se passe » sépare l’essai gratuit et ce que paie la mise en route ; llms.txt dit la même chose ;
    ⑨ essai.html lit ?formule= et coche d’avance les modules de la formule (le contenu des cartes de tarifs).
+   ★ TARIF-1 (§608, 25/11) : les montants et le contenu des formules ont changé (250 € pour toutes, Planning en
+      Vigneron) ; ④ ⑧ ⑨ suivent. La cohérence de toute la chaîne (appli, console, site) est dans mv-harnais-tarif1.
    ⚠️ Il ne regarde pas l’écran : le rendu au navigateur (375, 768, 1100, 1280, 1440) est dans le §606.
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs';
@@ -91,7 +93,7 @@ function suite(S) {
   T('③ le code des cartes retirées est parti (le fil, le registre et la cuve de « Cinq endroits »)', !/histFlux|histReg|histCuve|tracerFlux/.test(P));
 
   /* ④ le bandeau */
-  T('④ le prix du bandeau annonce la mise en route', /<b>Un prix par domaine<\/b><span>De 29 à 79&nbsp;€ par mois, sans coût par utilisateur \(\+&nbsp;mise en route unique\)\.<\/span>/.test(B));
+  T('④ le prix du bandeau annonce la mise en route et son montant', /<b>Un prix par domaine<\/b><span>De 29 à 79&nbsp;€ par mois, sans coût par utilisateur \(\+&nbsp;250&nbsp;€ de mise en route unique\)\.<\/span>/.test(B));
 
   /* ⑤ qui écrit ce logiciel */
   const aut = bloc(B, '<article class="auteur" id="auteur"');
@@ -128,10 +130,10 @@ function suite(S) {
   /* ⑧ l'essai et la mise en route */
   const et = [...bloc(B, '<ol class="etapes"').matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => texte(m[1]));
   T('⑧ étape 2 : l’essai sur un échantillon de parcelles, en conditions réelles, sans carte bancaire', /^Quinze jours d'essai/.test(et[1] || '') && ['en conditions réelles', 'sans carte bancaire', 'un échantillon suffit'].every((m) => (et[1] || '').includes(m)));
-  T('⑧ étape 3 : ce que couvre le forfait unique (le montant, le parcellaire, le barème, l’annualisation en Domaine, 10 à 20 h)',
-    /^La mise en route/.test(et[2] || '') && ['490, 690 ou 990 €', 'tout votre parcellaire depuis Telepac ou KML', 'barème et des périodes', "l'annualisation en formule Domaine", "10 à 20 h d'accompagnement et de formation"].every((m) => (et[2] || '').includes(m)));
+  T('⑧ étape 3 : ce que couvre le forfait unique (250 €, le parcellaire, le barème, l’annualisation dès Vigneron, la demi-journée de formation)',
+    /^La mise en route/.test(et[2] || '') && ['forfait unique de 250 €', 'tout votre parcellaire depuis Telepac ou KML', 'barème et des périodes', "l'annualisation dès la formule Vigneron", "une demi-journée de formation de l'équipe"].every((m) => (et[2] || '').includes(m)));
   T('⑧ llms.txt dit la même chose (l’annualisation, l’échantillon, chaque nuit, le préavis)',
-    ["(et de l'annualisation en formule Domaine)", 'un échantillon de parcelles suffit', 'sauvegardé chaque nuit', 'trois mois de préavis, puis 90 jours'].every((m) => S.llms.includes(m)));
+    ["(et de l'annualisation dès la formule Vigneron)", 'un échantillon de parcelles suffit', 'sauvegardé chaque nuit', 'trois mois de préavis, puis 90 jours'].every((m) => S.llms.includes(m)));
 
   /* ⑨ essai.html coche les modules de la formule */
   const E = S.essai;
@@ -140,8 +142,8 @@ function suite(S) {
   const mods = (k) => (F && F[k] ? F[k].mods.slice().sort().join() : '');
   T('⑨ essai.html : une table des trois formules, chaque module coché existe dans le formulaire',
     !!F && Object.keys(F).sort().join() === 'domaine,essentiel,vigneron' && Object.values(F).every((f) => f.mods.length && f.mods.every((m) => valeurs.has(m))));
-  T('⑨ le contenu des cartes : Essentiel = travaux, météo ; Vigneron = + tracteur, phyto ; Domaine = + planning, pilotage, cave',
-    mods('essentiel') === 'meteo,travaux' && mods('vigneron') === 'meteo,phyto,tracteur,travaux' && mods('domaine') === 'cave,meteo,phyto,pilotage,planning,tracteur,travaux');
+  T('⑨ le contenu des cartes : Essentiel = travaux, météo ; Vigneron = + tracteur, phyto, planning ; Domaine = + pilotage, cave',
+    mods('essentiel') === 'meteo,travaux' && mods('vigneron') === 'meteo,phyto,planning,tracteur,travaux' && mods('domaine') === 'cave,meteo,phyto,pilotage,planning,tracteur,travaux');
   const coch = (E.match(/function cocherFormule\(\)\{[\s\S]*?\n  \}/) || [''])[0];
   T('⑨ la formule est lue dans l’adresse, les cases cochées, les blocs qui en dépendent ouverts, et c’est appelé au chargement',
     /new URLSearchParams\(location\.search\)\.get\('formule'\)/.test(coch) && /i\.checked = true/.test(coch) && /syncConds\(\);/.test(coch) && /\n  cocherFormule\(\);\n/.test(E));
@@ -160,7 +162,10 @@ const MUTANTS = [
   ['un onglet qui ne désigne pas son écran', sur('page', 'id="og-phyto" aria-controls="ecran-phyto"', 'id="og-phyto" aria-controls="ecran-cave"')],
   ['un appui qui ne change rien', sur('page', "b.addEventListener('click',()=>choisir(i,false));", "b.addEventListener('click',()=>{});")],
   ['l’écran regardé remis avant les autres (le doigt s’éteint)', sur('page', 'reposerSauf([e,(e+3)%4]);\n  ECR[e](u-(e===0&&k>0?.8:.6));', 'ECR[e](u-(e===0&&k>0?.8:.6));\n  reposerSauf([e,(e+3)%4]);')],
-  ['le bandeau sans la mise en route', sur('page', ' (+&nbsp;mise en route unique).', '.')],
+  ['le bandeau sans la mise en route', sur('page', ' (+&nbsp;250&nbsp;€ de mise en route unique).', '.')],
+  ['le bandeau revient à l’ancien montant', sur('page', '(+&nbsp;250&nbsp;€ de mise en route unique)', '(+&nbsp;490&nbsp;€ de mise en route unique)')],
+  ['l’étape 3 revient aux 10 à 20 h', sur('page', 'et une demi-journée de formation de l’équipe, en visio ou sur place. Puis', 'et 10 à 20&nbsp;h d’accompagnement. Puis')],
+  ['Vigneron sans le planning (essai.html)', sur('essai', "mods: ['travaux', 'meteo', 'tracteur', 'phyto', 'planning'] }", "mods: ['travaux', 'meteo', 'tracteur', 'phyto'] }")],
   ['l’ancien chiffre faux revient', sur('page', 'Chaque calcul sensible', 'Et quand un chiffre est faux, je le dis. Le calcul des coûts par parcelle l’a été. Chaque calcul sensible')],
   ['le logo revient à la place du portrait', sur('page', '<span class="portrait" data-initiales="NG"><img src="/images/nicolas-gueret.webp"', '<img src="/logo-barre.png" alt=""><span class="portrait" data-initiales="NG"><img src="/images/x.webp"')],
   ['un retour client affiché sans être écrit par un client', sur('page', '\n  fin des retours terrain -->', ' -->\n  <div class="retours"><figure class="retour"><blockquote><p>Génial.</p></blockquote></figure></div>')],

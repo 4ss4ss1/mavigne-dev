@@ -14,7 +14,7 @@ Ce fichier résume ce que fait Ma Vigne, pour qui, et à quel prix. Les chiffres
 
 ### La vigne
 - **Parcelles et travaux à la tâche** : avancement en surface réelle (une parcelle de 2 ha ne pèse pas comme une de 20 ares), validation depuis le rang en un geste, tâche prioritaire posée par l'administrateur et affichée sur le téléphone de toute l'équipe.
-- **Temps de travail** : le rang validé part au journal, aux heures de chacun et sur la carte, sans ressaisie le soir. Les heures de référence de chaque tâche viennent du barème de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine. Avec la formule Domaine, les heures de chaque salarié au planning se partagent chaque jour entre les parcelles validées, au prorata du barème : temps réel par parcelle et par tâche, face au barème. Pas de badgeuse ni de suivi GPS.
+- **Temps de travail** : le rang validé part au journal, aux heures de chacun et sur la carte, sans ressaisie le soir. Les heures de référence de chaque tâche viennent du barème de la convention (Bourgogne ou Gironde), ramenées à la densité de plantation du domaine. Dès la formule Vigneron, les heures de chaque salarié se tiennent au planning ; avec la formule Domaine, elles se partagent chaque jour entre les parcelles validées, au prorata du barème : temps réel par parcelle et par tâche, face au barème. Pas de badgeuse ni de suivi GPS.
 - **Journal de l'équipe** : chaque geste daté et attribué ; une équipe entière tient en une seule entrée.
 - **Météo par parcelle** : modèle AROME de Météo-France, secteur par secteur ; risque de gel, de pluie, fenêtres de traitement.
 
@@ -42,6 +42,7 @@ Ce fichier résume ce que fait Ma Vigne, pour qui, et à quel prix. Les chiffres
 - Le règlement d'exécution (UE) 2023/564, modifié par le règlement (UE) 2025/2203, et l'arrêté français du 24 décembre 2025 imposent d'enregistrer l'utilisation des produits phytopharmaceutiques dans un format électronique lisible par une machine, à partir du 1er janvier 2027.
 - De 2027 à 2029, ce qui n'est pas saisi directement au format électronique doit y être converti avant le 31 janvier de l'année suivante ; à partir de 2030, dans les trente jours qui suivent le traitement.
 - Le texte n'impose aucun logiciel. Ma Vigne écrit le registre au moment du traitement et l'exporte au format électronique structuré.
+- Un modèle Excel vierge du registre 2027, aux colonnes de l'annexe II de l'arrêté, avec une ligne d'exemple et son mode d'emploi, se télécharge gratuitement et sans inscription : https://mavigneapp.fr/downloads/registre-phyto-2027-mavigneapp.xlsx
 
 ## Sur le terrain
 
@@ -54,11 +55,11 @@ Un prix par domaine, pas par utilisateur. TVA non applicable (article 293 B du C
 
 | Formule | Abonnement | Utilisateurs | Contenu | Mise en route (une seule fois) |
 |---|---|---|---|---|
-| Essentiel | 29 € / mois | jusqu'à 3 | Parcelles et travaux, journal, météo par parcelle, réglages du domaine | 490 €, 10 h d'accompagnement |
-| Vigneron | 49 € / mois | jusqu'à 10 | Tout Essentiel + matériel et carburant, traitements et registre réglementaire | 690 €, 15 h d'accompagnement |
-| Domaine | 79 € / mois | illimités | Tout Vigneron + planning, heures et annualisation, pilotage et coûts par parcelle, Cuvier et Chai, La Réserve | 990 €, 20 h d'accompagnement |
+| Essentiel | 29 € / mois | jusqu'à 3 | Parcelles et travaux, journal, météo par parcelle, réglages du domaine | 250 €, demi-journée de formation comprise |
+| Vigneron | 49 € / mois | jusqu'à 10 | Tout Essentiel + planning, heures et annualisation, matériel et carburant, traitements et registre phyto 2027 | 250 €, demi-journée de formation comprise |
+| Domaine | 79 € / mois | illimités | Tout Vigneron + Cuvier et Chai, La Réserve, pilotage et coûts par parcelle | 250 €, demi-journée de formation comprise |
 
-- La mise en route comprend l'import de tout le parcellaire (export PAC / Telepac ou fichier KML), la création des comptes, le paramétrage du barème et des périodes (et de l'annualisation en formule Domaine), et la formation de l'équipe. Au-delà des heures comprises : 60 € de l'heure, annoncés et acceptés avant d'être engagés.
+- La mise en route coûte 250 €, une seule fois, quelle que soit la formule. Elle comprend l'import de tout le parcellaire (export PAC / Telepac ou fichier KML), la création des comptes, le paramétrage du barème et des périodes (et de l'annualisation dès la formule Vigneron), et une demi-journée de formation de l'équipe, en visio ou sur place. Hors forfait, à 60 € de l'heure, sur devis accepté avant d'être engagé : les contours à créer sans KML ni Telepac, et la reprise des anciennes données.
 - Sans durée d'engagement : résiliable par écrit avec trente jours de préavis. Ni frais de dossier, ni coût par utilisateur, ni option obligatoire. Aucun paiement en ligne : tout démarre par un échange.
 - Démo libre, sans compte ni inscription. Essai gratuit de 15 jours sur les parcelles du domaine, en conditions réelles, sans carte bancaire (un échantillon de parcelles suffit pour juger) ; si le domaine continue, tout ce qui a été posé pendant l'essai est conservé.
 
@@ -72,7 +73,7 @@ Un prix par domaine, pas par utilisateur. TVA non applicable (article 293 B du C
 ## Éditeur
 
 - GUERETTECH, entreprise individuelle de Nicolas Guéret, Nuits-Saint-Georges (21700, Côte-d'Or, France). SIRET 982 148 116 00022.
-- Contact : contact@mavigneapp.fr · 06 99 42 48 59.
+- Contact : contact@mavigneapp.fr · 06 99 42 48 59 (appel ou WhatsApp : https://wa.me/33699424859).
 
 ## Pages principales
 

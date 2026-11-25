@@ -1,0 +1,45 @@
+{
+  "lot": "TARIF-1",
+  "section": "§608",
+  "base": "71a4311280d98889019180efbaa9e8e3cb592e27",
+  "inclut": [],
+  "date": "2026-11-25",
+  "tutos": {
+    "ok": true,
+    "empreinte": "3708aa4e6e53278ddd30ac4c112d80d86797333d2092d7370cab5ccb50ae8e9f",
+    "date": "2026-11-25T07:45:26.872Z",
+    "joues": {
+      "téléphone": 26,
+      "ordinateur": 26,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "11508d169530843494b5e6429f2cea7889cb6f5fd0f8429052eafc797ec0951b",
+    "CLAUDE.md": "be9b67776153ab2270d9e1a37f92a91505ec882f510d76f03022bc2903eafc11",
+    "docs/claude/INDEX.md": "74aad8394a27b4328c06b5b1d3525f372ca7e80e204cef2a6e6e026fb5521429",
+    "docs/claude/chantiers-580-629.md": "a12f4f7b100827cd8c045c00ca5ef35a4adcb225351d5e969aae68b04951f13b",
+    "docs/claude/journal.md": "0662f4818986b5c69a78924d0be6a72b5bb24a6021bb4c1fb07483c03a9dcef3",
+    "docs/claude/modules.md": "56bbd0180cbc633a866071bca7db2179d898d9cc15c0b204a61bb906bbf9477f",
+    "docs/geo-kit.md": "b01501805fd67c235f7b2b270071fb1d45e41bb01ba4ecc9617c4b3567c38ec1",
+    "guide/03-formules.html": "12365a209c236e5da6ab474e21ead16a342bd8387f82a34d38cc1902abcd33ed",
+    "public/essai.html": "e5757a3e8b0c2c86024c50499296023d1f16a3ba380223ee46529dc11a44f5ca",
+    "public/gestion-equipe-viticole.html": "84ec2fd11eab73dc3db9f41ef33df2ce868652382f0cd285807cd0676f87b8b3",
+    "public/guide.html": "af5659f4efe9676a9e2a2871e8639a31fd26b6d6fe7100c950eb7fe1a955ae65",
+    "public/llms.txt": "6c9ab359ef7f03bc2bd81de65de6a84630a8721f00d55c8a4a6b9b7682191456",
+    "public/logiciel-vigne.html": "5c85c67e1c0fbd7b9a4f1631935ca0560692afdc1adad17c650da398912aed2a",
+    "public/registre-phytosanitaire-2027.html": "29289d6c7027fc7acdcf4246f5a4fa62a4ad61c67a7a2fbcb8ec59753a289198",
+    "public/suivi-temps-travail-vigne.html": "74c69f57fe2bb9365c42d51b3bf75eec99e5dd193811b5080a12461f7222e7de",
+    "scripts/harnais-claude-md.mjs": "134df95cfd628d3f5788589190dab0a8fa22379daf7e44153e7e9b786807105c",
+    "scripts/mv-harnais-liste.mjs": "cb52e1f2506616fd57b4ba54fc5ae816a15b95dcf36af225d4ca0c57dfa9905b",
+    "scripts/mv-harnais-vitrine3.mjs": "344f03161fd8c5c749550889f364fd2e1565acff2eafc8f1b24221925c591575",
+    "src/admin-gt.js": "870e7f196a2f9cb710519729984df8b43ae9aa3eb8f06cc214ee9b912e85e315",
+    "src/firebase.js": "f4362c6245908384da4633c2d8a01f57ad135fb4b940cc334a4b03a9ff7e5621",
+    "src/gt/console.html": "c95390020b086605722b3c177e5b0caa4e559c449b10bbedab05ea26284d3354",
+    "public/downloads/registre-phyto-2027-mavigneapp.xlsx": "8449cfcfc460ab11461f9d222981f82f2971c33bedf88dde1ace6b1d942bd735",
+    "scripts/mv-harnais-tarif1.mjs": "f3fb65773e680ff4cfc343a1eed421b30551f75f125edf98a3cb14a0695778fb",
+    "scripts/mv-registre-modele.mjs": "4b21d536cb231c489d0aed2742c12e9d0908b9ffb77e61e23778475f93e3200e"
+  }
+}

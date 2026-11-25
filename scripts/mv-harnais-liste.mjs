@@ -860,6 +860,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque
   ['node scripts/mv-harnais-cuivre7.mjs --contre'],    //   mise à jour : il ne l'était pas) — la fenêtre, ce qui compte, la moyenne, le plafond de la Conformité
+  ['node scripts/mv-harnais-tarif1.mjs'],             // TARIF-1 (§608) : la grille dite pareil partout — _planModule JOUÉE comparée à la console, à essai.html,
+  ['node scripts/mv-harnais-tarif1.mjs --contre'],    //   aux cartes, au guide, à llms.txt ; 250 € ; plus d'offre de lancement ; téléphone et WhatsApp ; le modèle Excel rejoué octet pour octet
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois
   ['node scripts/mv-harnais-frais1.mjs --contre'],     //   figé, le relevé, la robustesse, l'échappement ; le branchement (fiche, compta, photos admin seul, aide)
   ['node scripts/mv-harnais-chaine1.mjs'],             // CHAINE-1 (§596) : un CDD qui devient CDI sans coupure ne remet pas le compteur à zéro — la chaîne

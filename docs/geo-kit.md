@@ -63,9 +63,9 @@ Pour les traitements, les produits viennent du catalogue officiel E-Phy de l'ANS
 
 Au bureau, le planning tient les heures de l'équipe à la minute, l'annualisation, les heures supplémentaires comptées à la semaine et le relevé mensuel pour la comptabilité. Les heures du jour se partagent entre les parcelles validées, au prorata du barème : le temps réel par parcelle et par tâche se compare au barème, et le coût par parcelle se calcule sur l'équipe qui y est réellement passée. En cave : réception de la vendange, cuves, élevage, analyses, mise en bouteille et stock.
 
-Les modules dépendent de la formule : Essentiel (parcelles et travaux, journal, météo par parcelle), Vigneron (en plus : matériel, traitements et registre), Domaine (en plus : planning et heures, pilotage et coûts, cave).
+Les modules dépendent de la formule : Essentiel (parcelles et travaux, journal, météo par parcelle), Vigneron (en plus : planning et heures, matériel, traitements et registre), Domaine (en plus : pilotage et coûts, cave).
 
-Ma Vigne s'installe sur l'écran d'accueil d'un téléphone Android, d'un iPhone ou d'un ordinateur, sans magasin d'applications. Un prix par domaine, pas par utilisateur : de 29 à 79 € par mois selon la formule, plus une mise en route payée une seule fois, sans durée d'engagement. Essai gratuit de 15 jours sur les parcelles du domaine, sans carte bancaire. Données hébergées en Europe, dans un espace isolé par domaine.
+Ma Vigne s'installe sur l'écran d'accueil d'un téléphone Android, d'un iPhone ou d'un ordinateur, sans magasin d'applications. Un prix par domaine, pas par utilisateur : de 29 à 79 € par mois selon la formule, plus une mise en route de 250 € payée une seule fois, sans durée d'engagement. Essai gratuit de 15 jours sur les parcelles du domaine, sans carte bancaire. Données hébergées en Europe, dans un espace isolé par domaine.
 ```
 
 ### 2.3 Fonctionnalités clés (liste à cocher ou à coller)
@@ -92,7 +92,7 @@ Ma Vigne s'installe sur l'écran d'accueil d'un téléphone Android, d'un iPhone
 | Modèle | Abonnement mensuel, prix par domaine (pas par utilisateur) |
 | Prix de départ | 29 € par mois (formule Essentiel, jusqu'à 3 utilisateurs) |
 | Autres formules | Vigneron 49 € par mois (jusqu'à 10 utilisateurs) ; Domaine 79 € par mois (utilisateurs illimités) |
-| Mise en route | 490 €, 690 € ou 990 € une seule fois (10, 15 ou 20 h d'accompagnement), 60 € de l'heure au-delà |
+| Mise en route | 250 € une seule fois, quelle que soit la formule (une demi-journée de formation de l'équipe comprise) ; hors forfait, 60 € de l'heure sur devis (contours sans KML ni Telepac, reprise des anciennes données) |
 | Essai gratuit | Oui, 15 jours, sans carte bancaire |
 | Version gratuite | Non (une démo libre, sans compte : https://mavigneapp.fr/demo.html) |
 | Engagement | Aucun, résiliable avec trente jours de préavis |
@@ -125,9 +125,9 @@ Spray applications use the official French E-Phy product catalogue (ANSES). One 
 
 In the office, the planning keeps team hours to the minute, annualised working time, weekly overtime and a monthly timesheet for the accountant. Each day's hours are shared among validated plots, pro rata to the reference scale, giving real time per plot and per task, and cost per plot. In the cellar: harvest intake, tanks, ageing, lab analyses, bottling and stock.
 
-Modules depend on the plan: Essentiel (plots and work, log, weather per plot), Vigneron (adds equipment, spraying and the register), Domaine (adds planning and hours, cost control, cellar).
+Modules depend on the plan: Essentiel (plots and work, log, weather per plot), Vigneron (adds planning and hours, equipment, spraying and the register), Domaine (adds cost control and the cellar).
 
-Installs on the home screen of Android phones, iPhones and computers, without an app store. One price per estate, not per user: from €29 to €79 per month, plus a one-time onboarding fee, no commitment. 15-day free trial on the estate's own plots, no credit card. Data hosted in Europe. Interface in French.
+Installs on the home screen of Android phones, iPhones and computers, without an app store. One price per estate, not per user: from €29 to €79 per month, plus a one-time €250 onboarding fee, no commitment. 15-day free trial on the estate's own plots, no credit card. Data hosted in Europe. Interface in French.
 ```
 
 ### 2.7 Visuels pour les annuaires — dossier `docs/annuaires/`
@@ -230,10 +230,10 @@ Le bureau retrouve les heures de chacun et ce que coûte chaque parcelle.
 - **Météo par parcelle** à partir du modèle AROME de Météo-France
 
 ## À qui s'adresse Ma Vigne
-Aux domaines viticoles, du domaine familial à l'exploitation qui emploie une équipe complète, avec ou sans cave. Le gérant ou le chef de culture voit l'ensemble ; l'ouvrier ne voit que ses parcelles du jour, sans les coûts ni les heures des autres ; le tractoriste et le maître de chai ont leurs propres écrans. Trois formules : Essentiel (parcelles, travaux, journal, météo), Vigneron (en plus : matériel, traitements et registre), Domaine (en plus : planning, heures, coûts et cave).
+Aux domaines viticoles, du domaine familial à l'exploitation qui emploie une équipe complète, avec ou sans cave. Le gérant ou le chef de culture voit l'ensemble ; l'ouvrier ne voit que ses parcelles du jour, sans les coûts ni les heures des autres ; le tractoriste et le maître de chai ont leurs propres écrans. Trois formules : Essentiel (parcelles, travaux, journal, météo), Vigneron (en plus : planning, heures, matériel, traitements et registre), Domaine (en plus : coûts et cave).
 
 ## Mise en place
-L'application s'installe sur l'écran d'accueil d'un téléphone Android, d'un iPhone ou d'un ordinateur, sans passer par un magasin d'applications. Une mise en route de 10 à 20 heures d'accompagnement, selon la formule, reprend le parcellaire (export PAC / Telepac ou fichier KML), crée les comptes, règle le barème et forme l'équipe. Les données sont hébergées en Europe, dans un espace séparé pour chaque domaine, et une sauvegarde complète se télécharge à tout moment.
+L'application s'installe sur l'écran d'accueil d'un téléphone Android, d'un iPhone ou d'un ordinateur, sans passer par un magasin d'applications. Une mise en route de 250 €, la même pour toutes les formules, reprend le parcellaire (export PAC / Telepac ou fichier KML), crée les comptes, règle le barème et forme l'équipe en une demi-journée, en visio ou sur place. Les données sont hébergées en Europe, dans un espace séparé pour chaque domaine, et une sauvegarde complète se télécharge à tout moment.
 
 ## Ce que Ma Vigne ne fait pas
 L'interface existe uniquement en français. Le logiciel ne pointe pas les salariés : ni badgeuse, ni géolocalisation. Ce n'est pas un logiciel de comptabilité ni de paie : il prépare le relevé d'heures transmis au cabinet.
@@ -256,10 +256,10 @@ stock, application mobile, mode hors ligne, météo.
 | Édition | Prix | Ce qu'elle ajoute |
 |---|---|---|
 | Essentiel | 29 € par mois et par domaine, jusqu'à 3 utilisateurs | parcelles et travaux, journal, météo par parcelle |
-| Vigneron | 49 € par mois et par domaine, jusqu'à 10 utilisateurs | en plus : matériel, traitements et registre phytosanitaire |
-| Domaine | 79 € par mois et par domaine, utilisateurs illimités | en plus : planning et heures, pilotage et coûts, cave |
+| Vigneron | 49 € par mois et par domaine, jusqu'à 10 utilisateurs | en plus : planning et heures, matériel, traitements et registre phytosanitaire |
+| Domaine | 79 € par mois et par domaine, utilisateurs illimités | en plus : pilotage et coûts, cave |
 
-Mise en route payée une fois : 490 €, 690 € ou 990 € selon l'édition. TVA non applicable, article 293 B du CGI.
+Mise en route payée une fois : 250 €, quelle que soit l'édition, demi-journée de formation comprise. TVA non applicable, article 293 B du CGI.
 
 ### 2.9 G2, Capterra, GetApp et Software Advice — un seul formulaire
 
@@ -286,7 +286,7 @@ adresse Gmail n'en est pas une.
 | Software type | Hosted deployment : Yes · On-premise : No |
 | Licensing model | Proprietary |
 | Support & training | ce qui est vraiment offert : phone, email ; training (compris dans la mise en route) |
-| Packages & Pricing | Essentiel €29 / month per estate (up to 3 users) · Vigneron €49 (up to 10) · Domaine €79 (unlimited users) · one-time onboarding €490 / €690 / €990 · free trial : yes, 15 days · free version : no |
+| Packages & Pricing | Essentiel €29 / month per estate (up to 3 users) · Vigneron €49 (up to 10) · Domaine €79 (unlimited users) · one-time onboarding €250 (half-day team training included) · free trial : yes, 15 days · free version : no |
 | Target buyers | Small-Business · industries : Wine and Spirits, Farming (si la liste les propose) · country : France |
 | Screenshots | les huit de §2.7, légendes anglaises |
 | Marketplaces | cocher Capterra, GetApp et Software Advice |
@@ -328,7 +328,7 @@ Ce qui est saisi :
 | Secteurs | **vide** : leur liste n'a aucun secteur agricole (ne pas cocher un faux) |
 | Fonctionnalités | **vide** : liste imposée, 3 minimum ; seules deux sont vraies (appli hors connexion, calcul de l'IFT). « Contrôle des doses, mélanges et ZNT » : **non**, Ma Vigne ne vérifie pas les mélanges (Nico, 23/11) |
 | Cas d'usage | 4 : registre phytosanitaire sans ressaisie · interventions saisies depuis le champ · planifier les travaux et les équipes · coût de production par parcelle (textes dans l'espace éditeur) |
-| Tarification | forfait mensuel, essai gratuit, lien `logiciel-vigne.html#prix` ; Essentiel 29 €, Vigneron 49 €, Domaine 79 € par mois, chacune avec ses utilisateurs, ses modules et sa mise en route (490 / 690 / 990 €, 10 / 15 / 20 h) |
+| Tarification | forfait mensuel, essai gratuit, lien `logiciel-vigne.html#prix` ; Essentiel 29 €, Vigneron 49 €, Domaine 79 € par mois, chacune avec ses utilisateurs et ses modules ; mise en route 250 € pour toutes, demi-journée de formation comprise |
 | Captures, clients, vidéo | rien : publiés seulement avec la Vitrine |
 
 Accroche (90 caractères sur 100) :
