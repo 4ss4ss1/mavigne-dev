@@ -20,7 +20,7 @@ const DEFAUTS = {
   tous:     ['« Chômer les N » n’écrit rien au brouillon', "if(f.h>0&&!f.sol){_planAnneePose(G,f.m,f.d,0);n++;}", 'if(f.h>0&&!f.sol){n++;}'],
   remet:    ['« Travailler » remet 0 au lieu des heures de la saison', '_planAnneePose(G,m,j,f.saison);', '_planAnneePose(G,m,j,0);'],
   semaine:  ['la semaine ne montre plus les heures d’un férié', "+(x.fer?_planAnneeFerieSem(x,A,yr,JN[x.g],adm)", "+(x.fer?'<span>'+_escHtml(x.fer)+'</span>'"],
-  base:     ['le texte dit l’année d’avant même quand la base est active', "+(_planBaseActive(yr)?'Ch\\u00f4m\\u00e9, un f\\u00e9ri\\u00e9 compte quand", "+(false?'Ch\\u00f4m\\u00e9, un f\\u00e9ri\\u00e9 compte quand"],
+  base:     ['le texte dit l’année d’avant même quand la base est active', "p:[_planBaseActive(yr)?'<b>Ch\\u00f4m\\u00e9</b>, un f\\u00e9ri\\u00e9 compte quand", "p:[false?'<b>Ch\\u00f4m\\u00e9</b>, un f\\u00e9ri\\u00e9 compte quand"],
   droits:   ['« Chômer les N » s’offre à qui n’est pas administrateur', "+(adm?'<div style=\"margin-top:8px\"><button class=\"plan-btn-saisir\" data-tuto=\"plan.annee.feries.tous\"", "+(true?'<div style=\"margin-top:8px\"><button class=\"plan-btn-saisir\" data-tuto=\"plan.annee.feries.tous\""],
 };
 if (process.argv.includes('--contre')) {
@@ -63,8 +63,10 @@ try {
   ctx = vm.createContext({ window: { CONFIG: {}, PLAN_MOIS: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'], showToast: () => {},
       PLAN_MOIS_FR: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'] }, _MV_FERIES_CACHE: {},
     PLAN_MOIS_FR: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
-    _escHtml: s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'), ADM: true, SOLID: null, RENDUS: 0 });
+    _escHtml: s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'), ADM: true, SOLID: null, RENDUS: 0, FICHES: {} });
   ctx.isAdmin = () => ctx.ADM;
+  // MOTS-17 (§612) : la règle des fériés vit dans une fiche « i » vivante — le harnais garde ce que la fiche reçoit
+  ctx._mvInfoBtn = (k) => '<button type="button" class="mv-i" data-mvi="' + k + '"></button>'; ctx._mvInfoSet = (k, f) => { ctx.FICHES[k] = f; };
   // le modèle : la vraie grille 2026, et des heures quatre jours fériés (un modèle importé)
   const G0 = JSON.parse(JSON.stringify(PLAN_DEF.standard)); G0[3][6] = 7; G0[4][25] = 7; G0[6][14] = 7; G0[10][11] = 7;
   ctx.G0 = G0; ctx.PLAN_STD = PLAN_DEF.standard;
@@ -84,10 +86,11 @@ etat();
 // ── A. La section : combien portent des heures, « Chômer les 4 » ──
 let H = bloc();
 T(/4 f\u00e9ri\u00e9s portent des heures\./.test(H) && /onclick="planAnneeFeriesChomer\(\)">Ch\u00f4mer les 4</.test(H), 'A1 quatre fériés portent des heures : l’encadré le dit, « Chômer les 4 »', H.slice(0, 300));
-T(/vaut 0\u00a0h au mod\u00e8le en 2026/.test(H) && /D\u00e8s 2027, un f\u00e9ri\u00e9 ch\u00f4m\u00e9 comptera pour ses heures pr\u00e9vues/.test(H), 'A2 en 2026, le texte : 0 h au modèle cette année, la base dès 2027', (H.match(/mvencadre[\s\S]{0,400}/) || [''])[0]);
+const FI = (ctx.FICHES['plan.feries'] || { p: [''] }).p[0];
+T(/vaut 0\u00a0h au mod\u00e8le en 2026/.test(FI) && /D\u00e8s 2027, un f\u00e9ri\u00e9 ch\u00f4m\u00e9 comptera pour ses heures pr\u00e9vues/.test(FI) && /data-mvi="plan.feries"/.test(H) && !/vaut 0\u00a0h au mod\u00e8le/.test(H), 'A2 en 2026, la règle (0 h au modèle cette année, la base dès 2027) dans le « i » de l’encadré, plus à l’écran (MOTS-17)', FI);
 T(/mer\.\u00a011\u00a0nov\.<span[^>]*>Armistice<\/span><\/span><b[^>]*>7\u00a0h<\/b><button[^>]*data-a="chomer"/.test(H) && /lun\.\u00a06\u00a0avr\./.test(H), 'A3 chacun : sa date, son nom, ses heures, « Chômer »', (H.match(/mer\.\u00a011[\s\S]{0,260}/) || ['(absent)'])[0]);
 T(/15\u00a0ao\u00fbt et 1er\u00a0nov\. tombent un week-end en 2026\./.test(H), 'A4 les fériés du week-end sont dits à part (15 août, 1er novembre)', (H.match(/tomb[\s\S]{0,60}/) || ['(absent)'])[0]);
-T(/<details open/.test(H), 'A5 la liste est ouverte quand des fériés portent des heures');
+T(/<details style/.test(H) && !/<details open/.test(H), 'A5 la liste est repliée hors brouillon, même quand des fériés portent des heures (MOTS-17 ; ouverte pendant un brouillon : B5)');
 const Hl = bloc(2026, false);
 T(/4 f\u00e9ri\u00e9s portent des heures/.test(Hl) && !/planAnneeFeriesChomer|planAnneeFerie\(/.test(Hl), 'A6 sans les droits d’administrateur : le constat, aucun bouton');
 // ── B. « Chômer les 4 » : au brouillon, rien d'autre ne bouge ──
@@ -132,7 +135,8 @@ T(/Armistice \u00b7 journ\u00e9e de solidarit\u00e9/.test(Ls) && !/<button/.test
 // ── F. 2027 : la base de l'année est active ──
 etat();
 const H27 = F._planAnneeFeriesBloc(F._planAnneeLire('mi-temps', 2027), 'mi-temps', 2027, true);
-T(/compte quand m\u00eame pour ses heures pr\u00e9vues \(la base de l\u2019ann\u00e9e\)/.test(H27) && !/D\u00e8s 2027/.test(H27), 'F1 en 2027 : « compte quand même pour ses heures prévues »', (H27.match(/mvencadre[\s\S]{0,300}/) || ['(absent : ' + H27.slice(0, 120) + ')'])[0]);
+const FI27 = (ctx.FICHES['plan.feries'] || { p: [''] }).p[0];
+T(/compte quand m\u00eame pour ses heures pr\u00e9vues \(la base de l\u2019ann\u00e9e\)/.test(FI27) && !/D\u00e8s 2027/.test(FI27), 'F1 en 2027 : « compte quand même pour ses heures prévues »', FI27);
 // ── G. Un férié sur un jour de repos de la saison : pas de « Travailler » ──
 const x15 = jour(A2, 4, 1);   // vendredi 1er mai
 const S15 = A2.saisons[x15.s], v15 = S15.h[4];

@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.33', d: '2026-11-25', items: [   // MOTS-17 (§612) : le balayage — Planning › Année, Stades, Tracteur › Entretien
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning, Stades, Entretien : les modes d’emploi dans les « i »',
+      desc: "Dans l’onglet Année du Planning, le mode d’emploi de la frise s’ouvre par « Régler la frise ? », la règle des fériés et celle du rythme par leur « i » ; la liste des fériés se replie. Dans les Stades, la méthode des degrés-jours et les seuils sont dans le « i » de « Ce qui vient ». Dans l’Entretien du tracteur, « intervalle ? » ouvre le crayon de la révision tant que l’intervalle manque, et « + Autre entretien » remplace la carte vide et sa phrase." }
+  ] },
   { v: '11.32', d: '2026-11-25', items: [   // MOTS-16 (§611) : La Réserve allégée — le parc en tête, une phrase pour les intrants
     { niv: 0, pour: ['admin'], emoji: 'carton', titre: 'La Réserve\u00a0: le parc en tête, une phrase pour les intrants',
       desc: "L\u2019onglet Fûts s\u2019ouvre sur le parc\u00a0: les fûts au domaine, en vin et libres. Les trois cases qui redisaient ces chiffres sont parties\u00a0; la pyramide des âges et la part des anges viennent sous les boutons. L\u2019onglet Intrants dit en une phrase ce qui compte\u00a0: un stock négatif, les stocks cohérents, les consommés à activer. Les notes de méthode sont dans les «\u00a0i\u00a0»\u00a0; le PDF du bilan matière garde la mention du contrôle bio." },

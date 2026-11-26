@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.23
+// MA VIGNE — Service Worker v12.24
+// v12.24 (25/11/2026) — MOTS-17 (§612) : le balayage — Planning › Année : le mode d'emploi de la frise derrière « Régler la frise ? », la règle des fériés et celle du rythme dans leur « i », la liste des fériés repliée ; Vigne › Stades : la méthode des degrés-jours et les seuils dans le « i » de « Ce qui vient » ; Tracteur › Entretien : « intervalle ? » ouvre le crayon, « + Autre entretien » remplace la carte vide ; l'Accueil : « Vos compteurs partent à la première validation »
 // v12.23 (25/11/2026) — MOTS-16 (§611) : La Réserve allégée — Fûts s'ouvre sur le parc (les trois tuiles qui le redisaient sont parties ; la pyramide sans « 55 barriques », sa méthode dans le « i » ; la part des anges vide en une ligne) ; Intrants : une phrase (stocks négatifs, cohérents, consommés à activer), « (lot suivant) » retiré ; Bilan matière : la mention du contrôle bio dans le « i » (le PDF la garde)
 // v12.22 (25/11/2026) — MOTS-15 (§610) : Phyto › Registre allégé — une phrase en haut (« Rentrée libre partout », le cuivre près du plafond sur sept ans), une année par bloc (la plus récente ouverte, le cuivre de l'année sur sa ligne), l'état de la rentrée tant qu'elle est interdite puis sept jours, le cuivre d'un traitement sans la couleur de la rentrée ; la fiche dit « 10 sept. 2026 » et « Rentrée » ; Conformité suit le plafond réglé (plus 28 en dur)
 // v12.21 (25/11/2026) — MOTS-14 (§609) : Cave › Aujourd'hui allégé — chaque chiffre à un seul endroit : le sommaire sans nombre pour « À faire » et « Fûts » (la bande les donne), « À surveiller » qui comptait chaque ligne deux fois, la raison seule sous le verdict, le détail d'aujourd'hui qui mène à « Ce qui presse » au lieu de redire les gestes, « Derniers gestes » à partir d'hier, la méthode dans le « i »
@@ -4755,7 +4756,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.23';
+const CACHE_NAME   = 'mavigne-v12.24';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4772,7 +4773,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.23 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.24 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4792,7 +4793,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.23 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.24 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

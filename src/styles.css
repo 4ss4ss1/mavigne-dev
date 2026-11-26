@@ -10334,7 +10334,14 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 .ent-prog .ep-etat.danger{color:var(--danger-texte)}
 .ent-prog .ep-btn{min-height:44px;flex:none}
 .ent-prog .ep-ic{min-width:44px;padding:0;display:inline-flex;align-items:center;justify-content:center}
-.ent-prog .ep-vide{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+/* MOTS-17 (§612) : rien de réglé — le bouton seul, à la place de la carte et de sa phrase */
+.ent-prog.ep-seul{margin-bottom:10px}
+.ent-prog.ep-seul .ep-btn{width:100%;justify-content:center}
+/* MOTS-17 : Planning › Année — « Régler la frise ? » au bout de la rangée de l'admin ; le « i » d'un titre replié */
+#page-planning .pa-aide{margin-left:auto;align-self:center}
+#page-planning summary .mv-i{margin-left:var(--e-1,4px);vertical-align:middle}
+/* MOTS-17 : Tracteur — la pastille « intervalle ? » garde son allure de pastille malgré l'habillage des boutons de carte */
+#page-tracteur .ent-resume-card button.mv-pq{ border:1px solid var(--or)!important; border-radius:var(--r-full,999px)!important; background:var(--or-pale)!important; font-weight:600!important; box-shadow:none!important; }
 .ent-prog .ep-form{border-top:1px solid var(--ligne,var(--gris-clair));padding-top:var(--e-2,8px);margin-top:var(--e-1,4px)}
 .ent-prog .ep-l{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-bottom:var(--e-1,4px)}
 .ent-prog .ep-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}

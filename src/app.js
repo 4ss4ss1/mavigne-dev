@@ -5885,7 +5885,7 @@ function renderHomeMoi(){
     if(lj) jal='<div class="hk-sec">'+lj+'</div>';
   }
   c.innerHTML=((T.total>0||T.jours>0)?st+part+semH+jal
-    :'<div class="hk-calme"><span class="hk-as-i">'+_mvIcon('etincelles',16)+'</span><span><b>Votre saison commence.</b> Votre premi\u00e8re validation lancera vos compteurs\u00a0: hectares, jours au domaine, kilom\u00e8tres de rangs.</span></div>'+part+jal)
+    :'<div class="hk-calme"><span class="hk-as-i">'+_mvIcon('etincelles',16)+'</span><span><b>Votre saison commence.</b> Vos compteurs partent \u00e0 la premi\u00e8re validation.</span></div>'+part+jal)   // MOTS-17 (\u00a7612) : 16 \u2192 9 mots ; hectares, jours et km s'affichent d'eux-m\u00eames d\u00e8s la premi\u00e8re validation
     +'<button type="button" class="hk-lien" onclick="openMaTrace()"><span>Ma trace</span>'+_mvIcon('chevron',16)+'</button>';
 }
 // « Au tracteur » (tractoriste et administrateur) : sa dernière session, le compteur du tracteur et sa révision, la cuve de GNR
@@ -11101,7 +11101,8 @@ function _phenoTemp(cb){
 }
 function _phenoFmtN(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0'); }
 function _phenoCqvHtml(T,auj){
-  var tete='<div class="mvcarte phr-resume" id="phr-cqv"><div class="phr-ct2">Ce qui vient</div><div class="phr-m">moyennes journali\u00e8res depuis le 1<sup>er</sup> mars, base 0\u00a0\u00b0C \u00b7 mod\u00e8le GFV (Parker et al. 2011, 2013)</div>';
+  // MOTS-17 (\u00a7612) : la m\u00e9thode (moyennes, base 0 \u00b0C, GFV, seuils publi\u00e9s, pr\u00e9vision) vit dans le \u00ab i \u00bb (MV_INFO phr.dj)
+  var tete='<div class="mvcarte phr-resume" id="phr-cqv"><div class="phr-ct2">Ce qui vient '+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('phr.dj'):'')+'</div>';
   if(!_phenoEnSaison(auj)) return tete+'<div class="phr-cqv-v">Le calcul reprend le 1<sup>er</sup> mars.</div></div>';
   if(!T) return tete+'<div class="phr-cqv-v phr-m">Lecture des temp\u00e9ratures\u2026</div></div>';
   if(T.err) return tete+'<div class="phr-cqv-v phr-m">'+_escHtml(T.err)+'</div></div>';
@@ -11116,7 +11117,7 @@ function _phenoCqvHtml(T,auj){
       var d=q[1].d; h+='<div class="phr-prev"><b>'+_escHtml(q[0]+', '+x.cep)+'</b><span>'+(d?_escHtml((q[1].vu?'not\u00e9e ':'vers ')+_phenoJour(d)+(q[1].vu?'':', \u00e0 une semaine pr\u00e8s')):'au-del\u00e0 du 31 octobre')+'</span></div>';
     });
   });
-  h+='<div class="phr-m phr-cqv-pied">Seuils publi\u00e9s\u00a0: Pinot noir 1\u00a0219 et 2\u00a0511\u00a0\u00b0C\u00b7j, Chardonnay 1\u00a0217 et 2\u00a0541. Au-del\u00e0 des 16 jours de pr\u00e9vision, la moyenne des dix derni\u00e8res ann\u00e9es. Chaque stade not\u00e9 recale la suite.'+(T.vieux?' (Temp\u00e9ratures de la derni\u00e8re lecture.)':'')+'</div>';
+  if(T.vieux) h+='<div class="phr-m phr-cqv-pied">Temp\u00e9ratures de la derni\u00e8re lecture.</div>';   // MOTS-17 : les seuils et la pr\u00e9vision sont dans le \u00ab i \u00bb
   return h+'</div>';
 }
 function _phenoCqvRemplir(){ var auj=todayStr(); if(!_phenoEnSaison(auj)) return; _phenoTemp(function(T){ var el=document.getElementById('phr-cqv'); if(el) el.outerHTML=_phenoCqvHtml(T,auj); }); }

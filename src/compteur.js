@@ -244,9 +244,12 @@ function _trEntProgHtml(t){
   if(!t) return '';
   var canEdit=isAdmin()||isTractoriste(), adm=isAdmin(), L=Array.isArray(t.entretiens_prog)?t.entretiens_prog:[];
   if(!L.length&&!adm) return '';
-  var h='<div class="ent-resume-card ent-prog"><div class="ep-tete"><span class="ep-titre">'+_mvIcon('outil',16)+' Autres entretiens</span>'+(adm&&_entProgEdit!=='nouveau'?'<button type="button" class="mvbtn mvbtn-secondaire ep-btn" onclick="_trEntEdit(\'nouveau\')">Ajouter</button>':'')+'</div>';
+  // MOTS-17 (§612) : le bouton s'appelle « + Autre entretien » ; la phrase d'exemple part (l'exemple vit dans le champ Nom).
+  //   Rien de réglé : le bouton seul, sans carte autour.
+  var ajout='<button type="button" class="mvbtn mvbtn-secondaire ep-btn" onclick="_trEntEdit(\'nouveau\')">+ Autre entretien</button>';
+  if(!L.length&&_entProgEdit!=='nouveau') return '<div class="ent-prog ep-seul">'+ajout+'</div>';
+  var h='<div class="ent-resume-card ent-prog"><div class="ep-tete"><span class="ep-titre">'+_mvIcon('outil',16)+' Autres entretiens</span>'+(adm&&_entProgEdit!=='nouveau'?ajout:'')+'</div>';
   if(_entProgEdit==='nouveau'&&adm) h+=_trEntForm(null);
-  if(!L.length&&_entProgEdit!=='nouveau') h+='<div class="ep-vide">Vidange de pont et bo\u00eete, filtres, graissage\u00a0: ajoutez ce qui se fait \u00e0 c\u00f4t\u00e9 de la r\u00e9vision.</div>';
   L.forEach(function(e){
     if(_entProgEdit===e.id&&adm){ h+=_trEntForm(e); return; }
     var st=_trEntEtat(t,e), cls=st.rouge?' danger':st.orange?' att':'';

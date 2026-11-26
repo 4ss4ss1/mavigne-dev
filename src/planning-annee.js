@@ -13,7 +13,7 @@
 // ⚠️ Rien ne s'exécute au chargement hors déclarations et expositions (mv-harnais-anneedec).
 // ════════════════════════════════════════════════════════════════════════════
 
-import { isAdmin, _escHtml, _escAttr } from './utils.js';
+import { isAdmin, _escHtml, _escAttr, _mvInfoBtn, _mvInfoSet } from './utils.js';
 
 // ── LA FRONTIÈRE : ce que la frise emprunte au Planning ──
 function _feriesY(){ return window._feriesY.apply(null, arguments); }
@@ -380,6 +380,7 @@ function _planRenderAnnee(){
     if(Math.abs(ec)>=0.05)h+='<button class="plan-btn-saisir" data-tuto="plan.annee.juste" onclick="planAnneeJuste()">'+(E.sugg?'Masquer les retouches':'Tomber juste')+'</button>';
     h+='<button class="plan-btn-pdf" data-pl="'+_escAttr(id)+'" onclick="planExportCSV(this.dataset.pl)">Exporter (CSV)</button>';
     if(E.brouillon)h+='<button class="plan-btn-saisir" data-tuto="plan.annee.enr" onclick="planAnneeEnregistrer()">Enregistrer</button><button class="plan-btn-pdf" data-tuto="plan.annee.ann" onclick="planAnneeAnnuler()">Annuler</button>';
+    h+='<button type="button" class="mv-pq pa-aide" data-mvi="plan.frise" aria-expanded="false">R\u00e9gler la frise\u00a0?</button>';   // MOTS-17 (§612) : le mode d'emploi de la frise
     h+='</div>';
     if(E.brouillon)h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:6px">Modifications pas encore enregistr\u00e9es.</div>';
     if(E.sugg){E.sg=_planAnneeSuggestions(id,yr,G,att,L.maxJour);
@@ -443,12 +444,12 @@ function _planRenderAnnee(){
       +(Sw.ferme?'<button class="plan-btn-pdf" data-tuto="plan.annee.rsem" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Rouvrir comme la saison</button>'
                :'<button class="plan-btn-pdf" data-tuto="plan.annee.fsem" data-w="'+sel+'" onclick="planAnneeFermeSem(this)">Fermer la semaine</button>'
                 +(diff?'<button class="plan-btn-pdf" data-w="'+sel+'" onclick="planAnneeRemettre(this)">Comme la saison</button>':''))+'</div>';
-    if(!Sw.ferme&&Ssw)h+='<details open><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Changer le rythme \u00e0 partir d\u2019ici</summary>'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0">Les jours r\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\u2019au '+_planAnneeDate(J,finS,true):'')+'\u00a0; la frise en fera une nouvelle saison.</div>'
+    if(!Sw.ferme&&Ssw){ _mvInfoSet('plan.rythme',{ p:['Les jours r\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\u2019au <b>'+_planAnneeDate(J,finS,true)+'</b>':'')+'\u00a0; la frise en fera une nouvelle saison.'] });   // MOTS-17 : la note vit dans le « i »
+    h+='<details open><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Changer le rythme \u00e0 partir d\u2019ici '+_mvInfoBtn('plan.rythme')+'</summary>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:0 16px">'+Ssw.h.map(function(v,g){   // DEBORD-1 : comme la semaine type
           return '<div style="'+row+'"><span style="flex:1">'+JN[g]+'</span>'
             +'<button class="plan-btn-pdf" data-w="'+sel+'" data-g="'+g+'" data-p="-0.5" aria-label="'+JN[g]+' moins 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">\u2212</button>'+hv(v)
-            +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JN[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></div>';}).join('')+'</div></details>';
+            +'<button class="plan-btn-pdf"'+(g===4?' data-tuto="plan.annee.desici"':'')+' data-w="'+sel+'" data-g="'+g+'" data-p="0.5" aria-label="'+JN[g]+' plus 30 min d\u00e8s cette semaine" onclick="planAnneeDesIci(this)">+</button></div>';}).join('')+'</div></details>'; }
     h+='</div>';
   }
   h+=_planAnneeFeriesBloc(A,id,yr,adm,!!E.brouillon);   // ★ FERIES-1 (§556) : ouverte tant qu'un brouillon est en cours
@@ -490,7 +491,7 @@ function _planRenderAnnee(){
     +ln(max12<=L.maxMoy,_paH(L.maxMoy)+' en moyenne sur 12 semaines \u2014 au plus '+_paH(Math.round(max12*2)/2))
     +ln(mod<=L.modulMax,'Heures de modulation programm\u00e9es\u00a0: '+_paH(mod)+' sur '+_paH(L.modulMax))
     +ln(minJ>=3.5||minJ===99,'Jour r\u00e9duit \u2014 le plus court\u00a0: '+(minJ===99?'\u2013':_paH(minJ)))
-    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;line-height:1.5">Dimanches travaill\u00e9s\u00a0: '+(dim||'aucun')+'. R\u00e8gle une saison avec \u2212 et + (ses jours r\u00e9guliers), d\u00e9place sa coupe d\u2019une semaine, r\u00e8gle un jour \u00e0 part ou remets-le comme la saison. Une semaine se r\u00e8gle jour par jour plus haut\u00a0: la fermer, la rouvrir, ou changer le rythme \u00e0 partir d\u2019elle.</div></div>';
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;line-height:1.5">Dimanches travaill\u00e9s\u00a0: '+(dim||'aucun')+'</div></div>';   // MOTS-17 : le mode d'emploi vit dans « Régler la frise ? » (MV_INFO plan.frise)
   h+='</div>';
   body.innerHTML=h;
 }

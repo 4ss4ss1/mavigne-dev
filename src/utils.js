@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.32';
+export const APP_VERSION = '11.33';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3423,6 +3423,26 @@ export const MV_INFO = {
     'Chaque trajet prend <b>ce qu’il ajoute au total de l’année</b> : le barème des km après lui, moins celui des km avant. Au 31 décembre, le total payé tombe exactement sur le barème de l’année, sans rien à régulariser. Un mois figé garde ses montants.',
     'Les km saisis sont ceux faits <b>en plus</b> du trajet habituel maison → domaine, qui n’est jamais payé.',
     'Un <b>taux du domaine</b>, posé dans la roue crantée du Planning, remplace le barème : km × taux, sans palier.'
+  ] },
+
+  // ★ MOTS-17 (§612) : le balayage — les notes de Planning › Année, des Stades et du Tracteur quittent l'écran.
+  //   plan.rythme et plan.feries sont VIVANTES (la date de fin de saison, l'année et sa base) : _mvInfoSet les remplit
+  //   au rendu ; le texte ci-dessous est le repli honnête si le Planning n'a pas tourné.
+  'plan.frise': { t: 'Régler la frise', p: [
+    'Une <b>saison</b> se règle avec − et + : ses jours réguliers seulement. Sa <b>coupe</b> se déplace d’une semaine.',
+    'Un <b>jour à part</b> se règle seul, ou revient comme la saison.',
+    'Une <b>semaine</b> se règle jour par jour, dans le cadre sous la frise (« Précédente », « Suivante ») : la fermer, la rouvrir, ou changer le rythme à partir d’elle.'
+  ] },
+  'plan.rythme': { t: 'Changer le rythme à partir d’ici', p: [
+    'Les jours réguliers de la saison, de cette semaine jusqu’à la fin de la saison ; la frise en fera une nouvelle saison.'
+  ] },
+  'plan.feries': { t: 'Les fériés qui portent des heures', p: [
+    '<b>Chômé</b>, un férié ne se travaille pas ; <b>travaillé</b> au modèle, le relevé le compte fait, majoration comprise. Depuis 2027, un férié chômé compte pour ses heures prévues (la base de l’année).'
+  ] },
+  'phr.dj': { t: 'Les degrés-jours', p: [
+    'Les <b>moyennes journalières</b> depuis le 1<sup>er</sup> mars, additionnées en base 0\u00a0°C : le <b>modèle GFV</b> (Parker et al. 2011, 2013).',
+    'Seuils publiés : Pinot noir <b>1\u00a0219</b> et <b>2\u00a0511\u00a0°C·j</b>, Chardonnay <b>1\u00a0217</b> et <b>2\u00a0541</b> — la pleine floraison, puis la véraison.',
+    'Au-delà des 16 jours de prévision, la moyenne des dix dernières années. Chaque stade noté recale la suite.'
   ] },
 
   // ★ MOTS-16 (§611) : La Réserve — ce qui quitte l'écran (la façon de compter l'âge, le consommé à activer, le contrôle bio)

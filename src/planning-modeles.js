@@ -6,7 +6,7 @@
 //   window à l'appel ; la frise emprunte ici trois fonctions (_planAnneeSuivi, _planAnneeFerieSem, _planAnneeFeriesBloc) ; les
 //   gestes s'exposent en fin de fichier. Rien ne s'exécute au chargement. Chargé par app.js juste après planning-annee.js.
 // ════════════════════════════════════════════════════════════════════════════
-import { isAdmin, _escHtml, _escAttr } from './utils.js';
+import { isAdmin, _escHtml, _escAttr, _mvInfoBtn, _mvInfoSet } from './utils.js';
 
 // ── Les emprunts : au Planning (planning.js) ──
 function _pY(){ return window._pY.apply(null, arguments); }
@@ -57,13 +57,13 @@ function _planAnneeFerieSem(x,A,yr,jn,adm){
 function _planAnneeFeriesBloc(A,id,yr,adm,ouvert){
   var F=_planAnneeFeries(A,yr),P=F.filter(function(f){return f.h>0&&!f.sol;}),L=F.filter(function(f){return !f.we||f.h>0;}),W=F.filter(function(f){return f.we&&!(f.h>0);});
   var h='<div id="pa-feries" data-tuto="plan.annee.feries" style="margin-top:14px;padding-top:10px;border-top:1px solid var(--gris-clair)"><b>Les f\u00e9ri\u00e9s de '+yr+' dans \u00ab\u00a0'+_escHtml(id)+'\u00a0\u00bb</b>';
-  if(P.length)h+='<div class="mvencadre mvencadre-attention" style="margin-top:8px"><b>'+P.length+' f\u00e9ri\u00e9'+(P.length>1?'s portent':' porte')+' des heures.</b>'
-    +'<div style="font-size:var(--pt-micro,11px);margin-top:2px">'+(_planBaseActive(yr)?'Ch\u00f4m\u00e9, un f\u00e9ri\u00e9 compte quand m\u00eame pour ses heures pr\u00e9vues (la base de l\u2019ann\u00e9e)\u00a0; travaill\u00e9 au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise.'
-      :'Ch\u00f4m\u00e9, un f\u00e9ri\u00e9 vaut 0\u00a0h au mod\u00e8le en '+yr+'\u00a0; travaill\u00e9 au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise. D\u00e8s 2027, un f\u00e9ri\u00e9 ch\u00f4m\u00e9 comptera pour ses heures pr\u00e9vues.')+'</div>'
-    +(adm?'<div style="margin-top:8px"><button class="plan-btn-saisir" data-tuto="plan.annee.feries.tous" onclick="planAnneeFeriesChomer()">Ch\u00f4mer les '+P.length+'</button></div>':'')+'</div>';
+  if(P.length){ _mvInfoSet('plan.feries',{ p:[_planBaseActive(yr)?'<b>Ch\u00f4m\u00e9</b>, un f\u00e9ri\u00e9 compte quand m\u00eame pour ses heures pr\u00e9vues (la base de l\u2019ann\u00e9e)\u00a0; <b>travaill\u00e9</b> au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise.'
+      :'<b>Ch\u00f4m\u00e9</b>, un f\u00e9ri\u00e9 vaut 0\u00a0h au mod\u00e8le en '+yr+'\u00a0; <b>travaill\u00e9</b> au mod\u00e8le, le relev\u00e9 le compte fait, majoration comprise. D\u00e8s 2027, un f\u00e9ri\u00e9 ch\u00f4m\u00e9 comptera pour ses heures pr\u00e9vues.'] });   // MOTS-17 (§612) : la règle vit dans le « i »
+    h+='<div class="mvencadre mvencadre-attention" style="margin-top:8px"><b>'+P.length+' f\u00e9ri\u00e9'+(P.length>1?'s portent':' porte')+' des heures.</b> '+_mvInfoBtn('plan.feries')
+    +(adm?'<div style="margin-top:8px"><button class="plan-btn-saisir" data-tuto="plan.annee.feries.tous" onclick="planAnneeFeriesChomer()">Ch\u00f4mer les '+P.length+'</button></div>':'')+'</div>'; }
   else h+='<div style="font-size:var(--pt-txt,13px);color:var(--texte-doux);margin-top:6px">Aucun f\u00e9ri\u00e9 n\u2019est travaill\u00e9 au mod\u00e8le.</div>';
   var row='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--gris-clair);font-size:var(--pt-txt,13px)',tr=false;
-  h+='<details'+((P.length||ouvert)?' open':'')+' style="margin-top:8px"><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Les '+L.length+' f\u00e9ri\u00e9s en semaine</summary>'
+  h+='<details'+(ouvert?' open':'')+' style="margin-top:8px"><summary style="cursor:pointer;font-size:var(--pt-txt,13px);font-weight:600">Les '+L.length+' f\u00e9ri\u00e9s en semaine</summary>'   // MOTS-17 : repliée, sauf pendant un brouillon
     +L.map(function(f){var g='';
       if(f.sol)g='<span style="color:var(--texte-doux)">journ\u00e9e de solidarit\u00e9</span>';
       else if(f.h>0)g='<b style="font-variant-numeric:tabular-nums">'+_paH(f.h)+'</b>'+(adm?'<button class="plan-btn-pdf" data-m="'+f.m+'" data-j="'+f.d+'" data-a="chomer" onclick="planAnneeFerie(this)">Ch\u00f4mer</button>':'');

@@ -29,6 +29,9 @@ const PLFR = fs.readFileSync('src/planning-frais.js', 'utf8');
 const TRAC = fs.readFileSync('src/tracteur.js', 'utf8');
 // ★ MOTS-16 (§611) : La Réserve pose les siennes (rsv.conso, rsv.bilan) depuis reserve.js — même règle.
 const RSV = fs.readFileSync('src/reserve.js', 'utf8');
+// ★ MOTS-17 (§612) : l'année du Planning (plan.frise, plan.rythme, plan.feries) et les Stades de la Vigne (phr.dj) posent les leurs
+//   depuis planning-annee.js, planning-modeles.js et le fichier principal de l'appli — même règle.
+const BAL = fs.readFileSync('src/planning-annee.js', 'utf8') + '\n' + fs.readFileSync('src/planning-modeles.js', 'utf8') + '\n' + fs.readFileSync('src/' + 'app' + '.js', 'utf8');
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
 function corpsPil(nom){
@@ -38,7 +41,7 @@ function corpsPil(nom){
   return '';
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
-const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL), CKNU = nu(COCKPIT), PLFRNU = nu(PLFR), TRACNU = nu(TRAC), RSVNU = nu(RSV);
+const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL), CKNU = nu(COCKPIT), PLFRNU = nu(PLFR), TRACNU = nu(TRAC), RSVNU = nu(RSV), BALNU = nu(BAL);
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -89,8 +92,8 @@ t('les balises <b> sont refermees',
    litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
    facon dont elle est posee. */
 const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
-              PILNU, CKNU, CAVENU, REGLNU, PLFRNU, TRACNU, RSVNU, HTML].join('\n');
-const posees = new Set([...[UNU, PILNU, CKNU, CAVENU, REGLNU, PLFRNU, TRACNU, RSVNU, HTML].join('\n')
+              PILNU, CKNU, CAVENU, REGLNU, PLFRNU, TRACNU, RSVNU, BALNU, HTML].join('\n');
+const posees = new Set([...[UNU, PILNU, CKNU, CAVENU, REGLNU, PLFRNU, TRACNU, RSVNU, BALNU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),

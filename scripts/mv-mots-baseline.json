@@ -124,13 +124,18 @@
    "date": "2026-11-25",
    "motif": "MOTS-16 (§611) : La Réserve allégée — le parc en tête de Fûts, plus de tuiles ; la phrase des Intrants, « (lot suivant) » retiré ; les notes de méthode dans les « i ». Et Phyto › Registre (ordinateur) : 35 → 32 mots avant le premier chiffre — les lignes d’année à 48 px de MOTS-15, posées après sa gravure",
    "hausses": []
+  },
+  {
+   "date": "2026-11-25",
+   "motif": "MOTS-17 (§612) : le balayage — Planning › Année, Stades, Tracteur › Entretien, l'Accueil",
+   "hausses": []
   }
  ],
  "mesures": {
   "téléphone": {
    "Vigne › Accueil": {
-    "mots": 284,
-    "p15": 1,
+    "mots": 277,
+    "p15": 0,
     "avant": 21,
     "lex": null
    },
@@ -141,7 +146,7 @@
     "lex": null
    },
    "Vigne › Parcelles › Stades": {
-    "mots": 106,
+    "mots": 94,
     "p15": 0,
     "avant": 0,
     "lex": null
@@ -159,8 +164,8 @@
     "lex": null
    },
    "Tracteur › Entretien": {
-    "mots": 103,
-    "p15": 1,
+    "mots": 78,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -291,8 +296,8 @@
     "lex": null
    },
    "Planning › Année": {
-    "mots": 308,
-    "p15": 3,
+    "mots": 171,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -407,8 +412,8 @@
   },
   "ordinateur": {
    "Vigne › Accueil": {
-    "mots": 284,
-    "p15": 1,
+    "mots": 277,
+    "p15": 0,
     "avant": 40,
     "lex": null
    },
@@ -419,7 +424,7 @@
     "lex": null
    },
    "Vigne › Parcelles › Stades": {
-    "mots": 132,
+    "mots": 120,
     "p15": 0,
     "avant": 0,
     "lex": null
@@ -437,8 +442,8 @@
     "lex": null
    },
    "Tracteur › Entretien": {
-    "mots": 177,
-    "p15": 1,
+    "mots": 152,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -569,8 +574,8 @@
     "lex": null
    },
    "Planning › Année": {
-    "mots": 308,
-    "p15": 3,
+    "mots": 171,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
