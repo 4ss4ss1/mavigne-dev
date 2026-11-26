@@ -1,0 +1,63 @@
+{
+  "lot": "ANNEE-3",
+  "section": "§614",
+  "base": "abd7cf52eca2f3a34bd523f8a8e584d9bc9aa502",
+  "inclut": [],
+  "date": "2026-11-26",
+  "tutos": {
+    "ok": true,
+    "empreinte": "35e2e513c4257a474f4fd58448cb148e667e23ebb07ddd6c2b75202425f47970",
+    "date": "2026-11-26T13:56:07.719Z",
+    "joues": {
+      "téléphone": 8,
+      "ordinateur": 8,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "inscrire",
+      "feries",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    "CLAUDE.md": "9f4e42b237111ae7bc554d6f2e6040ac3b20b638817171abb1f7d38c956e044d",
+    "docs/claude/INDEX.md": "0eed736045b7ba92e295be628d28cb50648cee16800058762ff612a2f430cfbf",
+    "docs/claude/chantiers-580-629.md": "ac5b030fcf770707f69bfc681523467498f6a0cdcae6184f399a5a7e47c2fa7d",
+    "docs/claude/journal.md": "79c4a5733e0d21ead72a30225c32ffb73b8a9e0df4d792c7fe7d5c69d86beb96",
+    "guide/10-planning.html": "74019d23435eddb8488155e9272d87fad37d69996142f696b19f51bbca940658",
+    "index.html": "64883bbacbf180f417fd8faae7d89f1aa0f66ea458789f46be42686536ef0e8f",
+    "public/guide.html": "316dd30fd991c4cd5033b0358ecf7877a40b7ff1adf5bfe9ec5ddd5a70e46768",
+    "public/sw.js": "14bdde3858e2d59b6d17f152bc68c8b4eef24c1218ae85b7fc24ff2e6dfc7f5e",
+    "scripts/harnais-claude-md.mjs": "3da6952056c8e7e90b3a3b4a4b52f4449c170ff4eb975a23355087a4d76c01bd",
+    "scripts/mv-harnais-ab1.mjs": "84622c2556c9cb8943e1d8134a66b91809f0f6b9a4ecf60e3cec0f0f46a192fb",
+    "scripts/mv-harnais-annee2.mjs": "4a1cf8f1792d406fe9b877f3206143294a87fd0f5148dcd054cd66bc25a55c9e",
+    "scripts/mv-harnais-anneedec.mjs": "337e3ddea9cb71b25ca1c999ab0415728c4eb4d2b47b7658cad4beba88e3db59",
+    "scripts/mv-harnais-anneetab.mjs": "1f780710176416a5e67163d243c17d5e905ec5e338206bb4e15d4599e80c669f",
+    "scripts/mv-harnais-debord1.mjs": "cf5933aaad48f8daa6fbac58781d64c859d43106a8058a973b4965e24deb262f",
+    "scripts/mv-harnais-feries1.mjs": "b4c693a3fbe88ac6dfb4f214350dbac0f0c2da2e0626ba9d472d4f837aa8eb76",
+    "scripts/mv-harnais-frise2.mjs": "b31e55459fe1e7b95c2b577ec0fee50e94aea737ef829d9ba3d0126b1e08dd5f",
+    "scripts/mv-harnais-frise3.mjs": "dbb407c7706536028b73a149cc387b5c468c022e4ba29d6866323f0319d12679",
+    "scripts/mv-harnais-frise4.mjs": "f90a57657949c38e66974b275724473bf538fbfefdd2b238778fc45305ad4251",
+    "scripts/mv-harnais-frise5.mjs": "7d1413b7519423b5ca4c9788d4914aab2e5f8850e7f49f7afe7954101f77d387",
+    "scripts/mv-harnais-hor1.mjs": "e4c03a13f4f8e7b4fc89c1d658953918b67891c4c8d18d9d9c834eb121bd44fe",
+    "scripts/mv-harnais-info.mjs": "9c067bf14357f7156100a90939b197211485ca892d320cab8256f878c3d3e3dd",
+    "scripts/mv-harnais-liste.mjs": "c718af8c50766aadef8fd8efc57ac43b5c70e1a470f7075d6d4b572236b6546f",
+    "scripts/mv-harnais-mots17.mjs": "b8f54bf7f608aafc69a5a7c715fde4b45e0381a5067e10bb7d3a35e62ce86d64",
+    "scripts/mv-harnais-regl-module.mjs": "e5ef1d933f1b7ad30731932939f6354a9b1e1599b14412171018970c37939abd",
+    "src/annee.css": "5d9fe35d42208c2a04d0964e0de9a4a77553f6e09a15052830f724640626bcfd",
+    "src/app.js": "8d7690b003141ba4f69f0963c2d7de13b42b3ea49df6ef299918809bedc9aee1",
+    "src/planning-annee.js": "a6f55534bac34f1693c8c494c9d4b497b432a2a895d84a274c218ee020af3b31",
+    "src/planning-modeles.js": "38cc33e2fe1a6c832820c5d6765a39422fa3d7993fb03b9abcc286de4f435540",
+    "src/tutos.js": "cff56bd097dc0bc0b9834e65e87313b5d8d043b17e9d75cf1de229bc1db3f3eb",
+    "src/utils.js": "e78f52b8426d89a58297e7dcc6be82b0936441dd4fb5fe80afaac0aeb4f89c4c",
+    "src/whats-new.js": "a7d772a790ebc6b23cde1a06cca32afe209f1cc3d0f91e678cf742081387d666",
+    "scripts/mv-harnais-annee3.mjs": "67d9b1b6c6aed3f52a179b42be9eee4fcf0c25075ac7c57bacae4dd5c62e6cbe",
+    "src/planning-annee-vue.js": "496cae79cc830916d43ed4457c7dae2b68309b077f5e0469ff6dc9b7ec8fdf08"
+  }
+}

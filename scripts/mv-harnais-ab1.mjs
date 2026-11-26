@@ -47,7 +47,7 @@ function fonction(src, nom) {
 }
 const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');
-const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planCreditFerie', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeReguliers',
+const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planCreditFerie', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeVal', '_planAnneeReguliers',
   '_planAnneeBrouillon', '_planAnneeGrille', '_planAnneeCleS', 'planAnneeAB', 'planAnneePas', 'planAnneeUneSemaine', '_planAnneeDate', '_planAnneePlage', '_planAnneeHoraireTxt', '_planAnneeNature', '_planAnneeModulation', '_planAnneeProgramme'];
 const ctx = vm.createContext({ window: { CONFIG: {}, PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] }, _MV_FERIES_CACHE: {}, isAdmin: () => true,
   PLAN_MOIS_FR: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'] });

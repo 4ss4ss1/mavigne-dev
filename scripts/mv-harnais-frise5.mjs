@@ -21,7 +21,7 @@ const DEFAUTS = {
 if (CONTRE) {
   console.log('\n── FRISE-5 — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0;
   for (const [cle, [quoi, ancre, rempl]] of Object.entries(DEFAUTS)) {
-    total++; const fic = cle === 'csv' ? 'src/planning-annee.js' : 'src/planning.js', env = cle === 'csv' ? 'MV_F5_AN' : 'MV_F5_PL';
+    total++; const fic = cle === 'csv' ? 'src/planning-annee-vue.js' : 'src/planning.js', env = cle === 'csv' ? 'MV_F5_VU' : 'MV_F5_PL';   // ANNEE-3 (§614) : la barre vit dans la vue
     const src = lire(fic), n = src.split(ancre).length - 1;
     if (n !== 1) { console.log('  \x1b[31m✗\x1b[0m ' + quoi + ' — ancre trouvée ' + n + ' fois'); continue; }
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mv-f5-')), fp = path.join(tmp, path.basename(fic));
@@ -32,7 +32,7 @@ if (CONTRE) {
   }
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
-const PL = lire('src/planning.js', 'MV_F5_PL'), AN = lire('src/planning-annee.js', 'MV_F5_AN');
+const PL = lire('src/planning.js', 'MV_F5_PL'), AN = lire('src/planning-annee.js', 'MV_F5_AN'), VU = lire('src/planning-annee-vue.js', 'MV_F5_VU');
 const TOUT = PL + '\n' + AN + '\n' + lire('src/app.js') + '\n' + lire('index.html') + '\n' + lire('src/tutos.js');
 const sansComm = t => t.replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
 let verts = 0; const ECHECS = [];
@@ -46,7 +46,7 @@ const cadre = (PL.match(/^function _planRenderCadre\(\)\{[\s\S]*?\n\}/m) || ['']
 T(!/_planRenderGridEditor/.test(cadre) && !/_planRenderAnnee/.test(cadre) && /planTab==='annee'&&window\._planAnneeOnglet/.test(PL), 'la roue du Planning ne route plus rien : l’année a son onglet (ANNEE-TAB)');
 const creer = (PL.match(/^function planCreateTemplate\(\)\{[\s\S]*?\n\}/m) || [''])[0];
 T(/window\.planAnneeOuvrir\(id\)/.test(creer), 'un modèle neuf s’ouvre sur son année');
-T(/onclick="planAnneeMenu\(\);planExportCSV\(this\.dataset\.pl\)">Exporter \(CSV\)<\/button>/.test(AN) && /^window\.planExportCSV\s*=/m.test(PL), 'l’export CSV reste, depuis l’année');
+T(/onclick="planAnneeMenu\(\);planExportCSV\(this\.dataset\.pl\)">Exporter \(CSV\)<\/button>/.test(VU) && /^window\.planExportCSV\s*=/m.test(PL), 'l’export CSV reste, depuis l’année');
 T(/^function planSaveTpl\(/m.test(PL) && /planSaveTpl\(id\)/.test(AN), '« Enregistrer » de l’année écrit toujours par planSaveTpl');
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

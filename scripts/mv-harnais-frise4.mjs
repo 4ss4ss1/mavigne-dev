@@ -45,7 +45,7 @@ function fonction(src, nom) {
   for (let j = i; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}') { d--; if (d === 0) return src.slice(m.index, j + 1); } }
   throw new Error('accolades : ' + nom);
 }
-const NOMS = ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeReguliers',
+const NOMS = ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeVal', '_planAnneeReguliers',
   '_planAnneeBrouillon', '_planAnneeGrille', 'planAnneePas', 'planAnneeFermeSem', 'planAnneeRemettre', 'planAnneeDesIci', 'planAnneeSemaine', '_planAnneeSemDefaut', '_planAnneeSemSel'];
 const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');

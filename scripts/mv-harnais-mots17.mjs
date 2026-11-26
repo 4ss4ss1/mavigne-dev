@@ -30,7 +30,8 @@ const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => { try { return fs.readFileSync(path.join(RACINE, f), 'utf8'); } catch (e) { return ''; } };
 const APP = 'src/' + 'app' + '.js';
-const S0 = { ann: lire('src/planning-annee.js'), mod: lire('src/planning-modeles.js'), app: lire(APP), cpt: lire('src/compteur.js'), trac: lire('src/tracteur.js'),
+const S0 = { ann: lire('src/planning-annee.js') + '\n' + lire('src/planning-annee-vue.js'),   // ANNEE-3 (§614) : la vue, sortie de planning-annee.js
+  mod: lire('src/planning-modeles.js'), app: lire(APP), cpt: lire('src/compteur.js'), trac: lire('src/tracteur.js'),
   uti: lire('src/utils.js'), css: lire('src/styles.css'), wn: lire('src/whats-new.js'), sw: lire('public/sw.js'), idx: lire('index.html'),
   gp: lire('guide/10-planning.html'), gv: lire('guide/04-vigne.html'), gt: lire('guide/06-tracteur.html'), liste: lire('scripts/mv-harnais-liste.mjs'),
   lm: lire('docs/maquettes/LISEZMOI.md'), maq: lire('docs/maquettes/maquette-balayage-v2.html') };
@@ -98,7 +99,7 @@ function suite(S) {
     && !S.css.includes('#page-planning .pa-aide{margin-left:auto;align-self:center}'));
   T('① le rythme : la note dans le « i » du titre (sa date en gras), plus sous le titre ; le « i » ne replie pas la section (règle des pastilles)',
     S.ann.includes("_mvInfoSet('plan.rythme',{ p:['Les jours r\\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\\u2019au <b>'+_planAnneeDate(J,finS,true)+'</b>':'')")
-    && S.ann.includes("Changer le rythme \\u00e0 partir d\\u2019ici '+_mvInfoBtn('plan.rythme')+'</summary>'") && !S.ann.includes('line-height:1.5;margin:4px 0">Les jours r')
+    && S.ann.includes("<span>Changer le rythme \\u00e0 partir d\\u2019ici</span>'+_mvInfoBtn('plan.rythme')+'</div>'") && !S.ann.includes('line-height:1.5;margin:4px 0">Les jours r')
     && S.ann.includes("import { isAdmin, _escHtml, _escAttr, _mvInfoBtn, _mvInfoSet } from './utils.js';"));
 
   // ②
@@ -183,7 +184,7 @@ if (!CONTRE) {
   const mutants = [
     ['le mode d’emploi revient sous Le cadre', sur('ann', "+(C.dim||'aucun')+'</span></div>'", "+(C.dim||'aucun')+'. R\\u00e8gle une saison avec \\u2212 et +.</span></div>'")],
     ['« Régler la frise ? » disparaît', sur('ann', "'<button type=\"button\" class=\"anv-menu-l\" role=\"menuitem\" data-mvi=\"plan.frise\">R\\u00e9gler la frise\\u00a0?<span>le mode d\\u2019emploi</span></button>'", "''")],
-    ['la note du rythme revient sous le titre', sur('ann', "+_mvInfoBtn('plan.rythme')+'</summary>'", "+_mvInfoBtn('plan.rythme')+'</summary><div style=\"font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0\">Les jours r\\u00e9guliers</div>'")],
+    ['la note du rythme revient sous le titre', sur('ann', "+_mvInfoBtn('plan.rythme')+'</div>'", "+_mvInfoBtn('plan.rythme')+'</div><div style=\"font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0\">Les jours r\\u00e9guliers</div>'")],
     ['le rythme perd sa date', sur('ann', "' jusqu\\u2019au <b>'+_planAnneeDate(J,finS,true)+'</b>'", "''")],
     ['la règle des fériés revient à l’écran', sur('mod', "des heures.</b> '+_mvInfoBtn('plan.feries')", "des heures.</b> Ch\\u00f4m\\u00e9, un f\\u00e9ri\\u00e9 vaut 0 h.'+_mvInfoBtn('plan.feries')")],
     ['la fiche des fériés ignore la base de l’année', sur('mod', "_mvInfoSet('plan.feries',{ p:[_planBaseActive(yr)?", "_mvInfoSet('plan.feries',{ p:[false?")],

@@ -866,6 +866,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-mots17.mjs --contre'],     //   Stades (le « i » de Ce qui vient), Tracteur (+ Autre entretien et intervalle ?, joués), l'Accueil
   ['node scripts/mv-harnais-annee2.mjs'],             // ANNEE-2 (§613) : Planning › Année refaite — le compte de la colonne (2026, et 2027 avec les fériés),
   ['node scripts/mv-harnais-annee2.mjs --contre'],    //   les semaines, plus de « − / + » dans la vue, la barre et le panneau, la légende, la garde de l'année, les ancres des tutos (joués)
+  ['node scripts/mv-harnais-annee3.mjs'],             // ANNEE-3 (§614) : plus de « − / + » — la grille des jours et son choix, une durée qui va à tous les jours réguliers,
+  ['node scripts/mv-harnais-annee3.mjs --contre'],    //   le cadre tenu, la prise et le début en champs, un champ tapé qui attend sa sortie, l'interrupteur A / B, le panneau qui ne réécrit que ce qui change
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

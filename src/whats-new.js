@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.35', d: '2026-11-26', items: [   // ANNEE-3 (§614) : Planning › Année — plus de « − / + » : la grille des jours, ses champs
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: plus de «\u00a0−\u00a0/\u00a0+\u00a0», une grille des jours',
+      desc: "Dans le panneau d\u2019une saison, ses jours forment une grille, lundi à dimanche\u00a0: touchez un jour, puis une durée — repos, 4, 7, 7,5, 8, 8,5 — ou tapez-en une autre\u00a0; tous ses jours réguliers la prennent. La prise de poste est un champ heure, le début de la saison un lundi à choisir dans une liste. Le même choix sert pour un jour d\u2019une semaine, un jour à part et «\u00a0Changer le rythme à partir d\u2019ici\u00a0»." },
+  ] },
   { v: '11.34', d: '2026-11-26', items: [   // ANNEE-2 (§613) : Planning › Année refaite — une vue de l'année, le détail dans un panneau
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: l\u2019année se lit comme un planning de projet',
       desc: "L\u2019onglet Année tient sur un écran\u00a0: en haut, le modèle, «\u00a0Tomber juste\u00a0» et le menu «\u00a0…\u00a0»\u00a0; dessous, une ligne par saison posée sur ses dates, les heures de chaque semaine face aux 35\u00a0h, les fériés et les congés. Touchez une saison, une semaine ou la ligne d\u2019état\u00a0: son détail s\u2019ouvre dans un panneau. Sur ordinateur, les heures par semaine et le total de chaque période s\u2019alignent à droite." },

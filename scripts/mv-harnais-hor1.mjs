@@ -49,8 +49,8 @@ const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');
 const i1 = PL.indexOf('var PLAN_DEF_T = {'), j1 = PL.indexOf('};', i1);
 const PLAN_DEF_T = vm.runInNewContext('(' + PL.slice(i1 + 17, j1 + 1) + ')');
-const NOMS = ['_mvEasterMD', '_feriesY', '_planDefTiming', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneeBrouillon', '_planAnneeMetaCopie', '_planAnneeMetaEd',
-  '_paMinT', '_paHHMM', '_paHm', '_planAnneeHoraire', '_planAnneePriseSaison', '_planAnneeCodes', 'planAnneePrise', 'planAnneeJourSel', 'planAnneePriseJour', 'planAnneeDma', 'planAnneeEnregistrer'];
+const NOMS = ['_mvEasterMD', '_feriesY', '_planDefTiming', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneeBrouillon', '_planAnneeMetaCopie', '_planAnneeMetaEd', '_planAnneeMeta', '_planAnneeGrille',
+  '_paMinT', '_paHHMM', '_paHm', '_planAnneeHoraire', '_planAnneePriseSaison', '_planAnneeCodes', 'planAnneePrise', 'planAnneePriseJour', 'planAnneeDma', 'planAnneeEnregistrer'];
 const TPL = { std: JSON.parse(JSON.stringify(PLAN_DEF.standard)) };
 const ctx = vm.createContext({ window: { PLAN_PAUSE_MIN: 60, PLAN_DEF_T }, PLAN_PAUSE_MIN: 60, PLAN_DEF_T, _MV_FERIES_CACHE: {}, isAdmin: () => true, STORE: {}, PLANNING_TEMPLATES: { 2026: {} } });
 ctx._planGetTpl = (pl, y) => (pl === 'std' ? TPL.std : {});
@@ -78,10 +78,9 @@ const s0 = A.saisons.findIndex(s => s.m0 === 0);
 F.planAnneePrise({ dataset: { s: String(s0), p: '15' } });
 const M = ctx.E().meta;
 vaut('« + 15 min » sur la saison de janvier-février : 7 h 15 en janvier et février, rien en mars', [M._timings[0] && M._timings[0].d, M._timings[1] && M._timings[1].d, M._timings[2] || null], ['07:15', '07:15', null]);
-F.planAnneeJourSel({ dataset: { m: '5', j: '10' } });
-F.planAnneePriseJour({ dataset: { p: '15' } });
+F.planAnneePriseJour({ dataset: { m: '5', j: '10', p: '15' } });   // ANNEE-3 (§614) : le jour porté par le geste (le choix d'un jour l'ouvre dans la semaine)
 vaut('la prise du mercredi 10 juin : 7 h 15, ce jour seul', ctx.E().meta._timings_jour[5][10], { d: '07:15' });
-F.planAnneePriseJour({ dataset: { p: '0' } });
+F.planAnneePriseJour({ dataset: { m: '5', j: '10', p: '0' } });
 vaut('… « Comme la saison » la retire', ctx.E().meta._timings_jour[5][10] || null, null);
 ctx.setE({ annee: 'std', meta: F._planAnneeMetaCopie(ctx.PLANNING_TEMPLATES[2026].t), brouillon: F._planAnneeCopie(TPL.std) });
 const avant = [3, 4, 5].map(d => dt(F._planAnneeHoraire(ctx.E().meta, 5, d, 1)));

@@ -216,7 +216,7 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   T(/if\(tab==='cadre'\)\{ if\(window\._mvReglOpen\) window\._mvReglOpen\('planning'\); return; \}/.test(pln), 'planSwitchTab(\'cadre\') ouvre la roue');
   T(!/planTab==='cadre'/.test(pln), 'plus aucune branche planTab===cadre');
   // ★ FRISE-5 (§544) : la grille de 365 cases est partie ; l'année d'un modèle (src/planning-annee.js) écrit dans la même feuille
-  const cadre = extraire(pln, '_planRenderCadre') || '', editor = extraire(readFileSync('src/planning-annee.js', 'utf8'), '_planRenderAnnee') || '';
+  const cadre = extraire(pln, '_planRenderCadre') || '', editor = extraire(readFileSync('src/planning-annee-vue.js', 'utf8'), '_planRenderAnnee') || '';   // ANNEE-3 (§614) : la vue de l'année, sortie de planning-annee.js
   T(/var body=_planCadreHost\(\);/.test(cadre) && /var body=document\.getElementById\('plan-body'\)/.test(editor), 'le cadre \u00e9crit dans l\u2019h\u00f4te de la feuille, l\u2019ann\u00e9e d\u2019un mod\u00e8le dans son onglet (ANNEE-TAB)');
   const host = extraire(pln, '_planCadreHost') || '';
   T(/getElementById\('plan-cadre-host'\)\|\|document\.getElementById\('plan-body'\)/.test(host), '\u2026 avec repli sur #plan-body');

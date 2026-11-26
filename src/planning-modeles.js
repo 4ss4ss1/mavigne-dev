@@ -43,15 +43,12 @@ function _planAnneeFeries(A,yr){
 }
 function _planAnneeFerieDate(f){var JL=['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'];return JL[f.g]+'\u00a0'+(f.d===1?'1er':f.d)+'\u00a0'+window.PLAN_MOIS_FR[f.m];}
 // la ligne d'un férié dans la semaine choisie (FRISE-4) : le nom et l'état, puis les gestes
-function _planAnneeFerieSem(x,A,yr,jn,adm){
+function _planAnneeFerieSem(x,A,yr,jn,adm){   // ★ ANNEE-3 (§614) : ses heures sont dans la case de la semaine (le choix d'une durée) — plus de « − / + » ici
   var f=_planAnneeFeries(A,yr).filter(function(y){return y.m===x.m&&y.d===x.d;})[0]||{nom:x.fer,h:x.h,sol:false,saison:0};
   var nom='<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">'+_escHtml(f.nom)+' \u00b7 ';
   if(f.sol)return nom+'journ\u00e9e de solidarit\u00e9</span>';
-  if(f.h>0)return nom+'travaill\u00e9 au mod\u00e8le</span>'+(adm?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="-0.5" aria-label="'+jn+' '+x.d+' moins 30 min" onclick="planAnneeJour(this)">\u2212</button>':'')
-    +'<b style="min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums">'+_paH(f.h)+'</b>'
-    +(adm?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-p="0.5" aria-label="'+jn+' '+x.d+' plus 30 min" onclick="planAnneeJour(this)">+</button>'
-      +'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-a="chomer" onclick="planAnneeFerie(this)">Ch\u00f4mer</button>':'');
-  return nom+'ch\u00f4m\u00e9</span>'+((adm&&f.saison>0)?'<button class="plan-btn-pdf" data-m="'+x.m+'" data-j="'+x.d+'" data-a="travailler" onclick="planAnneeFerie(this)">Travailler</button>':'');
+  if(f.h>0)return nom+'travaill\u00e9 au mod\u00e8le</span>'+(adm?'<button type="button" class="mvbtn mvbtn-secondaire" data-m="'+x.m+'" data-j="'+x.d+'" data-a="chomer" onclick="planAnneeFerie(this)">Ch\u00f4mer</button>':'');
+  return nom+'ch\u00f4m\u00e9</span>'+((adm&&f.saison>0)?'<button type="button" class="mvbtn mvbtn-secondaire" data-m="'+x.m+'" data-j="'+x.d+'" data-a="travailler" onclick="planAnneeFerie(this)">Travailler</button>':'');
 }
 // la section des fériés de l'année, sous la semaine : combien portent des heures, « Chômer les N », chacun avec son geste
 function _planAnneeFeriesBloc(A,id,yr,adm,ouvert){

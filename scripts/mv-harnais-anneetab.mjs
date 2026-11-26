@@ -6,6 +6,9 @@
    de Le mois et Les gens sera plus ergonomique ». Ce harnais tient : l'onglet (index.html, la liste des onglets valides,
    le routage), le choix du modèle en haut, la roue qui ne porte plus « L'année », la notation « 8 h 30 » (espaces
    insécables, « repos » pour un jour à zéro), les jours en lignes et plus en sept colonnes serrées.
+   ★ ANNEE-3 (§614) : la vue et son panneau vivent dans planning-annee-vue.js ; la saison se règle dans une GRILLE de sept
+   cases (maquette v3 validée) — des cases à toucher de 44 px au téléphone, plus des « − / + » serrés : le contrôle des
+   « sept colonnes » devient celui des cases.
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import vm from 'node:vm';
 import { spawnSync } from 'node:child_process';
@@ -33,6 +36,7 @@ if (CONTRE) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
 const PL = lire('src/planning.js', 'MV_AT_PL'), AN = lire('src/planning-annee.js', 'MV_AT_AN'), HTML = lire('index.html', 'MV_AT_HTML');
+const VU = lire('src/planning-annee-vue.js', 'MV_AT_VU'), CSS = lire('src/annee.css', 'MV_AT_CSS');   // ANNEE-3 (§614) : la vue, sortie de planning-annee.js
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);
   const i = src.indexOf('{', m.index); let d = 0;
@@ -47,16 +51,16 @@ T(/_PLAN_VALID_TAB=\{[^}]*annee:1/.test(PL), 'l’onglet est un onglet valide');
 T(/planTab==='annee'&&window\._planAnneeOnglet\)window\._planAnneeOnglet\(\)/.test(fonction(PL, '_planRenderBody')), 'il affiche l’année d’un modèle');
 T(/planTab==='annee'&&isAdmin\(\)\)\{ sb\.innerHTML=window\._planAnneeBande/.test(fonction(PL, '_planRenderHeader')), 'sa bande de chiffres : le modèle, la base, l’écart');
 T(!/onclick="planAnneeOuvrir\(/.test(PL), 'la roue crantée ne porte plus « L’année » sur chaque modèle');
-T(/onclick="planAnneeModele\(this\)"/.test(fonction(AN, '_anvOutils')) && /data-tuto="plan\.annee\.modele"/.test(fonction(AN, '_anvOutils')), 'en haut, le choix du modèle (ANNEE-2 : un bouton et son menu)');
-T(/document\.getElementById\('plan-body'\)/.test(fonction(AN, '_planRenderAnnee')), 'la frise s’écrit dans l’onglet');
+T(/onclick="planAnneeModele\(this\)"/.test(fonction(VU, '_anvOutils')) && /data-tuto="plan\.annee\.modele"/.test(fonction(VU, '_anvOutils')), 'en haut, le choix du modèle (ANNEE-2 : un bouton et son menu)');
+T(/document\.getElementById\('plan-body'\)/.test(fonction(VU, '_planRenderAnnee')), 'la frise s’écrit dans l’onglet');
 console.log('\n── une notation propre\n');
 const ctx = vm.createContext({});
 vm.runInContext(fonction(AN, '_paH') + ';this.H=_paH;', ctx);
 const n = s => s.replace(/\u00a0/g, '·').replace(/\u202f/g, '˙');
 T(n(ctx.H(8.5)) === '8·h·30' && n(ctx.H(4)) === '4·h' && n(ctx.H(1827)) === '1˙827·h', '« 8 h 30 », « 4 h », « 1 827 h » — espaces insécables', [ctx.H(8.5), ctx.H(4), ctx.H(1827)].map(n).join(' | '));
 T(n(ctx.H(-1.5)) === '−1·h·30', 'un écart négatif : « −1 h 30 », le vrai signe moins', n(ctx.H(-1.5)));
-const ed = fonction(AN, '_planAnneeJoursEd'), rd = fonction(AN, '_planRenderAnnee');
-T(!/repeat\(7,/.test(ed) && !/repeat\(7,/.test(rd), 'les jours en lignes, plus en sept colonnes serrées');
-T(/'repos'/.test(ed) && !/_planFmt\(/.test(rd) && !/_planFmt\(/.test(ed), 'un jour à zéro dit « repos » ; plus de « 8h30 » à l’écran');
+const ed = fonction(VU, '_anvCel'), gr = fonction(VU, '_anvGrille'), rd = fonction(VU, '_planRenderAnnee');   // ANNEE-3 (§614) : la grille des jours
+T(/repeat\(7,minmax\(0,1fr\)\)/.test(CSS) && /\.anv-ov \.anv-cel\{[^}]*height:44px/.test(CSS) && !/onclick="planAnnee(Pas|Jour|DesIci|Prise)\(/.test(VU) && !/\\u2212<\/button>/.test(VU), 'les jours d’une saison : sept cases à toucher (44 px au téléphone), plus de « − / + » serrés');
+T(/'repos'/.test(ed) && /_paH\(v\)/.test(ed) && !/_planFmt\(/.test(rd) && !/_planFmt\(/.test(ed) && !/_planFmt\(/.test(gr), 'un jour à zéro dit « repos » ; plus de « 8h30 » à l’écran');
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

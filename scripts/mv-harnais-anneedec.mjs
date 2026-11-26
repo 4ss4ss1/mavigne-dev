@@ -6,6 +6,8 @@
    et lu dans l'autre n'existe pas après le build s'il n'est pas posé sur window (CLAUDE.md §24 n°6) : ce harnais
    tient la frontière, comme mv-harnais-cuvier tient celle du Cuvier — l'ordre d'import, les emprunts tous exposés,
    les gestes tous exposés, l'état de la vue lu et écrit par fonction, rien d'exécuté au chargement.
+   ★ ANNEE-3 (§614) : la vue de l’année et son panneau sortent à leur tour, dans src/planning-annee-vue.js (chargé après
+   planning-modeles.js et planning-frais.js) — derrière la même frontière ; la frise l’appelle par window (le rendu, la fermeture du panneau, les menus).
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -23,6 +25,11 @@ const DEFAUTS = {
   m_geste:   ['un geste du module des modèles n’est plus exposé', 'src/planning-modeles.js', 'MV_DEC_MO', 'window.planAnneeFeriesChomer = planAnneeFeriesChomer;', '//'],
   m_charge:  ['le module des modèles lit le Planning au chargement', 'src/planning-modeles.js', 'MV_DEC_MO', 'var _paInscr=null;', 'var _paInscr=window._planMbrs();'],
   m_retour:  ['la frise n’emprunte plus la section des fériés au module', 'src/planning-modeles.js', 'MV_DEC_MO', 'window._planAnneeFeriesBloc  = _planAnneeFeriesBloc;', '//'],
+  // ★ ANNEE-3 (§614) : la vue de l'année et son panneau, sortis de la frise
+  v_emprunt: ['la frise n’expose plus ce que la vue lui emprunte', 'src/planning-annee.js', 'MV_DEC_AN', 'window._planAnneePriseSaison= _planAnneePriseSaison;', '//'],
+  v_geste:   ['un geste de la vue n’est plus exposé', 'src/planning-annee-vue.js', 'MV_DEC_VU', 'window.planAnneeCel         = planAnneeCel;', '//'],
+  v_charge:  ['la vue lit le Planning au chargement', 'src/planning-annee-vue.js', 'MV_DEC_VU', 'var _anvMenuPose=false;', 'var _anvMenuPose=window._pY();'],
+  v_retour:  ['la frise n’appelle plus le rendu de la vue par window', 'src/planning-annee-vue.js', 'MV_DEC_VU', 'window._planRenderAnnee     = _planRenderAnnee;', '//'],
 };
 if (CONTRE) {
   console.log('\n── ANNEE-DEC — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0;
@@ -38,6 +45,7 @@ if (CONTRE) {
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
 const PL = lire('src/planning.js', 'MV_DEC_PL'), AN = lire('src/planning-annee.js', 'MV_DEC_AN'), APP = lire('src/app.js', 'MV_DEC_APP'), MO = lire('src/planning-modeles.js', 'MV_DEC_MO');
+const VU = lire('src/planning-annee-vue.js', 'MV_DEC_VU');   // ★ ANNEE-3 (§614)
 const expose = (src, n) => new RegExp('^window\\.' + n + '\\s*=', 'm').test(src);
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? ' — ' + det : '')); } }
@@ -47,15 +55,16 @@ T(ip >= 0 && /^import '\.\/planning-annee\.js';/.test(lignes[ip + 1] || ''), 'ap
 const imports = AN.match(/^import .*$/gm) || [];
 T(imports.length === 1 && /from '\.\/utils\.js';$/.test(imports[0]), 'la frise n’importe que utils.js');
 const emprunts = [...AN.matchAll(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm)].map(m => m[1]);
-const absents = emprunts.filter(n => !expose(PL, n) && !expose(MO, n));
-T(emprunts.length >= 10 && absents.length === 0, 'chaque emprunt de la frise (' + emprunts.length + ') est exposé par planning.js ou planning-modeles.js', absents.join(', '));
+const absents = emprunts.filter(n => !expose(PL, n) && !expose(MO, n) && !expose(VU, n));
+T(emprunts.length >= 10 && absents.length === 0, 'chaque emprunt de la frise (' + emprunts.length + ') est exposé par planning.js, planning-modeles.js ou la vue', absents.join(', '));
 T(/^var _paEtat=null;/m.test(AN) && !/_planEditing/.test(PL.replace(/^\s*\/\/.*$/gm, '')), 'l’état de la vue vit dans la frise (_paEtat), plus dans planning.js (ANNEE-TAB)');
 T(!/_planEditing(?!Get|Set)/.test(AN.replace(/^\s*\/\/.*$/gm, '')), 'la frise ne touche jamais _planEditing en direct');
-const frise = ['_planAnneeLire', '_planRenderAnnee', 'planAnneeOuvrir', 'planAnneePas', 'planAnneeCoupe', '_planAnneeSuggestions'];
+const frise = ['_planAnneeLire', 'planAnneeOuvrir', 'planAnneePas', 'planAnneeCoupe', '_planAnneeSuggestions'];   // ANNEE-3 : _planRenderAnnee est parti dans la vue
 T(frise.every(n => new RegExp('^function ' + n + '\\s*\\(', 'm').test(AN)) && frise.every(n => !new RegExp('^function ' + n + '\\s*\\(', 'm').test(PL)), 'la frise vit dans planning-annee.js, plus dans planning.js');
 const gestes = [...new Set([...AN.matchAll(/onclick=\\?"(planAnnee\w+)\(/g)].map(m => m[1]))];
 const nonExposes = gestes.filter(n => !new RegExp('^window\\.' + n + '\\s*=\\s*' + n + ';', 'm').test(AN));
-T(gestes.length >= 8 && nonExposes.length === 0, 'chaque geste de la frise (' + gestes.length + ') est exposé', nonExposes.join(', '));
+T(nonExposes.length === 0,   // ANNEE-3 : la frise ne dessine plus rien ; ses gestes, la vue les pose (plus bas)
+  'chaque geste de la frise (' + gestes.length + ') est exposé', nonExposes.join(', '));
 T(/window\._planAnneeOnglet\(\)/.test(PL) && /^window\._planAnneeOnglet\s*=\s*_planAnneeOnglet;/m.test(AN), 'l’onglet L’année appelle la frise par window');
 // rien ne s'exécute au chargement : au niveau 0, des déclarations, des expositions, des commentaires
 function auChargement(SRC) { let prof = 0; const mauvais = [];
@@ -72,8 +81,8 @@ T(im >= 0 && /^import '\.\/planning-modeles\.js';/.test(lignes[im + 1] || ''), '
 const importsM = MO.match(/^import .*$/gm) || [];
 T(importsM.length === 1 && /from '\.\/utils\.js';$/.test(importsM[0]), 'le module des modèles n’importe que utils.js');
 const empruntsM = [...MO.matchAll(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm)].map(m => m[1]);
-const absentsM = empruntsM.filter(n => !expose(PL, n) && !expose(AN, n));
-T(empruntsM.length >= 10 && absentsM.length === 0, 'chaque emprunt du module des modèles (' + empruntsM.length + ') est exposé par planning.js ou la frise', absentsM.join(', '));
+const absentsM = empruntsM.filter(n => !expose(PL, n) && !expose(AN, n) && !expose(VU, n));
+T(empruntsM.length >= 10 && absentsM.length === 0, 'chaque emprunt du module des modèles (' + empruntsM.length + ') est exposé par planning.js, la frise ou la vue', absentsM.join(', '));
 const modeles = ['_planAnneeSuivi', 'planAnneeInscrire', 'planAnneeInscrOk', '_planAnneeFeries', '_planAnneeFeriesBloc', 'planAnneeFerie', 'planAnneeFeriesChomer'];
 T(modeles.every(n => new RegExp('^function ' + n + '\\s*\\(', 'm').test(MO)) && modeles.every(n => !new RegExp('^function ' + n + '\\s*\\(', 'm').test(AN.replace(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm, ''))), 'les modèles vivent dans planning-modeles.js, plus dans la frise');
 const gestesM = [...new Set([...MO.matchAll(/onclick=\\?"(planAnnee\w+)\(/g)].map(m => m[1]))];
@@ -82,5 +91,23 @@ const nonExposesM = gestesM.filter(n => !new RegExp('^window\\.' + n + '\\s*=\\s
 T(gestesM.length >= 4 && nonExposesM.length === 0, 'chaque geste du module des modèles (' + gestesM.length + ') est exposé', nonExposesM.join(', '));
 const mauvaisM = auChargement(MO);
 T(mauvaisM.length === 0, 'rien ne s’exécute au chargement du module des modèles', mauvaisM.slice(0, 2).join(' · '));
+// ★ ANNEE-3 (§614) : la vue de l'année et son panneau (planning-annee-vue.js), sortis de la frise, derrière la même frontière
+const iv = lignes.findIndex(l => /^import '\.\/planning-frais\.js';/.test(l));   // FRAIS-1 (§595) tient « planning-frais.js juste après planning-modeles.js »
+T(iv > im && /^import '\.\/planning-annee-vue\.js';/.test(lignes[iv + 1] || ''), 'le fichier principal charge planning-annee-vue.js après les modèles (juste après planning-frais.js)');
+const importsV = VU.match(/^import .*$/gm) || [];
+T(importsV.length === 1 && /from '\.\/utils\.js';$/.test(importsV[0]), 'la vue n’importe que utils.js');
+const empruntsV = [...VU.matchAll(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm)].map(m => m[1]);
+const absentsV = empruntsV.filter(n => !expose(PL, n) && !expose(AN, n) && !expose(MO, n));
+T(empruntsV.length >= 20 && absentsV.length === 0, 'chaque emprunt de la vue (' + empruntsV.length + ') est exposé par planning.js, la frise ou le module des modèles', absentsV.join(', '));
+const sansPonts = (src) => src.replace(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm, '');
+const vue = ['_planRenderAnnee', '_anvVue', '_anvPanSaison', '_anvPanSemaine', '_anvGrille', '_anvChoix', 'planAnneePan', 'planAnneeCel', 'planAnneeVal', 'planAnneeChamp'];
+T(vue.every(n => new RegExp('^function ' + n + '\\s*\\(', 'm').test(VU)) && vue.every(n => !new RegExp('^function ' + n + '\\s*\\(', 'm').test(sansPonts(AN))), 'la vue et son panneau vivent dans planning-annee-vue.js, plus dans la frise');
+T(['_planRenderAnnee', 'planAnneePanFermer', 'planAnneeMenu'].every(n => !new RegExp('^window\\.' + n + '\\s*=', 'm').test(AN)), 'la frise n’écrase pas sur window ce que la vue expose (un pont qui s’appellerait lui-même)');
+const gestesV = [...new Set([...VU.matchAll(/on(?:click|input|change|blur|keydown)=\\?"(planAnnee\w+)\(/g)].map(m => m[1]))];
+const nonExposesV = gestesV.filter(n => ![VU, AN, MO].some(src => new RegExp('^window\\.' + n + '\\s*=\\s*' + n + ';', 'm').test(src)));
+T(gestesV.length >= 15 && nonExposesV.length === 0, 'chaque geste de la vue (' + gestesV.length + ') est exposé', nonExposesV.join(', '));
+T(/^var _paEtat=null;/m.test(AN) && !/_paEtat/.test(VU.replace(/^\s*\/\/.*$/gm, '')) && /^function _paNeuf\(/m.test(AN), 'l’état de la vue reste dans la frise : la vue le lit (_paE) et le pose (_paNeuf) par fonction');
+const mauvaisV = auChargement(VU);
+T(mauvaisV.length === 0, 'rien ne s’exécute au chargement de la vue', mauvaisV.slice(0, 2).join(' · '));
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

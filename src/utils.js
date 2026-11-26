@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.34';
+export const APP_VERSION = '11.35';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3428,8 +3428,8 @@ export const MV_INFO = {
   // ★ MOTS-17 (§612) : le balayage — les notes de Planning › Année, des Stades et du Tracteur quittent l'écran.
   //   plan.rythme et plan.feries sont VIVANTES (la date de fin de saison, l'année et sa base) : _mvInfoSet les remplit
   //   au rendu ; le texte ci-dessous est le repli honnête si le Planning n'a pas tourné.
-  'plan.frise': { t: 'Régler la frise', p: [   // ANNEE-2 (§613) : la vue refaite, le détail dans un panneau
-    'Une <b>saison</b> se règle en touchant sa ligne : ses jours avec − et + (ses jours réguliers seulement), sa prise de poste, sa coupe d’une semaine.',
+  'plan.frise': { t: 'Régler la frise', p: [   // ANNEE-2 (§613) : la vue refaite, le détail dans un panneau ; ANNEE-3 (§614) : la grille des jours
+    'Une <b>saison</b> se règle en touchant sa ligne : dans sa grille, un jour puis une durée (ses jours réguliers seulement), sa prise de poste, son lundi de début.',
     'Une <b>semaine</b> s’ouvre en touchant ses heures, en tête de la vue (‹ et › pour la voisine) : ses jours un par un, la fermer, la rouvrir, ou changer le rythme à partir d’elle.',
     'Les <b>jours à part</b>, le <b>cadre</b> et les <b>fériés</b> s’ouvrent depuis la ligne d’état, sous la vue. Rien n’est écrit avant « Enregistrer ».'
   ] },

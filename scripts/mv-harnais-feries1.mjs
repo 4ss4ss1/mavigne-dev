@@ -14,12 +14,12 @@ import { fileURLToPath } from 'node:url';
 const ICI = fileURLToPath(import.meta.url);
 const R = path.resolve(path.dirname(ICI), '..');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const SOURCES = () => lire('src/planning.js') + '\n' + lire('src/planning-annee.js') + '\n' + lire('src/planning-modeles.js');   // MODELES-DEC (§558) : les fériés vivent dans planning-modeles.js
+const SOURCES = () => lire('src/planning.js') + '\n' + lire('src/planning-annee.js') + '\n' + lire('src/planning-modeles.js') + '\n' + lire('src/planning-annee-vue.js');   // MODELES-DEC (§558) : les fériés vivent dans planning-modeles.js ; ANNEE-3 (§614) : la semaine, dans planning-annee-vue.js
 const DEFAUTS = {
   solid:    ['la journée de solidarité compte parmi les fériés à chômer', 'P=F.filter(function(f){return f.h>0&&!f.sol;})', 'P=F.filter(function(f){return f.h>0;})'],
   tous:     ['« Chômer les N » n’écrit rien au brouillon', "if(f.h>0&&!f.sol){_planAnneePose(G,f.m,f.d,0);n++;}", 'if(f.h>0&&!f.sol){n++;}'],
   remet:    ['« Travailler » remet 0 au lieu des heures de la saison', '_planAnneePose(G,m,j,f.saison);', '_planAnneePose(G,m,j,0);'],
-  semaine:  ['la semaine ne montre plus les heures d’un férié', "+(x.fer?_planAnneeFerieSem(x,A,C.yr,JN[x.g],adm)", "+(x.fer?'<span>'+_escHtml(x.fer)+'</span>'"],   // ANNEE-2 (§613) : la semaine, dans le panneau
+  semaine:  ['la semaine ne montre plus l’état d’un férié', "var sub=x.fer?_planAnneeFerieSem(x,A,C.yr,ANV_JN[x.g],adm)", "var sub=x.fer?'<span>'+_escHtml(x.fer)+'</span>'"],   // ANNEE-3 (§614) : ses heures sont dans la case du jour   // ANNEE-2 (§613) : la semaine, dans le panneau
   base:     ['le texte dit l’année d’avant même quand la base est active', "p:[_planBaseActive(yr)?'<b>Ch\\u00f4m\\u00e9</b>, un f\\u00e9ri\\u00e9 compte quand", "p:[false?'<b>Ch\\u00f4m\\u00e9</b>, un f\\u00e9ri\\u00e9 compte quand"],
   droits:   ['« Chômer les N » s’offre à qui n’est pas administrateur', "+(adm?'<div style=\"margin-top:8px\"><button class=\"plan-btn-saisir\" data-tuto=\"plan.annee.feries.tous\"", "+(true?'<div style=\"margin-top:8px\"><button class=\"plan-btn-saisir\" data-tuto=\"plan.annee.feries.tous\""],
 };
@@ -122,10 +122,10 @@ T(ctx.E().n === n1 && ctx.E().brouillon[4][25] === 7, 'D3 et un « Chômer » fo
 // ── E. La ligne de la semaine ──
 etat();
 const RA = fonction(PL, '_anvPanSemaine');   // ANNEE-2 (§613) : la semaine choisie s'ouvre dans le panneau
-T(/\+\(x\.fer\?_planAnneeFerieSem\(x,A,C\.yr,JN\[x\.g\],adm\)/.test(RA), 'E0 la semaine choisie (son panneau) passe ses fériés à _planAnneeFerieSem');
+T(/var sub=x\.fer\?_planAnneeFerieSem\(x,A,C\.yr,ANV_JN\[x\.g\],adm\)/.test(RA) && /x\.fer&&\(sol\|\|!\(x\.h>0\)\)\)\?'':_anvCel\(/.test(RA), 'E0 la semaine choisie (son panneau) passe ses fériés à _planAnneeFerieSem ; un férié travaillé garde la case de ses heures (ANNEE-3)');
 const A2 = F._planAnneeLire('mi-temps', 2026), x11 = jour(A2, 10, 11), x1 = jour(A2, 0, 1);
 const L11 = F._planAnneeFerieSem(x11, A2, 2026, 'mercredi', true), L1 = F._planAnneeFerieSem(x1, A2, 2026, 'jeudi', true);
-T(/Armistice \u00b7 travaill\u00e9 au mod\u00e8le/.test(L11) && /onclick="planAnneeJour\(this\)">\u2212</.test(L11) && /7\u00a0h<\/b>/.test(L11) && /data-a="chomer"/.test(L11), 'E1 un férié travaillé : « travaillé au modèle », − 7 h +, « Chômer »', L11.slice(0, 260));
+T(/Armistice \u00b7 travaill\u00e9 au mod\u00e8le/.test(L11) && !/planAnneeJour\(|\u2212/.test(L11) && /data-a="chomer"/.test(L11), 'E1 un férié travaillé : « travaillé au modèle », « Chômer » — ses heures dans la case du jour, plus de « − / + » (ANNEE-3)', L11.slice(0, 260));
 T(/Jour de l['\u2019]An \u00b7 ch\u00f4m\u00e9/.test(L1) && /data-a="travailler"/.test(L1), 'E2 un férié chômé : « chômé », « Travailler »', L1.slice(0, 200));
 const L11l = F._planAnneeFerieSem(x11, A2, 2026, 'mercredi', false);
 T(/travaill\u00e9 au mod\u00e8le/.test(L11l) && !/<button/.test(L11l), 'E3 sans les droits : l’état et les heures, aucun bouton');

@@ -167,3 +167,53 @@ body[data-anv-menu="mod"] #page-planning .anv-menu[data-menu="mod"], body[data-a
 @keyframes anv-pan-in{ from{ transform:translateX(24px); opacity:0; } to{ transform:none; opacity:1; } }
 @media (prefers-reduced-motion:reduce){ .anv-ov .anv-pan{ animation:none; } }
 /* ★ FIN ANNEE-2 */
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★ ANNEE-3 (§614) — LE PANNEAU SANS « − / + » (maquette v3) : la grille des jours (lundi à dimanche en colonnes, la semaine A,
+   la B en lignes, le total au bout), le choix d'une durée sous la case touchée, les champs (prise de poste, début d'une saison :
+   le jeu des cases de saisie, .mvchamp-compact), les jours d'une semaine ou à part en rangées. L'interrupteur « une semaine sur
+   deux » est celui du jeu (.ephy-tgl). Cases et durées : 44 px au téléphone, 36 dès 768 px.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.anv-ov .anv-sec-f{ display:flex; align-items:center; gap:var(--e-2,8px); }
+.anv-ov .anv-sec-f > span:first-child{ flex:1 1 auto; }
+.anv-ov .anv-sec .mv-i{ margin-left:var(--e-1,4px); vertical-align:middle; }
+.anv-ov .anv-tog{ margin:0; padding:0; border:0; background:none; color:var(--texte,#1B1A18); font:inherit; font-size:var(--pt-txt,13px); font-weight:var(--fw-med,500); }
+.anv-ov .anv-tog:focus-visible{ outline:2px solid var(--accent,#7A2850); outline-offset:2px; border-radius:var(--r-xs,4px); }
+.anv-ov .anv-gr{ display:grid; grid-template-columns:0 repeat(7,minmax(0,1fr)) 3.6em; gap:var(--e-1,4px); align-items:center; }
+.anv-ov .anv-gr-ab{ grid-template-columns:1em repeat(7,minmax(0,1fr)) 3.6em; }
+.anv-ov .anv-gr-hd{ padding-bottom:var(--e-0,2px); color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); font-weight:var(--fw-med,500); text-align:center; }
+.anv-ov .anv-gr-r, .anv-ov .anv-gr-tt{ text-align:right; }
+.anv-ov .anv-gr-rl{ color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); font-weight:var(--fw-semi,600); }
+.anv-ov .anv-gr-tt{ font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.anv-ov .anv-cel{ display:flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:0; height:44px; margin:0; padding:0 var(--e-1,4px); border:var(--bw,1px) solid var(--champ-filet,#77736B); border-radius:var(--r-md,8px); background:var(--bg-card,#FFFFFF); color:var(--texte,#1B1A18); font:inherit; font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.anv-ov button.anv-cel{ cursor:pointer; }
+.anv-ov button.anv-cel:hover{ border-color:var(--texte,#1B1A18); }
+.anv-ov .anv-cel.z{ border-color:var(--ligne,#E7E6E2); background:var(--survol,rgba(28,26,22,.055)); color:var(--texte-doux,#686660); font-weight:var(--fw-med,500); }
+.anv-ov .anv-cel.on{ border-color:var(--accent,#7A2850); box-shadow:0 0 0 1px var(--accent,#7A2850); background:var(--bg-card,#FFFFFF); color:var(--accent-texte,#7A2850); }
+.anv-ov span.anv-cel{ border-color:var(--ligne,#E7E6E2); }
+.anv-ov .anv-cel-v{ flex:none; min-width:5.2em; height:40px; }
+.anv-ov .anv-choix{ margin-top:var(--e-2,8px); padding:var(--e-3,12px); border:var(--bw,1px) solid var(--ligne,#E7E6E2); border-radius:var(--r-lg,12px); background:var(--bg-app,#F0EEE9); }
+.anv-ov .anv-choix-q{ display:block; margin-bottom:var(--e-2,8px); color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); }
+.anv-ov .anv-choix-l{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:var(--e-1,4px); }
+.anv-ov .anv-chip{ min-width:0; height:44px; margin:0; padding:0 var(--e-1,4px); border:var(--bw,1px) solid var(--champ-filet,#77736B); border-radius:var(--r-md,8px); background:var(--bg-card,#FFFFFF); color:var(--texte,#1B1A18); font:inherit; font-size:var(--pt-base,14px); font-weight:var(--fw-med,500); font-variant-numeric:tabular-nums; white-space:nowrap; cursor:pointer; }
+.anv-ov .anv-chip:hover{ border-color:var(--texte,#1B1A18); }
+.anv-ov .anv-chip.on{ border-color:var(--accent,#7A2850); background:var(--accent,#7A2850); color:var(--sur-accent,#FFFFFF); }
+.anv-ov .anv-chip:disabled{ opacity:.4; cursor:not-allowed; }
+.anv-ov .anv-choix-au{ display:flex; align-items:center; gap:var(--e-2,8px); margin-top:var(--e-2,8px); font-size:var(--pt-txt,13px); }
+.anv-ov .anv-choix-au span{ flex:1 1 auto; }
+.anv-ov .anv-choix-au em{ color:var(--texte-doux,#686660); font-style:normal; }
+.anv-ov .anv-in{ flex:none; }
+.anv-ov .anv-in-h{ width:5.5em; text-align:right; }
+.anv-ov .anv-in-t{ width:8em; }
+.anv-ov .anv-in-d{ width:auto; max-width:12em; }
+.anv-ov .anv-jr{ display:flex; align-items:center; flex-wrap:wrap; gap:var(--e-1,4px) var(--e-2,8px); min-height:48px; padding:var(--e-1,4px) 0; border-bottom:var(--bw,1px) solid var(--ligne,#E7E6E2); font-size:var(--pt-txt,13px); }
+.anv-ov .anv-jr.on{ border-bottom-color:transparent; }
+.anv-ov .anv-jr-n{ flex:none; min-width:6.5em; font-weight:var(--fw-med,500); white-space:nowrap; }
+.anv-ov .anv-jr-s{ flex:1 1 8em; min-width:0; color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); }
+.anv-ov .anv-jr-s .mvbtn{ margin-left:var(--e-1,4px); }
+.anv-ov .anv-jr-ed{ padding-bottom:var(--e-3,12px); border-bottom:var(--bw,1px) solid var(--ligne,#E7E6E2); }
+.anv-ov .anv-jr-ed .anv-ln{ border-bottom:0; }
+@media (min-width:768px){
+  .anv-ov .anv-cel, .anv-ov .anv-chip, .anv-ov .anv-cel-v{ height:36px; }
+  .anv-ov .anv-jr{ min-height:40px; }
+}
+/* ★ FIN ANNEE-3 */

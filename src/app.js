@@ -38,6 +38,7 @@ import './planning.js';
 import './planning-annee.js';   // ANNEE-DEC (§542) : l'année d'un modèle, sortie de planning.js — chargée juste après lui
 import './planning-modeles.js';  // MODELES-DEC (§558) : qui suit un modèle, ses fériés — sortis de planning-annee.js, chargés juste après elle
 import './planning-frais.js';   // FRAIS-1 (§595) : les frais à rembourser et les indemnités km — le volet « Frais » de la fiche
+import './planning-annee-vue.js';   // ANNEE-3 (§614) : la vue de l'année et son panneau, sortis de planning-annee.js — chargés après les modèles et les frais
 import './reglages.js';
 import './tracteur.js';
 import './phyto.js';

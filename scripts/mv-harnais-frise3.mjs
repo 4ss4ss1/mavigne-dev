@@ -18,7 +18,7 @@ const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
 const DEFAUTS = {
   seuil: ['un mois n’est plus jamais coupé', '    if(dist<2)return;', '    if(dist<99)return;'],
   vides: ['la coupe ne part plus du lundi de sa semaine', '      if(fd){var lun=fd.i-fd.g;q=q.filter(function(y){return y.i>=lun;});}}', '      }'],
-  sens:  ['« 1 sem. plus tôt » repousse au lieu d’avancer', '  if(n<0)A.J.slice(Math.max(0,b+n),b).forEach(', '  if(n>0)A.J.slice(Math.max(0,b+n),b).forEach('],
+  sens:  ['« 1 sem. plus tôt » repousse au lieu d’avancer', '  if(t<b)A.J.slice(Math.max(0,t),b).forEach(', '  if(t>b)A.J.slice(Math.max(0,t),b).forEach('],   // ANNEE-3 (§614) : la coupe va au jour cible (le pas, ou le lundi choisi)
 };
 if (CONTRE) {
   console.log('\n── FRISE-3 — contre-épreuve (un processus par défaut)\n');
@@ -43,7 +43,7 @@ function fonction(src, nom) {
   for (let j = i; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}') { d--; if (d === 0) return src.slice(m.index, j + 1); } }
   throw new Error('accolades : ' + nom);
 }
-const NOMS = ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal',
+const NOMS = ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeVal',
   '_planAnneeBrouillon', 'planAnneeCoupe', 'planAnneeJour', 'planAnneeRemettre', '_planAnneeEtat'];
 const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');
