@@ -1,0 +1,27 @@
+{
+  "lot": "FRISE-AB2",
+  "section": "§616",
+  "base": "465f7a00ae1e1765096809e49c5c36e2dfd9b35c",
+  "inclut": [],
+  "date": "2026-11-26",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "9f22329bab8d1f2d8149276545be54a14a97e3c995b9e6014735b0f1ccf8b2a1",
+    "docs/claude/INDEX.md": "ff82b374418368f894964157b8e597ff4fd768e4f4c822511219aee820621e09",
+    "docs/claude/chantiers-580-629.md": "13bf1e03ba3444bae15a67751128db295b953ec18541d12b265733008bcfc910",
+    "docs/claude/journal.md": "6309d13dfa44030eb89466bd1c551dfae9b358829371e1db1873ca9e8ff0c20e",
+    "guide/10-planning.html": "5b0102cd7e9153faf7c1ef59ae6954b551838a9b20816dda46dcc13f5c710d21",
+    "index.html": "a14535c2fbc32b066fee4f0e197b8a78ac3b366e2759e3137fa500702c42a6b5",
+    "public/guide.html": "e60d0e7d74a5ead52b935f1f19145063414f96dbd53ecd37cbcd07e61a564143",
+    "public/sw.js": "80476eb3303d28e88751fc3936a4f4ab45a2a38be94416a45f1a901355a62a2c",
+    "scripts/harnais-claude-md.mjs": "96f6668159401c19111921d3850ff9b4988a4abec8487ec9a012cef52cd0c44c",
+    "scripts/mv-harnais-liste.mjs": "7b81b77c5eb9cc1c98a361535a872d9e106ed2844fdf656ac8666992843d56cd",
+    "src/planning-annee.js": "4eedc70093d8b3ffa266efbeb038ebdfd40337ba38c2bf57fbd7a2ba803bcc16",
+    "src/utils.js": "aa077c08a2fb122ccda66f977051992735963f07ed2c04ae4cc5473aecd6731f",
+    "src/whats-new.js": "8d5d56c06d06eef216f4b7d12115b5ff7e72befa0ba160a76b466d97ad24d862",
+    "scripts/mv-harnais-ab2.mjs": "e54abe56b5e7418e48a25f2389d6c6439bea52e01c1aeba0a410220edaa241af"
+  }
+}

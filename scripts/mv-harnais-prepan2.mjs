@@ -57,7 +57,7 @@ function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m
 let F, ctx; const EL = {}; const el = id => EL[id] || (EL[id] = { id, innerHTML: '', textContent: '', disabled: false });
 try {
   const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('\n};', i0);
-  const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planCreditFerie', '_planRecaleMap', '_planRecale', '_planTplDef', '_planTplDefInfo', '_planTplSource', '_planTplReport', '_planGetTpl',
+  const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planCreditFerie', '_planRecaleMap', '_planRecaleAlterne', '_planRecaleSemaines', '_planRecale', '_planTplDef', '_planTplDefInfo', '_planTplSource', '_planTplReport', '_planGetTpl',
     '_planRecaleEtat', '_planRecaleSourceTxt', '_planRecaleBar',
     '_planAnneeSaison', '_planAnneeLire', '_planAnneeCopie', '_planAnneeMetaCopie', '_planAnneePose', '_planAnneePasVal', '_planAnneeReguliers', '_planAnneeBrouillon', '_planAnneeCleS', '_planAnneeDate', '_planAnneePlage', '_planAnneeHoraireTxt', '_paH', 'planAnneeEnregistrer',
     '_planAnneeFeries', '_planAnneeManque', 'planAnneePartir', '_planPrepModeles', '_planPrepGrille', '_planPrepFeriesN', '_planPrepPeindre', 'planPrepOuvrir', 'planPrepToggle', 'planPrepFermer', 'planPrepOk'];

@@ -756,6 +756,34 @@ function _planRecaleMap(m,anSrc,anDst){
 //   `vides`, et l'écran les affiche. Compléter d'office aurait posé dans un
 //   planning des heures que personne n'a décidées — et un planning se signe.
 // Renvoie {g, perdus:[{m,d,h}], vides:[{m,d}]}.
+// ★★ FRISE-AB3 (§617) — UN MODÈLE QUI ALTERNE (une semaine A, une semaine B : un vendredi sur deux) SE REPORTE PAR SEMAINE.
+//   Au rang dans le mois, l'alternance basculait à certains changements de mois (2026 → 2027 : les vendredis 23 et 30 avril
+//   libres tous les deux, puis le 28 mai et le 4 juin) : elle compte les semaines de l'année, pas celles du mois. Nico (26/11) :
+//   « un vendredi sur 2 c'est un vendredi sur 2 en partant depuis le début de l'année jusqu'à sa fin », et « on continue à la
+//   suite de 2026 ». Chaque jour prend le jour de 52 semaines plus tôt (un nombre pair de semaines : A reste A, et janvier
+//   continue décembre) ; si ce jour tombe dans un autre mois, ou sur un férié de l'année d'avant (ses heures ne disent pas la
+//   semaine type), le même jour de semaine deux semaines plus tôt ou plus tard, dans le même mois. Les saisons restent sur leurs
+//   mois, un début de saison un lundi reste un lundi, la semaine des vendanges reste une semaine. Un modèle SANS alternance garde
+//   le rang dans le mois (ci-dessous) : rien ne change pour lui. L'alternance se lit par la frise (window._planAnneeLire) ;
+//   sans elle (un harnais, un module pas encore chargé), le rang dans le mois.
+function _planRecaleAlterne(grille,anSrc){
+  var L=(typeof window!=='undefined')?window._planAnneeLire:null;if(typeof L!=='function')return false;
+  try{var A=L('',anSrc,grille);return !!(A&&A.saisons&&A.saisons.some(function(x){return x.ab;}));}catch(e){return false;}
+}
+function _planRecaleSemaines(grille,anSrc,anDst){
+  var F=_feriesY(anSrc)||{},D=Math.round((Date.UTC(anDst,0,1)-Date.UTC(anSrc,0,1))/864e5),W=14*Math.round(D/14),g={},src={},inv={},vides=[],m,PAS=[0,-14,14,-28,28];
+  for(m=0;m<12;m++){g[m]={};src[m]={};inv[m]={};}
+  for(var t=new Date(anDst,0,1);t.getFullYear()===anDst;t.setDate(t.getDate()+1)){
+    var tm=t.getMonth(),td=t.getDate(),sd=null,mo=grille[tm]||{};
+    for(var k=0;k<PAS.length&&sd==null;k++){var c=new Date(anDst,tm,td-W+PAS[k]);
+      if(c.getFullYear()===anSrc&&c.getMonth()===tm&&!(F[tm]&&F[tm][c.getDate()]))sd=c.getDate();}
+    if(sd==null){var wd=t.getDay();   // aucune place dans le mois : un jour de semaine travaillé ce mois-là reste à poser (règle du 11/09)
+      if(Object.keys(mo).some(function(kd){return /^\d+$/.test(kd)&&new Date(anSrc,tm,+kd).getDay()===wd&&parseFloat(mo[kd])>0;}))vides.push({m:tm,d:td});continue;}
+    src[tm][td]=sd;if(inv[tm][sd]==null)inv[tm][sd]=td;
+    if(Object.prototype.hasOwnProperty.call(mo,String(sd)))g[tm][td]=mo[sd];
+  }
+  return {g:g,src:src,inv:inv,vides:vides};
+}
 function _planRecale(grille,anSrc,anDst){
   var perdus=[],vides=[];
   if(!grille)return {g:{},perdus:perdus,vides:vides};
@@ -764,7 +792,9 @@ function _planRecale(grille,anSrc,anDst){
   // Ce qui n'est pas un mois se recopie tel quel — `_timings` est clé par MOIS,
   // il ne glisse pas. `_timings_jour`, lui, est clé par JOUR : traité plus bas.
   Object.keys(grille).forEach(function(k){ if(!/^(?:[0-9]|1[01])$/.test(k)&&k!=='_timings_jour'&&k!=='_noms')out[k]=grille[k]; });
-  for(m=0;m<12;m++){
+  var SEM=_planRecaleAlterne(grille,anSrc)?_planRecaleSemaines(grille,anSrc,anDst):null;   // ★ FRISE-AB3 (§617) : un modèle qui alterne, par semaine
+  if(SEM){for(m=0;m<12;m++)out[m]=SEM.g[m];vides=SEM.vides;}
+  else for(m=0;m<12;m++){
     var mo=grille[m]; if(!mo)continue;
     var map=_planRecaleMap(m,anSrc,anDst),res={},pris={},dows={},_m=m;
     Object.keys(mo).forEach(function(k){
@@ -785,8 +815,9 @@ function _planRecale(grille,anSrc,anDst){
     var tj={};
     Object.keys(grille._timings_jour).forEach(function(km){
       var mm=parseInt(km,10); if(isNaN(mm)||mm<0||mm>11)return;
-      var mp=_planRecaleMap(mm,anSrc,anDst),src=grille._timings_jour[km],dst={};
-      Object.keys(src).forEach(function(kd){ var nd=mp[parseInt(kd,10)]; if(nd)dst[nd]=src[kd]; });
+      var src=grille._timings_jour[km],dst={};
+      if(SEM)Object.keys(SEM.src[mm]).forEach(function(td){ var sd=SEM.src[mm][td]; if(src[sd]!=null)dst[td]=src[sd]; });   // ★ FRISE-AB3 : le jour de la même semaine type
+      else{ var mp=_planRecaleMap(mm,anSrc,anDst); Object.keys(src).forEach(function(kd){ var nd=mp[parseInt(kd,10)]; if(nd)dst[nd]=src[kd]; }); }
       tj[mm]=dst;
     });
     out._timings_jour=tj;
@@ -798,7 +829,7 @@ function _planRecale(grille,anSrc,anDst){
     var nm={},mps={};
     Object.keys(grille._noms).forEach(function(k){
       var q=String(k).split('-'),mm=parseInt(q[0],10),d0=parseInt(q[1],10),nd=0,j;if(isNaN(mm)||mm<0||mm>11||!(d0>0))return;
-      var mp=mps[mm]||(mps[mm]=_planRecaleMap(mm,anSrc,anDst));for(j=d0;j<d0+7&&!nd;j++)nd=mp[j]||0;
+      var mp=mps[mm]||(mps[mm]=SEM?SEM.inv[mm]:_planRecaleMap(mm,anSrc,anDst));for(j=d0;j<d0+7&&!nd;j++)nd=mp[j]||0;
       if(nd&&nm[mm+'-'+nd]==null)nm[mm+'-'+nd]=grille._noms[k];
     });
     out._noms=nm;

@@ -1,0 +1,35 @@
+{
+  "lot": "FRISE-AB3",
+  "section": "§617",
+  "base": "465f7a00ae1e1765096809e49c5c36e2dfd9b35c",
+  "inclut": [
+    "FRISE-AB2"
+  ],
+  "date": "2026-11-26",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    "CLAUDE.md": "44898b1bc935140c83c3b088e5557599af889ab77b66e356359233ba509ec0b1",
+    "docs/claude/INDEX.md": "1018d8e9504f701fd0f5d89cf69e4e3b9d7a19bb6892d2b53eb90a520c5ad09a",
+    "docs/claude/chantiers-580-629.md": "fb01798f6487effa1dcc5ed9e5eb3b4faf0d4d2c31410e8231eed0a43d76f618",
+    "docs/claude/journal.md": "ba00549111f75bde45dca3b0828d22d8a0b7be3857bf4fe4a3244b93a701ab7b",
+    "guide/10-planning.html": "fde5494df3af0a8f3693e16224ecea4f48060302007d877a9c87f3240c5dd25a",
+    "index.html": "aed64d9bd6f2e3f6c73951b92c66dd92bd046d6119c531a851ab66cd085c2e46",
+    "public/guide.html": "c901f69f485fa3cefa65f678ff193c2517ae5213c244bd90410c9cecc6917fb0",
+    "public/sw.js": "d43b8862c9b89a2f984825b6e252fae1e7293abcd42c5cb00dcea60a1529047b",
+    "scripts/harnais-claude-md.mjs": "9b9d5e324b0f7f30b23ec0e5ada9475250a10fb59f3d396ff5714f617d4b7625",
+    "scripts/mv-harnais-annee4.mjs": "314f3b785728c700ed2ee839034627703b6b319cf0e923e5cee4ce93b82c5522",
+    "scripts/mv-harnais-liste.mjs": "6e3acfbf6d01d09cfcb26d592420f91d6b74e392a9f4e19443d98076aa20889e",
+    "scripts/mv-harnais-prepan1.mjs": "5c01d66635f1179c59c9fffded3a89b9df79886b2b849cbbee384eab27199c54",
+    "scripts/mv-harnais-prepan2.mjs": "4c8dfc2e7400344219d345d8851398de5b31775471c8f45dd9526c353509bdfa",
+    "scripts/mv-harnais-recalage.mjs": "908b2117475bf57b70f0108c07e01abb9faca5efe8b253317528de15b4ae95a4",
+    "src/planning-annee.js": "4eedc70093d8b3ffa266efbeb038ebdfd40337ba38c2bf57fbd7a2ba803bcc16",
+    "src/planning.js": "7b97a7c95669da71ea63e768a396d9e0f895369bad8d9210a11dc52fde00ad4e",
+    "src/utils.js": "5f3e5a4692bcaf035317747126af3a9c46069c28040dedc189c98fe3a0e77eae",
+    "src/whats-new.js": "bc2f500aa60cdfffef66018e1fe8e2ba7b8699dc0608ec44e5dc17b713d28f90",
+    "scripts/mv-harnais-ab2.mjs": "e54abe56b5e7418e48a25f2389d6c6439bea52e01c1aeba0a410220edaa241af",
+    "scripts/mv-harnais-ab3.mjs": "7cf4477f0949e684058caea6c7aee7fd229a7446a3738dc8ebf4f5d06b46040b"
+  }
+}

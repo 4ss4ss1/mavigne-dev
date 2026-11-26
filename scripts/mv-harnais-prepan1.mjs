@@ -50,7 +50,7 @@ function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m
 let F, ctx;
 try {
   const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('\n};', i0);
-  const NOMS = ['_planRecaleMap', '_planRecale', '_planTplDef', '_planTplDefInfo', '_planTplSource', '_planTplReport', '_planGetTpl', '_planRecaleEtat', '_planRecaleSourceTxt', '_planModeles', '_pTplStore', '_planRecaleBar'];
+  const NOMS = ['_planRecaleMap', '_planRecaleAlterne', '_planRecaleSemaines', '_planRecale', '_planTplDef', '_planTplDefInfo', '_planTplSource', '_planTplReport', '_planGetTpl', '_planRecaleEtat', '_planRecaleSourceTxt', '_planModeles', '_pTplStore', '_planRecaleBar'];
   ctx = vm.createContext({ ANNEE: 2027, ADM: true, ACTIFS: [] });
   vm.runInContext(PL.slice(i0, j0 + 3) + '\nvar PLAN_DEF_AN=2026, _PLAN_RECALE_CACHE={}, _PLAN_REPORT_CACHE={}, PLANNING_TEMPLATES={};\n'
     + 'function _pY(){return ANNEE;}\nfunction isAdmin(){return ADM;}\nfunction _pl2Actifs(){return ACTIFS;}\nfunction _planPlId(m){return m.planning_id||"standard";}\n'

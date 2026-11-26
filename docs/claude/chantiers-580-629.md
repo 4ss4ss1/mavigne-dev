@@ -1657,3 +1657,140 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Une plage de signes de contrôle dans une expression rougit le cliquet ESLint** (`no-control-regex`, plafond 0) : pour nettoyer un nom, un tour de boucle sur les codes (moins de 32, et 127) remplace l’expression. Seule la chaîne l’a vu (`lint-cliquet`), pas les harnais.
 - ⚠️ **Des barres pleines côte à côte se fondent.** Dans « Mon année », deux saisons de couleur voisine ne faisaient qu’une seule barre. Il faut un filet entre elles (une ombre intérieure de la couleur du fond), et une piste de la couleur de la carte, bordée.
 - ⚠️ **Une capture qui suit une autre dans la même page en garde l’état.** Le panneau ouvert à la capture d’avant couvrait « Mon année ». Un scénario qui doit partir propre se capture à part.
+
+
+## 616. ★★ FRISE-AB2 — PLANNING › ANNÉE : UN MOIS QUI N’A PAS DE QUOI LIRE L’ALTERNANCE A / B LA SUIT CHEZ SON VOISIN (26/11 — APP 11.37, SW 12.28 — `src/planning-annee.js` (`_planAnneeLire`) · `src/whats-new.js` · `src/utils.js` (APP) · `index.html` · `public/sw.js` · `guide/10-planning.html` · `public/guide.html` (regénéré) · `scripts/mv-harnais-ab2.mjs` (neuf) · `scripts/mv-harnais-liste.mjs`)
+
+### 616a. D’où ça vient
+
+- Signalé au §614e, à reprendre : une saison avril → septembre « un vendredi sur deux » se lisait en trois saisons. Après ANNEE-4, le défaut se voyait davantage, car le nom de la saison n’allait qu’au premier morceau. Nico a choisi ce lot pour la suite (26/11, « FRISE-AB fix », la recommandation).
+- **La cause** (`_planAnneeLire`, §551) : un mois ne lit l’alternance d’un jour de la semaine que s’il a deux semaines paires et deux impaires, sans exception. Deux choses l’en empêchent :
+  - **ses fériés** : en mai 2026, les vendredis 1er et 8 sont fériés, il ne reste que le 15, le 22 et le 29 (deux d’une sorte, un de l’autre). C’est pareil en juillet 2028 (le 14 est un vendredi), et pour un lundi sur deux avec le lundi de Pâques ou de Pentecôte ;
+  - **une semaine à part** : la semaine des vendanges, à 8 h 30 le vendredi, casse le « sans exception ». C’est vu en route, en 2027, sans aucun férié en cause.
+  
+  Le mois prenait alors sa propre semaine type, faisait sa saison, et ses vendredis « de l’autre sorte » devenaient des jours à part.
+- Mesuré avant (lundi-jeudi 8 h, un vendredi sur deux 5 h, avril → septembre ; le reste 7, 7, 7, 7, 4) :
+  - 2026 : **5 saisons** (avril / mai / juin → septembre), 1 jour à part ;
+  - 2028 : **5 saisons** (juillet à part), 1 jour à part ;
+  - 2027 : 3 saisons ;
+  - 2027 avec les vendanges : **4 saisons** (septembre à part).
+
+### 616b. Ce qui change
+
+- **Un mois qui ne montre pas l’alternance seul prend celle du mois d’avant (ou d’après) si ses jours la suivent**, dans `_planAnneeLire`, avant que les saisons se forment. Trois conditions :
+  - au plus une semaine à part (trois jours qui s’écartent, comme la règle des semaines à part plus bas) ;
+  - au plus deux autres jours qui s’écartent ;
+  - pas plus mal que sa propre semaine type (`_ecarts` compte, semaine par semaine, sans les fériés ni les fermetures).
+  
+  À égalité, le voisin l’emporte : le mois reste dans la saison, l’écart devient un jour à part, comme dans une saison sans alternance. Les tours se répètent tant qu’un mois change (un mois peut suivre un voisin qui vient lui-même d’en suivre un).
+- **L’alternance naît toujours dans un mois qui la montre seul** : la règle du §551 ne change pas, elle ne fait que se prolonger. Un modèle sans alternance (la grille intégrée, celle de Nico) se lit exactement comme avant : la règle ne s’applique qu’à côté d’un mois A / B.
+- **Rien d’autre** : ni la vue, ni le panneau, ni l’enregistrement. Ils lisent tous `_planAnneeLire`. Les heures n’ont jamais été fausses : seul le découpage en saisons l’était.
+
+### 616c. Mesuré après
+
+- Le même modèle : **3 saisons en 2026, 2027 et 2028**, semaine A paire ou impaire, **0 jour à part**. Avec les vendanges : 3 saisons et 1 semaine à part.
+- Capture sur ordinateur (démo, le modèle nommé « Travaux en vert ») : 3 lignes de saison, dont une seule « Travaux en vert » du 1er avril au 30 septembre, en bandes, 32 h / 37 h.
+- Le tuto « un vendredi sur deux » rejoué à la main, au téléphone et sur ordinateur : 8 étapes sur 8. L’aiguillage ne le dit pas concerné (aucun tuto ne l’est).
+
+### 616d. Harnais
+
+`scripts/mv-harnais-ab2.mjs` : 6 assertions et 6 contre-épreuves, sur la VRAIE lecture. Il tient :
+
+- un vendredi sur deux, d’un bloc en 2026, 2027 et 2028, A paire ou impaire, sans jour à part ;
+- un lundi sur deux (Pâques, Pentecôte) ;
+- la semaine des vendanges reste à part, la saison d’un bloc ;
+- un pont reste un jour à part ;
+- un mois qui ne suit PAS l’alternance garde sa saison : des vendredis tous à 5 h, tous libres, ou un autre horaire du lundi au jeudi ;
+- une saison qui commence le lundi 13 avril garde sa coupe ;
+- la grille intégrée n’a toujours aucune alternance ;
+- le nom de la saison (ANNEE-4) va à toute la saison.
+
+**Les harnais de l’année** (`ab1`, `annee` à `annee4`, `anneedec`, `anneetab`, `frise1` à `frise5`, `hor1`, `feries1`, `prog1`, `monan1`, `debord1`, `basean1`, `cpjours1`, `modeles1`, `modsuivi1`, `prepan1`, `prepan2`, `rattache1`, `recalage`, `relsol1`) restent verts, contre-épreuves comprises, sans retouche.
+
+### 616e. Restes
+
+- ★ **Vu en route, hors lot : le report d’un modèle A / B sur l’année d’après** (« Préparer 2027 », « Partir de 2026 », une année sans modèle qui lit celui d’avant : `_planRecale`) place chaque jour au même jour de la semaine et au même rang dans le mois (§559 ; règle du 11/09 : ne rien inventer). Or l’alternance suit les semaines de l’année, paires ou impaires : d’un mois à l’autre, la phase bascule.
+  - Mesuré, le même modèle reporté :
+    - 2026 → 2027 : un mai « A / B » à l’envers en saison à part, 7 jours à part, 7 jours sans place, 20 jours vides ;
+    - 2026 → 2028 : 6 saisons, 11 jours à part.
+  - Les heures de l’année restent celles du modèle, mais les vendredis travaillés ne tombent plus une semaine sur deux.
+  - À trancher : un modèle A / B pourrait se reporter par semaine de l’année (la semaine A d’une saison reste une semaine A). C’est un changement de la règle du report.
+- Vu en passant : sur ordinateur, un nom long cache « · A/B » à la fin de la ligne (« Travaux en vert · … »). Les bandes de la barre le disent quand même.
+- Toujours signalés :
+  - « 1 827 h » trois fois sur ordinateur pour une seule saison ;
+  - les cliquets de la feuille ne lisent que `styles.css` ;
+  - `src/app.js` est à 1 021 ko pour 1 024.
+
+### 616f. Leçons
+
+- ⚠️ **Une règle « sans exception » lue mois par mois casse à chaque mois court.** Les fériés et les semaines à part retirent des jours à la preuve. Il faut que la preuve naisse là où elle est entière, puis qu’elle se prolonge aux voisins qui la suivent, au lieu de baisser l’exigence partout (ce qui ferait naître de fausses alternances d’un pont ou d’un jour à part).
+- ⚠️ **Un cas d’essai se vérifie contre la donnée, pas contre l’idée.** Le premier « pont » du harnais tombait sur un vendredi férié (le 1er mai porte des heures dans la grille), puis sur le seul vendredi de mai à 5 h. Un mai dont tous les vendredis sont libres ne suit justement pas l’alternance. Chaque date se calcule dans la grille.
+
+
+## 617. ★★ FRISE-AB3 — UN MODÈLE QUI ALTERNE SE REPORTE PAR SEMAINE SUR L’ANNÉE D’APRÈS : JANVIER CONTINUE DÉCEMBRE (26/11 — APP 11.38, SW 12.29 — `src/planning.js` (`_planRecale`, `_planRecaleAlterne` et `_planRecaleSemaines` neufs) · `src/whats-new.js` · `src/utils.js` (APP) · `index.html` · `public/sw.js` · `guide/10-planning.html` · `public/guide.html` (regénéré) · `scripts/mv-harnais-ab3.mjs` (neuf) · `recalage`, `prepan1`, `prepan2`, `annee4` suivis · `scripts/mv-harnais-liste.mjs`)
+
+### 617a. D’où ça vient
+
+- Vu en route au §616e. Le report d’un modèle sur l’année d’après (`_planRecale`, §559) place chaque jour au même jour de semaine et au même rang dans le mois. Il sert à « Préparer 2027 », à « Partir de 2026 » et à toute année sans modèle, qui lit celui d’avant.
+- **Nico (26/11)** a d’abord demandé l’explication « en langage simple ». Puis : « quand on alterne il n’y a pas d’histoire de saison, un vendredi sur 2 c’est un vendredi sur 2 en partant depuis le début de l’année jusqu’à sa fin ». À la question « en janvier, l’alternance continue celle de fin 2026 ou repart comme en début 2026 ? », il a répondu : « on continue à la suite de 2026 ».
+  - ⚠️ L’explication avait d’abord pris en exemple un modèle de test (une alternance d’avril à septembre) et parlé de « saisons ». Cela a égaré Nico. Pour lui, l’alternance va de janvier à décembre, sans coupure.
+- Mesuré avant, sur un modèle « un vendredi sur deux libre toute l’année 2026 » reporté sur 2027 :
+  - les vendredis 23 et 30 avril sont libres tous les deux, le 28 mai et le 4 juin aussi ;
+  - l’alternance bascule à ces changements de mois, car elle compte les semaines de l’année, pas celles du mois.
+  
+  Sur une saison A / B d’avril à septembre, 2026 → 2027 donnait un mai « A / B » à l’envers, 7 jours à part, 7 jours sans place et 20 jours vides.
+
+### 617b. Ce qui change
+
+- **Un modèle qui alterne se reporte par semaine** (`_planRecaleSemaines`). Chaque jour prend le jour de 52 semaines plus tôt. C’est un nombre pair de semaines, donc la semaine A reste A et janvier continue décembre. Si ce jour tombe dans un autre mois, ou sur un férié de l’année d’avant (ses heures ne disent pas la semaine type), il prend le même jour de semaine deux semaines plus tôt ou plus tard, dans le même mois. Ce que cela garde :
+  - les saisons restent sur leurs mois ;
+  - une saison qui commence un lundi commence encore un lundi ;
+  - la semaine des vendanges reste une semaine du lundi au dimanche ;
+  - la prise de poste d’un jour (`_timings_jour`) et le nom d’une période (`_noms`, ANNEE-4) suivent le même report que les heures.
+  
+  Il ne reste rien à poser : chaque jour a sa place. Un jour sans aucune place dans son mois resterait « à poser » (la règle du 11/09), mais aucun cas d’essai n’en produit.
+- **« Un modèle qui alterne »**, c’est celui dont la frise lit au moins une saison A / B (`_planRecaleAlterne` appelle `window._planAnneeLire`, la même lecture que l’écran). Le Pilotage, les relevés et le document imprimé lisent `_planGetTpl`, donc ce report.
+- **Un modèle sans alternance se reporte exactement comme avant**, au rang dans le mois. La grille intégrée et celle de Nico sont dans ce cas. Sans la lecture de la frise (un harnais, un module pas encore chargé), c’est aussi le report d’avant.
+
+### 617c. Mesuré après
+
+- Le modèle « un vendredi sur deux toute l’année », reporté de 2026 à 2027, puis de 2027 à 2028 :
+  - **0 écart** avec l’alternance continuée à la main, hors fériés ;
+  - 0 jour à poser ;
+  - une seule saison A / B, 0 jour à part ;
+  - à la fin de 2026 : le 11 décembre travaillé, le 18 libre ; au début de 2027 : le 8 janvier travaillé, le 15 libre (le 25 décembre et le 1er janvier sont fériés).
+- La saison A / B d’avril à septembre, avec l’hiver et les vendanges : 3 saisons et 1 semaine à part en 2027 comme en 2026, 0 jour à part.
+- Dans l’appli construite (démo, ordinateur), l’année 2027 du modèle A / B, avant « Partir de 2026 » : une seule ligne de saison, et le bandeau ne parle plus de « jours à poser ».
+- Le tuto « préparer l’année suivante » et le tuto « un vendredi sur deux » ont été rejoués à la main, au téléphone et sur ordinateur. L’aiguillage n’en marque aucun : ses tutos couvrent `planPrep*`, pas le report.
+
+### 617d. Harnais
+
+`scripts/mv-harnais-ab3.mjs` : 5 assertions et 7 contre-épreuves. Il joue le VRAI report, avec la VRAIE lecture de la frise exposée comme dans l’appli. Il tient :
+
+- l’alternance continuée jour pour jour en 2027 et en 2028 ;
+- la saison A / B, l’hiver et les vendanges ;
+- la grille intégrée reportée à l’identique (JSON comparé, avec et sans la lecture) ;
+- la prise de poste d’un jour et un nom, le lundi 8 juin 2026 → le lundi 7 juin 2027 (au rang dans le mois, ce serait le 14) ;
+- le report d’avant quand la lecture manque.
+
+Les contre-épreuves rougissent toutes :
+
+- le report au rang pour un modèle qui alterne ;
+- 53 semaines au lieu de 52 ;
+- un jour pris dans un autre mois ;
+- les heures d’un férié recopiées ;
+- tout modèle reporté par semaine ;
+- la prise de poste ou le nom qui gardent le rang.
+
+**Suivis** : `recalage`, `prepan1`, `prepan2` et `annee4` chargent les deux aides du report.
+
+### 617e. Restes
+
+- Un modèle qui n’alterne qu’une partie de l’année est reporté entier par semaine, ses mois sans alternance compris. Les jours qui s’écartent (une veille de Noël, un pont) gardent alors leur jour de semaine 52 semaines plus tard, comme au rang dans le mois, à un jour près.
+- Un report de plusieurs années d’un coup (une année sans modèle qui lit celui d’il y a deux ans) prend le multiple de deux semaines le plus proche (104 semaines pour deux ans). Le harnais le joue en deux fois (2026 → 2027 → 2028), pas d’un coup.
+- Pas vu : « Partir de 2026 » puis « Enregistrer » sur un vrai modèle A / B de client.
+
+### 617f. Leçons
+
+- ⚠️ **Expliquer avec le cas de la personne, pas avec un cas de test.** Le modèle d’essai (une alternance d’avril à septembre, des « saisons ») a rendu l’explication obscure. Celui de Nico (un vendredi sur deux de janvier à décembre) la rendait évidente : deux vendredis libres de suite.
+- ⚠️ **Une règle « même rang dans le mois » ne garde que ce qui se compte dans le mois.** L’alternance se compte en semaines de l’année : son report doit garder la parité des semaines (52, et non 53 ou le rang). Le cas du rang n’apparaît qu’au 1er, au 8, au 15, au 22 ou au 29 du mois : deux contre-épreuves sont restées muettes sur un 20 mai et un 1er avril, où les deux reports tombent sur le même jour.

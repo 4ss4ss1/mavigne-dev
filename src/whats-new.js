@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.38', d: '2026-11-26', items: [   // FRISE-AB3 (§617) : un modèle qui alterne se reporte par semaine sur l'année d'après
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Préparer l\u2019année suivante\u00a0: un vendredi sur deux le reste',
+      desc: "Quand un modèle ne travaille qu\u2019un vendredi sur deux, «\u00a0Préparer 2027\u00a0» recopiait l\u2019année mois par mois, et l\u2019alternance se décalait à certains changements de mois (deux vendredis libres de suite). Elle continue maintenant semaine après semaine, et janvier prend la suite de décembre. Les modèles sans alternance se recopient comme avant." },
+  ] },
+  { v: '11.37', d: '2026-11-26', items: [   // FRISE-AB2 (§616) : un mois sans de quoi lire l'alternance A / B la suit chez son voisin
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: une semaine sur deux, la saison reste d\u2019un bloc',
+      desc: "Une saison où l\u2019on ne travaille qu\u2019un vendredi sur deux se lisait en morceaux quand des fériés tombaient sur ses vendredis (mai\u00a02026\u00a0: le 1er et le 8) ou quand elle portait la semaine des vendanges. Elle reste maintenant d\u2019un seul bloc, avec son nom. Les heures, elles, étaient déjà justes." },
+  ] },
   { v: '11.36', d: '2026-11-26', items: [   // ANNEE-4 (§615) : le nom des saisons et des semaines à part ; « Mon année » aux couleurs de la vue
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: une saison peut porter un nom',
       desc: "Dans le panneau d\u2019une saison ou d\u2019une semaine à part, tapez son nom en tête — «\u00a0Hiver\u00a0», «\u00a0Vendanges\u00a0», si vous voulez. Il prend la place du rythme dans la vue et se lit dans le programme indicatif, l\u2019export et «\u00a0Mon année\u00a0»\u00a0; quand le début de la saison bouge, il la suit." },

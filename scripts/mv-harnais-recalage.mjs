@@ -66,7 +66,7 @@ function charger(brut) {
   const an = src.match(/var PLAN_DEF_AN\s*=\s*(\d+)\s*;/);
   morceaux.push('var PLAN_DEF_AN=' + (an ? an[1] : 'null') + ';');
   morceaux.push('var _PLAN_RECALE_CACHE={};');
-  for (const f of ['_planRecaleMap', '_planRecale', '_planTplDef', '_planTplDefInfo']) {
+  for (const f of ['_planRecaleMap', '_planRecaleAlterne', '_planRecaleSemaines', '_planRecale', '_planTplDef', '_planTplDefInfo']) {   // FRISE-AB3 : les deux aides du report d'un modèle qui alterne
     const c = corps(src, f);
     if (!c) throw new Error('fonction introuvable : ' + f);
     morceaux.push(c);

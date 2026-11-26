@@ -870,6 +870,10 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-annee3.mjs --contre'],    //   le cadre tenu, la prise et le début en champs, un champ tapé qui attend sa sortie, l'interrupteur A / B, le panneau qui ne réécrit que ce qui change
   ['node scripts/mv-harnais-annee4.mjs'],             // ANNEE-4 (§615) : le nom des saisons et des semaines à part — la lecture, nommer, la coupe, « Enregistrer »,
   ['node scripts/mv-harnais-annee4.mjs --contre'],    //   la vue et le panneau, le programme, « Mon année » aux couleurs de la vue, l'export et l'import CSV
+  ['node scripts/mv-harnais-ab2.mjs'],                // FRISE-AB2 (§616) : un mois qui n'a pas de quoi lire l'alternance A / B (fériés, vendanges)
+  ['node scripts/mv-harnais-ab2.mjs --contre'],       //   la suit chez son voisin — la saison reste d'un bloc, son nom avec
+  ['node scripts/mv-harnais-ab3.mjs'],                // FRISE-AB3 (§617) : un modèle qui alterne se reporte par semaine sur l'année d'après —
+  ['node scripts/mv-harnais-ab3.mjs --contre'],       //   l'alternance continue (janvier suit décembre) ; sans alternance, le rang dans le mois
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

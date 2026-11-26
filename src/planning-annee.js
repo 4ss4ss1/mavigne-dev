@@ -96,6 +96,19 @@ function _planAnneeLire(plId,yr,G){
       else{v.push(tous);vB.push(tous);}
     })(mm,g);}
     type.push(v);typeB.push(alt?vB:v);ab.push(alt);}
+  // ★★ FRISE-AB2 (§616) — UN MOIS QUI N'A PAS DE QUOI LIRE L'ALTERNANCE LA SUIT CHEZ SON VOISIN. La lecture du mois demande deux
+  //   semaines paires et deux impaires sans exception : ses fériés peuvent les manger (mai 2026 : les vendredis 1er et 8 ; juillet
+  //   2028 : le 14), une semaine à part les casse (les vendanges : 8 h 30 un vendredi). Le mois faisait alors sa saison, entre deux
+  //   morceaux de la sienne. Désormais il prend l'alternance du mois d'avant (ou d'après) si ses jours la suivent : une semaine à
+  //   part au plus (3 jours qui s'écartent, mise de côté comme plus bas), deux autres jours qui s'écartent au plus, et pas plus mal
+  //   que sa propre semaine type. L'alternance naît toujours dans un mois qui la montre seul ; elle ne fait que s'y prolonger.
+  function _ecarts(mo,T,TB){var pw={},o={n:0,ap:0,w:0};
+    J.forEach(function(x){if(x.m!==mo||x.fer||x.ferme)return;if(!(x.w in pw)){pw[x.w]=0;o.w++;}if(x.h!==((TB&&x.w%2===1)?TB:T)[x.g])pw[x.w]++;});
+    Object.keys(pw).forEach(function(k){if(pw[k]>=3)o.ap++;else o.n+=pw[k];});o.v=o.ap*3+o.n;return o;}
+  for(var tour=0,chg=true;chg&&tour<12;tour++){chg=false;
+    for(mm=0;mm<12;mm++){if(ab[mm])continue;var pr=_ecarts(mm,type[mm]),nb=-1,bo=null;
+      [mm-1,mm+1].forEach(function(k){if(k<0||k>11||!ab[k])return;var o=_ecarts(mm,type[k],typeB[k]);if(o.ap<=1&&o.n<=2&&o.w-o.ap>=2&&o.v<=pr.v&&(!bo||o.v<bo.v)){bo=o;nb=k;}});
+      if(nb>=0){type[mm]=type[nb].slice();typeB[mm]=typeB[nb].slice();ab[mm]=true;chg=true;}}}
   function tyM(mo,x){return (ab[mo]&&x.w%2===1)?typeB[mo]:type[mo];}   // la semaine type d'un jour : paire ou impaire
   var saisons=[];
   for(mm=0;mm<12;mm++){var c=type[mm].join('|')+(ab[mm]?'/'+typeB[mm].join('|'):''),last=saisons[saisons.length-1],sm=function(a){return a.reduce(function(p,q){return p+q;},0);};

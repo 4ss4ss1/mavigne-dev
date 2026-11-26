@@ -41,7 +41,7 @@ const NOMS = ['_paH', '_paHm', '_paMinT', '_paHHMM', '_planAnneeSaison', '_planA
   '_planAnneeNomsIx', '_planAnneeNoms', '_planAnneeNomsUtiles', '_planAnneeNomPropre', 'planAnneeNom', 'planAnneeCoupe', 'planAnneeDesIci', 'planAnneeEnregistrer',
   '_planAnneeHoraireTxt', '_planAnneeNature', '_planAnneeModulation', '_planAnneeProgramme', '_planAnneeMini',
   '_anvP', '_anvSom', '_anvRythme', '_anvParSem', '_anvCtx', '_anvRangs', '_anvSec', '_anvDec', '_anvHHMM', '_anvIso', '_anvMemeCel', '_anvCel', '_anvGrille', '_anvChoix', '_anvHeure',
-  '_anvDebut', '_anvJourEd', '_anvPanSaison', '_anvPanSemaine', '_anvPanTitre', '_anvVue', 'planAnneeChamp', '_anvApres', '_anvAppuiEcoute', 'planExportCSV', 'planImportCSV', '_planRecaleMap', '_planRecale'];
+  '_anvDebut', '_anvJourEd', '_anvPanSaison', '_anvPanSemaine', '_anvPanTitre', '_anvVue', 'planAnneeChamp', '_anvApres', '_anvAppuiEcoute', 'planExportCSV', 'planImportCSV', '_planRecaleMap', '_planRecaleAlterne', '_planRecaleSemaines', '_planRecale'];
 
 function monter(S, o) {
   const i0 = S.pl.indexOf('var PLAN_DEF = {'), j0 = S.pl.indexOf('};', i0);
