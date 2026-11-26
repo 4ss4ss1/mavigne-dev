@@ -217,3 +217,28 @@ body[data-anv-menu="mod"] #page-planning .anv-menu[data-menu="mod"], body[data-a
   .anv-ov .anv-jr{ min-height:40px; }
 }
 /* ★ FIN ANNEE-3 */
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   ★★ ANNEE-4 (§615) — LE NOM D'UNE SAISON, D'UNE SEMAINE À PART ; « MON ANNÉE » AUX COULEURS DE LA VUE. Le nom se tape en tête du
+   panneau (le jeu des cases de saisie, .mvchamp-compact) ; dans la vue, il prend la place du rythme (au téléphone, il passe
+   devant les dates). « Mon année » reprend les pièces de la vue : la barre, ses bandes A / B, le rose d'une semaine à part, les
+   fermetures hachurées, le trait d'aujourd'hui, les pastilles de la légende.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.anv-ov .anv-nom{ display:block; width:100%; color:var(--texte,#1B1A18); font-size:var(--pt-base,14px); font-weight:var(--fw-semi,600); }
+.anv-ov .anv-nom::placeholder{ color:var(--texte-pale,#A3A19B); font-weight:var(--fw-med,500); }
+.anv-ov .anv-pan-tt .anv-nom + span{ margin-top:var(--e-1,4px); }
+#page-planning .anv-nm-n{ font-weight:var(--fw-semi,600); }
+#page-planning .anv-r-nom .anv-nm{ order:-2; flex:0 1 auto; color:var(--texte,#1B1A18); font-size:var(--pt-txt,13px); }
+#page-planning .anv-r-nom .anv-dt{ flex:1 1 auto; color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); font-weight:normal; }
+#page-planning .anv-mini{ --anv-sable:color-mix(in srgb,var(--or,#C2A14D) 38%,var(--bg-card,#FFFFFF)); --anv-sable-c:color-mix(in srgb,var(--or,#C2A14D) 14%,var(--bg-card,#FFFFFF)); --anv-rose:color-mix(in srgb,var(--accent,#7A2850) 22%,var(--bg-card,#FFFFFF));
+  margin-top:var(--e-2,8px); }
+#page-planning .anv-mini-t{ position:relative; height:24px; border-radius:var(--r-sm,6px); background:var(--bg-card,#FFFFFF); box-shadow:inset 0 0 0 var(--bw,1px) var(--ligne,#E7E6E2); }
+#page-planning .anv-mini .anv-bar{ height:14px; margin-top:-7px; border-radius:3px; box-shadow:inset -2px 0 0 var(--bg-card,#FFFFFF); }   /* un filet entre deux périodes qui se suivent */
+#page-planning .anv-mini .anv-bar-ab{ background:repeating-linear-gradient(90deg,var(--anv-sable) 0 4px,var(--anv-sable-c) 4px 8px); }
+#page-planning .anv-mini-auj{ position:absolute; top:-3px; bottom:-3px; width:0; border-left:1.5px solid var(--accent,#7A2850); pointer-events:none; }
+#page-planning .anv-mini-auj::before{ content:''; position:absolute; top:-4px; left:-4.75px; width:8px; height:8px; border-radius:50%; background:var(--accent,#7A2850); }
+#page-planning .anv-mini-m{ position:relative; height:16px; color:var(--texte-doux,#686660); font-size:var(--pt-nano,11px); }
+#page-planning .anv-mini-m span{ position:absolute; top:var(--e-0,2px); transform:translateX(-50%); }
+#page-planning .anv-mini-l{ display:grid; gap:var(--e-1,4px); margin-top:var(--e-2,8px); color:var(--texte-doux,#686660); font-size:var(--pt-micro,12px); }
+#page-planning .anv-mini-p{ display:flex; align-items:center; gap:var(--e-2,8px); min-width:0; }
+#page-planning .anv-mini-p b{ color:var(--texte,#1B1A18); font-weight:var(--fw-semi,600); }
+/* ★ FIN ANNEE-4 */

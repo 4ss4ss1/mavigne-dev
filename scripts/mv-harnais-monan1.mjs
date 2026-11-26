@@ -42,10 +42,10 @@ function fonction(src, nom) {
 }
 const i0 = SRC.indexOf('var PLAN_DEF = {'), j0 = SRC.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + SRC.slice(i0 + 15, j0 + 1) + ')');
-const ctx = vm.createContext({ window: {}, _MV_FERIES_CACHE: {}, PLAN_MOIS_FR: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] });
+const ctx = vm.createContext({ window: { PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] }, _MV_FERIES_CACHE: {}, PLAN_MOIS_FR: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], PLAN_MOIS: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'] });
 ctx._planGetTpl = (pl, y) => (pl === 'standard' && y === 2026) ? PLAN_DEF.standard : {};
-vm.runInContext('function _planFmt(h){return String(h)+" h";}\nfunction _escAttr(x){return String(x);}\n'
-  + ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeTon', '_planAnneeDate', '_planAnneePlage', '_paH', '_planAnneeMini'].map(n => fonction(SRC, n)).join('\n') + '\nthis.mini=_planAnneeMini;', ctx);
+vm.runInContext('function _planFmt(h){return String(h)+" h";}\nfunction _escAttr(x){return String(x);}\nfunction _escHtml(x){return String(x);}\n'
+  + ['_mvEasterMD', '_feriesY', '_planAnneeSaison', '_planAnneeLire', '_planAnneeDate', '_planAnneePlage', '_paH', '_planAnneeNomsIx', '_planAnneeNoms', '_planAnneeMini'].map(n => fonction(SRC, n)).join('\n') + '\nthis.mini=_planAnneeMini;', ctx);
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? ' — ' + det : '')); } }
 console.log('\n── MONAN-1 — la petite frise de la vraie grille 2026\n');

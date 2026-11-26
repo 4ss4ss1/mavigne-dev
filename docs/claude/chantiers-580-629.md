@@ -1588,3 +1588,72 @@ Aucun des 780 contrôles ne voyait la bulle : ils lisent les sources, ou mesuren
 - ⚠️ **Un rendu entre l’appui et le relâché perd le clic** : le bouton visé est remplacé sous le doigt. Un champ quitté par un appui attend le clic de cet appui pour se redessiner.
 - ⚠️ **Une ancre de tuto s’écrit en entier dans le code** (`' data-tuto="plan.annee.jour"'`) : passée en morceaux (`'plan.annee.'+…`), ni le harnais des tutos ni celui de l’année ne la trouvent.
 - ⚠️ **L’outil d’écriture change aussi les échappements des commandes** : un motif qui doit trouver un échappement du code se construit au script (la barre oblique inversée en `chr(92)`) ; et un bloc `/* … */` n’est pas un commentaire pour l’échappement ligne à ligne — l’en-tête d’un module neuf s’écrit en `//`.
+
+
+## 615. ★★★ ANNEE-4 — PLANNING › ANNÉE : LE NOM DES SAISONS ET DES SEMAINES À PART ; « MON ANNÉE » AUX COULEURS DE LA VUE (26/11 — APP 11.36, SW 12.27 — `src/planning-annee.js` · `src/planning-annee-vue.js` · `src/planning.js` (l’export et l’import CSV ; `_planRecale`, le report d’une année à l’autre) · `src/annee.css` · `src/utils.js` (la fiche `plan.frise`) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `public/guide.html` (regénéré) · `scripts/mv-harnais-annee4.mjs` (neuf) · `ab1`, `frise3`, `annee2`, `annee3`, `prog1`, `monan1` suivis · `scripts/mv-harnais-liste.mjs`)
+
+### 615a. D’où ça vient
+
+- Le dernier lot du découpage du §613 : **ANNEE-4**, « le nom des saisons : facultatif, avec le modèle ; la vue, le programme indicatif, l’export, « Mon année » ; « Mon année » aux couleurs de la vue ». Maquette : `docs/maquettes/maquette-planning-annee-refonte-v3.html` (le nom à gauche de la ligne, sur ordinateur).
+- Deux questions à l’ouverture. Les semaines à part ont-elles un nom aussi ? Nico a demandé l’explication en mots simples (une semaine de vendanges, d’inventaire : elle n’est pas une saison, mais on la reconnaît à son nom), puis « oui ». « Mon année » : refaite tout de suite aux couleurs de la vue, sans maquette (« Directement »).
+- Mesuré avant : « Mon année » peignait ses barres en dur (`_planAnneeTon`, 8 couleurs et fonds écrits dans la fonction) ; aucun nom nulle part.
+
+### 615b. Ce qui change
+
+- **Où vit le nom.** Une saison n’est écrite nulle part : elle se lit dans la grille. Son nom est rangé avec le modèle, dans `_noms` : `{'m-j': nom}`, au **jour où la période commence**. À la lecture (`_planAnneeNoms`), un nom va à la période qui contient son jour : une semaine à part s’il tombe dans l’une d’elles, sinon la saison. Si une saison contient plusieurs noms, le plus tôt l’emporte. Un nom dont le jour n’existe plus ne nomme rien. `_noms` voyage avec le modèle : il est copié par `_planAnneeMetaCopie` et par « Enregistrer ».
+- **D’une année à l’autre** (« Préparer 2027 », « Partir de 2026 », une année sans modèle qui lit celui d’avant : tous passent par `_planRecale`), le nom **glisse avec son jour**, comme les heures : même jour de semaine, même rang dans le mois (sinon le premier des six jours suivants qui a sa place). `_planRecale` recopiait tel quel tout ce qui n’est pas un mois (sauf `_timings_jour`) : un nom serait resté sur sa date, qui l’année d’après porte les heures d’un autre jour. Mesuré : « Vendanges », posé le lundi 7 septembre 2026, restait sur le 7 septembre 2027, un mardi de la saison — la semaine à part commence le lundi 6. Vu en relisant les lignes du lot à la demande de Nico, après une coupure de session.
+- **Nommer** (`planAnneeNom`, admin seulement) : un nom propre (sans retour ni signe de contrôle, les espaces resserrés, 40 signes au plus) est posé au premier jour régulier de la saison (au premier jour d’une semaine à part). Les noms posés sur les autres jours de la période s’effacent. Le même nom ne fait pas de brouillon ; un nom vide efface. Le champ suit la règle des champs du §614 : il s’enregistre à sa validation (Entrée, ou quand on le quitte), pas à chaque lettre.
+- **Le nom suit la saison.** Quand son début bouge (`planAnneeCoupe`, plus tôt ou plus tard), le nom va au nouveau premier jour travaillé. Si l’on posait le nom sur un dimanche au bord, il resterait à la saison d’avant et écraserait son nom : le harnais l’a vu, et la coupe cherche donc le premier jour qui a des heures. Quand « Changer le rythme » coupe une saison en deux, le nom reste à la partie d’avant. Quand deux saisons se fondent en une, le nom de la seconde se perd. **« Enregistrer » ne garde que les noms qui nomment encore une période.**
+- **La vue** : une ligne nommée montre le nom à la place du rythme (le rythme reste dans la bulle). Au téléphone, le nom passe devant les dates. Une semaine à part nommée montre son nom à la place de « Semaine à part ».
+- **Le panneau** : pour l’admin, le champ du nom en tête (`.anv-nom`, « Nom de la saison (facultatif) »), avec les dates dessous. Pour les autres, le nom en titre. Le titre d’une semaine ordinaire dit le nom de sa saison.
+- **Le programme indicatif** met le nom devant les dates d’une saison et d’une semaine à part. **L’export CSV** écrit une ligne `nom;mois;jour;nom` par nom (un `;` dans le nom devient une espace) ; **l’import** la relit et l’annonce (« · 2 noms »).
+- **« Mon année »** (`_planAnneeMini`) prend les pièces de la vue : une barre par saison, du sable de la vue (la semaine B en bandes ; les fermetures hachurées ; les semaines à part en rose), un filet entre deux périodes, aujourd’hui en trait, les initiales des mois. La légende passe en pastilles, avec le nom en gras devant le rythme. Plus aucune couleur écrite dans la fonction : toutes viennent de `annee.css` et suivent le thème sombre. ⚠️ Ce qui change à l’œil : les saisons ne sont plus teintées selon leur charge (vert sous 30 h par semaine, or jusqu’à 37 h, terre jusqu’à 42 h, bordeaux au-delà) ; comme dans la vue, elles ont toutes le même sable, et leurs heures se lisent dans la légende.
+
+### 615c. Mesuré après (build, démo)
+
+- « Mon année » : **8 → 0 couleurs et fonds écrits dans la fonction**, 3 → 0 appels à `_planAnneeTon` (restée sans appelant, la fonction est retirée — le preflight l’a vu). Il reste 3 `style=` : les positions et les largeurs des barres.
+- Le panneau d’une saison au téléphone, avec le champ du nom : la tête mesure 57 px.
+- Testé dans le navigateur avec un vrai clavier et une vraie souris, au téléphone et sur ordinateur :
+  - taper « Taille » ne fait aucun brouillon ;
+  - Entrée l’enregistre (la ligne de la vue dit « Taille ») ;
+  - ajouter « et liage » puis toucher « Annuler » : un seul toucher suffit, et plus aucune ligne n’est nommée ;
+  - nommer « Printemps », puis avancer le début de deux lundis (6 avril → 23 mars) : le nom suit.
+- Captures : la vue (téléphone et ordinateur), le panneau d’une saison (téléphone), celui de la semaine à part « Vendanges » (ordinateur), « Mon année » en clair et en sombre.
+
+### 615d. Harnais
+
+`scripts/mv-harnais-annee4.mjs` : 13 assertions et 19 contre-épreuves. Il joue les VRAIES fonctions des deux fichiers de l’année, le report d’une année à l’autre et l’export / l’import CSV de `planning.js` (FileReader et Blob simulés), sur la vraie grille 2026 de « standard ». Il tient :
+
+- la lecture : le jour d’un nom, une semaine à part, le plus tôt l’emporte ;
+- nommer : le brouillon, renommer, le même nom, effacer, un nom propre, une semaine à part, rien pour qui n’est pas admin ;
+- la coupe, plus tôt comme plus tard ;
+- l’année d’après : chaque nom glisse avec son jour et nomme la même période, en 2027 et en 2028 ;
+- « Changer le rythme » ;
+- « Enregistrer » qui ne garde que les noms utiles ;
+- la ligne de la vue (le nom échappé) ;
+- le panneau (le champ, le titre en lecture, la saison sous une semaine) ;
+- le champ, qui attend sa validation ;
+- le programme et « Mon année » (le nom, les pièces de la vue, plus de couleur en dur) ;
+- l’aller-retour CSV ;
+- la feuille.
+
+**Suivis** : les fonctions neuves ajoutées aux listes de `ab1`, `frise3` (avec les fonctions du `meta`), `annee2`, `annee3`, `prog1` et `monan1` (avec `PLAN_MOIS` et `_escHtml`). La contre-épreuve d’`annee3` sur le champ tapé se rattache à la nouvelle garde (`f==='autre'||f==='nom'`). Il n’a fallu changer aucun tuto. Les tutos concernés ont été rejoués, au téléphone et sur ordinateur. Le report d’une année à l’autre : `recalage`, `prepan1`, `prepan2`, `modsuivi1`, `effectif-periode` restent verts.
+
+### 615e. Restes
+
+- Le découpage du §613 est fini (ANNEE-2, 3, 4).
+- ★ Toujours **hors lot** : la lecture de l’alternance A / B (FRISE-AB, §551) demande deux semaines de chaque sorte par mois. Un mois aux vendredis fériés ne la voit pas, et coupe la saison en trois (§614e). Les heures restent justes.
+- Toujours signalés :
+  - « 1 827 h » trois fois sur ordinateur pour une seule saison ;
+  - les cliquets de la feuille ne lisent que `styles.css` ;
+  - le fichier principal de l’appli (`src/app.js`, que ce lot ne touche pas) reste à 1 021 ko pour 1 024.
+- Pas vu : un vrai modèle de client, un vrai téléphone, l’import d’un fichier CSV dans le navigateur (l’import n’est joué qu’au harnais).
+
+### 615f. Leçons
+
+- ⚠️ **Un nom qui n’a pas de place dans la donnée s’accroche à un jour.** La saison est lue, pas écrite : son nom va au jour où elle commence, et la lecture le rend à la période qui contient ce jour. Toute écriture qui déplace un début (la coupe) déplace donc aussi le nom. Et le jour visé doit être travaillé : un dimanche au bord appartient à la saison d’avant.
+- ⚠️ **Une clé posée sur un jour doit suivre le jour d’une année à l’autre.** Le report replace les heures au même jour de semaine et au même rang ; tout ce qui est rangé par date (`_timings_jour`, `_noms`) doit glisser de la même façon, sinon il reste sur une date qui porte les heures d’un autre jour. Une nouvelle clé rangée par jour se vérifie donc aussi dans `_planRecale`.
+- ⚠️ **Relire le code d’une session coupée avant de le livrer.** Le résumé dit ce qui a été écrit, pas ce qui manque. Le report d’une année à l’autre, absent du résumé, n’avait pas été vérifié.
+- ⚠️ **Une plage de signes de contrôle dans une expression rougit le cliquet ESLint** (`no-control-regex`, plafond 0) : pour nettoyer un nom, un tour de boucle sur les codes (moins de 32, et 127) remplace l’expression. Seule la chaîne l’a vu (`lint-cliquet`), pas les harnais.
+- ⚠️ **Des barres pleines côte à côte se fondent.** Dans « Mon année », deux saisons de couleur voisine ne faisaient qu’une seule barre. Il faut un filet entre elles (une ombre intérieure de la couleur du fond), et une piste de la couleur de la carte, bordée.
+- ⚠️ **Une capture qui suit une autre dans la même page en garde l’état.** Le panneau ouvert à la capture d’avant couvrait « Mon année ». Un scénario qui doit partir propre se capture à part.

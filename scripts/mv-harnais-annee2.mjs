@@ -39,7 +39,7 @@ function fonction(src, nom) {
 const ligneVar = (src, nom) => { const m = new RegExp('^var ' + nom + '=.*$', 'm').exec(src); if (!m) throw new Error('VAR ABSENTE : ' + nom); return m[0]; };
 const NOMS = ['_paH', '_paHm', '_paMinT', '_planAnneeSaison', '_planAnneeLire', '_planAnneeDate', '_planAnneePlage', '_planAnneeResumeTxt', '_planAnneeResumeAB',
   '_planAnneeCopie', '_planAnneePose', '_planAnneeGrille', '_planAnneeMeta', '_planAnneeMetaCopie', '_planAnneeSemDefaut', '_planAnneeSemSel', '_planAnneeCible', '_planAnneeTotal',
-  '_planAnneeCleS', '_planAnneePriseSaison', '_planAnneeHoraire', '_planAnneeHorairesTxt', '_planAnneeReguliers',
+  '_planAnneeCleS', '_planAnneeNomsIx', '_planAnneeNoms', '_planAnneePriseSaison', '_planAnneeHoraire', '_planAnneeHorairesTxt', '_planAnneeReguliers',
   '_planAnneePasVal', '_planAnneeNomS', '_planAnneeRetouches', '_planAnneeSuggestions', '_planAnneeBrouillon',
   '_anvP', '_anvSom', '_anvRythme', '_anvParSem', '_anvCtx', '_anvRangs', '_anvBrouillonBtns', '_anvOutils', '_anvVue', '_anvLegende', '_anvEtat', '_anvSec',
   '_anvPanSaison', '_anvPanSemaine', '_anvPanCtl', '_anvPanJuste', '_anvPanJours', 'planAnneeAn',

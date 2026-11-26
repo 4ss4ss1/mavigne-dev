@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.36', d: '2026-11-26', items: [   // ANNEE-4 (§615) : le nom des saisons et des semaines à part ; « Mon année » aux couleurs de la vue
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: une saison peut porter un nom',
+      desc: "Dans le panneau d\u2019une saison ou d\u2019une semaine à part, tapez son nom en tête — «\u00a0Hiver\u00a0», «\u00a0Vendanges\u00a0», si vous voulez. Il prend la place du rythme dans la vue et se lit dans le programme indicatif, l\u2019export et «\u00a0Mon année\u00a0»\u00a0; quand le début de la saison bouge, il la suit." },
+    { niv: 0, pour: ['tous'], emoji: 'calendrier', titre: 'Mon année, aux couleurs du planning',
+      desc: "La petite frise de ton année reprend les couleurs de l\u2019onglet Année\u00a0: une barre par saison, les fermetures hachurées, aujourd\u2019hui en trait — et chaque saison dit son nom quand elle en a un." },
+  ] },
   { v: '11.35', d: '2026-11-26', items: [   // ANNEE-3 (§614) : Planning › Année — plus de « − / + » : la grille des jours, ses champs
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: plus de «\u00a0−\u00a0/\u00a0+\u00a0», une grille des jours',
       desc: "Dans le panneau d\u2019une saison, ses jours forment une grille, lundi à dimanche\u00a0: touchez un jour, puis une durée — repos, 4, 7, 7,5, 8, 8,5 — ou tapez-en une autre\u00a0; tous ses jours réguliers la prennent. La prise de poste est un champ heure, le début de la saison un lundi à choisir dans une liste. Le même choix sert pour un jour d\u2019une semaine, un jour à part et «\u00a0Changer le rythme à partir d\u2019ici\u00a0»." },

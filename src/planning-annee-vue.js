@@ -48,6 +48,8 @@ function planAnneePriseJour(){ return window.planAnneePriseJour.apply(null, argu
 function planAnneeCoupe(){ return window.planAnneeCoupe.apply(null, arguments); }
 function planAnneeAB(){ return window.planAnneeAB.apply(null, arguments); }
 function planAnneeUneSemaine(){ return window.planAnneeUneSemaine.apply(null, arguments); }
+function _planAnneeNoms(){ return window._planAnneeNoms.apply(null, arguments); }
+function planAnneeNom(){ return window.planAnneeNom.apply(null, arguments); }
 // — planning-modeles.js (qui suit un modèle, ses fériés)
 function _planAnneeFerieSem(){ return window._planAnneeFerieSem.apply(null, arguments); }
 function _planAnneeFeriesBloc(){ return window._planAnneeFeriesBloc.apply(null, arguments); }
@@ -100,7 +102,7 @@ function _anvCtx(E){
   gens.forEach(function(mb){var Y=((window.PLANNING_ENTRIES||{})[mb.nom]||{})[yr]||{};J.forEach(function(x){var e=(Y[x.m]||{})[x.d];if(e&&e.type==='cp'&&cpS[x.w].indexOf(mb.nom)<0)cpS[x.w].push(mb.nom);});});
   var t=new Date(),auj=t.getFullYear()===yr?J.find(function(x){return x.m===t.getMonth()&&x.d===t.getDate();}):null;
   return {E:E,MT:MT,id:id,yr:yr,G:G,A:A,J:J,N:J.length,L:L,nv:nv,adm:adm,sel:_planAnneeSemSel(A,E,yr),tot:tot,brut:brut,att:att,ec:ec,gens:gens,
-    cad:cad,cadOk:cad.every(function(c){return c[0];}),dim:dim,fp:fp,cpS:cpS,auj:auj||null,sj:sj||null};
+    cad:cad,cadOk:cad.every(function(c){return c[0];}),dim:dim,fp:fp,cpS:cpS,auj:auj||null,sj:sj||null,noms:_planAnneeNoms(A,MT)};
 }
 // les lignes de la vue : chaque saison (ses morceaux, hors semaines à part et fermetures), chaque semaine à part, chaque fermeture
 function _anvRangs(C){var A=C.A,J=C.J,R=[];
@@ -148,12 +150,13 @@ function _anvVue(C){
     h+='<button type="button" class="anv-wh" data-pan="w" data-w="'+k+'"'+(k===C.sel?' data-tuto="plan.annee.semhit"':' tabindex="-1"')+' aria-label="'+_escAttr(tip)+'" title="'+_escAttr(tip)+'" style="left:'+_anvP(a,N)+';width:'+wd+'%" onclick="planAnneePan(this)"></button>';});
   h+='</span><span class="anv-n"><span class="anv-35n">'+L.hebdoLeg+'\u00a0h</span><b data-anv="tan">'+_paH(C.brut)+'</b></span></div>';
   // une ligne par période
-  _anvRangs(C).forEach(function(r){var on=!!(pan&&r.k==='s'&&pan.t==='s'&&pan.si===r.si),dates=_planAnneePlage(J,r.a,r.b),nom,ps,cls,tit,att;
-    if(r.k==='s'){nom=_anvRythme(r.sa.h)+(r.sa.ab?' \u00b7 A/B':'');ps=_anvParSem(r.sa);cls=r.sa.ab?' anv-bar-ab':'';tit='Saison du '+dates+' \u2014 '+_planAnneeResumeAB(r.sa);
+  _anvRangs(C).forEach(function(r){var on=!!(pan&&r.k==='s'&&pan.t==='s'&&pan.si===r.si),dates=_planAnneePlage(J,r.a,r.b),nom,ps,cls,tit,att,
+      nm=r.k==='s'?C.noms.s[r.si]:r.k==='a'?C.noms.w[r.w]:null,nb=nm?'<b class="anv-nm-n">'+_escHtml(nm)+'</b>':'';   // ★ ANNEE-4 : le nom, à la place du rythme (le rythme reste dans la bulle)
+    if(r.k==='s'){nom=(nb||_anvRythme(r.sa.h))+(r.sa.ab?' \u00b7 A/B':'');ps=_anvParSem(r.sa);cls=r.sa.ab?' anv-bar-ab':'';tit=(nm?nm+' \u2014 ':'')+'Saison du '+dates+' \u2014 '+_planAnneeResumeAB(r.sa);
       att=' data-pan="s" data-s="'+r.si+'"'+(r.si===0?' data-tuto="plan.annee.saison"':r.si===1?' data-tuto="plan.annee.saison2"':'');}
-    else if(r.k==='a'){nom='Semaine \u00e0 part';ps=_paH(r.tot);cls=' anv-bar-ap';tit='Semaine \u00e0 part du '+dates+' \u00b7 '+_paH(r.tot);att=' data-pan="w" data-w="'+r.w+'"';}
+    else if(r.k==='a'){nom=nb||'Semaine \u00e0 part';ps=_paH(r.tot);cls=' anv-bar-ap';tit=(nm?nm+' \u2014 ':'')+'Semaine \u00e0 part du '+dates+' \u00b7 '+_paH(r.tot);att=' data-pan="w" data-w="'+r.w+'"';}
     else{nom='Ferm\u00e9';ps='\u2013';cls=' anv-bar-f';tit='Ferm\u00e9 \u2014 '+dates;att=' data-pan="w" data-w="'+r.w+'"';}
-    h+='<button type="button" class="anv-l anv-r'+(on?' on':'')+'"'+att+' title="'+_escAttr(tit)+'" onclick="planAnneePan(this)">'
+    h+='<button type="button" class="anv-l anv-r'+(on?' on':'')+(nm?' anv-r-nom':'')+'"'+att+' title="'+_escAttr(tit)+'" onclick="planAnneePan(this)">'
       +'<span class="anv-c1"><span class="anv-nm">'+nom+'</span><span class="anv-dt">'+dates+'</span><span class="anv-ps">'+(r.k==='f'?_paH(0):ps)+'</span></span><span class="anv-t">'
       +r.seg.map(function(p){return '<span class="anv-bar'+cls+'" style="left:'+_anvP(p.i0,N)+';width:'+((p.i1-p.i0+1)/N*100).toFixed(3)+'%"></span>';}).join('')
       +'</span><span class="anv-n"><span'+(r.k==='f'?' class="z"':'')+'>'+ps+'</span><b'+(r.k==='f'?' class="z"':'')+' data-anv="p">'+_paH(r.tot)+'</b></span></button>';});
@@ -247,7 +250,7 @@ function _anvPanSaison(C,si){var A=C.A,J=C.J,E=C.E,sa=A.saisons[si];if(!sa)retur
     +'<div class="anv-ln"><span class="anv-ln-n">Prise de poste</span>'+(adm?_anvHeure('prise',pr,' data-s="'+si+'"',si===0?' data-tuto="plan.annee.prise"':'','Prise de poste'):'<b class="anv-ln-v">'+_paHm(pr)+'</b>')+'</div>'
     +'<div class="anv-ln"><span class="anv-ln-n">Dates</span>'+((adm&&si>0)?_anvDebut(C,si,a):'<span class="anv-ln-s">'+_planAnneeDate(J,a,true)+'</span>')+'<span class="anv-ln-s">\u2192 '+_planAnneeDate(J,b,true)+'</span></div>'
     +'<div class="anv-note">'+_planAnneeHorairesTxt(A,si,C.MT)+'</div>';
-  return {t:_planAnneePlage(J,a,b),s:_anvParSem(sa)+' par semaine \u00b7 '+_paH(t)+' sur la saison',c:c};}
+  return {t:_planAnneePlage(J,a,b),s:_anvParSem(sa)+' par semaine \u00b7 '+_paH(t)+' sur la saison',c:c,nom:{k:'s',s:si,v:C.noms.s[si]||'',ph:'Nom de la saison (facultatif)'}};}
 function _anvPanSemaine(C){var A=C.A,J=C.J,E=C.E,MT=C.MT,adm=C.adm,sel=C.sel,Sw=A.sem[sel];if(!Sw)return null;
   var a0=Sw.j[0].i,b0=Sw.j[Sw.j.length-1].i,si0=-1,cs=E.cel;Sw.j.forEach(function(x){if(si0<0&&!x.fer)si0=x.s;});var Ssw=A.saisons[si0];
   var diff=!!Ssw&&Sw.j.some(function(x){return !x.fer&&x.h!==Ssw.h[x.g];}),finS=-1;J.forEach(function(x){if(x.s===si0&&!x.ferme&&!x.apart)finS=x.i;});
@@ -267,7 +270,9 @@ function _anvPanSemaine(C){var A=C.A,J=C.J,E=C.E,MT=C.MT,adm=C.adm,sel=C.sel,Sw=
       if(cs&&cs.k==='r'&&+cs.w===sel)c+=_anvChoix(C,ANV_JN[+cs.g]+', d\u00e8s cette semaine',Ssw.h[+cs.g]);}}
   var nav='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-d="-1" aria-label="Semaine pr\u00e9c\u00e9dente" onclick="planAnneeSemaine(this)">\u2039</button>'
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-tuto="plan.annee.sem" data-d="1" aria-label="Semaine suivante" onclick="planAnneeSemaine(this)">\u203a</button>';
-  return {nav:nav,t:'Semaine du '+_planAnneePlage(J,a0,b0),s:_paH(Sw.h)+(Sw.ferme?' \u00b7 ferm\u00e9e':Sw.apart?' \u00b7 semaine \u00e0 part':''),c:c};}
+  var nmS=(!Sw.apart&&!Sw.ferme&&si0>=0)?C.noms.s[si0]:null;   // ★ ANNEE-4
+  return {nav:nav,t:'Semaine du '+_planAnneePlage(J,a0,b0),s:_paH(Sw.h)+(Sw.ferme?' \u00b7 ferm\u00e9e':Sw.apart?' \u00b7 semaine \u00e0 part':nmS?' \u00b7 '+_escHtml(nmS):''),c:c,
+    nom:Sw.apart?{k:'w',w:sel,v:C.noms.w[sel]||'',ph:'Nom de la semaine (facultatif)'}:null};}
 function _anvPanCtl(C){
   var c=_anvSec('Le cadre')+C.cad.map(function(l){return '<div class="anv-ln"><span class="mvpas mvpas-statut '+(l[0]?'mvpas-fait':'mvpas-surveiller')+'">'+(l[0]?'ok':'\u00e0 voir')+'</span><span class="anv-ln-n">'+l[1]+'</span><span class="anv-ln-s">'+l[2]+'</span></div>';}).join('')
     +'<div class="anv-ln"><span class="mvpas mvpas-statut mvpas-fait">ok</span><span class="anv-ln-n">Dimanches travaill\u00e9s</span><span class="anv-ln-s">'+(C.dim||'aucun')+'</span></div>'
@@ -286,12 +291,20 @@ function _anvPanJours(C){var A=C.A,J=C.J,E=C.E,adm=C.adm,cs=E.cel;if(!A.jours.le
       +_anvCel(C,{k:'j',m:x.m,j:x.d},x.h,q,k===0?' data-tuto="plan.annee.jour"':'',true)+'</div>'
       +((on&&adm)?'<div class="anv-jr-ed">'+_anvChoix(C,q,x.h)+'<div class="anv-act"><button type="button" class="mvbtn mvbtn-secondaire"'+(k===0?' data-tuto="plan.annee.remettre"':'')+' data-m="'+x.m+'" data-j="'+x.d+'" onclick="planAnneeRemettre(this)">Comme la saison</button></div></div>':'');}).join('');
   return {t:'Les jours \u00e0 part',s:A.jours.length+' jour'+(A.jours.length>1?'s':'')+' qui s\u2019\u00e9carte'+(A.jours.length>1?'nt':'')+' de leur saison',c:c};}
+// ★ ANNEE-4 (§615) — le titre du panneau : une saison, une semaine à part ont un nom (facultatif). L'admin le tape en tête, à la
+//   place du titre (les dates passent dessous, et nomment la fenêtre pour les lecteurs d'écran) ; les autres le lisent.
+function _anvPanTitre(C,r){var n=r.nom,st=r.s?'<span>'+r.s+'</span>':'';
+  if(!n)return '<div class="anv-pan-tt"><b id="anv-pan-t">'+r.t+'</b>'+st+'</div>';
+  if(!C.adm)return '<div class="anv-pan-tt"><b>'+(n.v?_escHtml(n.v):r.t)+'</b><span id="anv-pan-t">'+(n.v?r.t+' \u00b7 ':'')+(r.s||'')+'</span></div>';
+  return '<div class="anv-pan-tt"><input class="mvchamp mvchamp-compact anv-nom" type="text" maxlength="40" autocomplete="off" enterkeyhint="done" value="'+_escAttr(n.v)+'" placeholder="'+n.ph+'"'
+    +' aria-label="'+n.ph+'" data-f="nom" data-k="'+n.k+'"'+(n.k==='s'?' data-s="'+n.s+'"':' data-w="'+n.w+'"')
+    +' onchange="planAnneeChamp(this,event)" onkeydown="planAnneeChamp(this,event)"><span id="anv-pan-t">'+r.t+(r.s?' \u00b7 '+r.s:'')+'</span></div>';}
 function _anvPanPeindre(C){var E=C.E,p=E.pan,o=_anvOv(),hd=document.getElementById('anv-pan-h'),c=document.getElementById('anv-pan-c'),pd=document.getElementById('anv-pied');if(!p||!hd||!c)return;
   var r=p.t==='s'?_anvPanSaison(C,p.si):p.t==='w'?_anvPanSemaine(C):p.t==='ctl'?_anvPanCtl(C):p.t==='juste'?_anvPanJuste(C):p.t==='suivi'?_anvPanSuivi(C):p.t==='jours'?_anvPanJours(C):null;
   if(!r){planAnneePanFermer();return;}   // la saison a disparu (une coupe), plus de jour à part : le panneau se ferme
   // ★ ANNEE-3 : chaque partie n'est réécrite que si elle change — un bouton visé ne disparaît pas sous le doigt ; le champ qu'on
   //   vient de régler (la liste des lundis) garde le focus
-  var H=(r.nav||'')+'<div class="anv-pan-tt"><b id="anv-pan-t">'+r.t+'</b>'+(r.s?'<span>'+r.s+'</span>':'')+'</div>'
+  var H=(r.nav||'')+_anvPanTitre(C,r)
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-tuto="plan.annee.pan.x" aria-label="Fermer" onclick="planAnneePanFermer()">\u2715</button>';
   if(hd._anv!==H){hd.innerHTML=H;hd._anv=H;}
   if(c._anv!==r.c){var st=c.scrollTop,ae=document.activeElement,gk=(ae&&ae.tagName==='SELECT'&&c.contains(ae))?ae.getAttribute('data-garde'):null;   // une liste seulement : rendre le focus à un champ heure le ferait repartir de zéro
@@ -379,7 +392,7 @@ var _anvTenir=false,_anvAppui=false,_anvAppuiPose=false;
 function planAnneeChamp(el,ev){if(!el||!el.dataset)return;var t=ev&&ev.type,f=el.dataset.f,foc=typeof document!=='undefined'&&document.activeElement===el;
   if(t==='keydown'){el._clavier=true;if(ev.key==='Enter'&&f!=='debut'){if(ev.preventDefault)ev.preventDefault();if(el.blur)el.blur();}return;}   // Entrée : on quitte le champ, le quitter l'enregistre
   if(el.type==='time'&&(t==='input'||t==='change')&&(foc||el._clavier))return;   // au clavier, Chrome change l'heure à chaque morceau (et pas toujours champ actif) : on attend la sortie
-  if(f==='autre'&&t&&t!=='change')return;
+  if((f==='autre'||f==='nom')&&t&&t!=='change')return;   // ★ ANNEE-4 : un nom, comme « Autre durée », à sa validation
   if(typeof isAdmin==='function'&&!isAdmin())return;var E=_paE();if(!E||!E.annee)return;
   var x=String(el.value||''),n0=E.n||0,ok=true;
   _anvTenir=true;
@@ -388,6 +401,7 @@ function planAnneeChamp(el,ev){if(!el||!el.dataset)return;var t=ev&&ev.type,f=el
     else if(f==='prise'&&/^\d{1,2}:\d{2}/.test(x))planAnneePrise({dataset:{s:el.dataset.s,t:x}});
     else if(f==='prisej'&&/^\d{1,2}:\d{2}/.test(x))planAnneePriseJour({dataset:{m:el.dataset.m,j:el.dataset.j,t:x}});
     else if(f==='debut'&&/^\d{4}-\d{2}-\d{2}$/.test(x))planAnneeCoupe({dataset:{s:el.dataset.s,iso:x}});
+    else if(f==='nom')planAnneeNom({dataset:{k:el.dataset.k,s:el.dataset.s,w:el.dataset.w},value:x});
     else ok=false;
   }finally{_anvTenir=false;}
   if(!ok)return;if((E.n||0)!==n0){_anvAppuiEcoute();_anvApres();return;}

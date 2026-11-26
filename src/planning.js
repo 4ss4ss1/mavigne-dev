@@ -763,7 +763,7 @@ function _planRecale(grille,anSrc,anDst){
   var out={},m,d;
   // Ce qui n'est pas un mois se recopie tel quel — `_timings` est clé par MOIS,
   // il ne glisse pas. `_timings_jour`, lui, est clé par JOUR : traité plus bas.
-  Object.keys(grille).forEach(function(k){ if(!/^(?:[0-9]|1[01])$/.test(k)&&k!=='_timings_jour')out[k]=grille[k]; });
+  Object.keys(grille).forEach(function(k){ if(!/^(?:[0-9]|1[01])$/.test(k)&&k!=='_timings_jour'&&k!=='_noms')out[k]=grille[k]; });
   for(m=0;m<12;m++){
     var mo=grille[m]; if(!mo)continue;
     var map=_planRecaleMap(m,anSrc,anDst),res={},pris={},dows={},_m=m;
@@ -790,6 +790,18 @@ function _planRecale(grille,anSrc,anDst){
       tj[mm]=dst;
     });
     out._timings_jour=tj;
+  }
+  // ★ ANNEE-4 (§615) : le nom d'une saison ou d'une semaine à part tient au jour où elle commence ({'m-j': nom}) — il glisse avec
+  //   ce jour (même jour de semaine, même rang), sinon avec le premier des six suivants qui a sa place. Recopié tel quel, il restait
+  //   sur une date qui, l'année d'après, porte les heures d'un autre jour (« Vendanges » le 7 septembre 2027 : un jour de la saison).
+  if(grille._noms&&typeof grille._noms==='object'){
+    var nm={},mps={};
+    Object.keys(grille._noms).forEach(function(k){
+      var q=String(k).split('-'),mm=parseInt(q[0],10),d0=parseInt(q[1],10),nd=0,j;if(isNaN(mm)||mm<0||mm>11||!(d0>0))return;
+      var mp=mps[mm]||(mps[mm]=_planRecaleMap(mm,anSrc,anDst));for(j=d0;j<d0+7&&!nd;j++)nd=mp[j]||0;
+      if(nd&&nm[mm+'-'+nd]==null)nm[mm+'-'+nd]=grille._noms[k];
+    });
+    out._noms=nm;
   }
   return {g:out,perdus:perdus,vides:vides};
 }
@@ -7405,6 +7417,12 @@ function planExportCSV(templateId){
     rows.push('# horaires_dma'+S+'prise_decalee(M,A)'+S+'fin_commune(D,M)');
     rows.push('horaires_dma'+S+(_dx.decale||'09:00')+S+(_dx.fin||'16:30'));
   }
+  // ★ ANNEE-4 (§615) : le nom des saisons et des semaines à part, au jour où chacune commence — relu par l'import
+  if(tpl._noms&&typeof tpl._noms==='object'&&Object.keys(tpl._noms).length){
+    rows.push('# nom'+S+'mois'+S+'jour'+S+'nom (la saison ou la semaine \u00e0 part qui commence ce jour-l\u00e0)');
+    Object.keys(tpl._noms).forEach(function(k){var q=k.split('-'),mi=parseInt(q[0],10),dd=parseInt(q[1],10),v=String(tpl._noms[k]==null?'':tpl._noms[k]).replace(/[;\r\n]/g,' ').trim();
+      if(mi>=0&&mi<12&&dd>=1&&dd<=31&&v)rows.push('nom'+S+_PLAN_MOIS_CSV[mi]+S+dd+S+v);});
+  }
   // En-tête + heures
   rows.push('# jour'+S+'jan'+S+'fev'+S+'... (heures pr\u00e9vues par mois \u00b7 suffixe D/M/A = horaire par jour)');
   rows.push(['jour'].concat(_PLAN_MOIS_CSV).join(S));
@@ -7455,6 +7473,7 @@ function planImportCSV(targetId){
       var timings={};
       var jouTimings={};
       var dma=null, dmaVue=false;
+      var noms={};   // ★ ANNEE-4 (§615)
       lines.forEach(function(line){
         if(!line.trim()||line.charAt(0)==='#')return;
         var prefix=line.split(S)[0].trim().toLowerCase();
@@ -7475,6 +7494,10 @@ function planImportCSV(targetId){
         }
         // DMA-1 : horaires des jours D/M/A
         if(prefix==='horaires_dma'){ dmaVue=true; dma=_planCsvDma(line.split(S)); return; }
+        // ANNEE-4 (§615) : le nom d'une saison ou d'une semaine à part (mois ; jour ; nom)
+        if(prefix==='nom'){ var np=line.split(S),nk=(np[1]||'').trim().toLowerCase(),nmi=(_PLAN_MOIS_IDX[nk]!==undefined)?_PLAN_MOIS_IDX[nk]:parseInt(nk,10),nd=parseInt(np[2],10),
+            nv=np.slice(3).join(S).split('').map(function(ch){var c=ch.charCodeAt(0);return (c<32||c===127)?' ':ch;}).join('').replace(/\s+/g,' ').trim().slice(0,40);
+          if(!isNaN(nmi)&&nmi>=0&&nmi<12&&nd>=1&&nd<=31&&nv)noms[nmi+'-'+nd]=nv; return; }
         // En-tête
         if(prefix==='jour')return;
         // Données heures + codes D/M/A
@@ -7502,6 +7525,7 @@ function planImportCSV(targetId){
       if(nT>0)tplData._timings=timings;
       if(nJ>0)tplData._timings_jour=jouTimings;
       if(dma)tplData._horaires_dma=dma;
+      var nN=Object.keys(noms).length;if(nN>0)tplData._noms=noms;   // ★ ANNEE-4
       _pTplStore()[targetId]=tplData;
       window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
       var _mvEtat=window.fbSaveToast({planning_templates:PLANNING_TEMPLATES});
@@ -7509,6 +7533,7 @@ function planImportCSV(targetId){
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
       if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
       if(dma)msg+=' \u00b7 D/M/A '+dma.decale+' \u2192 '+dma.fin;
+      if(nN>0)msg+=' \u00b7 '+nN+' nom'+(nN>1?'s':'');   // ★ ANNEE-4
       var _dmaKo=dmaVue&&!dma;
       if(_dmaKo)msg+=' \u00b7 ligne horaires_dma illisible : 09:00 / 16:30 conserv\u00e9s';
       window.fbToastApres(_mvEtat,msg,_dmaKo?'#B85A1A':'#3D6B27');

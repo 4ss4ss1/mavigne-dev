@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.26
+// MA VIGNE — Service Worker v12.27
+// v12.27 (26/11/2026) — ANNEE-4 (§615) : Planning › Année, le nom des saisons et des semaines à part (facultatif, rangé avec le modèle, au jour où la période commence ; il suit la coupe) — dans la vue, le panneau, le programme indicatif, « Mon année » et l'export CSV (relu à l'import) ; « Mon année » aux couleurs de la vue. APP 11.36.
 // v12.26 (26/11/2026) — ANNEE-3 (§614) : Planning › Année, plus de « − / + » (maquette v3) — la grille des jours d'une saison (lundi à dimanche, semaines A et B) et le choix d'une durée (repos, 4, 7, 7,5, 8, 8,5, ou une autre) ; le même choix pour un jour d'une semaine, un jour à part, « Changer le rythme » ; la prise de poste en champ heure, le début d'une saison dans la liste de ses lundis. La vue et le panneau sortent dans planning-annee-vue.js. APP 11.35.
 // v12.25 (26/11/2026) — ANNEE-2 (§613) : Planning › Année refaite (maquette v3, « impeccable ») — une barre d'outils (le modèle et son menu, l'année, « Tomber juste », « … »), une seule vue de l'année comme un planning de projet (les heures de chaque semaine face aux 35 h, une ligne par saison posée sur ses dates, semaines à part, fermetures, fériés, congés, aujourd'hui ; sur ordinateur, le rythme et les dates à gauche, par semaine et total à droite), la ligne d'état et sa légende ; le détail dans un panneau (à droite, par le bas au téléphone) ; « Annuler » et « Enregistrer » dans la barre et au pied du panneau ; un brouillon garde son année. Rien ne change aux calculs.
 // v12.24 (25/11/2026) — MOTS-17 (§612) : le balayage — Planning › Année : le mode d'emploi de la frise derrière « Régler la frise ? », la règle des fériés et celle du rythme dans leur « i », la liste des fériés repliée ; Vigne › Stades : la méthode des degrés-jours et les seuils dans le « i » de « Ce qui vient » ; Tracteur › Entretien : « intervalle ? » ouvre le crayon, « + Autre entretien » remplace la carte vide ; l'Accueil : « Vos compteurs partent à la première validation »
@@ -4758,7 +4759,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.26';
+const CACHE_NAME   = 'mavigne-v12.27';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4775,7 +4776,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.26 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.27 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4795,7 +4796,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.26 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.27 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

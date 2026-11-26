@@ -42,7 +42,7 @@ function fonction(src, nom) {
 const ligneVar = (src, nom) => { const m = new RegExp('^var ' + nom + '=.*$', 'm').exec(src); if (!m) throw new Error('VAR ABSENTE : ' + nom); return m[0]; };
 const NOMS = ['_paH', '_paHm', '_paMinT', '_paHHMM', '_planAnneeSaison', '_planAnneeLire', '_planAnneeDate', '_planAnneePlage', '_planAnneeResumeTxt', '_planAnneeResumeAB',
   '_planAnneeCopie', '_planAnneePose', '_planAnneeGrille', '_planAnneeMeta', '_planAnneeMetaCopie', '_planAnneeMetaEd', '_planAnneeBrouillon', '_planAnneeSemDefaut', '_planAnneeSemSel',
-  '_planAnneeCible', '_planAnneeTotal', '_planAnneeCleS', '_planAnneePriseSaison', '_planAnneeHoraire', '_planAnneeHorairesTxt', '_planAnneeReguliers', '_planAnneePasVal', '_planAnneeVal',
+  '_planAnneeCible', '_planAnneeTotal', '_planAnneeCleS', '_planAnneePriseSaison', '_planAnneeHoraire', '_planAnneeHorairesTxt', '_planAnneeReguliers', '_planAnneeNomsIx', '_planAnneeNoms', '_planAnneePasVal', '_planAnneeVal',
   'planAnneePas', 'planAnneeJour', 'planAnneeDesIci', 'planAnneePrise', 'planAnneePriseJour', 'planAnneeCoupe', 'planAnneeAB', 'planAnneeUneSemaine',
   '_anvP', '_anvSom', '_anvRythme', '_anvParSem', '_anvCtx', '_anvSec', '_anvDec', '_anvHHMM', '_anvIso', '_anvMemeCel', '_anvCel', '_anvGrille', '_anvChoix', '_anvHeure',
   '_anvDebut', '_anvJourEd', '_anvPanSaison', '_anvPanSemaine', '_anvPanJours', 'planAnneeCel', 'planAnneeVal', 'planAnneeChamp', 'planAnneeBascule', '_planAnneeTuto', '_anvApres', '_anvAppuiEcoute'];
@@ -229,7 +229,7 @@ if (!CONTRE) {
     ['la liste des débuts offre tous les jours', sur('vu', 'if(x.i!==a&&(x.g!==0||P<0', 'if(x.i!==a&&(P<0')],
     ['un lundi qui ne change rien fait un brouillon', sur('an', "if(!n){_planRenderAnnee();return;}   // des jours pareils", "if(false){_planRenderAnnee();return;}   // des jours pareils")],
     ['une heure tapée s’enregistre à chaque morceau', sur('vu', "&&(foc||el._clavier))return;", "&&foc)return;")],
-    ['« Autre durée » s’enregistre à chaque chiffre', sur('vu', "if(f==='autre'&&t&&t!=='change')return;", '')],
+    ['« Autre durée » s’enregistre à chaque chiffre', sur('vu', "if((f==='autre'||f==='nom')&&t&&t!=='change')return;", '')],
     ['refusée, la valeur reste', sur('vu', 'else el.value=el.defaultValue;}', '}')],
     ['les appuis ne sont jamais suivis', sur('vu', "_anvOv();_anvAppuiEcoute();_planRenderAnnee();", "_anvOv();_planRenderAnnee();")],
     ['le rendu n’attend plus le champ quitté', sur('vu', 'function _planRenderAnnee(){\n  if(_anvTenir)return;', 'function _planRenderAnnee(){\n  if(false)return;')],

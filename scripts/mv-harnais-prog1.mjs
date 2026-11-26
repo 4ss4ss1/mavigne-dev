@@ -46,7 +46,7 @@ function fonction(src, nom) {
   throw new Error('accolades : ' + nom);
 }
 const NOMS = ['_mvEasterMD', '_feriesY', '_planBaseActive', '_planJoursSem', '_planBaseAn', '_planSolid', '_planSolidJour', '_planEstSolid', '_planSolidRatio', '_planCreditFerie',
-  '_planAnneeSaison', '_planAnneeLire', '_planAnneeDate', '_planAnneePlage', '_planAnneeHoraireTxt', '_planAnneeNature', '_planAnneeModulation', '_planAnneeProgramme'];
+  '_planAnneeSaison', '_planAnneeLire', '_planAnneeDate', '_planAnneePlage', '_planAnneeHoraireTxt', '_planAnneeNature', '_planAnneeModulation', '_planAnneeNomsIx', '_planAnneeNoms', '_planAnneeProgramme'];   // ANNEE-4 (§615) : le nom des périodes
 const MODES = /var PLAN_SOLID_MODES=\{[^;]*\};/.exec(PL)[0];
 const i0 = PL.indexOf('var PLAN_DEF = {'), j0 = PL.indexOf('};', i0);
 const PLAN_DEF = vm.runInNewContext('(' + PL.slice(i0 + 15, j0 + 1) + ')');

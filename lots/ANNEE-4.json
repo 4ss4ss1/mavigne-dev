@@ -1,0 +1,50 @@
+{
+  "lot": "ANNEE-4",
+  "section": "§615",
+  "base": "4bfe53da145b5a31d7373dd839c1a6b9f21790d9",
+  "inclut": [],
+  "date": "2026-11-26",
+  "tutos": {
+    "ok": true,
+    "empreinte": "fd7b2342b009c965b7d3aba017c98acfc4673b55503fb064b0a4d522b8bc9a8e",
+    "date": "2026-11-26T17:57:23.633Z",
+    "joues": {
+      "téléphone": 5,
+      "ordinateur": 5,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "unsurdeux"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    "CLAUDE.md": "649db55cd32d03cc681dc8ad7ed07709bd781792879e6d217caf695eb2d70f88",
+    "docs/claude/INDEX.md": "30763ceacf28eec23f8f69c3cb0738f9ea480b3e9a0a6a0bf1b907f0c71f9f03",
+    "docs/claude/chantiers-580-629.md": "f3e6a5b93bcb81506d62943843e521587956ae29b2c9e6cdefda44499b074361",
+    "docs/claude/journal.md": "7163d26851862aedb3a56b640d1ef6923471e276e6b737271a82fb1e1d4c84fd",
+    "guide/10-planning.html": "a0023b0f8bc123a19722cc6bc2b738b4c152c50b967f6494ab5d844137fb1d92",
+    "index.html": "17f42ca250412664ec1f1a283563a7642f2c4075b6a79d4dd3d17da08dd51917",
+    "public/guide.html": "ff294742f0b354e7aa5ec5334c762dedfaa141d5936a968e069f0891c24dbadf",
+    "public/sw.js": "62345577973634904bef3bb0545996d49214fdde7bae911b0865402a6b7ddd7c",
+    "scripts/harnais-claude-md.mjs": "76500d98738c21c8f60a292368e7d05efb680dc19fb8248f2f49794f029459e8",
+    "scripts/mv-harnais-ab1.mjs": "29af439b7c4c7953f2fe570a7ed69b781d67780d266ca6e382207c8f40695c4b",
+    "scripts/mv-harnais-annee2.mjs": "ca804248f6694ed09a3299a94523236696aed3b3a57b1db519a3eee986b82ebe",
+    "scripts/mv-harnais-annee3.mjs": "d3b4ef6da8d4e1bd294f4d31866a5cf218e5efa319d03ce2322950eb06732c37",
+    "scripts/mv-harnais-frise3.mjs": "1072dcee547a56c970867cb02b178adb62e1c119694ec9c8ac7f7bce9234090e",
+    "scripts/mv-harnais-liste.mjs": "e051feea5616939a99968a0a1d1518f79587cec2bb12086a462f4a831468b89c",
+    "scripts/mv-harnais-monan1.mjs": "7a7d184ae34012ade7ac1b2c6e4b7e11acaf970483cf6191c02abd0483e30028",
+    "scripts/mv-harnais-prog1.mjs": "39551bb754fff240e5a8fdb465ad65e2c4c6fae2e1d3e9e35fae84096dfe79f3",
+    "src/annee.css": "9625cd868156462015457c1e223c36b9021d5832a8df95ac96651f33347d58fd",
+    "src/planning-annee-vue.js": "7b2c1629d04d87a0537c22faf80bb80b7cc32bee61be0d96a6e1768f4dd5b795",
+    "src/planning-annee.js": "82ae45553343f3499bfd5423d9aef18c0094c4bc5e52cbaf71f255308f042c69",
+    "src/planning.js": "f0c5f665f73932655baa01ef0b11d85c0a864c258347338336002c57b8d5e2eb",
+    "src/utils.js": "dd2d4f5b24a0dac98c536b2574726973f0346c54bcd4047646779e0f0bf76df7",
+    "src/whats-new.js": "eaba04ab52fd505d5096ed7408c106bcab641e5b59c61e957eafc16454658631",
+    "scripts/mv-harnais-annee4.mjs": "df2496136eaf6866406f69feefa7fb05d2f1bea58d115276091462d1b0f405fa"
+  }
+}
