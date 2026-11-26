@@ -10,6 +10,7 @@ import './bandeau.css';   // ★ TETE-4A (§577) : le bandeau commun — une feu
 import './aujourdhui.css';   // ★ MOTS-5 (§586) : Pilotage › Aujourd'hui allégé — une feuille à part, pour la même raison ; elle passe après styles.css et recouvre ses règles du cockpit
 import './pilotage.css';   // ★ MOTS-8 (§590) : les onglets du Pilotage allégés sur place (Travaux d'abord) — une feuille à part, après les trois autres
 import './frais.css';   // ★ FRAIS-1 (§595) : les frais à rembourser (Planning › Personnel › Frais) — une feuille à part, après les quatre autres
+import './annee.css';   // ★ ANNEE-2 (§613) : Planning › Année refaite (la vue, la barre, le panneau) — une feuille à part, après frais.css (styles.css à son plafond)
 import { mvIdsParcelles, mvIdsJournal, mvCarteParcelles, mvNomsParPid, mvNomsJournal } from './ids.js';   // IDS-1 (§252, §253) : identifiants permanents des parcelles
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,

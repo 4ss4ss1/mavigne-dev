@@ -7410,8 +7410,7 @@ body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) 
 @media (max-width:599px){ #page-cave #cave-kpis .mvu-kpi{ flex-direction:column; align-items:flex-start; gap:0; min-width:0; padding:var(--e-2,8px) var(--e-3,12px)!important; } #page-cave #cave-kpis .mvu-kpi-l{ line-height:1.25; } }
 #page-cave .mlx-hint{ font-style:normal; font-size:var(--pt-micro,12px); color:var(--texte-doux); }
 /* ★ FIN CAVE-1 */
-/* DEBORD-1 (§593) : Planning › Année, la frise — au téléphone, un nom de mois sur trois (les autres gardent leur trait, vidé de son texte). */
-@media (max-width:599px){ .pa-mois.pa-mois-2{ font-size:0!important; height:12px; } }
+/* DEBORD-1 (§593) : la frise de Planning › Année ne nommait qu'un mois sur trois au téléphone — ANNEE-2 (§613) l'a refaite (bloc ANNEE-2) : une initiale par mois. */
 /* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════
    ★★ CAVEAUJ-1 (§434) — CAVE › AUJOURD’HUI AU DESSIN DE LA MAQUETTE VALIDÉE (Nico, 22/10 : « j’aime beaucoup », « go »)
    « Ce qui presse » : une ligne par contenant, un bouton par geste (jeu commun .mvbtn) ; ce qui est fait ; qui est en
@@ -10337,9 +10336,7 @@ body:not(.mv-rail-ouvert) .mv-rail .mv-rail-point,body:not(.mv-rail-ouvert) .mv-
 /* MOTS-17 (§612) : rien de réglé — le bouton seul, à la place de la carte et de sa phrase */
 .ent-prog.ep-seul{margin-bottom:10px}
 .ent-prog.ep-seul .ep-btn{width:100%;justify-content:center}
-/* MOTS-17 : Planning › Année — « Régler la frise ? » au bout de la rangée de l'admin ; le « i » d'un titre replié */
-#page-planning .pa-aide{margin-left:auto;align-self:center}
-#page-planning summary .mv-i{margin-left:var(--e-1,4px);vertical-align:middle}
+/* MOTS-17 : Planning › Année — « Régler la frise ? » passe dans le menu « … » de la barre (ANNEE-2, §613) ; le « i » d'un titre replié vit dans le panneau (bloc ANNEE-2) */
 /* MOTS-17 : Tracteur — la pastille « intervalle ? » garde son allure de pastille malgré l'habillage des boutons de carte */
 #page-tracteur .ent-resume-card button.mv-pq{ border:1px solid var(--or)!important; border-radius:var(--r-full,999px)!important; background:var(--or-pale)!important; font-weight:600!important; box-shadow:none!important; }
 .ent-prog .ep-form{border-top:1px solid var(--ligne,var(--gris-clair));padding-top:var(--e-2,8px);margin-top:var(--e-1,4px)}

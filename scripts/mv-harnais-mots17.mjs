@@ -87,13 +87,15 @@ function suite(S) {
   const essai = (n, f) => { try { const r = f(); T(n, Array.isArray(r) ? r[0] : r, Array.isArray(r) ? r[1] : ''); } catch (e) { T(n + ' (' + e.message + ')', false); } };
 
   // ①
+  // ANNEE-2 (§613) : la vue de l'année est refaite — le cadre et ses dimanches vivent dans le panneau des contrôles, « Régler la frise ? »
+  //   dans le menu « … » de la barre (après Exporter), plus au bout de la rangée de l'admin.
   T('① sous Le cadre, « Dimanches travaillés » seul : le mode d’emploi a quitté l’écran',
-    S.ann.includes("+'<div style=\"font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;line-height:1.5\">Dimanches travaill\\u00e9s\\u00a0: '+(dim||'aucun')+'</div></div>';")
+    S.ann.includes("<span class=\"anv-ln-n\">Dimanches travaill\\u00e9s</span><span class=\"anv-ln-s\">'+(C.dim||'aucun')+'</span></div>'")
     && !S.ann.includes('R\\u00e8gle une saison avec') && !S.ann.includes('se r\\u00e8gle jour par jour plus haut'));
-  T('① « Régler la frise ? » au bout de la rangée de l’admin, après Exporter et le brouillon, dans le style des pastilles',
-    S.ann.includes("    h+='<button type=\"button\" class=\"mv-pq pa-aide\" data-mvi=\"plan.frise\" aria-expanded=\"false\">R\\u00e9gler la frise\\u00a0?</button>';")
-    && S.ann.indexOf('data-mvi="plan.frise"') > S.ann.indexOf('planExportCSV(this.dataset.pl)') && S.ann.indexOf('data-mvi="plan.frise"') > S.ann.indexOf('planAnneeAnnuler()')
-    && S.css.includes('#page-planning .pa-aide{margin-left:auto;align-self:center}'));
+  T('① « Régler la frise ? » dans le menu « … » de la barre, après Exporter (ANNEE-2), dans le style du menu',
+    S.ann.includes("'<button type=\"button\" class=\"anv-menu-l\" role=\"menuitem\" data-mvi=\"plan.frise\">R\\u00e9gler la frise\\u00a0?<span>le mode d\\u2019emploi</span></button>'")
+    && S.ann.indexOf('data-mvi="plan.frise"') > S.ann.indexOf('planExportCSV(this.dataset.pl)')
+    && !S.css.includes('#page-planning .pa-aide{margin-left:auto;align-self:center}'));
   T('① le rythme : la note dans le « i » du titre (sa date en gras), plus sous le titre ; le « i » ne replie pas la section (règle des pastilles)',
     S.ann.includes("_mvInfoSet('plan.rythme',{ p:['Les jours r\\u00e9guliers de la saison, de cette semaine'+(finS>=0?' jusqu\\u2019au <b>'+_planAnneeDate(J,finS,true)+'</b>':'')")
     && S.ann.includes("Changer le rythme \\u00e0 partir d\\u2019ici '+_mvInfoBtn('plan.rythme')+'</summary>'") && !S.ann.includes('line-height:1.5;margin:4px 0">Les jours r')
@@ -150,14 +152,14 @@ function suite(S) {
   // ⑤
   T('⑤ l’Accueil : « Vos compteurs partent à la première validation. »',
     S.app.includes('<span><b>Votre saison commence.</b> Vos compteurs partent \\u00e0 la premi\\u00e8re validation.</span>') && !S.app.includes('lancera vos compteurs'));
-  T('⑤ les quatre fiches : la frise (Précédente, Suivante), le rythme et les fériés (repli honnête), les degrés-jours (GFV, seuils, prévision)',
-    S.uti.includes("'plan.frise': { t: 'Régler la frise'") && S.uti.includes('dans le cadre sous la frise (« Précédente », « Suivante »)')
+  T('⑤ les quatre fiches : la frise (ses heures en tête de la vue, ‹ et ›), le rythme et les fériés (repli honnête), les degrés-jours (GFV, seuils, prévision)',
+    S.uti.includes("'plan.frise': { t: 'Régler la frise'") && S.uti.includes('en touchant ses heures, en tête de la vue (‹ et › pour la voisine)')
     && S.uti.includes("'plan.rythme': { t: 'Changer le rythme à partir d’ici'") && S.uti.includes("'plan.feries': { t: 'Les fériés qui portent des heures'")
     && S.uti.includes("'phr.dj': { t: 'Les degrés-jours'") && S.uti.includes('le <b>modèle GFV</b> (Parker et al. 2011, 2013)')
     && S.uti.includes('Pinot noir <b>1\\u00a0219</b> et <b>2\\u00a0511\\u00a0°C·j</b>, Chardonnay <b>1\\u00a0217</b> et <b>2\\u00a0541</b> — la pleine floraison, puis la véraison.')
     && S.uti.includes('Au-delà des 16 jours de prévision, la moyenne des dix dernières années.'));
-  T('⑤ le guide : « Régler la frise ? », les fériés repliés, le « i » de « Ce qui vient », « intervalle ? », « + Autre entretien »',
-    S.gp.includes('par la pastille <b>« Régler la frise ? »</b>') && S.gp.includes('fériés en semaine y est repliée (ouverte pendant un brouillon)')
+  T('⑤ le guide : « Régler la frise ? » (menu « … », ANNEE-2), « Chômer les N », le « i » de « Ce qui vient », « intervalle ? », « + Autre entretien »',
+    S.gp.includes('le mode d\'emploi « Régler la frise ? »') && S.gp.includes('« Chômer les N » les chôme d\'un geste')   // ANNEE-2 (§613) : le guide de l'année réécrit — le mode d'emploi dans le menu « … », les fériés dans les contrôles
     && S.gv.includes('La méthode et les seuils sont dans le « i » de « Ce qui vient »') && S.gt.includes('la pastille <b>« intervalle ? »</b>') && S.gt.includes('par <b>« + Autre entretien »</b>'));
   const iW = S.wn.indexOf("{ v: '11.33'"), jW = S.wn.indexOf("{ v: '11.32'");
   T('⑤ l’annonce 11.33, pour l’administrateur seulement', iW > 0 && iW < jW && S.wn.slice(iW, jW).includes("pour: ['admin']") && S.wn.slice(iW, jW).includes('Régler la frise'));
@@ -179,8 +181,8 @@ if (!CONTRE) {
   if (suite(S0).some((x) => !x[1])) { console.log('\x1b[31mROUGE\x1b[0m — la suite de base est rouge : les contre-épreuves ne prouveraient rien (règle du §588)'); process.exit(1); }
   const sur = (cle, de, vers) => (S) => { if (S[cle].indexOf(de) < 0) throw new Error('motif absent : ' + de.slice(0, 60)); return { ...S, [cle]: S[cle].replace(de, vers) }; };
   const mutants = [
-    ['le mode d’emploi revient sous Le cadre', sur('ann', "+(dim||'aucun')+'</div></div>';", "+(dim||'aucun')+'. R\\u00e8gle une saison avec \\u2212 et +.</div></div>';")],
-    ['« Régler la frise ? » disparaît', sur('ann', "    h+='<button type=\"button\" class=\"mv-pq pa-aide\" data-mvi=\"plan.frise\" aria-expanded=\"false\">R\\u00e9gler la frise\\u00a0?</button>';", '')],
+    ['le mode d’emploi revient sous Le cadre', sur('ann', "+(C.dim||'aucun')+'</span></div>'", "+(C.dim||'aucun')+'. R\\u00e8gle une saison avec \\u2212 et +.</span></div>'")],
+    ['« Régler la frise ? » disparaît', sur('ann', "'<button type=\"button\" class=\"anv-menu-l\" role=\"menuitem\" data-mvi=\"plan.frise\">R\\u00e9gler la frise\\u00a0?<span>le mode d\\u2019emploi</span></button>'", "''")],
     ['la note du rythme revient sous le titre', sur('ann', "+_mvInfoBtn('plan.rythme')+'</summary>'", "+_mvInfoBtn('plan.rythme')+'</summary><div style=\"font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin:4px 0\">Les jours r\\u00e9guliers</div>'")],
     ['le rythme perd sa date', sur('ann', "' jusqu\\u2019au <b>'+_planAnneeDate(J,finS,true)+'</b>'", "''")],
     ['la règle des fériés revient à l’écran', sur('mod', "des heures.</b> '+_mvInfoBtn('plan.feries')", "des heures.</b> Ch\\u00f4m\\u00e9, un f\\u00e9ri\\u00e9 vaut 0 h.'+_mvInfoBtn('plan.feries')")],
@@ -196,9 +198,9 @@ if (!CONTRE) {
     ['« intervalle ? » montré à qui ne peut pas régler', sur('trac', 'var _ivP=(!(_ivh||_ivm)&&hasComp&&canEdit)?', 'var _ivP=(!(_ivh||_ivm)&&hasComp)?')],
     ['« intervalle ? » n’ouvre plus le crayon', sur('trac', 'class="mv-pq rel-iv" onclick="window.openRevEdit()"', 'class="mv-pq rel-iv"')],
     ['l’Accueil retrouve sa phrase longue', sur('app', 'Vos compteurs partent \\u00e0 la premi\\u00e8re validation.', 'Votre premi\\u00e8re validation lancera vos compteurs\\u00a0: hectares, jours au domaine, kilom\\u00e8tres de rangs.')],
-    ['la fiche de la frise oublie où se choisit la semaine', sur('uti', 'dans le cadre sous la frise (« Précédente », « Suivante »)', 'plus haut')],
+    ['la fiche de la frise oublie où se choisit la semaine', sur('uti', 'en touchant ses heures, en tête de la vue (‹ et › pour la voisine)', 'plus haut')],
     ['la fiche des degrés-jours perd les seuils', sur('uti', 'Pinot noir <b>1\\u00a0219</b>', 'Pinot noir <b>1\\u00a0291</b>')],
-    ['le guide ne dit pas « Régler la frise ? »', sur('gp', 'par la pastille <b>« Régler la frise ? »</b>', 'par la pastille <b>« Aide »</b>')],
+    ['le guide ne dit pas « Régler la frise ? »', sur('gp', 'le mode d\'emploi « Régler la frise ? »', 'le mode d\'emploi « Aide »')],
     ['l’annonce est montrée à tout le monde', sur('wn', "pour: ['admin'], emoji: 'calendrier', titre: 'Planning, Stades, Entretien", "pour: ['tous'], emoji: 'calendrier', titre: 'Planning, Stades, Entretien")],
     ['le service worker ne dit pas le lot', sur('sw', '// v12.24 (25/11/2026) — MOTS-17 (§612)', '// v12.24 (25/11/2026) — divers')],
     ['la maquette n’est pas citée', sur('lm', 'maquette-balayage-v2.html', 'maquette-balayage-vX.html')],

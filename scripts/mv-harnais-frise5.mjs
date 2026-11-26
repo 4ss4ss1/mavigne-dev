@@ -16,7 +16,7 @@ const lire = (f, env) => fs.readFileSync(process.env[env] || path.join(R, f), 'u
 const DEFAUTS = {
   creation: ['un modèle neuf rouvre l’éditeur de 365 cases', '  if(window.planAnneeOuvrir)window.planAnneeOuvrir(id);', '  planOpenGridEditor(id);'],
   route:    ['la roue route de nouveau vers l’éditeur', 'function _planRenderCadre(){\n', 'function _planRenderCadre(){\n  if(window._planEditing){_planRenderGridEditor();return;}\n'],   // ANNEE-TAB (§548) : la roue ne route plus rien, l’année a son onglet
-  csv:      ['l’export CSV disparaît de l’année', "onclick=\"planExportCSV(this.dataset.pl)\">Exporter (CSV)</button>", "onclick=\"void 0\">Exporter (CSV)</button>"],
+  csv:      ['l’export CSV disparaît de l’année', "onclick=\"planAnneeMenu();planExportCSV(this.dataset.pl)\">Exporter (CSV)</button>", "onclick=\"planAnneeMenu();void 0\">Exporter (CSV)</button>"],   // ANNEE-2 (§613) : dans le menu « … »
 };
 if (CONTRE) {
   console.log('\n── FRISE-5 — contre-épreuve (un processus par défaut)\n'); let tenues = 0, total = 0;
@@ -46,7 +46,7 @@ const cadre = (PL.match(/^function _planRenderCadre\(\)\{[\s\S]*?\n\}/m) || ['']
 T(!/_planRenderGridEditor/.test(cadre) && !/_planRenderAnnee/.test(cadre) && /planTab==='annee'&&window\._planAnneeOnglet/.test(PL), 'la roue du Planning ne route plus rien : l’année a son onglet (ANNEE-TAB)');
 const creer = (PL.match(/^function planCreateTemplate\(\)\{[\s\S]*?\n\}/m) || [''])[0];
 T(/window\.planAnneeOuvrir\(id\)/.test(creer), 'un modèle neuf s’ouvre sur son année');
-T(/onclick="planExportCSV\(this\.dataset\.pl\)">Exporter \(CSV\)<\/button>/.test(AN) && /^window\.planExportCSV\s*=/m.test(PL), 'l’export CSV reste, depuis l’année');
+T(/onclick="planAnneeMenu\(\);planExportCSV\(this\.dataset\.pl\)">Exporter \(CSV\)<\/button>/.test(AN) && /^window\.planExportCSV\s*=/m.test(PL), 'l’export CSV reste, depuis l’année');
 T(/^function planSaveTpl\(/m.test(PL) && /planSaveTpl\(id\)/.test(AN), '« Enregistrer » de l’année écrit toujours par planSaveTpl');
 console.log('\n  ' + verts + ' vert · ' + ECHECS.length + ' rouge\n');
 process.exit(ECHECS.length ? 1 : 0);

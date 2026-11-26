@@ -47,7 +47,7 @@ T(/_PLAN_VALID_TAB=\{[^}]*annee:1/.test(PL), 'l’onglet est un onglet valide');
 T(/planTab==='annee'&&window\._planAnneeOnglet\)window\._planAnneeOnglet\(\)/.test(fonction(PL, '_planRenderBody')), 'il affiche l’année d’un modèle');
 T(/planTab==='annee'&&isAdmin\(\)\)\{ sb\.innerHTML=window\._planAnneeBande/.test(fonction(PL, '_planRenderHeader')), 'sa bande de chiffres : le modèle, la base, l’écart');
 T(!/onclick="planAnneeOuvrir\(/.test(PL), 'la roue crantée ne porte plus « L’année » sur chaque modèle');
-T(/onclick="planAnneeModele\(this\)"/.test(fonction(AN, '_planAnneeChoix')) && /data-tuto="plan\.annee\.modele"/.test(AN), 'en haut, le choix du modèle');
+T(/onclick="planAnneeModele\(this\)"/.test(fonction(AN, '_anvOutils')) && /data-tuto="plan\.annee\.modele"/.test(fonction(AN, '_anvOutils')), 'en haut, le choix du modèle (ANNEE-2 : un bouton et son menu)');
 T(/document\.getElementById\('plan-body'\)/.test(fonction(AN, '_planRenderAnnee')), 'la frise s’écrit dans l’onglet');
 console.log('\n── une notation propre\n');
 const ctx = vm.createContext({});

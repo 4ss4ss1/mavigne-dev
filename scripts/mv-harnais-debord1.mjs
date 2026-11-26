@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { auj: lire('src/aujourdhui.css'), css: lire('src/styles.css'), cave: lire('src/cave.js'), cuv: lire('src/cuvier.js'), pa: lire('src/planning-annee.js'),
+const S0 = { auj: lire('src/aujourdhui.css'), an: lire('src/annee.css'), css: lire('src/styles.css'), cave: lire('src/cave.js'), cuv: lire('src/cuvier.js'), pa: lire('src/planning-annee.js'),
   pil: lire('src/pilotage.js'), reg: lire('src/reglages.js'), idx: lire('index.html'), regle: lire('scripts/mv-debord-rendu.mjs'), pkg: lire('package.json'),
   ci: lire('.github/workflows/ci.yml'), uti: lire('src/utils.js'), wn: lire('src/whats-new.js'), sw: lire('public/sw.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
 
@@ -41,12 +41,13 @@ const TENU = [
   ['⑥ les courbes : les trois colonnes de contexte suivent la largeur de la carte', 'cave',
     "+'.pcrb-b{container-type:inline-size}@container (max-width:640px){.pcrb-tb .o{display:none}}'", null],
   ['⑥ … un écart à gauche des chiffres, « Fin de FA » passe à la ligne', 'cave', "+'.pcrb-tb th.n,.pcrb-tb td.n{padding-left:var(--e-3,12px)}.pcrb-tb td:nth-child(2){white-space:normal}'", null],
-  ['⑦ le Planning de l’année : la ligne d’un jour passe à la ligne, ses colonnes font 300 px au moins', 'pa',
-    "repeat(auto-fill,minmax(min(300px,100%),1fr))", /minmax\(230px,1fr\)/],
+  // ANNEE-2 (§613) : la vue de l'année est refaite — la semaine et son rythme vivent dans un panneau de 400 px (une colonne), les mois
+  //   au téléphone sont des initiales (une par mois). Les vérités ⑦ suivent.
+  ['⑦ le Planning de l’année : dans le panneau, un jour garde sa ligne, son horaire passe dessous', 'pa',
+    "<span style=\"flex:1;min-width:7.5em;white-space:nowrap\">'", /minmax\(230px,1fr\)/],
   ['⑦ … la semaine type, 240 px au moins', 'pa', "repeat(auto-fill,minmax(min(240px,100%),1fr));gap:0 16px;margin-top:6px", /minmax\(210px,1fr\)/],
-  ['⑦ … et « Changer le rythme à partir d’ici », de même', 'pa', "repeat(auto-fill,minmax(min(240px,100%),1fr));gap:0 16px\">'+Ssw.h.map(", null],
-  ['⑦ … un nom de mois sur trois au téléphone', 'css', '@media (max-width:599px){ .pa-mois.pa-mois-2{ font-size:0!important; height:12px; } }', null],
-  ['⑦ … chaque nom de mois porte sa classe', 'pa', "'<span class=\"pa-mois'+(m%3?' pa-mois-2':'')+'\"", null],
+  ['⑦ … au téléphone, une initiale par mois (le nom entier dès 1 024 px ; src/annee.css)', 'an', '#page-planning .anv-mo-l{ display:none; }', null],
+  ['⑦ … chaque mois porte son nom et son initiale', 'pa', "<span class=\"anv-mo-l\">'+PLAN_MOIS_FR[m]+'</span><span class=\"anv-mo-c\">'", null],
   ['⑧ Décider : le nom s’abrège, « J3→J4 » reste entier', 'pil', '<div class="nm"><span class="nmt">', null],
   ['⑧ … la feuille', 'css', '.pil-dz-row .nm .nmt{min-width:0;overflow:hidden;text-overflow:ellipsis;}', /\.pil-dz-row \.nm\{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;/],
   ['⑧ … la carte du trajet n’a plus qu’un « Agrandir » (celui des graphes ne cache plus le trajet)', 'pil', "window._mvGraphSuivre('#pil-g-opmap', function(lg){ return _opMapSvg(rows,lg); }, { agrandir:false });", null],

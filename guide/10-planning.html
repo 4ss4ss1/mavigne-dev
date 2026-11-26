@@ -11,7 +11,7 @@
   <h3>{ic:balance} Trois onglets, et une roue crantée</h3>
   <ul class="dot">
     <li><b>Mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
-    <li><b>Année</b> — la frise d'un modèle : ses saisons, ses semaines, son compte face à la base. C'est là qu'il se règle.</li>
+    <li><b>Année</b> — l'année d'un modèle, comme un planning de projet : une ligne par saison, les heures de chaque semaine, le détail dans un panneau. C'est là qu'il se règle.</li>
     <li><b>Personnel</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (résumé pour la paie, jours,
     compteur, congés, frais et acomptes, relevé PDF), le récap annuel et les anciens salariés.</li>
     <li><b>La roue crantée</b> {ic:engrenage}, en haut à droite — ce qui se règle une fois par an :
@@ -153,38 +153,47 @@
     (accord national, art. 10.4) : les salariés concernés, la formule (jusqu'à 200&nbsp;h de modulation, contingent hors
     modulation de 150&nbsp;h ; au-delà, 100&nbsp;h), les périodes de forte, faible ou nulle activité avec leur horaire
     indicatif, la règle de décompte. Il s'affiche au moins une semaine avant le début de la période.</li>
-    <li><b>Les semaines A et B</b> : « Une semaine sur deux » ouvre, sous une saison, sa semaine B — ses jours se règlent à
+    <li><b>Les semaines A et B</b> : dans le panneau d'une saison, « Une semaine sur deux » ouvre sa semaine B — ses jours se règlent à
     part (un vendredi sur deux libre). Elles alternent, la première semaine de la saison est la A ; le compte de l'année prend leur
-    moyenne. « Une seule semaine » rend à la B les heures de la A.</li>
-    <li><b>Les horaires</b> : dans l'onglet Année, chaque saison a sa prise de poste, réglable par quart d'heure ; la fin se
-    calcule (début + heures du jour + la coupure du domaine, dès 6&nbsp;h). Dans la semaine, toucher l'horaire d'un jour lui donne
+    moyenne ; la vue montre la saison en bandes. « Une seule semaine » rend à la B les heures de la A.</li>
+    <li><b>Les horaires</b> : dans l'onglet Année, le panneau de chaque saison a sa prise de poste, réglable par quart d'heure ; la fin se
+    calcule (début + heures du jour + la coupure du domaine, dès 6&nbsp;h). Dans le panneau d'une semaine, toucher l'horaire d'un jour lui donne
     sa propre prise. Les codes D, M et A d'un modèle importé s'écrivent en heures, d'un bouton.</li>
-    <li>L'onglet <b>« Année »</b> du Planning (le modèle se choisit en haut) montre sa grille relue en saisons : une couleur
-    par semaine type, la semaine des vendanges à part, les fermetures hachurées, une barre par semaine face aux 35&nbsp;h,
-    son compte face à la base de l'année et le cadre vérifié. Chaque saison s'y règle avec − et + (ses jours réguliers),
-    « Tomber juste » propose une ou deux retouches qui posent l'année sur sa cible, et rien n'est écrit avant « Enregistrer ».
-    Chaque saison dit où elle commence, même en milieu de mois : « 1 sem. plus tôt / plus tard » déplace sa coupe ; un jour
-    à part se règle seul ou revient « comme la saison », une semaine à part aussi. Sous la frise, une semaine se règle jour par
-    jour, se ferme, se rouvre, ou change le rythme à partir d'elle (la frise en fait une nouvelle saison) ; un modèle vide se
-    construit ainsi. C'est là qu'un modèle se règle : la grille de 365 cases n'existe plus, un modèle neuf s'ouvre sur son
-    année, et « Exporter (CSV) » y est. Ce mode d'emploi s'ouvre à l'écran par la pastille <b>« Régler la frise ? »</b>,
-    au bout de la rangée « Tomber juste · Exporter » ; sous « Le cadre » ne reste que « Dimanches travaillés ». Le « i » de
-    « Changer le rythme à partir d'ici » dit jusqu'à quand le nouveau rythme s'applique.</li>
+    <li>L'onglet <b>« Année »</b> du Planning se lit comme un planning de projet. En haut, une barre : le modèle (un toucher ouvre
+    la liste des modèles et combien de personnes suivent chacun), l'année (‹ et ›, sur ordinateur), « Tomber juste », et le menu
+    « … » : exporter (CSV), imprimer le planning de l'année, le mode d'emploi « Régler la frise ? », qui suit ce modèle, préparer
+    l'année d'après. Dessous, <b>une seule vue de l'année</b> : les mois en colonnes ; en tête, les heures de chaque semaine face
+    aux 35&nbsp;h (au-dessus, en or) ; une ligne par saison, sa barre posée sur ses dates ; la semaine des vendanges à part et les
+    fermetures (hachurées) dans la même grille ; les fériés en points (plein : travaillé, creux : chômé) ; les congés posés de
+    l'équipe en traits ; aujourd'hui, un trait. Sur ordinateur, le rythme et les dates à gauche, et à droite deux colonnes : les
+    heures par semaine et le total de chaque période — le pied de la colonne fait le compte de la bande du haut (dès 2027, la ligne
+    des fériés y ajoute les fériés chômés, comptés pour leurs heures prévues). Sous la vue, la <b>ligne d'état</b> : le cadre légal,
+    les fériés travaillés au modèle, les jours à part, « Personne ne suit » ; et la légende, qui ne montre que ce que le modèle
+    contient.</li>
+    <li><b>Le détail s'ouvre dans un panneau</b> — à droite sur ordinateur, par le bas au téléphone — en touchant une saison, les
+    heures d'une semaine ou la ligne d'état. Une saison s'y règle avec − et + (ses jours réguliers), sa prise de poste, sa coupe
+    (« 1 sem. plus tôt / plus tard », même en milieu de mois). Une semaine se règle jour par jour (‹ et › pour la voisine), se
+    ferme, se rouvre, ou change le rythme à partir d'elle (la vue en fait une nouvelle saison) ; un modèle vide se construit ainsi.
+    Les jours à part se règlent seuls ou reviennent « comme la saison », une semaine à part aussi. « Tomber juste » ouvre une ou
+    deux retouches qui posent l'année sur sa cible. Rien n'est écrit avant « Enregistrer » : tant qu'un brouillon existe,
+    « Annuler » et « Enregistrer » sont dans la barre et au pied du panneau, et l'année ne change pas avant. La grille de 365 cases
+    n'existe plus, un modèle neuf s'ouvre sur son année. Le « i » de « Changer le rythme à partir d'ici » dit jusqu'à quand le
+    nouveau rythme s'applique.</li>
     <li><b>L'année suivante</b> : une année sans modèle enregistré part de vos modèles de l'année d'avant. Pour les écrire pour de
     bon, « Préparer 2027 » (menu « … » de la semaine, ou le bouton du bandeau sur une année sans modèle) recopie d'un coup les
     modèles cochés, replacés sur les jours de 2027 ; un modèle déjà là n'est remplacé que coché ; deux options : rouvrir les
     semaines fermées comme leur saison, chômer les fériés travaillés. Dans l'onglet Année, un modèle absent de l'année le dit :
     « Partir de 2026 » (ses horaires compris) ou « Partir d'une année vide », puis « Enregistrer ».</li>
-    <li><b>Les fériés du modèle</b> : un férié que le modèle prévoit travaillé se voit dans la semaine choisie de l'onglet Année
-    (« travaillé au modèle », ses heures). « Chômer » le passe à 0 h, « Travailler » lui rend les heures de sa saison. Sous la
-    semaine, « Les fériés de l'année » dit combien portent des heures et les chôme d'un geste (« Chômer les N ») ; la liste des
-    fériés en semaine y est repliée (ouverte pendant un brouillon), et la règle ci-dessous est dans le « i » ; la journée de
+    <li><b>Les fériés du modèle</b> : la ligne d'état de l'onglet Année dit combien de fériés le modèle prévoit travaillés ; un
+    toucher ouvre les contrôles, et ses fériés dans la semaine ouverte disent « travaillé au modèle », ses heures. « Chômer » le
+    passe à 0 h, « Travailler » lui rend les heures de sa saison ; « Chômer les N » les chôme d'un geste, et la règle ci-dessous
+    est dans le « i » ; la journée de
     solidarité, si le domaine la fait un férié, n'y est jamais touchée. Travaillé au modèle, un férié compte fait au relevé,
     majoration comprise ; chômé, il vaut 0 h au modèle en 2026 et compte pour ses heures prévues dès 2027. Rien n'est écrit avant
     « Enregistrer ».</li>
     <li><b>Qui suit quel modèle</b> se règle dans la roue crantée, « Assignation planning » : le modèle choisi vaut pour tous
     les mois de la personne, les mois passés compris, et devient la grille horaire de son contrat en cours (Réglages › Équipe).
-    Dans l'onglet Année, la carte du modèle dit qui le suit (« Suivi par ») ou « Personne ne suit » ; « Inscrire… » ou
+    Dans l'onglet Année, « Qui suit ce modèle » (menu « … ») le dit, et la ligne d'état dit « Personne ne suit » ; « Inscrire… » ou
     « Modifier » ouvrent la feuille : cochez ceux qui travaillent à ce rythme, l'effet sur leurs heures prévues des mois passés
     s'écrit avant de confirmer, et décocher quelqu'un le remet sur « standard ». Supprimer un modèle sur une année ne change le
     modèle de personne tant qu'il existe sur une autre année ; un modèle qui n'existe plus nulle part remet ceux qui le

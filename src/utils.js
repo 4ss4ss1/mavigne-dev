@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.33';
+export const APP_VERSION = '11.34';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3428,10 +3428,10 @@ export const MV_INFO = {
   // ★ MOTS-17 (§612) : le balayage — les notes de Planning › Année, des Stades et du Tracteur quittent l'écran.
   //   plan.rythme et plan.feries sont VIVANTES (la date de fin de saison, l'année et sa base) : _mvInfoSet les remplit
   //   au rendu ; le texte ci-dessous est le repli honnête si le Planning n'a pas tourné.
-  'plan.frise': { t: 'Régler la frise', p: [
-    'Une <b>saison</b> se règle avec − et + : ses jours réguliers seulement. Sa <b>coupe</b> se déplace d’une semaine.',
-    'Un <b>jour à part</b> se règle seul, ou revient comme la saison.',
-    'Une <b>semaine</b> se règle jour par jour, dans le cadre sous la frise (« Précédente », « Suivante ») : la fermer, la rouvrir, ou changer le rythme à partir d’elle.'
+  'plan.frise': { t: 'Régler la frise', p: [   // ANNEE-2 (§613) : la vue refaite, le détail dans un panneau
+    'Une <b>saison</b> se règle en touchant sa ligne : ses jours avec − et + (ses jours réguliers seulement), sa prise de poste, sa coupe d’une semaine.',
+    'Une <b>semaine</b> s’ouvre en touchant ses heures, en tête de la vue (‹ et › pour la voisine) : ses jours un par un, la fermer, la rouvrir, ou changer le rythme à partir d’elle.',
+    'Les <b>jours à part</b>, le <b>cadre</b> et les <b>fériés</b> s’ouvrent depuis la ligne d’état, sous la vue. Rien n’est écrit avant « Enregistrer ».'
   ] },
   'plan.rythme': { t: 'Changer le rythme à partir d’ici', p: [
     'Les jours réguliers de la saison, de cette semaine jusqu’à la fin de la saison ; la frise en fera une nouvelle saison.'

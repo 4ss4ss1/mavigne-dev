@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.34', d: '2026-11-26', items: [   // ANNEE-2 (§613) : Planning › Année refaite — une vue de l'année, le détail dans un panneau
+    { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning › Année\u00a0: l\u2019année se lit comme un planning de projet',
+      desc: "L\u2019onglet Année tient sur un écran\u00a0: en haut, le modèle, «\u00a0Tomber juste\u00a0» et le menu «\u00a0…\u00a0»\u00a0; dessous, une ligne par saison posée sur ses dates, les heures de chaque semaine face aux 35\u00a0h, les fériés et les congés. Touchez une saison, une semaine ou la ligne d\u2019état\u00a0: son détail s\u2019ouvre dans un panneau. Sur ordinateur, les heures par semaine et le total de chaque période s\u2019alignent à droite." },
+  ] },
   { v: '11.33', d: '2026-11-25', items: [   // MOTS-17 (§612) : le balayage — Planning › Année, Stades, Tracteur › Entretien
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Planning, Stades, Entretien : les modes d’emploi dans les « i »',
       desc: "Dans l’onglet Année du Planning, le mode d’emploi de la frise s’ouvre par « Régler la frise ? », la règle des fériés et celle du rythme par leur « i » ; la liste des fériés se replie. Dans les Stades, la méthode des degrés-jours et les seuils sont dans le « i » de « Ce qui vient ». Dans l’Entretien du tracteur, « intervalle ? » ouvre le crayon de la révision tant que l’intervalle manque, et « + Autre entretien » remplace la carte vide et sa phrase." }

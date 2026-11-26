@@ -129,6 +129,11 @@
    "date": "2026-11-25",
    "motif": "MOTS-17 (§612) : le balayage — Planning › Année, Stades, Tracteur › Entretien, l'Accueil",
    "hausses": []
+  },
+  {
+   "date": "2026-11-26",
+   "motif": "ANNEE-2 (§613) : Planning › Année refaite — une vue de l'année, le détail dans un panneau",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -296,7 +301,7 @@
     "lex": null
    },
    "Planning › Année": {
-    "mots": 171,
+    "mots": 29,
     "p15": 0,
     "avant": 0,
     "lex": null
@@ -574,7 +579,7 @@
     "lex": null
    },
    "Planning › Année": {
-    "mots": 171,
+    "mots": 45,
     "p15": 0,
     "avant": 0,
     "lex": null

@@ -1,0 +1,59 @@
+{
+  "lot": "ANNEE-2",
+  "section": "§613",
+  "base": "99321dc9230e37054e4ae5703727c8610c7535d7",
+  "inclut": [],
+  "date": "2026-11-26",
+  "tutos": {
+    "ok": true,
+    "empreinte": "bf15556144ab6b4ff2bddbdf11978dbaf3644d0557aa965bc05077f25547ede7",
+    "date": "2026-11-26T07:59:29.406Z",
+    "joues": {
+      "téléphone": 8,
+      "ordinateur": 8,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "annee",
+      "reglerannee",
+      "coupe",
+      "semaine",
+      "horaires",
+      "inscrire",
+      "feries",
+      "unsurdeux"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "3be5680349d63719bd1066b13fdd8339b3664a8d4bfa7c4cb908eac0b65e9c28",
+    "docs/claude/INDEX.md": "7e60c93fdf2faaccf16093f46adb4154208b0205fc576cdc956ef90171b3c574",
+    "docs/claude/chantiers-580-629.md": "2766fdf66f59134fa6474a6be100935ea5f99cc299bb335404885d48dd2a204f",
+    "docs/claude/journal.md": "41d4b4375768938ee742e3106b6b76ceecf37a6b64693bdd64d24720e6b06c20",
+    "docs/maquettes/LISEZMOI.md": "94b5747dbad4a2f93267ab980c74ebb73599d5d04c7aa728fae5abed8510ddbf",
+    "guide/10-planning.html": "3a848cd5085e039091282a46a0fd981798bcfbc87cd055bc01df4b24a7c76679",
+    "index.html": "3b5ca02fddd13456907f10c5bb3890d0118dd87b33c9af853b80608cafe74263",
+    "public/guide.html": "e26a1cee83bce7a4201bd8325fd297569b7e07be69cb975a033c7c6b9e809e43",
+    "public/sw.js": "797760ecf0e56fc3c2eff44170aaa1562772ca389cda2f5ec699a3dbeb275664",
+    "scripts/harnais-claude-md.mjs": "449e1957c1b6993d03b4241e245598a004a8907eea43e0f20cc7bcbaf3ae5c06",
+    "scripts/mv-captures.mjs": "36357d462e22c82fc255417238e7ba1c51a898aac359cef740aae9931edd91b3",
+    "scripts/mv-harnais-anneetab.mjs": "c9f3d826f2c9a1aa9b9c88c349a0ecbc6b65dcc067f998c5a127db976976736d",
+    "scripts/mv-harnais-debord1.mjs": "fc80c63b5434e99b2c4e3a249db8b5e6783a4acc9e46dd70c459511a4cde4adb",
+    "scripts/mv-harnais-feries1.mjs": "8e1b8d1c05509c8ff5e7eaabe27011f1896e920605d1a8afdcef6d60eb4f3648",
+    "scripts/mv-harnais-frise5.mjs": "b5f0b110fc0c809bf0798ff33bd2c07b65b086820b0edd8c12843e3be0d2be0b",
+    "scripts/mv-harnais-liste.mjs": "2a0698f1cd87db4165babbc4a5e512918d5df2caa1cbea4cfe5fc19f342116aa",
+    "scripts/mv-harnais-mots17.mjs": "cc0da9956d602862f701ca842f9a5ee5f24178d30ad679e81bc11a40e7da3c9e",
+    "scripts/mv-mots-baseline.json": "ab076a92dbc9d34077ea7f3b9b97b54cbbf54ecca5e8902e6165f49fae4d19ac",
+    "scripts/tutos-couverture.json": "ec2131153026b8547830cc7099e925ebd4c89ad2ee2ec1d2bdaed81a9c6b08c4",
+    "scripts/typo-baseline.json": "33b94d1eee5e0ec8122fd9a31d1dc018ca3f3242caac9acb05276bbda67cc7ef",
+    "src/app.js": "5d49705f09a4be1956d053a277eb79a3ad64c952ad2108cba069336c32a95a5f",
+    "src/planning-annee.js": "216a843572735107c694ebc705cf45053810684b80fd2f46e0dd1f8a28e1e566",
+    "src/styles.css": "71b88c469aee74afe496119045e011a0eac17720e42107eff3f5ace71a3fb43d",
+    "src/tutos.js": "193d45fff3afe75576f0041720cef06ad450f296e3ce754afe03fa2a18c2b22b",
+    "src/utils.js": "5ea045196f4020380a6956b745dfa8a12a2285579a55625569c4859b4dc136e6",
+    "src/whats-new.js": "4dedcc18b90c229a2a80df0558e57b3437ed64480dfb031fce706be3869a7c6d",
+    "docs/maquettes/maquette-planning-annee-refonte-v3.html": "c667afe983ebed6f447290f6eaafe153fff9b262dc0a5a366f35632d49b9aee5",
+    "scripts/mv-harnais-annee2.mjs": "ece492db17ac25eb9109b88cb9b0bd2fcb82d1e44611b9c81fc241b9e65bc6ca",
+    "src/annee.css": "c6323c912415ef268345c9200b26593e9b8f554c9dbccbf902b8f414e04bfd76"
+  }
+}
