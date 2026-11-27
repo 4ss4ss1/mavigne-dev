@@ -2238,8 +2238,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-det .pil-trx-go{margin-top:auto;padding-top:var(--e-3,12px);}
 .pil-t2b{padding:11px 16px 16px;}
 .pil-t2s{font-size:var(--pt-micro,12px);color:var(--texte-doux);margin-top:2px;line-height:1.45;}
-.pil-big{font-family:var(--font-titre);font-size:25px;font-weight:600;margin:2px 0 2px;color:var(--texte);line-height:1.1;}
-.pil-big.green{color:var(--vert-med);}
 .pil-chip2{display:inline-block;font-size:var(--pt-micro,11px);font-weight:600;border-radius:7px;padding:2px 8px;margin:3px 4px 0 0;}
 .pil-gbar{height:7px;border-radius:4px;background:var(--gris-clair);overflow:hidden;margin-top:10px;}
 .pil-gbar i{display:block;height:100%;border-radius:4px;transition:width .8s cubic-bezier(.22,.61,.36,1);}
@@ -5220,83 +5218,12 @@ body,#app-root,.page{min-height:100dvh;}
 .pil-metahost .mv-help-btn:active{ background:rgba(240,226,200,.18); }
 .pil-metahost .mv-help-btn .mvh-q{ background:#F0E2C8;color:var(--cave); }
 
-/* ══════════════════════════════════════════════════════════════════════
-   PILOTAGE > DECIDER — simulateur « Renfort : combien, et quand »
-   Trois etapes numerotees (quand le travail tombe -> combien de monde ->
-   ce que ca coute), chacune avec sa notice de lecture. Le numero encode une
-   vraie sequence : on ne peut pas lire l'etape 3 sans l'etape 1.
-   ══════════════════════════════════════════════════════════════════════ */
-.rf-step{display:flex;align-items:center;gap:10px;margin:20px 0 0;}
-.rf-n{width:24px;height:24px;border-radius:8px;background:var(--cave);color:var(--or-clair);flex:none;
-  display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,12px);font-weight:600;
-  font-family:var(--font-titre);}
-.rf-t{font-family:var(--font-titre);font-size:19px;font-weight:600;line-height:1.15;color:var(--texte);}
-.rf-how{margin:9px 0 10px;background:var(--or-pale);border-left:3px solid var(--or);border-radius:0 9px 9px 0;
-  padding:9px 12px;font-size:var(--pt-lbl,12px);line-height:1.6;color:var(--texte-med);white-space:normal;}
-.rf-how b{color:var(--texte);}
-.rf-k{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px;}
-/* RENF-2 (§224) : la carte du renfort en calendrier — espacements, tailles et rayons aux jetons. */
-.rf2-v{display:flex;gap:var(--e-3,12px);align-items:baseline;flex-wrap:wrap;margin:var(--e-1,4px) 0 var(--e-0,2px);}
-.rf2-vu{font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);}
-.rf2-vq{font-size:var(--pt-txt,13px);color:var(--texte-med);}
-.rf2-ok{display:inline-block;font-size:var(--pt-micro,11px);font-weight:600;color:var(--vert-med);background:var(--vert-pale);border-radius:10px;padding:var(--e-0,2px) var(--e-2,8px);margin-top:var(--e-1,4px);}
-.rf2-cal{border-top:1px solid var(--gris-clair);margin-top:var(--e-2,8px);}
-.rf2-row{display:grid;grid-template-columns:1fr auto;gap:var(--e-1,4px) var(--e-3,12px);padding:var(--e-3,12px) 0;border-bottom:1px solid var(--gris-clair);}
-.rf2-row .per{font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);}
-.rf2-row small{display:block;font-weight:500;color:var(--texte-doux);font-size:var(--pt-micro,11px);margin-top:var(--e-0,2px);}
-.rf2-row .nb{text-align:right;font-weight:600;font-size:var(--pt-base,14px);white-space:nowrap;}
-.rf2-row.gap .per,.rf2-row.fin .per{font-weight:500;color:var(--texte-med);}
-.rf2-fr{grid-column:1/-1;position:relative;height:var(--e-2,8px);background:var(--gris-clair);border-radius:4px;overflow:hidden;}
-.rf2-fr i{position:absolute;top:0;bottom:0;background:var(--or);border-radius:4px;}
-.rf2-tot{display:flex;justify-content:space-between;gap:var(--e-2,8px);flex-wrap:wrap;padding:var(--e-2,8px) 0 0;font-size:var(--pt-txt,13px);}
-.rf2-tot small{color:var(--texte-doux);}
-.rf2-seg{display:flex;gap:var(--e-2,8px);flex-wrap:wrap;align-items:center;margin:var(--e-2,8px) 0;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
-.rf2-seg select{font:inherit;color:var(--texte);border:1px solid var(--gris-clair);border-radius:6px;padding:var(--e-1,4px) var(--e-2,8px);background:var(--bg-card);}
-.rf2-cmp{border:1px solid var(--gris-clair);border-radius:10px;overflow:hidden;}
-.rf2-l{display:grid;grid-template-columns:1fr auto;gap:var(--e-0,2px) var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border-top:1px solid var(--gris-clair);}
-.rf2-l:first-child{border-top:0;}
-.rf2-l.reco{background:var(--vert-pale);}
-.rf2-l .a{font-weight:600;font-size:var(--pt-txt,13px);color:var(--texte);}
-.rf2-l .e{text-align:right;font-weight:600;font-size:var(--pt-txt,13px);font-variant-numeric:lining-nums tabular-nums;white-space:nowrap;}
-.rf2-l .d{grid-column:1/-1;font-size:var(--pt-micro,11px);color:var(--texte-doux);}
-.rf2-l .d b{color:var(--rouge);font-weight:600;}
-.rf2-l .d b.v,.rf2-l.reco .d b{color:var(--vert-med);}
-.rf2-pied{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:var(--e-2,8px);}
-.rf2-leg{display:flex;gap:var(--e-3,12px);flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:var(--e-1,4px);}
-.rf2-tir{height:0;border-top:2px dashed var(--texte);border-radius:0;vertical-align:3px;}
-.rf2-ferme{background:repeating-linear-gradient(45deg,var(--gris) 0 2px,transparent 2px 5px);}
-.rf2-choix{margin-top:var(--e-4,16px);border:1px solid var(--gris-clair);border-radius:10px;padding:var(--e-2,8px) var(--e-3,12px);}
-.rf2-choix summary{cursor:pointer;font-weight:600;font-size:var(--pt-txt,13px);color:var(--texte);}
-.rf-strats{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
-.rf-strat{border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-med);
-  font-family:var(--font-ui);font-size:var(--pt-lbl,12px);font-weight:600;padding:9px 13px;border-radius:20px;
-  cursor:pointer;min-height:38px;transition:.15s;}
-.rf-strat:hover{border-color:var(--or);color:var(--texte);}
-.rf-strat.best{border-color:var(--vert-med);color:var(--vert-med);}
-.rf-strat.raz{border-style:dashed;}
-.rf-cmp{width:100%;border-collapse:collapse;font-size:var(--pt-micro,12px);margin-top:10px;}
-.rf-cmp th{text-align:left;font-size:var(--pt-nano,9.5px);letter-spacing:0;text-transform:none;color:var(--texte-doux);
-  font-weight:600;padding:0 8px 7px;border-bottom:1px solid var(--gris-clair);white-space:nowrap;}
-.rf-cmp td{padding:8px;border-bottom:1px solid var(--gris-clair);font-variant-numeric:lining-nums tabular-nums;
-  color:var(--texte-med);white-space:nowrap;}
-.rf-cmp td.r,.rf-cmp th.r{text-align:right;}
-.rf-cmp tr.moi td{background:var(--vert-pale);}
-.rf-sub{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);white-space:normal;}
+/* PILOTAGE > DECIDER — le Renfort. RENF-3 (§619) : l'écran vit dans pilotage.css (préfixe .rfp-) ; reste ici la ligne
+   des hypothèses (.rf-lim). Les règles .rf-step … .rf-selinfo et .rf2-* (RENF-2) sont retirées :
+   plus aucun écran ne les écrit (vérifié classe par classe le 27/11). */
 .rf-lim{margin-top:14px;background:var(--orange-pale);border:1px solid var(--gris);border-radius:12px;
   padding:11px 13px;font-size:var(--pt-lbl,12px);line-height:1.6;color:var(--texte-med);white-space:normal;}
 .rf-lim b{color:var(--texte);}
-
-/* Selecteur du renfort (nombre + fenetre). Remplace l'edition au clic dans les
-   colonnes du profil : la zone cliquable couvrait tout le graphique et on ne
-   distinguait plus le besoin de ce qu'on avait pose. */
-.rf-sel{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:0 0 10px;}
-.rf-f{display:flex;flex-direction:column;gap:3px;}
-.rf-f > span{font-size:var(--pt-nano,9.5px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:600;}
-.rf-f select{font-family:var(--font-ui);font-size:var(--pt-base,14px);color:var(--texte);background:var(--bg-app);
-  border:1.5px solid var(--gris-clair);border-radius:10px;padding:9px 10px;min-height:44px;cursor:pointer;}
-.rf-f select:focus-visible{outline:2px solid var(--or);outline-offset:2px;}
-.rf-f select:disabled{opacity:.45;cursor:default;}
-.rf-selinfo{font-size:var(--pt-lbl,12px);color:var(--texte-doux);padding-bottom:12px;}
 
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5854,7 +5781,7 @@ button.pil-dz-set{cursor:pointer;width:100%;}
 #graph-inner{width:100%;overflow-x:auto;}
 /* Les grands chiffres : chiffres ALIGNÉS et PROPORTIONNELS. En chasse fixe, le « 1 » de la Cormorant prend la
    largeur d'un « 0 » et laisse un trou : « 12 % » se lisait « I 2 % ». La chasse fixe reste aux colonnes. */
-.pil-th-stat b,.pil-big,.pil-kval,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
+.pil-th-stat b,.pil-kval,.pil-ring-mid .pc,.pil-verdict .vbig,.pil-donut-c1,.pil-trx-co .v b,.hv2-card-val,.hv2-trac-val,.histo-col-pct,.hmsem-v,.pc-pct,.hc-total-val,.mvc-kpi-num,.pil-dom{font-variant-numeric:lining-nums proportional-nums;letter-spacing:0;}
 .pil-wrap{max-width:var(--page-max,1200px);}
 @media (min-width:1200px){ #page-home,#page-parcelles,#page-journal,#page-pilotage,#page-tracteur,#page-phyto,#page-cave,#page-reserve,#page-planning,#page-reglages{max-width:var(--page-max,1200px);margin-left:auto;margin-right:auto;} }
 
@@ -10408,14 +10335,13 @@ body #page-pilotage .pil-portee .pil-crumb{ min-width:auto; }
 /* 2. LES CHIFFRES */
 :is(#page-pilotage, #ovReglPilotage) .pec-verdict .t { font-size: var(--t-verdict) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-donut-c1) { font-size: var(--t-heros) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; }
-:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-big, .pil-dz-hero .stop, .pil-ift-k .v) {
+:is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n b, .pil-th-stat b:not(.warn), .pil-photo .v, .pec-k .v, .pil-anf-c .v, .prv-fx .v, .pec-mini .v, .pil-dz-hero .stop, .pil-ift-k .v) {
   font-size: var(--t-chiffre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.15 !important; letter-spacing: var(--ls-titre, -0.02em) !important; font-variant-numeric: tabular-nums; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-dz-v, .pil-dz-bil b) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.2 !important; }
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-ph-n small, .pil-photo .u, .pec-k .v small, .pil-th-stat) { font-size: var(--t-texte) !important; font-weight: var(--fw-med, 500) !important; letter-spacing: 0 !important; }
 /* 3. LES TITRES */
 :is(#page-pilotage, #ovReglPilotage) :is(.ck-titre-p, .pil-panel-t, .pec-ct) { font-size: var(--t-titre) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.25 !important; letter-spacing: var(--ls-serre, -0.011em) !important; }
 :is(#page-pilotage, #ovReglPilotage) .pil-sec-h { font-size: var(--t-section) !important; font-weight: var(--fw-semi, 600) !important; }
-:is(#page-pilotage, #ovReglPilotage) .rf-t { font-size: var(--t-ligne) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 4. LES ÉTIQUETTES (au-dessus d'un chiffre, d'un réglage) */
 :is(#page-pilotage, #ovReglPilotage) :is(.pil-th-t, .pil-photo .k, .pec-k .l, .pec-mini .l, .ck-ph-l span, .ck-dz-t, .ck-v-k, .pil-dz-lbl, .pil-dz-set .k, .pil-anf-c .l, .prv-fx .l, .pex-ctrl .l, .pil-ift-k .l) { font-size: var(--t-texte) !important; font-weight: var(--fw-semi, 600) !important; line-height: 1.35 !important; }
 /* 5. LES LIGNES (nom · valeur · détail) */

@@ -1,5 +1,5 @@
 {
-  "plafond": 793,
+  "plafond": 791,
   "exempts": {
     "planAnneeDma": "HOR-1 (§550) : écrit en heures les codes D, M et A d’un modèle importé — n’apparaît que si le modèle en porte, et le domaine d’entraînement n’en a aucun",
     "planAnneeAn": "ANNEE-2 (§613) : la flèche ‹ › de l’année dans la barre de Planning › Année, sur ordinateur — la même année se change depuis Mois et Personnel ; refusée tant qu’un brouillon n’est ni enregistré ni annulé (mv-harnais-annee2)",

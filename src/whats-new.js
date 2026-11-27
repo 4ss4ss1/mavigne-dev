@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.40', d: '2026-11-27', items: [   // RENF-3 (§619) : le Renfort, votre plan ligne par ligne (maquette Renfort v1)
+    { niv: 1, pour: ['admin'], emoji: 'equipe', titre: 'Renfort\u00a0: votre plan, ligne par ligne',
+      desc: "Dans Pilotage › Décider, le Renfort redevient le vôtre\u00a0: chaque ligne dit combien de saisonniers, de quand à quand, en TESA ou en CDD — touchez-la pour la régler\u00a0; sur ordinateur, une barre se glisse. L\u2019appli propose un plan d\u2019office\u00a0: le moins de monde possible, embauché le plus tard possible. Une fois touché, le plan s\u2019enregistre pour la campagne, et la carte Renfort de L\u2019équipe & le matériel le compte." },
+    { niv: 0, pour: ['admin'], emoji: 'tracteur', titre: 'Une ou plusieurs personnes au tracteur',
+      desc: "Le temps passé au tracteur sur la campagne apparaît en ligne («\u00a0habituel\u00a0»). Ajoutez quelqu\u2019un de l\u2019équipe pour une période — une personne de moins à la vigne —, ou quelqu\u2019un d\u2019embauché pour ça\u00a0: il est payé, et la vigne garde ses bras." },
+    { niv: 0, pour: ['admin'], emoji: 'graphique', titre: 'Le graphique montre la vraie charge',
+      desc: "Semaine par semaine, le besoin de chaque travail, dans ses couleurs, face aux bras de l\u2019équipe et du renfort. En orange, une semaine chargée mais absorbée sans retard\u00a0; en rouge, ce qui manque. «\u00a0Comparer\u00a0» met votre plan à côté de la proposition et de l\u2019équipe seule en heures sup." },
+  ] },
   { v: '11.39', d: '2026-11-26', items: [   // MOTS-18 (§618) : Fertilisation, la Cave, la fiche d'une personne allégées ; la feuille purgée
     { niv: 0, pour: ['admin'], emoji: 'liste', titre: 'Moins à lire\u00a0: la Fertilisation, la Cave, la fiche d\u2019une personne',
       desc: "Les longues explications de ces écrans sont passées derrière leur «\u00a0i\u00a0» ou dans l\u2019aide «\u00a0?\u00a0»\u00a0: rien n\u2019est perdu, il suffit de toucher le «\u00a0i\u00a0». Une campagne sans apport montre son bouton «\u00a0+ Amendement\u00a0», les parcelles de la zone vulnérable se touchent une par une, la légende des courbes se lit d\u2019un coup d\u2019œil. Dans la fiche d\u2019une personne, la grille du modèle se corrige dans Planning › Année." },

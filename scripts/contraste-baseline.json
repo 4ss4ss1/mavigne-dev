@@ -9,7 +9,7 @@
   },
   "code": {
     "clair": {
-      "mesurees": 1028,
+      "mesurees": 1022,
       "nonResoluble": 402,
       "fondInconnu": 445,
       "sous": {
@@ -26,7 +26,7 @@
       }
     },
     "sombre": {
-      "mesurees": 1028,
+      "mesurees": 1022,
       "nonResoluble": 399,
       "fondInconnu": 451,
       "sous": {

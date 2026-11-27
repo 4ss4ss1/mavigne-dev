@@ -121,7 +121,8 @@ function suite(S) {
   });
   T('③ les titres : « La tournée du jour », « Qui fait quoi », « Renfort » ; le Renfort reprend les pastilles de L’équipe',
     P.includes("_pilTile('ordrepassage','#C9A84C','La tourn\\u00e9e du jour',") && P.includes("_pilTile('simulateur','#C9A84C','Qui fait quoi',")
-    && P.includes("return _pilTile('renfort','#C9A84C','Renfort', stat,") && P.includes("_pilPhPl('\\u00e0 pr\\u00e9voir','or') : _pilStat('0','')+_pilPhPl('l\\u2019\\u00e9quipe suffit','ok');")
+    // RENF-3 (§619) : la pastille se calcule dans _rfStatHtml (la tuile et son rafraîchissement la partagent) — mêmes mots.
+    && P.includes("return _pilTile('renfort','#C9A84C','Renfort', _rfStatHtml(_RF_RES),") && P.includes("_pilPhPl('\\u00e0 pr\\u00e9voir','or') : _pilStat('0','')+_pilPhPl('l\\u2019\\u00e9quipe suffit','ok');")
     && P.includes("'aux heures du planning, sans heures sup', null,") && !/jusqu\\u2019o\\u00f9|r\\u00e9partir l\\u2019\\u00e9quipe|combien, et quand/.test(P));
 
   // ④ les corps

@@ -3290,8 +3290,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     personnes manqueront, et à partir de quand, pour que les travaux tiennent dans leur fenêtre — une
     ligne par période de manque. Dessous, semaine par semaine : le vert est ce que l'équipe couvre, le
     rouge hachuré le renfort à prévoir, le trait noir ce que l'équipe peut faire ; les semaines
-    passées sont en gris. <b>Combien recruter et quand</b> se chiffre dans Décider › Le renfort : le
-    bouton y mène.</li>
+    passées sont en gris. Les saisonniers <b>prévus</b> au plan de Décider › Renfort y comptent, en doré : ce
+    qui reste « à prévoir » est ce qui manque encore après eux. <b>Combien recruter et quand</b> se décide dans
+    Décider › Le renfort : le bouton y mène.</li>
     <li><b>Ce qui n'est pas daté n'est pas compté.</b> Au-delà de la dernière période datée, ni besoin
     ni équipe : l'écran le dit, plutôt que d'afficher un zéro.</li>
   </ul>
@@ -3438,7 +3439,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   trois cartes <b>repliées</b> : la tournée du jour, qui fait quoi, et le renfort. Chacune dit son chiffre
   et sa pastille (<b>tient</b>, <b>déborde</b>, <b>l'équipe suffit</b>) ; on la touche pour simuler.</p>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></span><div>Cet onglet s'appelait
-  <b>Simuler</b>. Ses trois cartes sont des simulations : rien n'y est enregistré. La tournée que suit
+  <b>Simuler</b>. Ses deux premières cartes sont des essais : rien n'y est enregistré. Le renfort, lui, garde
+  votre plan. La tournée que suit
   l'équipe se règle dans la roue crantée de la Vigne › <b>Tournées</b> ; Décider la suit, et ses tris
   restent un essai à l'écran.</div></div>
   <ul class="dot">
@@ -3456,21 +3458,36 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Les boutons + et − déplacent une personne, la date suit. Même jour, même planning et même calcul
     que la tournée : les deux cartes donnent la même date. « Ouvrir la priorité du moment » mène là où
     l'on fixe qui fait quoi (administrateur).</li>
-    <li><b>Renfort — combien de saisonniers, et quand</b> : repliée, « 0 » et « l'équipe suffit », ou
-    le nombre de saisonniers, leur coût et « à prévoir ». « Simuler un renfort », depuis Aujourd'hui ou
-    L'équipe &amp; le matériel, l'ouvre directement. Ouverte, elle répond d'office, en <b>calendrier</b> —
-    « du 2 novembre au 12 mars : 2 saisonniers, pour la taille » —, avec les heures et le coût de chaque
-    période. Elle se calcule aux <b>heures prévues au planning</b>, sans aucune heure sup : le renfort sert
-    justement à ne pas en faire. Un saisonnier en TESA suit l'horaire de l'équipe ; en CDD, 35&nbsp;h fixes.</li>
-    <li><b>La règle du calendrier</b> : tant qu'un travail déborde de sa fenêtre, l'application pose sur sa
-    fenêtre le <b>moins de monde possible</b> qui le fait tenir. L'équipe <b>déjà sous contrat</b> est comptée,
-    vendangeurs et saisonniers embauchés compris : seul ce qui manque en plus est réclamé.</li>
-    <li><b>Et sans renfort&nbsp;?</b> Trois lignes comparent : le renfort proposé ; l'équipe seule qui monte
-    jusqu'à 39, 43 ou 48&nbsp;h par semaine, avec le coût de ses heures sup (comptées comme le relevé : 25&nbsp;%
-    jusqu'à la 43<sup>e</sup> heure, 50&nbsp;% au-delà) et le retard qui reste ; l'équipe seule sans heures sup.
-    Le plafond proposé d'office est la semaine la plus longue de votre planning.</li>
-    <li><b>Choisir moi-même la période</b> : pour d'autres dates que celles du calendrier, l'application donne
-    le plus petit nombre de saisonniers qui fait tout tenir sur ces dates.</li>
+    <li><b>Renfort — votre plan</b> : repliée, le nombre de saisonniers et leur coût, avec une pastille —
+    « à prévoir » tant que rien n'est gardé, « prévu » une fois le plan enregistré, « 0 » et « l'équipe suffit »,
+    ou, en rouge, combien de travaux finissent en retard. « Simuler un renfort », depuis Aujourd'hui ou
+    L'équipe &amp; le matériel, l'ouvre directement.</li>
+    <li><b>Le graphique</b> : semaine par semaine, le besoin de chaque travail, dans ses couleurs de Travaux, face
+    aux bras — le tireté est l'équipe à la vigne, le doré ce qu'ajoute le renfort. En orange, une semaine plus
+    chargée que les bras mais absorbée sans retard ; en rouge, ce qui manque. Toucher une semaine donne son
+    détail ; « Heures » montre la même chose en heures plutôt qu'en personnes.</li>
+    <li><b>Les lignes du plan</b>, dessous, à la même échelle : chaque travail avec sa fenêtre et sa fin prévue
+    (« fin 12 mars », ou « +2 sem. » en rouge) ; vos saisonniers <b>à la vigne</b> ; les personnes <b>au
+    tracteur</b>. Toucher une ligne ouvre son réglage : combien, du … au …, le contrat (TESA, à l'horaire de
+    l'équipe, ou CDD 35&nbsp;h). Sur ordinateur, une barre se glisse, et un bord change sa date.
+    « + Saisonniers » pose une ligne là où il manque du monde.</li>
+    <li><b>Au tracteur</b> : le temps mesuré au tracteur sur la campagne y figure d'office (« habituel »). Une
+    personne de l'équipe au tracteur, c'est une personne de moins à la vigne — on règle combien, et combien de
+    jours par semaine ; quelqu'un d'embauché pour ça est payé, et la vigne garde ses bras.</li>
+    <li><b>La proposition de l'appli</b> : tant qu'un travail déborde de sa fenêtre, le <b>moins de monde
+    possible</b> qui le fait tenir, embauché <b>le plus tard possible</b>. L'équipe <b>déjà sous contrat</b> est
+    comptée, vendangeurs et saisonniers embauchés compris : seul ce qui manque en plus est réclamé. Tant que vous
+    n'y touchez pas, le plan montré est celui-là, marqué « proposé » ; « Garder ce plan » l'enregistre tel quel.</li>
+    <li><b>Le plan s'enregistre</b> dès qu'on y touche, un par campagne (administrateur). « Annuler » revient en
+    arrière. La carte Renfort de L'équipe &amp; le matériel le lit : les saisonniers prévus y comptent, en doré.
+    Rien n'est embauché ici.</li>
+    <li><b>Comparer</b> : votre plan, la proposition de l'appli, et l'équipe seule qui monte jusqu'à 39, 43 ou
+    48&nbsp;h par semaine — le coût, les saisonniers, les heures sup (comptées comme le relevé : 25&nbsp;% jusqu'à
+    la 43<sup>e</sup> heure, 50&nbsp;% au-delà), la fin prévue et le retard. Le plafond proposé d'office est la
+    semaine la plus longue de votre planning. « Prendre la proposition » remplace vos saisonniers par ceux de
+    l'appli.</li>
+    <li>Tout se calcule aux <b>heures prévues au planning</b>, sans aucune heure sup : le renfort sert justement à
+    ne pas en faire.</li>
     <li><b>Les propositions ciblées ne dépassent jamais la solution globale.</b> Renforcer une seule
     tâche alors que rien n'a été fait avant peut coûter plus cher que de tenir toute la campagne.
     Ces propositions-là ne vous sont plus présentées : ce qui reste est comparable.</li>
@@ -3515,7 +3532,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>La date compte autant que
   le nombre.</b> Certains travaux ont une fenêtre qu'on ne rattrape pas : la vendange se fait quand
   le raisin est mûr, ou elle ne se fait pas. Poser du renfort trop tôt coûte plein tarif sans rien
-  sauver — le calendrier pose donc le renfort <b>dans la fenêtre</b> du travail qui déborde, jamais après.</div></div>
+  sauver — la proposition pose donc le renfort <b>dans la fenêtre</b> du travail qui déborde, jamais après.</div></div>
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> L'équipe &amp; le matériel</h3>
   <p>Une phrase en haut — les présents du jour, les personnes au seuil, la cuve sous le seuil, une révision dépassée —, puis les
   cartes, repliées : un titre, un chiffre, une pastille. Touchez-en une pour son détail ; son bouton « Ouvrir » mène au module où

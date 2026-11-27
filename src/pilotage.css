@@ -211,3 +211,121 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
 #page-pilotage .pil-cf .pil-prot-l{margin-top:0}
 #page-pilotage .pil-cf .pil-prot-pied{margin-top:var(--e-3,12px);white-space:normal;line-height:1.5}
 #page-pilotage .pil-cf .pil-prot .pil-tv-act{margin-top:var(--e-3,12px)}
+
+/* ★★★ RENF-3 (§619) — LE RENFORT : VOTRE PLAN, LIGNE PAR LIGNE (maquette Renfort v1, docs/maquettes/maquette-renfort-v1.html).
+   Le graphe (le besoin de chaque semaine face aux bras), puis les lignes du plan à la MÊME échelle : le graphe pose leur marge
+   (--rfp-pl, --rfp-pr) et la classe .rfp-et au téléphone. Préfixe .rfp- (le .rf- d'avant reste à .rf-lim). */
+#page-pilotage .rfp-sh{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px);min-height:32px;margin-top:var(--e-2,8px)}
+#page-pilotage .rfp-sh > b{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-sh-r{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px);margin-left:auto}
+#page-pilotage .rfp-g{position:relative;width:100%;margin-top:var(--e-2,8px)}
+#page-pilotage .rfp-g .rfp-hit{fill:transparent;cursor:pointer}
+#page-pilotage .rfp-g .rfp-hit.on{fill:color-mix(in srgb,var(--texte) 6%,transparent)}
+/* la légende */
+#page-pilotage .rfp-lg{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-4,16px);margin-top:var(--e-1,4px);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+#page-pilotage .rfp-lg span{display:inline-flex;align-items:center;gap:var(--e-2,8px);white-space:nowrap}
+#page-pilotage .rfp-lg i{flex:none;width:10px;height:10px;border-radius:2px}
+#page-pilotage .rfp-lg .rfp-lg-eq{width:16px;height:0;border-radius:0;border-top:2px dashed var(--texte)}
+#page-pilotage .rfp-lg .rfp-lg-rf{width:16px;background:var(--or-pale);border-top:2px solid var(--or)}
+#page-pilotage .rfp-lg .rfp-lg-av{background:repeating-linear-gradient(135deg,var(--orange) 0 2px,var(--orange-pale) 2px 4.5px)}
+#page-pilotage .rfp-lg .rfp-lg-mq{background:repeating-linear-gradient(135deg,var(--rouge) 0 2px,var(--rouge-pale) 2px 4.5px)}
+#page-pilotage .rfp-lg .rfp-lg-fz{background:repeating-linear-gradient(135deg,var(--gris) 0 1.5px,var(--bg-card) 1.5px 5px)}
+/* la semaine touchée */
+#page-pilotage .rfp-sem{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--e-0,2px) var(--e-3,12px);margin-top:var(--e-2,8px);padding:var(--e-2,8px) var(--e-3,12px);
+  border-radius:var(--r-md,10px);background:var(--bg-doux);font-size:var(--pt-micro,12px);color:var(--texte-med)}
+#page-pilotage .rfp-sem > b{width:100%;font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-sem span b{font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-sem .ok,#page-pilotage .rfp-sem .ok b{color:var(--ok-texte)}
+#page-pilotage .rfp-sem .ko,#page-pilotage .rfp-sem .ko b{color:var(--danger-texte)}
+#page-pilotage .rfp-sem .or,#page-pilotage .rfp-sem .or b{color:var(--orange-tx)}
+#page-pilotage .rfp-sem .rfp-sem-l{display:flex;flex-wrap:wrap;gap:var(--e-0,2px) var(--e-3,12px);width:100%}
+#page-pilotage .rfp-sem-t{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+#page-pilotage .rfp-sem-t i{width:8px;height:8px;border-radius:2px;flex:none}
+/* les lignes */
+#page-pilotage .rfp-gt{--rfp-pl:150px;--rfp-pr:12px;margin-top:var(--e-1,4px)}
+#page-pilotage .rfp-sec{display:flex;align-items:baseline;gap:var(--e-2,8px);margin:var(--e-3,12px) 0 var(--e-0,2px);font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);color:var(--texte-doux)}
+#page-pilotage .rfp-sec small{font-size:inherit;font-weight:var(--fw-reg,400)}
+#page-pilotage .rfp-r{display:grid;grid-template-columns:var(--rfp-pl) minmax(0,1fr);align-items:center;min-height:40px;border-radius:var(--r-sm,8px)}
+#page-pilotage .rfp-r.sel{background:var(--accent-doux);box-shadow:inset 0 0 0 1.5px var(--accent)}
+#page-pilotage .rfp-l{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:var(--e-1,4px) var(--e-2,8px) var(--e-1,4px) var(--e-1,4px);line-height:1.25;
+  font:inherit;color:inherit;text-align:left;background:none;border:0;border-radius:var(--r-sm,8px)}
+#page-pilotage button.rfp-l{cursor:pointer;min-height:40px}
+#page-pilotage .rfp-l b{display:inline-flex;align-items:center;gap:var(--e-2,8px);font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap}
+#page-pilotage .rfp-l small{font-size:var(--pt-micro,12px);color:var(--texte-doux);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#page-pilotage .rfp-l small.ok{color:var(--ok-texte);font-weight:var(--fw-med,500)}
+#page-pilotage .rfp-l small.ko{color:var(--danger-texte);font-weight:var(--fw-semi,600)}
+#page-pilotage .rfp-dt{width:9px;height:9px;border-radius:2px;flex:none}
+#page-pilotage .rfp-tag{display:inline-block;font-size:var(--pt-nano,11px);font-weight:var(--fw-med,500);color:var(--texte-med);background:var(--bg-doux);border:1px solid var(--ligne,#ECE6DA);
+  border-radius:var(--r-full,999px);padding:0 var(--e-2,8px);line-height:17px}
+#page-pilotage .rfp-t{position:relative;height:28px;margin-right:var(--rfp-pr)}
+#page-pilotage .rfp-t .rfp-ms{position:absolute;top:0;bottom:0;width:1px;background:var(--ligne,#ECE6DA)}
+#page-pilotage .rfp-t .rfp-fz{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,var(--gris-clair) 0 1.5px,transparent 1.5px 5px)}
+#page-pilotage .rfp-t .rfp-tw{position:absolute;top:8px;height:12px;border-radius:6px;opacity:.85}
+#page-pilotage .rfp-t .rfp-tl{position:absolute;top:8px;height:12px;border-radius:0 6px 6px 0;background:repeating-linear-gradient(135deg,var(--rouge) 0 2px,var(--rouge-pale) 2px 4.5px)}
+#page-pilotage .rfp-t .rfp-tf{position:absolute;top:8px;width:12px;height:12px;margin-left:-6px;transform:rotate(45deg);border-radius:2px;background:var(--ok);box-shadow:0 0 0 2px var(--bg-card)}
+#page-pilotage .rfp-t .rfp-tf.ko{background:var(--danger)}
+#page-pilotage .rfp-bar{position:absolute;top:3px;height:22px;display:flex;align-items:center;padding:0 var(--e-2,8px);border-radius:7px;overflow:hidden;white-space:nowrap;
+  font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#page-pilotage .rfp-bar.v{background:var(--or);color:var(--or-tx)}
+#page-pilotage .rfp-bar.v.p{background:repeating-linear-gradient(135deg,var(--or) 0 6px,color-mix(in srgb,var(--or) 78%,var(--bg-card)) 6px 12px)}
+#page-pilotage .rfp-bar.t{background:var(--bleu);color:var(--blanc)}
+#page-pilotage .rfp-bar.t.hab{background:color-mix(in srgb,var(--bleu) 58%,var(--bg-card))}
+#page-pilotage .rfp-bar.sel{box-shadow:0 0 0 2px var(--bg-card),0 0 0 4px var(--accent)}
+#page-pilotage .rfp-bar.glisse{opacity:.92;cursor:grabbing}
+#page-pilotage .rfp-bar .rfp-h{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize}
+#page-pilotage .rfp-bar .rfp-h.l{left:0}
+#page-pilotage .rfp-bar .rfp-h.r{right:0}
+#page-pilotage .rfp-bar .rfp-h::after{content:"";position:absolute;top:6px;bottom:6px;left:3px;width:2px;border-radius:1px;background:color-mix(in srgb,var(--texte) 30%,transparent)}
+#page-pilotage .rfp-bar.t .rfp-h::after{background:color-mix(in srgb,var(--blanc) 60%,transparent)}
+#page-pilotage .rfp-bulle{position:absolute;top:-24px;z-index:5;transform:translateX(-50%);padding:3px var(--e-2,8px);border-radius:var(--r-xs,6px);background:var(--inverse);color:var(--sur-inverse);
+  font-size:var(--pt-nano,11px);font-weight:var(--fw-semi,600);white-space:nowrap;pointer-events:none}
+#page-pilotage .rfp-vide{padding:var(--e-2,8px) var(--e-1,4px);font-size:var(--pt-txt,13px);color:var(--texte-doux)}
+#page-pilotage .rfp-add{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-3,12px);padding-left:var(--rfp-pl)}
+/* le réglage d'une ligne */
+#page-pilotage .rfp-ed{margin:var(--e-3,12px) 0 0 var(--rfp-pl);padding:var(--e-3,12px);border:1.5px solid var(--accent);border-radius:var(--r-lg,12px);background:var(--bg-card)}
+#page-pilotage .rfp-ed-h{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px);font-size:var(--pt-base,14px)}
+#page-pilotage .rfp-ed-h > b{font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-ed-g{display:grid;grid-template-columns:repeat(3,auto) minmax(0,1fr);justify-content:start;align-items:end;gap:var(--e-3,12px) var(--e-5,20px);margin-top:var(--e-3,12px)}
+#page-pilotage .rfp-c{display:flex;flex-direction:column;align-items:flex-start;gap:var(--e-1,4px);min-width:0}
+#page-pilotage .rfp-c > .rfp-in{align-self:stretch}
+#page-pilotage .rfp-c > span:first-child{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+#page-pilotage .rfp-c .mvbtn-choix{flex-wrap:wrap}
+/* un choix à plusieurs boutons prend toute la largeur du réglage : sinon sa colonne pousse les autres hors de la carte (768 px) */
+#page-pilotage .rfp-c-w{grid-column:1/-1}
+#page-pilotage .rfp-stp{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+#page-pilotage .rfp-stp b{min-width:40px;text-align:center;font-size:var(--pt-lg,17px);font-weight:var(--fw-semi,600);font-variant-numeric:tabular-nums;color:var(--texte)}
+#page-pilotage .rfp-in{min-width:0;width:100%;height:var(--h-ctl,40px);padding:0 var(--e-2,8px);font:inherit;font-size:var(--pt-base,14px);color:var(--texte);
+  background:var(--bg-card);border:1px solid var(--ligne-forte);border-radius:var(--r-md,10px)}
+#page-pilotage .rfp-ed-f{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px) var(--e-4,16px);margin-top:var(--e-3,12px);font-size:var(--pt-txt,13px);color:var(--texte-med)}
+#page-pilotage .rfp-ed-f b{font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-ed-f .mvbtn{margin-left:auto}
+/* comparer */
+#page-pilotage .rfp-s{margin-top:var(--e-4,16px);padding-top:var(--e-2,8px);border-top:1px solid var(--ligne,#ECE6DA)}
+#page-pilotage .rfp-cmp{width:100%;max-width:880px;margin-top:var(--e-2,8px);border-collapse:collapse;table-layout:fixed;font-size:var(--pt-txt,13px)}
+#page-pilotage .rfp-cmp th,#page-pilotage .rfp-cmp td{padding:var(--e-2,8px) var(--e-2,8px);text-align:left;vertical-align:top;border-bottom:1px solid var(--ligne,#ECE6DA);font-variant-numeric:tabular-nums}
+#page-pilotage .rfp-cmp tr:last-child td{border-bottom:0}
+#page-pilotage .rfp-cmp th{vertical-align:bottom;font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-cmp th small{display:block;font-size:var(--pt-micro,12px);font-weight:var(--fw-reg,400);color:var(--texte-doux)}
+#page-pilotage .rfp-cmp td:first-child,#page-pilotage .rfp-cmp th:first-child{width:104px;color:var(--texte-doux);font-weight:var(--fw-reg,400)}
+#page-pilotage .rfp-cmp .vo{background:var(--accent-doux)}
+#page-pilotage .rfp-cmp b{font-weight:var(--fw-semi,600);color:var(--texte)}
+#page-pilotage .rfp-cmp .ok{color:var(--ok-texte)}
+#page-pilotage .rfp-cmp .ko{color:var(--danger-texte)}
+#page-pilotage .rfp-cmp-p{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2,8px) var(--e-3,12px);margin-top:var(--e-3,12px);font-size:var(--pt-txt,13px);color:var(--texte-med)}
+/* au téléphone : l'étiquette au-dessus de sa piste, la piste à la largeur du graphe ; on touche une barre, on ne la glisse pas */
+#page-pilotage .rfp-gt.rfp-et .rfp-r{display:block;min-height:0;padding:var(--e-1,4px) 0 var(--e-0,2px)}
+#page-pilotage .rfp-gt.rfp-et .rfp-l{flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;gap:0 var(--e-2,8px);width:100%;min-height:0;padding:0 var(--e-1,4px) 3px var(--rfp-pl)}
+#page-pilotage .rfp-gt.rfp-et .rfp-t{height:24px;margin-left:var(--rfp-pl)}
+#page-pilotage .rfp-gt.rfp-et .rfp-t .rfp-tw,#page-pilotage .rfp-gt.rfp-et .rfp-t .rfp-tl,#page-pilotage .rfp-gt.rfp-et .rfp-t .rfp-tf{top:6px}
+#page-pilotage .rfp-gt.rfp-et .rfp-bar{top:2px;height:20px;padding:0;justify-content:center;touch-action:auto}
+#page-pilotage .rfp-gt.rfp-et .rfp-bar .rfp-h{display:none}
+#page-pilotage .rfp-gt.rfp-et .rfp-add{padding-left:0}
+#page-pilotage .rfp-gt.rfp-et .rfp-ed{margin-left:0}
+#page-pilotage .rfp-gt.rfp-et .rfp-ed-g{grid-template-columns:1fr 1fr;gap:var(--e-3,12px)}
+#page-pilotage .rfp-gt.rfp-et .rfp-c-n{grid-column:1/-1}
+@media (max-width:559px){
+  #page-pilotage .rfp-cmp{font-size:var(--pt-micro,12px)}
+  #page-pilotage .rfp-cmp th,#page-pilotage .rfp-cmp td{padding:var(--e-2,8px) var(--e-1,4px)}
+  #page-pilotage .rfp-cmp td:first-child,#page-pilotage .rfp-cmp th:first-child{width:72px}
+  #page-pilotage .rfp-sh-r{margin-left:0;width:100%}
+}

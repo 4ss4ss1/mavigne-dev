@@ -6123,6 +6123,11 @@ function _renamePeriode(oldN,newN){
   (window.HISTORIQUE||[]).forEach(function(x){ if(x&&x.saisonNom===oldN) x.saisonNom=newN; });
   if(window.CONFIG&&window.CONFIG.tachesPrio&&window.CONFIG.tachesPrio.saison===oldN)
     window.CONFIG.tachesPrio.saison=newN;
+  // RENF-3 (§619) : le plan du Renfort (Pilotage › Décider) est rangé sous le nom de la campagne — il le suit.
+  var _rp=window.CONFIG&&window.CONFIG.renfort_plan;
+  if(_rp&&typeof _rp==='object'&&Object.prototype.hasOwnProperty.call(_rp,oldN)&&!Object.prototype.hasOwnProperty.call(_rp,newN)){
+    _rp[newN]=_rp[oldN]; delete _rp[oldN];
+  }
   return true;
 }
 
@@ -6161,6 +6166,7 @@ function saveEditSaison(){
   });
   if(Object.keys(ech).length) s.echeances=ech; else if(s.echeances) delete s.echeances;
   window.saveData('saisons','Période mise à jour');
+  if(_renomme) window.saveData('config');   // RENF-3 (§619) : la priorité du moment et le plan du Renfort ont suivi le nom
   if(_tAjout.length){
     _tAjout.forEach(function(n){ if(window.recalcTravaux) window.recalcTravaux(n); });
     window.saveData('taches'); window.saveData('travaux');

@@ -3518,6 +3518,9 @@ function _rfCtx(d,mode,cdIn,opts){
   // ETP tracteur : MESURE sur la campagne ENTIERE dans les deux modes. Le
   // rapporter aux seules semaines restantes ferait exploser le ratio.
   var trac=_rfTracEtp(capTfull);
+  // RENF-3 (§619), D3 : opts.sansTrac — le Renfort lit l'équipe ENTIÈRE ; le tracteur habituel y devient une ligne visible
+  //   du plan (_rfHab), qui le retire elle-même. Les autres lecteurs gardent le retrait d'office.
+  var tracX=(opts&&opts.sansTrac)?0:trac.etp;
   // ⚠⚠ EFFECTIF PERMANENT : cd.weeks[].headPerm, l'effectif LISSE au prorata des
   // jours reellement sous contrat (_headWeek), equipes collectives exclues.
   // L'ancienne version comptait les TETES — saisonniers enregistres et CDD hors
@@ -3572,7 +3575,7 @@ function _rfCtx(d,mode,cdIn,opts){
   var hDisp=W.map(function(w,j){
     var cp=w.cap||0, ch=_chW(w);
     var hp=(ch!=null)?(ch+dP*cp):(head[j]*cp);
-    return Math.max(0, hp-trac.etp*cp);
+    return Math.max(0, hp-tracX*cp);
   });
   var dispo=W.map(function(w,j){ return ((w.cap||0)>0)?(hDisp[j]/w.cap):0; });
   var socle=0, capDispo=0;
@@ -3649,11 +3652,11 @@ function _rfMemeImage(P,R){
 // SOURCE UNIQUE des deux lectures. _rfBody, la tuile et _rfAppliquer doivent
 // raisonner sur EXACTEMENT le meme contexte decisionnel : les index « Du / Au »
 // du selecteur designent des semaines de ctx.W, ils n'ont aucun sens dans l'autre.
-function _rfPair(d){
+function _rfPair(d,opts){
   var cd=_rfCd();
-  var p=_rfCtx(d,'plan',cd);
+  var p=_rfCtx(d,'plan',cd,opts);
   if(!p||p.noRate) return { plan:p, dec:p, fini:false };
-  var r=_rfCtx(d,'reste',cd);
+  var r=_rfCtx(d,'reste',cd,opts);
   if(r&&r.fini) return { plan:p, dec:p, fini:true };
   var dec=(r&&!r.noRate&&!r.fini)?r:p;
   // Meme image des deux cotes : un seul contexte, donc un seul graphe. `meme`
@@ -3837,19 +3840,40 @@ function _rfWkEnd(ctx,w){
 
 // ══ RENF-2 (§224) — LE RENFORT, COMBIEN ET QUAND : SANS HEURES SUP ══════════════════════════════════
 // Nico (03/10) : « il faut indiquer combien de saisonniers il faut à une période donnée, pour justement éviter
-//   que l'équipe ait à faire des heures sup ». Maquette v2 validée le 03/10. La réponse arrive d'office :
-//   tant qu'un travail déborde de sa fenêtre, on pose sur SA fenêtre (de son ouverture — ou d'aujourd'hui — à sa
-//   limite) le plus petit nombre CONSTANT de saisonniers qui le fait tenir (_rfMinR, en plus de ce qui est
-//   posé), puis on regroupe les semaines de même effectif. Un saisonnier en TESA suit l'horaire de l'équipe
-//   (Nico : « ça suit l'horaire de l'équipe ») ; en CDD, c.hCdd heures fixes. Aucune heure sup nulle part :
-//   elles n'existent que dans « Et sans renfort ? », qui les nomme et les chiffre aux taux du relevé.
-var _RF_MOIS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+//   que l'équipe ait à faire des heures sup ». Un saisonnier en TESA suit l'horaire de l'équipe ; en CDD, c.hCdd
+//   heures fixes. Aucune heure sup nulle part : elles n'existent que dans « Sans renfort », qui les nomme et les
+//   chiffre aux taux du relevé.
+// ══ RENF-3 (§619) — LE RENFORT : VOTRE PLAN, CHOISI LIGNE PAR LIGNE ═════════════════════════════════
+// Nico (17/11) : « je ne peux plus choisir le nombre de saisonniers, je ne peux plus vraiment choisir les dates […] le
+//   graphique ne veut plus rien dire, on ne voit pas réellement la charge de travail ; il faut aussi pouvoir mettre une ou
+//   plusieurs personnes au tracteur ». Maquette Renfort v1 (docs/maquettes/maquette-renfort-v1.html), « go » le 27/11 avec
+//   ses cinq avis :
+//   D1  le plan est ENREGISTRÉ, un par campagne (CONFIG.renfort_plan[nom de la campagne]) ; la carte Renfort de L'équipe
+//       & le matériel le lit (_rfPlanPrevuSem) ;
+//   D2  la proposition : le moins de saisonniers possible, embauchés le plus TARD possible (_rfCalendrier) ;
+//   D3  le tracteur habituel — le temps MESURÉ (_rfTracEtp), retiré jusqu'ici sans le dire — devient une ligne visible ;
+//   D4  le graphique : le BESOIN de chaque semaine, travail par travail, face aux BRAS (en personnes, les heures en option) ;
+//   D5  (lot à part) « Créer le contrat » depuis une ligne.
+//   Le simulateur ne change pas (_rfSim, _rfMinR, _rfSansRenfort) : une ligne de saisonniers se traduit en profil
+//   « à l'horaire de l'équipe » (un CDD de 35 h, l'hiver à 28 h, en vaut 1,25), une ligne de tracteur prise dans l'équipe
+//   en bras de moins à la vigne, une ligne de tracteur embauchée en heures payées.
+var _RF_MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 function _rfCtxRenf(ctx){
   var contrat=(_RF_SEL&&_RF_SEL.contrat==='cdd')?'cdd':'tesa', W=ctx.W, hC=(ctx.c&&ctx.c.hCdd)||35;
   var c=Object.assign({}, ctx.c, { hMax:ctx.c.hJour, plaf:0, contrat:contrat,
     capS:function(i){ var w=W[i]||{}; if(!(w.cap>0)) return 0; return (contrat==='cdd')?hC*(w.capRatio!=null?w.capRatio:1):w.cap; } });
   return Object.assign({}, ctx, { c:c });
 }
+// RENF-3 (§619), D2 : tant qu'un travail déborde, le plus pressé d'abord, on pose sur SA fenêtre un nombre CONSTANT de
+//   saisonniers qui le fait tenir (_rfMinR, en plus de ce qui est posé). Le début se choisit, dans cet ordre :
+//   ① le moins de saisonniers EN MÊME TEMPS sur toute la campagne (la pointe, ce qu'il faut recruter) ;
+//   ② puis le moins de saisonniers sur cette ligne ;
+//   ③ puis le début le plus TARDIF — le même monde, moins d'heures payées.
+//   Avant, la période partait d'aujourd'hui (l'exemple de la maquette : 3 saisonniers dès le 17 nov. pour 17 647 € ; ici 3
+//   dès le 30 nov. et 1 une semaine en mars, 16 038 €). « Le moins cher » tout court a été essayé et écarté : 22 personnes
+//   une seule semaine. ① vient d'un essai : sans lui, un deuxième travail posait 1 saisonnier sur la dernière semaine du
+//   premier — 5 en même temps pour un plan qui en demandait 4. R ne peut que monter quand le début recule (moins de semaines
+//   pour le même travail) : on s'arrête dès qu'il dépasse la meilleure pointe.
 function _rfCalendrier(ctx){
   var x=_rfCtxRenf(ctx), n=x.W.length, prof=_rfProf(x,null), blocs=[], rMax=_rfRMax(x), garde=0;
   var res=_rfSim(x,prof);
@@ -3861,10 +3885,19 @@ function _rfCalendrier(ctx){
     (x.tw||[]).forEach(function(t){ if(t.nom===s.nom) tw=t; });
     var a=tw?_rfWOf(x.W,tw.ws):0, b=Math.min(n-1,s.lim);
     if(b<a) b=a;
-    var R=_rfMinR(x,a,b,rMax,s.nom,prof);
-    if(!(R>0)){ blocs.push({nom:s.nom,a:a,b:b,R:null}); break; }
-    for(var i=a;i<=b;i++){ if(x.W[i].cap>0) prof[i]+=R; }
-    blocs.push({nom:s.nom,a:a,b:b,R:R});
+    var best=null, m, i;
+    for(m=a;m<=b;m++){
+      if(m>a && !(x.W[m].cap>0)) continue;            // commencer un lundi fermé, c'est commencer au suivant
+      var R=_rfMinR(x,m,b,rMax,s.nom,prof);
+      if(!(R>0)) break;                               // trop tard : plus rien ne suffit
+      if(best && R>best.pk) break;                    // R ne fait que monter : la pointe ne s'améliorera plus
+      var pk=0;
+      for(i=0;i<n;i++){ var v=(prof[i]||0)+((i>=m&&i<=b&&x.W[i].cap>0)?R:0); if(v>pk) pk=v; }
+      if(!best || pk<best.pk || (pk===best.pk && (R<best.R || (R===best.R && m>best.m)))) best={ m:m, R:R, pk:pk };
+    }
+    if(!best){ blocs.push({nom:s.nom,a:a,b:b,R:null}); break; }
+    for(i=best.m;i<=b;i++){ if(x.W[i].cap>0) prof[i]+=best.R; }
+    blocs.push({nom:s.nom,a:best.m,b:b,R:best.R});
     res=_rfSim(x,prof);
   }
   return { x:x, prof:prof, blocs:blocs, res:res, ok:!res.deborde };
@@ -3904,159 +3937,588 @@ function _rfPlafDef(ctx){
   (ctx.W||[]).forEach(function(w){ if((w.cap||0)>cm) cm=w.cap; });
   return Math.min(48, Math.max(Math.round(m>0?m:39), Math.ceil(cm)));
 }
+
+// ── RENF-3 : le plan enregistré ──
+// CONFIG.renfort_plan[<nom de la campagne>] = { v:1, maj:'AAAA-MM-JJ', l:[ ligne… ] } — la clé des objectifs de fin
+//   (CONFIG.objectifs_fin), écrite par l'administrateur seul, comme eux.
+// Une ligne : { t:'v' (saisonniers à la vigne) | 't' (au tracteur), n (personnes), a, b ('AAAA-MM-JJ', du … au … compris),
+//   ctr:'tesa'|'cdd' (vigne), j (jours par semaine, de ½ à 5) et qui:'eq'|'emb' (tracteur : pris dans l'équipe, ou embauché),
+//   p:1 (une ligne de la proposition, pas encore touchée), hab:1 (le tracteur habituel : il suit la mesure, sans dates) }.
+var _RF_P=null;      // l'écran : { cle, src, l, enr, hist, sel, unite, sem, plaf, propK, prop, admin, glisse }
+var _RF_V=null;      // le dernier calcul : le graphe, la bande de la semaine et le glisser le relisent
+var _RF_SAVE_T=null;
+function _rfPlanCle(){ var sa=null; try{ sa=_pilSaison(); }catch(e){ sa=null; if(window._mvAvale) window._mvAvale(e,'pilotage.js/_rfPlanCle'); } return (sa&&sa.nom)?String(sa.nom):''; }
+function _rfIsoOk(s){ return typeof s==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(_pilAnnOrd(s)); }
+// ⚠ Une donnée enregistrée par une version d'avant, ou abîmée, n'a pas la forme d'aujourd'hui (§24 n°20) : tout se relit.
+function _rfPlanNorm(l){
+  return (Array.isArray(l)?l:[]).map(function(L){
+    if(!L||typeof L!=='object') return null;
+    var t=(L.t==='t')?'t':((L.t==='v')?'v':null); if(!t) return null;
+    var hab=(t==='t'&&L.hab===1);
+    if(hab) return { t:'t', hab:1 };
+    if(!_rfIsoOk(L.a)||!_rfIsoOk(L.b)) return null;
+    var n=Math.round(Number(L.n)); if(!(n>=1)) n=1; if(n>_RF_RMAX_DUR) n=_RF_RMAX_DUR;
+    var o={ t:t, n:n, a:(L.a<=L.b?L.a:L.b), b:(L.a<=L.b?L.b:L.a) };
+    if(t==='v') o.ctr=(L.ctr==='cdd')?'cdd':'tesa';
+    else { var j=Number(L.j); o.j=(j>=0.5&&j<=5)?Math.round(j*2)/2:5; o.qui=(L.qui==='emb')?'emb':'eq'; }
+    if(L.p===1) o.p=1;
+    return o;
+  }).filter(function(o){ return !!o; });
+}
+function _rfPlanLu(cle){
+  var R=(window.CONFIG&&window.CONFIG.renfort_plan&&typeof window.CONFIG.renfort_plan==='object')?window.CONFIG.renfort_plan:{};
+  var P=(cle&&R[cle]&&typeof R[cle]==='object')?R[cle]:null;
+  return P?{ l:_rfPlanNorm(P.l), maj:(typeof P.maj==='string'?P.maj:'') }:null;
+}
+function _rfPlanEcrit(){
+  var S=_RF_P; if(!S||!S.cle||!S.admin||!window.CONFIG) return false;
+  var l=_rfPlanNorm(S.l);
+  if(!window.CONFIG.renfort_plan||typeof window.CONFIG.renfort_plan!=='object') window.CONFIG.renfort_plan={};
+  window.CONFIG.renfort_plan[S.cle]={ v:1, maj:_pilIsoJ(new Date(),0), l:l };
+  S.l=JSON.parse(JSON.stringify(l)); S.src=JSON.stringify(l); S.enr=true;
+  _PIL_ANR=null;   // la carte Renfort de L'équipe & le matériel relit le plan
+  // Un « + » touché trois fois de suite part en une écriture.
+  if(_RF_SAVE_T) clearTimeout(_RF_SAVE_T);
+  _RF_SAVE_T=setTimeout(function(){
+    _RF_SAVE_T=null;
+    try{ if(typeof window.saveData==='function') window.saveData('config'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_rfPlanEcrit'); }
+  },500);
+  return true;
+}
+// Le renfort PRÉVU (les lignes de saisonniers de tous les plans enregistrés) sur les jours [o0, o1] : en personnes, à leur
+//   cadence (c.rdt) — ce que L'équipe & le matériel ajoute à l'équipe, semaine par semaine (D1). Les lignes proposées et
+//   gardées comptent : garder la proposition, c'est la choisir.
+function _rfPlanPrevuSem(o0,o1){
+  var R=(window.CONFIG&&window.CONFIG.renfort_plan&&typeof window.CONFIG.renfort_plan==='object')?window.CONFIG.renfort_plan:{};
+  var ouv=_rfOuv(o0,o1), p=0, c=_rfCfg();
+  if(!(ouv>0)) return { n:0, eq:0 };
+  Object.keys(R).forEach(function(k){
+    var P=R[k]; if(!P||typeof P!=='object') return;
+    _rfPlanNorm(P.l).forEach(function(L){
+      if(L.t!=='v') return;
+      var a=Math.max(o0,_pilAnnOrd(L.a)), b=Math.min(o1,_pilAnnOrd(L.b));
+      if(b>=a) p+=L.n*_rfOuv(a,b)/ouv;
+    });
+  });
+  return { n:p, eq:p*c.rdt };
+}
+function _rfPlanSig(){ try{ return JSON.stringify((window.CONFIG&&window.CONFIG.renfort_plan)||{}); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_rfPlanSig'); return ''; } }
+
+// ── RENF-3 : une ligne, traduite pour le simulateur ──
+function _rfJo(o){ return _pilOrdD(o).getUTCDay(); }
+function _rfOuv(a,b){ var n=0; for(var o=a;o<=b;o++){ var d=_rfJo(o); if(d>=1&&d<=5) n++; } return n; }
+// La part de la semaine i couverte par [o0, o1], en jours ouvrés : une ligne commence et finit au jour près.
+function _rfFrac(w,o0,o1){
+  var a=Math.max(o0,w.o0), b=Math.min(o1,w.o1); if(b<a) return 0;
+  var t=_rfOuv(w.o0,w.o1); return t?_rfOuv(a,b)/t:0;
+}
+// Le tracteur habituel : le temps MESURÉ sur la campagne (_rfTracEtp, ou CONFIG.eco.trac_etp s'il est réglé), en personnes
+//   et en jours par semaine. Le contexte est lu sans le retirer (_rfCtx, opts.sansTrac) : c'est cette ligne qui le retire.
+function _rfHab(x){
+  var e=(x&&x.trac&&x.trac.etp)||0; if(!(e>0.01)) return null;
+  var n=Math.max(1,Math.ceil(e-1e-9));
+  return { n:n, j:Math.min(5,e*5/n), etp:e };
+}
+function _rfAbs(x,L){
+  if(!L) return null;
+  var W=x.W, D0=W[0].o0, D1=W[W.length-1].o1;
+  if(L.hab){ var h=_rfHab(x); return h?{ t:'t', n:h.n, j:h.j, qui:'eq', hab:1, o0:D0, o1:D1 }:null; }
+  var o0=_pilAnnOrd(L.a), o1=_pilAnnOrd(L.b); if(isNaN(o0)||isNaN(o1)) return null;
+  return Object.assign({}, L, { o0:Math.min(o0,o1), o1:Math.max(o0,o1) });
+}
+// Les lignes → ce que lit le simulateur : les bras de l'équipe à la vigne (dispo, moins ce qui part au tracteur), le profil
+//   de saisonniers à l'horaire de l'équipe (prof), les heures payées, et la pointe (pour les frais d'embauche, comme avant).
+function _rfCompile(x,A){
+  var W=x.W, n=W.length, c=x.c, hC=c.hCdd||35, dispo=[], prof=_rfProf(x,null), trac=[], pers=[], hPay=0, i;
+  for(i=0;i<n;i++){ trac[i]=0; pers[i]=0; }
+  (A||[]).forEach(function(L){
+    if(!L) return;
+    for(var k=0;k<n;k++){
+      var w=W[k], f=_rfFrac(w,L.o0,L.o1);
+      if(!(f>0)) continue;
+      if(L.t==='v'){
+        if(!(w.cap>0)) continue;             // le domaine fermé : personne ne travaille, personne n'est payé
+        var hs=(L.ctr==='cdd')?hC*(w.capRatio!=null?w.capRatio:1):w.cap;
+        prof[k]+=L.n*f*hs/w.cap; hPay+=L.n*f*hs; pers[k]+=L.n;
+      } else {
+        var part=L.n*f*(L.j/5);
+        if(L.qui==='emb'){ if(w.cap>0){ hPay+=part*w.cap; pers[k]+=L.n; } }
+        else trac[k]+=part;
+      }
+    }
+  });
+  for(i=0;i<n;i++) dispo[i]=Math.max(0,(x.dispo[i]||0)-trac[i]);
+  var pointe=0; pers.forEach(function(p){ if(p>pointe) pointe=p; });
+  var tauxR=(c.tauxRenfort>0?c.tauxRenfort:x.rate);
+  return { dispo:dispo, prof:prof, trac:trac, hPay:hPay, pointe:pointe, cout:hPay*tauxR+pointe*(c.fixe||0) };
+}
+// Ce que donne un plan : chaque travail (sa fin, sa limite, son retard) et la fin de tout.
+function _rfSimPlan(x,A){
+  var k=_rfCompile(x,A), r=_rfSim(_rfCtxRenf(Object.assign({},x,{dispo:k.dispo})),k.prof), W=x.W, n=W.length, D0=W[0].o0;
+  var tw={}; (x.tw||[]).forEach(function(t){ tw[t.nom]=t; });
+  var T=(r.taches||[]).map(function(s){
+    var t=tw[s.nom], lim=t?(t.we-1):W[Math.min(s.lim,n-1)].o1;
+    var ok=!(s.dep>0||s.perdu>0.01||s.fin===null);
+    var fin=(s.fin===null)?null:Math.max(W[Math.min(s.fin,n-1)].o0,_rfWkEnd(x,s.fin)-2);   // le vendredi de sa semaine
+    if(fin!==null&&ok&&fin>lim) fin=lim;
+    return { nom:s.nom, ws:t?Math.max(t.ws,D0):D0, lim:lim, fin:fin, dep:s.dep, perdu:(s.perdu||0), ok:ok };
+  });
+  var finMax=null, limMax=null, nRet=0;
+  T.forEach(function(t){
+    if(!t.ok) nRet++;
+    if(t.fin===null) finMax=Infinity; else if(finMax!==Infinity&&(finMax===null||t.fin>finMax)) finMax=t.fin;
+    if(limMax===null||t.lim>limMax) limMax=t.lim;
+  });
+  return { k:k, r:r, ok:!r.deborde, T:T, nRet:nRet, finMax:finMax, limMax:limMax };
+}
+// La proposition (D2), en lignes : les semaines de même effectif en une ligne — une fermeture ne la coupe pas (elle ne paie
+//   personne, la ligne reste lisible) ; du lundi au vendredi.
+function _rfProposition(x,A){
+  var tr=(A||[]).filter(function(L){ return L&&L.t==='t'; }), kt=_rfCompile(x,tr);
+  var cal=_rfCalendrier(Object.assign({},x,{dispo:kt.dispo})), W=x.W, out=[];
+  _rfPeriodes(cal).forEach(function(p){
+    var dern=out[out.length-1];
+    if(dern&&dern.R===p.R){ var ferme=true; for(var q=dern.b+1;q<p.a;q++){ if(W[q].cap>0) ferme=false; } if(ferme){ dern.b=p.b; return; } }
+    out.push({ R:p.R, a:p.a, b:p.b });
+  });
+  return { ok:cal.ok, l:out.map(function(p){
+    var o0=W[p.a].o0, o1=W[p.b].o1;
+    while(o0<o1&&(_rfJo(o0)===0||_rfJo(o0)===6)) o0++;
+    while(o1>o0&&(_rfJo(o1)===0||_rfJo(o1)===6)) o1--;
+    return { t:'v', n:p.R, a:_pilOrdIso(o0), b:_pilOrdIso(o1), ctr:'tesa', p:1 };
+  }) };
+}
+// L'état de l'écran : relu dans CONFIG quand la campagne change, ou quand un autre appareil a écrit le plan.
+function _rfEtat(){
+  var cle=_rfPlanCle(), lu=_rfPlanLu(cle), src=lu?JSON.stringify(lu.l):'';
+  if(!_RF_P||_RF_P.cle!==cle||_RF_P.src!==src){
+    var g=(_RF_P&&_RF_P.cle===cle)?_RF_P:{};
+    _RF_P={ cle:cle, src:src, l:lu?lu.l:[], enr:!!lu, hist:(g.hist||[]), sel:null, unite:(g.unite||'p'), sem:null, plaf:(g.plaf||0),
+            propK:null, prop:null, glisse:0, touche:false };
+  }
+  _RF_P.admin=!!(typeof window.isAdmin==='function'&&window.isAdmin());
+  return _RF_P;
+}
+// Tout ce que l'écran montre, calculé une fois par geste. Sans plan enregistré, le plan montré EST la proposition, précédée
+//   du tracteur habituel — « proposé » tant qu'on n'y touche pas, et recalculée tant qu'on n'y touche pas.
+function _rfVue(x){
+  var S=_rfEtat(), W=x.W, n=W.length, D0=W[0].o0, D1=W[n-1].o1, auto=(!S.enr&&!S.touche);
+  if(auto) S.l=_rfHab(x)?[{ t:'t', hab:1 }]:[];
+  var tr=S.l.filter(function(L){ return L.t==='t'; }).map(function(L){ return _rfAbs(x,L); }).filter(function(L){ return !!L; });
+  var sd=0; x.dispo.forEach(function(v){ sd+=v; });
+  var pk=JSON.stringify([tr.map(function(L){ return [L.n,L.o0,L.o1,L.j,L.qui]; }), Math.round(x.charge), Math.round(sd*100), n, D0]);
+  if(S.propK!==pk||!S.prop){ S.propK=pk; S.prop=_rfProposition(x,tr); }
+  if(auto) S.l=S.l.concat(JSON.parse(JSON.stringify(S.prop.l)));
+  var A=S.l.map(function(L){ return _rfAbs(x,L); });
+  var sim=_rfSimPlan(x,A), ps=_rfSimPlan(x,tr.concat(S.prop.l.map(function(L){ return _rfAbs(x,L); })));
+  var plafs=[_rfPlafDef(x),43,48].filter(function(v,i,a){ return a.indexOf(v)===i; }).sort(function(p,q){ return p-q; });
+  var plaf=(S.plaf>0&&plafs.indexOf(S.plaf)>=0)?S.plaf:plafs[0];
+  var kq=_rfCompile(x,tr.filter(function(L){ return L.qui!=='emb'; })), sr=_rfSansRenfort(Object.assign({},x,{dispo:kq.dispo}),plaf);
+  var srFin=null; (sr.r.taches||[]).forEach(function(s){ var f=(s.fin===null)?Infinity:_rfWkEnd(x,s.fin)-2; if(srFin===null||f>srFin) srFin=f; });
+  // La charge de chaque semaine, travail par travail (la règle A, _rfHIn), face aux bras. Une semaine qui demande plus que ses
+  //   bras est « absorbée » quand aucun de ses travaux ne finit en retard (l'avance prise avant, ou le creux d'après, la
+  //   couvre) ; sinon, c'est un manque. Le simulateur décide, pas la hauteur d'une barre.
+  var late={}; sim.T.forEach(function(t){ if(!t.ok) late[t.nom]=1; });
+  var sem=[], rdt=x.c.rdt;
+  W.forEach(function(w,i){
+    var par={}, beH=0, rg=false;
+    (x.tw||[]).forEach(function(t){ var h=_rfHIn(x.cd,t,w.o0,w.o1+1); if(h>0.01){ par[t.nom]=h; beH+=h; if(late[t.nom]) rg=true; } });
+    var eq=sim.k.dispo[i]||0, rf=(sim.k.prof[i]||0)*rdt, cap=w.cap||0, brH=(eq+rf)*cap;
+    sem.push({ cap:cap, par:par, beH:beH, beP:(cap>0?beH/cap:0), eq:eq, rf:rf, tr:(sim.k.trac[i]||0),
+               brH:brH, brP:eq+rf, st:(cap>0&&beH>brH+0.5)?(rg?'manque':'absorbe'):'ok' });
+  });
+  var mois=[]; for(var o=D0;o<=D1;o++){ if(_pilOrdD(o).getUTCDate()===1) mois.push({ o:o, m:_pilOrdD(o).getUTCMonth() }); }
+  function sig(l){ return JSON.stringify(l.filter(function(L){ return L.t==='v'; }).map(function(L){ return [L.n,L.a,L.b,L.ctr]; })); }
+  _RF_V={ x:x, S:S, A:A, sim:sim, ps:ps, prop:S.prop, sr:sr, srFin:srFin, plaf:plaf, plafs:plafs, sem:sem, mois:mois,
+          D0:D0, D1:D1, DT:Math.max(1,D1+1-D0), memes:(sig(S.l)===sig(S.prop.l)) };
+  return _RF_V;
+}
+
+// ── RENF-3 : l'écran ──
+// La règle MOTS (§580) : rien à lire à demeure — la méthode derrière les « i » (pil.sim.plan, pil.sim.cout, pil.sim.modele),
+//   un chiffre et sa pastille, les mots du lexique. La réponse reste près des gestes (la leçon du §594g) : la fin de chaque
+//   travail sur sa ligne, « tout tient » dans le réglage d'une ligne.
+function _rfJr(o){ return _pilDfr(_pilOrdIso(o)); }
+function _rfPlage(a,b){
+  var A=_rfJr(a), B=_rfJr(b), ma=A.split(' ')[1], mb=B.split(' ')[1];
+  return (a===b)?A:((ma===mb)?(A.split(' ')[0]+'–'+B):(A+' → '+B));
+}
+function _rfJtxt(j){
+  var h=Math.round((Number(j)||0)*2)/2; if(h>=5) return 'temps plein';
+  if(h<=0.5) return '½ j';
+  var e=Math.floor(h); return e+' j'+((h-e)?' ½':'');
+}
+function _rfPct(V,o){ return Math.max(0,Math.min(100,(o-V.D0)/V.DT*100)); }
+function _rfPers(n){ return (Math.round(n*10)/10).toString().replace('.',','); }
+function _rfStatHtml(Q){
+  if(!Q) return _pilStat('—','');
+  var lib=Q.pointe?_pilStat(Q.pointe,' saisonnier'+(Q.pointe>1?'s':'')+' · '+_ecoEur(Q.cout)):_pilStat('0','');
+  if(Q.prevu) return lib+(Q.ok?_pilPhPl(Q.pointe?'prévu':'l’équipe suffit','ok'):_pilPhPl(Q.nRet+' en retard','ko'));
+  if(!Q.ok) return _pilStat('\u2014','');
+  return Q.pointe ? lib+_pilPhPl('\u00e0 pr\u00e9voir','or') : _pilStat('0','')+_pilPhPl('l\u2019\u00e9quipe suffit','ok');
+}
+function _rfBody(d){
+  _RF_RES=null; _RF_V=null;
+  var P=_rfPair(d,{sansTrac:true}), ctxP=P.plan, x=P.dec;
+  if(!ctxP) return _pilEmptyGo('Renseignez les dates de début et de fin de la période : les fenêtres de tâches et la charge en découlent.','saisons','Réglages › Saisons');
+  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salarié pour chiffrer le renfort.','equipe','Réglages › Équipe');
+  if(P.fini||!x||!x.W||!x.W.length) return '<div class="pil-empty">La campagne est <b>terminée</b> : il ne reste rien à renforcer.</div>';
+  var V=_rfVue(x), S=V.S, sim=V.sim;
+  _RF_RES={ ok:sim.ok, pointe:sim.k.pointe, cout:sim.k.cout, prevu:S.enr, nRet:sim.nRet };
+  var H='<div class="rfp" id="rf-plan">'
+    +'<div class="rfp-sh"><b>Votre plan</b>'+_mvInfoBtn('pil.sim.plan')
+    +(S.enr?_pilPhPl('enregistré',''):(S.l.length?_pilPhPl('proposé','or'):''))
+    +'<span class="rfp-sh-r">'
+    +((S.admin&&!S.enr&&S.l.length)?'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact" data-rf="garder" onclick="window._rfGeste(this)">Garder ce plan</button>':'')
+    +((S.admin&&S.hist.length)?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="undo" onclick="window._rfGeste(this)">Annuler</button>':'')
+    +'<span class="mvbtn-choix" role="group" aria-label="Unité">'
+    +'<button type="button" class="mvbtn mvbtn-option mvbtn-compact" data-rf="unite" data-v="p" aria-pressed="'+(S.unite!=='h')+'" onclick="window._rfGeste(this)">Personnes</button>'
+    +'<button type="button" class="mvbtn mvbtn-option mvbtn-compact" data-rf="unite" data-v="h" aria-pressed="'+(S.unite==='h')+'" onclick="window._rfGeste(this)">Heures</button>'
+    +'</span></span></div>'
+    +'<div class="rfp-g" id="rf-g-plan"></div>'
+    +_rfLegende(V)
+    +'<div class="rfp-sem" id="rf-sem">'+_rfSemHtml(V)+'</div>'
+    +'<div class="rfp-gt" id="rf-gt"><div id="rf-gt-a">'+_rfRangsTaches(V)+'</div><div id="rf-gt-b">'+_rfRangsLignes(V)+'</div>'
+    +(S.admin?('<div class="rfp-add">'
+      +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="addv" onclick="window._rfGeste(this)">+ Saisonniers</button>'
+      +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="addt" onclick="window._rfGeste(this)">+ Au tracteur</button></div>'):'')
+    +'<div id="rf-ed">'+_rfEditeur(V)+'</div></div>'
+    +'</div>'
+    +'<div id="rf-cmp">'+_rfComparer(V)+'</div>'
+    +'<div class="rf-lim">Saisonnier : cadence <b>'+_pilNum(x.c.rdt*100)+' %</b> · <b>'+_ecoEur2(x.c.tauxRenfort>0?x.c.tauxRenfort:x.rate)+' €/h</b> · <b>'
+      +_ecoEur(x.c.fixe||0)+'</b> d’embauche · heures du planning '+_mvInfoBtn('pil.sim.modele')+'</div>';
+  window._mvGraphSuivre('#rf-g-plan', function(lg){ return _rfPlanSvg(lg); }, { max:1800, agrandir:false });
+  _rfGlisserBrancher();
+  return H;
+}
+function _rfLegende(V){
+  var h='<div class="rfp-lg">';
+  (V.x.tw||[]).forEach(function(t){ h+='<span><i style="background:'+_pilTCol(t.nom)+'"></i>'+_pilEsc(_pilTnom(t.nom))+'</span>'; });
+  return h+'<span><i class="rfp-lg-eq"></i>équipe à la vigne</span><span><i class="rfp-lg-rf"></i>avec le renfort</span>'
+    +'<span><i class="rfp-lg-av"></i>absorbé</span><span><i class="rfp-lg-mq"></i>manque</span><span><i class="rfp-lg-fz"></i>fermé</span></div>';
+}
+// La semaine choisie : touchée (ou survolée) dans le graphe ; d'office, celle qui manque le plus.
+function _rfSemI(V){
+  var S=V.S; if(S.sem!=null&&V.sem[S.sem]) return S.sem;
+  var best=-1e9, bi=0;
+  V.sem.forEach(function(s,i){ if(!(s.cap>0)) return; var g=s.beP-s.brP; if(g>best){ best=g; bi=i; } });
+  return bi;
+}
+function _rfSemHtml(V){
+  var i=_rfSemI(V), s=V.sem[i], w=V.x.W[i], u=(V.S.unite==='h');
+  var a=w.o0, b=Math.max(a,w.o1-2);
+  if(!s) return '';
+  if(!(s.cap>0)) return '<b>Semaine du '+_rfPlage(a,b)+'</b><span>domaine fermé</span>';
+  function f(p,h){ return u?(_pilNum(h)+' h'):_rfPers(p); }
+  var d=s.brP-s.beP, dH=s.brH-s.beH, etat;
+  if(s.st==='manque') etat='<span class="ko"><b>manque '+f(-d,-dH)+'</b></span>';
+  else if(s.st==='absorbe') etat='<span class="or"><b>+'+f(-d,-dH)+'</b> absorbé</span>';
+  else etat='<span class="ok"><b>marge '+f(d,dH)+'</b></span>';
+  var t='';
+  Object.keys(s.par).forEach(function(k){ t+='<span class="rfp-sem-t"><i style="background:'+_pilTCol(k)+'"></i>'+_pilEsc(_pilTnom(k).toLowerCase())+' '+f(s.par[k]/s.cap,s.par[k])+'</span>'; });
+  return '<b>Semaine du '+_rfPlage(a,b)+'</b><span>besoin <b>'+f(s.beP,s.beH)+'</b></span><span>bras <b>'+f(s.brP,s.brH)+'</b></span>'
+    +(s.rf>0.001?'<span>dont renfort <b>'+f(s.rf,s.rf*s.cap)+'</b></span>':'')
+    +(s.tr>0.001?'<span>tracteur <b>−'+f(s.tr,s.tr*s.cap)+'</b></span>':'')+etat+(t?'<span class="rfp-sem-l">'+t+'</span>':'');
+}
+function _rfSemMaj(){
+  var V=_RF_V; if(!V) return;
+  var el=document.getElementById('rf-sem'); if(el) el.innerHTML=_rfSemHtml(V);
+  var i=_rfSemI(V);
+  document.querySelectorAll('#rf-g-plan .rfp-hit').forEach(function(r){ r.classList.toggle('on', Number(r.getAttribute('data-i'))===i); });
+}
+// Le graphe : le BESOIN de chaque semaine, travail par travail (les couleurs de Travaux), face aux BRAS — l'équipe à la vigne
+//   (tirets), puis avec le renfort à sa cadence (or). La part qui dépasse : orange si elle est absorbée sans retard, rouge sinon.
+//   Les lignes du plan, dessous, suivent la même échelle : le graphe pose leur marge (--rfp-pl, --rfp-pr).
+function _rfPlanSvg(lg){
+  var V=_RF_V; if(!V||!V.x) return '';
+  var et=lg<560, c=window._mvGraphCadre(lg,(et?196:236),{ padL:(et?36:150), padR:(et?6:12), padT:26, padB:26, grad:4 });
+  if(typeof document!=='undefined'){
+    var gt=document.getElementById('rf-gt');
+    if(gt&&gt.style){ gt.style.setProperty('--rfp-pl',c.padL+'px'); gt.style.setProperty('--rfp-pr',c.padR+'px'); gt.classList.toggle('rfp-et',et); }
+  }
+  var u=(V.S.unite==='h'), W=V.x.W, S=V.sem, si=_rfSemI(V), mx=0, v, i;
+  S.forEach(function(s){ var q=u?Math.max(s.beH,s.brH):Math.max(s.beP,s.brP); if(q>mx) mx=q; });
+  var pas=u?(mx>600?200:(mx>300?100:(mx>120?50:25))):(mx>16?4:(mx>8?2:1));
+  mx=Math.max(pas,Math.ceil((mx*1.04)/pas)*pas);
+  function X(o){ return c.padL+(o-V.D0)/V.DT*c.iw; }
+  function Y(q){ return c.padT+c.ih*(1-Math.min(q,mx)/mx); }
+  var fa=et?c.txt.mini:c.txt.axe;
+  var g='<defs><pattern id="rfp-hm" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="var(--rouge-pale)"/><rect width="2" height="5" fill="'+c.col.alerte+'"/></pattern>'
+    +'<pattern id="rfp-ha" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="var(--orange-pale)"/><rect width="2" height="5" fill="'+c.col.attention+'"/></pattern>'
+    +'<pattern id="rfp-hf" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="5" fill="var(--gris)"/></pattern></defs>';
+  for(v=0;v<=mx+1e-9;v+=pas) g+='<line x1="'+c.padL+'" x2="'+(c.w-c.padR)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+    +'<text x="'+(c.padL-6)+'" y="'+(Y(v)+3.5).toFixed(1)+'" text-anchor="end" font-size="'+fa+'" fill="'+c.col.texte+'">'+_pilNum(v)+'</text>';
+  g+='<text x="'+(c.padL-6)+'" y="'+(c.padT-12)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">'+(u?'h':'pers.')+'</text>';
+  // le doré d'abord, en fond : les barres du besoin passent devant
+  var dEq='', dTot='', aire='', suit=false;
+  for(i=0;i<W.length;i++){
+    var w2=W[i], s2=S[i], a0=X(w2.o0), a1=X(w2.o1+1);
+    if(!(s2.cap>0)){ suit=false; continue; }
+    var e=u?s2.eq*s2.cap:s2.eq, tt=u?s2.brH:s2.brP;
+    dEq+=(suit?'L':'M')+a0.toFixed(1)+' '+Y(e).toFixed(1)+' L'+a1.toFixed(1)+' '+Y(e).toFixed(1)+' ';
+    dTot+=(suit?'L':'M')+a0.toFixed(1)+' '+Y(tt).toFixed(1)+' L'+a1.toFixed(1)+' '+Y(tt).toFixed(1)+' ';
+    if(s2.rf>0.001) aire+='<rect x="'+a0.toFixed(1)+'" y="'+Y(tt).toFixed(1)+'" width="'+(a1-a0).toFixed(1)+'" height="'+Math.max(0,Y(e)-Y(tt)).toFixed(1)+'" fill="var(--or-pale)"/>';
+    suit=true;
+  }
+  g+=aire;
+  for(i=0;i<W.length;i++){
+    var w=W[i], s=S[i], x0=X(w.o0), x1=X(w.o1+1), cw=x1-x0, bw=Math.max(2,cw*0.64), bx=x0+(cw-bw)/2;
+    if(!(s.cap>0)){
+      g+='<rect x="'+x0.toFixed(1)+'" y="'+c.padT+'" width="'+cw.toFixed(1)+'" height="'+c.ih+'" fill="url(#rfp-hf)"/>';
+      if(!et&&(i===0||W[i-1].cap>0)){ var j=i; while(j+1<W.length&&!(W[j+1].cap>0)) j++; var xm=(x0+X(W[j].o1+1))/2;
+        if(X(W[j].o1+1)-x0>34) g+='<text x="'+xm.toFixed(1)+'" y="'+(c.padT+12)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">fermé</text>'; }
+      continue;
+    }
+    var y=0;
+    (V.x.tw||[]).forEach(function(t){
+      var h=s.par[t.nom]||0, q=u?h:h/s.cap; if(!(q>0.0005)) return;
+      g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(y+q).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(0,Y(y)-Y(y+q)).toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+_pilTCol(t.nom)+'" opacity="0.9"/>';
+      y+=q;
+    });
+    if(s.st!=='ok'){
+      var be=u?s.beH:s.beP, br=u?s.brH:s.brP, rg=(s.st==='manque');
+      g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(be).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,Y(br)-Y(be)).toFixed(1)+'" fill="url(#'+(rg?'rfp-hm':'rfp-ha')+')"/>'
+        +'<line x1="'+bx.toFixed(1)+'" x2="'+(bx+bw).toFixed(1)+'" y1="'+Y(be).toFixed(1)+'" y2="'+Y(be).toFixed(1)+'" stroke="'+(rg?c.col.alerte:c.col.attention)+'" stroke-width="1.5"/>';
+    }
+  }
+  g+='<path d="'+dTot+'" fill="none" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.mesure+'" stroke-linejoin="round"/>'
+    +'<path d="'+dEq+'" fill="none" stroke="var(--texte)" stroke-width="'+c.trait.prevu+'" stroke-dasharray="4 3"/>';
+  V.mois.forEach(function(m){ var xm=X(m.o); if(xm>c.w-c.padR-18) return;
+    g+='<line x1="'+xm.toFixed(1)+'" x2="'+xm.toFixed(1)+'" y1="'+(c.padT+c.ih)+'" y2="'+(c.padT+c.ih+4)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'
+      +'<text x="'+(xm+2).toFixed(1)+'" y="'+(c.h-8)+'" font-size="'+fa+'" fill="'+c.col.texte+'">'+_RF_MOIS[m.m]+'</text>'; });
+  if(V.x.mode==='reste') g+='<text x="'+(c.padL+2)+'" y="'+(c.padT-12)+'" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.alerte+'">auj.</text>';
+  for(i=0;i<W.length;i++){ var h0=X(W[i].o0), h1=X(W[i].o1+1);
+    g+='<rect class="rfp-hit'+(i===si?' on':'')+'" data-rf="sem" data-i="'+i+'" x="'+h0.toFixed(1)+'" y="'+c.padT+'" width="'+Math.max(1,h1-h0).toFixed(1)+'" height="'+c.ih+'" onclick="window._rfGeste(this)" onmouseenter="window._rfGeste(this)"/>'; }
+  return window._mvGraphSvg(c,'Le besoin de chaque semaine face aux bras : l’équipe à la vigne et le renfort',g);
+}
+// La piste d'une ligne : les fermetures hachurées, les mois en filets — la même échelle que le graphe.
+function _rfFond(V){
+  if(V._fond!=null) return V._fond;
+  var h='';
+  V.x.W.forEach(function(w){ if(!(w.cap>0)) h+='<i class="rfp-fz" style="left:'+_rfPct(V,w.o0).toFixed(2)+'%;width:'+(_rfPct(V,w.o1+1)-_rfPct(V,w.o0)).toFixed(2)+'%"></i>'; });
+  V.mois.forEach(function(m){ h+='<i class="rfp-ms" style="left:'+_rfPct(V,m.o).toFixed(2)+'%"></i>'; });
+  V._fond=h; return h;
+}
+function _rfRangsTaches(V){
+  var h='<div class="rfp-sec">Travaux</div>';
+  V.sim.T.forEach(function(t){
+    var col=_pilTCol(t.nom), x0=_rfPct(V,t.ws), x1=_rfPct(V,t.lim+1), mk='', late='', et;
+    if(t.ok&&t.fin!=null) mk='<i class="rfp-tf" style="left:'+_rfPct(V,t.fin+0.5).toFixed(2)+'%"></i>';
+    else {
+      var xe=(t.fin==null)?100:_rfPct(V,Math.min(t.fin,V.D1)+1);
+      late='<i class="rfp-tl" style="left:'+x1.toFixed(2)+'%;width:'+Math.max(0.6,xe-x1).toFixed(2)+'%"></i>';
+      if(t.fin!=null&&t.fin<=V.D1) mk='<i class="rfp-tf ko" style="left:'+_rfPct(V,t.fin+0.5).toFixed(2)+'%"></i>';
+    }
+    if(t.ok) et='<small class="ok">fin '+_rfJr(t.fin)+'</small>';
+    else if(t.perdu>0.01) et='<small class="ko">en partie perdue</small>';
+    else if(t.fin==null) et='<small class="ko">ne finit pas</small>';
+    else et='<small class="ko">+'+Math.max(1,t.dep)+' sem.</small>';
+    h+='<div class="rfp-r"><div class="rfp-l"><b><i class="rfp-dt" style="background:'+col+'"></i>'+_pilEsc(_pilTnom(t.nom))+'</b>'+et+'</div>'
+      +'<div class="rfp-t">'+_rfFond(V)+'<i class="rfp-tw" style="left:'+x0.toFixed(2)+'%;width:'+Math.max(0.6,x1-x0).toFixed(2)+'%;background:'+col+'"></i>'+late+mk+'</div></div>';
+  });
+  return h;
+}
+function _rfEtiq(L,A){
+  if(L.t==='v') return '<b>'+L.n+' saisonnier'+(L.n>1?'s':'')+'</b><small>'+(L.ctr==='cdd'?'CDD':'TESA')+' · '+(A?_rfPlage(A.o0,A.o1):'')+'</small>'
+    +(L.p?'<small><span class="rfp-tag">proposé</span></small>':'');
+  var n=A?A.n:1, j=A?A.j:5;
+  return '<b>'+n+' personne'+(n>1?'s':'')+'</b><small>'+_rfJtxt(j)+(j<4.99?' par sem.':'')+' · '+(L.qui==='emb'?'embauché':'équipe')+'</small>'
+    +(L.hab?'<small><span class="rfp-tag">habituel</span></small>':'');
+}
+function _rfBarre(V,L,A,k){
+  if(!A) return '';
+  var x0=_rfPct(V,A.o0), x1=_rfPct(V,A.o1+1); if(x1<=x0) return '';
+  // dans la barre, le nombre seul : le reste est sur l'étiquette de la ligne (une barre de deux semaines, au téléphone, fait 25 px)
+  var S=V.S, txt=String(L.t==='v'?L.n:A.n);
+  return '<div class="rfp-bar '+L.t+(L.p?' p':'')+(L.hab?' hab':'')+(S.sel===k?' sel':'')+'" data-rf="sel" data-i="'+k+'"'
+    +(S.admin?' onclick="window._rfGeste(this)"':'')+' style="left:'+x0.toFixed(2)+'%;width:'+Math.max(0.8,x1-x0).toFixed(2)+'%">'
+    +'<span>'+_pilEsc(txt)+'</span>'+(S.admin?'<i class="rfp-h l"></i><i class="rfp-h r"></i>':'')+'</div>';
+}
+function _rfRangsLignes(V){
+  var S=V.S, h='', nv=0, nt=0;
+  function rang(L,k){
+    var A=V.A[k], lab=_rfEtiq(L,A);
+    return '<div class="rfp-r'+(S.sel===k?' sel':'')+'">'
+      +(S.admin?('<button type="button" class="rfp-l" data-rf="sel" data-i="'+k+'" onclick="window._rfGeste(this)">'+lab+'</button>'):('<div class="rfp-l">'+lab+'</div>'))
+      +'<div class="rfp-t">'+_rfFond(V)+_rfBarre(V,L,A,k)+'</div></div>';
+  }
+  h+='<div class="rfp-sec">À la vigne <small>saisonniers</small></div>';
+  S.l.forEach(function(L,k){ if(L.t==='v'){ nv++; h+=rang(L,k); } });
+  if(!nv) h+='<div class="rfp-vide">Aucun saisonnier.</div>';
+  h+='<div class="rfp-sec">Au tracteur <small>hors de la vigne</small></div>';
+  S.l.forEach(function(L,k){ if(L.t==='t'){ nt++; h+=rang(L,k); } });
+  if(!nt) h+='<div class="rfp-vide">Personne au tracteur.</div>';
+  return h;
+}
+function _rfOpt(rf,v,lib,on){ return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact" data-rf="'+rf+'" data-v="'+v+'" aria-pressed="'+(!!on)+'" onclick="window._rfGeste(this)">'+lib+'</button>'; }
+function _rfEditeur(V){
+  var S=V.S; if(!S.admin||S.sel==null||!S.l[S.sel]) return '';
+  var k=S.sel, L=S.l[k], A=V.A[k], sim=V.sim, x=V.x;
+  if(!A) return '';
+  var mn=_pilOrdIso(V.D0), mxi=_pilOrdIso(V.D1), a=L.hab?mn:L.a, b=L.hab?mxi:L.b;
+  var h='<div class="rfp-ed"><div class="rfp-ed-h"><b>'+(L.t==='v'?'Saisonniers à la vigne':'Au tracteur')+'</b>'
+    +(L.p?_pilPhPl('proposé','or'):'')+(L.hab?_pilPhPl((x.trac&&x.trac.mesure===false)?'réglé':'mesuré',''):'')
+    +'<span class="rfp-sh-r">'+(sim.ok?_pilPhPl('tout tient','ok'):_pilPhPl(sim.nRet+' en retard','ko'))
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone mvbtn-compact" data-rf="close" aria-label="Fermer" onclick="window._rfGeste(this)">×</button></span></div>'
+    +'<div class="rfp-ed-g">'
+    +'<div class="rfp-c rfp-c-n"><span>Combien</span><span class="rfp-stp">'
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-rf="n-" data-i="'+k+'" aria-label="Un de moins" onclick="window._rfGeste(this)">−</button>'
+    +'<b>'+A.n+'</b>'
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-rf="n+" data-i="'+k+'" aria-label="Un de plus" onclick="window._rfGeste(this)">+</button></span></div>'
+    +'<label class="rfp-c"><span>Du</span><input type="date" class="rfp-in" data-rf="a" data-i="'+k+'" min="'+mn+'" max="'+mxi+'" value="'+a+'" onchange="window._rfGeste(this)"></label>'
+    +'<label class="rfp-c"><span>Au</span><input type="date" class="rfp-in" data-rf="b" data-i="'+k+'" min="'+mn+'" max="'+mxi+'" value="'+b+'" onchange="window._rfGeste(this)"></label>';
+  if(L.t==='v'){
+    h+='<div class="rfp-c rfp-c-w"><span>Contrat</span><span class="mvbtn-choix" role="group" aria-label="Contrat">'
+      +_rfOpt('ctr','tesa','TESA',L.ctr!=='cdd')+_rfOpt('ctr','cdd','CDD '+(x.c.hCdd||35)+' h',L.ctr==='cdd')+'</span></div>';
+  } else {
+    var jj=Math.round(A.j*2)/2;
+    h+='<div class="rfp-c rfp-c-w"><span>Par semaine</span><span class="mvbtn-choix" role="group" aria-label="Jours par semaine">'
+      +[1,1.5,2,3,4,5].map(function(j){ return _rfOpt('j',j,(j===5?'5 j':_rfJtxt(j)),jj===j); }).join('')+'</span></div>'
+      +'<div class="rfp-c rfp-c-w"><span>Qui</span><span class="mvbtn-choix" role="group" aria-label="Qui">'
+      +_rfOpt('qui','eq','Quelqu’un de l’équipe',L.qui!=='emb')+_rfOpt('qui','emb','Embauché pour ça',L.qui==='emb')+'</span></div>';
+  }
+  var kL=_rfCompile(x,[A]), info;
+  if(L.t==='t'&&L.qui!=='emb'){ var hq=0; kL.trac.forEach(function(p,i){ hq+=p*(x.W[i].cap||0); }); info='l’équipe perd <b>'+_pilNum(hq)+' h</b> à la vigne'; }
+  else info='<b>'+_pilNum(kL.hPay)+' h</b> payées · <b>'+_ecoEur(kL.cout)+'</b>';
+  h+='</div><div class="rfp-ed-f"><span>'+info+'</span>'
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="del" data-i="'+k+'" onclick="window._rfGeste(this)">Retirer la ligne</button></div></div>';
+  return h;
+}
+function _rfComparer(V){
+  var S=V.S, sim=V.sim, ps=V.ps, sr=V.sr;
+  function fin(f){ return (f===Infinity||f==null)?'au-delà':_rfJr(f); }
+  function ret(T){ var r=T.filter(function(t){ return !t.ok; }); if(!r.length) return '<span class="ok">rien</span>';
+    return '<span class="ko">'+r.map(function(t){ return _pilEsc(_pilTnom(t.nom).toLowerCase())+(t.perdu>0.01?' en partie perdue':(t.fin==null?' au-delà':' +'+Math.max(1,t.dep)+' sem.')); }).join(', ')+'</span>'; }
+  var rs=_rfRetards(sr.r);
+  var h='<div class="rfp-s"><div class="rfp-sh"><b>Comparer</b>'+_mvInfoBtn('pil.sim.cout')+'</div>'
+    +'<table class="rfp-cmp"><thead><tr><th></th><th class="vo">Votre plan</th><th>Proposition<small>de l’appli</small></th><th>Sans renfort<small>équipe à '+V.plaf+' h</small></th></tr></thead><tbody>'
+    +'<tr><td>Coût</td><td class="vo"><b>'+_ecoEur(sim.k.cout)+'</b></td><td><b>'+_ecoEur(ps.k.cout)+'</b></td><td><b>'+_ecoEur(sr.cout)+'</b></td></tr>'
+    +'<tr><td>Saisonniers</td><td class="vo">'+sim.k.pointe+'</td><td>'+ps.k.pointe+'</td><td>0</td></tr>'
+    +'<tr><td>Heures sup</td><td class="vo">0 h</td><td>0 h</td><td>'+_pilNum(sr.hs)+' h</td></tr>'
+    +'<tr><td>Fin prévue</td><td class="vo">'+fin(sim.finMax)+'</td><td>'+fin(ps.finMax)+'</td><td>'+fin(V.srFin)+'</td></tr>'
+    +'<tr><td>Retard</td><td class="vo">'+ret(sim.T)+'</td><td>'+ret(ps.T)+'</td><td>'+(rs.length?'<span class="ko">'+rs.join(', ')+'</span>':'<span class="ok">rien</span>')+'</td></tr>'
+    +'</tbody></table><div class="rfp-cmp-p">'
+    +((S.admin&&!V.memes)?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="prop" onclick="window._rfGeste(this)">Prendre la proposition</button>':'')
+    +'<span>Sans renfort, l’équipe monte jusqu’à</span><span class="mvbtn-choix" role="group" aria-label="Plafond">'
+    +V.plafs.map(function(p){ return _rfOpt('plaf',p,p+' h',p===V.plaf); }).join('')+'</span></div></div>';
+  return h;
+}
 function _rfRetards(r){
   return (r.taches||[]).filter(function(s){ return s.dep>0||s.perdu>0.01||s.fin===null; })
     .map(function(s){ return _pilEsc(_pilTnom(s.nom).toLowerCase())+(s.perdu>0.01?' en partie perdue':(' +'+_pilNum(Math.max(1,s.dep))+' sem.')); });
 }
-function _rfCalSvg(cal,lg){
-  var x=cal.x, W=x.W, n=W.length, par=cal.res.parSem||[], c=window._mvGraphCadre(lg,(lg<480?210:240),{padT:30});
-  var mx=0;
-  par.forEach(function(s){ var eq=(s.dispo||0)*(s.cap||0); if(s.used>mx) mx=s.used; if(eq>mx) mx=eq; });
-  var pas=(mx>200?50:(mx>100?25:10)); mx=Math.max(pas,Math.ceil(mx/pas)*pas);
-  var iw=c.iw/Math.max(1,n), bw=Math.max(2,iw*0.68), v, k;
-  function X(i){ return c.padL+i*iw; }
-  function Y(q){ return c.padT+c.ih*(1-q/mx); }
-  var g='<defs><pattern id="rf2-h" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="var(--gris)"/></pattern></defs>';
-  for(v=0;v<=mx;v+=pas) g+='<line x1="'+c.padL+'" x2="'+(c.padL+c.iw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
-    +'<text x="'+(c.padL-6)+'" y="'+(Y(v)+3.5)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="var(--texte-doux)">'+v+'</text>';
-  par.forEach(function(s,i){
-    if(!(W[i]&&W[i].cap>0)){ g+='<rect x="'+X(i)+'" y="'+c.padT+'" width="'+iw+'" height="'+c.ih+'" fill="url(#rf2-h)"/>'; return; }
-    var eq=Math.min(s.used,(s.dispo||0)*s.cap), rf=Math.max(0,s.used-eq), cx=X(i)+(iw-bw)/2;
-    if(eq>0) g+='<rect x="'+cx+'" y="'+Y(eq)+'" width="'+bw+'" height="'+(Y(0)-Y(eq))+'" fill="'+c.col.fait+'" rx="'+_PIL_GB.rv+'"/>';
-    if(rf>0) g+='<rect x="'+cx+'" y="'+Y(eq+rf)+'" width="'+bw+'" height="'+(Y(eq)-Y(eq+rf))+'" fill="'+c.col.prevu+'" rx="'+_PIL_GB.rv+'"/>';
-  });
-  var d='';
-  par.forEach(function(s,i){ var yy=Y((s.dispo||0)*s.cap); d+=(i?'L':'M')+X(i)+' '+yy+' L'+(X(i)+iw)+' '+yy+' '; });
-  g+='<path d="'+d+'" fill="none" stroke="var(--texte)" stroke-width="'+c.trait.prevu+'" stroke-dasharray="4 3"/>';
-  _rfPeriodes(cal).forEach(function(p){
-    var x0=X(p.a)+1, w0=Math.max(4,X(p.b+1)-X(p.a)-2);
-    g+='<rect x="'+x0+'" y="6" width="'+w0+'" height="15" rx="7.5" fill="var(--or-pale)" stroke="var(--or)"/>';
-    if(w0>58) g+='<text x="'+(x0+w0/2)+'" y="17" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="var(--texte)">'+p.R+' saisonnier'+(p.R>1?'s':'')+'</text>';
-  });
-  var last=-1;
-  for(k=0;k<n;k++){ var m=W[k].m; if(m!=null && m!==last){ last=m; g+='<text x="'+(X(k)+2)+'" y="'+(c.h-8)+'" font-size="'+c.txt.axe+'" fill="var(--texte-doux)">'+_RF_MOIS[m]+'</text>'; } }
-  return window._mvGraphSvg(c,'Heures faites par semaine : l\u2019\u00e9quipe et le renfort',g);
+
+// ── RENF-3 : les gestes. Un seul gestionnaire, la valeur dans data-* (C24b) ; l'administrateur seul modifie. ──
+function _rfMemo(){ var S=_RF_P; if(!S) return; S.hist.push(JSON.stringify(S.l)); if(S.hist.length>40) S.hist.shift(); }
+// Toucher une ligne proposée ou le tracteur habituel la rend « à vous » : elle garde ses chiffres du moment.
+function _rfPerso(V,L){
+  if(L.p) delete L.p;
+  if(L.hab){ var h=_rfHab(V.x)||{n:1,j:1}; delete L.hab; L.n=h.n; L.j=Math.max(0.5,Math.round(h.j*2)/2); L.qui='eq'; L.a=_pilOrdIso(V.D0); L.b=_pilOrdIso(V.D1); }
 }
-function _rfBody(d){
-  _RF_RES=null;
-  var P=_rfPair(d), ctxP=P.plan, ctx=P.dec;
-  if(!ctxP) return _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.','saisons','R\u00e9glages \u203a Saisons');
-  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 pour chiffrer le renfort.','equipe','R\u00e9glages \u203a \u00c9quipe');
-  if(P.fini||!ctx||!ctx.W||!ctx.W.length) return '<div class="rf-how">La campagne est <b>termin\u00e9e</b> : il ne reste rien \u00e0 renforcer.</div>';
-  var cal=_rfCalendrier(ctx), x=cal.x, W=x.W, n=W.length, per=_rfPeriodes(cal);
-  var tauxR=(x.c.tauxRenfort>0?x.c.tauxRenfort:x.rate), pointe=0, hTot=0;
-  per.forEach(function(p){ if(p.R>pointe) pointe=p.R; hTot+=p.h; });
-  var cTot=hTot*tauxR+pointe*(x.c.fixe||0);
-  _RF_RES={ ok:cal.ok, pointe:pointe, cout:cTot };
-  function jr(o){ return _pilDfr(_rfIso(o)); }
-  var cdd=(x.c.contrat==='cdd'), H='';
-  // Le verdict
-  if(!cal.ok){
-    var bl=cal.blocs[cal.blocs.length-1]||{};
-    H+='<div class="rf2-v"><span class="pil-big">\u2014</span><span class="rf2-vu">'+_mvIcon('alerte',16)+' '
-      +_pilEsc(_pilTnom(bl.nom||'').toLowerCase()||'le travail')+' ne tient pas dans sa fen\u00eatre, m\u00eame avec du renfort</span></div>'
-      +'<div class="rf-how">La fen\u00eatre est trop courte pour ce qui reste. \u00c9largissez-la (roue crant\u00e9e, fen\u00eatres des t\u00e2ches) ou acceptez le retard.</div>';
-  } else if(!pointe){
-    H+='<div class="rf2-v"><span class="pil-big green">0</span><span class="rf2-vu">renfort : l\u2019\u00e9quipe suffit</span></div>'
-      +'<div class="rf2-ok">\u2713 Tout tient dans les fen\u00eatres, aux heures du planning \u00b7 0 heure sup</div>';
-  } else {
-    var gap=per.length>1;
-    H+='<div class="rf2-v"><span class="pil-big">'+pointe+'</span><span class="rf2-vu">saisonnier'+(pointe>1?'s':'')+'</span>'
-      +'<span class="rf2-vq">du '+jr(W[per[0].a].o0)+' au '+jr(W[per[per.length-1].b].o1)+(gap?', avec des pauses':'')+'</span></div>'
-      +'<div class="rf2-ok">\u2713 Tout tient dans les fen\u00eatres \u00b7 0 heure sup</div>';
-  }
-  // Le calendrier
-  if(pointe){
-    H+='<div class="rf-step"><div class="rf-t">Le calendrier '+_mvInfoBtn('pil.sim.frise')+'</div></div><div class="rf2-cal">';
-    per.forEach(function(p,k){
-      if(k>0){
-        var prv=per[k-1], ferme=true;
-        for(var q=prv.b+1;q<p.a;q++){ if(W[q].cap>0) ferme=false; }
-        if(p.a>prv.b+1) H+='<div class="rf2-row gap"><div class="per">'+(ferme?'Domaine ferm\u00e9':'Pas de renfort')+'<small>du '+jr(W[prv.b+1].o0)+' au '+jr(W[p.a-1].o1)+'</small></div><div class="nb">\u2014</div></div>';
-      }
-      var l=(p.a/n*100).toFixed(2), w=((p.b-p.a+1)/n*100).toFixed(2);
-      H+='<div class="rf2-row"><div class="per">Du '+jr(W[p.a].o0)+' au '+jr(W[p.b].o1)
-        +'<small>pour '+p.pour.map(function(t){ return _pilEsc(_pilTnom(t).toLowerCase()); }).join(', ')+' \u00b7 '+_pilNum(p.h)+' h \u00b7 '+_ecoEur(p.h*tauxR)+'</small></div>'
-        +'<div class="nb">'+p.R+'<small>saisonnier'+(p.R>1?'s':'')+'</small></div>'
-        +'<div class="rf2-fr"><i style="left:'+l+'%;width:'+w+'%"></i></div></div>';
-    });
-    var fins=(cal.res.taches||[]).filter(function(s){ return s.fin!==null; }).map(function(s){
-      return _pilEsc(_pilTnom(s.nom).toLowerCase())+' fini vers le '+jr(_rfWkEnd(x,s.fin)); });
-    H+='<div class="rf2-row fin"><div class="per">Ensuite : l\u2019\u00e9quipe suffit<small>'+fins.join(' \u00b7 ')+'</small></div><div class="nb">0</div></div></div>'
-      +'<div class="rf2-tot"><span>Renfort : <b>'+_pilNum(hTot)+' h pay\u00e9es</b> \u00b7 <b>'+_ecoEur(cTot)+'</b>'
-      +((x.c.fixe>0)?(' <small>(dont '+_ecoEur(pointe*x.c.fixe)+' d\u2019embauche)</small>'):'')+'</span><span>Heures sup : <b>0</b></span></div>';
-  }
-  // Et sans renfort ?
-  if(pointe && cal.ok){
-    var pd=_rfPlafDef(x), opts=[pd,43,48].filter(function(v,i,a){ return a.indexOf(v)===i; }).sort(function(p,q){ return p-q; });
-    var pl=(_RF_SEL.plaf>0&&opts.indexOf(_RF_SEL.plaf)>=0)?_RF_SEL.plaf:pd;
-    var S=_rfSansRenfort(x,pl), S0=_rfSansRenfort(x,0), r1=_rfRetards(S.r), r0=_rfRetards(S0.r);
-    var cm=0; W.forEach(function(w){ if((w.cap||0)>cm) cm=w.cap; });
-    var plMin=null;
-    for(var C=Math.max(1,Math.ceil(cm));C<=48;C++){ if(!_rfSansRenfort(x,C).r.deborde){ plMin=C; break; } }
-    var Smin=plMin?_rfSansRenfort(x,plMin):null;
-    H+='<div class="rf-step"><div class="rf-t">Et sans renfort ? '+_mvInfoBtn('pil.sim.cout')+'</div></div>'
-      +'<div class="rf2-seg"><span>L\u2019\u00e9quipe monte jusqu\u2019\u00e0</span><div class="pil-seg">'
-      +opts.map(function(v){ return '<button type="button" data-p="'+Number(v)+'"'+(v===pl?' class="on"':'')+' onclick="window._rfPlaf(this.dataset.p)">'+Number(v)+' h</button>'; }).join('')
-      +'</div><span>par semaine</span></div>'
-      +'<div class="rf2-cmp">'
-      +'<div class="rf2-l reco"><div class="a">Avec le renfort propos\u00e9</div><div class="e">'+_ecoEur(cTot)+'</div>'
-      +'<div class="d">'+pointe+' saisonnier'+(pointe>1?'s':'')+' \u00b7 0 heure sup \u00b7 <b>tout tient</b> dans les fen\u00eatres</div></div>'
-      +'<div class="rf2-l"><div class="a">Sans renfort, l\u2019\u00e9quipe \u00e0 '+pl+' h</div><div class="e">'+_ecoEur(S.cout)+'</div>'
-      +'<div class="d">'+_pilNum(S.hs)+' h sup'+(S.h50>0.5?(' ('+_pilNum(S.h25)+' h \u00e0 25 %, '+_pilNum(S.h50)+' h \u00e0 50 %)'):' \u00e0 25 %')+' \u00b7 '
-      +(r1.length?('<b>en retard</b> : '+r1.join(' \u00b7 ')):'<b class="v">tout tient</b> dans les fen\u00eatres')+'</div></div>'
-      +'<div class="rf2-l"><div class="a">Sans renfort ni heures sup</div><div class="e">0 \u20ac</div>'
-      +'<div class="d">'+(r0.length?('<b>en retard</b> : '+r0.join(' \u00b7 ')):'<b class="v">tout tient</b> dans les fen\u00eatres')+'</div></div></div>'
-      +'<div class="rf2-pied">'+(Smin?('Pour tout tenir sans renfort, il faudrait des semaines de <b>'+plMin+' h</b> : '+_pilNum(Smin.hs)+' h sup, '+_ecoEur(Smin.cout)+'. ')
-         :'M\u00eame \u00e0 48 h par semaine, l\u2019\u00e9quipe seule ne tient pas les fen\u00eatres. ')
-      +'Heures sup compt\u00e9es comme le relev\u00e9, au taux de l\u2019\u00e9quipe ; le co\u00fbt du retard lui-m\u00eame n\u2019est pas chiffr\u00e9.</div>';
-  }
-  // Semaine par semaine
-  H+='<div class="rf-step"><div class="rf-t">Semaine par semaine '+_mvInfoBtn('pil.sim.semaine')+'</div></div>'
-    +'<div style="width:100%;overflow-x:auto" id="rf-g-cal"></div>'
-    +'<div class="rf2-leg"><span><span class="rf-k" style="background:var(--vert-med)"></span>fait par l\u2019\u00e9quipe</span>'
-    +'<span><span class="rf-k" style="background:var(--or)"></span>fait par le renfort</span>'
-    +'<span><span class="rf-k rf2-tir"></span>l\u2019\u00e9quipe aux heures du planning</span>'
-    +'<span><span class="rf-k rf2-ferme"></span>domaine ferm\u00e9</span></div>';
-  window._mvGraphSuivre('#rf-g-cal', function(lg){ return _rfCalSvg(cal,lg); });
-  // Ce que le calcul suppose
-  var hyp=(cdd?'CDD \u00e0 '+(x.c.hCdd||35)+' h fixes':'TESA \u00e0 l\u2019horaire de l\u2019\u00e9quipe')+' \u00b7 cadence '+_pilNum(x.c.rdt*100)+' % \u00b7 '+_ecoEur(tauxR)+'/h \u00b7 heures du planning \u00b7 aucune heure sup';
-  H+='<div class="rf-lim">'+hyp+' '+_mvInfoBtn('pil.sim.modele')+'</div>'
-    +'<div class="rf2-seg"><span>Contrat du renfort :</span><div class="pil-seg">'
-    +'<button type="button"'+(cdd?'':' class="on"')+' onclick="window._rfContrat(\'tesa\')">TESA</button>'
-    +'<button type="button"'+(cdd?' class="on"':'')+' onclick="window._rfContrat(\'cdd\')">CDD '+(x.c.hCdd||35)+' h</button></div></div>';
-  // Choisir moi-même la période
-  var a=(_RF_SEL.choix?_RF_SEL.a:(per[0]?per[0].a:0)), b=(_RF_SEL.choix?_RF_SEL.b:(per.length?per[per.length-1].b:n-1));
-  a=Math.max(0,Math.min(n-1,a||0)); b=Math.max(a,Math.min(n-1,(b==null?n-1:b)));
-  var rc=_rfMinR(x,a,b,_rfRMax(x),null), so=function(cle,sel){
-    var h='<select data-cle="'+_pilEsc(cle)+'" onchange="window._rfChoix(this.dataset.cle,this.value)">';
-    for(var i=0;i<n;i++){ if(W[i].cap>0) h+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+_rfLabJ(W,i)+'</option>'; }
-    return h+'</select>';
-  };
-  H+='<details class="rf2-choix"'+(_RF_SEL.ouvert?' open':'')+'><summary>Choisir moi-m\u00eame la p\u00e9riode '+_mvInfoBtn('pil.sim.plan')+'</summary>'
-    +'<div class="rf2-seg"><span>Du</span>'+so('a',a)+'<span>au</span>'+so('b',b)+'</div>'
-    +'<div class="rf2-pied">'+((rc==null)?'Sur cette p\u00e9riode, m\u00eame beaucoup de monde ne suffit pas : un travail d\u00e9borde avant ou apr\u00e8s.'
-       :(rc===0)?'Personne : l\u2019\u00e9quipe suffit sur cette p\u00e9riode.'
-       :('\u2192 <b>'+rc+' saisonnier'+(rc>1?'s':'')+'</b> sur cette p\u00e9riode pour que tout tienne. M\u00eame r\u00e8gle : heures du planning, aucune heure sup.'))+'</div></details>';
-  return H;
+function _rfOuvre(o){ while(_rfJo(o)===0||_rfJo(o)===6) o++; return o; }
+function _rfFerme(o){ while(_rfJo(o)===0||_rfJo(o)===6) o--; return o; }
+// « + Saisonniers » : d'office, là où il manque des bras, autant de monde qu'il en manque (à leur cadence).
+function _rfNouvelleVigne(V){
+  var W=V.x.W, a=-1, b=-1, mq=0;
+  V.sem.forEach(function(s,i){ var g=s.beP-s.brP; if(s.cap>0&&g>0.05){ if(a<0) a=i; b=i; if(g>mq) mq=g; } });
+  if(a<0){ a=Math.min(W.length-1,1); b=Math.min(W.length-1,a+3); mq=V.x.c.rdt; }
+  return { t:'v', n:Math.max(1,Math.ceil(mq/V.x.c.rdt-1e-9)), a:_pilOrdIso(_rfOuvre(W[a].o0)), b:_pilOrdIso(_rfFerme(W[b].o1)), ctr:'tesa' };
 }
-window._rfContrat=function(v){ _RF_SEL.contrat=(v==='cdd')?'cdd':'tesa'; _rfRefresh(); };
-window._rfPlaf=function(v){ var q=Number(v); _RF_SEL.plaf=(q>0)?q:0; _rfRefresh(); };
-window._rfChoix=function(cle,v){
-  var q=parseInt(v,10); if(!isFinite(q)) return;
-  if(!_RF_SEL.choix){ _RF_SEL.choix=true; }
-  if(cle==='a') _RF_SEL.a=q; else _RF_SEL.b=q;
-  if(_RF_SEL.b<_RF_SEL.a){ var t=_RF_SEL.a; _RF_SEL.a=_RF_SEL.b; _RF_SEL.b=t; }
-  _RF_SEL.ouvert=true; _rfRefresh();
+function _rfNouveauTracteur(V){
+  var W=V.x.W, i=Math.min(W.length-1,1), o=_rfOuvre(W[i].o0);
+  return { t:'t', n:1, j:5, qui:'eq', a:_pilOrdIso(o), b:_pilOrdIso(_rfFerme(Math.min(V.D1,o+11))) };
+}
+window._rfGeste=function(el){
+  var S=_RF_P, V=_RF_V; if(!el||!el.getAttribute||!S||!V) return;
+  var a=el.getAttribute('data-rf'), k=parseInt(el.getAttribute('data-i'),10), v=el.getAttribute('data-v');
+  if(a==='sem'){ if(!isNaN(k)&&S.sem!==k){ S.sem=k; _rfSemMaj(); } return; }
+  if(a==='unite'){ S.unite=(v==='h')?'h':'p'; _rfRefresh(); return; }
+  if(a==='plaf'){ var q=Number(v); S.plaf=(q>0)?q:0; _rfRefresh(); return; }
+  if(!S.admin) return;
+  if(a==='sel'){ if(Date.now()-(S.glisse||0)<450) return; S.sel=(S.sel===k)?null:k; _rfRefresh(); return; }
+  if(a==='close'){ S.sel=null; _rfRefresh(); return; }
+  if(a==='undo'){ if(S.hist.length){ S.l=JSON.parse(S.hist.pop()); if(S.sel!=null&&!S.l[S.sel]) S.sel=null; _rfPlanEcrit(); _rfRefresh(); } return; }
+  if(a==='garder'){ _rfPlanEcrit(); _rfRefresh(); return; }
+  if(a==='prop'){ _rfMemo(); S.l=S.l.filter(function(L){ return L.t==='t'; }).concat(JSON.parse(JSON.stringify(V.prop.l))); S.sel=null; _rfPlanEcrit(); _rfRefresh(); return; }
+  if(a==='addv'||a==='addt'){ _rfMemo(); S.l.push(a==='addv'?_rfNouvelleVigne(V):_rfNouveauTracteur(V)); S.sel=S.l.length-1; _rfPlanEcrit(); _rfRefresh(); return; }
+  var L=S.l[k]; if(!L) return;
+  if(a==='del'){ _rfMemo(); S.l.splice(k,1); S.sel=null; _rfPlanEcrit(); _rfRefresh(); return; }
+  if(a==='a'||a==='b'){ if(!_rfIsoOk(el.value)) return; }
+  _rfMemo(); _rfPerso(V,L);
+  if(a==='n+'||a==='n-') L.n=Math.max(1,Math.min(_RF_RMAX_DUR,(Number(L.n)||1)+(a==='n+'?1:-1)));
+  else if(a==='ctr') L.ctr=(v==='cdd')?'cdd':'tesa';
+  else if(a==='j'){ var jv=Number(v); if(jv>=0.5&&jv<=5) L.j=jv; }
+  else if(a==='qui') L.qui=(v==='emb')?'emb':'eq';
+  else if(a==='a'||a==='b'){ L[a]=el.value; if(L.b<L.a){ if(a==='a') L.b=L.a; else L.a=L.b; } }
+  else { S.hist.pop(); return; }
+  _rfPlanEcrit(); _rfRefresh();
 };
+// Sur ordinateur, une barre se GLISSE (le milieu la déplace, un bord change sa date), au jour près ; le graphe, la fin des
+//   travaux et « Comparer » suivent pendant le geste. Au téléphone, le toucher ouvre le réglage de la ligne.
+var _RF_GL=null, _RF_GL_ON=false;
+function _rfGlisserBrancher(){
+  if(_RF_GL_ON||typeof document==='undefined'||!document.addEventListener) return;
+  _RF_GL_ON=true;
+  document.addEventListener('pointerdown',function(e){
+    var bar=e.target&&e.target.closest?e.target.closest('#rf-gt .rfp-bar'):null;
+    var S=_RF_P, V=_RF_V; if(!bar||!S||!V||!S.admin||e.button!==0) return;
+    var gt=document.getElementById('rf-gt'); if(!gt||gt.classList.contains('rfp-et')) return;
+    var k=parseInt(bar.getAttribute('data-i'),10), L=S.l[k], A=V.A[k]; if(!L||!A) return;
+    var mode=e.target.classList.contains('l')?'l':(e.target.classList.contains('r')?'r':'m');
+    _RF_GL={ bar:bar, k:k, mode:mode, x:e.clientX, o0:A.o0, o1:A.o1, bouge:false, pre:JSON.stringify(S.l), w:(bar.parentNode&&bar.parentNode.clientWidth)||1, raf:0 };
+    try{ bar.setPointerCapture(e.pointerId); }catch(eC){ if(window._mvAvale) window._mvAvale(eC,'pilotage.js/_rfGlisser#capture'); }
+  });
+  document.addEventListener('pointermove',function(e){
+    var G=_RF_GL, S=_RF_P, V=_RF_V; if(!G||!S||!V) return;
+    if(!G.bouge&&Math.abs(e.clientX-G.x)<4) return;
+    var L=S.l[G.k]; if(!L) return;
+    if(!G.bouge){ G.bouge=true; S.touche=true; G.bar.classList.add('glisse'); _rfPerso(V,L); }
+    var dd=Math.round((e.clientX-G.x)/G.w*V.DT), o0=G.o0, o1=G.o1;
+    if(G.mode==='m'){ var sp=G.o1-G.o0; o0=Math.max(V.D0,Math.min(V.D1-sp,G.o0+dd)); o1=o0+sp; }
+    else if(G.mode==='l') o0=Math.max(V.D0,Math.min(G.o1,G.o0+dd));
+    else o1=Math.min(V.D1,Math.max(G.o0,G.o1+dd));
+    // un samedi ou un dimanche ne commence ni ne finit une ligne : le lundi suivant, le vendredi d'avant
+    var p0=_rfOuvre(o0), p1=_rfFerme(o1); if(p0<=p1&&p0<=V.D1&&p1>=V.D0){ o0=p0; o1=p1; }
+    L.a=_pilOrdIso(o0); L.b=_pilOrdIso(o1);
+    var x0=_rfPct(V,o0), x1=_rfPct(V,o1+1);
+    G.bar.style.left=x0.toFixed(2)+'%'; G.bar.style.width=Math.max(0.8,x1-x0).toFixed(2)+'%';
+    var bu=G.bar.parentNode.querySelector('.rfp-bulle');
+    if(!bu){ bu=document.createElement('span'); bu.className='rfp-bulle'; G.bar.parentNode.appendChild(bu); }
+    bu.textContent=_rfPlage(o0,o1); bu.style.left=((x0+x1)/2).toFixed(2)+'%';
+    var rg=G.bar.closest?G.bar.closest('.rfp-r'):null, sm=rg?rg.querySelector('.rfp-l small'):null;
+    if(sm&&L.t==='v') sm.textContent=(L.ctr==='cdd'?'CDD':'TESA')+' \u00b7 '+_rfPlage(o0,o1);
+    if(!G.raf) G.raf=requestAnimationFrame(function(){ if(_RF_GL) _RF_GL.raf=0; _rfRefreshVif(); });
+  });
+  document.addEventListener('pointerup',function(){
+    var G=_RF_GL, S=_RF_P; _RF_GL=null; if(!G||!S) return;
+    if(G.bouge){ S.hist.push(G.pre); if(S.hist.length>40) S.hist.shift(); S.glisse=Date.now(); S.sel=G.k; _rfPlanEcrit(); _rfRefresh(); }
+  });
+}
+function _rfHeadMaj(){
+  var el=document.querySelector('.pil-tile[data-pid="renfort"] .pil-th-l2');
+  if(el) el.innerHTML=_rfStatHtml(_RF_RES);
+  _pilDcPhraseMaj();
+}
+// Pendant le glisser : tout ce qui se lit du plan suit, sauf la ligne qu'on tient (elle est sous le doigt).
+function _rfRefreshVif(){
+  var V0=_RF_V; if(!V0||!V0.x||typeof document==='undefined') return;
+  var V=_rfVue(V0.x), sim=V.sim;
+  _RF_RES={ ok:sim.ok, pointe:sim.k.pointe, cout:sim.k.cout, prevu:V.S.enr, nRet:sim.nRet };
+  var a=document.getElementById('rf-gt-a'); if(a) a.innerHTML=_rfRangsTaches(V);
+  var c=document.getElementById('rf-cmp'); if(c) c.innerHTML=_rfComparer(V);
+  var e=document.getElementById('rf-sem'); if(e) e.innerHTML=_rfSemHtml(V);
+  var g=document.getElementById('rf-g-plan'); if(g) g.innerHTML='';   // le socle ne repeint pas un graphe déjà dessiné
+  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  _rfHeadMaj();
+}
 
 function _pilPanelRenfort(d){
   _RF_D=d;
   // RENF-2 (§224) : la tuile redit le calendrier — l'effectif le plus haut et son coût, ou « l'équipe suffit ».
   // MOTS-10 (§594) : la pastille de L'équipe & le matériel (« à prévoir », « l'équipe suffit ») ; l'intérieur suit le lot du renfort.
-  var corps=_rfBody(d), stat=_pilStat('\u2014',''), Q=_RF_RES;
-  if(Q && Q.ok) stat=Q.pointe ? _pilStat(Q.pointe,' saisonnier'+(Q.pointe>1?'s':'')+' \u00b7 '+_ecoEur(Q.cout))+_pilPhPl('\u00e0 pr\u00e9voir','or') : _pilStat('0','')+_pilPhPl('l\u2019\u00e9quipe suffit','ok');
-  return _pilTile('renfort','#C9A84C','Renfort', stat,
+  // RENF-3 (§619) : le plan enregistré se dit « prévu » ; un plan qui laisse un travail en retard le dit, en rouge.
+  var corps=_rfBody(d);
+  return _pilTile('renfort','#C9A84C','Renfort', _rfStatHtml(_RF_RES),
     'aux heures du planning, sans heures sup', null,
     '<div id="pil-rf-body">'+corps+'</div>');
 }
@@ -4068,6 +4530,7 @@ function _rfRefresh(){
     // Le simulateur se reconstruit a chaque interaction, hors du chemin de
     // _pilFillContent : il repeint donc ses graphes lui-meme.
     if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+    _rfHeadMaj();
   }
 }
 
@@ -4099,7 +4562,9 @@ function _pilDcPhrase(){
     var fR=_dzRepFin(R), kR=R.taches.some(function(x){ return !x.rien&&!x.ok; });
     if(fR) p.push('fin pr\u00e9vue <b'+(kR?' class="ko"':'')+'>'+_dzJc(fR)+'</b>');
   }
-  if(Q&&Q.ok) p.push(Q.pointe?'<b class="or">'+_dzPl(Q.pointe,'saisonnier')+' \u00e0 pr\u00e9voir</b>':'l\u2019\u00e9quipe suffit');
+  // RENF-3 (§619) : un plan enregistré se dit « prévu » ; s'il laisse un travail en retard, la phrase le dit.
+  if(Q&&Q.ok) p.push(Q.pointe?(Q.prevu?'<b>'+_dzPl(Q.pointe,'saisonnier')+' pr\u00e9vu'+(Q.pointe>1?'s':'')+'</b>':'<b class="or">'+_dzPl(Q.pointe,'saisonnier')+' \u00e0 pr\u00e9voir</b>'):'l\u2019\u00e9quipe suffit');
+  else if(Q&&Q.prevu) p.push('<b class="ko">le renfort pr\u00e9vu ne suffit pas</b>');
   if((_PIL_OP&&_dzMod())||_dzRepSim()) p.push('simulation');
   return p.length?'<span class="pil-tv-ph">'+p.join(', ')+'</span>':_pilEsc(_pilTabLabel('sim'));
 }
@@ -5706,7 +6171,8 @@ function _pilAnRenfortData(){
   var C=_pilAnCadre(); if(!C) return null;
   var ann=null;
   try{ ann=_pilAnnuelData(); }catch(e){ ann=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'annee: semaines illisibles'}); }
-  var k=C.cadre+'|'+C.d0+'|'+C.d1+'|'+C.auj+'|'+(ann?String(_PIL_ANNK):'-');
+  // RENF-3 (§619), D1 : le plan de renfort enregistré (Décider › Renfort) entre dans la clé — un plan gardé redessine la carte.
+  var k=C.cadre+'|'+C.d0+'|'+C.d1+'|'+C.auj+'|'+(ann?String(_PIL_ANNK):'-')+'|'+_rfPlanSig();
   if(_PIL_ANR && _PIL_ANR.k===k) return _PIL_ANR.v;
   var s=_pilAnnOrd(C.d0), e=_pilAnnOrd(C.d1), oA=_pilAnnOrd(C.auj), sem=[], couv=[];
   ((ann && ann.weeks) || []).forEach(function(x){
@@ -5714,9 +6180,14 @@ function _pilAnRenfortData(){
     var need=Number(x.need), dispo=Number(_pilDispoSem(x));
     if(!isFinite(need) || need<0) need=0;
     if(!isFinite(dispo) || dispo<0) dispo=0;
-    sem.push({ o0:Math.max(x.o0,s), o1:Math.min(x.o1,e), need:need, dispo:dispo,
-               manque:Math.max(0,need-dispo), passe:(x.o1<oA), per:x.per });
+    // RENF-3 (§619), D1 : les saisonniers PRÉVUS au plan du Renfort, à leur cadence — ce qui reste à prévoir est ce qui
+    //   manque encore après eux.
+    var a0=Math.max(x.o0,s), a1=Math.min(x.o1,e), rf=_rfPlanPrevuSem(a0,a1).eq;
+    sem.push({ o0:a0, o1:a1, need:need, dispo:dispo, rf:rf,
+               manque:Math.max(0,need-dispo-rf), passe:(x.o1<oA), per:x.per });
   });
+  var prevu=0;
+  sem.forEach(function(w){ if(!w.passe && w.rf>0.01){ var n=_rfPlanPrevuSem(w.o0,w.o1).n; if(n>prevu) prevu=n; } });
   sem.sort(function(a,b){ return a.o0-b.o0; });
   // Ce que les periodes couvrent : au-dela, ni besoin ni equipe — un trou, pas un zero.
   ((ann && ann.pers) || []).forEach(function(p){
@@ -5740,7 +6211,7 @@ function _pilAnRenfortData(){
       if(t && _friseNorm(t.nom).indexOf('vendang')>=0 && String(t.end)>=C.d0 && String(t.start)<=C.d1) vend=true;
     });
   });
-  var v={ C:C, s:s, e:e, oAuj:oA, sem:sem, couv:couv, fen:fen, vend:vend, ok:(sem.length>0),
+  var v={ C:C, s:s, e:e, oAuj:oA, sem:sem, couv:couv, fen:fen, vend:vend, ok:(sem.length>0), prevu:Math.round(prevu),
           finCouv:(finCouv!=null ? _pilOrdIso(finCouv) : null),
           trouFin:(finCouv!=null && finCouv<e && C.enCours) };
   _PIL_ANR={k:k, v:v};
@@ -5907,6 +6378,8 @@ function _pilPanelAnRenfort(){
     sub=_cadL+(f0.a<=C.auj?'d\u00e8s cette semaine':('d\u00e8s le '+_pilAnDfrJM(f0.a)))+(F[1] ? (' \u00b7 puis '+(F[1].plat?'':'jusqu\u2019\u00e0 ')+F[1].n+' en '+_PIL_AN_MOIS[_pilOrdD(F[1].oMax).getUTCMonth()]) : (' \u00b7 jusqu\u2019au '+_pilDfr(f0.b)));
   } else {
     stat=_pilStat('0','')+_pilPhPl('l\u2019\u00e9quipe suffit','ok');
+    // RENF-3 (§619), D1 : le plan du Renfort couvre ce qui manquait — la carte le dit « prévu ».
+    if(R.prevu>0) stat=_pilStat('+'+R.prevu,' pers.')+_pilPhPl('pr\u00e9vu','ok');
     sub=_cadL+(R.finCouv?('jusqu\u2019au '+_pilDfr(R.finCouv)):'');
   }
   var body='';
@@ -5928,6 +6401,7 @@ function _pilPanelAnRenfort(){
   body+='<div class="pil-anh">Personnes n\u00e9cessaires, semaine par semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-anr"></div>';
   window._mvGraphSuivre('#pil-g-anr', function(lg){ return _pilAnRenfortSvg(R,lg); }, {max:1800});
   body+='<div class="pil-anb-leg"><span><em style="background:var(--vert-med)"></em>couvert par l\u2019\u00e9quipe</span>'
+    +(R.prevu>0?'<span><em style="background:var(--or)"></em>renfort pr\u00e9vu</span>':'')
     +'<span><em class="pil-anr-h"></em>renfort \u00e0 pr\u00e9voir</span>'
     +'<span><em style="background:transparent;border-top:2px solid var(--texte);height:0;border-radius:0"></em>ce que l\u2019\u00e9quipe peut faire, d\u2019apr\u00e8s le planning</span>'
     +'<span><em style="background:var(--gris)"></em>semaines pass\u00e9es</span></div>';
@@ -5979,9 +6453,11 @@ function _pilAnRenfortSvg(R, w){
         +'<text x="'+(xa+bw/2).toFixed(1)+'" y="'+(pT-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'">'+_pilUn(x.need)+'</text>';
       return;
     }
-    var hc=H(Math.min(x.need, x.dispo)), hr=H(x.need)-hc, yc=base-H(x.dispo);
+    // RENF-3 (§619), D1 : entre le vert (l'équipe) et le rouge (à prévoir), l'or — ce que le plan du Renfort couvre.
+    var hc=H(Math.min(x.need, x.dispo)), hv=H(Math.min(x.need, x.dispo+(x.rf||0)))-hc, hr=H(x.need)-hc-hv, yc=base-H(x.dispo);
     if(hc>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hc.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+c.col.fait+'"/>';
-    if(hr>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="url(#pil-anr-hp)" stroke="'+c.col.alerte+'" stroke-width="0.8"/>';
+    if(hv>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hv).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hv.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="'+c.col.prevu+'"/>';
+    if(hr>0.2) g+='<rect x="'+xa.toFixed(1)+'" y="'+(base-hc-hv-hr).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hr.toFixed(1)+'" rx="'+_PIL_GB.rv+'" fill="url(#pil-anr-hp)" stroke="'+c.col.alerte+'" stroke-width="0.8"/>';
     g+='<line x1="'+(xa-0.6).toFixed(1)+'" y1="'+yc.toFixed(1)+'" x2="'+(xa+bw+0.6).toFixed(1)+'" y2="'+yc.toFixed(1)+'" stroke="var(--texte)" stroke-width="2"/>';
   });
   if(!isNaN(oA) && oA>=s && oA<=e){

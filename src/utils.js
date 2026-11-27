@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.39';
+export const APP_VERSION = '11.40';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3039,7 +3039,7 @@ var MV_AIDE = {
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
       // MOTS-10 (§594) : Décider se lit comme Travaux et L'équipe — la phrase, puis les trois cartes repliées.
-      ['Décider se lit d’un coup d’œil', " : une phrase en haut — le travail, où l’équipe sera ce soir, la fin prévue, le renfort — puis trois cartes repliées : un titre, un chiffre, une pastille (tient, déborde, l’équipe suffit). Touchez-en une pour simuler : rien ne s’y enregistre. <b>La tournée du jour</b> suit la tournée choisie pour le travail (roue crantée de la Vigne › Tournées) ; ses tris sont un essai. <b>Qui fait quoi</b> répartit l’équipe entre les priorités — « Ouvrir la priorité du moment » la fixe. <b>Renfort</b> dit combien de saisonniers, et quand, aux heures du planning, sans heures sup."],
+      ['Décider se lit d’un coup d’œil', " : une phrase en haut — le travail, où l’équipe sera ce soir, la fin prévue, le renfort — puis trois cartes repliées : un titre, un chiffre, une pastille (tient, déborde, l’équipe suffit). Touchez-en une pour l’ouvrir. <b>La tournée du jour</b> suit la tournée choisie pour le travail (roue crantée de la Vigne › Tournées) ; ses tris sont un essai. <b>Qui fait quoi</b> répartit l’équipe entre les priorités — « Ouvrir la priorité du moment » la fixe. <b>Renfort</b> est votre plan : combien de saisonniers, de quand à quand, et qui au tracteur — l’appli en propose un, aux heures du planning, sans heures sup ; il s’enregistre dès qu’on y touche."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
       ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
       ['Le rendement de la tournée', ": sous le résultat, la part du temps de l’équipe passée sur les parcelles face aux trajets, le coût de l’équipe et le revient à l’hectare. La même tournée « au plus proche » est calculée à côté, pour comparer ; un bouton prend cet ordre."],
@@ -3354,34 +3354,27 @@ export const MV_INFO = {
     'Rien n\u2019est enregistré ici : l\u2019affectation se diffuse dans Vigne \u203a Priorité du moment.'
   ] },
 
-  'pil.sim.frise': { t: 'Le calendrier du renfort', p: [
-    'Chaque ligne dit <b>combien de saisonniers</b>, <b>de quand à quand</b>, pour <b>quel travail</b>, et ce que ça coûte. Il se calcule <b>tout seul</b>, sur ce qu’il reste à faire depuis aujourd’hui : aucun effectif ni aucune fenêtre à choisir avant de voir la réponse.',
-    'La règle : tant qu’un travail déborde de sa fenêtre, on pose sur <b>sa</b> fenêtre — de son ouverture, ou d’aujourd’hui, à sa limite — le <b>moins de monde possible</b> qui le fait tenir, en plus de ce qui est déjà posé. Les semaines de même effectif se regroupent en périodes ; une semaine où le domaine est fermé coupe la période.',
-    'L’équipe <b>déjà sous contrat</b> est comptée, saisonniers et vendangeurs déjà embauchés compris : le calendrier ne réclame que ce qui manque en plus.'
+  // ★ RENF-3 (§619) : le Renfort devient « Votre plan » (ses lignes, choisies) et « Comparer ». Les fiches du calendrier, de la
+  //   semaine par semaine et de « Choisir moi-même la période » (RENF-2) se fondent dans pil.sim.plan : ces écrans n'existent plus.
+  'pil.sim.plan': { t: 'Votre plan', p: [
+    'Le graphique montre, semaine par semaine, le <b>besoin</b> de chaque travail (ses couleurs de Travaux) face aux <b>bras</b> : l’équipe à la vigne en tireté, avec le renfort en doré. En <b>orange</b>, une semaine plus chargée que les bras mais absorbée sans retard ; en <b>rouge</b>, ce qui manque vraiment. Touchez une semaine pour son détail ; « Heures » montre la même chose en heures.',
+    'Dessous, à la même échelle : chaque travail, sa fenêtre et sa fin prévue ; puis vos saisonniers à la vigne et les personnes au tracteur. Touchez une ligne pour régler combien, du … au …, le contrat. Sur ordinateur, une barre se glisse, et un bord change sa date.',
+    'La proposition de l’appli : tant qu’un travail déborde de sa fenêtre, le <b>moins de monde possible</b> qui le fait tenir, embauché <b>le plus tard possible</b>. L’équipe déjà sous contrat est comptée, saisonniers et vendangeurs compris. Elle reste « proposé » tant que vous n’y touchez pas.',
+    'Au tracteur, le temps <b>mesuré</b> sur la campagne figure d’office (« habituel »). Quelqu’un de l’équipe au tracteur, c’est une personne de moins à la vigne ; quelqu’un d’embauché pour ça est payé, et la vigne garde ses bras.',
+    'Le plan s’<b>enregistre</b> dès qu’on y touche, un par campagne, et L’équipe & le matériel › Renfort le lit. « Annuler » revient en arrière. Rien n’est embauché ici.'
   ] },
 
-
-  'pil.sim.semaine': { t: 'Semaine par semaine', p: [
-    'Une colonne par semaine : en <b>vert</b> ce que fait l’équipe, en <b>doré</b> ce que fait le renfort du calendrier. Le <b>tireté</b> est ce que l’équipe peut faire aux heures du planning : il suit l’annualisation, les congés et les fermetures. Le <b>hachuré</b> marque une semaine où le domaine est fermé.',
-    'La bande du haut redit l’effectif de chaque période. Aucune colonne ne passe le tireté sans doré : il n’y a pas d’heures sup dans ce plan.'
-  ] },
-
-  'pil.sim.cout': { t: 'Et sans renfort ?', p: [
-    'Trois lignes à comparer : le renfort proposé ; l’équipe seule qui monte jusqu’au plafond choisi, en heures sup ; l’équipe seule sans heures sup. Pour chacune, ce que ça coûte en plus, et le retard qui reste.',
+  'pil.sim.cout': { t: 'Comparer', p: [
+    'Trois colonnes : votre plan, la proposition de l’appli, et l’équipe seule qui monte jusqu’au plafond choisi, en heures sup. Pour chacune : ce que coûtent le renfort ou les heures sup, la fin prévue, et le retard qui reste.',
     'Le plafond proposé d’office est la <b>semaine la plus longue de votre planning</b>, lue dans le modèle. 43 h est la dernière heure à 25 % ; 48 h, le maximum légal d’une semaine.',
     'Les heures sup se comptent <b>comme le relevé</b> : au-delà du planning de la semaine, 25 % jusqu’à la 43<sup>e</sup> heure, 50 % au-delà, au coût moyen de l’équipe. Le travail en retard s’allonge du pourcentage réglé par semaine.',
     'Ce que la fiche ne chiffre pas : le coût du retard lui-même — travaux décalés, récolte. Et une limite : sur plusieurs semaines, la moyenne légale autorisée est plus basse que 48 h : l’application ne la vérifie pas.'
   ] },
 
-  'pil.sim.plan': { t: 'Choisir moi-même la période', p: [
-    'Pour une autre organisation que celle du calendrier : vous dites de quand à quand le renfort sera là, l’application donne le <b>plus petit nombre constant</b> de saisonniers qui fait tout tenir sur cette période. Même calcul, mêmes heures du planning, aucune heure sup.',
-    'Une période plus courte demande plus de monde ; une période qui commence après la limite d’un travail ne peut plus le sauver.'
-  ] },
-
   'pil.sim.modele': { t: 'Ce que le calcul suppose', p: [
     'Un saisonnier en <b>TESA</b> suit l’horaire de l’équipe : les heures du modèle de la semaine. En <b>CDD</b>, 35 h chaque semaine ouverte, quel que soit cet horaire.',
     'Il fait la <b>cadence d’un renfort</b> (85 % par défaut) de ce que fait un permanent sur la même heure — réglage de la roue crantée, comme son taux horaire et ses frais d’embauche.',
-    'L’équipe compte aux <b>heures du planning</b> : modèle de chacun, congés, récup et fermetures retirés, tracteur déduit. <b>Aucune heure sup</b> dans le plan : le renfort sert justement à ne pas en faire.',
+    'L’équipe compte aux <b>heures du planning</b> : modèle de chacun, congés, récup et fermetures retirés ; le tracteur est une ligne du plan. <b>Aucune heure sup</b> dans le plan : le renfort sert justement à ne pas en faire.',
     'Le travail <b>avance dès que l’équipe a de la marge</b>, dans la fenêtre de chaque tâche. <b>Sauf les travaux sans rattrapage</b> — la vendange : ce qui n’est pas fait dans sa fenêtre est perdu, et c’est compté.'
   ] },
 
@@ -3909,6 +3902,7 @@ export const MV_INFO = {
     'Chaque semaine compare le <b>besoin</b> (les heures de barème de la semaine, ramenées à une personne) à <b>ce que l’équipe peut faire</b> la même semaine. Une semaine où il manque une demi-personne ou plus ouvre une ligne ; les semaines qui se suivent font une seule ligne, avec le manque le plus fort.',
     'L’échelle suit les semaines à venir. Les semaines passées restent en gris ; la vendange, si elle dépasse, est coupée net avec son chiffre.',
     '<b>Combien recruter, quand, et ce que coûte de ne rien faire</b> se chiffrent dans Décider › Le renfort. Lui laisse glisser le travail dans sa fenêtre : ses chiffres peuvent être plus bas que cette photo.',
+    'Les saisonniers <b>prévus</b> au plan de Décider › Renfort comptent ici, en doré, à leur cadence : ce qui reste « à prévoir » est ce qui manque encore après eux.',
     'Rien n’est compté au-delà de la dernière période datée : un trou n’est pas un zéro.'
   ] }
 

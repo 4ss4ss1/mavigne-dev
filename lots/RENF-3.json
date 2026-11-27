@@ -1,0 +1,51 @@
+{
+  "lot": "RENF-3",
+  "section": "§619",
+  "base": "60e717c64173f481e5775d90c0f1d069ea8ea735",
+  "inclut": [],
+  "date": "2026-11-27",
+  "tutos": {
+    "ok": true,
+    "empreinte": "8629a9af7cc1a1cfb2e8e3c10f8eed41f79a9c14866c77a1d257f219da81dbc6",
+    "date": "2026-11-27T06:43:53.327Z",
+    "joues": {
+      "téléphone": 0,
+      "ordinateur": 0,
+      "côte à côte": 3
+    },
+    "concernes": [],
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "12e19abc005e1e3ad840e80ec29d2402feae0b7da6e0d261458aefc6a1634812",
+    "CLAUDE.md": "b5d3b0a6332b306b335d178291d5dd3ab041a6b2ddd8b2bb9d85a24283c792cc",
+    "docs/claude/INDEX.md": "3adec10f0b119ebe27456805daf2c32f62375032a47d22dddacc4dd24fe21017",
+    "docs/claude/chantiers-580-629.md": "8d0ba495d37b8e3f5f6cbb916c909699ccae260d3830a9150514157b04fdd825",
+    "docs/claude/journal.md": "679763bd22792664fc5b839222d05fa9e6b8ded951fbdd275163240de6e0d718",
+    "docs/maquettes/LISEZMOI.md": "43c82e9e72513e5c0a5bd1993ea3393533866c8ac8e049dcf039c36559dccbd5",
+    "guide/11-pilotage.html": "484e9f2496cd066129dfebadc99713fc74d264411bb9f32c845cd27eb7f62a25",
+    "index.html": "c6942814414749f621a3b723d242262f98b87c37b308d1039a9fecae9942d8d3",
+    "public/demo.html": "94d23c3aec3802b7c2ea9c1ff45145f288c5fe854e905219599b8b120f780841",
+    "public/demo/r-ger-renfort.webp": "e18f3b2278a25aef69d209d216b1fdbd30bc4fd22b7aeaa3adb591c1d2a1c6c3",
+    "public/demo/renfort-pc.webp": "5fc6f33312c463be16db55a76dfaa8b4a1474c688dd39188c8139d25355deb72",
+    "public/demo/t-r-ger-renfort.webp": "ae84928cde00133d80736bf5ff22b0a9eea381c7061234e68d03ee6169a55a78",
+    "public/demo/t-renfort-pc.webp": "b4a6711bc2bd05b7ce904529a21ae52ceae016d89a1552aa326cc329346ef0ab",
+    "public/sw.js": "9c821dea752dc3fa00faaef44d0b8b77eb1a1b763834e27d6d2d807cb2033cb6",
+    "scripts/contraste-baseline.json": "57569a6b3c6b5590e1272f6ccc00e4f0bef28fdc6b16b57afe6f89fee5d64173",
+    "scripts/harnais-claude-md.mjs": "8b8d3b5ec975c5fd871a8bf11b941d69dddf084c24a6f24e337208b2de2533d2",
+    "scripts/mv-harnais-gabarit2.mjs": "3ced3ff0b0252db3582cb25d5a6b1e9f8a701ee75918708d3c118d7730d4bcbd",
+    "scripts/mv-harnais-info.mjs": "d6309eac570b2cf3fd81d5152776ae7db6c577d274a1eaf642a655d7a623832a",
+    "scripts/mv-harnais-liste.mjs": "63742f56399377f259c68e083de765d94b9bd882a929412e010a4f5ce1289925",
+    "scripts/mv-harnais-mots10.mjs": "3c91fde2568f7b0bdf61de4ab0b9c11d96f0dacb0ae3910f0757a83b15ccc20a",
+    "scripts/mv-harnais-renf2.mjs": "91dd0447e8fd54fc60095fc2f87c6ab5dd9ce03b78a16e99c59a9b0224982fc4",
+    "scripts/tutos-couverture.json": "56f418b7f9c18f81e81e9d759e7141bed10387b70a96f13820771a3f297dfa05",
+    "src/pilotage.css": "da40143c81617232806a7a189f09f2e7f99824781eb4e380e6cfa42ce3afdc2a",
+    "src/pilotage.js": "a965f312bc0591c68ca3bd68bbfdc04661155800fff769e61813fffd1668d1ac",
+    "src/reglages.js": "8dd51b09351c56ae40256974104bf50eb7f6a841436aa60b79b9429a6fc82b7d",
+    "src/styles.css": "a34fb11ea69a31209d32c78b04b635c34508319dc1f91fa1e2f719af765839d4",
+    "src/utils.js": "67802471af0bc573679d51cbbf83e5c0af4947bb9f46d955b32d5ddd7055ce18",
+    "src/whats-new.js": "0c3f2d0180ec2402b7a620e657ac7ca29facf12d8abb169de3bb7a79e915e81c",
+    "docs/maquettes/maquette-renfort-v1.html": "8b6dc92f48f67478471bdba3b1b2267063d4fe6ac2552515bebb53fedac7de59",
+    "scripts/mv-harnais-renf3.mjs": "8578b7f372daab81a42ac6875080949525ee81bef7ffacae34b2a4679d05194a"
+  }
+}

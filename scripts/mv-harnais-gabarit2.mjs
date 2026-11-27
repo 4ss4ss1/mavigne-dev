@@ -32,7 +32,7 @@ function jouer(S) {
   // MOTS-3 (§584) : le graphique en barres de Postes & travaux est parti avec ses tableaux — ses lignes de liste portent une jauge fine (.pec-bar, 6 px).
   t('② « Postes & travaux » n’a plus de graphique : la jauge de ses lignes est la barre fine de la charte (6 px, rayon 3)', !/_pecTaskSvg/.test(S.pil) && /'\.pec-rg \.l2 \.pec-bar\{flex:1;min-width:36px;height:6px;border-radius:3px\}'/.test(S.pil));
   t('② « Parcelles » (écart) aussi', /bh=_PIL_GB\.h;/.test(ec));
-  const fns = ['_pilFriseSvg', '_pecEcartSvg', '_rfCalSvg', '_pilAnRenfortSvg', '_pilAnBudgetSvg', '_pilDemandSvg', '_pexGraph'];
+  const fns = ['_pilFriseSvg', '_pecEcartSvg', '_rfPlanSvg', '_pilAnRenfortSvg', '_pilAnBudgetSvg', '_pilDemandSvg', '_pexGraph'];
   const apart = fns.filter((f) => /rx="(1\.5|3|5)"/.test(corps(S.pil, f)));
   t('③ plus aucun arrondi de barre « à part » (1,5 · 3 · 5) dans les ' + fns.length + ' graphiques', fns.every((f) => corps(S.pil, f).length > 0) && apart.length === 0, apart.join(', '));
   t('④ plus aucune police Cormorant écrite dans pilotage.js', !/--font-titre/.test(S.pil));
@@ -55,7 +55,7 @@ if (!CONTRE) {
     ['la frise reprend un réel à 11 px', (S) => Object.assign({}, S, { pil: S.pil.replace('hR=_PIL_GB.h2;', 'hR=11;') })],
     ['la jauge des listes de Postes & travaux s’épaissit', (S) => Object.assign({}, S, { pil: S.pil.replace("'.pec-rg .l2 .pec-bar{flex:1;min-width:36px;height:6px;border-radius:3px}'", "'.pec-rg .l2 .pec-bar{flex:1;min-width:36px;height:11px;border-radius:3px}'") })],
     ['« Parcelles » reprend 15 px', (S) => Object.assign({}, S, { pil: S.pil.replace('bh=_PIL_GB.h;\n', 'bh=et?16:15;\n').replace(/(function _pecEcartSvg[\s\S]*?)bh=_PIL_GB\.h;/, '$1bh=et?16:15;') })],
-    ['un graphique reprend un arrondi à 1,5', (S) => Object.assign({}, S, { pil: S.pil.replace(/(function _rfCalSvg[\s\S]*?)rx="'\+_PIL_GB\.rv\+'"/, '$1rx="1.5"') })],
+    ['un graphique reprend un arrondi à 1,5', (S) => Object.assign({}, S, { pil: S.pil.replace(/(function _rfPlanSvg[\s\S]*?)rx="'\+_PIL_GB\.rv\+'"/, '$1rx="1.5"') })],
     ['une police Cormorant revient', (S) => Object.assign({}, S, { pil: S.pil + "\n  +'.pec-ct{font-family:var(--font-titre,serif)}'\n" })],
     ['npm ne joue plus le contrôle au rendu', (S) => Object.assign({}, S, { pkg: S.pkg.replace('"test:gabarit"', '"test:gabarit-off"') })],
     ['la CI ne le joue plus', (S) => Object.assign({}, S, { ci: S.ci.replace('run: npm run test:gabarit', 'run: echo rien') })],

@@ -365,16 +365,17 @@ for (const [nom, motif] of PARTIES)
    Simuler, Conformite, Cave, La campagne. « Comment lire » est, par definition,
    ce qu'on lit une fois — c'etait affiche en permanence entre chaque titre
    d'etape et son graphe. */
-/* RENF-2 (§224) : la carte du renfort est refaite (calendrier, « Et sans renfort ? », semaine par semaine,
-   hypotheses, periode choisie) — les cinq fiches pil.sim.* y sont toutes posees, sur les nouvelles sections. */
-t('les cinq sections du renfort portent leur fiche',
-  ['frise','semaine','cout','plan','modele'].every(k => PILNU.includes("_mvInfoBtn('pil.sim." + k + "')")));
+/* RENF-3 (§619) : le renfort devient « Votre plan » et « Comparer » ; les fiches du calendrier, de la semaine par semaine et de
+   « Choisir moi-même la période » (RENF-2) se fondent dans pil.sim.plan — trois sections, trois fiches. */
+t('les trois sections du renfort portent leur fiche (plan, comparer, hypothèses)',
+  ['plan','cout','modele'].every(k => PILNU.includes("_mvInfoBtn('pil.sim." + k + "')"))
+  && !cles.includes('pil.sim.frise') && !cles.includes('pil.sim.semaine'));
 t('plus aucun « Comment lire » a l\'ecran', !PILNU.includes('Comment lire'));
 t('… et les explications sont dans les fiches',
-  txt.includes('moins de monde possible') && txt.includes('semaine la plus longue de votre planning'));
+  txt.includes('moins de monde possible') && txt.includes('le plus tard possible') && txt.includes('semaine la plus longue de votre planning'));
 /* La legende de couleurs RESTE : on ne la lit pas, on la consulte du regard. */
 t('la legende des couleurs reste a l\'ecran',
-  /rf-k[\s\S]{0,200}fait par l[\s\S]{0,200}rf-k[\s\S]{0,200}fait par le renfort[\s\S]{0,300}domaine ferm/.test(PILNU));
+  /rfp-lg-eq[\s\S]{0,80}\u00e9quipe \u00e0 la vigne[\s\S]{0,120}rfp-lg-rf[\s\S]{0,80}avec le renfort[\s\S]{0,300}rfp-lg-mq[\s\S]{0,40}manque[\s\S]{0,120}ferm/.test(PILNU));
 /* ⚠️ ON MESURE, ON NE CHERCHE PAS UNE PHRASE. Un `!includes` sur du texte
    echappe est vrai des qu'un niveau d'echappement diverge — donc toujours vert.
    La longueur du bloc, elle, ne ment pas. */

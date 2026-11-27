@@ -61,12 +61,16 @@ function suite(S) {
   const cal = f._rfCalendrier(X), per = f._rfPeriodes(cal);
   T('le calendrier tient toutes les fenêtres', cal.ok && !cal.res.deborde);
   T('aucune heure sup dans le plan (hSup = 0)', cal.res.hSup < 1e-6);
-  T('2 saisonniers, pour la taille, en deux périodes coupées par la fermeture de Noël',
-    per.length === 2 && per.every(p => p.R === 2 && p.pour.length === 1 && p.pour[0] === 'Taille'));
-  T('968 h payées en TESA (392 + 576), l\u2019horaire de l\u2019équipe', pres(per[0].h, 392) && pres(per[1].h, 576));
+  // RENF-3 (§619), D2 : le moins de monde, embauché le plus TARD. Avant : 2 dès le 2 nov. (968 h). Maintenant : 2 dès le 16 nov.,
+  //   la pause de Noël, 2 jusqu'au 12 mars, puis 1 deux semaines pour le tirage — 920 h, la même pointe.
+  T('2 saisonniers pour la taille, embauchés le 16 nov. (pas le 2), la pause de Noël, puis 1 pour le tirage',
+    per.length === 3 && per[0].R === 2 && per[1].R === 2 && per[2].R === 1 && per[0].a === 6 && per[0].b === 10 && per[1].a === 13 && per[1].b === 22
+    && per[0].pour.join() === 'Taille' && per[1].pour.join() === 'Taille' && per[2].pour.join() === 'Tirage');
+  T('920 h payées en TESA (280 + 576 + 64), l\u2019horaire de l\u2019équipe — 48 h de moins qu\u2019embauchés dès le 2 nov.',
+    pres(per[0].h, 280) && pres(per[1].h, 576) && pres(per[2].h, 64));
   const wc = monde(S, 'cdd'); const calC = wc.f._rfCalendrier(wc.X), perC = wc.f._rfPeriodes(calC);
-  T('en CDD : 35 h fixes chaque semaine ouverte (1 190 h pour le même effectif)', perC.length === 2 && pres(perC[0].h + perC[1].h, 1190));
-  T('… et le simulateur paie ces mêmes heures (capRenf = 1 190 h)', pres(calC.res.capRenf, 1190));
+  T('en CDD : 35 h fixes chaque semaine ouverte (945 h)', perC.length === 3 && pres(perC[0].h + perC[1].h + perC[2].h, 945));
+  T('… et le simulateur paie ces mêmes heures (capRenf = 945 h)', pres(calC.res.capRenf, 945));
   T('en CDD : une semaine fermée ne paie rien', wc.X.c && wc.f._rfCtxRenf(wc.X).c.capS(11) === 0 && wc.f._rfCtxRenf(wc.X).c.capS(5) === 35);
   const xr = f._rfCtxRenf(X), aT = f._rfWOf(X.W, X.tw[0].ws), bT = cal.res.taches.find(s => s.nom === 'Taille').lim;
   T('_rfMinR s\u2019ajoute à ce qui est posé : sur le calendrier, il ne réclame plus personne', f._rfMinR(xr, aT, bT, f._rfRMax(X), 'Taille', cal.prof) === 0
@@ -89,7 +93,7 @@ function suite(S) {
   T('_planSemaineMax lit la grille : 39 h en juin, pas la somme d\u2019un mois', pres(planSem(S, tpl)(2027), 39, 0.01));
   T('la carte ne fabrique plus d\u2019heures sup (verdict, stratégies, sélecteur d\u2019avant)',
     !/h sup des permanents/.test(S.pil) && !/function _rfStrategies\(/.test(S.pil) && !/window\._rfAppliquer *=/.test(S.pil)
-    && /_rfCalendrier\(ctx\)/.test(S.pil) && /_rfSansRenfort\(x,pl\)/.test(S.pil));
+    && /_rfCalendrier\(ctx\)/.test(S.pil) && /_rfSansRenfort\(Object\.assign\(\{\},x,\{dispo:kq\.dispo\}\),plaf\)/.test(S.pil));
   return out;
 }
 let ok = 0, ko = 0;
