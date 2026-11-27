@@ -89,6 +89,7 @@ function _caveCuve(id){ return PARC[id] || null; }
 function _escHtml(s){ return String(s == null ? '' : s); }
 function _escAttr(s){ return String(s == null ? '' : s); }
 function _mvIcon(){ return '<svg></svg>'; }
+function _pratStepperHtml(){ return ''; }   // PRATIQUES-2 (§624) : bouchon — la frise d'un blanc se joue dans mv-harnais-pratiques2
 function _vendCfg(){ return { poids_caisse_kg: 25, ratio_min: 130, ratio_max: 140, sucre_par_degre: 16.83 }; }
 function _recCaisses(){ return 0; }
 function _recKg(){ return 0; }

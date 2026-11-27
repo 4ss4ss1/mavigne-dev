@@ -21,7 +21,8 @@
 import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon, _mvInfoBtn, _mvInfoSet } from './utils.js';
 // ★ PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve et son chapeau — dans leur module.
 import { _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
-  _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre } from './cuvier-pratiques.js';
+  _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris } from './cuvier-pratiques.js';   // PRATIQUES-2 (§624) : la frise du blanc, ses choix
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -1568,7 +1569,7 @@ function _vendLigneHtml(c,canEdit){
      telephone, et c'est LE chiffre de la cuve a ce stade. */
   if(_gp.etat!=='attente') bits.unshift('<b class="mvv-gf-sub">'+_vendGfF(_gp.gf)+'\u00a0g/L</b>');
   var h='<div class="mvv-row '+cls+(ouv?' open':'')+'">'
-    +'<button type="button" class="mvv-hd" aria-expanded="'+ouv+'" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
+    +'<button type="button" class="mvv-hd" data-tuto="cuv.ligne" aria-expanded="'+ouv+'" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
     +(rep?'<span class="mvv-ref"><span class="mvv-ref-n">'+_escHtml(rep)+'</span>'
           +'<span class="mvv-ref-u">CUVE</span></span>':'')
     +'<span class="mvv-mid"><span class="mvv-nom">'+_escHtml(c.nom||'Cuve')+'</span>'
@@ -1593,8 +1594,10 @@ function _vendDetailHtml(c,canEdit){
   /* La frise des etapes : elle dit OU EN EST la cuve dans son parcours.
      La ligne fermee n'en montre que l'aboutissement (le badge d'etat) ;
      ici on remet le parcours entier. */
-  h+=_vendStepper(c);
-  h+=_vendParcLigne(c);
+  /* ★ PRATIQUES-2 (§624) : un blanc ou un rosé suit la frise de SON parcours (lue des faits, _pratAvance) ; un rouge,
+     ou une cuve sans réglage, garde la frise d'avant. */
+  var _pst=_pratStepperHtml(c);
+  h+=_pst||(_vendStepper(c)+_vendParcLigne(c));
   if(mes.length>=3){
     h+='<div class="mvv-det-g" id="mvg-fm-'+_mvgId(c.id)+'"></div>';
   } else if(mes.length>=2){
@@ -1956,7 +1959,7 @@ function _vendFicheHtml(c, canEdit){
   var coul=_vendCuveCoul(c);   // ★ PRATIQUES-1 (§622) : la couleur dite à la création, sinon celle des parcelles
   var tag=function(t){ return '<span class="mvpas mvpas-etiquette">'+t+'</span>'; };
   var h='<div class="mat-fi-hd"><div class="mat-fi-cel"><h3 class="mat-fi-t">'+_escHtml(c.nom||'Cuve')+'</h3><div class="mat-tags">'
-    +(rep?tag('Cuve '+_escHtml(rep)):'')+tag(_escHtml(_vendStatLbl(c.statut)))
+    +(rep?tag('Cuve '+_escHtml(rep)):'')+tag(_escHtml(_pratEtapeLbl(c)||_vendStatLbl(c.statut)))   /* PRATIQUES-2 (§624) : l'étape du parcours d'un blanc */
     +((mat||c.volume_hl)?tag(_escHtml([mat, c.volume_hl?_vendCuvF1(c.volume_hl)+'\u00a0hL':''].filter(Boolean).join(' · '))):'')
     +((coul==='r'||coul==='b'||coul==='o')?tag('<i class="mat-pt '+(coul==='o'?'prat-pt-o':_matVin(coul))+'"></i>'+(coul==='r'?'Rouge':coul==='b'?'Blanc':'Ros\u00e9')):'')
     +'</div></div><button type="button" class="mvbtn mvbtn-icone mvbtn-secondaire" aria-label="Fermer la fiche" data-id="'+_escAttr(c.id)+'" onclick="_vendBascOuv(this.dataset.id)">'+_mvIcon('croix',16)+'</button></div>';
@@ -2542,7 +2545,15 @@ function saveVendCuve() {
     fusion_src:existing&&Array.isArray(existing.fusion_src)?existing.fusion_src.slice():undefined,
     /* ★ PRATIQUES-1 (§622) — la couleur, sa confirmation, le blanc de macération : rebati de zero, l'objet les perdait. */
     couleur:_coul||undefined, couleur_conf:_vcuvCoulConf(parcelles,_coul,existing),
-    macere:existing?(existing.macere||undefined):undefined};
+    macere:existing?(existing.macere||undefined):undefined,
+    /* ★ PRATIQUES-2 (§624) — le débourbage : rebati de zero, l'objet l'aurait perdu (piège récurrent). */
+    debourbage:existing?(existing.debourbage||undefined):undefined};
+  /* ★ PRATIQUES-2 (§624) — le pressurage d'arrivée et les choix de la cuve (fût ou cuve, malo), dits dans la fenêtre ;
+     non dits, ceux d'avant restent. */
+  var _ch=_vcuvChoixPris(_coul);
+  obj.pressurage=_ch.pressurage||(existing&&existing.pressurage)||undefined;
+  obj.fa_lieu=_ch.fa_lieu||(existing&&existing.fa_lieu)||undefined;
+  obj.malo_prevue=_ch.malo_prevue||(existing&&existing.malo_prevue)||undefined;
   if(!id && _vcuvFromGrp){
     var _d=_vcuvFromGrp;
     obj.cuvee_src=_d.cuvee; obj.vcuvee_id=_d.id||null; obj.recolte_ids=_d.ids.slice(); obj.nb_caisses=_d.caisses;
@@ -4296,8 +4307,11 @@ var _vendDecVolSaisi=null;
 var _vendDecCuveTouche=false;
 // Ce que la liste dit apres un fut hors format ajoute.
 var _vendDecNote='';
-function openVendDecuvage(cuveId){
+/* ★ PRATIQUES-2 (§624) — `opts.ent` : la même feuille pour ENTONNER un jus de blanc débourbé. La fermentation finira au
+   Chai (fa_finie:false, CUV-10 : la cuvée reste suivie dans la tournée), le volume proposé est le jus clair. Rien d'autre ne change. */
+function openVendDecuvage(cuveId, opts){
   if(!canWrite()) return;
+  var _ent=!!(opts&&opts.ent);
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
   if(!c){ showToast('Cuve introuvable','#E07060'); return; }
   _vendDecCuveId=cuveId;
@@ -4313,9 +4327,9 @@ function openVendDecuvage(cuveId){
   _vendDecChoix={}; _vendDecMain={};
   _vendDecPropose();
   var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Décuver → Le Chai</div>'
+    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(_ent?'Entonner → Le Chai':'Décuver → Le Chai')+'</div>'
     +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
-    +'<div class="mvv-sheet-sub">La cuve sort du Cuvier et devient une cuvée en élevage dans « Le Chai ». Le vin en barrique commence son suivi d\'ouillage.</div>'
+    +'<div class="mvv-sheet-sub">'+(_ent?'Le jus clair part en fûts et devient une cuvée au Chai\u00a0: sa fermentation y reste suivie, dans la tournée.':'La cuve sort du Cuvier et devient une cuvée en élevage dans « Le Chai ». Le vin en barrique commence son suivi d\'ouillage.')+'</div>'
     +'<label class="mvv-flbl">Nom de la cuvée</label>'
     +'<input id="vdec-nom" class="mvv-tin" type="text" value="'+_escHtml(c.nom||'')+'">'
     +'<label class="mvv-flbl">Millésime</label>'
@@ -4325,10 +4339,15 @@ function openVendDecuvage(cuveId){
     +_vendDecVolHtml()
     +_vendDecSegHtml()
     +'<div id="vdec-zone"></div>'
-    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendDecuvage()" id="vdec-go">D\u00e9cuver et cr\u00e9er la cuv\u00e9e</button>';
+    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendDecuvage()" id="vdec-go">'+(_ent?'Entonner et cr\u00e9er la cuv\u00e9e':'D\u00e9cuver et cr\u00e9er la cuv\u00e9e')+'</button>';
   _vendSheet(html);
   _vendDecVolBind();
   _vendDecZone();
+  if(_ent){   // PRATIQUES-2 (§624) : la fermentation finira au chai ; le jus clair se propose, les fûts se proposent dessus
+    _vendDecFaSet(0);
+    var _vi=document.getElementById('vdec-vol');
+    if(_vi&&opts.vol_hl>0){ _vi.value=String(opts.vol_hl).replace('.',','); _vi.dispatchEvent(new Event('input')); _vi.dispatchEvent(new Event('change')); }
+  }
 }
 
 /* ★★★ CUV-10 — CE QUE LE DECUVAGE ENREGISTRE EN PLUS.
@@ -9556,6 +9575,9 @@ window._matPlur = _matPlur;
 window._vendGarde = _vendGarde;
 window._vendPressee = _vendPressee;
 window.renderVendCuves = renderVendCuves;
+// ★ PRATIQUES-2 (§624) — et pour les gestes du blanc
+window._vendFmlVin = _vendFmlVin;
+window._vendHistPose = _vendHistPose;
 // ══ LA FRONTIÈRE — ce que le Chai (cave.js) lit du Cuvier ═════════════════
 // ★ CUV-DEC (§164) — chacun de ces noms est lu par cave.js (au premier geste, jamais au
 //   chargement : cave.js est évalué AVANT ce fichier). Retirer une ligne : ReferenceError.

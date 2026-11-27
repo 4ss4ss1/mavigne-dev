@@ -113,6 +113,7 @@ function _vcuvCoulChoisie(){ return null; }
 function _vcuvCoulPret(){ return null; }
 function _vcuvCoulRendre(){}
 function _vcuvCoulConf(){ return undefined; }
+function _vcuvChoixPris(){ return {}; }   // PRATIQUES-2 (§624) : le pressurage et les choix de la cuve, joués dans mv-harnais-pratiques2
 function _vendSheetClose(){}
 function renderVendCuves(){ RENDUS++; }
 function _caveCuveOcc(){ return false; }

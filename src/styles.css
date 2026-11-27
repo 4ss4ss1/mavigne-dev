@@ -8267,6 +8267,13 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 .prat-note{margin:var(--e-2,8px) 0;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.45}
 .prat-parc-f{margin:0 0 var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border:var(--bw,1px) solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card)}
 .prat-parc-f summary{min-height:32px;display:flex;align-items:center;font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte-med);cursor:pointer}
+/* ★ PRATIQUES-2 (§624) — le prochain geste d’un blanc, les repères du domaine, l’erreur d’un soutirage */
+.prat-next{margin:0 0 var(--e-3,12px)}
+.prat-rep{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1,4px) var(--e-3,12px);margin:var(--e-2,8px) 0 var(--e-1,4px);font-size:var(--pt-txt,13px);color:var(--texte-med)}
+.prat-rep .prat-q-a{margin:0;width:100%}
+.prat-rep-l{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
+.prat-rep-i{box-sizing:border-box;width:64px;min-height:40px;padding:0 var(--e-2,8px);border:var(--bw,1px) solid var(--ligne-forte);border-radius:var(--r-sm,6px);background:var(--bg-card);color:var(--texte);font:inherit;font-size:var(--pt-txt,13px);text-align:right}
+.mvv-fnote.prat-err{color:var(--danger-texte);font-weight:var(--fw-semi,600)}
 /* ★ FIN PRATIQUES-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,

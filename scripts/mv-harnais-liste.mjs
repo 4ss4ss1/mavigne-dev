@@ -890,6 +890,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-cuivre7.mjs --contre'],    //   mise à jour : il ne l'était pas) — la fenêtre, ce qui compte, la moyenne, le plafond de la Conformité
   ['node scripts/mv-harnais-reseaux1.mjs'],            // RESEAUX-1 (§623) : les quatre pages du site mènent à LinkedIn, Facebook, Instagram — adresses publiques
   ['node scripts/mv-harnais-reseaux1.mjs --contre'],   //   (ni /admin/, ni locale=), nouvel onglet + noopener, sameAs du JSON-LD = le pied de page, llms.txt suit
+  ['node scripts/mv-harnais-pratiques2.mjs'],          // PRATIQUES-2 (§624) : les gestes du blanc — débourber, soutirer (les blocages JOUÉS), entonner ou fermenter en cuve,
+  ['node scripts/mv-harnais-pratiques2.mjs --contre'], //   la frise d'une cuve de blanc lue des faits, le prochain geste, les repères du domaine, le tuto
   ['node scripts/mv-harnais-tarif1.mjs'],             // TARIF-1 (§608) : la grille dite pareil partout — _planModule JOUÉE comparée à la console, à essai.html,
   ['node scripts/mv-harnais-tarif1.mjs --contre'],    //   aux cartes, au guide, à llms.txt ; 250 € ; plus d'offre de lancement ; téléphone et WhatsApp ; le modèle Excel rejoué octet pour octet
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois

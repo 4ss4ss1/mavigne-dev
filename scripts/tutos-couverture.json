@@ -81,6 +81,9 @@
     "_pratPlusTard": "PRATIQUES-1 (§622) : range le bandeau de la première ouverture du Cuvier ; le tuto « régler vos pratiques » passe par « Régler »",
     "_vcuvCoulOkSet": "PRATIQUES-1 (§622) : confirme un cas rare (un blanc de raisins noirs, des raisins rouges et blancs dans une cuve) ; le tuto « créer une cuve de blanc » montre le refus voisin",
     "_vmMacOuvrir": "PRATIQUES-1 (§622) : un blanc de macération longue, rare ; le domaine fictif n’a pas de cuve de blanc en fermentation",
-    "_vmMacConfirmer": "PRATIQUES-1 (§622) : la confirmation du blanc de macération (voir _vmMacOuvrir)"
+    "_vmMacConfirmer": "PRATIQUES-1 (§622) : la confirmation du blanc de macération (voir _vmMacOuvrir)",
+    "_debMeth": "PRATIQUES-2 (§624) : la méthode du débourbage se propose d’après les pratiques du domaine (statique ou flottation) ; le tuto « débourber » la montre sans la changer",
+    "_vcuvFaLieu": "PRATIQUES-2 (§624) : n’apparaît que si le domaine fermente ses blancs de plusieurs façons (réglage) ; le domaine fictif n’a pas de réglage",
+    "_vcuvMaloSet": "PRATIQUES-2 (§624) : n’apparaît que si le domaine a plusieurs malos pour ses blancs (réglage) ; le domaine fictif n’a pas de réglage"
   }
 }

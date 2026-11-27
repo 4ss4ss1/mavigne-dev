@@ -2103,3 +2103,45 @@ Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’un
 
 - ⚠️ **Une adresse copiée depuis un compte connecté n’est pas l’adresse publique** : vue d’administration (`/admin/…`), paramètre de langue (`locale=`). Le harnais refuse les deux.
 - ⚠️ **Un lot livré et pas poussé vieillit** : trois jours plus tard, son numéro de section était pris et ses fichiers de documentation en retard de quatorze lots. Avant de relivrer, refaire sur le `HEAD` du jour, jamais redonner l’ancien zip.
+
+## 624. ★★★ PRATIQUES-2 — LES GESTES DU BLANC AU CUVIER : DÉBOURBER, SOUTIRER, ENTONNER OU FERMENTER EN CUVE ; LA FRISE D’UNE CUVE DE BLANC (27/11 — APP 11.43 → 11.44, SW 12.34 → 12.35 — `src/cuvier-pratiques.js` (le bloc PRATIQUES-2) · `src/cuvier.js` (`openVendDecuvage(id, opts)`, `saveVendCuve`, `_vendDetailHtml`, `_vendFicheHtml`, l’étiquette `cuv.ligne`, l’import, la frontière) · `src/styles.css` · `src/utils.js` (aide, APP) · `src/whats-new.js` · `src/tutos.js` (le tuto `debourber`, sa cuve `_tuCaveDeb`) · `guide/08-cave.html` · `index.html` (versions) · `public/sw.js` · `scripts/mv-harnais-pratiques2.mjs` (neuf) · `scripts/mv-harnais-fml1.mjs`, `cuves1`, `parcours`, `cuv13` (bouchons) · `scripts/tutos-couverture.json` · `scripts/mv-harnais-liste.mjs`)
+
+**La demande.** Nico, 27/11, après PRATIQUES-1 : « suite » — les restes du §622e, d’après la maquette v2 validée (écrans ③ « Une cuve de blanc » et ④ « Débourber »). Préparé sur `591ea59`, reposé sur `0112671` (« linkedin », RESEAUX-1 : pages du site seulement, aucun fichier de l’appli en commun) : le §623 étant pris, renuméroté §624.
+
+### 624a. Mesuré avant (pratiques1)
+
+- Un blanc entrait au Cuvier comme un rouge : `setup` → « Démarrer la fermentation » ; aucun débourbage ; la frise disait Setup · MPF · FA · Press. · FML · Fini.
+- **Ce qui existait déjà et sert tel quel** : la feuille de décuvage sait envoyer un vin au Chai en fûts **avec une fermentation qui y finit** (`fa_finie:false`, CUV-10) — la cuvée naît, la cuve reste suivie dans la tournée (`_vendFaEnCours`) jusqu’à « Déclarer la FA finie ». C’est exactement l’entonnage d’un jus de blanc débourbé.
+
+### 624b. Ce qui change
+
+- **Le cycle ne change pas de clés.** Une cuve au débourbage est en `setup` ; entonnée, elle est décuvée (CUV-10) ; fermentée en cuve, elle est en `fa`. Le débourbage s’écrit dans **`c.debourbage`** = `{ methode:'stat'|'flot', debut:'AAAA-MM-JJTHH:MM', temp, enz, ntu0, par, fin, jus_l, bourbes_l, ntu1, suite:'fut'|'cuve', par_fin }`.
+- **« Débourber »** (feuille de la famille du décuvage, `_vendSheet`) : la méthode (proposée d’après les pratiques), le début (date et heure), la température, l’enzymage (texte libre), la turbidité au départ (si le domaine la mesure, ou sans réglage), le repère de durée s’il est réglé. **Bloqué, avec la raison, sur une cuve qui fermente** (`_debBloque` : étape au-delà de `setup`/`mpf`, pressurée, partie au Chai).
+- **« Soutirer le jus clair »** : la fin, le jus clair, les bourbes (le % se lit à la frappe), la turbidité et le repère du domaine (« dedans », « au-dessus », « au-dessous »). **Refusé avant toute écriture** (`_debCheckFin`) : une fin avant le début, pas de jus, plus de jus clair et de bourbes que le jus pressé (ou, à défaut, que la contenance). Puis **la suite** : *Fermenter dans cette cuve* → `statut:'fa'`, daté de la fin (`_vendHistPose`) ; *Entonner (fûts du parc)* → la feuille de décuvage **en mode entonnage** (`openVendDecuvage(id, {ent:true, vol_hl})` : titre, phrase, « Elle finira au chai » d’office, le jus clair en volume).
+- **Le pressurage d’arrivée** (goutte, presse, en litres, facultatif) et **les choix de la cuve** quand le domaine a plusieurs façons (fermentation en fût, en cuve ou démarrée en cuve ; la malo) se disent dans la fenêtre de la cuve (`_vcuvChoixHtml`) ; le pressurage tapé survit au redessin de la ligne. L’objet rebâti de `saveVendCuve` garde `debourbage`, `pressurage`, `fa_lieu`, `malo_prevue`.
+- **La frise d’une cuve de blanc ou de rosé** (`_pratStepperHtml`) remplace celle d’avant : les étapes de **son** parcours (`_pratParcoursCuve` : celui de la couleur, avec ses choix), **lues des faits** (`_pratAvance` : pressé ; débourbage en cours ou fini ; entonné = décuvé ; fermentation en cours ou finie ; malo d’après `_vendFmlVin` ; « Au Chai » dès le départ). Rien n’est « en cours » au-delà de la première étape pas faite. L’étiquette de la fiche dit l’étape (« Pressé, à débourber », « Débourbage », « Fermentation »).
+- **Le prochain geste** (`_debProchain`) dans la fiche : Débourber, Soutirer le jus clair, Entonner (le jus clair qui attend) — **avec ou sans réglage** : un blanc se débourbe même sans pratiques ; « pas de débourbage » au réglage retire le geste.
+- **Les repères du domaine**, sous la question du débourbage : la durée (h) et la turbidité visée (de … à … NTU), facultatifs ; relus à la frappe sans redessiner ; un repère à l’envers est « impossible » au réglage (`rep-ntu-b`).
+- **Un tuto, « débourber une cuve de blanc »** (12 étapes) sur une cuve chargée **pour lui seul** (`_tuCaveDeb`, sur le modèle de REG27-1A) : le jus, les bourbes, la fermentation en cuve.
+
+### 624c. Mesuré après
+
+- `mv-harnais-pratiques2` : 27 assertions (les blocages, les parcours, la frise et le prochain geste JOUÉS dans Node), 14 contre-épreuves. `pratiques1`, `cuvier` suivis, verts. `fml1`, `cuves1`, `parcours`, `cuv13` : bouchons des noms neufs.
+- **Joué à l’écran sur le build** (domaine de démo, téléphone et ordinateur, aucune erreur de page) : deux cuves de Les Perrières, 2 000 + 380 L, l’une « en cuve », l’autre « en fût » ; fiche → « Prochain geste · Débourber », frise Press. ✓ · Débourb. ; débourbée à 12 °C, 1 450 NTU → « Soutirer le jus clair · repère de 24 h », frise Débourb. ● ; 2 250 + 230 L → « 2 480 L : plus que les 2 380 L de jus de la cuve », bouton grisé ; 2 150 L → « Bourbes : 9,7 % », 220 NTU « dedans » ; fermentée en cuve → `fa` daté, frise FA ● ; re-débourber → « Impossible · Cette cuve fermente déjà » ; l’autre entonnée → « Entonner → Le Chai », 21,5 hL, « Elle finira au chai » coché → décuvée `fa_finie:false`, frise Enton. ✓ · FA ● · Au Chai ✓.
+- ⚠️ **`mv-harnais-cuvier` (F) a vu du code au chargement** : sept `_PRAT_ETQ['deb.…'] = …` posés après l’objet. Rentrés dans sa déclaration.
+- ⚠️ **Le cliquet ESLint a vu deux espaces insécables tapés tels quels** dans une expression régulière (`no-irregular-whitespace`) : écrits `\u00a0\u202f`.
+- **Tutos** : six gestes neufs ; le tuto en couvre trois ; trois exemptions motivées (`_debMeth`, `_vcuvFaLieu`, `_vcuvMaloSet`) ; plafond inchangé, **788**. `src/tutos.js` reste sous les 5 % de son barème (180 → 186 ko) : **le découpage de la liste des tutos reste dû** (§622e).
+
+### 624d. Leçons
+
+- **Réutiliser un geste qui a déjà le bon sens plutôt qu’en écrire un second** : l’entonnage d’un blanc est le décuvage « la fermentation finira au chai » de CUV-10 — une option de la même feuille, pas une nouvelle écriture de cuvée.
+- **Une frise qui se lit des faits n’a rien à migrer** : aucune clé d’étape nouvelle, aucun backfill (règle PARC-1).
+- Une écriture au premier niveau d’un module, même une simple affectation de table, est du « code au chargement » pour la frontière (§164) : tout dans la déclaration.
+
+### 624e. Restes, à leur lot
+
+- **Le découpage de `src/tutos.js`** (la liste par module, le moteur seul) — dû.
+- **COULEUR-1** : la couleur de la cuvée au Chai, héritée de sa cuve ; l’interdit d’assembler un rouge et un blanc en « rosé ».
+- La saignée d’une cuve de rouge qui crée la cuve de rosé.
+- Le soutirage qui arrive dans « À faire » à l’heure du repère (aujourd’hui : la fiche le dit).
+- L’enzymage pris dans La Réserve (sortie de stock) : aujourd’hui un texte libre.

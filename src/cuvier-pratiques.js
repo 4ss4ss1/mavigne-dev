@@ -58,7 +58,10 @@ var _PRAT_NOM = {r:'rouge', b:'blanc', o:'rosé'};
 var _PRAT_ETQ = {
   'prat.r':'data-tuto="prat.r"', 'prat.b':'data-tuto="prat.b"', 'prat.o':'data-tuto="prat.o"',
   'prat.o.met.direct':'data-tuto="prat.o.met.direct"', 'prat.b.ml.bloq':'data-tuto="prat.b.ml.bloq"', 'prat.b.lies.bat':'data-tuto="prat.b.lies.bat"',
-  'vcuv.coul.r':'data-tuto="vcuv.coul.r"', 'vcuv.coul.b':'data-tuto="vcuv.coul.b"', 'vcuv.coul.o':'data-tuto="vcuv.coul.o"'
+  'vcuv.coul.r':'data-tuto="vcuv.coul.r"', 'vcuv.coul.b':'data-tuto="vcuv.coul.b"', 'vcuv.coul.o':'data-tuto="vcuv.coul.o"',
+  // PRATIQUES-2 (§624) : la feuille « Débourber » et le prochain geste
+  'deb.go':'data-tuto="deb.go"', 'deb.ok':'data-tuto="deb.ok"', 'deb.temp':'data-tuto="deb.temp"', 'deb.jus':'data-tuto="deb.jus"',
+  'deb.bourbes':'data-tuto="deb.bourbes"', 'deb.suite.cuve':'data-tuto="deb.suite.cuve"', 'deb.suite.fut':'data-tuto="deb.suite.fut"'
 };
 function _pratEtq(k){ return _PRAT_ETQ[k] || ('data-tuto="'+k+'"'); }
 var _PRAT_NIV = {w:'À vérifier', fix:'À mettre d’accord', b:'Impossible'};
@@ -97,6 +100,12 @@ function _pratAlertes(P){
   else if(P.actif.o && P.actif.r && _pratHas(P,'o','met','sai') && _pratHas(P,'r','sai','non'))
     l.push({id:'sai-fix', niv:'fix', c:'o', q:'met', t:'Deux réponses se contredisent',
       d:'Vos rosés naissent d’une saignée, mais vos pratiques du rouge disent « pas de saignée ».', fix:'Rouge : saignée « parfois »'});
+  // PRATIQUES-2 (§624) : un repère de turbidité à l'envers — le bas au-dessus du haut.
+  ['b','o'].forEach(function(k){
+    var r=P[k]&&P[k].rep, a=r&&parseFloat(r.ntu_min), b=r&&parseFloat(r.ntu_max);
+    if(P.actif[k]&&isFinite(a)&&isFinite(b)&&a>b) l.push({id:'rep-ntu-'+k, niv:'b', c:k, q:'deb', t:'Turbidité visée à l’envers',
+      d:'Le bas ('+String(a).replace('.',',')+' NTU) dépasse le haut ('+String(b).replace('.',',')+' NTU). Corrigez l’un des deux.'});
+  });
   return l;
 }
 /* Ce qui reste à régler avant d'enregistrer : tout, sauf « à vérifier » déjà confirmé. */
@@ -112,7 +121,8 @@ function _pratParcours(P, c){
     if(h('arr','egr')) s.push(['Égrappage','']);
     if(h('arr','pel')) s.push(['Égrappage',''],['Macération pelliculaire','à froid']);
     s.push(['Pressurage','goutte et presse']);
-    if(h('deb','stat')) s.push(['Débourbage','statique, au froid'+(h('ntu','oui')?' · turbidité':'')]);
+    var _rh=P.b&&P.b.rep&&parseFloat(P.b.rep.deb_h);   // PRATIQUES-2 (§624) : le repère de durée
+    if(h('deb','stat')) s.push(['Débourbage','statique, au froid'+(_rh>0?' · '+String(_rh).replace('.',',')+'\u00a0h':'')+(h('ntu','oui')?' · turbidité':'')]);
     if(h('deb','flot')) s.push(['Flottation',h('ntu','oui')?'turbidité':'']);
     var fa=[]; if(h('fa','fut')) fa.push('en fût'); if(h('fa','cuve')) fa.push('en cuve'); if(h('fa','cf')) fa.push('démarrée en cuve');
     if(h('fa','fut')&&!h('fa','cuve')&&!h('fa','cf')) s.push(['Entonnage',h('deb','non')?'au sortir du pressoir':'fûts du parc']);
@@ -195,6 +205,7 @@ function _pratRendre(){
             +' '+_pratEtq('prat.'+c+'.'+q.k+'.'+v)+' data-k="'+q.k+'" data-v="'+v+'" onclick="_pratSet(this.dataset.k,this.dataset.v)">'
             +o[1]+(sub?'<small>'+sub+'</small>':'')+'</button>';
         }).join('')+'</div>'
+        +((q.k==='deb'&&(c==='b'||c==='o')&&!_pratHas(P,c,'deb','non'))?_pratRepHtml(P,c,adm):'')   // PRATIQUES-2 (§624) : vos repères
         +al.filter(function(a){ return a.c===c&&a.q===q.k; }).map(function(a){ return _pratAlHtml(P,a,adm); }).join('')+'</div>';
     });
     if(cachees.length) h+='<p class="prat-cache">Question cachée : '+cachees.join(', ')+' — sans débourbage, il n’y a rien à mesurer.</p>';
@@ -206,6 +217,26 @@ function _pratRendre(){
   if(adm) h+='<div class="prat-pied"><button type="button" class="mvbtn mvbtn-principal" data-tuto="prat.ok" onclick="savePratiques()"'+(ouv.length?' disabled':'')+'>Enregistrer</button>'
     +'<button type="button" class="mvbtn mvbtn-discret" onclick="closeOv(null,\'ovPratiques\')">Annuler</button></div>';
   corps.innerHTML=h;
+  _pratRepBind(P, c);
+}
+/* ★ PRATIQUES-2 (§624) — LES REPÈRES DU DOMAINE : la durée d'un débourbage, la turbidité visée. Facultatifs ; aucun
+   chiffre n'est imposé par l'appli. Ils se relisent à la frappe, sans redessiner (le curseur reste). */
+function _pratRepHtml(P, c, adm){
+  var r=(P[c]&&P[c].rep)||{}, v=function(k){ return (r[k]!=null&&r[k]!=='')?String(r[k]).replace('.',','):''; };
+  var inp=function(k, ph){ return '<input type="text" inputmode="decimal" class="prat-rep-i" data-rep="'+k+'" value="'+_escAttr(v(k))+'" placeholder="'+ph+'"'+(adm?'':' disabled')+' aria-label="'+_escAttr(ph)+'">'; };
+  return '<div class="prat-rep"><span class="prat-q-a">Vos repères, facultatifs :</span>'
+    +'<span class="prat-rep-l">durée '+inp('deb_h','24')+' h</span>'
+    +((c==='b'&&_pratHas(P,'b','ntu','oui'))?'<span class="prat-rep-l">turbidité visée '+inp('ntu_min','200')+' à '+inp('ntu_max','300')+' NTU</span>':'')+'</div>';
+}
+function _pratRepBind(P, c){
+  var corps=document.getElementById('prat-corps'); if(!corps) return;
+  [].forEach.call(corps.querySelectorAll('[data-rep]'), function(el){
+    el.addEventListener('input', function(){
+      var k=el.getAttribute('data-rep'), x=parseFloat(String(el.value||'').replace(',','.'));
+      if(!P[c].rep) P[c].rep={};
+      if(isFinite(x)&&x>=0) P[c].rep[k]=x; else delete P[c].rep[k];
+    });
+  });
 }
 function _pratEtapesHtml(l){
   return '<ol class="prat-et">'+l.map(function(x){ return '<li><b>'+x[0]+'</b>'+(x[1]?'<small>'+x[1]+'</small>':'')+'</li>'; }).join('')+'</ol>';
@@ -354,14 +385,18 @@ function _vcuvNoms(){
 }
 function _vcuvCoulInject(c){
   _vcuvCoulEx=c||null; _vcuvCoul=(c&&(c.couleur==='r'||c.couleur==='b'||c.couleur==='o'))?c.couleur:null; _vcuvCoulOk=null;
+  _vcuvFa=(c&&c.fa_lieu)||null; _vcuvMalo=(c&&c.malo_prevue)||null;   // PRATIQUES-2 (§624) : les choix de la cuve
   var inp=document.getElementById('vcuv-parcelles'); if(!inp) return;
   var row=document.getElementById('vcuv-coul-row');
   if(!row){ row=document.createElement('div'); row.id='vcuv-coul-row'; if(inp.parentNode) inp.parentNode.insertBefore(row, inp.nextSibling); }
   inp.oninput=_vcuvCoulRendre;
   _vcuvCoulRendre();
+  _vcuvChoixReset(c);   // PRATIQUES-2 (§624) : le pressurage d'arrivée, prérempli à la correction, vide à la création
 }
 function _vcuvCoulRendre(){
   var row=document.getElementById('vcuv-coul-row'); if(!row) return;
+  // PRATIQUES-2 (§624) : la ligne se redessine au choix d'une couleur — le pressurage tapé y revient.
+  var _g=(document.getElementById('vcuv-goutte')||{}).value, _p=(document.getElementById('vcuv-presse')||{}).value;
   var noms=_vcuvNoms(), auto=_vendCoulAuto(noms), k=_vcuvCoul||auto, P=_pratCfg();
   var ro=!!(P&&P.actif.o)||k==='o';
   var h='<div class="fl">Couleur de la cuve <span style="font-weight:400;opacity:.75">— '+(auto!=='?'?'proposée d’après les parcelles':'les parcelles ne la disent pas')+'</span></div>'
@@ -376,7 +411,10 @@ function _vcuvCoulRendre(){
     else h+='<div class="mvencadre mvencadre-'+(a.niv==='b'?'danger':'attention')+' prat-al">'+_mvIcon(a.niv==='b'?'interdit':'alerte',18)+'<span><b class="mvencadre-t">'+_PRAT_NIV[a.niv]+' · '+a.t+'</b>'+a.d
       +(a.niv==='w'?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact prat-al-b" data-id="'+a.id+'" onclick="_vcuvCoulOkSet(this.dataset.id)">C’est voulu</button>':'')+'</span></div>';
   }
+  h+=_vcuvChoixHtml(k);   // PRATIQUES-2 (§624) : pressurage d'arrivée, fût ou cuve, malo — pour cette cuve
   row.innerHTML=h;
+  var g=document.getElementById('vcuv-goutte'), pp=document.getElementById('vcuv-presse');
+  if(g&&_g!=null) g.value=_g; if(pp&&_p!=null) pp.value=_p;
 }
 function _vcuvCoulSet(k){ if(k!=='r'&&k!=='b'&&k!=='o') return; _vcuvCoul=k; _vcuvCoulOk=null; _vcuvCoulRendre(); }
 function _vcuvCoulOkSet(id){ _vcuvCoulOk=id; _vcuvCoulRendre(); }
@@ -399,10 +437,12 @@ function _vcuvCoulPret(noms, k, existing){
 /* Le parcours prévu, dans la fiche d'une cuve (replié). */
 function _vendParcoursHtml(c){
   var P=_pratCfg(), k=_vendCuveCoul(c);
-  if(!P||!_PRAT_Q[k]||!P.actif[k]) return '';
+  var nx=_debProchainHtml(c);   // PRATIQUES-2 (§624) : le prochain geste d'un blanc ou d'un rosé — avec ou sans réglage
+  if(!P||!_PRAT_Q[k]||!P.actif[k]) return nx;
   var conf=c.couleur_conf?'<p class="prat-note">'+_escHtml(c.couleur_conf.t||'Couleur confirmée')+' : confirmé'+(c.couleur_conf.par?' par '+_escHtml(c.couleur_conf.par):'')+(c.couleur_conf.le?' le '+_vendFrDate(c.couleur_conf.le):'')+'.</p>':'';
   var mac=c.macere?'<p class="prat-note">Blanc de macération : pigeages et remontages notés'+(c.macere.par?' (confirmé par '+_escHtml(c.macere.par)+')':'')+'.</p>':'';
-  return '<details class="prat-parc-f"><summary>Son parcours prévu · d’après vos pratiques du '+_PRAT_NOM[k]+'</summary>'+_pratEtapesHtml(_pratParcours(P,k))+conf+mac+'</details>';
+  var st=(k==='b'||k==='o')?(_pratParcoursCuve(c)||_pratParcours(P,k)):_pratParcours(P,k);
+  return nx+'<details class="prat-parc-f"><summary>Son parcours prévu · d’après vos pratiques du '+_PRAT_NOM[k]+'</summary>'+_pratEtapesHtml(st)+conf+mac+_debRecapHtml(c)+'</details>';
 }
 /* —— La mesure d'un blanc ou d'un rosé : pas de chapeau, sauf blanc de macération confirmé —— */
 var _vmMacOk=false;
@@ -435,6 +475,345 @@ function _vtMontre(c, k){
   return _vendChapeau(c) && (_vendCuveCoul(c)!=='r' || _pratGeste(k==='p'?'pig':'rem'));
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   ★★★ PRATIQUES-2 (§624) — LES GESTES DU BLANC AU CUVIER.
+   La suite de PRATIQUES-1 (Nico, 27/11 : « suite »), d'après la maquette v2 validée : le pressurage d'arrivée
+   (goutte et presse), le DÉBOURBAGE (mettre à débourber, puis soutirer le jus clair), et ce qui suit — ENTONNER
+   (la feuille de décuvage d'avant, en mode « entonnage » : la cuvée naît au Chai, sa fermentation y reste suivie,
+   fa_finie:false, CUV-10) ou FERMENTER DANS LA CUVE (statut 'fa', daté). Une cuve de blanc ou de rosé suit sa
+   frise, celle de son parcours, et sa fiche dit le prochain geste.
+   ⚠⚠ LE CYCLE NE CHANGE PAS DE CLÉS : une cuve au débourbage est en 'setup' ; entonnée, elle est décuvée (CUV-10) ;
+     fermentée en cuve, elle est en 'fa'. La frise du blanc se LIT de ces faits (_pratAvance), elle n'écrit rien.
+   ⚠ Les blocages passent AVANT toute écriture (_debBloque, _debCheckFin) : débourber une cuve qui fermente,
+     une fin avant le début, plus de jus clair et de bourbes que de jus.
+══════════════════════════════════════════════════════════════════ */
+/* Les réglages de la couleur d'une cuve, ou null (pas de réglage, couleur non faite). */
+function _pratDe(c){
+  var P=_pratCfg(), k=_vendCuveCoul(c);
+  return (P&&_PRAT_Q[k]&&P.actif[k])?{P:P, k:k}:null;
+}
+/* Le jus d'une cuve, en litres : le pressurage s'il est dit. */
+function _debJusL(c){
+  var p=c&&c.pressurage; if(!p) return null;
+  var t=(parseFloat(p.goutte_l)||0)+(parseFloat(p.presse_l)||0);
+  return t>0?t:null;
+}
+/* Le plafond du soutirage : le jus du pressurage, sinon la contenance de la cuve. */
+function _debBaseL(c){
+  var j=_debJusL(c); if(j) return j;
+  var v=parseFloat(c&&c.volume_hl)||0;
+  return v>0?Math.round(v*100):null;
+}
+/* Le débourbage est-il un geste de cette cuve ? Un blanc ou un rosé — sauf « pas de débourbage » au réglage. */
+function _debPossible(c){
+  var k=_vendCuveCoul(c);
+  if(k!=='b'&&k!=='o') return false;
+  if(c&&c.fusion) return false;
+  var d=_pratDe(c);
+  if(d && _pratHas(d.P,k,'deb','non') && !(c.debourbage&&c.debourbage.debut)) return false;
+  return true;
+}
+function _debEtat(c){
+  var d=c&&c.debourbage;
+  if(!d||!d.debut) return 'aucun';
+  return d.fin?'fini':'encours';
+}
+/* ★ LE BLOCAGE « IMPOSSIBLE » : le débourbage clarifie le jus AVANT qu'il fermente. null, ou la raison. */
+function _debBloque(c){
+  if(!c) return 'Cuve introuvable.';
+  if(_vendDecuvee(c)) return 'Cette cuve est déjà partie au Chai.';
+  if(_vendPressee(c)) return 'Cette cuve est déjà pressurée après fermentation.';
+  if(c.statut&&c.statut!=='setup'&&c.statut!=='mpf') return 'Cette cuve fermente déjà (étape « '+(typeof _vendStatLbl==='function'?_vendStatLbl(c.statut):c.statut)+' »). Le débourbage clarifie le jus avant qu’il fermente.';
+  return null;
+}
+/* Une heure saisie : 'AAAA-MM-JJTHH:MM', ou ''. */
+function _debQuand(date, heure){
+  var d=String(date||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return '';
+  var h=/^\d{2}:\d{2}$/.test(String(heure||''))?heure:'00:00';
+  return d+'T'+h;
+}
+function _debQuandTxt(q){
+  if(!q) return '';
+  return _vendFrDate(String(q).slice(0,10))+(String(q).length>10?' à '+String(q).slice(11,16):'');
+}
+/* ★ LE CONTRÔLE DU SOUTIRAGE, AVANT TOUTE ÉCRITURE. null, ou la raison du refus. */
+function _debCheckFin(c, f){
+  var d=(c&&c.debourbage)||{};
+  if(!f.fin) return 'Indiquez la fin du débourbage.';
+  if(d.debut && f.fin<d.debut) return 'La fin ('+_debQuandTxt(f.fin)+') précède le début ('+_debQuandTxt(d.debut)+').';
+  if(!(f.jus>0)) return 'Indiquez le jus clair soutiré, en litres.';
+  var b=_debBaseL(c), tot=f.jus+(f.bourbes>0?f.bourbes:0);
+  if(b && tot>b) return _nbL(f.jus)+(f.bourbes>0?' + '+_nbL(f.bourbes):'')+' = '+_nbL(tot)+' L : plus que les '+_nbL(b)+' L '+(_debJusL(c)?'de jus de la cuve':'que la cuve contient')+'.';
+  return null;
+}
+function _nbL(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
+/* Le repère de turbidité du domaine : 'dedans', 'au-dessus', 'au-dessous', ou null. */
+function _debNtuRep(rep, v){
+  if(!rep||!(v>=0)) return null;
+  var a=parseFloat(rep.ntu_min), b=parseFloat(rep.ntu_max);
+  if(!isFinite(a)&&!isFinite(b)) return null;
+  if(isFinite(a)&&v<a) return 'au-dessous';
+  if(isFinite(b)&&v>b) return 'au-dessus';
+  return 'dedans';
+}
+/* Le parcours d'UNE cuve : celui de sa couleur, avec ses propres choix (fût ou cuve, la malo). */
+function _pratParcoursCuve(c){
+  var d=_pratDe(c); if(!d) return null;
+  var s=_pratParcours(d.P,d.k);
+  if(d.k==='b'&&c.fa_lieu){
+    var lieu=c.fa_lieu;
+    s=s.map(function(x){ return x[0]==='Fermentation'?['Fermentation', lieu==='fut'?'en fût':lieu==='cf'?'démarrée en cuve, puis entonnée':'en cuve']:x; })
+       .filter(function(x){ return !(x[0]==='Entonnage'&&lieu==='cuve'); });
+    var iF=-1; s.forEach(function(x,i){ if(x[0]==='Fermentation') iF=i; });
+    var iE=-1; s.forEach(function(x,i){ if(x[0]==='Entonnage') iE=i; });
+    if(lieu==='fut'&&iE===-1) s.splice(iF,0,['Entonnage','fûts du parc']);
+    if(lieu==='fut'&&iE>iF){ var e=s.splice(iE,1)[0]; s.splice(iF,0,e); }
+    if(lieu==='cf'&&(iE===-1||iE<iF)){ if(iE!==-1) s.splice(iE,1); iF=-1; s.forEach(function(x,i){ if(x[0]==='Fermentation') iF=i; }); s.splice(iF+1,0,['Entonnage','en cours de fermentation']); }
+  }
+  if(c.malo_prevue) s=s.map(function(x){ return x[0]==='Malo'?['Malo', c.malo_prevue==='fait'?'faite':c.malo_prevue==='bloq'?'bloquée':'partielle']:x; });
+  return s;
+}
+/* ★ OÙ EN EST UNE CUVE DE BLANC OU DE ROSÉ — LU DES FAITS, JAMAIS ÉCRIT. Pour chaque étape : 'fait', 'cours' ou ''.
+   La première étape pas faite est en cours si un fait l'ouvre, sinon elle attend. « Au Chai » est fait dès que la
+   cuve y est partie. */
+function _pratAvance(c, steps){
+  var deb=_debEtat(c), dec=_vendDecuvee(c), d=c.decuvage||{};
+  var v=(typeof _vendFmlVin==='function')?_vendFmlVin(c):null;
+  var faFinie=(dec&&d.fa_finie===true)||c.statut==='fml'||(c.statut==='termine'&&!dec);
+  var faCours=c.statut==='fa'||(typeof _vendFaEnCours==='function'&&_vendFaEnCours(c))||_vendPressee(c);
+  var maloFaite=!!(v&&(v.etat==='finie'||v.etat==='sans'||v.etat==='bouteille'))||(c.statut==='termine'&&!dec);
+  var etat=steps.map(function(x){
+    var n=x[0];
+    if(n==='Égrappage'||n==='Macération pelliculaire'||n==='Pressurage'||n==='Pressurage direct'||n==='Saignée'||n==='Macération courte') return 'fait';
+    if(n==='Débourbage'||n==='Flottation') return deb==='fini'?'fait':(deb==='encours'?'cours':'');
+    if(n==='Entonnage') return dec?'fait':'';
+    if(n==='Fermentation') return faFinie?'fait':(faCours?'cours':'');
+    if(n==='Malo') return maloFaite?'fait':(c.statut==='fml'||(v&&v.etat==='cours')?'cours':'');
+    if(n==='Au Chai') return dec?'fait':'';
+    return (dec&&maloFaite)?'cours':'';   // Élevage sur lies, Soutirage : au Chai, une fois la malo faite
+  });
+  // L'ordre du parcours : rien n'est « en cours » au-delà de la première étape pas faite (hors « Au Chai »).
+  var vu=false;
+  return etat.map(function(e,i){
+    if(steps[i][0]==='Au Chai') return e;
+    if(vu) return '';
+    if(e!=='fait'){ vu=true; return e; }
+    return e;
+  });
+}
+/* La frise d'une cuve de blanc ou de rosé (mêmes classes que _vendStepper). '' pour un rouge ou sans réglage. */
+function _pratStepperHtml(c){
+  var k=_vendCuveCoul(c); if(k!=='b'&&k!=='o') return '';
+  var s=_pratParcoursCuve(c); if(!s) return '';
+  var e=_pratAvance(c,s), cur=-1;
+  e.forEach(function(x,i){ if(x==='cours'&&cur===-1) cur=i; });
+  var lbl=function(n){ return n==='Élevage sur lies'?'Élevage':n==='Macération pelliculaire'?'Macér.':n==='Pressurage direct'?'Press.':n==='Pressurage'?'Press.':n==='Fermentation'?'FA':n==='Débourbage'?'Débourb.':n==='Entonnage'?'Enton.':n; };
+  var h='<div class="mvv-steps prat-steps">'+s.map(function(x,i){
+    return '<div class="mvv-step '+(e[i]==='fait'?'done':e[i]==='cours'?'cur':'')+'"><div class="dot"></div><div class="lb">'+lbl(x[0])+'</div><div class="dt"></div></div>';
+  }).join('')+'</div>';
+  var l=_pratEtapeLbl(c);
+  if(l) h+='<div class="mvv-parc"><b>'+_escHtml(l)+'</b>'+_pratDepuis(c)+'</div>';
+  return h;
+}
+/* Le nom de l'étape en cours d'une cuve de blanc ou de rosé, ou ''. */
+function _pratEtapeLbl(c){
+  var k=_vendCuveCoul(c); if(k!=='b'&&k!=='o') return '';
+  var s=_pratParcoursCuve(c); if(!s) return '';
+  var e=_pratAvance(c,s);
+  for(var i=0;i<e.length;i++) if(e[i]==='cours') return s[i][0];
+  for(var j=0;j<e.length;j++) if(e[j]!=='fait') return s[j][0]==='Débourbage'||s[j][0]==='Flottation'?'Pressé, à débourber':s[j][0]+' à venir';
+  return '';
+}
+function _pratDepuis(c){
+  var d=c.debourbage;
+  if(_debEtat(c)==='encours') return ' depuis le '+_escHtml(_debQuandTxt(d.debut))+(d.temp!=null?' · '+String(d.temp).replace('.',',')+' °C':'');
+  return '';
+}
+/* Le prochain geste d'une cuve de blanc ou de rosé, ou null. */
+function _debProchain(c){
+  if(!c||c.fusion||!_debPossible(c)) return null;
+  var e=_debEtat(c), dec=_vendDecuvee(c);
+  if(e==='aucun'&&!_debBloque(c)) return {k:'debut', t:'Débourber', s:'Le jus est pressé : mettez-le à débourber.'};
+  if(e==='encours'){
+    var d=_pratDe(c), rep=d&&d.P[d.k]&&d.P[d.k].rep, h=rep&&parseFloat(rep.deb_h);
+    return {k:'fin', t:'Soutirer le jus clair', s:'Débourbage depuis le '+_debQuandTxt(c.debourbage.debut)+(h>0?' · repère de '+String(h).replace('.',',')+' h':'')+'.'};
+  }
+  if(e==='fini'&&!dec&&c.statut==='setup'&&c.debourbage.suite==='fut') return {k:'ent', t:'Entonner', s:'Le jus clair attend d’être entonné : '+_nbL(c.debourbage.jus_l||0)+' L.'};
+  return null;
+}
+function _debProchainHtml(c){
+  var p=_debProchain(c); if(!p||!canWrite()) return '';
+  return '<div class="mvencadre mvencadre-info prat-next">'+_mvIcon('entonnoir',18)+'<span><b class="mvencadre-t">Prochain geste · '+p.t+'</b>'+_escHtml(p.s)
+    +'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact prat-al-b" '+_pratEtq('deb.go')+' data-id="'+_escAttr(c.id)+'" data-k="'+p.k+'" onclick="openDebourber(this.dataset.id,this.dataset.k)">'+p.t+'</button></span></div>';
+}
+
+/* Ce que le débourbage a laissé, dans le parcours replié de la fiche. */
+function _debRecapHtml(c){
+  var d=c.debourbage; if(!d||!d.debut) return '';
+  var t='Débourbage '+(d.methode==='flot'?'par flottation':'statique')+' du '+_debQuandTxt(d.debut)+(d.fin?' au '+_debQuandTxt(d.fin):'')
+    +(d.temp!=null?' · '+String(d.temp).replace('.',',')+' °C':'')+(d.enz?' · '+d.enz:'')
+    +(d.ntu0!=null?' · '+_nbL(d.ntu0)+' NTU au départ':'')
+    +(d.jus_l?' · '+_nbL(d.jus_l)+' L de jus clair':'')+(d.bourbes_l?', '+_nbL(d.bourbes_l)+' L de bourbes':'')
+    +(d.ntu1!=null?' · '+_nbL(d.ntu1)+' NTU':'')+'.';
+  return '<p class="prat-note">'+_escHtml(t)+'</p>';
+}
+/* —— La feuille « Débourber » (même famille que la feuille de décuvage : _vendSheet) —— */
+var _debEt=null;   // { id, mode:'debut'|'fin', meth, suite }
+function _debCuve(id){ return ((CAVE_VENDANGE.cuves_vinif)||[]).filter(function(x){ return x&&x.id===id; })[0]||null; }
+function openDebourber(id, k){
+  if(!canWrite()) return;
+  var c=_debCuve(id); if(!c){ showToast('Cuve introuvable','#B85A1A'); return; }
+  if(k==='ent'){ _debEntonner(c); return; }
+  var d=_pratDe(c), kk=_vendCuveCoul(c);
+  var meth=(c.debourbage&&c.debourbage.methode)||(d&&_pratHas(d.P,kk,'deb','flot')&&!_pratHas(d.P,kk,'deb','stat')?'flot':'stat');
+  var suite=(c.fa_lieu==='cuve')?'cuve':(c.fa_lieu==='fut'||c.fa_lieu==='cf')?(c.fa_lieu==='fut'?'fut':'cuve')
+    :(d&&kk==='b'&&_pratHas(d.P,'b','fa','cuve')&&!_pratHas(d.P,'b','fa','fut'))?'cuve':(kk==='o'?'cuve':'fut');
+  _debEt={ id:id, mode:(_debEtat(c)==='encours')?'fin':'debut', meth:meth, suite:suite };
+  _debRendre();
+}
+function _debNtuOn(c){ var d=_pratDe(c); return !d || d.k!=='b' || _pratHas(d.P,'b','ntu','oui'); }
+function _debRendre(){
+  var E=_debEt, c=E&&_debCuve(E.id); if(!c) return;
+  var k=_vendCuveCoul(c), d=_pratDe(c), rep=(d&&d.P[d.k]&&d.P[d.k].rep)||null, jus=_debJusL(c);
+  var auj=(typeof _mlAuj==='function')?_mlAuj():'', now=new Date(), hh=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(E.mode==='fin'?'Soutirer le jus clair':'Débourber')+'</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
+    +'<div class="mvv-sheet-sub">'+_escHtml(c.nom||'Cuve')+' · '+(k==='o'?'Rosé':'Blanc')+(jus?' · '+_nbL(jus)+' L de jus':'')+'</div>';
+  var bl=(E.mode==='debut')?_debBloque(c):null;
+  if(bl){
+    h+='<div class="mvencadre mvencadre-danger prat-al">'+_mvIcon('interdit',18)+'<span><b class="mvencadre-t">Impossible · Cette cuve ne se débourbe plus</b>'+_escHtml(bl)+'</span></div>'
+      +'<button class="mvv-save" style="margin-top:18px" onclick="_vendSheetClose()">Fermer</button>';
+    _vendSheet(h); return;
+  }
+  if(E.mode==='debut'){
+    h+='<label class="mvv-flbl">Méthode</label><div class="mvv-optabs">'
+      +[['stat','Statique, au froid'],['flot','Flottation']].map(function(m){ return '<button type="button" class="mvv-optab'+(E.meth===m[0]?' on':'')+'" data-m="'+m[0]+'" onclick="_debMeth(this.dataset.m)">'+m[1]+'</button>'; }).join('')+'</div>'
+      +(d?'<div class="mvv-fnote">Proposée d’après vos pratiques.</div>':'')
+      +'<label class="mvv-flbl">Début</label><div style="display:flex;gap:9px"><input id="deb-d" class="mvv-tin" type="date" value="'+_escAttr(auj)+'"><input id="deb-h" class="mvv-tin" type="time" value="'+_escAttr(hh)+'"></div>'
+      +'<label class="mvv-flbl">Température <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:8px;align-items:center"><input id="deb-t" class="mvv-tin" type="text" inputmode="decimal" '+_pratEtq('deb.temp')+' placeholder="ex. 12"><span class="mvv-step2-u">°C</span></div>'
+      +'<label class="mvv-flbl">Enzymage <span class="mvv-fhint">(facultatif — produit et dose)</span></label><input id="deb-e" class="mvv-tin" type="text" placeholder="ex. pectinase, 2 g/hL">'
+      +(_debNtuOn(c)?'<label class="mvv-flbl">Turbidité au départ <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:8px;align-items:center"><input id="deb-n" class="mvv-tin" type="text" inputmode="decimal" placeholder="ex. 1450"><span class="mvv-step2-u">NTU</span></div>':'')
+      +((rep&&parseFloat(rep.deb_h)>0)?'<div class="mvv-fnote">Durée prévue : <b>'+String(rep.deb_h).replace('.',',')+' h</b> — votre repère, réglé dans vos pratiques.</div>':'')
+      +'<button class="mvv-save" style="margin-top:18px" '+_pratEtq('deb.ok')+' onclick="saveDebourber()">Mettre à débourber</button>';
+  } else {
+    var db=c.debourbage||{};
+    h+='<div class="mvv-fnote">Débourbage '+(db.methode==='flot'?'par flottation':'statique')+' depuis le '+_escHtml(_debQuandTxt(db.debut))+(db.temp!=null?' · '+String(db.temp).replace('.',',')+' °C':'')+'.</div>'
+      +'<label class="mvv-flbl">Fin</label><div style="display:flex;gap:9px"><input id="deb-d" class="mvv-tin" type="date" value="'+_escAttr(auj)+'"><input id="deb-h" class="mvv-tin" type="time" value="'+_escAttr(hh)+'"></div>'
+      +'<div style="display:flex;gap:9px"><div style="flex:1"><label class="mvv-flbl">Jus clair</label><div style="display:flex;gap:6px;align-items:center"><input id="deb-j" class="mvv-tin" type="text" inputmode="decimal" '+_pratEtq('deb.jus')+' placeholder="litres"><span class="mvv-step2-u">L</span></div></div>'
+      +'<div style="flex:1"><label class="mvv-flbl">Bourbes <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:6px;align-items:center"><input id="deb-b" class="mvv-tin" type="text" inputmode="decimal" '+_pratEtq('deb.bourbes')+' placeholder="litres"><span class="mvv-step2-u">L</span></div></div></div>'
+      +'<div class="mvv-fnote" id="deb-vol-note"></div>'
+      +(_debNtuOn(c)?'<label class="mvv-flbl">Turbidité du jus clair <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:8px;align-items:center"><input id="deb-n" class="mvv-tin" type="text" inputmode="decimal" placeholder="ex. 220"><span class="mvv-step2-u">NTU</span></div><div class="mvv-fnote" id="deb-ntu-note"></div>':'')
+      +'<label class="mvv-flbl">Et ensuite</label><div class="mvv-optabs">'
+      +'<button type="button" class="mvv-optab'+(E.suite==='fut'?' on':'')+'" '+_pratEtq('deb.suite.fut')+' data-s="fut" onclick="_debSuite(this.dataset.s)">Entonner (fûts du parc)</button>'
+      +'<button type="button" class="mvv-optab'+(E.suite==='cuve'?' on':'')+'" '+_pratEtq('deb.suite.cuve')+' data-s="cuve" onclick="_debSuite(this.dataset.s)">Fermenter dans cette cuve</button></div>'
+      +'<div class="mvv-fnote">'+(E.suite==='fut'?'La feuille d’entonnage suit : les fûts du parc, la cuvée au Chai, sa fermentation suivie.':'La cuve passe en fermentation, datée de la fin du débourbage ; la tournée la suit.')+'</div>'
+      +'<button class="mvv-save" style="margin-top:18px" '+_pratEtq('deb.ok')+' id="deb-go" onclick="saveDebourber()">'+(E.suite==='fut'?'Soutirer et entonner':'Soutirer et fermenter en cuve')+'</button>';
+  }
+  _vendSheet(h);
+  if(E.mode==='fin') _debFinBind(c, rep);
+}
+function _debNum(id){ var v=parseFloat(String(((document.getElementById(id)||{}).value)||'').replace(/[\s\u00a0\u202f]/g,'').replace(',','.')); return isFinite(v)?v:null; }
+/* Les volumes et la turbidité se relisent à la frappe, sans redessiner (le curseur reste). */
+function _debFinBind(c, rep){
+  var maj=function(){
+    var j=_debNum('deb-j'), b=_debNum('deb-b'), n=_debNum('deb-n'), note=document.getElementById('deb-vol-note'), go=document.getElementById('deb-go');
+    var err=(j>0)?_debCheckFin(c,{fin:'9999', jus:j, bourbes:b}):null;
+    if(note){ note.classList.toggle('prat-err', !!err); note.textContent=err||((j>0&&b>0)?'Bourbes : '+String(Math.round(b/(j+b)*1000)/10).replace('.',',')+' % du jus.':''); }
+    if(go) go.disabled=!!err;
+    var nn=document.getElementById('deb-ntu-note');
+    if(nn){ var r=_debNtuRep(rep,n); nn.textContent=r?('Votre repère : '+(rep.ntu_min!=null&&rep.ntu_min!==''?rep.ntu_min:'…')+' à '+(rep.ntu_max!=null&&rep.ntu_max!==''?rep.ntu_max:'…')+' NTU — '+(r==='dedans'?'dedans.':r==='au-dessus'?'au-dessus : le jus est encore trouble.':'au-dessous : le jus est très clair.')):''; }
+  };
+  ['deb-j','deb-b','deb-n'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('input', maj); });
+  maj();
+}
+function _debMeth(m){ if(!_debEt||(m!=='stat'&&m!=='flot')) return; _debEt.meth=m; _debRendre(); }
+function _debSuite(s){ if(!_debEt||(s!=='fut'&&s!=='cuve')) return; _debGarder(); _debEt.suite=s; _debRendre(); _debRemettre(); }
+/* Un changement de suite redessine la feuille : ce qu'on avait tapé y revient. */
+var _debTape=null;
+function _debGarder(){ _debTape={}; ['deb-d','deb-h','deb-j','deb-b','deb-n'].forEach(function(id){ var el=document.getElementById(id); if(el) _debTape[id]=el.value; }); }
+function _debRemettre(){
+  if(!_debTape) return;
+  Object.keys(_debTape).forEach(function(id){ var el=document.getElementById(id); if(el&&_debTape[id]!=null){ el.value=_debTape[id]; el.dispatchEvent(new Event('input')); } });
+  _debTape=null;
+}
+function saveDebourber(){
+  if(!_debEt||!_vendGarde()) return;
+  var c=_debCuve(_debEt.id); if(!c) return;
+  var quand=_debQuand((document.getElementById('deb-d')||{}).value,(document.getElementById('deb-h')||{}).value);
+  var qui=(window.currentUser&&window.currentUser.nom)||'';
+  if(_debEt.mode==='debut'){
+    var bl=_debBloque(c); if(bl){ showToast(bl,'#B85A1A'); return; }   // ⚠ AVANT toute écriture
+    if(!quand){ showToast('Indiquez le début du débourbage','#B85A1A'); return; }
+    var t=_debNum('deb-t'), n=_debNum('deb-n'), e=String(((document.getElementById('deb-e')||{}).value)||'').trim();
+    c.debourbage={ methode:_debEt.meth, debut:quand, temp:(t!=null?t:null), enz:e||null, ntu0:(n!=null&&n>=0?n:null), par:qui };
+    window.CAVE_VENDANGE=CAVE_VENDANGE;
+    _vendSheetClose();
+    _vendFbSave((c.nom||'La cuve')+' : mise à débourber','#3D6B27');
+    renderVendCuves();
+    return;
+  }
+  var f={ fin:quand, jus:_debNum('deb-j'), bourbes:_debNum('deb-b') };
+  var err=_debCheckFin(c,f); if(err){ showToast(err,'#B85A1A'); return; }   // ⚠ AVANT toute écriture
+  var n1=_debNum('deb-n');
+  Object.assign(c.debourbage, { fin:f.fin, jus_l:Math.round(f.jus), bourbes_l:(f.bourbes>0?Math.round(f.bourbes):null), ntu1:(n1!=null&&n1>=0?n1:null), suite:_debEt.suite, par_fin:qui });
+  if(_debEt.suite==='cuve'){
+    c.statut='fa';
+    _vendHistPose(c,'fa',f.fin.slice(0,10));   // PARC-1 : le passage se date, de la fin du débourbage
+  }
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendSheetClose();
+  _vendFbSave((c.nom||'La cuve')+' : '+_nbL(f.jus)+' L de jus clair'+(_debEt.suite==='cuve'?', en fermentation':''),'#3D6B27');
+  renderVendCuves();
+  if(_debEt.suite==='fut'){ var cid=c.id; setTimeout(function(){ var cc=_debCuve(cid); if(cc) _debEntonner(cc); }, 0); }
+}
+/* Entonner : la feuille de décuvage, en mode entonnage — la fermentation finira au Chai, le volume est le jus clair. */
+function _debEntonner(c){
+  var j=c.debourbage&&c.debourbage.jus_l;
+  if(typeof openVendDecuvage==='function') openVendDecuvage(c.id, { ent:true, vol_hl:(j>0?Math.round(j)/100:null) });
+}
+
+/* —— La fenêtre de la cuve : le pressurage d'arrivée et les choix de la cuve —— */
+var _vcuvFa=null, _vcuvMalo=null;
+function _vcuvChoixReset(c){
+  _vcuvFa=(c&&c.fa_lieu)||null; _vcuvMalo=(c&&c.malo_prevue)||null;
+  var g=document.getElementById('vcuv-goutte'), p=document.getElementById('vcuv-presse');
+  if(g) g.value=(c&&c.pressurage&&c.pressurage.goutte_l!=null)?c.pressurage.goutte_l:'';
+  if(p) p.value=(c&&c.pressurage&&c.pressurage.presse_l!=null)?c.pressurage.presse_l:'';
+}
+function _vcuvChoixHtml(k){
+  var P=_pratCfg(), h='';
+  if(k==='b'||k==='o') h+='<div id="vcuv-press-row"><div class="fl" style="margin-top:14px">Pressurage <span style="font-weight:400;opacity:.75">— le jus de la cuve, facultatif</span></div>'
+    +'<div style="display:flex;gap:8px"><input type="text" inputmode="decimal" class="fi ac" id="vcuv-goutte" placeholder="Goutte (L)"><input type="text" inputmode="decimal" class="fi ac" id="vcuv-presse" placeholder="Presse (L)"></div></div>';
+  if(k==='b'&&P&&P.actif.b&&(P.b.fa||[]).length>1){
+    if(!_vcuvFa||P.b.fa.indexOf(_vcuvFa)===-1) _vcuvFa=P.b.fa[0];
+    h+='<div class="fl" style="margin-top:14px">Fermentation de cette cuve <span style="font-weight:400;opacity:.75">— vos façons</span></div><div class="prat-ch">'
+      +P.b.fa.map(function(v){ return '<button type="button" class="prat-o'+(_vcuvFa===v?' on':'')+'" aria-pressed="'+(_vcuvFa===v)+'" data-v="'+v+'" onclick="_vcuvFaLieu(this.dataset.v)">'+(v==='fut'?'En fût':v==='cuve'?'En cuve':'Démarrée en cuve')+'</button>'; }).join('')+'</div>';
+  }
+  if(k==='b'&&P&&P.actif.b&&(P.b.ml||[]).length>1){
+    if(!_vcuvMalo||P.b.ml.indexOf(_vcuvMalo)===-1) _vcuvMalo=P.b.ml[0];
+    h+='<div class="fl" style="margin-top:14px">Malo de cette cuve</div><div class="prat-ch">'
+      +P.b.ml.map(function(v){ return '<button type="button" class="prat-o'+(_vcuvMalo===v?' on':'')+'" aria-pressed="'+(_vcuvMalo===v)+'" data-v="'+v+'" onclick="_vcuvMaloSet(this.dataset.v)">'+(v==='fait'?'Faite':v==='bloq'?'Bloquée':'Partielle')+'</button>'; }).join('')+'</div>';
+  }
+  return h;
+}
+function _vcuvFaLieu(v){ if(v!=='fut'&&v!=='cuve'&&v!=='cf') return; _vcuvFa=v; _vcuvCoulRendre(); }
+function _vcuvMaloSet(v){ if(v!=='fait'&&v!=='bloq'&&v!=='part') return; _vcuvMalo=v; _vcuvCoulRendre(); }
+/* Lus par saveVendCuve : le pressurage dit, et les choix de la cuve (seulement pour sa couleur). */
+function _vcuvChoixPris(k){
+  var o={};
+  if(k==='b'||k==='o'){
+    var g=_debNumV('vcuv-goutte'), p=_debNumV('vcuv-presse');
+    if(g!=null||p!=null) o.pressurage={ goutte_l:(g!=null?Math.round(g):null), presse_l:(p!=null?Math.round(p):null) };
+  }
+  var P=_pratCfg();
+  if(k==='b'&&P&&P.actif.b){
+    if((P.b.fa||[]).length>1&&_vcuvFa) o.fa_lieu=_vcuvFa; else if((P.b.fa||[]).length===1) o.fa_lieu=P.b.fa[0];
+    if((P.b.ml||[]).length>1&&_vcuvMalo) o.malo_prevue=_vcuvMalo; else if((P.b.ml||[]).length===1) o.malo_prevue=P.b.ml[0];
+  }
+  return o;
+}
+function _debNumV(id){ var el=document.getElementById(id); if(!el) return null; var v=parseFloat(String(el.value||'').replace(/[\s\u00a0\u202f]/g,'').replace(',','.')); return (isFinite(v)&&v>=0)?v:null; }
+
 // ── Les gestes (onclick) ──
 window.openPratiques   = openPratiques;
 window._pratCoul       = _pratCoul;
@@ -448,6 +827,14 @@ window._vcuvCoulSet    = _vcuvCoulSet;
 window._vcuvCoulOkSet  = _vcuvCoulOkSet;
 window._vmMacOuvrir    = _vmMacOuvrir;
 window._vmMacConfirmer = _vmMacConfirmer;
+// PRATIQUES-2 (§624)
+window.openDebourber   = openDebourber;
+window._debMeth        = _debMeth;
+window._debSuite       = _debSuite;
+window.saveDebourber   = saveDebourber;
+window._vcuvFaLieu     = _vcuvFaLieu;
+window._vcuvMaloSet    = _vcuvMaloSet;
 // ── Lus par cuvier.js ──
 export { _pratCfg, _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
-  _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre };
+  _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris };

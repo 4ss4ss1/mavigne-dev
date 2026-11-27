@@ -1129,6 +1129,63 @@ var TU_TUTOS = [
       { type: 'regarder', cible: '[data-tuto="vend.nouvelle"]',
         txt: function () { return 'Sa fiche dit « Blanc » et, une fois vos pratiques réglées, son parcours prévu. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] },
+  // ★ PRATIQUES-2 (§624) : débourber une cuve de blanc, puis soutirer le jus clair et le faire fermenter dans la cuve. La cuve
+  //   est chargée pour ce tuto seul (_tuCaveDeb). La suite « Entonner » ouvrirait la feuille de décuvage : le tuto la nomme.
+  { id: 'debourber', titre: 'Comment faire pour débourber une cuve de blanc\u00a0?', fin: 'débourber une cuve de blanc',
+    module: 'Cave', pages: ['cave'], pour: 'admin', duree: '2 min', depart: 'home',
+    couvre: ['openDebourber', 'saveDebourber', '_debSuite'],
+    retenir: ['Cave › Le Cuvier › Cuves : la fiche d’une cuve de blanc dit son prochain geste.',
+              '« Débourber » : la méthode, le début, la température. Puis « Soutirer le jus clair » : le jus, les bourbes.',
+              'Ensuite, entonner (fûts du parc, la cuvée au Chai) ou fermenter dans la cuve.',
+              'Une cuve qui fermente ne se débourbe plus ; plus de jus que la cuve n’en a est refusé.'],
+    etapes: [
+      { type: 'aller', page: 'cave', pourquoi: 'Les cuves de vinification vivent au Cuvier.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="cave.cuvier"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="cave.cuvier"]') || 'Le Cuvier') + ' », onglet « Cuves ».'; },
+        fait: function () { var b = _q('[data-tuto="cave.cuvier"]'), c = _q('[data-tuto="cuv.cuves"]'); return !!(b && b.classList.contains('active')) && !!(c && c.classList.contains('active')) && !!_q('[data-tuto="cuv.ligne"]'); },
+        ok: 'La cuve 2 attend : Les Perrières, pressées hier.' },
+      { type: 'toucher', cible: '[data-tuto="cuv.ligne"]',
+        txt: function () { return '{T} la cuve « ' + (L('[data-tuto="cuv.ligne"] .mvv-nom') || 'Cuve 2') + ' ».'; },
+        fait: function () { return !!_q('[data-tuto="deb.go"]'); },
+        ok: 'Sa fiche dit le prochain geste : débourber.' },
+      { type: 'toucher', cible: '[data-tuto="deb.go"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="deb.go"]') || 'Débourber') + ' ».'; },
+        fait: function () { return !!_q('#mvv-ov.open [data-tuto="deb.temp"]'); },
+        ok: 'La méthode se propose ; le début, c’est maintenant.' },
+      { type: 'taper', cible: '[data-tuto="deb.temp"]', exemple: '12',
+        txt: function () { return 'La cuve est au froid : tapez sa température, par exemple 12.'; },
+        txtReel: 'la température de la cuve, en °C.',
+        valide: function (x) { var n = _num(x); return n >= 0 && n <= 30; },
+        ok: function () { return 'La turbidité et l’enzymage sont facultatifs.'; } },
+      { type: 'toucher', cible: '#mvv-ov.open [data-tuto="deb.ok"]',
+        txt: function () { return '{T} « ' + (L('#mvv-ov.open [data-tuto="deb.ok"]') || 'Mettre à débourber') + ' ».'; },
+        fait: function () { var c = ((window.CAVE_VENDANGE || {}).cuves_vinif || []).filter(function (x) { return x && x.id === 'tu_cvb'; })[0]; return !!(c && c.debourbage && c.debourbage.debut) && !_q('#mvv-ov.open'); },
+        ok: 'Le jus débourbe. Le lendemain, le prochain geste a changé.' },
+      { type: 'toucher', cible: '[data-tuto="deb.go"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="deb.go"]') || 'Soutirer le jus clair') + ' ».'; },
+        fait: function () { return !!_q('#mvv-ov.open [data-tuto="deb.jus"]'); },
+        ok: 'Le jus clair, les bourbes, et la suite.' },
+      { type: 'taper', cible: '[data-tuto="deb.jus"]', exemple: '2150',
+        txt: function () { return 'Tapez le jus clair soutiré, par exemple 2150 litres.'; },
+        txtReel: 'le jus clair soutiré, en litres.',
+        valide: function (x) { var n = _num(x); return n > 0 && n <= 2380; },
+        ok: function (x) { return _nb(_num(x)) + ' L sur 2 380 L de jus.'; } },
+      { type: 'taper', cible: '[data-tuto="deb.bourbes"]', exemple: '200',
+        txt: function () { return 'Et les bourbes restées au fond : par exemple 200 litres.'; },
+        txtReel: 'les bourbes, en litres.',
+        valide: function (x) { var n = _num(x), j = _num((_q('[data-tuto="deb.jus"]') || {}).value); return n >= 0 && (!(j > 0) || j + n <= 2380); },
+        ok: function () { return 'Plus que le jus de la cuve serait refusé : le calcul se vérifie à la frappe.'; } },
+      { type: 'toucher', cible: '[data-tuto="deb.suite.cuve"]',
+        txt: function () { return 'Ce blanc fermente en cuve. {T} « ' + (L('[data-tuto="deb.suite.cuve"]') || 'Fermenter dans cette cuve') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="deb.suite.cuve"]'); return !!(b && b.classList.contains('on')); },
+        ok: '« Entonner » ouvrirait la feuille des fûts : la cuvée naîtrait au Chai.' },
+      { type: 'toucher', cible: '#mvv-ov.open [data-tuto="deb.ok"]',
+        txt: function () { return '{T} « ' + (L('#mvv-ov.open [data-tuto="deb.ok"]') || 'Soutirer et fermenter en cuve') + ' ».'; },
+        fait: function () { var c = ((window.CAVE_VENDANGE || {}).cuves_vinif || []).filter(function (x) { return x && x.id === 'tu_cvb'; })[0]; return !!(c && c.debourbage && c.debourbage.fin && c.statut === 'fa'); },
+        ok: 'La cuve passe en fermentation : la tournée la suit, sans pigeage ni remontage.' },
+      { type: 'regarder', cible: '[data-tuto="cuv.ligne"]',
+        txt: function () { return 'Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
+    ] },
   // ★ PHENO-1C (§508) : noter le stade d'une parcelle (administrateur) — le chemin de la fiche, qui marche en toute saison.
   { id: 'stade', titre: 'Comment faire pour noter le stade d’une parcelle\u00a0?', fin: 'noter le stade d’une parcelle',
     module: 'Vigne', pages: ['parcelles'], pour: 'admin', duree: '1 min', depart: 'parcelles',   // au téléphone, Parcelles n'est ni dans le dock ni dans « Plus » (un onglet de la Vigne) : le tuto y démarre, comme celui du Journal
@@ -1996,6 +2053,14 @@ function _tuCave() {
     analyses: [a(1, 'Les Charmes', -6, 196), a(2, 'Les Charmes', -2, 204), a(3, 'Clos du Moulin', -5, 203), a(4, 'Clos du Moulin', -1, 211), a(5, 'Vieilles Vignes', -2, 199)],
     recoltes: [], cuves_vinif: [] };
 }
+/* ★ PRATIQUES-2 (§624) — POUR LE TUTO « DÉBOURBER » SEUL : une cuve de blanc pressée hier (Les Perrières, un chardonnay),
+   2 380 L de jus. Chargée pour lui seul : dans la vendange de tous les tutos, elle changerait le Cuvier des autres. */
+function _tuCaveDeb() {
+  var d = _tuCave();
+  d.cuves_vinif = [{ id: 'tu_cvb', nom: 'Cuve 2 — Les Perrières', volume_hl: 30, statut: 'setup', parcelles: ['Les Perrières'], couleur: 'b',
+    date_entree: _tuJour(-1), pressurage: { goutte_l: 2000, presse_l: 380 }, mesures_fa: [], statut_hist: [{ id: 'vst_tu_cvb', statut: 'setup', date: _tuJour(-1) }] }];
+  return d;
+}
 /* ★ TUTO-9 (§423) — UN JOURNAL POUR LE DOMAINE FICTIF. Le tuto « corriger l'équipe d'une validation » (ACCV-4, §419) vise le
    bouton « Équipe » d'une validation : le domaine fictif n'en avait AUCUNE (« Journal vide »), le tuto restait à l'étape 1
    partout. test:tutos ne l'a pas vu au téléphone : il y jouait un autre tuto sous son nom (§423b). La première validation est
@@ -2031,6 +2096,7 @@ function _charger() {
     if (typeof window.applyFbData === 'function') { try { window.applyFbData('intrants', _tuIntrants()); } catch (e) { _avale(e, '_charger#intrants'); } }   // FERTI-8 (§466)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('sessions', _tuSessions()); } catch (e) { _avale(e, '_charger#sessions'); } }   // COEQ-3 (§524)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('kml_polygons', _tuKml()); } catch (e) { _avale(e, '_charger#kml'); } }   // YALLER-1 (§527)
+  if (String(window.__MV_TUTO || '') === 'debourber' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveDeb()); } catch (e) { _avale(e, '_charger#cave_deb'); } }   // PRATIQUES-2 (§624)
   if (String(window.__MV_TUTO || '') === 'rentree' && typeof window.applyFbData === 'function') { try { window.applyFbData('traitements', _tuTraitements()); } catch (e) { _avale(e, '_charger#traitements'); } }   // REG27-1A (§572)
 }
 function _demarrer() {

@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.44', d: '2026-11-27', items: [   // PRATIQUES-2 (§624) : les gestes du blanc au Cuvier — débourber, soutirer, entonner ou fermenter en cuve
+    { niv: 1, pour: ['admin', 'cave'], emoji: 'entonnoir', titre: 'Une cuve de blanc suit son parcours',
+      desc: "La fiche d’une cuve de blanc (ou de rosé) dit son prochain geste. «\u00a0Débourber\u00a0»\u00a0: la méthode, le début, la température, la turbidité si vous la mesurez. Puis «\u00a0Soutirer le jus clair\u00a0»\u00a0: le jus, les bourbes, et la suite — entonner en fûts (la cuvée naît au Chai, sa fermentation y reste suivie) ou fermenter dans la cuve. Sa frise suit son parcours\u00a0: pressé, débourbé, entonné, en fermentation. Une cuve qui fermente ne se débourbe plus, et plus de jus que la cuve n’en a est refusé." },
+    { niv: 0, pour: ['admin'], emoji: 'raisin', titre: 'Vos pratiques\u00a0: vos repères',
+      desc: "Sous le débourbage, vos repères, facultatifs\u00a0: une durée, une turbidité visée. La feuille du débourbage les rappelle, et dit si le jus clair est dedans. À la création d’une cuve de blanc\u00a0: le pressurage (goutte, presse) et, si le domaine a plusieurs façons, celle de cette cuve — en fût ou en cuve, la malo." },
+  ] },
   { v: '11.43', d: '2026-11-27', items: [   // PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve, pas de chapeau sur un blanc
     { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Vos pratiques de cave',
       desc: "Chaque domaine passe ses vins au cuvier à sa façon. Réglez-la une fois, par couleur\u00a0: l’arrivée de la vendange, la clarification des jus, la fermentation, la malo, l’élevage — et le rosé, si vous en faites. La fiche de chaque cuve montre son parcours prévu\u00a0; la mesure et la tournée ne proposent que vos gestes d’extraction. Deux réponses rares ensemble se confirment, une réponse impossible est refusée avec la raison. Le Cuvier vous le propose à la première ouverture\u00a0; ensuite, roue crantée, bloc Le Cuvier." },

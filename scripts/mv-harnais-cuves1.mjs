@@ -63,6 +63,7 @@ function jouer(S) {
     _parcCoul: () => 'r', _vendStatLbl: (s) => ({ fa: 'FA', mpf: 'MPF', setup: 'Setup', termine: 'Terminé' })[s] || s, _vendCuvF1: (x) => String(x),
     _vendPeindreGraphes: () => appels.push('peindre'), _vendRefreshCockpit() {},
     // PRATIQUES-1 (§622) : bouchons — le bandeau, la couleur et le parcours prévu se jouent dans mv-harnais-pratiques1.
+    _pratEtapeLbl: () => '',   // PRATIQUES-2 (§624) : l'étape d'un blanc, jouée dans mv-harnais-pratiques2
     _pratBandeauHtml: () => '', _vendCuveCoul: (c) => ctx._parcCoul((c.parcelles || [])[0]), _vendParcoursHtml: () => '', _matVin: (c) => c,
   };
   ctx.window = ctx;
