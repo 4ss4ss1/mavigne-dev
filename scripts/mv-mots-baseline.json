@@ -134,6 +134,11 @@
    "date": "2026-11-26",
    "motif": "ANNEE-2 (§613) : Planning › Année refaite — une vue de l'année, le détail dans un panneau",
    "hausses": []
+  },
+  {
+   "date": "2026-11-26",
+   "motif": "MOTS-18 (§618) : Phyto › Fertilisation, la Cave (Récoltes, Cuves, Bouteilles, Labo, Diagnostic, Courbes) et la fiche d'une personne allégées — leurs notes dans leur « i » ou dans l'aide ; la fiche d'une personne mesurée sur ordinateur (ses quatre autres onglets)",
+   "hausses": []
   }
  ],
  "mesures": {
@@ -187,8 +192,8 @@
     "lex": null
    },
    "Phyto › Fertilisation": {
-    "mots": 206,
-    "p15": 4,
+    "mots": 140,
+    "p15": 0,
     "avant": null,
     "lex": null
    },
@@ -205,14 +210,14 @@
     "lex": null
    },
    "Cave › Le Cuvier › Récoltes": {
-    "mots": 148,
-    "p15": 1,
+    "mots": 132,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Cuvier › Cuves": {
-    "mots": 128,
-    "p15": 1,
+    "mots": 112,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -229,20 +234,20 @@
     "lex": null
    },
    "Cave › Le Chai › Bouteilles": {
-    "mots": 120,
-    "p15": 1,
+    "mots": 102,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Chai › Labo": {
-    "mots": 74,
-    "p15": 1,
+    "mots": 43,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Chai › Diagnostic": {
-    "mots": 105,
-    "p15": 1,
+    "mots": 93,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -307,6 +312,30 @@
     "lex": null
    },
    "Planning › Personnel": {
+    "mots": 71,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Jours": {
+    "mots": 71,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Compteur": {
+    "mots": 71,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Congés": {
+    "mots": 71,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Frais": {
     "mots": 71,
     "p15": 0,
     "avant": 0,
@@ -465,8 +494,8 @@
     "lex": null
    },
    "Phyto › Fertilisation": {
-    "mots": 209,
-    "p15": 4,
+    "mots": 143,
+    "p15": 0,
     "avant": null,
     "lex": null
    },
@@ -483,14 +512,14 @@
     "lex": null
    },
    "Cave › Le Cuvier › Récoltes": {
-    "mots": 246,
-    "p15": 1,
+    "mots": 230,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Cuvier › Cuves": {
-    "mots": 160,
-    "p15": 1,
+    "mots": 144,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -507,20 +536,20 @@
     "lex": null
    },
    "Cave › Le Chai › Bouteilles": {
-    "mots": 116,
-    "p15": 1,
+    "mots": 98,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Chai › Labo": {
-    "mots": 74,
-    "p15": 1,
+    "mots": 43,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
    "Cave › Le Chai › Diagnostic": {
-    "mots": 296,
-    "p15": 2,
+    "mots": 276,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },
@@ -549,8 +578,8 @@
     "lex": null
    },
    "Cave › Le Millésime › Courbes": {
-    "mots": 284,
-    "p15": 2,
+    "mots": 272,
+    "p15": 0,
     "avant": 4,
     "lex": null
    },
@@ -585,8 +614,32 @@
     "lex": null
    },
    "Planning › Personnel": {
-    "mots": 275,
-    "p15": 4,
+    "mots": 215,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Jours": {
+    "mots": 310,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Compteur": {
+    "mots": 207,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Congés": {
+    "mots": 108,
+    "p15": 0,
+    "avant": 0,
+    "lex": null
+   },
+   "Planning › Personnel › Frais": {
+    "mots": 129,
+    "p15": 0,
     "avant": 0,
     "lex": null
    },

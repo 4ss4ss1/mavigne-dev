@@ -17,7 +17,7 @@
 //
 // ════════════════════════════════════════════════════════════════════
 
-import { isAdmin, showToast, _escHtml, _escAttr } from './utils.js';
+import { isAdmin, showToast, _escHtml, _escAttr, _mvInfoBtn, _mvInfoSet } from './utils.js';   // ★ MOTS-18 (§618) : les « i » de la fiche
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] planning.js chargé — ' + new Date().toISOString());
@@ -4655,7 +4655,7 @@ function _planCompteCard(mbr,uptoMonth,a){
   var tc=mbr.type_contrat||'CDI';
   var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
-    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'
+    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'+_mvInfoBtn('plan.cpt.heure')   // ★ MOTS-18
     +'<span class="mvpas mvpas-etiquette" style="margin-left:auto">'+_escHtml(tc)+'</span>'
   +'</div>';
   h+='<div style="display:flex;gap:7px">'
@@ -4663,9 +4663,7 @@ function _planCompteCard(mbr,uptoMonth,a){
     +'<div class="mvcarte-fond" style="flex:1;text-align:center;padding:11px 4px"><div style="font-size:var(--pt-lg,24px);font-weight:800;line-height:1;font-variant-numeric:lining-nums tabular-nums">'+jours+'</div><div style="font-size:9px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
   +'</div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.4">'
-    +'<b>Pas d\u2019annualisation</b> pour ce type de contrat\u00a0: les heures sont pay\u00e9es \u00e0 l\u2019heure. '
-    +'Ni plafond de '+_planFmt(_planLegal().plafAnnuel)+', ni modulation, ni solde \u00e0 la cl\u00f4ture. '
-    +'Mesur\u00e9 en travail effectif\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas.'
+    +'<b>Pas d\u2019annualisation</b>\u00a0: pay\u00e9 \u00e0 l\u2019heure.'   // ★ MOTS-18 (§618) : le reste dans le « i » du titre (plan.cpt.heure)
   +'</div>';
   return h+'</div>';
 }
@@ -4725,7 +4723,7 @@ function _planAnnuCard(mbr,uptoMonth){
     :{t:'en cours',c:'var(--vert-med)',bg:'var(--vert-pale)',b:'rgba(61,107,39,0.35)'};
   var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
   h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
-    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\ud83d\udcc5 Compteur d\u2019heures \u00b7 '+planYear+'</span>'
+    +'<span style="font-size:10px;font-weight:700;color:var(--terre)">\ud83d\udcc5 Compteur d\u2019heures \u00b7 '+planYear+'</span>'+_mvInfoBtn('plan.cpt.an')   // ★ MOTS-18 : ce qu'il compte, derrière le « i »
     +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+pill.c+';background:'+pill.bg+';border:1px solid '+pill.b+';padding:2px 8px;border-radius:20px">'+pill.t+'</span>'
   +'</div>';
   h+='<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">'
@@ -4746,15 +4744,18 @@ function _planAnnuCard(mbr,uptoMonth){
   var nt=a.base
     ?'Compt\u00e9\u00a0: le <b>travail</b>, plus les cong\u00e9s et les f\u00e9ri\u00e9s ch\u00f4m\u00e9s \u00e0 leurs heures pr\u00e9vues \u2014 ils ne retirent rien et ne se rattrapent pas. Base '+_pY()+'\u00a0: '+_planJoursSem(_pY())+' jours du lundi au vendredi \u00d7 7 h = '+_planFmt(a.baseAn)+(_planSolidFait(mbr,_pY())?', + '+_planFmt(7*_planSolidRatio(_planPlId(mbr),_pY()))+' de journ\u00e9e de solidarit\u00e9':'')+'.'
     :'Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
-  if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
-  else if(a.plafond<_ref-1)nt='<b>'+(a.base?'Base proratis\u00e9e':'Plafond proratis\u00e9')+'</b> \u00e0 la dur\u00e9e du contrat. '+nt;
-  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.4">'+nt+'</div>';
+  // ★ MOTS-18 (§618) : la méthode (ce qui est compté, la base ou le plafond, la suspension) va dans le « i » du titre ; à l'écran, l'état seul
+  var ntEtat='';
+  if(a.susp>0.0001){nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;ntEtat='<b>Suspension de contrat\u00a0:</b> plafond \u2212\u00a0'+_planFmt(a.susp)+'.';}
+  else if(a.plafond<_ref-1){nt='<b>'+(a.base?'Base proratis\u00e9e':'Plafond proratis\u00e9')+'</b> \u00e0 la dur\u00e9e du contrat. '+nt;ntEtat='<b>'+(a.base?'Base proratis\u00e9e':'Plafond proratis\u00e9')+'</b> \u00e0 la dur\u00e9e du contrat.';}
+  _mvInfoSet('plan.cpt.an',{ p:[nt,'Un \u00e9cart du mod\u00e8le avec '+(a.base?'la base':'le plafond')+' se reporte sur chaque salari\u00e9 qui le suit\u00a0: la grille se corrige dans Planning \u203a Ann\u00e9e.'] });
+  if(ntEtat)h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;line-height:1.4">'+ntEtat+'</div>';
   var _mdl=a.base?_planModelBrut(_planPlId(mbr),_pY()):_planModelTotal(_planPlId(mbr)),_att=a.base?a.baseAtt:L.plafAnnuel,_dev=_mdl-_att,_devAb=Math.abs(_dev);
   h+='<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
   h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:var(--pt-txt,13px);color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:var(--pt-base,14px);font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:lining-nums tabular-nums">'+_planFmt(_mdl)+'</span></div>';
   h+='<div style="font-size:var(--pt-micro,11px);color:'+(_devAb>10?'var(--orange)':'var(--texte-doux)')+';margin-top:5px;line-height:1.4">'
     +(_devAb>10
-      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(_att)+(a.base?' de la base':' attendues')+'.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
+      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(_att)+(a.base?' de la base':' attendues')+'.</b> La grille se corrige dans Planning \u203a Ann\u00e9e.'
       :'Conforme aux '+_planFmt(_att)+(a.base?' de la base':' attendues')+' ('+(_dev>=0?'+':'\u2212')+_planFmt(_devAb)+').')
   +'</div>';
   h+='</div><div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
@@ -5453,11 +5454,12 @@ function _pfCadreCompta(mbr,P,D){
     +'<div class="pf-cpt">'+K.L.map(function(l){
         return '<div class="pf-cl pf-cl-'+l.k+(l.ton?' pf-cl-'+l.ton:'')+'"><span class="pf-cl-l">'+l.l+'</span>'
           +'<span class="pf-cl-v">'+(l.ton==='ko'?_mvIcon('alerte',18):(l.ton==='ok'&&l.k==='base'?_mvIcon('check',18):''))+'<span>'+l.v+'</span></span>'
-          +(l.p?'<p class="pf-cl-p">'+l.p+'</p>':'')+'</div>';}).join('')
+          +(l.p?l.p.split(/(?<=[.!?])\s+(?=[A-Z\u00c0-\u00dd0-9])|,\s+(?=\d)/).map(function(x){return '<p class="pf-cl-p">'+x+'</p>';}).join(''):'')+'</div>';}).join('')   // ★ MOTS-18 (§618) : une idée par ligne, à l'écran seulement (le relevé imprimé garde ses phrases)
       +((typeof window._fraisCompta==='function')?window._fraisCompta(mbr.nom,_pY(),P.m):'')+'</div>'   // ★ FRAIS-1 (§595) : les remboursements, hors salaire
     +'<div class="pf-sal"><h4>Pour le salari\u00e9</h4><dl class="pf-lst">'+_pfLignes(K.I)+'</dl>'
       +(P.recupNC>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>R\u00e9cup prise non couverte\u00a0: '+_planFmt(P.recupNC)+'.</span></p>':'')+'</div>'
-    +'<p class="pf-pied">'+K.pied+(K.semaines?' '+K.semaines+(/[.]$/.test(K.semaines)?'':'.'):'')+(K.plan?' <span class="pf-plan">'+K.plan+'</span>':'')+'</p>'
+    +'<p class="pf-pied">'+K.pied+(K.plan&&!K.semaines?' <span class="pf-plan">'+K.plan+'</span>':'')+'</p>'   // ★ MOTS-18 : le mois, puis ses semaines, sur deux lignes
+    +(K.semaines?'<p class="pf-pied">'+K.semaines+(/[.]$/.test(K.semaines)?'':'.')+(K.plan?' <span class="pf-plan">'+K.plan+'</span>':'')+'</p>':'')
   +'</section>';
 }
 function _pfCadre(mbr,P){
@@ -5493,7 +5495,7 @@ function _pfCadre(mbr,P){
 function _pfDemande(mbr,P){
   if(!P.act||!isAdmin())return '';
   // ★ FIGE-1 : un mois figé ne change plus son paiement — la carte le dit, sans commandes.
-  if(P.fige)return '<section class="pf-card pf-dem" aria-labelledby="pf-dem-t"><div class="pf-card-t"><h3 id="pf-dem-t">Paiement des heures sup</h3><span>'+PLAN_MOIS[P.m].toLowerCase()+'</span></div>'
+  if(P.fige)return '<section class="pf-card pf-dem" aria-labelledby="pf-dem-t"><div class="pf-card-t"><h3 id="pf-dem-t">Paiement des heures sup '+_mvInfoBtn('plan.paie.ordre')+'</h3><span>'+PLAN_MOIS[P.m].toLowerCase()+'</span></div>'
     +'<p class="pf-res" id="pf-dem-res">'+(P.payeTotal>0.0001?_planFmt(P.payeTotal)+' pay\u00e9es':'Aucune heure sup pay\u00e9e')+', fig\u00e9 le '+_planFmtJour(P.fige.le)+'\u00a0: le paiement ne se modifie plus.</p></section>';
   var tot=_planPayeMaxTotal(mbr,P.m),v=P.demande?Math.max(P.payeDem||0,P.payeTotal):0,duMois=Math.min(P.sup,tot);
   var payes=P.lignes.filter(function(l){return l.paye>0.0001;});
@@ -5504,7 +5506,7 @@ function _pfDemande(mbr,P){
       +((P.payeDem||0)>P.payeTotal+0.01?' Sur '+_planFmt(P.payeDem)+' demand\u00e9es\u00a0: les absences passent d\u2019abord, le reste n\u2019est pas payable ce mois-ci.':''))
     :(P.sup>0.0001?(tot<=0.0001?'Aucune heure payable\u00a0: les heures sup couvrent d\u2019abord les absences.':'Aucune heure pay\u00e9e\u00a0: les '+_planFmt(P.sup)+' sup restent en r\u00e9cup, soit '+_planFmt(P.valeurRecup)+' de repos.'):'Pas d\u2019heures sup ce mois-ci.');
   return '<section class="pf-card pf-dem" aria-labelledby="pf-dem-t">'
-    +'<div class="pf-card-t"><h3 id="pf-dem-t">Paiement des heures sup</h3><span>'+PLAN_MOIS[P.m].toLowerCase()+'</span></div>'
+    +'<div class="pf-card-t"><h3 id="pf-dem-t">Paiement des heures sup '+_mvInfoBtn('plan.paie.ordre')+'</h3><span>'+PLAN_MOIS[P.m].toLowerCase()+'</span></div>'
     +'<label class="pf-case"><input type="checkbox" id="pf-dem-case"'+(P.demande?' checked':'')+' onchange="planFicheDemande(\''+_escAttr(mbr.nom)+'\')"><span>'+_escHtml(mbr.nom)+' demande \u00e0 \u00eatre pay\u00e9 de ses heures sup</span></label>'
     +'<div class="pf-dem-h'+(P.demande?'':' off')+'"><label for="pf-dem-h">Heures \u00e0 payer</label>'
       +'<div class="pf-stp"><button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',-1)" aria-label="Une heure de moins"'+(P.demande?'':' disabled')+'>\u2212</button>'
@@ -5516,17 +5518,16 @@ function _pfDemande(mbr,P){
       +(tot>duMois+0.01?'<button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',0,'+_escAttr(String(tot))+')">Tout le compteur ('+_planFmt(tot)+')</button>':'')+'</div>':'')
     +'<p class="pf-res" id="pf-dem-res">'+res+'</p>'
     +(P.demande?'<p class="pf-reste">Il restera <b>'+_planFmt(_pfRestants(mbr,P).total)+'</b> d\u2019heures sup \u00e0 payer, d\u00e9taill\u00e9es dans l\u2019onglet Compteur.</p>':'')
-    +'<p class="pl2-note">Les absences passent d\u2019abord. On paie les heures du mois (le taux le plus fort d\u2019abord), puis le compteur, les plus anciennes d\u2019abord. 1h pay\u00e9e \u00e0 +50\u202f% = 1h30 de r\u00e9cup en moins.</p>'
   +'</section>';
 }
 function _pfOuVont(P){
   if(!P.act||!P.lignes.length)return '';
   var g=P.lignes.reduce(function(a,l){return a+l.garde;},0),v=P.lignes.reduce(function(a,l){return a+l.valeur;},0);
-  return '<section class="pf-card"><div class="pf-card-t"><h3>O\u00f9 vont les heures sup</h3></div>'
+  return '<section class="pf-card"><div class="pf-card-t"><h3>O\u00f9 vont les heures sup '+_mvInfoBtn('plan.hsup.taux')+'</h3></div>'   // ★ MOTS-18 : les taux et la conversion derrière le « i »
     +'<div class="pf-scroll"><table class="pf-t"><thead><tr><th>Nature</th><th class="n">Faites</th><th class="n">Pay\u00e9es</th><th class="n">Gard\u00e9es</th><th class="n pf-cv">Repos gagn\u00e9</th></tr></thead><tbody>'
     +P.lignes.map(function(l){return '<tr><td>'+(l.nat==='hs'?'\u00c0 +'+l.taux+'\u202f%':_pfNatLib(l)+', +'+l.taux+'\u202f%')+'</td><td class="n">'+_planFmt(l.h)+'</td><td class="n">'+(l.paye>0.0001?_pfMark('sup',_planFmt(l.paye)):'\u2014')+'</td><td class="n">'+(l.garde>0.0001?_planFmt(l.garde):'\u2014')+'</td><td class="n pf-cv pf-rec">'+(l.garde>0.0001?_planFmt(l.valeur):'\u2014')+'</td></tr>';}).join('')
     +'</tbody><tfoot><tr><td>Total</td><td class="n">'+_planFmt(P.sup)+'</td><td class="n">'+_planFmt(P.payeMois)+'</td><td class="n">'+_planFmt(g)+'</td><td class="n pf-cv pf-rec">'+_planFmt(v)+'</td></tr></tfoot></table></div>'
-    +'<p class="pl2-note">Faites = pay\u00e9es + gard\u00e9es. Les huit premi\u00e8res heures sup de la semaine sont \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%\u00a0; le repos gagn\u00e9 convertit les heures gard\u00e9es (1h \u00e0 25\u202f% = 1h15, 1h \u00e0 50\u202f% = 1h30).</p></section>';
+    +'</section>';
 }
 function _pfResume(mbr,P){
   return _pfCadre(mbr,P)+_pfDemande(mbr,P)+_pfFige(mbr,P)+_pfOuVont(P)
@@ -5994,7 +5995,7 @@ function _pfJours(mbr,P){
     vider();
     h+='</section>';
   });
-  return h+'<p class="pl2-note">Toucher un jour ouvre sa feuille.'+(act?' Les heures sup se comptent \u00e0 la semaine\u00a0: les huit premi\u00e8res \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%.':'')+'</p>';
+  return h+'<p class="pl2-note">Toucher un jour ouvre sa feuille.'+(act?' '+_mvInfoBtn('plan.hsup.taux'):'')+'</p>';   // ★ MOTS-18 : les taux derrière le « i »
 }
 function _pfCompteur(mbr,P){
   if(!P.act)return _planHsupCard(mbr);
@@ -6008,22 +6009,22 @@ function _pfCompteur(mbr,P){
     +'<li class="pf-tot"><span class="pf-mv-t">'+fin+'</span><b>'+F(vfin)+'</b></li></ul>';};
   var AT=_pfAnneeTable(AN,m,{table:'pf-t pf-an',cv:'pf-cv',rc:'pf-rc',vide:'pf-vide',tot:'pf-totr',court:true,fs:'pf-fs',fd:'pf-fd',ff:'pf-ff',g:'pf-gs',gr:'pf-grp'}),cum={p:AT.cum.p};
   var dep=_planDepartSolde(mbr),depD=_planDepartDate(mbr);
+  _mvInfoSet('plan.cpt.lire',{ p:[AT.legende] });   // ★ MOTS-18 (§618) : la légende du tableau (avec ses notes d'avant la majoration) derrière le « i »
   return '<section class="pf-card"><div class="pf-card-t"><h3>Temps de r\u00e9cup</h3><span>fin '+PLAN_MOIS[m].toLowerCase()+'</span></div>'
       +'<div class="pf-solde">'+_pfMark('rec',F(c.solde))+'<span>\u00e0 prendre</span></div>'
       +liste(CV.MV,'Solde fin '+PLAN_MOIS[m].toLowerCase(),Math.max(0,c.solde))
-      +((c.solde||0)>=7?'<p class="pl2-note"><b>Droit \u00e0 repos ouvert.</b> Par journ\u00e9e ou demi-journ\u00e9e, aux dates convenues\u00a0; faute d\u2019accord, dans les deux mois.</p>':'')
+      +((c.solde||0)>=7?'<p class="pl2-note"><b>Droit \u00e0 repos ouvert.</b> '+_mvInfoBtn('plan.repos')+'</p>':'')   // ★ MOTS-18 : la règle derrière le « i »
       +(P.recupNC>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>R\u00e9cup prise non couverte\u00a0: '+F(P.recupNC)+'.</span></p>':'')
     +'</section>'
-    +'<section class="pf-card"><div class="pf-card-t"><h3>Heures \u00e0 rattraper</h3><span>\u00e9court\u00e9es par le domaine</span></div>'
+    +'<section class="pf-card"><div class="pf-card-t"><h3>Heures \u00e0 rattraper '+_mvInfoBtn('plan.rattrapage')+'</h3><span>\u00e9court\u00e9es par le domaine</span></div>'   // ★ MOTS-18 : la règle derrière le « i »
       +'<div class="pf-solde">'+_pfMark(CV.detteFin>0.0001?'cp':'fait',F(CV.detteFin))+'<span>restent</span></div>'
       +liste(CV.RA,'Reste \u00e0 rattraper fin '+PLAN_MOIS[m].toLowerCase(),CV.detteFin,true)
-      +'<p class="pl2-note">Une journ\u00e9e \u00e9court\u00e9e par le domaine reste pay\u00e9e\u00a0: ses heures se rattrapent dans la semaine, puis sur les heures sup, jamais sur la paie.'+(P.att>0.0001?' '+F(P.att)+' attendent la fin de leur semaine, le mois prochain.':'')+(CV.detteFin>0.0001?' Les prochaines heures sup les rattrapent d\u2019abord.':'')+'</p>'
+      +((P.att>0.0001||CV.detteFin>0.0001)?'<p class="pl2-note">'+(P.att>0.0001?F(P.att)+' attendent la fin de leur semaine, le mois prochain.':'')+(P.att>0.0001&&CV.detteFin>0.0001?' ':'')+(CV.detteFin>0.0001?'Les prochaines heures sup les rattrapent d\u2019abord.':'')+'</p>':'')
     +'</section>'
     +(P.demande?_pfRestantsCarte(mbr,P):'')
-    +'<section class="pf-card"><div class="pf-card-t"><h3>L\u2019ann\u00e9e '+planYear+'</h3><span>mois par mois</span></div>'
+    +'<section class="pf-card"><div class="pf-card-t"><h3>L\u2019ann\u00e9e '+planYear+' '+_mvInfoBtn('plan.cpt.lire')+'</h3><span>mois par mois</span></div>'   // ★ MOTS-18 : la lecture du tableau derrière le « i »
       +'<div class="pf-scroll">'+AT.html+'</div>'
       +(AT.df?'<p class="pl2-note"><b>'+AT.df.entete+'</b></p><div class="pf-scroll">'+AT.df.html+'</div><p class="pl2-note">'+AT.df.legende+'</p>':'')   // ★ DIMAV-1
-      +'<p class="pl2-note">'+AT.legende+'</p>'
       +(cum.p>=PLAN_CONTINGENT_DEF-20?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>'+F(cum.p)+' pay\u00e9es depuis janvier\u00a0: le contingent annuel ('+PLAN_CONTINGENT_DEF+'h, \u00e0 confirmer avec le comptable) est presque atteint.</span></p>':'')
     +'</section>'
     +_planAnnuCard(mbr,m)
@@ -6039,7 +6040,7 @@ function _pfConges(mbr,P){
       +'<div class="pf-cp3"><div><span>Acquis au d\u00e9part</span><b>'+cpIni+' j</b></div><div><span>Pris</span><b>'+_pfMark('cp',cpPris+' j')+'</b></div><div'+(cpSolde<0?' class="neg"':'')+'><span>Restants</span><b>'+cpSolde+' j</b></div></div>'
       +(cpJ.length?'<ul class="pf-mv">'+cpJ.map(function(x){return '<li><span class="pf-mv-d">'+PLAN_JOURS[x.w]+' '+x.d+'</span><span class="pf-mv-t">Cong\u00e9 pay\u00e9</span><b>'+_planFmt(x.paye)+'</b></li>';}).join('')+'</ul>'
         :'<p class="pl2-note">Aucun cong\u00e9 pay\u00e9 en '+PLAN_MOIS[P.m].toLowerCase()+'.</p>')
-      +'<p class="pl2-note">Le solde de d\u00e9part se r\u00e8gle dans R\u00e9glages, \u00c9quipe. La r\u00e8gle de d\u00e9compte du domaine est dans la roue crant\u00e9e du Planning.</p>'
+      +'<p class="pl2-note">Solde de d\u00e9part\u00a0: R\u00e9glages \u203a \u00c9quipe. R\u00e8gle de d\u00e9compte\u00a0: la roue du Planning.</p>'   // ★ MOTS-18 : plus court
     +'</section>';   // ★ FRAIS-2 (§597) : les acomptes sont partis dans l'onglet « Frais » (l'argent qui passe avec la paie)
 }
 function _planRecupCartes(mbr,dm){
@@ -6513,7 +6514,7 @@ function _pfFige(mbr,P){
       +'<p class="pl2-note">'+(Math.abs(rs)>0.0001?(rs>0?'Depuis, '+F(rs)+' de plus \u00e0 retenir passent sur '+suiv+', reprises d\u2019abord sur la r\u00e9cup et les heures sup.':'Depuis, '+F(-rs)+' retenues de trop sont rendues sur '+suiv+'.'):'Rien n\u2019a chang\u00e9 depuis l\u2019envoi.')+' Ce qui change encore passe sur '+suiv+'.</p>'
       +'<div class="pf-rac"><button type="button" onclick="planFicheDefiger(\''+nm+'\')">D\u00e9figer</button></div>';
   } else {
-    h+='<p class="pl2-note">Au moment d\u2019envoyer la feuille, figez ce qui est pay\u00e9 et retenu\u00a0: ce qui changera ensuite passera sur '+suiv+'.</p>'
+    h+='<p class="pl2-note">Figez avant l\u2019envoi\u00a0: la suite passera sur '+suiv+'. '+_mvInfoBtn('plan.paie.figer')+'</p>'   // ★ MOTS-18 : plus court, la règle derrière le « i »
       +'<button type="button" class="pf-btn" onclick="planFicheFiger(\''+nm+'\')">'+_mvIcon('check',18)+'<span>Figer '+mois+'</span></button>';
   }
   return h+'</section>';
@@ -8217,7 +8218,7 @@ function _planAcomptesCard(mbr,canEdit){
     +'</div>'
     +'<button type="button" id="plan-ac-add-'+key+'" class="pf-btn" onclick="planToggleAcForm(\''+_escAttr(mbr.nom)+'\')">'+_mvIcon('euro',16)+'<span>Ajouter un acompte</span></button>';
   }
-  html+='<p class="pl2-note">Un acompte est une avance en euros\u00a0: il se retire du salaire, jamais du temps de r\u00e9cup.</p></section>';
+  html+='<p class="pl2-note">Une avance en euros, retir\u00e9e du salaire, jamais de la r\u00e9cup.</p></section>';   // ★ MOTS-18 : plus court
   return html;
 }
 

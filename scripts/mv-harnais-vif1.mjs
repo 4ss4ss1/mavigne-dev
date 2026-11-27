@@ -42,8 +42,9 @@ function suite(S) {
   const ab = ctx._ckSvAbsences([{ nom: 'Sophie' }], PE, e => ({ etat: e && e.absent ? 'absent' : 'present', motif: '' }), t0);
   T('une absence ne s’accorde plus de travers : « Absence de Sophie »', ab.length === 1 && ab[0].titre === 'Absence de Sophie' && S.ck.includes("[suite] || 'absence'))"));
   T('un objectif déjà passé n’a plus de ligne d’allure qui déborde à gauche', S.vue.includes("$('#ck-c-besoin').setAttribute('d', VISEE > AUJ ? 'M' + f1(xa)"));
-  T('le fil de portée collé sous le bandeau, les onglets sous les deux ; sa hauteur posée aussi sur Aujourd’hui',
-    S.css.includes('body #page-pilotage .pil-tabsbar{top:calc(var(--pil-entete-bas,0px) + var(--pil-portee-h,0px))}') && S.css.includes('body #page-pilotage .pil-portee{position:sticky;top:var(--pil-entete-bas,0px);z-index:61}')
+  // ★ MOTS-18 (§618) : les onglets « sous les deux » (.pil-tabsbar) sont partis avec leur barre (TETE-4C) ; le fil de portée reste collé
+  T('le fil de portée collé sous le bandeau ; sa hauteur posée aussi sur Aujourd’hui',
+    S.css.includes('body #page-pilotage .pil-portee{position:sticky;top:var(--pil-entete-bas,0px);z-index:61}')
     && S.pil.includes('window._ck2Monter(_V); _pilStickyH();'));
   T('la nouveauté de VIF-1 reste au Journal (bloc 9.74)', /\{ v: '9\.74', d: '2026-10-21', items: \[\n    \{ niv: 1, pour: \['admin'\], cible: '#ck-page'/.test(S.uti));
   return out;

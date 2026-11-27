@@ -6,7 +6,7 @@
 // ════════════════════════════════════
 
 // Fonctions pures importées d'utils.js (mêmes exports que tracteur.js)
-import { isAdmin, isTractoriste, showToast, _escHtml, _escAttr, dreEffectif, _mvIcon } from './utils.js';
+import { isAdmin, isTractoriste, showToast, _escHtml, _escAttr, dreEffectif, _mvIcon, _mvInfoBtn } from './utils.js';
 import './registre.js';   // ★ REG27-1B (§573) : la vérification du registre avant l'export (la carte de Conformité, la fenêtre « avant l'export »)
 
 // Flag debug (console.log silencieux en prod) — const par module (cf. tracteur.js)
@@ -1523,6 +1523,7 @@ function _ferCss(){
   +'.fer-ic.ok{background:var(--vert-pale,#EAF3E2);color:var(--vert-med,#3D6B27)}.fer-ic.al{background:var(--orange-pale,#FBF0E6);color:var(--texte,#1A1A14);box-shadow:inset 0 0 0 1px var(--orange,#B85A1A)}.fer-ic.n{background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
   +'.fer-cf b{font-size:var(--pt-txt,13px);font-weight:600;display:block;color:var(--texte,#1A1A14)}.fer-cf small{font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45}'
   +'.fer-lk{color:var(--phyto,#5B2D8E);font-weight:600;cursor:pointer;text-decoration:underline}'
+  +'.fer-zvl{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:3px;font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);line-height:1.45}'   // ★ MOTS-18 : une parcelle par case
   // FERTI-5 (§462) : normes en un geste, statut vigne des résultats, étiquette d'exemple
   +'.fer-norms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 8px}'
   +'.fer-norm{-webkit-appearance:none;appearance:none;border:1px solid var(--gris,#DED7C9);background:var(--bg-card,#fff);border-radius:12px;padding:7px 10px;font-family:inherit;font-size:var(--pt-micro,12px);line-height:1.3;color:var(--texte-med,#4A4A3A);cursor:pointer;text-align:left;min-height:44px}'
@@ -2032,7 +2033,7 @@ function _ferRender(){
   var h='';
   if(camps.length>1) h+='<div class="fer-seg" style="margin-bottom:12px">'+camps.slice(0,4).map(function(y){ return '<button type="button" class="'+(y===C?'on':'')+'" onclick="_ferCamp('+y+')">'+_ferCampLbl(y)+'</button>'; }).join('')+'</div>';
   h+='<div class="fer-h" style="margin:0 0 10px">Campagne '+_ferCampLbl(C)+', du 1<sup>er</sup> septembre au 31 ao\u00fbt. '+(adm?'Le bouton rond ajoute un amendement.':'')+'</div>';
-  if(!ops.length) h+='<div class="fer-c"><div class="fer-h" style="margin:0">Aucun apport sur cette campagne.'+(adm?' Touchez le bouton rond en bas \u00e0 droite pour enregistrer un amendement\u00a0: sacs, temps tracteur et registre se remplissent seuls.':'')+'</div></div>';
+  if(!ops.length) h+='<div class="fer-c"><div class="fer-h" style="margin:0">Aucun apport sur cette campagne.</div>'+(adm?'<button type="button" class="mvr-btn mvr-btn-p" style="margin-top:10px" onclick="_phytoFab()">+ Amendement</button>':'')+'</div>';   // ★ MOTS-18 (§618) : « Aucun apport » et son bouton dans la carte (maquette v3)
   ops.forEach(function(op){
     var r=Fa[op.id]||{}, nha=_ferNha(op), tot=0, fait=0, nf=0;
     (op.parcs||[]).forEach(function(n){ var s=_ferSurf(_ferParc(n)); tot+=s; if(r[n]){ fait+=s; nf++; } });
@@ -2073,14 +2074,14 @@ function _ferRender(){
   var lk=function(p){ return adm?'<span class="fer-lk" onclick="openFerParc(\''+_escAttr(p.nom)+'\')">'+_escHtml(p.nom)+'</span>':_escHtml(p.nom); };
   h+='<div class="fer-c"><div class="fer-stt" style="font-size:var(--pt-md,20px)">Ce qu\u2019un contr\u00f4le va demander</div>'
     +'<div class="fer-rs" style="margin-top:3px">Zone vuln\u00e9rable\u00a0: '+zvP.length+' parcelle'+(zvP.length>1?'s':'')+', '+_ferFr(zvS,2)+'\u00a0ha</div>';
-  h+='<div class="fer-cf"><div class="fer-ic '+(zvP.length?'ok':'n')+'">'+(zvP.length?_mvIcon('check',16):'i')+'</div><div><b>'+(zvP.length?'Parcelles en zone vuln\u00e9rable d\u00e9clar\u00e9es':'Aucune parcelle d\u00e9clar\u00e9e en zone vuln\u00e9rable')+'</b><small>'
-    +'Le zonage a \u00e9t\u00e9 revu en 2026 et peut ne couvrir qu\u2019une partie d\u2019une commune. '+(adm?'Touchez une parcelle pour la d\u00e9clarer\u00a0: ':'')+_ferParcs().map(function(p){ return lk(p)+(p.zv?' (ZV)':''); }).join(', ')+'</small></div></div>';
+  h+='<div class="fer-cf"><div class="fer-ic '+(zvP.length?'ok':'n')+'">'+(zvP.length?_mvIcon('check',16):'i')+'</div><div><b>'+(zvP.length?'Parcelles en zone vuln\u00e9rable d\u00e9clar\u00e9es':'Aucune parcelle d\u00e9clar\u00e9e en zone vuln\u00e9rable')+' '+_mvInfoBtn('phyto.fer.zv')
+    +'</b>'+(_ferParcs().length?(adm?'<small>Touchez une parcelle pour la d\u00e9clarer\u00a0:</small>':'')+'<div class="fer-zvl">'+_ferParcs().map(function(p){ return '<span>'+lk(p)+(p.zv?' (ZV)':'')+'</span>'; }).join('')+'</div>':'')+'</div></div>';   // ★ MOTS-18 : le zonage revu en 2026 derrière le « i » ; une parcelle par case
   if(zvP.length) h+='<div class="fer-cf"><div class="fer-ic '+(noIl.length?'al':'ok')+'">'+(noIl.length?'!':_mvIcon('check',16))+'</div><div><b>'+(noIl.length?'\u00celot PAC manquant sur '+noIl.length+' parcelle'+(noIl.length>1?'s':''):'\u00celots PAC renseign\u00e9s')+'</b><small>'+(noIl.length?noIl.map(lk).join(', ')+'. Le cahier exige la r\u00e9f\u00e9rence de l\u2019\u00eelot.':'Ils sortent sur le cahier imprim\u00e9.')+'</small></div></div>';
   if(zvP.length) h+='<div class="fer-cf"><div class="fer-ic '+(noSol.length?'al':'ok')+'">'+(noSol.length?'!':_mvIcon('check',16))+'</div><div><b>'+(noSol.length?'Type de sol manquant sur '+noSol.length+' parcelle'+(noSol.length>1?'s':''):'Types de sol renseign\u00e9s')+'</b><small>'+(noSol.length?noSol.map(lk).join(', ')+'.':'Ils sortent sur le cahier imprim\u00e9.')+'</small></div></div>';
   h+='<div class="fer-cf"><div class="fer-ic ok">'+_mvIcon('check',16)+'</div><div><b>Rendement r\u00e9alis\u00e9 repris de la vendange</b><small>Les hL/ha du Cuvier entrent dans le cahier sans ressaisie.</small></div></div>';
-  h+='<div class="fer-cf"><div class="fer-ic '+(zvS>3?'al':'n')+'">'+(zvS>3?'!':'i')+'</div><div><b>Analyse de sol de la campagne</b><small>Au-del\u00e0 de 3\u00a0ha en zone vuln\u00e9rable, une analyse par campagne est exig\u00e9e (mati\u00e8re organique pour la vigne). '+(zvS>3?'Le domaine en a '+_ferFr(zvS,2)+'\u00a0ha\u00a0: concern\u00e9.':'Le domaine en a '+_ferFr(zvS,2)+'\u00a0ha\u00a0: non concern\u00e9 aujourd\u2019hui.')+'</small></div></div>';
-  h+='<div class="fer-cf"><div class="fer-ic '+(fracto.length?'al':'ok')+'">'+(fracto.length?'!':_mvIcon('check',16))+'</div><div><b>'+(fracto.length?'Fractionnement \u00e0 v\u00e9rifier':'Pas de fractionnement \u00e0 pr\u00e9voir')+'</b><small>'+(fracto.length?fracto.map(_escHtml).join(', ')+'\u00a0: plus de 60\u00a0kg N/ha d\u2019azote min\u00e9ral sur la campagne. Il doit \u00eatre apport\u00e9 en deux fois au moins.':'Il ne concerne que l\u2019azote min\u00e9ral (type III) au-del\u00e0 de 60\u00a0kg N/ha.')+'</small></div></div>';
-  h+='<div class="fer-cf"><div class="fer-ic n">i</div><div><b>Plan pr\u00e9visionnel de fumure</b><small>Le calcul de dose r\u00e9glementaire (r\u00e9f\u00e9rentiel r\u00e9gional) reste celui de votre conseiller. Ma Vigne enregistre la dose choisie.</small></div></div>';
+  h+='<div class="fer-cf"><div class="fer-ic '+(zvS>3?'al':'n')+'">'+(zvS>3?'!':'i')+'</div><div><b>Analyse de sol de la campagne '+_mvInfoBtn('phyto.fer.sol')+'</b><small>'+(zvS>3?'Concern\u00e9':'Non concern\u00e9 aujourd\u2019hui')+'\u00a0: '+_ferFr(zvS,2)+'\u00a0ha en zone vuln\u00e9rable, pour un seuil de 3\u00a0ha.</small></div></div>';   // ★ MOTS-18 : la règle derrière le « i »
+  h+='<div class="fer-cf"><div class="fer-ic '+(fracto.length?'al':'ok')+'">'+(fracto.length?'!':_mvIcon('check',16))+'</div><div><b>'+(fracto.length?'Fractionnement \u00e0 v\u00e9rifier':'Pas de fractionnement \u00e0 pr\u00e9voir')+' '+_mvInfoBtn('phyto.fer.frac')+'</b>'+(fracto.length?'<div class="fer-zvl">'+fracto.map(function(n){ return '<span>'+_escHtml(n)+'</span>'; }).join('')+'</div><small>Plus de 60\u00a0kg N/ha d\u2019azote min\u00e9ral\u00a0: en deux apports au moins.</small>':'')+'</div></div>';   // ★ MOTS-18 : la règle derrière le « i » (maquette v3)
+  h+='<div class="fer-cf"><div class="fer-ic n">i</div><div><b>Plan pr\u00e9visionnel de fumure '+_mvInfoBtn('phyto.fer.plan')+'</b><small>La dose r\u00e9glementaire\u00a0: celle de votre conseiller.</small></div></div>';   // ★ MOTS-18 : le détail derrière le « i » du plan de fumure (maquette v3)
   h+='</div>';
   h+='<div style="display:flex;gap:8px;margin-top:4px"><button class="mvr-btn mvr-btn-p" style="flex:1" onclick="_ferExportPdf()">Imprimer le cahier</button><button class="mvr-btn mvr-btn-o" style="flex:1" onclick="_ferExportCsv()">Fichier tableur</button></div>'
     +'<div class="fer-h" style="text-align:center;margin-top:8px">Les deux sont aussi dans la roue crant\u00e9e du Phyto.</div>';

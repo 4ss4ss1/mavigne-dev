@@ -763,7 +763,7 @@ function typo(h) {
 function dgnMonter() {
   var root = $(DGN_ROOT); if (!root) return false;
   if (!$('dgn-vues')) {
-    root.innerHTML = '<div class="dgn-app"><div class="dgn-vue-barre"><div id="dgn-vues"></div><p class="dgn-lecture-g">' + ico('info') + '<span>Lecture seule : le diagnostic croise les données de Cuvées, Bouteilles et Labo. Les rapports d’analyse se saisissent dans l’onglet Labo.</span></p><div class="dgn-vb-act"><button type="button" class="mvbtn mvbtn-discret mvbtn-bureau" data-dgn="aide" aria-label="Méthode du diagnostic">' + ico('info') + '<span>Méthode</span></button><button type="button" class="mvbtn mvbtn-discret mvbtn-bureau" data-dgn="reg" aria-label="Réglages du diagnostic">' + ico('reglages') + '<span>Réglages</span></button></div></div><div id="dgn-vue" class="dgn-vue"></div></div>';
+    root.innerHTML = '<div class="dgn-app"><div class="dgn-vue-barre"><div id="dgn-vues"></div><p class="dgn-lecture-g">' + ico('info') + '<span>Lecture seule — les analyses se saisissent dans Labo.</span></p><div class="dgn-vb-act"><button type="button" class="mvbtn mvbtn-discret mvbtn-bureau" data-dgn="aide" aria-label="Méthode du diagnostic">' + ico('info') + '<span>Méthode</span></button><button type="button" class="mvbtn mvbtn-discret mvbtn-bureau" data-dgn="reg" aria-label="Réglages du diagnostic">' + ico('reglages') + '<span>Réglages</span></button></div></div><div id="dgn-vue" class="dgn-vue"></div></div>';
     if (!root._dgn) { root._dgn = true; root.addEventListener('click', dgnClic); root.addEventListener('input', dgnSaisie); }
   }
   if (!$('dgn-voile')) {
@@ -865,7 +865,8 @@ function diagHtml(M) {
     var pasMes = dg.ev.reduce(function (a, e) { e.manque.forEach(function (x) { if (COURT[x.id] && a.indexOf(COURT[x.id]) < 0) a.push(COURT[x.id]); }); return a; }, []);
     h += '<section class="dgn-diag dgn-diag-ok" aria-label="Diagnostic"><div class="dgn-diag-t"><span class="dgn-diag-i">' + ico('ok') + '</span><div class="dgn-diag-tt"><h2>Aucune anomalie détectée</h2><p>' + nb + ' indices croisés (laboratoire, opérations, fûts, dégustations) : aucun ne s’écarte des références du domaine.</p></div>' + pill(['ok', 'Aucun signe']) + '</div>';
     if (P.length) h += '<div class="dgn-diag-bloc"><h3>Prochaines échéances</h3><ul class="dgn-vient">' + P.map(function (p) { return '<li class="dgn-v-' + p.g + '">' + esc(p.txt) + '</li>'; }).join('') + '</ul></div>';
-    if (pasMes.length) h += '<p class="dgn-diag-note">' + esc(cap(pasMes.slice(0, -1).join(', ') + (pasMes.length > 1 ? ' et ' : '') + pasMes[pasMes.length - 1])) + ' : non suivis à ce jour. Ces mesures permettraient une détection plus précoce.</p>';
+    // ★ MOTS-18 (§618) : ce qui n'est pas suivi, une case chacun (le « permettraient une détection plus précoce » vit dans l'aide « ? »)
+    if (pasMes.length) h += '<div class="dgn-diag-note" style="display:flex;flex-wrap:wrap;gap:2px 10px"><span>Pas encore suivi' + (pasMes.length > 1 ? 's' : '') + '\u00a0:</span>' + pasMes.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</div>';
     return h + '</section>';
   }
   var top = dg.top, g = top[0].st === 'probable' ? 'dan' : 'att';

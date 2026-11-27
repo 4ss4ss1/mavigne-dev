@@ -108,7 +108,7 @@ function suite(S) {
     return b.includes('<b>Appuyez sur un graphe</b>') && b.includes('un moût à 12° est sec vers 994') && b.includes('de 18 à 30\\u00a0°C') && b.includes('Les maturités restent sur un <b>axe de dates</b>') && b.includes('Une cuvée sans <b>date d\\u2019entonnage</b>');
   })());
   T('③ sous-titres, aide des puces et légende courts', S.cave.includes("'Les m\\u00eames cuves, depuis l\\u2019encuvage.','J0 = encuvage',") && S.cave.includes("'Le couloir du cuvage, et la cuve que vous suivez.',")
-    && S.cave.includes("if(l === 1) return 'Touchez-en une seconde pour comparer.';") && S.cave.includes("+ '<b style=\"color:var(--texte-med)\">Zone dor\\u00e9e</b>\\u00a0: du minimum au maximum. '")
+    && S.cave.includes("if(l === 1) return 'Touchez-en une seconde pour comparer.';") && S.cave.includes("+ '<span><b style=\"color:var(--texte-med)\">Zone dor\\u00e9e</b>\\u00a0: du minimum au maximum</span>'")   /* MOTS-18 (§618) : une case par repère */
     && !/Un palier de densit\\u00e9 s\\u2019explique souvent ici/.test(C) && !/Vous pouvez en ajouter une seconde/.test(C));
 
   // ④ les défauts

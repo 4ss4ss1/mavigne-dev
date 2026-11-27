@@ -874,6 +874,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-ab2.mjs --contre'],       //   la suit chez son voisin — la saison reste d'un bloc, son nom avec
   ['node scripts/mv-harnais-ab3.mjs'],                // FRISE-AB3 (§617) : un modèle qui alterne se reporte par semaine sur l'année d'après —
   ['node scripts/mv-harnais-ab3.mjs --contre'],       //   l'alternance continue (janvier suit décembre) ; sans alternance, le rang dans le mois
+  ['node scripts/mv-harnais-mots18.mjs'],             // MOTS-18 (§618) : Fertilisation, la Cave, la fiche d'une personne allégées (leurs notes dans leur « i »),
+  ['node scripts/mv-harnais-mots18.mjs --contre'],    //   la feuille purgée des places que plus rien ne pose (.pil-tabsbar, la ligne du jour sous l'en-tête)
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

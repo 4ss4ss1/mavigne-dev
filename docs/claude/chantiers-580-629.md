@@ -1794,3 +1794,118 @@ Les contre-épreuves rougissent toutes :
 
 - ⚠️ **Expliquer avec le cas de la personne, pas avec un cas de test.** Le modèle d’essai (une alternance d’avril à septembre, des « saisons ») a rendu l’explication obscure. Celui de Nico (un vendredi sur deux de janvier à décembre) la rendait évidente : deux vendredis libres de suite.
 - ⚠️ **Une règle « même rang dans le mois » ne garde que ce qui se compte dans le mois.** L’alternance se compte en semaines de l’année : son report doit garder la parité des semaines (52, et non 53 ou le rang). Le cas du rang n’apparaît qu’au 1er, au 8, au 15, au 22 ou au 29 du mois : deux contre-épreuves sont restées muettes sur un 20 mai et un 1er avril, où les deux reports tombent sur le même jour.
+
+
+## 618. ★★ MOTS-18 — PHYTO › FERTILISATION, LA CAVE, LA FICHE D’UNE PERSONNE ALLÉGÉES ; LA FEUILLE PURGÉE DES RÈGLES QUE PLUS RIEN N’AFFICHE (26/11 — APP 11.39, SW 12.30 — `src/phyto.js` · `src/cuvier.js` · `src/cave.js` · `src/diagnostic.js` · `src/planning.js` · `src/utils.js` (15 fiches `MV_INFO`, l’aide du diagnostic, APP) · `src/styles.css` (la purge) · `src/whats-new.js` · `index.html` · `public/sw.js` · `guide/07-phyto.html` · `public/guide.html` (regénéré) · `scripts/mv-harnais-mots18.mjs` (neuf) · `scripts/mv-mots-rendu.mjs` (la fiche d’une personne mesurée) et `scripts/mv-mots-baseline.json` (regravé) · `scripts/contraste-baseline.json` (regravé) · `recup`, `info`, `rec1`, `cuves1`, `mots13`, `tete1`, `tete3b`, `tete3c`, `tete3d`, `colle1`, `vif1` suivis · `scripts/mv-harnais-liste.mjs`)
+
+### 618a. D’où ça vient
+
+- Restes hors plan du §612 (« Moins de texte » fini) : 10 phrases de 15 mots et plus au téléphone et 17 sur ordinateur, dans Phyto › Fertilisation, la Cave et la fiche d’une personne au Planning. Il y avait aussi la « petite suite » de TETE-4C (§579) : purger de `styles.css` les règles de deux places que plus rien ne pose.
+- Nico (26/11) : « on fait les 3. si tu peux faire en un lot c’est parfait », puis « directement » (sans maquette). La maquette v3 du plan tranchait déjà l’essentiel de la Fertilisation et de la Cave.
+- **Le relevé d’avant** (`/home/claude/work/m18/releve.mjs`, hors dépôt : les blocs de 15 mots et plus, écran par écran, téléphone et ordinateur, la démo et le domaine des tutos) :
+  - Fertilisation : 4 phrases.
+  - Le Cuvier : Récoltes 1, Cuves 1.
+  - Le Chai : Cuvées 1 (l’alerte), Bouteilles 1, Labo 1, Diagnostic 1 (2 sur ordinateur).
+  - Le Millésime › Courbes : 2 sur ordinateur.
+  - La fiche d’une personne, sur ses cinq onglets et sur chacun des salariés de la démo : 12 notes, plus une 13e (l’explication de la compta) sur un salarié.
+
+### 618b. Ce qui change
+
+- **La règle du plan** : un texte qui quitte l’écran va dans le « i » de son chiffre (`MV_INFO`) ou dans l’aide « ? » (`MV_AIDE`) — jamais supprimé. Quinze fiches neuves, dont trois **vivantes** (`_mvInfoSet`) :
+  - `cave.rec.rdt` : le réglage des kilos par hL du domaine ;
+  - `plan.cpt.lire` : la légende du tableau de l’année, avec ses notes d’avant la majoration ;
+  - `plan.cpt.an` : la base ou le plafond du salarié, sa suspension, sa proratisation.
+- **Phyto › Fertilisation** (maquette v3) :
+  - une campagne sans apport dit « Aucun apport sur cette campagne » et montre le bouton **« + Amendement »**, qui appelle le même geste que le bouton rond (`_phytoFab`) ;
+  - la zone vulnérable : le zonage revu en 2026 derrière le « i », puis **une parcelle par case**. Sans parcelle, plus de « Touchez une parcelle » à vide ;
+  - l’analyse de sol : « Non concerné aujourd’hui : 0,00 ha en zone vulnérable, pour un seuil de 3 ha », la règle derrière le « i » ;
+  - le fractionnement : le titre et sa coche ; à vérifier, les parcelles en cases et une ligne ;
+  - le plan de fumure : « La dose réglementaire : celle de votre conseiller. », le détail derrière le « i ».
+- **Le Cuvier** :
+  - Récoltes : « 8 parcelles rentrées sur 8. » et son « i » ;
+  - Cuves : « N cuves à mesurer » et son « i » ; le pourquoi du relevé quotidien quitte l’alerte, qui garde ses cuves à toucher ;
+  - Maturités (et Le Millésime) : la plus avancée en une ligne (« En Bertrange en tête, +3,5 g/L par jour. »), puis « Ordre de récolte : de haut en bas. » dessous, sous un seul filet (25 → 13 mots).
+- **Le Chai** :
+  - Bouteilles : le calcul (× 133,33) et la sortie du chai derrière le « i » du titre ;
+  - Labo : la phrase d’accueil quitte l’écran — l’aide de la Cave (« Les rapports du labo ») la portait déjà ;
+  - Diagnostic : « Lecture seule — les analyses se saisissent dans Labo. » ; ce qui n’est pas suivi en cases (« Pas encore suivi : la température du chai ») — l’accord fautif « non suivis » disparaît avec la phrase ; le « permettraient une détection plus précoce » rejoint l’aide du diagnostic ;
+  - Cuvées : **l’alerte « Fermentation à finir » reste** (24 mots ; la maquette v3 la gardait : elle demande un geste).
+- **Le Millésime › Courbes** : la légende en cases (zone dorée, pointillé, vos cuves, bande verte), une par repère.
+- **La fiche d’une personne** (Planning › Personnel) :
+  - Résumé :
+    - le pied du cadre sur deux lignes (le mois, puis ses semaines) ;
+    - l’explication de la compta **une idée par ligne, à l’écran seulement** — le relevé imprimé, qui lit la même `_pfCompta`, garde ses phrases (CLAIR-1, MAPIED-1 n’ont pas bougé) ;
+    - l’ordre de paiement derrière le « i » du titre « Paiement des heures sup » ;
+    - les taux et la conversion derrière celui de « Où vont les heures sup » ;
+    - « Figez avant l’envoi : la suite passera sur novembre. » et son « i » ;
+  - Jours : « Toucher un jour ouvre sa feuille. » et le « i » des taux ;
+  - Compteur :
+    - « Droit à repos ouvert. » et son « i » ;
+    - « Heures à rattraper » : la règle derrière le « i » du titre, à l’écran seulement ce qui attend (sa semaine, ou les prochaines heures sup) ;
+    - la légende du tableau de l’année derrière le « i » de son titre ;
+    - le compteur de l’année : sa méthode derrière le « i » du titre ; à l’écran, l’état seul (une suspension, une proratisation) ;
+    - **l’écart du modèle se corrige « dans Planning › Année »** : la fiche disait « dans Réglages », or la grille d’un modèle quitte la roue crantée depuis ANNEE-TAB (§548) ;
+    - un contrat payé à l’heure : « Pas d’annualisation : payé à l’heure. » et son « i » ;
+  - Congés : « Solde de départ : Réglages › Équipe. Règle de décompte : la roue du Planning. » ;
+  - Frais : « Une avance en euros, retirée du salaire, jamais de la récup. ».
+  - Les « i » de la fiche se posent **dans le titre** de leur carte : posés entre le titre et le sous-titre, ils flottaient au milieu de la ligne (vu à la capture).
+- **La purge de `styles.css`** — d’abord relevée dans l’appli construite : chaque sélecteur candidat interrogé sur 15 pages × 3 tailles (téléphone, tablette, ordinateur).
+  - Ce qui part : `.pil-tabsbar` (la barre d’onglets du Pilotage, partie à TETE-4C) et « `.mod-header + .mod-meta-row` » (la ligne du jour SOUS l’en-tête, qui vit dedans depuis TETE-4A, §577). Les deux visent **0 élément** partout.
+  - Le bilan : 20 règles retirées, 22 délestées de leurs seuls sélecteurs morts (leurs autres sélecteurs restent), 4 170 octets de moins. Une règle qui ne vise rien n’a pas d’effet : l’écran ne bouge pas.
+  - Ce qui reste, parce que vivant : la règle collée de `.pil-portee` (la ligne d’écran du Pilotage existe, et `--pil-entete-bas` la place), la colonne du cockpit (le reste de COLLE-1), et `_pilStickyH` / `_pilEnteteBas` dans `pilotage.js` (le second nourrit encore `.pil-portee` ; le premier ne nourrit plus rien, laissé pour un lot de code).
+  - Les commentaires de la feuille disent le départ.
+
+### 618c. Mesuré après (build, démo et domaine des tutos)
+
+- **Phrases de 15 mots et plus sur les 50 écrans de l’admin : téléphone 10 → 1, ordinateur 17 → 1** (celle qui reste : l’alerte gardée des Cuvées).
+- Mots au téléphone :
+  - Fertilisation 206 → 140 ;
+  - Le Cuvier : Récoltes 148 → 132, Cuves 128 → 112 ;
+  - Le Chai : Bouteilles 120 → 102, Labo 74 → 43, Diagnostic 105 → 93.
+- Mots sur ordinateur :
+  - Fertilisation 209 → 143 ;
+  - Le Cuvier : Récoltes 246 → 230, Cuves 160 → 144 ;
+  - Le Chai : Bouteilles 116 → 98, Labo 74 → 43, Diagnostic 296 → 276 ;
+  - Le Millésime : Courbes 284 → 272 ;
+  - Planning › Personnel (la fiche rangée dans la page, son Résumé) 275 → 215.
+- **La fiche d’une personne, ordinateur, tous les salariés de la démo** :
+  - mots : Résumé 204 → 144, Jours 251 → 239, Compteur 255 → 136, Congés 47 → 37, Frais 64 → 58 ;
+  - blocs longs : **13 → 0**.
+- Le cliquet des mots regravé avec son motif, sans hausse. Il **mesure désormais la fiche d’une personne sur ordinateur** (ses quatre autres onglets : 4 écrans de plus, 50 en tout) — elle n’était pas mesurée.
+- Captures :
+  - Fertilisation au téléphone : le bouton « + Amendement », les huit parcelles en cases ;
+  - la fiche sur ordinateur : le Compteur et ses « i » ;
+  - Le Millésime › Courbes : la légende en cases.
+
+### 618d. Harnais
+
+`scripts/mv-harnais-mots18.mjs` : 8 assertions et 12 contre-épreuves, sur les sources. Il tient :
+
+- chaque phrase retirée et sa fiche (15), l’aide du Labo et du diagnostic ;
+- chaque « i » posé à sa place, les trois fiches vivantes remplies ;
+- aucune des 23 phrases longues revenue ;
+- ce qui reste à l’écran, dans la Fertilisation, la Cave et la fiche ;
+- la feuille sans `.pil-tabsbar` ni « `.mod-header + .mod-meta-row` », et ce qui vit encore resté en place.
+
+**Suivis** :
+
+- `recup` (V5 : les taux dans le « i » ; V7 : le titre porte son « i ») ;
+- `info` (lit aussi `phyto.js` et `planning.js`, où se posent les nouvelles pastilles) ;
+- `rec1` et `cuves1` (les deux aides de la pastille, en bouchon) ;
+- `mots13` (la légende en cases) ;
+- `tete1`, `colle1`, `vif1`, `tete3b`, `tete3c`, `tete3d` : ces gardes de lots anciens vérifiaient que les règles purgées existaient. Ils vérifient maintenant qu’elles ne reviennent pas, et suivent ce qui reste. `tete3d` lit `bandeau.css`, où vit la ligne du jour.
+
+Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’une règle morte (1 029 → 1 028). `audit-pil`, hors chaîne, était déjà rouge avant ce lot (17 sur 51) : pas touché.
+
+### 618e. Restes
+
+- **L’alerte « Fermentation à finir »** des Cuvées (24 mots) reste, comme la maquette v3 le voulait ; c’est la seule phrase longue de l’admin.
+- `_pilStickyH` (pilotage.js) ne nourrit plus aucune règle : il peut partir avec un lot de code, ses quatre contrôles (`audit-pil`, `ref1`, `vif1`, `pilrange1`) avec lui. Il reste aussi la ligne `.pil-souslig` (les 32 px sous la ligne d’écran, hors Aujourd’hui) et le bouton du téléphone qui ne se referme pas d’un toucher hors de la page.
+- Pas vu : la fiche d’une personne au téléphone (elle s’ouvre par-dessus, le cliquet ne la mesure pas) ; un vrai salarié avec suspension ou proratisation (l’état court et sa fiche « i » ne sont joués qu’au harnais) ; le thème sombre.
+
+### 618f. Leçons
+
+- ⚠️ **Une règle « morte » se prouve dans l’appli, pas dans la doc.** Le reste noté au §579 disait « le bloc COLLE-1 du Pilotage » mort ; le relevé page par page a montré que sa moitié vit encore (la ligne d’écran collée, la colonne du cockpit), et que `.mod-meta-row` est partout — seule sa place « sous l’en-tête » était morte. On purge un sélecteur qui ne vise **aucun élément**, relevé sur toutes les pages et toutes les tailles, pas un bloc entier sur sa réputation.
+- ⚠️ **Un garde de lot ancien qui vérifie qu’une règle EXISTE rougit quand elle part — c’est voulu.** Il se retourne : il vérifie qu’elle ne revient pas, et suit ce qui reste. Le contrôle n’est pas affaibli, il garde la nouvelle vérité.
+- ⚠️ **Une note retirée peut cacher une erreur de l’écran.** « Corrige la grille du modèle dans Réglages » renvoyait vers un réglage parti depuis ANNEE-TAB ; « non suivis » s’accordait mal. Relire chaque phrase en la déplaçant.
+- ⚠️ **Un bouton neuf qui appelle une fonction neuve compte un geste sans tuto** (le cliquet des tutos, F). Le même geste que le bouton rond (`_phytoFab`) ne compte rien de plus.

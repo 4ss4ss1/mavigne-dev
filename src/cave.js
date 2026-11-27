@@ -3949,6 +3949,7 @@ function _caveV2InjectCss(){
   +'.mvmat-it em{font-style:normal;color:var(--texte-doux,#5F5F5F);font-variant-numeric:lining-nums tabular-nums;margin-left:auto;text-align:right}'
   +'.mvmat-note{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:8px}'
   +'.mvmat-ord{font-size:var(--pt-txt,13px);color:var(--texte-med,#4A4A3A);margin-top:10px;padding-top:10px;border-top:1px solid var(--gris-clair,#ECE6DA)}'
+  +'.mvmat-ord + .mvmat-ord{margin-top:2px;padding-top:0;border-top:0}'   // ★ MOTS-18 (§618) : l'ordre de récolte, sous la plus avancée, sans second filet
   +'.mvmat-card{background:var(--bg-card,#FBFAF6);border-radius:14px;padding:15px;margin-bottom:14px;box-shadow:0 1px 4px rgba(20,17,13,.06);border:1px solid var(--gris-clair,#ECE6DA)}'
   +'.mvmat-ttl{font-size:var(--pt-lbl,10.5px);letter-spacing:0;text-transform:none;color:var(--texte-doux,#5F5F5F);font-weight:600;margin-bottom:10px}'
   +'.mva-card{background:var(--bg-card,#FBFAF6);border-radius:14px;padding:15px;margin-bottom:12px;box-shadow:0 1px 4px rgba(20,17,13,.06);border:1px solid rgba(138,90,56,.08)}'
@@ -4367,8 +4368,8 @@ function renderCaveBouteille(){
   var act=cuvs.filter(function(c){return c.statut!=='embouteille';});
   var emb=cuvs.filter(function(c){return c.statut==='embouteille';});
   var w=canWrite();
-  var html='<div class="mvb-sec">Prêt à mettre en bouteille</div>';
-  html+='<div class="mvb-hint">Bouteilles auto = volume élevé × 133,33 (75 cl). Ajustable. Mettre en bouteille sort la cuvée du chai et l\'archive par millésime.</div>';
+  // ★ MOTS-18 (§618) : le calcul des bouteilles et la sortie du chai derrière le « i » (maquette v3)
+  var html='<div class="mvb-sec">Prêt à mettre en bouteille'+(typeof window._mvInfoBtn==='function'?' '+window._mvInfoBtn('cave.btl'):'')+'</div>';
   if(!act.length){
     html+='<div class="mvb-empty">Aucune cuvée en élevage.</div>';
   } else {
@@ -7894,11 +7895,12 @@ function _pcrbDens(){
    divergent au premier changement, et l'ecran dirait deux choses du meme dessin. */
 function _crbLeg(dens){
   // MOTS-13 : plus court — une légende se lit en regardant le dessin ; le détail est dans le « i »
-  return '<div class="crb-aide" style="padding-top:8px">'
-    + '<b style="color:var(--texte-med)">Zone dor\u00e9e</b>\u00a0: du minimum au maximum. '
-    + '<b style="color:var(--texte-med)">Pointill\u00e9</b>\u00a0: la m\u00e9diane. '
-    + '<b style="color:var(--terre)">Trait plein</b>, <b style="color:var(--bleu)">tiret\u00e9</b>\u00a0: vos cuves.'
-    + (dens ? '' : ' <b style="color:var(--texte-med)">Bande verte</b>\u00a0: de 18 \u00e0 30\u00a0\u00b0C.')
+  // ★ MOTS-18 (§618) : une case par repère — la légende se lit en regardant le dessin, plus une phrase de 17 mots
+  return '<div class="crb-aide" style="padding-top:8px;display:flex;flex-wrap:wrap;gap:2px 14px">'
+    + '<span><b style="color:var(--texte-med)">Zone dor\u00e9e</b>\u00a0: du minimum au maximum</span>'
+    + '<span><b style="color:var(--texte-med)">Pointill\u00e9</b>\u00a0: la m\u00e9diane</span>'
+    + '<span><b style="color:var(--terre)">Trait plein</b>, <b style="color:var(--bleu)">tiret\u00e9</b>\u00a0: vos cuves</span>'
+    + (dens ? '' : '<span><b style="color:var(--texte-med)">Bande verte</b>\u00a0: de 18 \u00e0 30\u00a0\u00b0C</span>')
     + '</div>';
 }
 /* MOTS-13 : _crbNoteInterp (la phrase de l'interpolation, sous deux graphes) est partie — elle est dans le « i » (cave.courbes). */
@@ -11458,7 +11460,7 @@ function _laboVueListe(){
   var peut=_laboPeut();
   var h='<div class="lbo-page">';
   if(mf!=='tous') h+='<div class="mvc-jmilnote">Millésime '+_escHtml(mf)+' seul'+(cache?' \u00b7 '+cache+' rapport'+(cache>1?'s':'')+' d’un autre millésime, visible'+(cache>1?'s':'')+' sur « Tous »':'')+'</div>';
-  h+='<p class="lbo-intro">Une fiche par envoi au labo. Chaque rapport se range seul sur sa cuvée ou sa cuve : ses courbes, la projection de la malo et le suivi des sucres le lisent.</p>';
+  // ★ MOTS-18 (§618) : la phrase d'accueil a quitté l'écran — elle vit dans l'aide « ? » de la Cave (« Les rapports du labo », maquette v3)
   if(peut) h+='<button class="lbo-btn" id="lbo-saisir" onclick="window.openLabo({nouveau:true})">'+_mvIcon('ajout',18)+'Saisir un rapport</button>';
   if(!dates.length) h+='<div class="lbo-vide">'+(cache?'Aucun rapport du labo sur ce millésime.':'Aucun rapport du labo pour l’instant.')+'</div>';
   dates.forEach(function(d){

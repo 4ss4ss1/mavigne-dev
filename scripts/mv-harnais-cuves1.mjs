@@ -52,6 +52,7 @@ function jouer(S) {
     CAVE_VENDANGE: { cuves_vinif: CUVES },
     document: { getElementById: (id) => (id === 'cuv-fiche-corps' ? (ctx.FENETRE ? (els[id] = els[id] || { innerHTML: '' }) : null) : els[id] || null) },
     _mvToday: () => '2026-09-08', _mvIcon: (n) => '<svg data-ic="' + n + '"></svg>',
+    _mvInfoBtn: (k) => '<button class="mv-i" data-mvi="' + k + '"></button>', _mvInfoSet: () => {},   // MOTS-18 (§618)
     _escHtml: (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
     _escAttr: (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;'),
     canWrite: () => ctx.ECRIRE, _matAnCourant: () => ctx.AN, _mlCampagne: () => '2026', _matLarge: () => ctx.LARGE, _vendAnnees: () => ['2026', '2025'],

@@ -31,7 +31,8 @@ function suite(S) {
   T('les sous-onglets sont un filtre segmenté', B.includes('body .mvu-tabs.mvu-sub{ gap:var(--e-0,2px); padding:var(--e-0,2px);') && B.includes('body .mvu-tabs.mvu-sub .mvu-tab.active,body .mvu-tabs.mvu-sub .mvu-tab.on{ background:var(--bg-card)!important;'));
   T('le bandeau du Pilotage quitte le brun : surface, plus de halo ni de filet dégradé', B.includes('body .pil-mast{ background:var(--bg-card)!important;') && B.includes('body .pil-mast::after,body .pil-mast .pil-mast-orb{ display:none!important; }'));
   T('les petites étiquettes ne sont plus en capitales espacées', B.includes('.pil-eyebrow{ color:var(--texte-doux)!important; font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; letter-spacing:0!important; text-transform:none!important; }'));
-  T('la barre d’onglets du Pilotage est sur la surface', B.includes('body .pil-tabsbar{ background:var(--bg-card)!important;'));
+  // ★ MOTS-18 (§618) : la barre .pil-tabsbar n'existe plus depuis TETE-4C (§579) — sa règle est partie de la feuille (0 élément visé, relevé page par page)
+  T('la barre d’onglets du Pilotage n’a plus de règle : elle n’existe plus (TETE-4C), les onglets sont dans l’en-tête', !B.replace(/\/\*[\s\S]*?\*\//g, '').includes('pil-tabsbar'));
   T('sur ordinateur avec la barre, le contenu est un panneau posé sur le fond (et la barre perd son filet)',
     /@media \(min-width:1024px\)\{\s*body\.mv-avec-rail \.mv-rail\{ border-right-color:transparent; \}\s*body\.mv-avec-rail #app-content-wrap\{ margin:var\(--l-inset\) var\(--l-inset\) var\(--l-inset\) 0;[^}]*border-radius:var\(--r-md,8px\);[^}]*overflow:clip; \}/.test(B));
   T('ce harnais est branché dans la liste des contrôles', S.liste.includes("['node scripts/mv-harnais-tete1.mjs'],") && S.liste.includes("['node scripts/mv-harnais-tete1.mjs --contre'],"));

@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.29
+// MA VIGNE — Service Worker v12.30
+// v12.30 (26/11/2026) — MOTS-18 (§618) : Phyto › Fertilisation, la Cave (Récoltes, Cuves, Bouteilles, Labo, Diagnostic, Courbes) et la fiche d'une personne au Planning allégées — leurs notes passent dans leur « i » ou dans l'aide ; la feuille de style purgée des règles que plus rien n'affiche (la barre .pil-tabsbar, la ligne du jour sous l'en-tête). APP 11.39.
 // v12.29 (26/11/2026) — FRISE-AB3 (§617) : « Préparer 2027 » (et toute année qui reprend celle d'avant) reporte un modèle qui alterne semaine après semaine — un vendredi sur deux le reste toute l'année, janvier continue décembre ; un modèle sans alternance se reporte comme avant. APP 11.38.
 // v12.28 (26/11/2026) — FRISE-AB2 (§616) : Planning › Année, un mois qui n'a pas de quoi lire l'alternance A / B (ses fériés sur le jour qui alterne, la semaine des vendanges) la suit chez son voisin — une saison « un vendredi sur deux » reste d'un bloc, son nom avec. APP 11.37.
 // v12.27 (26/11/2026) — ANNEE-4 (§615) : Planning › Année, le nom des saisons et des semaines à part (facultatif, rangé avec le modèle, au jour où la période commence ; il suit la coupe) — dans la vue, le panneau, le programme indicatif, « Mon année » et l'export CSV (relu à l'import) ; « Mon année » aux couleurs de la vue. APP 11.36.
@@ -4761,7 +4762,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.29';
+const CACHE_NAME   = 'mavigne-v12.30';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4778,7 +4779,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.29 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.30 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4798,7 +4799,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.29 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.30 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

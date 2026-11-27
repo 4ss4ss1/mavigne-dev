@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.39', d: '2026-11-26', items: [   // MOTS-18 (§618) : Fertilisation, la Cave, la fiche d'une personne allégées ; la feuille purgée
+    { niv: 0, pour: ['admin'], emoji: 'liste', titre: 'Moins à lire\u00a0: la Fertilisation, la Cave, la fiche d\u2019une personne',
+      desc: "Les longues explications de ces écrans sont passées derrière leur «\u00a0i\u00a0» ou dans l\u2019aide «\u00a0?\u00a0»\u00a0: rien n\u2019est perdu, il suffit de toucher le «\u00a0i\u00a0». Une campagne sans apport montre son bouton «\u00a0+ Amendement\u00a0», les parcelles de la zone vulnérable se touchent une par une, la légende des courbes se lit d\u2019un coup d\u2019œil. Dans la fiche d\u2019une personne, la grille du modèle se corrige dans Planning › Année." },
+  ] },
   { v: '11.38', d: '2026-11-26', items: [   // FRISE-AB3 (§617) : un modèle qui alterne se reporte par semaine sur l'année d'après
     { niv: 0, pour: ['admin'], emoji: 'calendrier', titre: 'Préparer l\u2019année suivante\u00a0: un vendredi sur deux le reste',
       desc: "Quand un modèle ne travaille qu\u2019un vendredi sur deux, «\u00a0Préparer 2027\u00a0» recopiait l\u2019année mois par mois, et l\u2019alternance se décalait à certains changements de mois (deux vendredis libres de suite). Elle continue maintenant semaine après semaine, et janvier prend la suite de décembre. Les modèles sans alternance se recopient comme avant." },

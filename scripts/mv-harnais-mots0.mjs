@@ -7,7 +7,7 @@
    Le contrôle au rendu (scripts/mv-mots-rendu.mjs) demande un build et un navigateur : il vit hors de `npm run check`,
    comme le gabarit (§456) et l’expérience d’usage (§459), et la CI le joue après eux. Ce harnais, lui, tourne à chaque
    check et garde ce qui ne se voit pas tant que rien ne rougit : que npm et la CI jouent bien le contrôle — UN CLIQUET ÉCRIT
-   N’EST PAS UN CLIQUET BRANCHÉ —, que la référence (scripts/mv-mots-baseline.json) couvre les 46 écrans et les deux tailles
+   N’EST PAS UN CLIQUET BRANCHÉ —, que la référence (scripts/mv-mots-baseline.json) couvre les 50 écrans (46, puis la fiche d’une personne, MOTS-18) et les deux tailles
    que le contrôle relève, avec des nombres, que son horloge est celle du contrôle ET celle de l’expérience d’usage (la même
    démo, le même jour), que le contrôle pose bien cette horloge, refuse de regraver une hausse sans raison écrite, garde sa
    contre-épreuve et son lexique, ne lit le lexique qu’au Pilotage — et que la LISTE ne le joue pas : il lui faut un build
@@ -35,7 +35,8 @@ function jouer(S) {
   const iMe = S.rendu.indexOf('const MESURES = {'), jMe = S.rendu.indexOf('\n};', iMe);
   const mesures = iMe > 0 ? [...S.rendu.slice(iMe, jMe).matchAll(/^ {2}([a-z0-9]+): \{ tol:/gm)].map((m) => m[1]) : [];
   const mH = S.rendu.match(/const HORLOGE = '([^']+)'/), mHux = S.ux.match(/const HORLOGE = '([^']+)'/);
-  t('③ le contrôle relève 46 écrans, sans doublon, et quatre mesures', ecrans.length === 46 && new Set(ecrans).size === 46 && mesures.join(',') === 'mots,p15,avant,lex', ecrans.length + ' écrans, mesures : ' + mesures.join(','));
+  // ★ MOTS-18 (§618) : 46 + les quatre autres onglets de la fiche d'une personne (mesurée sur ordinateur) = 50
+  t('③ le contrôle relève 50 écrans, sans doublon, et quatre mesures', ecrans.length === 50 && new Set(ecrans).size === 50 && mesures.join(',') === 'mots,p15,avant,lex', ecrans.length + ' écrans, mesures : ' + mesures.join(','));
   t('③ le Pilotage y a ses quatorze écrans', ecrans.filter((e) => e.startsWith('Pilotage › ')).length === 14, String(ecrans.filter((e) => e.startsWith('Pilotage › ')).length));
   let ref = null; try { ref = JSON.parse(S.ref); } catch (e) { ref = null; }
   t('④ la référence se lit (JSON)', !!ref);
@@ -47,7 +48,7 @@ function jouer(S) {
       ['mots', 'p15'].forEach((k) => { if (!nombre(m[k])) manques.push(e + ' › ' + c + ' › ' + k + ' = ' + JSON.stringify(m[k])); });
       if (m.avant !== null && !nombre(m.avant)) manques.push(e + ' › ' + c + ' › avant = ' + JSON.stringify(m.avant));
       if (c.startsWith('Pilotage › ') ? !nombre(m.lex) : m.lex !== null) manques.push(e + ' › ' + c + ' › lex = ' + JSON.stringify(m.lex)); }));
-    t('④ la référence couvre les deux tailles × 46 écrans, avec des nombres (le lexique au Pilotage seulement)', manques.length === 0, manques.slice(0, 4).join(' · '));
+    t('④ la référence couvre les deux tailles × 50 écrans, avec des nombres (le lexique au Pilotage seulement)', manques.length === 0, manques.slice(0, 4).join(' · '));
     const enTrop = ['téléphone', 'ordinateur'].flatMap((e) => Object.keys((ref.mesures || {})[e] || {}).filter((c) => !ecrans.includes(c)).map((c) => e + ' › ' + c));
     t('④ la référence ne garde aucun écran que le contrôle ne relève plus', enTrop.length === 0, enTrop.slice(0, 4).join(' · '));
     t('④ chaque regravure dit pourquoi', Array.isArray(ref.regravures) && ref.regravures.length > 0 && ref.regravures.every((r) => r && typeof r.motif === 'string' && r.motif.length > 0));

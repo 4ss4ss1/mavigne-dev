@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.38';
+export const APP_VERSION = '11.39';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2916,7 +2916,7 @@ var MV_AIDE = {
         + "Les trois arrivent au journal et au Suivi d’élevage ; traitement et filtration entrent au registre des manipulations, la dégustation y est comptée en pied."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Les rapports du labo', "Le Chai › onglet « Labo » : une fiche par envoi au labo. La date du prélèvement, les analyses demandées — reprises de la fiche précédente —, puis une ligne par rapport : n° de rapport, n° d’échantillon, la cuvée au Chai ou la cuve au Cuvier. La couleur et l’appellation se lisent sur ses parcelles ; « < 0,1 » s’écrit tel quel ; un PDF par rapport. Avant d’enregistrer, l’écran montre où va chaque chiffre : le glucose d’une cuve qui fermente sur sa courbe des sucres, le malique d’une cuvée sur sa malo, le reste dans son bloc « Au labo ». Au-delà des neuf analyses courantes, la fiche propose l’azote assimilable, les éthylphénols, l’acétate d’éthyle et l’éthanal : le Diagnostic s’en sert pour confirmer ou écarter une piste."],
-      ['Le diagnostic', "Le Chai › onglet « Diagnostic » : rien à y saisir. Il croise les analyses du labo, les opérations, les fûts et les dégustations de chaque cuvée, et nomme une cause possible quand plusieurs signaux vont ensemble — Brett, piqûre acétique, oxydation, malo lente. Pour chaque cuvée : les indices relevés, ce qui permettrait de confirmer (au labo, au chai), les chiffres clés, la grille des risques et l’évolution des analyses. <b>Échéancier</b> liste ce qui est à traiter maintenant et les sulfitages des 60 prochains jours ; <b>Comparaison</b> met les cuvées côte à côte selon les fûts ou le millésime ; <b>Méthode</b> explique les statuts ; <b>Réglages</b> (administrateur) fixe l’unité de la volatile, l’objectif de SO2 actif et le seuil d’alerte. Seule action : <b>Demander une analyse</b> prépare la demande, à partager ou copier pour le labo. Le diagnostic est indicatif : il oriente les contrôles, il ne remplace ni l’analyse de confirmation ni l’avis de l’œnologue. Dans ses Réglages, la force de la solution de SO2 du Chai convertit les doses du soutirage en mg/L : rendement des sulfitages et dose estimée."],
+      ['Le diagnostic', "Le Chai › onglet « Diagnostic » : rien à y saisir. Il croise les analyses du labo, les opérations, les fûts et les dégustations de chaque cuvée, et nomme une cause possible quand plusieurs signaux vont ensemble — Brett, piqûre acétique, oxydation, malo lente. Pour chaque cuvée : les indices relevés, ce qui permettrait de confirmer (au labo, au chai), les chiffres clés, la grille des risques et l’évolution des analyses. <b>Échéancier</b> liste ce qui est à traiter maintenant et les sulfitages des 60 prochains jours ; <b>Comparaison</b> met les cuvées côte à côte selon les fûts ou le millésime ; <b>Méthode</b> explique les statuts ; <b>Réglages</b> (administrateur) fixe l’unité de la volatile, l’objectif de SO2 actif et le seuil d’alerte. Seule action : <b>Demander une analyse</b> prépare la demande, à partager ou copier pour le labo. Le diagnostic est indicatif : il oriente les contrôles, il ne remplace ni l’analyse de confirmation ni l’avis de l’œnologue. Dans ses Réglages, la force de la solution de SO2 du Chai convertit les doses du soutirage en mg/L : rendement des sulfitages et dose estimée. Ce qui n’est pas encore suivi (la fleur, la température du chai…) est nommé sous le diagnostic : le suivre permettrait une détection plus précoce."],
       ['Aération et fleur', "dans <b>Nouvelle opération</b> : au soutirage, « À l’abri de l’air » ou « À l’air » dit si le vin a été aéré ; à la dégustation, le signal « Fleur en surface » se coche quand un voile apparaît. Rien de coché reste « non renseigné ». Le Diagnostic s’en sert : un soutirage à l’air ou de la fleur appuient une piqûre acétique ou une oxydation."],
       ['Température, mise, part des anges', "à la dégustation, « Température du chai » se note en °C (facultatif) ; à la mise en bouteille, l’oxygène dissous et les tests de stabilité tartrique et protéique (facultatifs). Le Diagnostic s’en sert : un chai sous 16 °C freine la malo ; plus de 1 mg/L d’oxygène à la mise ou un test instable s’affichent dans les risques de la bouteille. La part des anges se calcule seule, sur les volumes d’ouillage."],
       ['Rien ne s’efface', "la même date rouvre la fiche, et un n° de rapport déjà saisi est reconnu, même tapé à une autre date. Une case laissée vide ne retire rien ; deux valeurs différentes pour la même analyse, une autre date ou une autre cuvée pour le même rapport : c’est vous qui choisissez. Pour corriger, « Compléter » le rapport dans sa fiche et prendre la nouvelle valeur ; l’administrateur peut aussi le « Retirer »."],
@@ -3423,6 +3423,61 @@ export const MV_INFO = {
     'Chaque trajet prend <b>ce qu’il ajoute au total de l’année</b> : le barème des km après lui, moins celui des km avant. Au 31 décembre, le total payé tombe exactement sur le barème de l’année, sans rien à régulariser. Un mois figé garde ses montants.',
     'Les km saisis sont ceux faits <b>en plus</b> du trajet habituel maison → domaine, qui n’est jamais payé.',
     'Un <b>taux du domaine</b>, posé dans la roue crantée du Planning, remplace le barème : km × taux, sans palier.'
+  ] },
+
+  // ★ MOTS-18 (§618) : Phyto › Fertilisation, la Cave (Le Cuvier, Le Chai) et la fiche d'une personne au Planning — leurs notes
+  //   quittent l'écran pour leur « i ». cave.rec.rdt, plan.cpt.lire et plan.cpt.an sont VIVANTES (_mvInfoSet : le réglage kilos
+  //   par hL du domaine, la légende du tableau de l'année, la base ou le plafond du salarié) ; le texte ci-dessous est leur repli.
+  'phyto.fer.zv': { t: 'La zone vulnérable', p: [
+    'Le <b>zonage</b> a été revu en 2026 et peut ne couvrir qu’une partie d’une commune : chaque parcelle se déclare à part, en la touchant dans la liste (administrateur).',
+    'Une parcelle en zone vulnérable demande, sur le cahier, son <b>îlot PAC</b> et son <b>type de sol</b>.'
+  ] },
+  'phyto.fer.sol': { t: 'L’analyse de sol', p: [
+    'Au-delà de <b>3 ha en zone vulnérable</b>, une analyse de sol par campagne est exigée — pour la vigne, la matière organique.'
+  ] },
+  'phyto.fer.frac': { t: 'Le fractionnement', p: [
+    'Il ne concerne que l’<b>azote minéral</b> (type III) : au-delà de <b>60 kg N/ha</b> sur la campagne, une parcelle le reçoit en deux apports au moins.'
+  ] },
+  'phyto.fer.plan': { t: 'Le plan prévisionnel de fumure', p: [
+    'Le calcul de la <b>dose réglementaire</b> (le référentiel régional) reste celui de votre conseiller. Ma Vigne enregistre la dose choisie.'
+  ] },
+  'cave.rec.rdt': { t: 'Le rendement d’une parcelle', p: [
+    'Une <b>valeur</b> quand le volume est mesuré, une <b>fourchette</b> quand il est estimé, d’après les kilos par hL réglés au Cuvier.'
+  ] },
+  'cave.mesurer': { t: 'Une cuve à mesurer', p: [
+    'En fermentation active, un <b>relevé de densité par jour</b> suit la cinétique et anticipe un arrêt.'
+  ] },
+  'cave.btl': { t: 'Mettre en bouteille', p: [
+    'Le nombre de bouteilles se calcule seul : <b>volume élevé × 133,33</b> (bouteilles de 75 cl). Il reste ajustable.',
+    'Mettre en bouteille <b>sort la cuvée du chai</b> et l’archive par millésime.'
+  ] },
+  'plan.paie.ordre': { t: 'Payer des heures sup', p: [
+    'Les <b>absences</b> passent d’abord. On paie ensuite les heures du mois (le taux le plus fort d’abord), puis le compteur, les plus anciennes d’abord.',
+    '1 h payée à +50 % = 1 h 30 de récup en moins.'
+  ] },
+  'plan.paie.figer': { t: 'Figer le mois', p: [
+    'Au moment d’envoyer la feuille à la compta, <b>figez</b> ce qui est payé et retenu : ce qui changera ensuite passera sur le mois suivant.'
+  ] },
+  'plan.hsup.taux': { t: 'Les heures sup et leur taux', p: [
+    'Les heures sup se comptent <b>à la semaine</b> : les huit premières à 25 %, les suivantes à 50 %.',
+    'Faites = payées + gardées. Le repos gagné convertit les heures gardées : 1 h à 25 % = 1 h 15, 1 h à 50 % = 1 h 30.'
+  ] },
+  'plan.repos': { t: 'Le droit à repos', p: [
+    'Ouvert dès 7 h de récup : il se prend par journée ou demi-journée, aux dates convenues ; faute d’accord, dans les deux mois.'
+  ] },
+  'plan.rattrapage': { t: 'Une journée écourtée par le domaine', p: [
+    'Elle reste <b>payée</b> : ses heures se rattrapent dans la semaine, puis sur les heures sup, jamais sur la paie.'
+  ] },
+  'plan.cpt.lire': { t: 'Lire le tableau de l’année', p: [
+    'Heures sup de semaine : l’heure faite, hors dimanche et férié. Dimanches, fériés : toutes les heures travaillées ces jours-là. Payées : ce qui est parti dans la case de son taux, majoration seule comprise. Récup : le temps à prendre, majoration comprise (1 h à 25 % = 1 h 15, 1 h à 50 % = 1 h 30).'
+  ] },
+  'plan.cpt.an': { t: 'Ce que compte le compteur de l’année', p: [
+    'Mesuré en <b>travail effectif</b> : congés, arrêts et récup n’y entrent pas. Le plafond de l’année est déjà calculé congés déduits.',
+    'Un écart du modèle avec le plafond se reporte sur chaque salarié qui le suit : la grille se corrige dans Planning › Année.'
+  ] },
+  'plan.cpt.heure': { t: 'Un contrat payé à l’heure', p: [
+    '<b>Pas d’annualisation</b> pour ce type de contrat : les heures sont payées à l’heure. Ni plafond de l’année, ni modulation, ni solde à la clôture.',
+    'Mesuré en <b>travail effectif</b> : congés, arrêts et récup n’y entrent pas.'
   ] },
 
   // ★ MOTS-17 (§612) : le balayage — les notes de Planning › Année, des Stades et du Tracteur quittent l'écran.

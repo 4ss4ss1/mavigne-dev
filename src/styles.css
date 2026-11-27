@@ -308,7 +308,7 @@ body{font-family:var(--font-ui);background:#0F1319;color:var(--texte);max-width:
    Meme mecanique que le bandeau d'essai (body.mv-trial-on) ; la hauteur est mesuree par
    _initLoginDemo (--mv-demo-h). */
 body.mv-demo-on #app-root{padding-top:var(--mv-demo-h,40px);}
-body.mv-demo-on .mod-header,body.mv-demo-on .pil-tabsbar{top:var(--mv-demo-h,40px);}
+body.mv-demo-on .mod-header{top:var(--mv-demo-h,40px);}
 .readonly-banner{background:var(--or-pale);border:1px solid var(--or);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:var(--pt-micro,12px);color:var(--terre);display:flex;gap:8px;align-items:center;}
 .scard{background:var(--bg-card);border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
 .scard-enc{background:var(--acier);border:1px solid rgba(255,255,255,0.06);}
@@ -2175,7 +2175,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-meteo .t{font-family:var(--font-titre);font-size:22px;font-weight:600;color:#F0E2C8;}
 .pil-meteo .sub{font-size:var(--pt-nano,11px);color:rgba(240,226,200,.5);line-height:1.35;}
 /* — Rail d'onglets (soulignement or) — */
-.pil-tabsbar{position:sticky;top:0;z-index:60;background:var(--cave-2);border-bottom:1px solid rgba(240,226,200,.08);}
 /* — Corps de page — */
 .pil-wrap{max-width:1280px;margin:0 auto;padding:20px 24px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;font-family:var(--font-ui);}
 .pil-tabhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 12px;}
@@ -4361,13 +4360,7 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 }
 .mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}   /* la bande et le segment, serrés vers la maquette (104 px au repos ; mesuré : la ligne portait 31 px de marges pour 44 de contenu) */
 .mod-header-mod + span:not(:empty)::before{content:'\00a0\00b7\00a0';}   /* « Vigne · 14 entrées » ; « Vigne » seul quand la page n'a rien à ajouter */
-.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;padding:8px 16px 2px!important;min-height:0;}
-.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}
-.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill:not(.consult){background:var(--bg-card,#FFFFFF)!important;border-color:var(--ligne,#E7E6E2)!important;}   /* ★ TETE-3D (§482) : la règle d'UI-3 « .hv2-saison-pill » (!important, plus haut) la peignait en gris — la pastille blanche de la maquette ne s'était jamais affichée ; une campagne passée garde son ambre (.consult) */
-.mod-header + .mod-meta-row.mvu-meta .hv2-date{color:var(--texte-doux,#686660)!important;}
-.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini{background:var(--bg-card,#FFFFFF);border-color:var(--ligne,#E7E6E2);backdrop-filter:none;}
-.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini,.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini *{color:var(--texte-med,#55534E);}
-.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini-temp{color:var(--texte,#1B1A18);}
+   /* ★ TETE-3D (§482) : la règle d'UI-3 « .hv2-saison-pill » (!important, plus haut) la peignait en gris — la pastille blanche de la maquette ne s'était jamais affichée ; une campagne passée garde son ambre (.consult) */
 
 /* Bande de stats descendue dans le corps — cartes papier (suit le dark mode via les vars) */
 .mvu-kpis{display:flex;gap:8px;padding:14px 16px 2px;}
@@ -4616,9 +4609,8 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 
 /* ═══ NAV UNIFIÉE — étape 5 : Pilotage ═══
    La barre d'onglets passe de 9 entrées à 5 + un bouton Outils, et adopte la primitive
-   .mvu-tabs (le conteneur .pil-tabsbar reste sticky, il porte déjà le fond sombre).
+   .mvu-tabs. (Le conteneur .pil-tabsbar n'existe plus depuis TETE-4C, §579 : ses règles sont parties avec MOTS-18, §618.)
    Bloc appended → gagne par ordre de source. */
-.pil-tabsbar .mvu-tabs.mvu-pil{max-width:1280px;margin:0 auto;padding:9px 24px;}
 .mvu-tabs.mvu-pil .mvu-tab{flex:0 0 auto;}
 
 /* Menu Outils : petit panneau sous la barre, fermé par défaut */
@@ -4709,10 +4701,8 @@ body.pl2-plus-ouvert .pl2-plus{display:block;position:absolute;right:0;top:100%;
 .mod-header .mvu-tab:hover{background:var(--gris-clair);}
 .mod-header .mvu-tab.active,.mod-header .mvu-tab.on{background:var(--cave);color:#F0E2C8;box-shadow:0 2px 8px rgba(20,17,13,0.22);}
 /* Le creme ne revient QUE sur une surface reellement sombre. */
-.mod-header-top .mvu-tab,.mvu-tabs-dark .mvu-tab,.mvu-tabs.on-dark .mvu-tab,.pil-tabsbar .mvu-tab{color:rgba(240,226,200,0.72);background:rgba(255,255,255,0.07);}
-.mod-header-top .mvu-tab.active,.mod-header-top .mvu-tab.on,
-.mvu-tabs-dark .mvu-tab.active,.mvu-tabs-dark .mvu-tab.on,
-.pil-tabsbar .mvu-tab.active,.pil-tabsbar .mvu-tab.on{background:#F0E2C8;color:#1C1813;}
+.mod-header-top .mvu-tab,.mvu-tabs-dark .mvu-tab,.mvu-tabs.on-dark .mvu-tab{color:rgba(240,226,200,0.72);background:rgba(255,255,255,0.07);}
+.mod-header-top .mvu-tab.active,.mod-header-top .mvu-tab.on,.mvu-tabs-dark .mvu-tab.active,.mvu-tabs-dark .mvu-tab.on{background:#F0E2C8;color:#1C1813;}
 
 /* — 3. En-tetes de module : sous-titre et badges.  3,05 a 4,16:1 -> 5,2 a 6,7:1
        (!important requis : UI-4 pose deja .mod-header-sub en !important) — */
@@ -6786,7 +6776,6 @@ body .pil-mast .pil-cell .s1{ color:var(--texte-doux)!important; font-size:var(-
 body .pil-mast .pil-cell .s2{ font-family:var(--font-ui)!important; color:var(--texte)!important; font-size:var(--pt-base,14px)!important; font-weight:var(--fw-semi,600)!important; }
 body .pil-mast .pil-msep{ background:var(--ligne,#E7E6E2)!important; }
 body .pil-mast .pil-meteo{ color:var(--texte-med)!important; }
-body .pil-tabsbar{ background:var(--bg-card)!important; border-bottom:var(--bw) solid var(--ligne,#E7E6E2)!important; box-shadow:none!important; }
 @media (min-width:1024px){
   body.mv-avec-rail .mv-rail{ border-right-color:transparent; }
   body.mv-avec-rail #app-content-wrap{ margin:var(--l-inset) var(--l-inset) var(--l-inset) 0; min-height:calc(100vh - var(--l-inset) * 2); background:var(--bg-card); border:var(--bw) solid var(--ligne,#E7E6E2); border-radius:var(--r-md,8px); box-shadow:var(--panneau); overflow:clip; }
@@ -9509,7 +9498,6 @@ input[type="checkbox"], input[type="radio"]{ accent-color:var(--accent); }
    la colonne de droite sous les deux (--ck-colle, mesuré par cockpit-vue.js, bandeau compris). Au téléphone, rien ne change.
    Copie de la maquette validée le 21/10 ; le bloc reste AVANT celui de TETE-2, le dernier de la feuille. */
 @media (min-width:760px) and (min-height:600px){
-  body #page-pilotage .pil-tabsbar{top:calc(var(--pil-entete-bas,0px) + var(--pil-portee-h,0px))}
   body #page-pilotage .pil-portee{position:sticky;top:var(--pil-entete-bas,0px);z-index:61}   /* VIF-1 (§414) : le fil de portée collé sous le bandeau, les onglets sous les deux */
 }
 @media (min-width:760px){
@@ -10366,48 +10354,39 @@ body .mod-header .mod-header-action{ display:inline-flex; align-items:center; ju
 body .mod-header #regl-role-badge.mod-header-badge{ color:var(--texte-med)!important; background:var(--survol)!important; border:0!important; }
 /* — La ligne du jour — ★ TETE-3D (§482) : TETE-3B (§474) l'a sortie de l'en-tête, et plus rien ici ne la visait (la date en
      graisse 300, la saison sur deux lignes, la date longue à côté de la météo, « Aide » en toutes lettres au téléphone). Chaque
-     règle la vise désormais à ses deux places : « body .mod-header + .mod-meta-row » en tête, l'ancienne derrière. — */
-body .mod-header + .mod-meta-row,body .mod-header .mod-meta-row{ flex-wrap:nowrap; align-items:center; gap:var(--e-2,8px); min-height:var(--h-sm,28px); }
-body .mod-header + .mod-meta-row > *,body .mod-header .mod-meta-row > *{ flex-shrink:0; }
-body .mod-header + .mod-meta-row .hv2-saison-pill,body .mod-header .hv2-saison-pill{ height:var(--h-sm,28px)!important; gap:var(--e-1,4px); }
-body .mod-header + .mod-meta-row .hv2-saison-pill > span,body .mod-header + .mod-meta-row .hv2-meteo-mini,body .mod-header + .mod-meta-row .mv-help-btn,body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }
-body .mod-header + .mod-meta-row .hv2-sc-chev,body .mod-header .hv2-sc-chev{ display:inline-flex; margin-left:0; opacity:1; color:var(--texte-doux); }
-body .mod-header + .mod-meta-row .hv2-sc-chev svg,body .mod-header .hv2-sc-chev svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
-body .mod-header + .mod-meta-row .hv2-sep,body .mod-header .hv2-sep{ width:var(--e-1,4px); height:var(--e-1,4px); background:var(--ligne-forte)!important; }
-body .mod-header + .mod-meta-row .hv2-date,body .mod-header .hv2-date{ flex-shrink:1!important; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:var(--fw-reg,400)!important; color:var(--texte-doux)!important; }
-body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-sep,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-sep{ display:none!important; }
+     règle la visait à ses deux places. ★ MOTS-18 (§618) : la ligne vit dans l'en-tête depuis TETE-4A (§577) ; la place « sous
+     l'en-tête » (« .mod-header + .mod-meta-row ») ne vise plus aucune page — ses sélecteurs sont partis, relevé page par page. — */
+body .mod-header .mod-meta-row{ flex-wrap:nowrap; align-items:center; gap:var(--e-2,8px); min-height:var(--h-sm,28px); }
+body .mod-header .mod-meta-row > *{ flex-shrink:0; }
+body .mod-header .hv2-saison-pill{ height:var(--h-sm,28px)!important; gap:var(--e-1,4px); }
+body .mod-header .hv2-saison-pill > span,body .mod-header .hv2-meteo-mini,body .mod-header .mv-help-btn{ white-space:nowrap; }
+body .mod-header .hv2-sc-chev{ display:inline-flex; margin-left:0; opacity:1; color:var(--texte-doux); }
+body .mod-header .hv2-sc-chev svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header .hv2-sep{ width:var(--e-1,4px); height:var(--e-1,4px); background:var(--ligne-forte)!important; }
+body .mod-header .hv2-date{ flex-shrink:1!important; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:var(--fw-reg,400)!important; color:var(--texte-doux)!important; }
+body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-date,body .mod-header .mod-meta-row.mvu-avec-meteo > .hv2-sep{ display:none!important; }
 body .mod-header .hv2-meteo-mini{ height:var(--h-sm,28px); padding:0 var(--e-2,8px)!important; gap:var(--e-1,4px)!important; background:var(--survol)!important; border:0!important; border-radius:var(--r-xs,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; color:var(--texte-med); }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-ico,body .mod-header .hv2-meteo-mini-ico{ display:inline-flex; color:var(--texte-doux); }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-ico svg,body .mod-header .hv2-meteo-mini-ico svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-soleil"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-soleil"]{ color:var(--attention); }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header + .mod-meta-row .hv2-meteo-mini-ico use[href="#ic-neige"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-neige"]{ color:var(--bleu); }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-temp,body .mod-header .hv2-meteo-mini-temp{ font-family:var(--font-ui)!important; font-size:var(--pt-txt,13px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; font-variant-numeric:lining-nums tabular-nums; line-height:1; }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-txt,body .mod-header .hv2-meteo-mini-txt{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); }
+body .mod-header .hv2-meteo-mini-ico{ display:inline-flex; color:var(--texte-doux); }
+body .mod-header .hv2-meteo-mini-ico svg{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); }
+body .mod-header .hv2-meteo-mini-ico use[href="#ic-soleil"]{ color:var(--attention); }
+body .mod-header .hv2-meteo-mini-ico use[href="#ic-pluie"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-orage"],body .mod-header .hv2-meteo-mini-ico use[href="#ic-neige"]{ color:var(--bleu); }
+body .mod-header .hv2-meteo-mini-temp{ font-family:var(--font-ui)!important; font-size:var(--pt-txt,13px)!important; font-weight:var(--fw-semi,600)!important; color:var(--texte)!important; font-variant-numeric:lining-nums tabular-nums; line-height:1; }
+body .mod-header .hv2-meteo-mini-txt{ display:flex; flex-direction:column; justify-content:center; gap:var(--e-0,2px); }
 body .mod-header .hv2-meteo-mini-desc,body .mod-header .hv2-meteo-mini-jour{ font-size:var(--pt-nano,11px)!important; color:var(--texte-doux)!important; margin:0!important; line-height:1; }
-body .mod-header + .mod-meta-row .mv-help-btn,body .mod-header .mv-help-btn{ height:var(--h-sm,28px); min-height:0; padding:0 var(--e-2,8px) 0 var(--e-1,4px)!important; gap:var(--e-1,4px); background:transparent!important; border:var(--bw,1px) solid var(--ligne-forte)!important; border-radius:var(--r-full,999px)!important; color:var(--texte-med)!important; font-family:var(--font-ui); font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; }
-body .mod-header + .mod-meta-row .mv-help-btn:hover,body .mod-header .mv-help-btn:hover{ background:var(--survol)!important; color:var(--texte)!important; }
-body .mod-header + .mod-meta-row .mv-help-btn:active,body .mod-header .mv-help-btn:active{ background:var(--presse)!important; }
-body .mod-header + .mod-meta-row .mv-help-btn .mvh-q,body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); background:var(--texte-med)!important; color:var(--sur-inverse)!important; font-size:var(--pt-nano,11px); }
-/* — TETE-3D (§482), sous l'en-tête seulement : la saison et la météo en pastilles rondes, comme la .pill de la maquette ux-v1 (leurs
-     couleurs restent celles de la page, règle « .mod-header + .mod-meta-row.mvu-meta » de TETE-3B) ; les deux lignes de la météo à
-     12 px et non 11 (LISIBLE-1, §470 : le cliquet des textes sous 12 px) ; le point de la saison au vert du thème, comme avant. */
-body .mod-header + .mod-meta-row .hv2-saison-pill,body .mod-header + .mod-meta-row .hv2-meteo-mini{ padding:0 var(--e-2,8px)!important; border-radius:var(--r-full,999px)!important; box-shadow:none!important; }
-body .mod-header + .mod-meta-row .hv2-meteo-mini{ height:var(--h-sm,28px); gap:var(--e-1,4px)!important; -webkit-backdrop-filter:none; backdrop-filter:none!important; }
-body .mod-header + .mod-meta-row .hv2-meteo-mini-desc,body .mod-header + .mod-meta-row .hv2-meteo-mini-jour{ font-size:var(--pt-micro,12px)!important; color:var(--texte-doux)!important; margin:0!important; line-height:1; }
-body .mod-header + .mod-meta-row .hv2-dot{ background:var(--ok)!important; box-shadow:none!important; }
+body .mod-header .mv-help-btn{ height:var(--h-sm,28px); min-height:0; padding:0 var(--e-2,8px) 0 var(--e-1,4px)!important; gap:var(--e-1,4px); background:transparent!important; border:var(--bw,1px) solid var(--ligne-forte)!important; border-radius:var(--r-full,999px)!important; color:var(--texte-med)!important; font-family:var(--font-ui); font-size:var(--pt-micro,12px)!important; font-weight:var(--fw-med,500)!important; }
+body .mod-header .mv-help-btn:hover{ background:var(--survol)!important; color:var(--texte)!important; }
+body .mod-header .mv-help-btn:active{ background:var(--presse)!important; }
+body .mod-header .mv-help-btn .mvh-q{ width:var(--ic-sm,16px); height:var(--ic-sm,16px); background:var(--texte-med)!important; color:var(--sur-inverse)!important; font-size:var(--pt-nano,11px); }
+/* — TETE-3D (§482), sous l'en-tête seulement : ses règles (la saison et la météo en pastilles rondes) sont parties avec MOTS-18
+     (§618) — aucune page ne pose plus la ligne du jour sous l'en-tête. */
 /* — À côté de la météo (la date longue cachée), c'est la campagne qui cède en « … » : à 360 px, la météo du Pilotage poussait
      « ? » hors de l'écran (déjà vrai dans l'en-tête avant TETE-3B, vu à la capture). — */
-body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-saison-pill{ flex-shrink:1; min-width:0; }
-body .mod-header + .mod-meta-row.mvu-avec-meteo > .hv2-saison-pill > span:not(.hv2-dot):not(.hv2-sc-chev){ min-width:0; overflow:hidden; text-overflow:ellipsis; }
 /* — Au téléphone : « ? » seul (aria-label garde « Aide sur cet écran »), le vignoble du Pilotage sous-entendu — */
 @media (max-width:600px){
   body .mod-header .mv-help-btn{ width:var(--h-sm,28px); padding:0!important; justify-content:center; font-size:0!important; gap:0; }
   body .mod-header .mv-help-btn .mvh-q{ background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); }
   /* TETE-3D (§482) : la même chose sous l'en-tête ; et le « ? » rond garde 44 px d'appui en largeur (UX-1, §467 : sa zone en ::after
      débordait de 6 px de chaque côté, pensée pour « ? Aide » — 40 px autour de 28) */
-  body .mod-header + .mod-meta-row .mv-help-btn{ width:var(--h-sm,28px); padding:0!important; justify-content:center; font-size:0!important; gap:0; }
-  body .mod-header + .mod-meta-row .mv-help-btn .mvh-q{ background:transparent!important; color:var(--texte-med)!important; font-size:var(--pt-txt,13px); font-weight:var(--fw-semi,600); }
-  body .mod-header + .mod-meta-row .mv-help-btn::after{ left:calc(var(--e-2,8px) * -1); right:calc(var(--e-2,8px) * -1); }
   body .mod-header .pil-vgn{ display:none; }
 }
 /* — Pilotage : la barre de portée sous l'en-tête. Le fil d'Ariane pouvait rétrécir sous son libellé (min-width:0) et passer

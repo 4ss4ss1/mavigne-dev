@@ -33,8 +33,9 @@ function jouer(S) {
     && S.html.includes('<div class="mod-header-sub"><span class="mod-header-mod">Vigne</span></div>') && S.html.includes('<span class="mv-ecran-etat" id="j-sub">')   /* TETE-4A (§577) : le compte du Journal sur la ligne d'écran */
     && S.css.includes(".mod-header-mod + span:not(:empty)::before{content:'\\00a0\\00b7\\00a0';}") && S.app.includes("document.getElementById('p-saison-sub').textContent='';"));
   t('③ les onglets de l’en-tête : un segment arrondi, des options de 36 px, texte seul', S.css.includes('.mod-header > .mvu-tabs{gap:4px;padding:3px;margin:6px 0 6px;') && S.css.includes('.mod-header > .mod-header-top{padding-top:calc(env(safe-area-inset-top,0px) + 8px)!important;padding-bottom:4px!important;margin-bottom:0;min-height:44px!important;}') && S.css.includes('border-radius:var(--r-full,999px);}\n.mod-header > .mvu-tabs .mvu-tab{min-height:36px;padding:7px 12px;border-radius:var(--r-full,999px);}') && S.css.includes('.mod-header > .mvu-tabs .mvu-tab-em{display:none;}'));
-  t('④ la bande sur le fond de la page : au-dessus des cartes (menu des campagnes), pastille, date et mini-météo lisibles', S.css.includes('.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;') && S.css.includes('.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}')
-    && S.css.includes('.mod-header + .mod-meta-row.mvu-meta .hv2-date{color:var(--texte-doux,#686660)!important;}') && S.css.includes('.mod-header + .mod-meta-row.mvu-meta .hv2-meteo-mini-temp{color:var(--texte,#1B1A18);}'));
+  // ★ MOTS-18 (§618) : la bande n'est plus « sur le fond de la page » — elle vit dans l'en-tête depuis TETE-4A (§577), sa peau dans
+  //   bandeau.css ; les règles « .mod-header + .mod-meta-row » ne visaient plus aucune page (relevé : 0 élément) et sont parties.
+  t('④ la bande vit dans l’en-tête : plus aucune règle ne la vise sous lui', !/\.mod-header\s*\+\s*\.mod-meta-row/.test(S.css.replace(/\/\*[\s\S]*?\*\//g, '')));
   t('⑤ la liste joue ce fichier et sa contre-épreuve', S.liste.indexOf("mv-harnais-tete3b.mjs'") > 0 && S.liste.indexOf("mv-harnais-tete3b.mjs --contre'") > 0);
 }
 if (!CONTRE) {
@@ -51,8 +52,7 @@ if (!CONTRE) {
     ['le Journal reprend « Vigne » pour titre', (S) => Object.assign({}, S, { html: S.html.replace(/(<div class="mod-header h-journal">[\s\S]*?<div class="mod-header-title"[^>]*>)Journal(<\/div>)/, '$1Vigne$2') })],
     ['Parcelles se redit dans son sous-titre', m('app', "document.getElementById('p-saison-sub').textContent='';", "document.getElementById('p-saison-sub').textContent='Parcelles';")],
     ['les icônes reviennent dans les onglets', m('css', '.mod-header > .mvu-tabs .mvu-tab-em{display:none;}', '')],
-    ['la bande repasse sous les cartes (le menu des campagnes caché)', m('css', '.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;', '.mod-header + .mod-meta-row.mvu-meta{')],
-    ['la pastille reste blanche sur fond clair', m('css', '.mod-header + .mod-meta-row.mvu-meta .hv2-saison-pill{background:var(--bg-card,#FFFFFF);border:1px solid var(--ligne,#E7E6E2);color:var(--texte,#1B1A18);}', '')],
+    ['une règle « sous l’en-tête » revient', m('css', '.mod-header > .mvu-tabs .mvu-tab-em{display:none;}', '.mod-header > .mvu-tabs .mvu-tab-em{display:none;}\n.mod-header + .mod-meta-row.mvu-meta{position:relative;z-index:5;}')],   // MOTS-18 (§618)
     ['la liste ne joue plus ce fichier', (S) => Object.assign({}, S, { liste: S.liste.split("mv-harnais-tete3b.mjs'").join("mv-harnais-tete3Z.mjs'") })],
   ];
   let bons = 0;

@@ -67,6 +67,7 @@ function jouer(S) {
     _escHtml: (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
     _escAttr: (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;'),
     _mvIcon: (n) => '<svg data-ic="' + n + '"></svg>', canWrite: () => ctx.ECRIRE,
+    _mvInfoBtn: (k) => '<button class="mv-i" data-mvi="' + k + '"></button>', _mvInfoSet: () => {},   // MOTS-18 (§618)
     _mlCampagne: () => '2026', _matAnCourant: () => ctx.AN, _matLarge: () => ctx.LARGE, _matAnnees: () => ['2026'],
     _vendParcByName: (n) => P[String(n).trim()] || null, _parcCoul: (n) => (n === 'Champ Perdrix' ? 'b' : 'r'),
     _vendRdtMax: (p, an) => ({ max: 40, src: 'aoc', aoc: 'Gevrey-Chambertin' }), _vendAocDe: () => ({ nom: 'Gevrey-Chambertin' }),

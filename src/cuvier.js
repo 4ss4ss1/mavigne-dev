@@ -1337,8 +1337,10 @@ function _recParcHtml(D){
   if(dep.length) h += '<div class="mvencadre mvencadre-danger">' + _mvIcon('alerte', 18) + '<span>' + (dep.length === 1
       ? '<b>' + _escHtml(dep[0].nom) + '</b> au-dessus du maximum de son appellation.' : dep.length + ' parcelles au-dessus du maximum de leur appellation.') + '</span></div>';
   var cfg = _vendCfg();
+  // ★ MOTS-18 (§618) : la méthode derrière le « i » (maquette v3) — vivante : le rapport kilos par hL du domaine
+  _mvInfoSet('cave.rec.rdt', { p: ['Une <b>valeur</b> quand le volume est mesuré, une <b>fourchette</b> quand il est estimé, de ' + (cfg.ratio_min || 130) + ' à ' + (cfg.ratio_max || 140) + '\u00a0kg par hL (le réglage du Cuvier).'] });
   h += '<p class="rec-note">' + _matPlur(D.rows.length, 'parcelle rentrée', 'parcelles rentrées') + (D.courante ? ' sur ' + (D.rows.length + D.reste.lignes.length) : '')
-    + '. Une valeur quand le volume est mesuré, une fourchette quand il est estimé (' + (cfg.ratio_min || 130) + ' à ' + (cfg.ratio_max || 140) + ' kg par hL).</p>'
+    + '. ' + _mvInfoBtn('cave.rec.rdt') + '</p>'
     + '<div class="rec-cols rec-axe" aria-hidden="true"><span></span><span class="pi">' + axe + '</span><span class="u">hL/ha</span><span class="u rec-c4">' + y1 + '</span></div>';
   D.rows.forEach(function(o){
     var lo = o.hlMin != null ? o.hlMin : o.hlHa, hi = o.hlMax != null ? o.hlMax : o.hlHa, sel = _recSelNom === o.nom;
@@ -1879,8 +1881,7 @@ function renderVendCuves() {
   }
   if(cuves.length) h+=_vendChiffresHtml(cuves);
   if(due.length){
-    h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' \u00e0 mesurer</div>'
-      +'<div class="mvv-alert-d">En fermentation active, un relev\u00e9 de densit\u00e9 par jour suit la cin\u00e9tique et anticipe un arr\u00eat.</div>'
+    h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' \u00e0 mesurer '+_mvInfoBtn('cave.mesurer')+'</div>'   // ★ MOTS-18 : le pourquoi derrière le « i »
       +'<div class="mvv-alert-chips">'+due.map(function(c){
         return '<button class="mvv-alert-chip" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
           +_escHtml(c.nom)+' <small>\u00b7 '+_vendStale(c)+' j</small></button>';
@@ -8361,9 +8362,10 @@ function _matLegende(traces, caches, etroit){
   if(caches > 0) h += '<div class="mvmat-note">Les ' + traces.length + ' parcelles les plus avanc\u00e9es. '
     + caches + ' autre' + (caches > 1 ? 's' : '') + ' suivie' + (caches > 1 ? 's' : '') + ' plus bas, fiche par fiche.</div>';
   var t = traces[0];
-  h += '<div class="mvmat-ord"><b>' + _escHtml(t.nom) + '</b> est la plus avanc\u00e9e'
-    + (t.vit != null && t.vit > 0 ? ', et elle monte de ' + _mvF1(t.vit) + ' g/L par jour' : '')
-    + '. L\u2019ordre de r\u00e9colte se lit dans cette liste, du haut vers le bas.</div>';
+  // ★ MOTS-18 (§618) : deux lignes courtes (25 → 13 mots) — la plus avancée, puis l'ordre de récolte
+  h += '<div class="mvmat-ord"><b>' + _escHtml(t.nom) + '</b> en t\u00eate'
+    + (t.vit != null && t.vit > 0 ? ', +' + _mvF1(t.vit) + '\u00a0g/L par jour' : '') + '.</div>'
+    + '<div class="mvmat-ord">Ordre de r\u00e9colte\u00a0: de haut en bas.</div>';
   return h;
 }
 

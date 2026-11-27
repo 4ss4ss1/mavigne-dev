@@ -74,7 +74,8 @@ function verifs(S) {
   ok('J5. renderPilotage suit le bandeau', corps(S.pil, 'function renderPilotage(){').includes('_pilEnteteSuivre();'));
   const B = bloc(S.css), iT = S.css.indexOf('★ TETE-2 (§329)'), iC = S.css.indexOf('★ COLLE-1 (§412)');
   ok('K1. le bloc existe, AVANT celui de TETE-2', B && iC > 0 && iT > iC);
-  ok('K2. les onglets sous le bandeau, sur ordinateur et tablette seulement', /@media \(min-width:760px\) and \(min-height:600px\)\{\s*body #page-pilotage \.pil-tabsbar\{top:calc\(var\(--pil-entete-bas,0px\) \+ var\(--pil-portee-h,0px\)\)\}/.test(B)   /* VIF-1 (§414) : sous le bandeau ET sous le fil de portée, collé lui aussi */);
+  // ★ MOTS-18 (§618) : la règle des onglets collés (.pil-tabsbar) est partie avec la barre (TETE-4C, §579) ; la ligne d'écran collée sous le bandeau reste
+  ok('K2. la ligne d’écran collée sous le bandeau, sur ordinateur et tablette seulement ; plus de règle pour une barre d’onglets qui n’existe plus', /@media \(min-width:760px\) and \(min-height:600px\)\{\s*body #page-pilotage \.pil-portee\{position:sticky;top:var\(--pil-entete-bas,0px\);z-index:61\}/.test(B) && !/pil-tabsbar\{/.test(B));
   ok('K3. la colonne bornée à l’écran, qui défile seule', B.includes('max-height:calc(100dvh - var(--ck-colle,16px) - var(--e-2,8px))') && B.includes('overflow-y:auto'));
   ok('K4. « En direct » plafonné à une journée calme, et pas écrasé', B.includes('#ck-t-c #ck-fil{position:relative;max-height:186px;overflow:hidden}') && B.includes('#ck-t-c #ck-fil,#ck-t-c #ck-savoir{flex:none}'));
   ok('K5. déplié sans plafond ; le fondu ; le bouton à la hauteur du titre', B.includes('#ck-t-c #ck-fil.ouvert{max-height:none;overflow:visible}') && B.includes('#ck-t-c #ck-fil.deborde:not(.ouvert)::after') && B.includes('min-height:var(--h-sm,28px)'));
@@ -102,7 +103,7 @@ const DEFAUTS = [
   ['renderPilotage ne suit plus le bandeau', sub('pil', '  _pilEnteteSuivre();   // ★ COLLE-1', '  // ★ COLLE-1')],
   ['le bloc posé après TETE-2', S => { const i = S.css.indexOf('/* ★ COLLE-1 (§412)'), j = S.css.indexOf('/* ★ FIN COLLE-1 */') + '/* ★ FIN COLLE-1 */\n'.length; if (i < 0) throw new Error('sans prise'); const b = S.css.slice(i, j); return { ...S, css: S.css.slice(0, i) + S.css.slice(j) + '\n' + b }; }],
   ['« En direct » écrasé (sans flex:none)', sub('css', '#ck-t-c #ck-fil,#ck-t-c #ck-savoir{flex:none}', '')],
-  ['les onglets sous le bandeau aussi au téléphone', sub('css', '@media (min-width:760px) and (min-height:600px){\n  body #page-pilotage .pil-tabsbar', '@media (min-width:0px){\n  body #page-pilotage .pil-tabsbar')],
+  ['la ligne d’écran collée aussi au téléphone', sub('css', '@media (min-width:760px) and (min-height:600px){\n  body #page-pilotage .pil-portee', '@media (min-width:0px){\n  body #page-pilotage .pil-portee')],   // MOTS-18 : la barre partie, le contrôle suit la ligne d'écran
   ['plus de plafond', sub('css', 'max-height:186px;', '')],
   ['l’aide d’avant', sub('uti', 'le fil <b>En direct</b> puis <b>À savoir</b> restent visibles', '<b>À savoir</b> reste visible')],
   ['le guide d’avant', sub('guide', 'Sur le côté, en haut, le fil <b>En direct</b>', 'Sur le côté, <b>En direct</b>')],

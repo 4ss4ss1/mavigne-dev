@@ -31,7 +31,8 @@ const TRAC = fs.readFileSync('src/tracteur.js', 'utf8');
 const RSV = fs.readFileSync('src/reserve.js', 'utf8');
 // ★ MOTS-17 (§612) : l'année du Planning (plan.frise, plan.rythme, plan.feries) et les Stades de la Vigne (phr.dj) posent les leurs
 //   depuis planning-annee.js, planning-modeles.js, planning-annee-vue.js (ANNEE-3) et le fichier principal de l'appli — même règle.
-const BAL = fs.readFileSync('src/planning-annee.js', 'utf8') + '\n' + fs.readFileSync('src/planning-modeles.js', 'utf8') + '\n' + fs.readFileSync('src/planning-annee-vue.js', 'utf8') + '\n' + fs.readFileSync('src/' + 'app' + '.js', 'utf8');
+const BAL = fs.readFileSync('src/planning-annee.js', 'utf8') + '\n' + fs.readFileSync('src/planning-modeles.js', 'utf8') + '\n' + fs.readFileSync('src/planning-annee-vue.js', 'utf8') + '\n' + fs.readFileSync('src/' + 'app' + '.js', 'utf8')
+  + '\n' + fs.readFileSync('src/phyto.js', 'utf8') + '\n' + fs.readFileSync('src/planning.js', 'utf8');   // ★ MOTS-18 (§618) : la Fertilisation et la fiche d'une personne posent les leurs
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
 function corpsPil(nom){

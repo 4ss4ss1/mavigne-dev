@@ -33,7 +33,7 @@
 //   déménage doit rougir (§6c), on le suit, on ne le contourne pas. ⚠️ UN ONGLET QUI DÉMÉNAGE (rangement admin, §577) :
 //   son écran change de clé — retirer l’ancienne de ECRANS, poser la nouvelle, regraver avec --motif. Les mots, eux,
 //   ne doivent pas monter au passage.
-// ⚠️ Pas mesuré : la fiche d’une personne au Planning, Parcelles › Carte, les fenêtres qui s’ouvrent par-dessus, le thème
+// ⚠️ Pas mesuré : la fiche d’une personne au téléphone (sur ordinateur, ses cinq onglets le sont depuis MOTS-18, §618), Parcelles › Carte, les fenêtres qui s’ouvrent par-dessus, le thème
 //   sombre, la vue de l’équipe. Ce contrôle compte des mots ; il ne dit pas si un écran se comprend.
 // =============================================================================
 import http from 'node:http';
@@ -69,6 +69,10 @@ const ECRANS = [
   ['Cave › Le Millésime › Cuvées', 'cave', [J('selectCaveSection("millesime")'), J('_mlSetTab("cuv")')]], ['Cave › Le Millésime › Courbes', 'cave', [J('selectCaveSection("millesime")'), J('_mlSetTab("crb")')]],
   ['Réserve › Fûts', 'reserve', [J('_rsvTabTo("futs")')]], ['Réserve › Intrants', 'reserve', [J('_rsvTabTo("intrants")')]], ['Réserve › Bilan matière', 'reserve', [J('_rsvTabTo("audit")')]],
   ['Planning › Mois', 'planning', [J('planSwitchTab("mois")')]], ['Planning › Année', 'planning', [J('planSwitchTab("annee")')]], ['Planning › Personnel', 'planning', [J('planSwitchTab("gens")')]],
+  // ★ MOTS-18 (§618) : la fiche d'une personne, ses quatre autres onglets — sur ordinateur, elle est rangée dans la page (le Résumé l'est déjà
+  //   avec « Planning › Personnel ») ; au téléphone elle s'ouvre par-dessus et ces quatre clés relèvent la liste, comme « Personnel ».
+  ['Planning › Personnel › Jours', 'planning', [J('planSwitchTab("gens")'), J('planFicheTab("jours")')]], ['Planning › Personnel › Compteur', 'planning', [J('planSwitchTab("gens")'), J('planFicheTab("hsup")')]],
+  ['Planning › Personnel › Congés', 'planning', [J('planSwitchTab("gens")'), J('planFicheTab("cp")')]], ['Planning › Personnel › Frais', 'planning', [J('planSwitchTab("gens")'), J('planFicheTab("frais")')]],
   ['Pilotage › Aujourd’hui › Terrain', 'pilotage', [J('_pilSetTab("auj")'), C('Terrain')]], ['Pilotage › Aujourd’hui › Cave', 'pilotage', [J('_pilSetTab("auj")'), C('Cave')]],
   ['Pilotage › Aujourd’hui › Économie', 'pilotage', [J('_pilSetTab("auj")'), C('Économie')]],
   ['Pilotage › Travaux', 'pilotage', [J('_pilSetTab("avc")')]], ['Pilotage › L’équipe & le matériel', 'pilotage', [J('_pilSetTab("equ")')]], ['Pilotage › Décider', 'pilotage', [J('_pilSetTab("sim")')]],
