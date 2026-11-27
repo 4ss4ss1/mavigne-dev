@@ -2071,3 +2071,35 @@ Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’un
 - **COULEUR-1** : la couleur de la cuvée au Chai, héritée de sa cuve (`couleur`) ; l’interdit d’assembler un rouge et un blanc en « rosé » (§ maquette v2) s’y pose.
 - La saignée d’une cuve de rouge qui crée la cuve de rosé.
 - ⚠️ **`src/tutos.js` à découper** avant le prochain tuto : la liste des tutos par module, le moteur seul (deux regravures de suite, §621 et §622). `styles.css` est à 1 013 ko pour un plafond de 1 024.
+
+## 623. ★ RESEAUX-1 — LES PAGES DU SITE MÈNENT À LINKEDIN, FACEBOOK ET INSTAGRAM ; LA VIGNETTE CLAIRE (27/11 — `public/og-mavigne.png` · `public/logiciel-vigne.html` · `public/registre-phytosanitaire-2027.html` · `public/suivi-temps-travail-vigne.html` · `public/gestion-equipe-viticole.html` · `public/llms.txt` · `scripts/mv-harnais-reseaux1.mjs` (neuf) · `scripts/mv-harnais-liste.mjs` · `scripts/harnais-claude-md.mjs` · **aucun bump** : pages du site, script et documentation · base `591ea59`)
+
+**La demande.** Nico (24/11) a créé une page entreprise LinkedIn pour Ma Vigne (au départ pour G2, dont la case « LinkedIn company page URL » exige une page entreprise, §602–§603). Il garde son profil perso pour publier et veut le lien de la page partout où sont déjà Facebook et Instagram. **Vérifié avant d’écrire : le site ne menait à aucun réseau** (aucun lien LinkedIn, Facebook ni Instagram dans `public/`). Adresses données par Nico, copiées de ses barres d’adresse.
+
+⚠️ **Livré une première fois le 24/11 sur `71a4311` sous le numéro §608, jamais poussé.** Entre-temps, quatorze lots sont passés et §608 a été pris par TARIF-1. Le lot est refait le 27/11 sur `591ea59` : la première livraison ne doit pas être dézippée (elle ramènerait `CLAUDE.md`, le journal, `INDEX.md` et la liste des harnais au 24/11).
+
+### 623a. Ce qui change
+
+- **Pied de page des quatre pages au pied `pied`** (logiciel-vigne et les trois pages GEO-2) : sous le courriel et le téléphone, « Suivre Ma Vigne : LinkedIn · Facebook · Instagram » (`span.reseaux`), nouvel onglet, `rel="me noopener"`. Mêmes trois liens, même ordre, sur les quatre pages ; le style est celui des liens voisins (`.pied a`).
+- ⚠️ **Les adresses publiques, pas celles de la barre d’adresse** : Nico a collé `linkedin.com/company/147018340/admin/dashboard/` (la vue d’administration, qui ne s’ouvre que pour un admin de la page) → `https://www.linkedin.com/company/147018340/` ; Facebook `…profile.php?id=61596214465759&locale=fr_FR` → sans `&locale=fr_FR` ; Instagram `https://www.instagram.com/mavigneapp/` tel quel.
+- **JSON-LD de logiciel-vigne** : `sameAs` (les trois) sur le `SoftwareApplication` « Ma Vigne », **pas sur l’`Organization` GUERETTECH** (`publisher`) : les trois pages portent le nom de Ma Vigne, pas celui de l’entreprise. Les pages GEO-2 n’ont pas d’entité « Ma Vigne » dans leur JSON-LD : pied de page seul.
+- **`llms.txt`** : une section « Suivre Ma Vigne » après « Éditeur ».
+- **La vignette de lien claire** (27/11, demandé par Nico en voyant la carte du premier post de la page LinkedIn : « je ne veux plus de fond sombre ») : `public/og-mavigne.png` (1200 × 630, l’image des partages LinkedIn, Facebook et WhatsApp de toutes les pages) remplacée par la miniature claire déjà validée le 03/11 (`miniature-lien-ma-vigne-1200x630.png` du projet : fond crème, « Ma Vigne », l’accroche, le site, le logo GT, rien d’autre). Même nom de fichier, donc aucune balise ni `index.html` touchés, pas de bump. ⚠️ LinkedIn et Facebook gardent l’ancienne image en cache : après le déploiement, la faire relire (Post Inspector de LinkedIn, débogueur de partage de Facebook).
+- **Pas touchés** : les pages légales, `essai.html`, `demarrage.html`, `mise-en-route.html` et le guide (`guide/_layout.html`), qui ont chacun leur propre pied de page. À ajouter si Nico le veut.
+
+### 623b. Mesuré
+
+- `mv-harnais-reseaux1` : **13 assertions, 10/10 contre-épreuves** (l’adresse d’administration, le paramètre de langue, un réseau oublié, `noopener` retiré, l’onglet gardé, l’ordre inversé, `sameAs` amputé ou faux, le JSON-LD cassé, `llms.txt` sans LinkedIn).
+- Suivis, verts : `vitrine3` 33 + 29/29, `tarif1` 38 + 22/22, `cuivre7` 8, `demo` 13, `icones` 27 + 22, `subset` (dette inchangée, 239), `mv-sitemap --check` 16 vert · 4 attention (les `lastmod`, refaits par `npm run site`).
+- Rendu regardé le 24/11 dans Chrome sans tête, à 375 et 1 280 px (copie jetable de la page, pied seul) : la ligne se place sous le courriel et le téléphone, même police, même couleur, sans débordement. Le pied n’a pas bougé depuis.
+
+### 623c. Restes
+
+- **À faire chez Nico** : `npm run site` → `npm run build` → `firebase deploy --only hosting`, puis faire relire `https://mavigneapp.fr/logiciel-vigne.html` par le Post Inspector de LinkedIn pour que la vignette claire remplace l’ancienne.
+- Hors dépôt, fait avec Nico : la signature de contact@mavigneapp.fr (webmail Zimbra) porte le lien de la page LinkedIn (24/11) ; le tuto LinkedIn est un doc Claude, pas un fichier du dépôt.
+- Si LinkedIn donne plus tard une adresse à nom (`/company/ma-vigne…/`) : la changer dans les quatre pages, `llms.txt`, et la constante `LI` du harnais. La chaîne YouTube (`@mavigneapp`) n’est pas encore dans le pied : à ajouter quand Nico le décide.
+
+### 623d. Leçons
+
+- ⚠️ **Une adresse copiée depuis un compte connecté n’est pas l’adresse publique** : vue d’administration (`/admin/…`), paramètre de langue (`locale=`). Le harnais refuse les deux.
+- ⚠️ **Un lot livré et pas poussé vieillit** : trois jours plus tard, son numéro de section était pris et ses fichiers de documentation en retard de quatorze lots. Avant de relivrer, refaire sur le `HEAD` du jour, jamais redonner l’ancien zip.
