@@ -13,11 +13,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = f => fs.readFileSync(path.join(R, f), 'utf8');
-const BASE = { app: lire('src/app.js'), utl: lire('src/utils.js'), idx: lire('index.html'), tutos: lire('src/tutos.js'), wn: lire('src/whats-new.js'),
+const BASE = { app: lire('src/app.js'), utl: lire('src/utils.js'), idx: lire('index.html'), tutos: texteTutosDepot(), wn: lire('src/whats-new.js'),
   pil: lire('src/pilotage.js'), g4: lire('guide/04-vigne.html'), g11: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 const nu = s => s.replace(/^\s*\/\/.*$/gm, '');
 function extraire(src, debut) {

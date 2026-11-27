@@ -15,11 +15,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
 const S0 = { app: lire('src/app.js'), utils: lire('src/utils.js'), html: lire('index.html'), css: lire('src/styles.css'), charte: lire('src/charte.css'),
-  tutos: lire('src/tutos.js'), wn: lire('src/whats-new.js'), smoke: lire('scripts/smoke.mjs'), ci: lire('.github/workflows/ci.yml'), liste: lire('scripts/mv-harnais-liste.mjs') };
+  tutos: texteTutosDepot(), wn: lire('src/whats-new.js'), smoke: lire('scripts/smoke.mjs'), ci: lire('.github/workflows/ci.yml'), liste: lire('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function variable(src, nom) { const i = src.indexOf('var ' + nom + '='); if (i < 0) throw new Error('introuvable : ' + nom); return src.slice(i, src.indexOf(';\n', i) + 1); }
 let ok = 0, ko = 0;

@@ -8,6 +8,7 @@
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const ICI = fileURLToPath(import.meta.url);
 const R = path.resolve(path.dirname(ICI), '..');
 const CONTRE = process.argv.includes('--contre');
@@ -31,7 +32,7 @@ if (CONTRE) {
   }
   console.log(`\n  ${tenues} contre-épreuve(s) tenue(s) sur ${total}\n`); process.exit(tenues === total ? 0 : 1);
 }
-const HTML = lire('index.html', 'MV_O1_HTML'), UT = lire('src/utils.js', 'MV_O1_UT'), G = lire('guide/10-planning.html'), TU = lire('src/tutos.js'), PL = lire('src/planning.js', 'MV_O1_PL');
+const HTML = lire('index.html', 'MV_O1_HTML'), UT = lire('src/utils.js', 'MV_O1_UT'), G = lire('guide/10-planning.html'), TU = texteTutosDepot(), PL = lire('src/planning.js', 'MV_O1_PL');
 let verts = 0; const ECHECS = [];
 function T(ok, quoi, det) { if (ok) { verts++; console.log('  \x1b[32m✓\x1b[0m ' + quoi); } else { ECHECS.push(quoi); console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? ' — ' + det : '')); } }
 console.log('\n── ONGLETS-1 — Mois, Année, Personnel\n');

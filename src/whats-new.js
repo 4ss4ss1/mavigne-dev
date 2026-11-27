@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.45', d: '2026-11-27', items: [   // COULEUR-1 (§625) : la couleur de la cuvée au Chai, les mélanges qui ne se font pas
+    { niv: 1, pour: ['admin', 'cave'], emoji: 'verre', titre: 'La couleur de vos cuvées, au Chai',
+      desc: "Une cuvée garde la couleur de sa cuve en quittant le Cuvier\u00a0; une cuvée créée au Chai la reçoit à «\u00a0Nouvelle cuvée\u00a0» (facultatif). Sa fiche la dit, et sa carte aussi quand le domaine fait plusieurs couleurs. Compléter un fût ou fusionner des cuves refuse un rouge versé dans un blanc et du blanc dans un rosé\u00a0: un rosé ne se fait pas en mélangeant un rouge et un blanc. Du blanc dans un rouge se confirme, après avoir vérifié votre cahier des charges." },
+  ] },
   { v: '11.44', d: '2026-11-27', items: [   // PRATIQUES-2 (§624) : les gestes du blanc au Cuvier — débourber, soutirer, entonner ou fermenter en cuve
     { niv: 1, pour: ['admin', 'cave'], emoji: 'entonnoir', titre: 'Une cuve de blanc suit son parcours',
       desc: "La fiche d’une cuve de blanc (ou de rosé) dit son prochain geste. «\u00a0Débourber\u00a0»\u00a0: la méthode, le début, la température, la turbidité si vous la mesurez. Puis «\u00a0Soutirer le jus clair\u00a0»\u00a0: le jus, les bourbes, et la suite — entonner en fûts (la cuvée naît au Chai, sa fermentation y reste suivie) ou fermenter dans la cuve. Sa frise suit son parcours\u00a0: pressé, débourbé, entonné, en fermentation. Une cuve qui fermente ne se débourbe plus, et plus de jus que la cuve n’en a est refusé." },

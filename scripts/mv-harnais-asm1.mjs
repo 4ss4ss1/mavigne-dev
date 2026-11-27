@@ -72,7 +72,7 @@ const NC = ['_vendCfg', '_mvF1', '_vendCuvF1', '_mvBtl', '_mlKgHl', '_vendHlKg',
   '_rmNum', '_rmF', '_rmDetail', '_rmVolRepli', '_rmMilCuve', '_rmMilCuvees', '_rmLignes',
   '_caveBilanChaine', '_caveBtlGraphSvg',
   '_asmCuvee', '_asmAocsCuve', '_asmAocsCuvee', '_asmIdxCuve', '_asmSources', '_asmFutSvg', '_asmCarteHtml',
-  '_asmFutTxt', '_asmRefus', '_asmApercu', '_asmValider', '_asmDefaire',
+  '_asmFutTxt', '_asmMel', '_asmRefus', '_asmApercu', '_asmValider', '_asmDefaire',   // _asmMel : COULEUR-1 (§625), sans règle chargée ici (window._coulMelange absent : rien à dire) — jouée dans mv-harnais-couleur1
   // PDF-1 (§174) : deleteCaveOp photographie et purge les PDF orphelins.
   '_cavePdfRefs', '_cavePdfPurge', 'deleteCaveOp'];
 const TABLES = ['_VEND_STAT', '_VEND_OPS', '_VEND_INTR', '_VEND_FROID', '_VEND_CHAUD', 'RM_TYPES', 'RM_HORS'];
@@ -81,7 +81,7 @@ var window = { CONFIG: { cave: { fut_l: 228 } }, PARCELLES: [], currentUser: { n
 var CAVE_VENDANGE = { config: { ratio_min: 130, ratio_max: 140 }, recoltes: [], cuves_vinif: [] };
 var CAVE_ELEVAGE = { cuvees: [], operations: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
-var _CAVE_BTL_GID = 0, _asmCuv = null, _asmSrc = null, _asmL = 0, _ASM_GID = 0;
+var _CAVE_BTL_GID = 0, _asmCuv = null, _asmSrc = null, _asmL = 0, _ASM_GID = 0, _asmCoulOk = null;
 var document = { getElementById: function(){ return null; }, querySelectorAll: function(){ return []; } };
 var __journal = { saves: [], toasts: [], confirm: null, rendu: 0 };
 function _recKgDom(r){ return (r && r.kg_dom) || 0; }

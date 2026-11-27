@@ -4,10 +4,11 @@
 // Joue les VRAIES _mvTFaite, renderHomeSaison, _jFaitPar, _jEqCibles, _jEqAppliquer et _jEqBtn (extraites par leurs accolades) sur de
 // fausses données — quatre parcelles arrachées aux deux tiers, le cas de Nico le 21/10 — et lit le reste dans les sources.
 import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const L = f => fs.readFileSync(path.join(R, f), 'utf8');
-const S0 = { app: L('src/app.js'), jal: L('src/jalons.js'), html: L('index.html'), tut: L('src/tutos.js'), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
+const S0 = { app: L('src/app.js'), jal: L('src/jalons.js'), html: L('index.html'), tut: texteTutosDepot(), uti: (L('src/utils.js') + '\n' + L('src/whats-new.js')), guide: L('guide/04-vigne.html'), liste: L('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) return ''; let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const el = () => ({ innerHTML: '', textContent: '', style: {}, attrs: {}, classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } }, setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k]; } });

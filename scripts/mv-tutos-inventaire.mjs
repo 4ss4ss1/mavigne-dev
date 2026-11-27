@@ -16,8 +16,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { estTutos, texteTutos } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625)
 
-const R = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const R =path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lire = (f) => fs.readFileSync(path.join(R, f), 'utf8');
 const HORS = new Set(['src/admin-gt.js', 'src/gt.js', 'src/tutos.js']);
 const GENERIQUES = new Set(['$', 'if', 'return', 'event.stopPropagation', 'event.preventDefault', 'closeOv', '_openOv', 'openOv',
@@ -28,7 +29,7 @@ const MODULE = { 'src/app.js': 'Vigne', 'src/tournees.js': 'Vigne', 'src/comptes
   'src/cockpit-vue.js': 'Pilotage', 'src/reglages.js': 'Réglages', 'src/onboarding.js': 'Installation', 'src/utils.js': 'Commun',
   'src/coquille.js': 'Commun', 'src/firebase.js': 'Commun', 'src/ids.js': 'Commun' };
 
-const fichiers = fs.readdirSync(path.join(R, 'src')).filter((f) => f.endsWith('.js')).map((f) => 'src/' + f).filter((f) => !HORS.has(f));
+const fichiers = fs.readdirSync(path.join(R, 'src')).filter((f) => f.endsWith('.js')).map((f) => 'src/' + f).filter((f) => !HORS.has(f) && !estTutos(f));   // COULEUR-1 (§625) : les listes de tutos non plus
 const SRC = {}; for (const f of fichiers.concat(['index.html'])) SRC[f] = lire(f);
 const nettoie = (t) => String(t || '').replace(/'\s*\+[^+]*\+\s*'/g, ' ').replace(/\\u00a0/g, ' ').replace(/\\u([0-9a-fA-F]{4})/g, (m, h) => String.fromCharCode(parseInt(h, 16)))
   .replace(/<[^>]*>/g, ' ').replace(/&nbsp;|&#39;|&quot;|\\'/g, ' ').replace(/\s+/g, ' ').trim();
@@ -83,7 +84,7 @@ function libelle(s, i) {
   return t.replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').replace(/[^A-Za-zÀ-ÿ0-9)…]+$/, '').slice(0, 80);
 }
 
-const couvre = new Set([...lire('src/tutos.js').matchAll(/couvre:\s*\[([^\]]*)\]/g)].flatMap((m) => [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])));
+const couvre = new Set([...texteTutos((f) => { try { return lire(f); } catch (e) { return null; } }).matchAll(/couvre:\s*\[([^\]]*)\]/g)].flatMap((m) => [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])));
 const gestes = {};
 for (const [f, s] of Object.entries(SRC)) {
   for (const m of s.matchAll(/on(click|change|input|submit|keyup|keydown)\s*=\s*\\?["']\s*([A-Za-z_$][\w$.]*)/g)) {

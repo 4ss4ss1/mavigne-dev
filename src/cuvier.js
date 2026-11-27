@@ -22,7 +22,7 @@ import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon, _m
 // ★ PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve et son chapeau — dans leur module.
 import { _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
   _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
-  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris } from './cuvier-pratiques.js';   // PRATIQUES-2 (§624) : la frise du blanc, ses choix
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml } from './cuvier-pratiques.js';   // PRATIQUES-2 (§624) : la frise du blanc, ses choix ; COULEUR-1 (§625) : les mélanges
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -4918,6 +4918,8 @@ function saveVendDecuvage(){
   // La cuve part avec la cuvee. Le volume ecrit est celui qu'on a saisi : un
   // FAIT DATE, pas la contenance du parc.
   if(_cv) cuvee.cuves=[{ref:_cv.id, litres:_vendDecCuveL}];
+  /* ★ COULEUR-1 (§625) — la couleur de la cuve part avec la cuvée : au Chai, l'assemblage la lit. */
+  var _coulC=_vendCuveCoul(c); if(_coulC==='r'||_coulC==='b'||_coulC==='o') cuvee.couleur=_coulC;
   if(!CAVE_ELEVAGE.cuvees) CAVE_ELEVAGE.cuvees=[];
   CAVE_ELEVAGE.cuvees.push(cuvee);
   var _dfd=parseFloat((document.getElementById('vdec-dens')||{}).value);
@@ -5431,6 +5433,7 @@ function _vendOpsSummary(c,canEdit){
 }
 /* ═══════════ FUSIONNER DES CUVES (FUS-1) ═══════════ */
 var _vendFusSel={}, _vendFusDest=null, _vendFusNom='', _vendFusNomTouche=false;
+var _vendFusCoulOk=null;   // COULEUR-1 (§625) : le mélange « à vérifier » confirmé dans cette feuille (son id)
 
 function _vendFusCuves(){
   return (CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
@@ -5476,7 +5479,7 @@ function _vendFusDestObj(){
 }
 function openVendFusion(){
   if(!canWrite()) return;
-  _vendFusSel={}; _vendFusDest=null; _vendFusNom=''; _vendFusNomTouche=false;
+  _vendFusSel={}; _vendFusDest=null; _vendFusNom=''; _vendFusNomTouche=false; _vendFusCoulOk=null;
   _caveV2InjectCss();          // le selecteur de cuve du parc vit la
   _vendFusPeindre(true);
 }
@@ -5487,7 +5490,18 @@ function _vendFusBasc(id){
   if(!_vendFusNomTouche) _vendFusNom='';
   _vendFusPeindre(false);
 }
-function _vendFusPick(id){ _vendFusDest=id; _vendFusPeindre(false); }
+function _vendFusPick(id){ _vendFusDest=id; _vendFusCoulOk=null; _vendFusPeindre(false); }
+/* ★ COULEUR-1 (§625) — les couleurs des cuves réunies : chacune versée dans la porteuse (la cuve d'arrivée, sinon la
+   première choisie — la règle de saveVendFusion). Le plus grave l'emporte : un « impossible » avant un « à vérifier ». */
+function _vendFusMel(){
+  var d=_vendFusDestObj(), p=_vendFusPris(); if(!d||p.length<2) return null;
+  var por=(d.kind==='cuve')?p.filter(function(c){ return c.id===d.id; })[0]:p[0]; if(!por) return null;
+  var kV=_vendCuveCoul(por), pire=null;
+  p.forEach(function(c){ if(c===por) return; var m=_coulMelange(kV,_vendCuveCoul(c)); if(m&&(!pire||(m.niv==='b'&&pire.niv!=='b'))) pire=m; });
+  return pire;
+}
+function _vendFusMelBloque(){ var m=_vendFusMel(); return !!(m&&(m.niv==='b'||_vendFusCoulOk!==m.id)); }
+function _vendFusCoulOkSet(id){ _vendFusCoulOk=id; _vendFusRecap(); }
 function _vendFusSetNom(v){ _vendFusNom=v; _vendFusNomTouche=true; _vendFusRecap(); }
 
 function _vendFusHtml(){
@@ -5557,7 +5571,7 @@ function _vendFusHtml(){
     +'<input id="vfus-date" class="mvv-tin" type="date" value="'+_mvToday()+'">';
 
   h+='<div id="vfus-recap">'+_vendFusRecapHtml()+'</div>'
-    +'<button class="mvv-save" id="vfus-go" onclick="saveVendFusion()">'+_vendFusGoLbl()+'</button>';
+    +'<button class="mvv-save" id="vfus-go" onclick="saveVendFusion()"'+(_vendFusMelBloque()?' disabled':'')+'>'+_vendFusGoLbl()+'</button>';   // COULEUR-1 (§625)
   return h;
 }
 function _vendFusRecapHtml(){
@@ -5579,6 +5593,7 @@ function _vendFusRecapHtml(){
      evite de faire lire une estimation comme une mesure. */
   h+='<div class="mvv-dlnote">Volume estim\u00e9 d\u2019apr\u00e8s les caisses du domaine : rien n\u2019a encore '
     +'\u00e9t\u00e9 mesur\u00e9 en cuve.</div>';
+  h+=_coulMelHtml(_vendFusMel(), _vendFusCoulOk, 'fus');   // COULEUR-1 (§625)
   if(trop) h+='<div class="mvv-dwarn">Le volume d\u00e9passe la contenance. Prends une cuve plus grande, ou '
     +'fusionne moins de cuves \u2014 rien n\u2019est bloqu\u00e9, mais la jauge de remplissage sortira au-dessus de 100\u00a0%.</div>';
   return h;
@@ -5593,7 +5608,7 @@ function _vendFusGoLbl(){
 function _vendFusRecap(){
   var e=document.getElementById('vfus-recap'); if(e) e.innerHTML=_vendFusRecapHtml();
   var g=document.getElementById('vfus-go');
-  if(g){ g.textContent=_vendFusGoLbl(); g.disabled=!_vendFusDestObj(); }
+  if(g){ g.textContent=_vendFusGoLbl(); g.disabled=!_vendFusDestObj()||_vendFusMelBloque(); }   // COULEUR-1 (§625)
 }
 function _vendFusPeindre(neuf){
   if(neuf){ _vendSheet(_vendFusHtml()); return; }
@@ -5611,6 +5626,9 @@ function saveVendFusion(){
   if(p.length<2){ showToast('Choisissez au moins deux cuves','#E07060'); return; }
   var d=_vendFusDestObj();
   if(!d){ showToast('Choisissez la cuve d\u2019arriv\u00e9e','#E07060'); return; }
+  /* ★ COULEUR-1 (§625) — un mélange impossible, ou à vérifier et pas confirmé : refusé AVANT toute écriture. */
+  var _mel=_vendFusMel();
+  if(_mel&&(_mel.niv==='b'||_vendFusCoulOk!==_mel.id)){ showToast(_mel.niv==='b'?(_mel.t+' : impossible'):(_mel.t+' : confirmez d\u2019abord'),'#B85A1A'); return; }
   var nom=((document.getElementById('vfus-nom')||{}).value||'').trim() || _vendFusNomAuto();
   var date=(document.getElementById('vfus-date')||{}).value || _mvToday();
   var hl=_vendFusTotHl();
@@ -5678,6 +5696,7 @@ function saveVendFusion(){
   porteuse.operations.push({id:'vop_fus_'+Date.now(), type:'assemblage', date:date,
     sources:noms, volume_hl:Math.round(hl*10)/10, estime:true,
     note:'Assemblage de '+(absorbees.length+1)+' cuves'});
+  if(_mel) porteuse.operations[porteuse.operations.length-1].couleur_conf={k:_mel.id, par:(window.currentUser&&window.currentUser.nom)||'', le:date};   // COULEUR-1 (§625)
   _vendTriOps(porteuse);
 
   window.CAVE_VENDANGE=CAVE_VENDANGE;
@@ -5691,6 +5710,7 @@ window.openVendFusion  = openVendFusion;
 window._vendFusBasc    = _vendFusBasc;
 window._vendFusPick    = _vendFusPick;
 window._vendFusSetNom  = _vendFusSetNom;
+window._vendFusCoulOkSet = _vendFusCoulOkSet;   // COULEUR-1 (§625)
 window.saveVendFusion  = saveVendFusion;
 
 function _vendFusionneesSection(list){

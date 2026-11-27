@@ -17,10 +17,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { rsv: lire('src/reserve.js'), pil: lire('src/pilotage.js'), tu: lire('src/tutos.js'), css: lire('src/styles.css'),
+const S0 = { rsv: lire('src/reserve.js'), pil: lire('src/pilotage.js'), tu: texteTutosDepot(), css: lire('src/styles.css'),
   aj: lire('scripts/mv-harnais-ajour1.mjs'), liste: lire('scripts/mv-harnais-liste.mjs'), couv: lire('scripts/tutos-couverture.json') };
 
 // Une fonction par comptage d'accolades, chaînes et commentaires sautés (trois formes de déclaration).

@@ -12,6 +12,8 @@ const lire = (f) => fs.readFileSync(f, 'utf8');
 const SAIN = { aig: lire('scripts/mv-tutos-concernes.mjs'), jeu: lire('scripts/mv-tutos-jeu.mjs'), marque: lire('scripts/mv-lot-marque.mjs') };
 const VRAI = {};
 ['src/tutos.js', 'src/app.js', 'src/cuvier.js', 'src/coquille.js', 'src/styles.css', 'index.html', 'public/boot.js'].forEach((f) => { VRAI[f] = lire(f); });
+// ★ COULEUR-1 (§625) : les listes de tutos, une par module, que src/tutos.js importe (sans elles, « avant » n'aurait aucun tuto).
+[...VRAI['src/tutos.js'].matchAll(/^import \{[^}]*\} from '\.\/(tutos-[a-z]+)\.js';/gm)].forEach((m) => { VRAI['src/' + m[1] + '.js'] = lire('src/' + m[1] + '.js'); });
 const sansCommentaires = (s) => s.replace(/^\s*\/\/.*$/gm, '');
 // Une copie « après » : on remplace UNE fois une ancre du vrai fichier (sinon le scénario ne prouve rien : rouge).
 function apres(f, ancre, neuf) {
@@ -29,8 +31,10 @@ const SCENARIOS = [
   ['une fonction sans rapport change (setJQui) : rien', { 'src/app.js': ['function setJQui(v,el){jQui=v;', 'function setJQui(v,el){jQui=v;var __t10=4;'] }, (r) => !r.tous && r.ids.length === 0],
   ['le moteur change (_boucle) : TOUS', { 'src/tutos.js': ['function _boucle() {\n', 'function _boucle() {\n  var __t10 = 5;\n'] }, (r) => r.tous && r.ids.length === r.total && r.total >= 4 && r.cote],
   ['le domaine d’entraînement change (_tuJournal) : TOUS', { 'src/tutos.js': ["v(1, -1, 'Les Charmes', 'Relevage', 'Paul', [])", "v(1, -1, 'Les Charmes', 'Relevage', 'Marie', [])"] }, (r) => r.tous],
-  ['la fiche d’un tuto change : ce tuto', { 'src/tutos.js': ["duree: '1 min', depart: 'journal'", "duree: '2 min', depart: 'journal'"] }, (r) => !r.tous && r.ids.join() === 'jequipe'],
-  ['un tuto neuf : lui', { 'src/tutos.js': ['\n];\n', "\n  { id: 'neuf', titre: 'Comment faire pour essayer ?', fin: 'essayer', module: 'Vigne', pages: ['home'], couvre: [], etapes: [] },\n];\n"] }, (r) => !r.tous && r.ids.join() === 'neuf' && /nouveau/.test((r.raisons.neuf || []).join())],
+  ['la fiche d’un tuto change : ce tuto', { 'src/tutos-vigne.js': ["duree: '1 min', depart: 'journal'", "duree: '2 min', depart: 'journal'"] }, (r) => !r.tous && r.ids.join() === 'jequipe'],
+  // ★ COULEUR-1 (§625) : la tête d'une liste (les outils qu'elle lit) concerne ses tutos, pas ceux des autres listes.
+  ['la tête d’une liste change : ses tutos seuls', { 'src/tutos-reserve.js': ['export function _tuOutils(o) {', 'export function _tuOutils(o) { var __t10 = 7;'] }, (r) => !r.tous && r.ids.join() === 'intrant'],
+  ['un tuto neuf : lui', { 'src/tutos-vigne.js': ['\n];\n', "\n  { id: 'neuf', titre: 'Comment faire pour essayer ?', fin: 'essayer', module: 'Vigne', pages: ['home'], couvre: [], etapes: [] },\n];\n"] }, (r) => !r.tous && r.ids.join() === 'neuf' && /nouveau/.test((r.raisons.neuf || []).join())],
   ['une feuille de styles change : le côte à côte, aucun tuto', { 'src/styles.css': ['.mat-tete{', '.zz-t10{color:red}\n.mat-tete{'] }, (r) => !r.tous && r.cote && r.ids.length === 0],
   ['le bac à sable change (boot.js) : TOUS', { 'public/boot.js': ['__MV_BOOT_TUTO_V', '__MV_BOOT_TUTO_V/*t10*/ && true, __MV_BOOT_TUTO_V'] }, (r) => r.tous],
   ['le chemin vers les modules change (_dockDef) : TOUS', { 'src/app.js': ['function _dockDef(){\n', 'function _dockDef(){\n  var __t10 = 6;\n'] }, (r) => r.tous],
@@ -62,7 +66,9 @@ async function jouer(S) {
 const DEFAUTS = [
   ['les fonctions enseignées ne comptent plus', (S) => ({ ...S, aig: S.aig.replace("    t.couvre.forEach((n) => { if (modifiees.has(n)) ajoute(id, n + ' a changé'); });\n", '') })],
   ['un commentaire fait rejouer', (S) => ({ ...S, aig: S.aig.replace("const norm = (s) => (s == null ? null : blanc(String(s)).replace(/\\s+/g, ' ').trim());", "const norm = (s) => (s == null ? null : String(s).replace(/\\s+/g, ' ').trim());") })],
-  ['le moteur ne fait plus tout rejouer', (S) => ({ ...S, aig: S.aig.replace("if (norm(T0.horsListe) !== norm(T1.horsListe)) tous(", "if (false) tous(") })],
+  ['le moteur ne fait plus tout rejouer', (S) => ({ ...S, aig: S.aig.replace("if (norm(T0.moteur) !== norm(T1.moteur)) tous(", "if (false) tous(") })],
+  ['une liste de module n’est plus lue (COULEUR-1)', (S) => ({ ...S, aig: S.aig.replace('[MOTEUR_TUTOS, ...listesDe(lire(MOTEUR_TUTOS))].forEach(', '[MOTEUR_TUTOS].forEach(') })],
+  ['la tête d’une liste ne compte plus (COULEUR-1)', (S) => ({ ...S, aig: S.aig.replace("ajoute(id, 'la tête de sa liste a changé (' + f + ')')", '0') })],
   ['les boutons visés ne comptent plus', (S) => ({ ...S, aig: S.aig.replace('    t.etiquettes.forEach((e) => {', '    [].forEach((e) => {') })],
   ['les feuilles de styles ne font plus rejouer le côte à côte', (S) => ({ ...S, aig: S.aig.replace("export const COTE_FICHIERS = ['src/coquille.js', 'src/styles.css', 'src/charte.css'];", 'export const COTE_FICHIERS = [];') })],
   ['le dock ne fait plus tout rejouer', (S) => ({ ...S, aig: S.aig.replace("export const TOUS_FONCTIONS = ['_dockDef',", "export const TOUS_FONCTIONS = ['_rien',") })],

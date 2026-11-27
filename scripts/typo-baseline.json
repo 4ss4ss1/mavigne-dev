@@ -147,7 +147,7 @@
   "src/tutos.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 180
+    "ko": 77
   },
   "src/utils.js": {
     "dur": 5,
@@ -173,5 +173,35 @@
     "dur": 0,
     "petit": 0,
     "ko": 4
+  },
+  "src/tutos-cave.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 25
+  },
+  "src/tutos-phyto.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 15
+  },
+  "src/tutos-planning.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 51
+  },
+  "src/tutos-reserve.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 4
+  },
+  "src/tutos-tracteur.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 9
+  },
+  "src/tutos-vigne.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 17
   }
 }

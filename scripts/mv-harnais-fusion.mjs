@@ -61,6 +61,7 @@ const MORCEAUX = [
   bloc(SRC, 'function _vendFusNomAuto(){', '\n}'),
   bloc(SRC, 'function _vendFusParcLibre(){', '\n}'),
   bloc(SRC, 'function _vendFusDestObj(){', '\n}'),
+  bloc(SRC, 'function _vendFusMel(){', '\n}'),   // COULEUR-1 (§625) : la règle des couleurs est bouchée ici (rien à dire) — jouée dans mv-harnais-couleur1
   bloc(SRC, 'function saveVendFusion(){', '\n}'),
 ];
 
@@ -69,6 +70,7 @@ const PRELUDE = `
 ${sourceDates()}
 var CAVE_VENDANGE = null, CAVE_ELEVAGE = { cuvees: [] };
 var _vendFusSel = {}, _vendFusDest = null, _vendFusNom = '', _vendFusNomTouche = false;
+var _vendFusCoulOk = null; function _coulMelange(){ return null; } function _vendCuveCoul(){ return '?'; }   // COULEUR-1 (§625) : bouchons
 var _vendOuvert = null;
 var TOASTS = [], CHAMPS = {};
 function showToast(m){ TOASTS.push(String(m)); }

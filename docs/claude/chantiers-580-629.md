@@ -2145,3 +2145,46 @@ Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’un
 - La saignée d’une cuve de rouge qui crée la cuve de rosé.
 - Le soutirage qui arrive dans « À faire » à l’heure du repère (aujourd’hui : la fiche le dit).
 - L’enzymage pris dans La Réserve (sortie de stock) : aujourd’hui un texte libre.
+
+## 625. ★★★ COULEUR-1 — LA COULEUR DE LA CUVÉE AU CHAI ; LES MÉLANGES QUI NE SE FONT PAS (UN ROUGE DANS UN BLANC, DU BLANC DANS UN ROSÉ) ; LA LISTE DES TUTOS RANGÉE PAR MODULE (27/11 — APP 11.44 → 11.45, SW 12.35 → 12.36 — `src/cuvier-pratiques.js` (le bloc COULEUR-1) · `src/cuvier.js` (le décuvage, la fusion) · `src/cave.js` (« Nouvelle cuvée », la carte et la fiche du Chai, l'assemblage, le labo) · `index.html` · `src/styles.css` · `src/tutos.js` (le moteur seul) · `src/tutos-vigne.js`, `-tracteur`, `-planning`, `-phyto`, `-reserve`, `-cave` (neufs) · `scripts/mv-tutos-sources.mjs` (neuf) · `scripts/mv-tutos-concernes.mjs` · `scripts/mv-tutos-inventaire.mjs` · `scripts/mv-harnais-tutos.mjs`, `tuto10`, et vingt et un harnais qui lisaient `src/tutos.js` (dont `tuto9`, qui lit aussi les zones de choix dans chaque liste) · `scripts/mv-harnais-asm1.mjs`, `fusion` (bouchons) · `scripts/mv-harnais-couleur1.mjs` (neuf) · `scripts/tutos-couverture.json` · `scripts/typo-baseline.json` · `src/utils.js` · `src/whats-new.js` · `guide/08-cave.html`)
+
+**La demande.** Nico, 27/11, après PRATIQUES-2 : « Alors, suite, et puis l’idéal, ce serait de faire tout en un lot » — les deux suites proposées au §624e : **COULEUR-1** (maquette v2 validée : « Assembler une cuvée rouge et une blanche en “rosé” — Impossible ») et **le découpage de `src/tutos.js`**, dû depuis §621.
+
+### 625a. Mesuré avant (`0164d6a`, « pratiques2 »)
+
+- Une cuvée du Chai n’avait pas de couleur : le décuvage écrivait `{nom, millesime, tonneaux, …}` sans elle ; le labo la recalculait des parcelles de la cuve d’origine (`_laboOrigine`) — rouge ou blanc, rien pour un rosé ni pour une cuvée créée au Chai.
+- « Compléter le fût » (ASM-1) et « Fusionner des cuves » acceptaient tout mélange : l’appli « ne tranche pas ce que la réglementation permet (appellation, millésime) ».
+- `src/tutos.js` : 190 833 octets, dont 114 ko de liste (30 tutos) ; deux regravures du barème de suite (§621, §622). Vingt-neuf scripts le lisaient par son nom.
+- **Vérifié** (règlement délégué (UE) 2019/934) : article 7, le rosé compte comme un rouge pour le coupage ; article 8, le coupage d’un blanc et d’un rouge ne peut pas donner un rosé — sauf pour la cuvée d’un vin mousseux.
+
+### 625b. Ce qui change
+
+- **La couleur d’une cuvée** : `cuvee.couleur` (`r`, `b`, `o`). Le décuvage la recopie de sa cuve (`_vendCuveCoul` : dite, sinon ses parcelles). « Nouvelle cuvée » / « Modifier la cuvée » la propose (`#cuv-coul-body`, facultatif ; la seule couleur du domaine quand ses pratiques n’en ont qu’une ; le rosé seulement s’il en fait). Sans couleur dite : celle de la cuve d’où elle vient. Une seule lecture, `_cuveeCoul` (cuvier-pratiques.js).
+- **Au Chai** : la fiche la dit en tête de sa ligne (« Blanc · 6 fûts · 13,7 hL ») ; la carte, seulement si le domaine fait plusieurs couleurs (`_chaiMultiCoul` : ses pratiques, ou ses cuvées). Le labo lit la même couleur, rosé compris.
+- **Les mélanges, une règle** — `_coulMelange(vers, de)` : un rouge ou un rosé dans un blanc, du blanc dans un rosé → **impossible** ; du blanc dans un rouge → **à vérifier** (« C’est voulu », noté `couleur_conf` sur l’opération) ; un rouge et un rosé, une couleur inconnue → rien. Elle joue à **« Compléter le fût »** (la source porte sa couleur ; `_asmRefus` refuse avant d’écrire) et à **« Fusionner des cuves »** (la porteuse telle que `saveVendFusion` la choisit ; le bouton éteint ; refus avant toute écriture). L’encadré est celui des sécurités de PRATIQUES-1.
+- `cave.js` n’importe pas le module des pratiques : il lit `window._cuveeCoul`, `window._coulMelange`… et expose `_caveCuveSource` pour `_cuveeCoul`.
+- **Les tutos rangés par module** : `src/tutos.js` garde le moteur et le domaine d’entraînement (78 ko) ; la liste vit dans `src/tutos-vigne.js`, `-tracteur`, `-planning`, `-phyto`, `-reserve`, `-cave`, que le moteur importe dans l’ordre du catalogue. Une liste lit les outils du moteur que `_TU_OUTILS` lui **pose** avant le premier tuto (`_tuOutils`) ; `_zoneEquipe`, lu **au chargement** (`zone: _zoneEquipe`), est passé dans la liste Vigne. Les tutos sont **déplacés tels quels** (le lecteur de l’aiguillage ne voit aucun texte changé). Le catalogue ne change pas ; le tuto proposé à la fin d’un tuto suit désormais l’ordre des modules.
+- **Les scripts** : `scripts/mv-tutos-sources.mjs` dit où sont les tutos (le moteur, puis les listes qu’il importe, dans son ordre) et rend leur texte bout à bout. L’aiguillage (`mv-tutos-concernes`, chargé aussi depuis une adresse `data:` : la règle y est recopiée) lit chaque liste : le moteur concerne tous les tutos, la tête d’une liste concerne ses tutos seuls. `mv-harnais-tutos` et `mv-tutos-inventaire` tiennent les listes hors de « l’appli ». `typo-baseline.json` : la ligne de `tutos.js` regravée (180 → 77 ko), les six listes y entrent.
+- **Le tuto « créer une cuvée en cuve »** choisit « Blanc » (12 étapes) et finit sur une cuvée blanche. Les deux « C’est voulu » sont écrits en toutes lettres et exemptés avec leur raison ; plafond 788.
+
+### 625c. Mesuré après
+
+- `mv-harnais-couleur1` : 22 assertions (la règle et la couleur JOUÉES dans Node, le branchement, le tuto, le découpage, les six listes chargées dans Node), 21 contre-épreuves. `tuto10` : un scénario neuf (la tête d’une liste) et deux contre-épreuves ; `mv-harnais-tutos` : une (une liste que le moteur n’importe plus).
+- **Joué à l’écran sur le build** (domaine d’entraînement, téléphone et ordinateur, aucune erreur de page) : « Nouvelle cuvée » propose Rouge et Blanc (pas de rosé : le domaine n’en fait pas) ; « Bourgogne blanc » naît `couleur: 'b'`, sa carte dit « Blanc », sa fiche « Blanc · 6 fûts · 13,7 hL » ; compléter son fût avec « Vieilles Vignes » (rouge) : « Impossible · Pas de rouge dans un blanc », bouton éteint, rien d’écrit ; compléter le rouge avec le blanc : « À vérifier », « C’est voulu », écrit avec `couleur_conf` ; une cuve de blanc et une de rouge fusionnées : vers le blanc impossible, vers le rouge à confirmer ; une cuve de blanc décuvée : sa cuvée naît blanche.
+- ⚠️ **Le préflight (C23) a vu des outils appelés et pas déclarés** dans les listes : `var _q, L;` sans valeur n’est pas une déclaration pour lui. Écrits `var _q = null, L = null;` — et `mv-harnais-couleur1` (E3) tient ce que C23 ne voit pas : chaque outil lu est posé, chaque outil posé existe dans le moteur.
+- `asm1`, `fusion` : bouchons des noms neufs (la règle des couleurs se joue dans `couleur1`) ; `tuto9` lit les zones de choix dans toutes les listes.
+
+### 625d. Leçons
+
+- **Une liste découpée lit ses outils à l’appel, jamais au chargement** : `zone: _zoneEquipe` prend sa valeur au moment où la liste se construit — un outil posé après y serait `undefined`, sans erreur. Le harnais cherche ces valeurs nues, et charge les listes dans Node.
+- **Un geste écrit par variable (`onclick="'+fn+'(…)"`) échappe au compte des gestes** : l’écrire en toutes lettres, même au prix d’un ternaire.
+- **Un déplacement se vérifie avec l’outil qui le jugera** : l’aiguillage des tutos relit avant et après — aucun tuto « changé ».
+- Dans le bac à sable de Claude, un harnais qui lit `src/app.js` ne se lance pas seul : il passe par le lanceur.
+
+### 625e. Restes, à leur lot
+
+- La saignée d’une cuve de rouge qui crée la cuve de rosé.
+- Le soutirage qui arrive dans « À faire » à l’heure du repère ; l’enzymage pris dans La Réserve.
+- L’exception de l’article 8 (la cuvée d’un mousseux) : un domaine qui ferait un crémant rosé d’assemblage aurait besoin d’un réglage — rien ne la lève aujourd’hui.
+- Changer la couleur d’une cuvée qui a déjà reçu l’apport d’une autre couleur n’est pas contrôlé.
+- `styles.css` : 1 014 ko pour un plafond de 1 024.

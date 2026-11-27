@@ -1149,7 +1149,8 @@ function _caveCuvCardHtml(c,w){
   return '<div class="mvc-cuv st-'+st+'" data-cuv="'+_escAttr(c.id)+'" onclick="_chaiSel(\''+c.id+'\')">'
     +'<div class="mvc-cuv-head"><div class="mvc-cuv-lead"><div class="mvc-cuv-name">'+_escHtml(c.nom)+'</div>'
     +(tonStr?'<div class="mvc-cuv-ton">'+tonStr+'</div>':'')+'</div>'+right+'</div>'
-    +'<div class="mvc-cuv-vol">'+_mvIcon(nbT?'barrique':'cuve',16)+' '+(_caveContenantsHtml(c)||'aucun contenant')+' <span class="mvc-dot"></span> '+hl+' hL</div>'
+    +'<div class="mvc-cuv-vol">'+_mvIcon(nbT?'barrique':'cuve',16)+' '+(_caveContenantsHtml(c)||'aucun contenant')+' <span class="mvc-dot"></span> '+hl+' hL'
+    +(typeof window._chaiCoulHtml==='function'?window._chaiCoulHtml(c):'')+'</div>'   // ★ COULEUR-1 (§625) : sa couleur, si le domaine en a plusieurs
     +_asmCarteHtml(c,w)   // ASM-1
     +(isEmb?'':_caveFaLineHtml(c))
     +(isEmb?'':(_caveOuille(c)?_caveGaugeHtml(c):_caveNoOuHtml(c)))
@@ -2179,6 +2180,7 @@ function openOvCavee(cuvId) {
   el=document.getElementById('cuv-id'); if(el) el.value=cuvId||'';
   el=document.getElementById('cuv-del-btn'); if(el) el.style.display=cuv?'block':'none';
   _cuvContReset(cuv?cuvId:null);   // ★ CONTENANT-1 (§621) — fûts ou cuve, pour une cuvée nouvelle
+  if(typeof window._cuvCoulOuvrir==='function') window._cuvCoulOuvrir(cuv);   // ★ COULEUR-1 (§625) — sa couleur, facultative
   var _ovCm=document.getElementById('ovCuveeMgmt');if(_ovCm)_ovCm.classList.add('open');
 }
 
@@ -2191,6 +2193,7 @@ function saveCuvee() {
   /* ★ FML-1 — « Pas de malo (voulu) » : le domaine évite la malo exprès. Datée comme « Terminée ». */
   var fmlSans=_fmlV==='sans';
   var existId=(document.getElementById('cuv-id')||{}).value;
+  var _coulN=(typeof window._cuvCoulPrise==='function')?window._cuvCoulPrise():null;   // ★ COULEUR-1 (§625)
   var tonneaux=_cuvTonneaux.filter(function(t){return t.nb>0;});
   var nbTotal=tonneaux.reduce(function(s,t){return s+(t.nb||0);},0);
   if(!nom){showToast('Saisissez un nom','#E07060');return;}
@@ -2255,6 +2258,7 @@ function saveCuvee() {
       if(fmlTerminee&&(!_prevC.fml_terminee||!_fmlD)) _fmlD=_fmlAuj;
       if(!fmlTerminee) _fmlD=null;
       Object.assign(_prevC,{nom:nom,millesime:millesime,tonneaux:tonneaux,statut:statut,fml_terminee:fmlTerminee,fml_terminee_date:_fmlD});
+      if(_coulN) _prevC.couleur=_coulN; else delete _prevC.couleur;   // ★ COULEUR-1 (§625) : sans couleur dite, celle de sa cuve
       /* ★ FML-1 — même règle de date que « Terminée » : réenregistrer ne la redate pas. */
       var _sansD=_prevC.fml_sans_date||null;
       if(fmlSans&&(!_prevC.fml_sans||!_sansD)) _sansD=_fmlAuj;
@@ -2269,6 +2273,7 @@ function saveCuvee() {
       last_ouillage:null,last_analyse:null});
     if(_cvPret){ CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].cuves=[{ref:_cvPret.ref, litres:_cvPret.litres}]; }
     if(fmlSans){ var _nc=CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1]; _nc.fml_sans=true; _nc.fml_sans_date=_fmlAuj; }   // ★ FML-1
+    if(_coulN) CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].couleur=_coulN;   // ★ COULEUR-1 (§625)
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e')
@@ -2851,7 +2856,8 @@ function openCuveeDetail(cuvId,dans,volet){
   if(tEl)tEl.textContent=cuv.nom+(cuv.millesime?' '+cuv.millesime:'');
   // ⚠️ Ecrivait « N tonneaux » en dur : faux des qu'une cuve est logee. Le
   //   libelle est DERIVE, donc juste dans les trois cas (futs / cuve / mixte).
-  if(sEl)sEl.textContent=(_caveContenantsStr(cuv)||'aucun contenant')+' \u00B7 '+_mvF1(_caveVolHl(cuv))+'\u00a0hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
+  var _coulF=(typeof window._cuveeCoul==='function')?window._coulMot(window._cuveeCoul(cuv)):'';   // ★ COULEUR-1 (§625)
+  if(sEl)sEl.textContent=(_coulF?_coulF+' \u00B7 ':'')+(_caveContenantsStr(cuv)||'aucun contenant')+' \u00B7 '+_mvF1(_caveVolHl(cuv))+'\u00a0hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
   var seuil=_caveSeuilOu(cuv);
   var lMs=cuv.last_ouillage?new Date(cuv.last_ouillage).getTime():0;
   var dSince=lMs?Math.floor((Date.now()-lMs)/86400000):9999;
@@ -3332,7 +3338,7 @@ function _caveContenantsSectionHtml(cuv){
 }
 
 /* ★★★ ASM-1 — COMPLETER UN FUT ENTAME. ⚠️ _asmValider ne relit pas le DOM (§153b). */
-var _asmCuv=null, _asmSrc=null, _asmL=0, _ASM_GID=0;
+var _asmCuv=null, _asmSrc=null, _asmL=0, _ASM_GID=0, _asmCoulOk=null;   // COULEUR-1 (§625) : le mélange « à vérifier » confirmé
 function _asmCuvee(id){
   return ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).find(function(x){ return x&&x.id===id; })||null;
 }
@@ -3363,7 +3369,8 @@ function _asmSources(cu){
     out.push({k:'cuve:'+c.id, type:'cuve', grp:'cuvier', id:c.id,
       nom:(c.nom||'Cuve')+(vin?' \u00b7 '+vin:''), lbl:(c.nom||'Cuve')+(vin?' ('+vin+')':''),
       meta:_vendStatLbl(c.statut)+' \u00b7 environ '+_vendCuvF1(v.hl)+'\u00a0hL dedans',
-      hl:v.hl, mil:_rmMilCuve(CAVE_VENDANGE,c.id), aocs:_asmAocsCuve(c), futs:false, cuveL:0});
+      hl:v.hl, mil:_rmMilCuve(CAVE_VENDANGE,c.id), aocs:_asmAocsCuve(c), futs:false, cuveL:0,
+      coul:(typeof window._vendCuveCoul==='function')?window._vendCuveCoul(c):'?'});   // COULEUR-1 (§625)
   });
   ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).forEach(function(x){
     if(!x||!cu||x.id===cu.id||x.statut==='embouteille') return;
@@ -3372,7 +3379,8 @@ function _asmSources(cu){
     out.push({k:'cuvee:'+x.id, type:'cuvee', grp:'chai', id:x.id, nom:nm, lbl:nm,
       meta:(_caveContenantsHtml(x)||'')+' \u00b7 '+_mvF1(hl)+'\u00a0hL',
       hl:(k>=0?(parseFloat(x.cuves[k].litres)||0)/100:hl), mil:(x.millesime!=null?x.millesime:null),
-      aocs:_asmAocsCuvee(x), futs:(k<0), cuveL:(k>=0?(parseFloat(x.cuves[k].litres)||0):0)});
+      aocs:_asmAocsCuvee(x), futs:(k<0), cuveL:(k>=0?(parseFloat(x.cuves[k].litres)||0):0),
+      coul:(typeof window._cuveeCoul==='function')?window._cuveeCoul(x):'?'});   // COULEUR-1 (§625)
   });
   return out;
 }
@@ -3419,14 +3427,15 @@ function _asmOuvrir(cuvId){
   var m=_caveManqueL(cu);
   if(!(m>0)){ showToast('Les f\u00fbts de cette cuv\u00e9e sont pleins','#3D6B27'); return; }
   var S=_asmSources(cu);
-  _asmCuv=cuvId; _asmL=m; _asmSrc=S.length?S[0].k:null;
+  _asmCuv=cuvId; _asmL=m; _asmSrc=S.length?S[0].k:null; _asmCoulOk=null;
   // ⚠️ Les styles du Cuvier : sans eux, le bouton sortait brut (§153e).
   _caveV2InjectCss(); _vendInjectCss();
   var ligne=function(s){
     var bois=(s.type==='cuvee'&&s.futs);
     return '<button type="button" class="mvc-pk mvc-aff-c'+(s.k===_asmSrc?' sel':'')+'" data-asm="'+_escHtml(s.k)+'" onclick="_asmChoisir(\''+_escAttr(s.k)+'\')">'
       +'<span class="mvc-aff-rad"></span><span class="mvc-pk-ic '+(bois?'bois':'inox')+'">'+_mvIcon(bois?'barrique':'cuve',18)+'</span>'
-      +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(s.nom)+'</span><span class="mvc-pk-m">'+s.meta+'</span>'
+      +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(s.nom)+'</span><span class="mvc-pk-m">'+s.meta
+      +((typeof window._coulMot==='function'&&window._coulMot(s.coul))?' \u00b7 '+window._coulMot(s.coul):'')+'</span>'   // COULEUR-1 (§625)
       +(s.aocs.length?'<span class="mvc-pk-m mvv-asm-aoc">'+_escHtml(s.aocs.join(', '))+'</span>':'')+'</span></button>';
   };
   var cv=S.filter(function(s){ return s.grp==='cuvier'; }), ch=S.filter(function(s){ return s.grp==='chai'; });
@@ -3450,7 +3459,7 @@ function _asmOuvrir(cuvId){
   _asmApercu();
 }
 function _asmChoisir(k){
-  _asmSrc=k;
+  _asmSrc=k; _asmCoulOk=null;
   document.querySelectorAll('#mvv-ov [data-asm]').forEach(function(b){ b.classList.toggle('sel', b.getAttribute('data-asm')===k); });
   _asmApercu();
 }
@@ -3464,10 +3473,16 @@ function _asmSaisie(){
   var v=Math.round(parseFloat((document.getElementById('asm-l')||{}).value));
   _asmL=isFinite(v)?v:0; _asmApercu();
 }
+// ★ COULEUR-1 (§625) — verser la source dans la cuvée : la règle des mélanges (cuvier-pratiques.js), null si rien à dire.
+function _asmMel(cu,s){ return (s&&typeof window._coulMelange==='function')?window._coulMelange(window._cuveeCoul(cu), s.coul):null; }
+function _asmCoulOkSet(id){ _asmCoulOk=id; _asmApercu(); }
 // Ce qui empeche d'ecrire, en mots ('' : rien).
 function _asmRefus(cu,s,L){
   var m=_caveManqueL(cu);
   if(!s) return 'Choisissez d\u2019o\u00f9 vient le vin.';
+  var _mel=_asmMel(cu,s);   // COULEUR-1 (§625) : impossible, ou à vérifier et pas confirmé
+  if(_mel&&_mel.niv==='b') return _mel.t+'\u00a0: impossible.';
+  if(_mel&&_asmCoulOk!==_mel.id) return _mel.t+'\u00a0: confirmez d\u2019abord, ci-dessus.';
   if(!(L>0)) return 'Indiquez les litres.';
   if(L>m) return 'Le f\u00fbt n\u2019en attend que '+m+'\u00a0L.';
   if(L/100>s.hl+1e-9) return 'La source n\u2019a qu\u2019environ '+_mvF1(s.hl)+'\u00a0hL.';
@@ -3479,8 +3494,9 @@ function _asmApercu(){
   var L=_asmL, m=_caveManqueL(cu);
   var s=_asmSources(cu).find(function(x){ return x.k===_asmSrc; })||null;
   var err=_asmRefus(cu,s,L);
+  var _melH=(typeof window._coulMelHtml==='function')?window._coulMelHtml(_asmMel(cu,s), _asmCoulOk, 'asm'):'';   // COULEUR-1 (§625)
   if(go){ go.disabled=!!err; go.textContent=err?'Compl\u00e9ter le f\u00fbt':('Compl\u00e9ter le f\u00fbt \u2014 '+L+'\u00a0L'); }
-  if(err){ el.innerHTML='<div class="mvv-asm-prev mvv-asm-err">'+err+'</div>'; return; }
+  if(err){ el.innerHTML=_melH+'<div class="mvv-asm-prev mvv-asm-err">'+err+'</div>'; return; }
   var avant=_caveVolL(cu), tot=avant+L, nomCu=(cu.nom||'')+(cu.millesime?' '+cu.millesime:'');
   var dA=_asmAocsCuvee(cu), deja=(cu.apports||[]).reduce(function(t,a){ return t+(parseFloat(a&&a.l)||0); },0);
   var part=Math.round(L*100/tot), dejaP=Math.round(deja*100/tot);
@@ -3496,7 +3512,7 @@ function _asmApercu(){
     ? ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> environ '+_mvF1(s.hl)+' \u2192 '+_mvF1(Math.max(0,s.hl-L/100))+'\u00a0hL dedans. Ces '+L+'\u00a0L restent dans le rendement de ses parcelles.')
     : (s.futs ? ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> un de ses f\u00fbts attendra '+L+'\u00a0L.')
               : ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> sa cuve passe de '+_mvF1(s.cuveL/100)+' \u00e0 '+_mvF1(Math.max(0,s.cuveL-L)/100)+'\u00a0hL.'));
-  el.innerHTML='<div class="mvv-asm-prev">'+h+'<div class="mvv-asm-e">'+e+'</div></div>';
+  el.innerHTML=_melH+'<div class="mvv-asm-prev">'+h+'<div class="mvv-asm-e">'+e+'</div></div>';
 }
 function _asmValider(){
   if(typeof canWrite==='function'&&!canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
@@ -3511,6 +3527,7 @@ function _asmValider(){
     operateur:(window.currentUser&&window.currentUser.nom)||'', intervenants:[], notes:'',
     data:{litres:L, volume_hl:L/100, sources:[s.lbl], de_type:s.type, de_id:s.id, de_nom:s.lbl,
           de_mil:(s.mil!=null?s.mil:null), vers_id:cu.id, vers_nom:vers}};
+  var _melV=_asmMel(cu,s); if(_melV) op.data.couleur_conf={k:_melV.id, par:op.operateur, le:date};   // COULEUR-1 (§625) : confirmé, noté
   cu.manque_l=m-L;
   cu.apports=(cu.apports||[]).concat([{id:id, date:date, l:L, de:s.lbl, de_type:s.type, de_id:s.id,
     mil:(s.mil!=null?s.mil:null), aoc:s.aocs.join(', ')}]);
@@ -3589,7 +3606,7 @@ function _asmDefaire(op){
     }
   }
 }
-window._asmOuvrir=_asmOuvrir; window._asmChoisir=_asmChoisir; window._asmPas=_asmPas;
+window._asmOuvrir=_asmOuvrir; window._asmChoisir=_asmChoisir; window._asmPas=_asmPas; window._asmCoulOkSet=_asmCoulOkSet;   /* COULEUR-1 (§625) */
 window._asmSaisie=_asmSaisie; window._asmValider=_asmValider;
 
 function _caveAffOpen(cuvId){
@@ -11198,11 +11215,12 @@ function _laboNomCible(lieu,id){
 /* Couleur et appellation : rien à saisir, on les lit sur les parcelles (comme l'assemblage, ASM-1). */
 function _laboOrigine(lieu,id){
   var cv=(lieu==='cuvier')?_laboCuveDe(id):((typeof _caveCuveSource==='function')?_caveCuveSource(_laboCuveeDe(id)):null);
-  if(!cv) return '';
-  var coul={}, parts=[];
-  (Array.isArray(cv.parcelles)?cv.parcelles:[]).forEach(function(p){ var x=(typeof _parcCoul==='function')?_parcCoul(p):'?'; coul[x]=1; });
-  var ks=Object.keys(coul);
-  if(ks.length===1&&ks[0]==='r') parts.push('Rouge'); else if(ks.length===1&&ks[0]==='b') parts.push('Blanc');
+  var parts=[];
+  /* ★ COULEUR-1 (§625) : la couleur de la cuve ou de la cuvée — la même source que le Chai (sa couleur dite, sinon sa cuve,
+     sinon ses parcelles). Une cuvée créée au Chai n'a pas de cuve d'origine : sa couleur dite se lit quand même. */
+  var _k=(typeof window._vendCuveCoul==='function')?((lieu==='cuvier')?(cv?window._vendCuveCoul(cv):'?'):window._cuveeCoul(_laboCuveeDe(id))):'?';
+  if(typeof window._coulMot==='function'&&window._coulMot(_k)) parts.push(window._coulMot(_k));
+  if(!cv) return parts.join(' · ');
   var aoc=(typeof _asmAocsCuve==='function')?_asmAocsCuve(cv):[];
   if(aoc.length) parts.push(aoc.join(', '));
   return parts.join(' \u00b7 ');
@@ -12067,6 +12085,7 @@ window._mlFinMalo = _mlFinMalo;         // ★ FML-1 — et le jour où elle a �
 window._fermLegende = _fermLegende;
 window._cuveCouches = _cuveCouches;
 window._parcCoul = _parcCoul;
+window._caveCuveSource = _caveCuveSource;   // COULEUR-1 (§625) : lue par _cuveeCoul (cuvier-pratiques.js)
 window._mlAuj = _mlAuj;
 window._mlEcartJ = _mlEcartJ;
 window._mlCampagne = _mlCampagne;

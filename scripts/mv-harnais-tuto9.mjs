@@ -11,9 +11,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 
 const CONTRE = process.argv.includes('--contre');
-const SAIN = { tutos: fs.readFileSync('src/tutos.js', 'utf8'), app: fs.readFileSync('src/app.js', 'utf8'), html: fs.readFileSync('index.html', 'utf8'),
+const SAIN = { tutos: texteTutosDepot(), app: fs.readFileSync('src/app.js', 'utf8'), html: fs.readFileSync('index.html', 'utf8'),
   jeu: fs.readFileSync('scripts/mv-tutos-jeu.mjs', 'utf8'), marque: fs.readFileSync('scripts/mv-lot-marque.mjs', 'utf8'),
   emp: fs.readFileSync('scripts/mv-tutos-empreinte.mjs', 'utf8') };
 function bornes(src, nom) {
@@ -83,7 +84,8 @@ async function jouer(S) {
   } catch (e) { t('_jeqCorrigee se joue', false, e.message); }
   // TUTO-9 : la zone d'un choix est une LISTE (le moteur la parcourt : _place, _verifie). Celle du Journal rendait un élément
   //   seul : « e.forEach is not a function » à l'étape 2, sur tous les écrans. Règle pour TOUS les tutos.
-  const debut = tu.indexOf('var TU_TUTOS = ['), fin = tu.indexOf('\n];', debut), tous = debut < 0 ? '' : tu.slice(debut, fin);
+  // ★ COULEUR-1 (§625) : les tutos vivent dans une liste par module (`var TU_TUTOS_VIGNE = [` … `\n];`) — toutes lues.
+  const tous = [...tu.matchAll(/var TU_TUTOS(?:_[A-Z]+)? = \[\n[\s\S]*?\n\];/g)].map((m) => m[0]).join('\n');
   const zones = [...tous.matchAll(/zone: (function \(\w*\) \{[^\n]*?\}|_\w+),/g)].map((m) => m[1]);
   //   EQDEF-1 (§492) : le tuto des équipes n'a plus qu'un choix (tout le monde arrive en Équipe 1) — deux zones dans les tutos, le
   //   plancher suit le compte réel : il garde contre un motif qui ne lirait plus rien, pas contre un tuto raccourci.

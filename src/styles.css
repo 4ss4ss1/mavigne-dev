@@ -8274,6 +8274,8 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 .prat-rep-l{display:inline-flex;align-items:center;gap:var(--e-1,4px)}
 .prat-rep-i{box-sizing:border-box;width:64px;min-height:40px;padding:0 var(--e-2,8px);border:var(--bw,1px) solid var(--ligne-forte);border-radius:var(--r-sm,6px);background:var(--bg-card);color:var(--texte);font:inherit;font-size:var(--pt-txt,13px);text-align:right}
 .mvv-fnote.prat-err{color:var(--danger-texte);font-weight:var(--fw-semi,600)}
+/* COULEUR-1 (§625) : la couleur d'une cuvée sur sa carte du Chai — un point et son mot */
+.coul-mot{display:inline-flex;align-items:center;gap:5px}
 /* ★ FIN PRATIQUES-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,

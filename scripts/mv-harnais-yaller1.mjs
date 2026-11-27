@@ -7,8 +7,9 @@
    câblage : le filtre de la liste, la fiche, ↩ et ✕ à l’admin, le tri de la carte Tracteur, l’accompagnement.
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const lire = f => fs.readFileSync(f, 'utf8');
-const S0 = { A: lire('src/app.js'), H: lire('index.html'), U: lire('src/utils.js'), W: lire('src/whats-new.js'), G: lire('guide/04-vigne.html'), T: lire('src/tutos.js') };
+const S0 = { A: lire('src/app.js'), H: lire('index.html'), U: lire('src/utils.js'), W: lire('src/whats-new.js'), G: lire('guide/04-vigne.html'), T: texteTutosDepot() };
 const CONTRE = process.argv.includes('--contre');
 function fonction(src, nom) {
   const i = src.indexOf('function ' + nom + '('); if (i < 0) return '';

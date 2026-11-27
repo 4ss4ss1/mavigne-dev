@@ -11,11 +11,12 @@
 //   4. le « + » : l'icône des trois points s'appelle « points », celle du « + » « ajout », et « plus » n'existe plus nulle part.
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(f, 'utf8');
 const SRC = ['src/app.js', 'src/cave.js', 'src/comptes.js', 'src/cuvier.js', 'src/tournees.js', 'src/utils.js', 'src/pilotage.js', 'src/reglages.js', 'src/tracteur.js', 'src/planning.js'];
-const SAIN = { tutos: lire('src/tutos.js'), coq: lire('src/coquille.js'), css: lire('src/styles.css'), html: lire('index.html'), guide: lire('guide/05-saisons.html'),
+const SAIN = { tutos: texteTutosDepot(), coq: lire('src/coquille.js'), css: lire('src/styles.css'), html: lire('index.html'), guide: lire('guide/05-saisons.html'),
   autres: SRC.filter((f) => fs.existsSync(f)).map(lire).join('\n') };
 // Les couches fixes posées sur toute la largeur qui n'ont pas à suivre le panneau — chacune avec sa raison.
 const EXEMPT = {

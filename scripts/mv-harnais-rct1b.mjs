@@ -14,10 +14,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { app: lire('src/app.js'), cuv: lire('src/cuvier.js'), tu: lire('src/tutos.js'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { app: lire('src/app.js'), cuv: lire('src/cuvier.js'), tu: texteTutosDepot(), liste: lire('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function variable(src, nom) { const m = new RegExp('var ' + nom + '\\s*=').exec(src); if (!m) throw new Error('introuvable : ' + nom); return src.slice(m.index, src.indexOf(';', m.index) + 1); }
 let ok = 0, ko = 0;

@@ -59,6 +59,7 @@ var _PRAT_ETQ = {
   'prat.r':'data-tuto="prat.r"', 'prat.b':'data-tuto="prat.b"', 'prat.o':'data-tuto="prat.o"',
   'prat.o.met.direct':'data-tuto="prat.o.met.direct"', 'prat.b.ml.bloq':'data-tuto="prat.b.ml.bloq"', 'prat.b.lies.bat':'data-tuto="prat.b.lies.bat"',
   'vcuv.coul.r':'data-tuto="vcuv.coul.r"', 'vcuv.coul.b':'data-tuto="vcuv.coul.b"', 'vcuv.coul.o':'data-tuto="vcuv.coul.o"',
+  'cuv.coul.r':'data-tuto="cuv.coul.r"', 'cuv.coul.b':'data-tuto="cuv.coul.b"', 'cuv.coul.o':'data-tuto="cuv.coul.o"',   // COULEUR-1 (§625)
   // PRATIQUES-2 (§624) : la feuille « Débourber » et le prochain geste
   'deb.go':'data-tuto="deb.go"', 'deb.ok':'data-tuto="deb.ok"', 'deb.temp':'data-tuto="deb.temp"', 'deb.jus':'data-tuto="deb.jus"',
   'deb.bourbes':'data-tuto="deb.bourbes"', 'deb.suite.cuve':'data-tuto="deb.suite.cuve"', 'deb.suite.fut':'data-tuto="deb.suite.fut"'
@@ -814,6 +815,76 @@ function _vcuvChoixPris(k){
 }
 function _debNumV(id){ var el=document.getElementById(id); if(!el) return null; var v=parseFloat(String(el.value||'').replace(/[\s\u00a0\u202f]/g,'').replace(',','.')); return (isFinite(v)&&v>=0)?v:null; }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ★★ COULEUR-1 (§625) — LA COULEUR D'UNE CUVÉE AU CHAI, ET LES MÉLANGES QUI NE SE FONT PAS
+   Une cuvée prend la couleur de sa cuve au décuvage (`couleur`, écrite par saveVendDecuvage) ; une cuvée créée au
+   Chai la reçoit à « Nouvelle cuvée » (facultatif). Les mélanges — l'assemblage du Chai (« Compléter le fût ») et la
+   fusion du Cuvier — lisent une seule règle, _coulMelange : le rosé compte comme un rouge (règlement (UE) 2019/934,
+   art. 7), et un rosé ne se fait pas en mélangeant un rouge et un blanc (art. 8). Une couleur inconnue ne tranche rien.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function _coulOk(k){ return k==='r'||k==='b'||k==='o'; }
+function _coulMot(k){ return k==='r'?'Rouge':k==='b'?'Blanc':k==='o'?'Rosé':''; }
+/* La couleur d'une cuvée : celle qu'on lui a dite, sinon celle de la cuve d'où elle vient, sinon '?'. */
+function _cuveeCoul(cu){
+  if(cu&&_coulOk(cu.couleur)) return cu.couleur;
+  var cv=(cu&&typeof window._caveCuveSource==='function')?window._caveCuveSource(cu):null;
+  var k=cv?_vendCuveCoul(cv):'?';
+  return _coulOk(k)?k:'?';
+}
+/* ★ LA SOURCE DES MÉLANGES : verser `kDe` dans `kVers`. null, ou {id, niv:'w' (à vérifier) | 'b' (impossible), t, d}. */
+function _coulMelange(kVers, kDe){
+  if(!_coulOk(kVers)||!_coulOk(kDe)||kVers===kDe) return null;
+  var regle='un rosé ne se fait pas en mélangeant un rouge et un blanc — c’est interdit en Europe (règlement 2019/934, article 8).';
+  if(kVers==='b') return {id:'mel-b-'+kDe, niv:'b', t:'Pas de '+_PRAT_NOM[kDe]+' dans un blanc', d:'Le blanc deviendrait un rosé de mélange : '+regle};
+  if(kVers==='o'&&kDe==='b') return {id:'mel-o-b', niv:'b', t:'Pas de blanc dans un rosé', d:'U'+regle.slice(1)};
+  if(kVers==='r'&&kDe==='b') return {id:'mel-r-b', niv:'w', t:'Du blanc dans un rouge',
+    d:'Selon l’appellation, ce mélange peut être refusé. À Gevrey-Chambertin par exemple, un cépage blanc n’entre dans un rouge qu’en mélange de plants dans la vigne. Vérifiez votre cahier des charges.'};
+  return null;   // un rouge et un rosé : la même catégorie
+}
+/* L'encadré d'un mélange (le style des sécurités de PRATIQUES-1) ; `ok` : l'id déjà confirmé ; `ou` : 'fus' (la fusion du
+   Cuvier) ou 'asm' (l'assemblage du Chai) — le geste qui confirme, écrit en toutes lettres (le compte des gestes le lit). */
+function _coulMelHtml(m, ok, ou){
+  if(!m) return '';
+  if(m.niv==='w'&&ok===m.id) return '<div class="mvencadre mvencadre-ok prat-al">'+_mvIcon('check',18)+'<span><b class="mvencadre-t">'+m.t+'</b>Confirmé : noté au registre avec le mélange.</span></div>';
+  return '<div class="mvencadre mvencadre-'+(m.niv==='b'?'danger':'attention')+' prat-al">'+_mvIcon(m.niv==='b'?'interdit':'alerte',18)
+    +'<span><b class="mvencadre-t">'+_PRAT_NIV[m.niv]+' · '+m.t+'</b>'+m.d
+    +(m.niv==='w'?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact prat-al-b" data-id="'+m.id+'" '
+      +(ou==='fus'?'onclick="_vendFusCoulOkSet(this.dataset.id)"':'onclick="_asmCoulOkSet(this.dataset.id)"')+'>C’est voulu</button>':'')+'</span></div>';
+}
+/* Au Chai, la couleur ne se dit sur les cartes que si le domaine en a plusieurs (ses pratiques, ou ses cuvées). */
+function _chaiMultiCoul(){
+  var P=_pratCfg();
+  if(P&&['r','b','o'].filter(function(k){ return P.actif[k]; }).length>1) return true;
+  var vu={};
+  (((window.CAVE_ELEVAGE||{}).cuvees)||[]).forEach(function(c){ if(c&&c.statut!=='embouteille'){ var k=_cuveeCoul(c); if(k!=='?') vu[k]=1; } });
+  return Object.keys(vu).length>1;
+}
+function _chaiCoulHtml(c){
+  var k=_cuveeCoul(c); if(k==='?'||!_chaiMultiCoul()) return '';
+  return ' <span class="mvc-dot"></span> <span class="coul-mot"><i class="mat-pt '+(k==='o'?'prat-pt-o':k)+'"></i>'+_coulMot(k)+'</span>';
+}
+/* « Nouvelle cuvée » / « Modifier la cuvée » (cave.js) : la couleur, facultative. */
+var _cuvCoul=null, _cuvCoulEx=null;
+function _cuvCoulSeule(){ var P=_pratCfg(); if(!P) return null; var a=['r','b','o'].filter(function(k){ return P.actif[k]; }); return a.length===1?a[0]:null; }
+function _cuvCoulOuvrir(cu){
+  _cuvCoulEx=cu||null;
+  var k=cu?_cuveeCoul(cu):'?';
+  _cuvCoul=cu?(k!=='?'?k:null):_cuvCoulSeule();
+  _cuvCoulRendre();
+}
+function _cuvCoulRendre(){
+  var el=document.getElementById('cuv-coul-body'); if(!el) return;
+  var P=_pratCfg(), ro=!!(P&&P.actif.o)||_cuvCoul==='o';
+  var herite=!!(_cuvCoulEx&&!_coulOk(_cuvCoulEx.couleur)&&_cuveeCoul(_cuvCoulEx)!=='?');
+  el.innerHTML='<div class="fl" style="margin-top:14px">Couleur <span style="font-weight:400;opacity:.75">— '+(herite?'celle de sa cuve au Cuvier':'facultatif')+'</span></div>'
+    +'<div class="prat-ch" role="group" aria-label="Couleur de la cuvée">'+['r','b','o'].filter(function(x){ return x!=='o'||ro; }).map(function(x){
+      return '<button type="button" class="prat-o'+(_cuvCoul===x?' on':'')+'" aria-pressed="'+(_cuvCoul===x)+'" '+_pratEtq('cuv.coul.'+x)+' data-c="'+x+'" onclick="_cuvCoulSet(this.dataset.c)">'+_coulMot(x)+'</button>';
+    }).join('')+'</div>';
+}
+function _cuvCoulSet(k){ if(!_coulOk(k)) return; _cuvCoul=(_cuvCoul===k)?null:k; _cuvCoulRendre(); }
+/* Lu par saveCuvee : la couleur à écrire, ou null (rien de dit). */
+function _cuvCoulPrise(){ return _coulOk(_cuvCoul)?_cuvCoul:null; }
+
 // ── Les gestes (onclick) ──
 window.openPratiques   = openPratiques;
 window._pratCoul       = _pratCoul;
@@ -834,7 +905,17 @@ window._debSuite       = _debSuite;
 window.saveDebourber   = saveDebourber;
 window._vcuvFaLieu     = _vcuvFaLieu;
 window._vcuvMaloSet    = _vcuvMaloSet;
+// COULEUR-1 (§625) : le geste de la fiche de cuvée, et ce que cave.js lit (cave.js n'importe pas ce module)
+window._cuvCoulSet     = _cuvCoulSet;
+window._cuveeCoul      = _cuveeCoul;
+window._vendCuveCoul   = _vendCuveCoul;
+window._coulMelange    = _coulMelange;
+window._coulMelHtml    = _coulMelHtml;
+window._coulMot        = _coulMot;
+window._chaiCoulHtml   = _chaiCoulHtml;
+window._cuvCoulOuvrir  = _cuvCoulOuvrir;
+window._cuvCoulPrise   = _cuvCoulPrise;
 // ── Lus par cuvier.js ──
 export { _pratCfg, _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
   _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
-  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris };
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml };

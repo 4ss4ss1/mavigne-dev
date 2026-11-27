@@ -27,11 +27,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
 const sansPonts = (t) => t.replace(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm, '');
-const S0 = { pl: lire('src/planning.js'), an: lire('src/planning-annee.js'), vu: lire('src/planning-annee-vue.js'), css: lire('src/annee.css'), tu: lire('src/tutos.js') };
+const S0 = { pl: lire('src/planning.js'), an: lire('src/planning-annee.js'), vu: lire('src/planning-annee-vue.js'), css: lire('src/annee.css'), tu: texteTutosDepot() };
 
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);

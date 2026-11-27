@@ -22,13 +22,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
 // ANNEE-3 (§614) : la vue et son panneau vivent dans planning-annee-vue.js. Les deux fichiers sont lus ensemble, leurs ponts
 //   (function X(){ return window.X.apply(…) }) retirés : chaque fonction n'y est qu'une fois, la vraie.
 const sansPonts = (t) => t.replace(/^function (\w+)\(\)\{ return window\.\1\.apply\(null, arguments\); \}$/gm, '');
-const S0 = { pl: lire('src/planning.js'), ann: sansPonts(lire('src/planning-annee.js')) + '\n' + sansPonts(lire('src/planning-annee-vue.js')), mod: lire('src/planning-modeles.js'), css: lire('src/annee.css'), sty: lire('src/styles.css'), app: lire('src/' + 'app' + '.js'), tu: lire('src/tutos.js'), html: lire('index.html') };
+const S0 = { pl: lire('src/planning.js'), ann: sansPonts(lire('src/planning-annee.js')) + '\n' + sansPonts(lire('src/planning-annee-vue.js')), mod: lire('src/planning-modeles.js'), css: lire('src/annee.css'), sty: lire('src/styles.css'), app: lire('src/' + 'app' + '.js'), tu: texteTutosDepot(), html: lire('index.html') };
 
 function fonction(src, nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(src); if (!m) throw new Error('ABSENTE : ' + nom);

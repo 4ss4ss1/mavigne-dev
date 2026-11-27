@@ -36,6 +36,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { estTutos, texteTutos } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur et ses listes par module
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
@@ -46,6 +47,9 @@ const PORTE = ['getDoc', 'getDocFromServer', 'getDocFromCache', 'getDocs', 'onSn
   'sendPasswordResetEmail', 'updatePassword', 'reauthenticateWithCredential', 'createUserWithEmailAndPassword'];
 // Fichiers de l'appli des clients (gt.js / admin-gt.js : la console GUERETTECH, autre page, hors entraînement).
 const HORS_APPLI = new Set(['src/admin-gt.js', 'src/gt.js', 'src/tutos.js']);
+// ★ COULEUR-1 (§625) : les listes de tutos (src/tutos-<module>.js) non plus — une étiquette visée par un tuto se trouverait
+//   « dans l'appli » dans le fichier même du tuto qui la vise.
+const horsAppli = (f) => HORS_APPLI.has(f) || estTutos(f);
 const GENERIQUES = new Set(['$', 'if', 'return', 'event.stopPropagation', 'event.preventDefault', 'closeOv', '_openOv', 'openOv',
   'closeModal', 'history.back', 'this.select', 'this.blur', 'location.reload']);
 
@@ -61,6 +65,7 @@ const MOTEUR = new Set(['data-tuto', 'data-c', 'data-f', 'data-tu']);
 function verifie(F) {
   const L = []; let ko = 0;
   const t = (lib, ok) => { L.push((ok ? c.g('  ✓ ') : c.r('  ✗ ')) + lib); if (!ok) ko++; };
+  const tu = texteTutos((f) => (F[f] == null ? null : F[f]));   // le moteur, puis ses listes (COULEUR-1, §625)
   // A. la porte
   const fb = F['src/firebase.js'];
   for (const n of PORTE) {
@@ -76,7 +81,7 @@ function verifie(F) {
   // B. personne d'autre n'importe le SDK serveur
   const fuites = [];
   for (const [f, s] of Object.entries(F)) {
-    if (!f.startsWith('src/') || f === 'src/firebase.js' || HORS_APPLI.has(f)) continue;
+    if (!f.startsWith('src/') || f === 'src/firebase.js' || horsAppli(f)) continue;
     for (const m of s.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]firebase\/[a-z-]+['"]/g)) {
       for (const n of PORTE) if (new RegExp('\\b' + n + '\\b').test(m[1])) fuites.push(f + ' : ' + n);
     }
@@ -87,15 +92,14 @@ function verifie(F) {
   const iVerif = bt.indexOf('if (!pose || window.localStorage !== JL || window.sessionStorage !== JS) {'), iPose = bt.indexOf('window.__MV_TUTO = m[1].toLowerCase();');
   t('C · boot.js remplace la mémoire du téléphone ET la mémoire de session', bt.includes("Object.defineProperty(window, 'localStorage'") && bt.includes("Object.defineProperty(window, 'sessionStorage'") && bt.includes("depart = { mavigne_tenant: 'domaine-dupont' }"));
   t('C · __MV_TUTO n\u2019existe qu\u2019APRÈS la vérification des deux mémoires jetables', iVerif > 0 && iPose > iVerif);
-  t('C · le drapeau d\u2019entraînement ne s\u2019écrit jamais en mémoire de session (partagée avec le panneau)', !/sessionStorage\.setItem\(\s*['"]mavigne_tuto['"]/.test(bt + F['src/tutos.js']));
+  t('C · le drapeau d\u2019entraînement ne s\u2019écrit jamais en mémoire de session (partagée avec le panneau)', !/sessionStorage\.setItem\(\s*['"]mavigne_tuto['"]/.test(bt + tu));
   // D. app.js
   const ap = F['src/app.js'];
   const iTu = ap.indexOf('if(window.__MV_TUTO && _mvTutoEntrer())'), iFb = ap.indexOf('window._fbLoad().catch(');
   t('D · app.js importe tutos.js', /import '\.\/tutos\.js';/.test(ap));
   t('D · l\u2019entraînement passe avant le chargement du domaine', iTu > 0 && iFb > iTu);
   // E. tutos.js
-  const tu = F['src/tutos.js'];
-  const autres = Object.entries(F).filter(([f]) => f !== 'src/tutos.js' && (f.startsWith('src/') || f === 'index.html')).map(([, s]) => s).join('\n');
+  const autres = Object.entries(F).filter(([f]) => !estTutos(f) && (f.startsWith('src/') || f === 'index.html')).map(([, s]) => s).join('\n');
   const etiquettes = [...new Set([...tu.matchAll(/\[data-tuto="([a-z0-9.-]+)"\]/g)].map((m) => m[1]))];
   t('E · le moteur vise au moins une étiquette', etiquettes.length > 0);
   for (const e of etiquettes) t('E · étiquette « ' + e + ' » présente dans l\u2019appli', autres.includes('data-tuto="' + e + '"') || autres.includes('data-tuto=\\"' + e + '\\"'));
@@ -141,7 +145,7 @@ function verifie(F) {
   // F. le compte des gestes sans tuto
   const gestes = new Set();
   for (const [f, s] of Object.entries(F)) {
-    if (!(f.startsWith('src/') || f === 'index.html') || HORS_APPLI.has(f)) continue;
+    if (!(f.startsWith('src/') || f === 'index.html') || horsAppli(f)) continue;
     for (const m of s.matchAll(/on(?:click|change|input|submit|keyup|keydown)\s*=\s*\\?["']\s*([A-Za-z_$][\w$.]*)/g)) {
       const n = m[1].replace(/^window\./, '');
       if (!GENERIQUES.has(n)) gestes.add(n);
@@ -173,7 +177,7 @@ const MUT = [
   ['boot.js qui écrit le drapeau en mémoire de session', 'public/boot.js', 'window.__MV_TUTO = m[1].toLowerCase();', "sessionStorage.setItem('mavigne_tuto', m[1]);\n  window.__MV_TUTO = m[1].toLowerCase();"],
   ['l\u2019entraînement dans le cache partagé', 'src/firebase.js', "  if (typeof window !== 'undefined' && window.__MV_TUTO) return initializeFirestore(app, { localCache: memoryLocalCache() });\n", ''],
   ['frame-src sans l\u2019appli', 'firebase.json', "frame-src 'self' https://www.google.com", 'frame-src https://www.google.com'],
-  ['un titre qui n\u2019est pas une question', 'src/tutos.js', "titre: 'Comment faire pour noter un plein de GNR", "titre: 'Plein de GNR"],
+  ['un titre qui n\u2019est pas une question', 'src/tutos-tracteur.js', "titre: 'Comment faire pour noter un plein de GNR", "titre: 'Plein de GNR"],
   ['la fenêtre qui dit autre chose', 'src/tutos.js', "_dire({ mvtu: 'fermer' })", "_dire({ mvtu: 'clic' })"],
   ['la fenêtre qui appelle autre chose chez l\u2019appli', 'src/tutos.js', "h._mvTutoAnneau(E.t.id,", "h._mvTutoSortir(E.t.id,"],
   ['la fenêtre qui touche le document de l\u2019appli', 'src/tutos.js', "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};", "    if (!E.memoHote) E.memoHote = h._mvTutoAvant(E.t.id) || {};\n    h.document.body.click();"],
@@ -188,8 +192,12 @@ const MUT = [
   ['un clic hors du moteur', 'src/tutos.js', "    if (a === 'fermer') _fermerPanneau();", "    if (a === 'fermer') { document.body.click(); _fermerPanneau(); }"],
   ['app.js sans tutos.js', 'src/app.js', "import './tutos.js';", ''],
   ['une étiquette disparue', 'index.html', 'data-tuto="eqj.save" ', ''],
-  ['une fonction enseignée renommée', 'src/tutos.js', "couvre: ['openGnrAppoint', 'saveGnrAppoint']", "couvre: ['openGnrAppoint', 'saveGnrAppointX']"],
-  ['une personne absente du domaine fictif', 'src/tutos.js', '[data-eqj-n="Paul"][data-eqj-k="2"]', '[data-eqj-n="Pauline"][data-eqj-k="2"]'],
+  ['une fonction enseignée renommée', 'src/tutos-tracteur.js', "couvre: ['openGnrAppoint', 'saveGnrAppoint']", "couvre: ['openGnrAppoint', 'saveGnrAppointX']"],
+  ['une personne absente du domaine fictif', 'src/tutos-vigne.js', '[data-eqj-n="Paul"][data-eqj-k="2"]', '[data-eqj-n="Pauline"][data-eqj-k="2"]'],
+  // ★ COULEUR-1 (§625) : une liste que le moteur n'importe plus sort ses tutos du compte — leurs gestes redeviennent « sans tuto ».
+  //   (« une étiquette disparue », plus haut, tient aussi les listes hors de l'appli : sans cela, l'étiquette se trouverait
+  //   dans le fichier du tuto qui la vise.)
+  ['une liste de tutos oubliée par le moteur', 'src/tutos.js', "import { _tuOutils as _tuOutilsTracteur, TU_TUTOS_TRACTEUR } from './tutos-tracteur.js';\n", ''],
   ['un geste nouveau sans tuto', 'index.html', '<div class="home-prio-pill-row" data-tuto="home.eqj"', '<button onclick="geste_nouveau_sans_tuto()">x</button><div class="home-prio-pill-row" data-tuto="home.eqj"'],
 ];
 console.log(c.b('MA VIGNE — Harnais TUTO-1 · contre-épreuves'));

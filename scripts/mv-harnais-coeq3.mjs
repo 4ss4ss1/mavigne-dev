@@ -7,8 +7,9 @@
    le câblage du journal (app.js) et des tutos (tutos.js).
    ─────────────────────────────────────────────────────────────────────────── */
 import fs from 'node:fs';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const lire = f => fs.readFileSync(f, 'utf8');
-const S0 = { C: lire('src/coequipier.js'), A: lire('src/app.js'), U: lire('src/tutos.js'), T: lire('src/tracteur.js') };
+const S0 = { C: lire('src/coequipier.js'), A: lire('src/app.js'), U: texteTutosDepot(), T: lire('src/tracteur.js') };
 const CONTRE = process.argv.includes('--contre');
 function fonction(src, nom) {
   const i = src.indexOf('function ' + nom + '('); if (i < 0) return '';

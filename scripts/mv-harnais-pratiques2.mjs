@@ -24,11 +24,12 @@
 // ═════════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SAIN = {
   pr: lire('src/cuvier-pratiques.js'), cu: lire('src/cuvier.js'), utils: lire('src/utils.js'), wn: lire('src/whats-new.js'),
-  g08: lire('guide/08-cave.html'), tu: lire('src/tutos.js'), css: lire('src/styles.css')
+  g08: lire('guide/08-cave.html'), tu: texteTutosDepot(), css: lire('src/styles.css')
 };
 
 function bornes(src, nom) {

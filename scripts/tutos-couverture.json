@@ -84,6 +84,8 @@
     "_vmMacConfirmer": "PRATIQUES-1 (§622) : la confirmation du blanc de macération (voir _vmMacOuvrir)",
     "_debMeth": "PRATIQUES-2 (§624) : la méthode du débourbage se propose d’après les pratiques du domaine (statique ou flottation) ; le tuto « débourber » la montre sans la changer",
     "_vcuvFaLieu": "PRATIQUES-2 (§624) : n’apparaît que si le domaine fermente ses blancs de plusieurs façons (réglage) ; le domaine fictif n’a pas de réglage",
-    "_vcuvMaloSet": "PRATIQUES-2 (§624) : n’apparaît que si le domaine a plusieurs malos pour ses blancs (réglage) ; le domaine fictif n’a pas de réglage"
+    "_vcuvMaloSet": "PRATIQUES-2 (§624) : n’apparaît que si le domaine a plusieurs malos pour ses blancs (réglage) ; le domaine fictif n’a pas de réglage",
+    "_asmCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur du blanc versé dans un rouge — un mélange rare, et l’encadré qui le propose dit lui-même quoi vérifier",
+    "_vendFusCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur une cuve de blanc réunie à une de rouge — rare, et l’encadré qui le propose dit lui-même quoi vérifier"
   }
 }

@@ -7,9 +7,10 @@
 // prochain, et « Noter des mesures » disparaîtrait). _tuJour et _tuCave sont joués pour de vrai.
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 
 const CONTRE = process.argv.includes('--contre');
-const SAIN = { tutos: fs.readFileSync('src/tutos.js', 'utf8'), cuv: fs.readFileSync('src/cuvier.js', 'utf8'), html: fs.readFileSync('index.html', 'utf8'),
+const SAIN = { tutos: texteTutosDepot(), cuv: fs.readFileSync('src/cuvier.js', 'utf8'), html: fs.readFileSync('index.html', 'utf8'),
   couv: fs.readFileSync('scripts/tutos-couverture.json', 'utf8'), utils: (fs.readFileSync('src/utils.js', 'utf8') + '\n' + fs.readFileSync('src/whats-new.js', 'utf8')) };
 function bornes(src, nom) {
   const m = [...src.matchAll(new RegExp('^function ' + nom + '\\s*\\(', 'gm'))];

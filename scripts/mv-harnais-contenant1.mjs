@@ -27,11 +27,12 @@
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { lireCave } from './mv-cave-src.mjs';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SAIN = {
   cave: lireCave(), idx: lire('index.html'), utils: lire('src/utils.js'), wn: lire('src/whats-new.js'),
-  g08: lire('guide/08-cave.html'), tu: lire('src/tutos.js')
+  g08: lire('guide/08-cave.html'), tu: texteTutosDepot()
 };
 
 /* ══ EXTRACTION — accolades comptées hors chaînes et hors commentaires ══ */

@@ -7,7 +7,7 @@
 // Rejouer TOUS les tutos à chaque lot coûte ~1 min 30 par tuto (7 min pour quatre ; une heure à quarante). Or chaque tuto a
 // déjà sa fiche : son entrée de TU_TUTOS, les fonctions qu'il enseigne (`couvre`), les boutons qu'il vise (`data-tuto`).
 // L'aiguillage compare ce que le changement touche à ces fiches, et dit quoi rejouer :
-//   · TOUS — le moteur ou le domaine d'entraînement (tutos.js hors de la liste des tutos), le bac à sable (boot.js, la porte
+//   · TOUS — le moteur ou le domaine d'entraînement (tutos.js ; les listes sont dans src/tutos-<module>.js), le bac à sable (boot.js, la porte
 //     de firebase.js), le chemin vers un module (le dock, la barre latérale : les étapes « aller » se calculent dessus) ;
 //   · UN TUTO — sa fiche, une fonction qu'il enseigne, ou l'endroit du code qui dessine un bouton qu'il vise (la fonction
 //     qui porte l'étiquette, ou sa ligne d'index.html) ;
@@ -59,9 +59,11 @@ export function fonctions(src) {
   return out;
 }
 const corpsPar = (src) => { const c = {}; fonctions(src).forEach((x) => { c[x.nom] = (c[x.nom] || '') + src.slice(x.a, x.b); }); return c; };
-// La liste des tutos : id → { texte, couvre, etiquettes, fin } ; et tout ce qui n'est pas la liste (le moteur, les données).
+// La liste des tutos d'UN fichier : id → { texte, couvre, etiquettes, fin } ; et tout ce qui n'est pas la liste.
+// ★ COULEUR-1 (§625) : la liste vit dans les fichiers de module (`var TU_TUTOS_VIGNE = [` … `\n];`) ; l'ancien
+//   src/tutos.js la portait (`var TU_TUTOS = [`) — un commit d'avant le découpage se lit encore.
 export function lireTutos(src) {
-  const s = src || '', i = s.indexOf('var TU_TUTOS = ['), j = i < 0 ? -1 : s.indexOf('\n];', i);
+  const s = src || '', m = /var TU_TUTOS(?:_[A-Z]+)? = \[\n/.exec(s), i = m ? m.index : -1, j = i < 0 ? -1 : s.indexOf('\n];', i);
   if (i < 0 || j < 0) return { tutos: {}, horsListe: s };
   const tutos = {};
   s.slice(i, j).split(/\n  \{ id: '/).slice(1).forEach((p) => {
@@ -70,6 +72,22 @@ export function lireTutos(src) {
       etiquettes: [...new Set([...p.matchAll(/\[data-tuto="([\w.-]+)"\]/g)].map((x) => x[1]))] };
   });
   return { tutos, horsListe: s.slice(0, i) + s.slice(j + 3) };
+}
+// ★ COULEUR-1 (§625) — les fichiers des tutos : le moteur, puis les listes qu'il importe (la règle de
+//   scripts/mv-tutos-sources.mjs, recopiée : ce fichier se charge aussi depuis une adresse data:, sans import relatif).
+export const MOTEUR_TUTOS = 'src/tutos.js';
+export const estTutos = (f) => f === MOTEUR_TUTOS || /^src\/tutos-[a-z]+\.js$/.test(String(f || ''));
+const listesDe = (moteur) => [...String(moteur || '').matchAll(/^import \{[^}]*\} from '\.\/(tutos-[a-z]+)\.js';/gm)].map((m) => 'src/' + m[1] + '.js');
+// Les tutos d'une version (avant ou après) : la liste réunie, le moteur hors liste, chaque liste hors de ses tutos.
+function tutosDe(lire) {
+  const tutos = {}, de = {}, horsListes = {};
+  let moteur = '';
+  [MOTEUR_TUTOS, ...listesDe(lire(MOTEUR_TUTOS))].forEach((f) => {
+    const T = lireTutos(lire(f));
+    Object.keys(T.tutos).forEach((id) => { tutos[id] = T.tutos[id]; de[id] = f; });
+    if (f === MOTEUR_TUTOS) moteur = T.horsListe; else horsListes[f] = T.horsListe;
+  });
+  return { tutos, de, horsListes, moteur };
 }
 const echappe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const reEtiquette = (e) => new RegExp('data-tuto=\\\\{0,2}["\']' + echappe(e) + '\\\\{0,2}["\']', 'g');
@@ -88,7 +106,7 @@ function porteurs(src, e) {
 export function concernes({ fichiers, avant, apres }) {
   const R = { tous: false, cote: false, ids: [], raisons: {}, tousRaisons: [], total: 0, fins: {} };
   const F = [...new Set(fichiers || [])];
-  const T0 = lireTutos(avant('src/tutos.js')), T1 = lireTutos(apres('src/tutos.js'));
+  const T0 = tutosDe(avant), T1 = tutosDe(apres);
   const ids = Object.keys(T1.tutos);
   R.total = ids.length;
   ids.forEach((id) => { R.fins[id] = T1.tutos[id].fin; });
@@ -99,11 +117,13 @@ export function concernes({ fichiers, avant, apres }) {
     if (TOUS_FICHIERS.includes(f) && change(f)) tous(f + ' a changé');
     if (COTE_FICHIERS.includes(f) && change(f)) R.cote = true;
   });
-  if (F.includes('src/tutos.js')) {
-    if (norm(T0.horsListe) !== norm(T1.horsListe)) tous('le moteur des tutos ou le domaine d’entraînement (tutos.js, hors de la liste des tutos)');
+  if (F.some(estTutos)) {
+    if (norm(T0.moteur) !== norm(T1.moteur)) tous('le moteur des tutos ou le domaine d’entraînement (tutos.js, hors des listes de tutos)');
     ids.forEach((id) => { const a = T0.tutos[id]; if (!a) ajoute(id, 'tuto nouveau'); else if (norm(a.texte) !== norm(T1.tutos[id].texte)) ajoute(id, 'sa fiche a changé'); });
+    // ★ COULEUR-1 (§625) : les outils qu'une liste lit (sa tête) concernent ses tutos, pas ceux des autres listes.
+    ids.forEach((id) => { const f = T1.de[id]; if (f !== MOTEUR_TUTOS && T0.horsListes[f] != null && norm(T0.horsListes[f]) !== norm(T1.horsListes[f])) ajoute(id, 'la tête de sa liste a changé (' + f + ')'); });
   }
-  const js = F.filter((f) => /^src\/.+\.js$/.test(f) && f !== 'src/tutos.js');
+  const js = F.filter((f) => /^src\/.+\.js$/.test(f) && !estTutos(f));
   const modifiees = new Set();
   js.forEach((f) => {
     const A = corpsPar(avant(f) || ''), B = corpsPar(apres(f) || '');

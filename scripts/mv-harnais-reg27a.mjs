@@ -18,11 +18,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { texteTutosDepot } from './mv-tutos-sources.mjs';   // ★ COULEUR-1 (§625) : le moteur des tutos et ses listes par module
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
 const S0 = { ut: lire('src/utils.js'), phy: lire('src/phyto.js'), rg: lire('src/registre.js'), pil: lire('src/pilotage.js'), rsv: lire('src/reserve.js'), reg: lire('src/reglages.js'),
-  trc: lire('src/tracteur.js'), tu: lire('src/tutos.js'), wn: lire('src/whats-new.js'), cov: lire('scripts/tutos-couverture.json'),
+  trc: lire('src/tracteur.js'), tu: texteTutosDepot(), wn: lire('src/whats-new.js'), cov: lire('scripts/tutos-couverture.json'),
   g07: lire('guide/07-phyto.html'), g11: lire('guide/11-pilotage.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 function fonction(src, debut) { const i = src.indexOf(debut); if (i < 0) throw new Error('introuvable : ' + debut); let k = src.indexOf('{', i), p = 0; for (; k < src.length; k++) { if (src[k] === '{') p++; else if (src[k] === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 function tranche(src, a, b) { const i = src.indexOf(a), j = src.indexOf(b, i); if (i < 0 || j < 0) throw new Error('tranche introuvable : ' + a); return src.slice(i, j + b.length); }
