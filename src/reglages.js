@@ -6176,6 +6176,167 @@ function saveEditSaison(){
   showToast('Période mise à jour'+(_tAjout.length?(' · '+_tAjout.length+' tâche'+(_tAjout.length>1?'s':'')+' ajoutée'+(_tAjout.length>1?'s':'')+' au domaine'):''),'#3D6B27');
 }
 
+// ══ RENF-4 (§620) — « CRÉER LE CONTRAT » DEPUIS UNE LIGNE DU RENFORT ═════════════════════════════════════════════
+// Nico (27/11) : « go pour créer le contrat » — le D5 de la maquette Renfort v1 (« Créer le contrat » depuis la ligne, qui passe
+//   « sous contrat », comme une place sans nom devient une personne dans Runn ou Forecast). Au choix (« les deux, au choix ») :
+//   (1) UNE FICHE PAR PERSONNE : prénom, adresse (fictive d'office, la convention du domaine), le compte créé comme « Nouveau
+//      membre » (createAuthAccount : SEC-2, le mot de passe affiché UNE fois) ; le contrat de la ligne dans le journal du salarié
+//      (une embauche datée, son type, sa fin prévue). Rôles : ouvrier (il travaille dans les rangs, il valide) et saisonnier.
+//   (2) UNE ÉQUIPE COLLECTIVE : une fiche, N personnes, sans compte ni relevé individuel (comme une équipe de vendange).
+//   La feuille vit ici, avec l'équipe : le Pilotage décide (la ligne), le module fait (les fiches). Elle rend les noms créés à
+//   qui l'a ouverte (Pilotage › Renfort, _rfContrat).
+var _RFC=null;
+var _RFC_MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+function _rfcJ(iso){ var p=String(iso||'').split('-'); return (p.length<3)?String(iso||''):(parseInt(p[2],10)+' '+(_RFC_MOIS[parseInt(p[1],10)-1]||'')); }
+function _rfcSlug(v){ return String(v==null?'':v).trim().toLowerCase().normalize('NFD').replace(/[^ -~]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,''); }
+// La convention d'adresse fictive du domaine, DÉDUITE des fiches existantes (prenom.partie@domaine), par majorité — deux
+//   conventions sont en usage et la partie n'est pas toujours le slug (la leçon d'admin-gt, _agtLotPart). À défaut, le nom du
+//   domaine, sur mavigneapp.fr.
+function _rfcConvention(){
+  var cpt={}, best=null;
+  (window.MEMBRES||[]).forEach(function(m){
+    var r=/^[^.@]+\.([a-z0-9.-]+)@(mavigne\.app|mavigneapp\.fr)$/.exec(String((m&&m.email)||'').trim().toLowerCase());
+    if(!r) return;
+    var k=r[1]+'@'+r[2]; cpt[k]=(cpt[k]||0)+1; if(!best||cpt[k]>cpt[best]) best=k;
+  });
+  if(best){ var i=best.indexOf('@'); return { part:best.slice(0,i), dom:best.slice(i+1) }; }
+  return { part:(_rfcSlug(window.DOMAINE_NOM||'')||'domaine'), dom:'mavigneapp.fr' };
+}
+function _rfcMail(prenom,pris){
+  var p=_rfcSlug(prenom); if(!p) return '';
+  var c=_rfcConvention(), e=p+'.'+c.part+'@'+c.dom, k=2;
+  while(pris.indexOf(e)>=0&&k<100){ e=p+k+'.'+c.part+'@'+c.dom; k++; }
+  return e;
+}
+function _rfcDemo(){ var cu=window.currentUser; return !!(cu&&(cu._isDemo||cu._isVisite)); }
+function _rfcAdresses(sauf){
+  var R=_RFC, out=(window.MEMBRES||[]).map(function(m){ return String((m&&m.email)||'').trim().toLowerCase(); });
+  if(R) R.rows.forEach(function(r,i){ if(i!==sauf&&r.e) out.push(r.e.toLowerCase()); });
+  return out;
+}
+function _rfcOuvrir(o,fin){
+  if(!isAdmin()||!o||!(o.n>0)) return;
+  var nc='Saisonniers '+_rfcJ(o.a), noms=(window.MEMBRES||[]).map(function(m){ return String((m&&m.nom)||'').toLowerCase(); }), k=2;
+  while(noms.indexOf(nc.toLowerCase())>=0&&k<100){ nc='Saisonniers '+_rfcJ(o.a)+' '+k; k++; }
+  var rows=[]; for(var i=0;i<Math.min(o.n,40);i++) rows.push({ p:'', e:'', auto:true });
+  _RFC={ o:o, fin:fin, mode:'pers', rows:rows, nc:nc, err:'', run:false, res:null };
+  _rfcRendu();
+  window.openOv('ovRfContrat');
+}
+function _rfcOpt(v,lib){ var on=_RFC.mode===v; return '<button type="button" class="mvbtn mvbtn-option mvbtn-compact" data-rfc="mode" data-v="'+v+'" aria-pressed="'+on+'" onclick="window._rfcGeste(this)">'+lib+'</button>'; }
+function _rfcRendu(){
+  var R=_RFC, b=document.getElementById('rfc-corps'); if(!R||!b) return;
+  var o=R.o, tc=(o.ctr==='cdd')?'CDD':'TESA', h;
+  if(R.res){
+    var ok=R.res.ok, ko=R.res.ko;
+    h='<div class="modal-hd"><div class="modal-title">'+(ok.length?('Fiche'+(ok.length>1?'s':'')+' créée'+(ok.length>1?'s':'')):'Rien n’est créé')+'</div>'
+      +'<div class="modal-sub">'+ok.length+' sous contrat · '+tc+' · du '+_rfcJ(o.a)+' au '+_rfcJ(o.b)+'</div></div><div class="modal-body">';
+    if(ok.length&&!R.res.demo) h+='<div class="rfc-n">Les mots de passe ne s’afficheront plus : notez-les ou copiez-les.</div>';
+    if(R.res.demo) h+='<div class="rfc-n">Démo : aucun compte n’est créé.</div>';
+    h+='<div class="rfc-res">'+ok.map(function(x){ return '<div><b>'+_escHtml(x.nom)+'</b><span>'+_escHtml(x.email)+'</span>'+(x.pwd?'<code>'+_escHtml(x.pwd)+'</code>':'')+'</div>'; }).join('')+'</div>';
+    if(ko.length) h+='<div class="rfc-err" role="alert">'+ko.map(_escHtml).join('<br>')+'</div>';
+    h+='<div class="rfc-pied">'+((ok.length&&!R.res.demo)?'<button type="button" class="mvbtn mvbtn-secondaire" data-rfc="copie" onclick="window._rfcGeste(this)">Copier tout</button>':'')
+      +'<button type="button" class="mvbtn mvbtn-principal" data-rfc="fin" onclick="window._rfcGeste(this)">Terminé</button></div></div>';
+    b.innerHTML=h; return;
+  }
+  var pers=(R.mode==='pers'), n=o.n;
+  h='<div class="modal-hd"><div class="modal-title">Créer le contrat</div><div class="modal-sub">'+n+' saisonnier'+(n>1?'s':'')+' · '+tc+' · du '+_rfcJ(o.a)+' au '+_rfcJ(o.b)+'</div></div><div class="modal-body">'
+    +'<span class="mvbtn-choix rfc-mode" role="group" aria-label="Créer">'+_rfcOpt('pers','Une fiche par personne')+_rfcOpt('coll','Une équipe collective')+'</span>';
+  if(pers){
+    h+='<div class="rfc-rs">'+R.rows.map(function(r,i){
+      return '<div class="rfc-r"><input type="text" class="fi" maxlength="40" autocomplete="off" placeholder="Prénom" aria-label="Prénom '+(i+1)+'" data-rfc="p" data-i="'+i+'" value="'+_escAttr(r.p)+'" oninput="window._rfcSaisie(this)">'
+        +'<input type="email" class="fi" autocomplete="off" placeholder="adresse" aria-label="Adresse '+(i+1)+'" data-rfc="e" data-i="'+i+'" value="'+_escAttr(r.e)+'" oninput="window._rfcSaisie(this)"></div>';
+    }).join('')+'</div>'
+      +'<div class="rfc-n">'+(_rfcDemo()?'Démo : aucun compte n’est créé.':'Chacun a son compte ; son mot de passe s’affiche une seule fois.')+'</div>';
+  } else {
+    h+='<label class="rfc-c"><span>Nom de l’équipe</span><input type="text" class="fi" maxlength="40" autocomplete="off" data-rfc="nc" value="'+_escAttr(R.nc)+'" oninput="window._rfcSaisie(this)"></label>'
+      +'<div class="rfc-n">Une fiche pour '+n+' personne'+(n>1?'s':'')+', sans compte ni relevé individuel.</div>';
+  }
+  h+='<div class="rfc-err" role="alert" id="rfc-err">'+_escHtml(R.err||'')+'</div>'
+    +'<div class="rfc-pied"><button type="button" class="mvbtn mvbtn-principal" data-rfc="ok" onclick="window._rfcGeste(this)"'+(R.run?' disabled':'')+'>'
+    +(R.run?'Création…':(pers?('Créer '+n+' fiche'+(n>1?'s':'')):'Créer l’équipe'))+'</button></div></div>';
+  b.innerHTML=h;
+}
+// La saisie ne redessine pas la feuille (le curseur resterait en route) : l'état suit, l'adresse fictive se propose tant
+//   qu'on n'a pas écrit la sienne.
+function _rfcSaisie(el){
+  var R=_RFC; if(!R||!el||!el.getAttribute) return;
+  var a=el.getAttribute('data-rfc'), i=parseInt(el.getAttribute('data-i'),10);
+  if(a==='nc'){ R.nc=el.value; return; }
+  var r=R.rows[i]; if(!r) return;
+  if(a==='p'){
+    r.p=el.value;
+    if(r.auto){ r.e=_rfcMail(r.p,_rfcAdresses(i)); var e=document.querySelector('#rfc-corps input[data-rfc="e"][data-i="'+i+'"]'); if(e) e.value=r.e; }
+  } else if(a==='e'){ r.e=el.value.trim(); r.auto=!r.e; }
+}
+function _rfcMsg(e){
+  var c=(e&&e.code)||'', reason=(e&&e.details&&e.details.reason)||'';
+  if(c==='auth/email-already-in-use') return 'cette adresse est déjà utilisée';
+  if(c==='auth/invalid-email') return 'adresse invalide';
+  if(c==='mv/timeout') return 'délai dépassé (réseau faible ?)';
+  if(reason) return reason;
+  return (e&&e.message)||'erreur';
+}
+async function _rfcCreer(){
+  var R=_RFC; if(!R||R.run||!isAdmin()) return;
+  var o=R.o, M=window.MEMBRES=window.MEMBRES||[], type=(o.ctr==='cdd')?'CDD':'TESA';
+  var noms=M.map(function(m){ return String((m&&m.nom)||'').trim().toLowerCase(); });
+  var couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];
+  function fiche(base){ var m=Object.assign({ statut:'Actif', couleur:couleurs[M.length%couleurs.length], hist:[{ d:o.a, t:'embauche', type:type, fin:o.b }] }, base); window._mvHistMirror(m); return m; }
+  function err(t){ R.err=t; var e=document.getElementById('rfc-err'); if(e) e.textContent=t; }
+  if(R.mode==='coll'){
+    var nc=String(R.nc||'').trim();
+    if(!nc) return err('Donnez un nom à l’équipe.');
+    if(noms.indexOf(nc.toLowerCase())>=0) return err('Une fiche porte déjà ce nom.');
+    M.push(fiche({ nom:nc, roles:['saisonnier'], collectif:true, effectif:o.n }));
+    window.saveData('membres');
+    var fc=R.fin; _RFC=null; window.closeOv(null,'ovRfContrat');
+    showToast('Équipe créée : '+nc,'#3D6B27');
+    if(typeof fc==='function') fc({ noms:[nc], n:o.n });
+    return;
+  }
+  var vus=[], mails=_rfcAdresses(-1).filter(function(x){ return !!x; }), lus=[];
+  for(var i=0;i<R.rows.length;i++){
+    var r=R.rows[i], p=String(r.p||'').trim(), e=String(r.e||'').trim().toLowerCase();
+    if(!p) return err('Le prénom n°'+(i+1)+' manque.');
+    if(noms.indexOf(p.toLowerCase())>=0||vus.indexOf(p.toLowerCase())>=0) return err(p+' : ce nom est déjà dans l’équipe — ajoutez une initiale.');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return err(p+' : l’adresse n’est pas valable.');
+    if(M.some(function(m){ return String((m&&m.email)||'').trim().toLowerCase()===e; })||lus.indexOf(e)>=0) return err(p+' : cette adresse est déjà prise.');
+    vus.push(p.toLowerCase()); lus.push(e);
+  }
+  R.err=''; R.run=true; _rfcRendu();
+  var demo=_rfcDemo(), roles=['ouvrier','saisonnier'], ok=[], ko=[];
+  for(var j=0;j<R.rows.length;j++){
+    var rr=R.rows[j], pp=String(rr.p).trim(), ee=String(rr.e).trim().toLowerCase(), res=null;
+    if(!demo){
+      try{ res=await window.createAuthAccount(ee,'',{ roles:roles }); }
+      catch(eC){ ko.push(pp+' : '+_rfcMsg(eC)); continue; }
+    }
+    M.push(fiche({ nom:pp, email:ee, roles:roles.slice() }));
+    // Une fiche écrite à chaque compte : si l'appli se ferme en route, aucun compte ne reste sans sa fiche.
+    window.saveData('membres');
+    ok.push({ nom:pp, email:ee, pwd:(res&&res.password)||'' });
+  }
+  if(!_RFC) return;
+  R.run=false; R.res={ ok:ok, ko:ko, demo:demo };
+  _rfcRendu();
+  if(ok.length&&typeof R.fin==='function') R.fin({ noms:ok.map(function(x){ return x.nom; }), n:ok.length });
+}
+function _rfcGeste(el){
+  var R=_RFC; if(!R||!el||!el.getAttribute) return;
+  var a=el.getAttribute('data-rfc');
+  if(a==='mode'){ R.mode=(el.getAttribute('data-v')==='coll')?'coll':'pers'; R.err=''; _rfcRendu(); return; }
+  if(a==='ok'){ _rfcCreer(); return; }
+  if(a==='copie'){
+    var t=(R.res&&R.res.ok||[]).map(function(x){ return x.nom+'\t'+x.email+'\t'+x.pwd; }).join('\n');
+    var fait=function(){ showToast('Copié','#3D6B27'); };
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(fait).catch(function(){ _mvCopyFallback(t,fait); }); else _mvCopyFallback(t,fait); }
+    catch(eP){ _mvCopyFallback(t,fait); }
+    return;
+  }
+  if(a==='fin'){ _RFC=null; window.closeOv(null,'ovRfContrat'); }
+}
+
 // ════════════════════════════════════════════════════════════════════
 // EXPOSITIONS WINDOW — toutes les fonctions réglages
 // ════════════════════════════════════════════════════════════════════
@@ -6227,6 +6388,9 @@ window.removeTacheFromSaison = removeTacheFromSaison;
 window.saveEditHha           = saveEditHha;
 window.toggleRole            = toggleRole;
 window.saveMembre            = saveMembre;
+window._rfcOuvrir            = _rfcOuvrir;   // RENF-4 (§620)
+window._rfcGeste             = _rfcGeste;
+window._rfcSaisie            = _rfcSaisie;
 window.editMembre            = editMembre;
 window.toggleEmRole          = toggleEmRole;
 window.toggleEmBureau        = toggleEmBureau;

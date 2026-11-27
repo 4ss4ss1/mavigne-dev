@@ -1,0 +1,33 @@
+{
+  "lot": "RENF-4",
+  "section": "§620",
+  "base": "85214708ff827269155473463673e7f5635ea008",
+  "inclut": [],
+  "date": "2026-11-27",
+  "tutos": {
+    "concernes": [],
+    "note": "aucun tuto ne touche ce lot"
+  },
+  "fichiers": {
+    ".mv-base": "66829d09587a146126ee2d6165e365c458ab3ecc90d27f89fe6dfda3dd2afefe",
+    "CLAUDE.md": "2ed7be90ddaa0518f25c2f82969b3a23e30a4e6194ce2cb9a680eceff06165a4",
+    "docs/claude/INDEX.md": "10cffb2a09b5fab25ec0c8d4a4c840bb78ef8424d49ba22fda027cda5d419668",
+    "docs/claude/chantiers-580-629.md": "392e8a359858132a8bc02168732b9fd11be8f1bd3e5cf9bdac184b1d5fed9b40",
+    "docs/claude/journal.md": "fedd49ca2ed844524085d567c2845eb1ebc64c40608136453867999248393fd3",
+    "guide/11-pilotage.html": "4ceac57a18fb964790ef44891921fbb1dea3f7612e4fe0f3567ed5da54a61e08",
+    "index.html": "839cf43cd68022c334721c192ece4041c4d4deefd55683c17087ae378404e096",
+    "public/sw.js": "5b29e0354040595943f9e935e3d860bf33896c4513fb7e12e3f58e6d9fc3fecf",
+    "scripts/harnais-claude-md.mjs": "335d1f525ac55768a9f07eba878997d5e1e523b83858ed210f096d9c30f13954",
+    "scripts/mv-harnais-ajour1.mjs": "fdae0c19d3c3d5896db80e79b52ae971a15fd6a2e6219d3af34adb59215a56c7",
+    "scripts/mv-harnais-liste.mjs": "dcd72f468d422676685c0219d068bfb183cab605f41bae97eb7b5b807ac9cff0",
+    "scripts/mv-harnais-renf3.mjs": "59e4091cf4320b48befb73ae7f7dfb42a35ef18a60afc299746ddafc8eedcb7c",
+    "scripts/tutos-couverture.json": "e0f731c405b087a488facaf9cdb1fc7b043efe1c4319459f7ec0de8903339e91",
+    "src/app.js": "5ac290ae059226e5f9d95a543f9d9e88156d9e940196a0336819006c15d36fdc",
+    "src/pilotage.css": "e10e4280a594c148fa01ba8ae49fec0ecc4900288dfba87dcc865ae70a450e65",
+    "src/pilotage.js": "6fdaa02e546c209674070af47964a215077c78800f4826cca0190e1cd11105fe",
+    "src/reglages.js": "122fdff031aaac3a49bb75e9d740160705bbc1a61f555eb7f522550788f29885",
+    "src/utils.js": "b7cdc599f6e63bd15f5e8d1fe6ec4524cd11aadce506c7e0c64f45fcd0d58b04",
+    "src/whats-new.js": "af6526037a8312441a7f3387f985ab489ab10c26e3f54b299d6470a4b6405f9b",
+    "scripts/mv-harnais-renf4.mjs": "eaa15253be34eed6b3782a84b157f57084f5368ded5cba7dbe68f5942ecade6c"
+  }
+}

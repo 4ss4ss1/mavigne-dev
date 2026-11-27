@@ -329,3 +329,28 @@ body .mod-header .hv2-saison-pill.pil-saison-btn.consult .hv2-dot{background:var
   #page-pilotage .rfp-cmp td:first-child,#page-pilotage .rfp-cmp th:first-child{width:72px}
   #page-pilotage .rfp-sh-r{margin-left:0;width:100%}
 }
+
+/* ★ RENF-4 (§620) — « sous contrat » : la ligne d'une barre pleine, les noms en pastilles ; la feuille « Créer le contrat »
+   (#ovRfContrat, hors de la page : la feuille vit avec l'équipe, reglages.js) */
+#page-pilotage .rfp-bar.v.sc{background:var(--or);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--texte) 22%,transparent);cursor:pointer}
+#page-pilotage .rfp-bar.v.sc.sel{box-shadow:0 0 0 2px var(--bg-card),0 0 0 4px var(--accent)}
+#page-pilotage .rfp-tag.sc{color:var(--ok-texte);background:var(--ok-doux);border-color:transparent}
+#page-pilotage .rfp-sc{display:flex;flex-wrap:wrap;gap:var(--e-1,4px) var(--e-2,8px);margin-top:var(--e-3,12px)}
+#page-pilotage .rfp-sc span{display:inline-flex;align-items:center;min-height:28px;padding:0 var(--e-3,12px);border-radius:var(--r-full,999px);background:var(--bg-doux);
+  border:1px solid var(--ligne,#ECE6DA);font-size:var(--pt-txt,13px);font-weight:var(--fw-med,500);color:var(--texte)}
+#ovRfContrat .rfc-mode{display:flex;flex-wrap:wrap;margin-bottom:var(--e-3,12px)}
+#ovRfContrat .rfc-rs{display:flex;flex-direction:column;gap:var(--e-2,8px)}
+#ovRfContrat .rfc-r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:var(--e-2,8px)}
+#ovRfContrat .rfc-r .fi{margin:0;min-width:0}
+#ovRfContrat .rfc-c{display:flex;flex-direction:column;gap:var(--e-1,4px)}
+#ovRfContrat .rfc-c > span{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+#ovRfContrat .rfc-c .fi{margin:0}
+#ovRfContrat .rfc-n{margin-top:var(--e-3,12px);font-size:var(--pt-micro,12px);line-height:1.45;color:var(--texte-doux)}
+#ovRfContrat .rfc-err{min-height:18px;margin-top:var(--e-2,8px);font-size:var(--pt-txt,13px);color:var(--danger-texte)}
+#ovRfContrat .rfc-pied{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--e-2,8px);margin-top:var(--e-3,12px)}
+#ovRfContrat .rfc-res{display:flex;flex-direction:column;gap:var(--e-2,8px);margin-top:var(--e-3,12px)}
+#ovRfContrat .rfc-res > div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border-radius:var(--r-md,10px);background:var(--bg-doux)}
+#ovRfContrat .rfc-res b{font-weight:var(--fw-semi,600);color:var(--texte)}
+#ovRfContrat .rfc-res span{grid-column:1;font-size:var(--pt-micro,12px);color:var(--texte-doux);overflow-wrap:anywhere}
+#ovRfContrat .rfc-res code{grid-column:2;grid-row:1 / span 2;align-self:center;font-family:var(--font-code,monospace);font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+@media (max-width:420px){ #ovRfContrat .rfc-r{grid-template-columns:minmax(0,1fr)} }

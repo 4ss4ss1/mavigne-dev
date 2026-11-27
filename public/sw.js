@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.31
+// MA VIGNE — Service Worker v12.32
+// v12.32 (27/11/2026) — RENF-4 (§620) : « Créer le contrat » depuis une ligne du Renfort (Pilotage › Décider) — au choix, une fiche par personne (son compte, le contrat de la ligne dans son journal) ou une équipe collective ; la ligne passe « sous contrat » et ne compte plus en renfort. APP 11.41.
 // v12.31 (27/11/2026) — RENF-3 (§619) : Pilotage › Décider › Renfort refait d'après la maquette Renfort v1 — votre plan, ligne par ligne : combien de saisonniers, de quand à quand, le contrat ; une ou plusieurs personnes au tracteur (le temps mesuré y figure d'office) ; le graphique montre le besoin de chaque travail face aux bras ; la proposition de l'appli (le moins de monde, embauché le plus tard) ; le plan enregistré par campagne, lu par L'équipe & le matériel › Renfort. APP 11.40.
 // v12.30 (26/11/2026) — MOTS-18 (§618) : Phyto › Fertilisation, la Cave (Récoltes, Cuves, Bouteilles, Labo, Diagnostic, Courbes) et la fiche d'une personne au Planning allégées — leurs notes passent dans leur « i » ou dans l'aide ; la feuille de style purgée des règles que plus rien n'affiche (la barre .pil-tabsbar, la ligne du jour sous l'en-tête). APP 11.39.
 // v12.29 (26/11/2026) — FRISE-AB3 (§617) : « Préparer 2027 » (et toute année qui reprend celle d'avant) reporte un modèle qui alterne semaine après semaine — un vendredi sur deux le reste toute l'année, janvier continue décembre ; un modèle sans alternance se reporte comme avant. APP 11.38.
@@ -4763,7 +4764,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.31';
+const CACHE_NAME   = 'mavigne-v12.32';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4780,7 +4781,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.31 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.32 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4800,7 +4801,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.31 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.32 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

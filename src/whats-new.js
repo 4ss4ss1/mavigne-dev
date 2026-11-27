@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.41', d: '2026-11-27', items: [   // RENF-4 (§620) : « Créer le contrat » depuis une ligne du Renfort
+    { niv: 1, pour: ['admin'], emoji: 'document', titre: 'Renfort\u00a0: créer le contrat depuis la ligne',
+      desc: "Dans le réglage d\u2019une ligne de saisonniers, «\u00a0Créer le contrat\u00a0» les fait entrer dans l\u2019équipe\u00a0: au choix, une fiche par personne (son prénom, son compte, son mot de passe affiché une fois) ou une équipe collective, sans compte. Le contrat et ses dates sont ceux de la ligne. La ligne passe «\u00a0sous contrat\u00a0»\u00a0: le planning les compte, elle ne les compte plus en renfort." },
+  ] },
   { v: '11.40', d: '2026-11-27', items: [   // RENF-3 (§619) : le Renfort, votre plan ligne par ligne (maquette Renfort v1)
     { niv: 1, pour: ['admin'], emoji: 'equipe', titre: 'Renfort\u00a0: votre plan, ligne par ligne',
       desc: "Dans Pilotage › Décider, le Renfort redevient le vôtre\u00a0: chaque ligne dit combien de saisonniers, de quand à quand, en TESA ou en CDD — touchez-la pour la régler\u00a0; sur ordinateur, une barre se glisse. L\u2019appli propose un plan d\u2019office\u00a0: le moins de monde possible, embauché le plus tard possible. Une fois touché, le plan s\u2019enregistre pour la campagne, et la carte Renfort de L\u2019équipe & le matériel le compte." },

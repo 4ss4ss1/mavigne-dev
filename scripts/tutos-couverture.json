@@ -1,6 +1,8 @@
 {
   "plafond": 791,
   "exempts": {
+    "_rfcGeste": "RENF-4 (§620) : la feuille « Créer le contrat » (Pilotage › Décider › Renfort, une ligne) — ses boutons créent des comptes et des fiches dans l’équipe (createAuthAccount) : rien à jouer sur le domaine d’entraînement sans écrire dans l’équipe ; le tuto se fera avec une équipe d’entraînement qui l’accepte (mv-harnais-renf4 joue la feuille)",
+    "_rfcSaisie": "RENF-4 (§620) : la saisie des prénoms et des adresses de la même feuille — même raison que _rfcGeste",
     "planAnneeDma": "HOR-1 (§550) : écrit en heures les codes D, M et A d’un modèle importé — n’apparaît que si le modèle en porte, et le domaine d’entraînement n’en a aucun",
     "planAnneeAn": "ANNEE-2 (§613) : la flèche ‹ › de l’année dans la barre de Planning › Année, sur ordinateur — la même année se change depuis Mois et Personnel ; refusée tant qu’un brouillon n’est ni enregistré ni annulé (mv-harnais-annee2)",
     "planAnnuelNomPdf": "MONAN-1 (§546) : ouvre le planning de l’année imprimé dans une fenêtre d’impression — rien à jouer sur le domaine d’entraînement ; la carte « Mon année » vit dans la vue d’un salarié, que l’utilisateur du domaine fictif (admin) ne voit pas",

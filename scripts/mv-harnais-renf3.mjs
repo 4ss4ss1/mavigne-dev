@@ -27,7 +27,7 @@ function prendre(src, sig) {
 }
 const NOMS = ['_rfCfg', '_rfRMax', '_rfWOf', '_rfOkT', '_rfMinR', '_rfCapIn', '_rfHIn', '_rfProf', '_rfSim', '_rfWkEnd', '_rfCtxRenf', '_rfCalendrier',
   '_rfPeriodes', '_rfSansRenfort', '_rfPlafDef', '_rfPlanCle', '_rfIsoOk', '_rfPlanNorm', '_rfPlanLu', '_rfPlanEcrit', '_rfPlanPrevuSem', '_rfPlanSig',
-  '_rfJo', '_rfOuv', '_rfFrac', '_rfHab', '_rfAbs', '_rfCompile', '_rfSimPlan', '_rfProposition', '_rfEtat', '_rfVue', '_rfJr', '_rfPlage', '_rfJtxt',
+  '_rfJo', '_rfOuv', '_rfFrac', '_rfHab', '_rfScN', '_rfAbs', '_rfCompile', '_rfSimPlan', '_rfProposition', '_rfEtat', '_rfVue', '_rfJr', '_rfPlage', '_rfJtxt',
   '_rfPct', '_rfPers', '_rfStatHtml', '_rfSemI', '_rfSemHtml', '_rfRangsTaches', '_rfEtiq', '_rfBarre', '_rfRangsLignes', '_rfOpt', '_rfEditeur',
   '_rfComparer', '_rfRetards', '_rfFond', '_rfLegende', '_rfMemo', '_rfPerso', '_rfOuvre', '_rfFerme', '_rfNouvelleVigne', '_rfNouveauTracteur',
   '_pilOrdD', '_pilOrdIso', '_pilAnnOrd', '_pilDfr', '_pilIsoJ', '_pilNum', '_ecoEur', '_ecoEur2', '_pilStat', '_pilPhPl'];

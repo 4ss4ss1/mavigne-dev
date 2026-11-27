@@ -3943,7 +3943,8 @@ function _rfPlafDef(ctx){
 //   (CONFIG.objectifs_fin), écrite par l'administrateur seul, comme eux.
 // Une ligne : { t:'v' (saisonniers à la vigne) | 't' (au tracteur), n (personnes), a, b ('AAAA-MM-JJ', du … au … compris),
 //   ctr:'tesa'|'cdd' (vigne), j (jours par semaine, de ½ à 5) et qui:'eq'|'emb' (tracteur : pris dans l'équipe, ou embauché),
-//   p:1 (une ligne de la proposition, pas encore touchée), hab:1 (le tracteur habituel : il suit la mesure, sans dates) }.
+//   p:1 (une ligne de la proposition, pas encore touchée), hab:1 (le tracteur habituel : il suit la mesure, sans dates),
+//   sc:['Jean', …] (RENF-4 : « sous contrat » — les fiches de l'équipe créées depuis la ligne, ou le nom d'une équipe collective) }.
 var _RF_P=null;      // l'écran : { cle, src, l, enr, hist, sel, unite, sem, plaf, propK, prop, admin, glisse }
 var _RF_V=null;      // le dernier calcul : le graphe, la bande de la semaine et le glisser le relisent
 var _RF_SAVE_T=null;
@@ -3959,7 +3960,13 @@ function _rfPlanNorm(l){
     if(!_rfIsoOk(L.a)||!_rfIsoOk(L.b)) return null;
     var n=Math.round(Number(L.n)); if(!(n>=1)) n=1; if(n>_RF_RMAX_DUR) n=_RF_RMAX_DUR;
     var o={ t:t, n:n, a:(L.a<=L.b?L.a:L.b), b:(L.a<=L.b?L.b:L.a) };
-    if(t==='v') o.ctr=(L.ctr==='cdd')?'cdd':'tesa';
+    if(t==='v'){
+      o.ctr=(L.ctr==='cdd')?'cdd':'tesa';
+      if(Array.isArray(L.sc)){
+        var sc=[]; L.sc.forEach(function(x){ x=String(x==null?'':x).trim().slice(0,60); if(x&&sc.indexOf(x)<0&&sc.length<_RF_RMAX_DUR) sc.push(x); });
+        if(sc.length) o.sc=sc;
+      }
+    }
     else { var j=Number(L.j); o.j=(j>=0.5&&j<=5)?Math.round(j*2)/2:5; o.qui=(L.qui==='emb')?'emb':'eq'; }
     if(L.p===1) o.p=1;
     return o;
@@ -3996,8 +4003,8 @@ function _rfPlanPrevuSem(o0,o1){
     var P=R[k]; if(!P||typeof P!=='object') return;
     _rfPlanNorm(P.l).forEach(function(L){
       if(L.t!=='v') return;
-      var a=Math.max(o0,_pilAnnOrd(L.a)), b=Math.min(o1,_pilAnnOrd(L.b));
-      if(b>=a) p+=L.n*_rfOuv(a,b)/ouv;
+      var a=Math.max(o0,_pilAnnOrd(L.a)), b=Math.min(o1,_pilAnnOrd(L.b)), nn=Math.max(0,L.n-_rfScN(L.sc));   // RENF-4 : les fiches créées sont déjà dans l'équipe
+      if(b>=a&&nn>0) p+=nn*_rfOuv(a,b)/ouv;
     });
   });
   return { n:p, eq:p*c.rdt };
@@ -4019,12 +4026,26 @@ function _rfHab(x){
   var n=Math.max(1,Math.ceil(e-1e-9));
   return { n:n, j:Math.min(5,e*5/n), etp:e };
 }
+// ★ RENF-4 (§620) — SOUS CONTRAT : combien de personnes de la ligne ont leur fiche dans l'équipe. Une fiche par personne
+//   compte 1, une équipe collective son nombre de personnes ; une fiche retirée de l'équipe, ou passée inactive, ne compte
+//   plus — la ligne redemande ce monde-là. Ces personnes sont dans l'équipe (le planning les compte, à leur horaire) : la ligne
+//   ne les compte plus en renfort, sinon elles le seraient deux fois.
+function _rfScN(sc){
+  if(!Array.isArray(sc)||!sc.length) return 0;
+  var M=window.MEMBRES||[], n=0;
+  sc.forEach(function(nom){
+    for(var i=0;i<M.length;i++){ var m=M[i]; if(m&&m.nom===nom&&m.statut!=='Inactif'){ n+=(m.collectif?Math.max(1,Number(m.effectif)||1):1); return; } }
+  });
+  return n;
+}
 function _rfAbs(x,L){
   if(!L) return null;
   var W=x.W, D0=W[0].o0, D1=W[W.length-1].o1;
   if(L.hab){ var h=_rfHab(x); return h?{ t:'t', n:h.n, j:h.j, qui:'eq', hab:1, o0:D0, o1:D1 }:null; }
   var o0=_pilAnnOrd(L.a), o1=_pilAnnOrd(L.b); if(isNaN(o0)||isNaN(o1)) return null;
-  return Object.assign({}, L, { o0:Math.min(o0,o1), o1:Math.max(o0,o1) });
+  var o=Object.assign({}, L, { o0:Math.min(o0,o1), o1:Math.max(o0,o1) });
+  if(L.t==='v'){ o.nSc=Math.min(L.n,_rfScN(L.sc)); o.nR=L.n-o.nSc; }
+  return o;
 }
 // Les lignes → ce que lit le simulateur : les bras de l'équipe à la vigne (dispo, moins ce qui part au tracteur), le profil
 //   de saisonniers à l'horaire de l'équipe (prof), les heures payées, et la pointe (pour les frais d'embauche, comme avant).
@@ -4038,8 +4059,9 @@ function _rfCompile(x,A){
       if(!(f>0)) continue;
       if(L.t==='v'){
         if(!(w.cap>0)) continue;             // le domaine fermé : personne ne travaille, personne n'est payé
-        var hs=(L.ctr==='cdd')?hC*(w.capRatio!=null?w.capRatio:1):w.cap;
-        prof[k]+=L.n*f*hs/w.cap; hPay+=L.n*f*hs; pers[k]+=L.n;
+        var hs=(L.ctr==='cdd')?hC*(w.capRatio!=null?w.capRatio:1):w.cap, nn=(L.nR!=null)?L.nR:L.n;
+        if(!(nn>0)) continue;                // RENF-4 : sous contrat, ils sont dans l'équipe
+        prof[k]+=nn*f*hs/w.cap; hPay+=nn*f*hs; pers[k]+=nn;
       } else {
         var part=L.n*f*(L.j/5);
         if(L.qui==='emb'){ if(w.cap>0){ hPay+=part*w.cap; pers[k]+=L.n; } }
@@ -4128,7 +4150,7 @@ function _rfVue(x){
                brH:brH, brP:eq+rf, st:(cap>0&&beH>brH+0.5)?(rg?'manque':'absorbe'):'ok' });
   });
   var mois=[]; for(var o=D0;o<=D1;o++){ if(_pilOrdD(o).getUTCDate()===1) mois.push({ o:o, m:_pilOrdD(o).getUTCMonth() }); }
-  function sig(l){ return JSON.stringify(l.filter(function(L){ return L.t==='v'; }).map(function(L){ return [L.n,L.a,L.b,L.ctr]; })); }
+  function sig(l){ return JSON.stringify(l.filter(function(L){ return L.t==='v'&&!L.sc; }).map(function(L){ return [L.n,L.a,L.b,L.ctr]; })); }
   _RF_V={ x:x, S:S, A:A, sim:sim, ps:ps, prop:S.prop, sr:sr, srFin:srFin, plaf:plaf, plafs:plafs, sem:sem, mois:mois,
           D0:D0, D1:D1, DT:Math.max(1,D1+1-D0), memes:(sig(S.l)===sig(S.prop.l)) };
   return _RF_V;
@@ -4320,7 +4342,8 @@ function _rfRangsTaches(V){
 }
 function _rfEtiq(L,A){
   if(L.t==='v') return '<b>'+L.n+' saisonnier'+(L.n>1?'s':'')+'</b><small>'+(L.ctr==='cdd'?'CDD':'TESA')+' · '+(A?_rfPlage(A.o0,A.o1):'')+'</small>'
-    +(L.p?'<small><span class="rfp-tag">proposé</span></small>':'');
+    +(L.sc?'<small><span class="rfp-tag sc">'+((A&&A.nR>0)?(A.nSc+' sur '+L.n+' sous contrat'):'sous contrat')+'</span></small>'
+      :(L.p?'<small><span class="rfp-tag">proposé</span></small>':''));
   var n=A?A.n:1, j=A?A.j:5;
   return '<b>'+n+' personne'+(n>1?'s':'')+'</b><small>'+_rfJtxt(j)+(j<4.99?' par sem.':'')+' · '+(L.qui==='emb'?'embauché':'équipe')+'</small>'
     +(L.hab?'<small><span class="rfp-tag">habituel</span></small>':'');
@@ -4329,10 +4352,11 @@ function _rfBarre(V,L,A,k){
   if(!A) return '';
   var x0=_rfPct(V,A.o0), x1=_rfPct(V,A.o1+1); if(x1<=x0) return '';
   // dans la barre, le nombre seul : le reste est sur l'étiquette de la ligne (une barre de deux semaines, au téléphone, fait 25 px)
-  var S=V.S, txt=String(L.t==='v'?L.n:A.n);
-  return '<div class="rfp-bar '+L.t+(L.p?' p':'')+(L.hab?' hab':'')+(S.sel===k?' sel':'')+'" data-rf="sel" data-i="'+k+'"'
+  // RENF-4 : une ligne sous contrat ne se glisse plus (ses dates sont celles des contrats) : ni poignées, ni glisser.
+  var S=V.S, txt=String(L.t==='v'?L.n:A.n), sc=!!L.sc;
+  return '<div class="rfp-bar '+L.t+(L.p?' p':'')+(L.hab?' hab':'')+(sc?' sc':'')+(S.sel===k?' sel':'')+'" data-rf="sel" data-i="'+k+'"'
     +(S.admin?' onclick="window._rfGeste(this)"':'')+' style="left:'+x0.toFixed(2)+'%;width:'+Math.max(0.8,x1-x0).toFixed(2)+'%">'
-    +'<span>'+_pilEsc(txt)+'</span>'+(S.admin?'<i class="rfp-h l"></i><i class="rfp-h r"></i>':'')+'</div>';
+    +'<span>'+_pilEsc(txt)+'</span>'+((S.admin&&!sc)?'<i class="rfp-h l"></i><i class="rfp-h r"></i>':'')+'</div>';
 }
 function _rfRangsLignes(V){
   var S=V.S, h='', nv=0, nt=0;
@@ -4356,11 +4380,22 @@ function _rfEditeur(V){
   var k=S.sel, L=S.l[k], A=V.A[k], sim=V.sim, x=V.x;
   if(!A) return '';
   var mn=_pilOrdIso(V.D0), mxi=_pilOrdIso(V.D1), a=L.hab?mn:L.a, b=L.hab?mxi:L.b;
+  var sc=(L.t==='v'&&L.sc);
   var h='<div class="rfp-ed"><div class="rfp-ed-h"><b>'+(L.t==='v'?'Saisonniers à la vigne':'Au tracteur')+'</b>'
-    +(L.p?_pilPhPl('proposé','or'):'')+(L.hab?_pilPhPl((x.trac&&x.trac.mesure===false)?'réglé':'mesuré',''):'')
+    +(sc?(A.nR>0?_pilPhPl(A.nSc+' sur '+L.n+' sous contrat','or'):_pilPhPl('sous contrat','ok')):(L.p?_pilPhPl('proposé','or'):''))
+    +(L.hab?_pilPhPl((x.trac&&x.trac.mesure===false)?'réglé':'mesuré',''):'')
     +'<span class="rfp-sh-r">'+(sim.ok?_pilPhPl('tout tient','ok'):_pilPhPl(sim.nRet+' en retard','ko'))
-    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone mvbtn-compact" data-rf="close" aria-label="Fermer" onclick="window._rfGeste(this)">×</button></span></div>'
-    +'<div class="rfp-ed-g">'
+    +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone mvbtn-compact" data-rf="close" aria-label="Fermer" onclick="window._rfGeste(this)">×</button></span></div>';
+  // ★ RENF-4 (§620) : sous contrat, la ligne ne se règle plus ici — ses dates et son contrat sont ceux des fiches de l'équipe.
+  //   Elle dit qui ; s'il manque du monde (une fiche retirée), « Créer le contrat » propose le reste.
+  if(sc){
+    h+='<div class="rfp-sc">'+L.sc.map(function(nom){ return '<span>'+_pilEsc(nom)+'</span>'; }).join('')+'</div>'
+      +'<div class="rfp-ed-f"><span>'+(L.ctr==='cdd'?'CDD':'TESA')+' · '+_rfPlage(A.o0,A.o1)+'</span>'
+      +(A.nR>0?'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact" data-rf="ctrt" data-i="'+k+'" onclick="window._rfGeste(this)">Créer le contrat · '+A.nR+'</button>':'')
+      +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="del" data-i="'+k+'" onclick="window._rfGeste(this)">Retirer la ligne</button></div></div>';
+    return h;
+  }
+  h+='<div class="rfp-ed-g">'
     +'<div class="rfp-c rfp-c-n"><span>Combien</span><span class="rfp-stp">'
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-icone" data-rf="n-" data-i="'+k+'" aria-label="Un de moins" onclick="window._rfGeste(this)">−</button>'
     +'<b>'+A.n+'</b>'
@@ -4381,6 +4416,7 @@ function _rfEditeur(V){
   if(L.t==='t'&&L.qui!=='emb'){ var hq=0; kL.trac.forEach(function(p,i){ hq+=p*(x.W[i].cap||0); }); info='l’équipe perd <b>'+_pilNum(hq)+' h</b> à la vigne'; }
   else info='<b>'+_pilNum(kL.hPay)+' h</b> payées · <b>'+_ecoEur(kL.cout)+'</b>';
   h+='</div><div class="rfp-ed-f"><span>'+info+'</span>'
+    +((L.t==='v'&&typeof window._rfcOuvrir==='function')?'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact" data-rf="ctrt" data-i="'+k+'" onclick="window._rfGeste(this)">Créer le contrat</button>':'')
     +'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact" data-rf="del" data-i="'+k+'" onclick="window._rfGeste(this)">Retirer la ligne</button></div></div>';
   return h;
 }
@@ -4439,10 +4475,12 @@ window._rfGeste=function(el){
   if(a==='close'){ S.sel=null; _rfRefresh(); return; }
   if(a==='undo'){ if(S.hist.length){ S.l=JSON.parse(S.hist.pop()); if(S.sel!=null&&!S.l[S.sel]) S.sel=null; _rfPlanEcrit(); _rfRefresh(); } return; }
   if(a==='garder'){ _rfPlanEcrit(); _rfRefresh(); return; }
-  if(a==='prop'){ _rfMemo(); S.l=S.l.filter(function(L){ return L.t==='t'; }).concat(JSON.parse(JSON.stringify(V.prop.l))); S.sel=null; _rfPlanEcrit(); _rfRefresh(); return; }
+  if(a==='prop'){ _rfMemo(); S.l=S.l.filter(function(L){ return L.t==='t'||L.sc; }).concat(JSON.parse(JSON.stringify(V.prop.l))); S.sel=null; _rfPlanEcrit(); _rfRefresh(); return; }
   if(a==='addv'||a==='addt'){ _rfMemo(); S.l.push(a==='addv'?_rfNouvelleVigne(V):_rfNouveauTracteur(V)); S.sel=S.l.length-1; _rfPlanEcrit(); _rfRefresh(); return; }
   var L=S.l[k]; if(!L) return;
   if(a==='del'){ _rfMemo(); S.l.splice(k,1); S.sel=null; _rfPlanEcrit(); _rfRefresh(); return; }
+  if(a==='ctrt'){ _rfContrat(V,L,k); return; }
+  if(L.sc&&(a==='n+'||a==='n-'||a==='ctr'||a==='a'||a==='b')) return;   // RENF-4 : sous contrat, la ligne suit les fiches
   if(a==='a'||a==='b'){ if(!_rfIsoOk(el.value)) return; }
   _rfMemo(); _rfPerso(V,L);
   if(a==='n+'||a==='n-') L.n=Math.max(1,Math.min(_RF_RMAX_DUR,(Number(L.n)||1)+(a==='n+'?1:-1)));
@@ -4453,6 +4491,29 @@ window._rfGeste=function(el){
   else { S.hist.pop(); return; }
   _rfPlanEcrit(); _rfRefresh();
 };
+// ★ RENF-4 (§620) — « CRÉER LE CONTRAT » depuis une ligne (D5 du 27/11 ; Nico : « les deux, au choix »). La feuille vit avec
+//   l'équipe (reglages.js, _rfcOuvrir) : le Pilotage décide, le module fait. Elle rend les noms créés — une fiche par personne,
+//   ou une équipe collective — et la ligne passe « sous contrat ». Un plan encore « proposé » s'enregistre d'abord : la ligne
+//   qu'on vient de toucher ne doit pas être recalculée sous la feuille.
+function _rfContrat(V,L,k){
+  var S=_RF_P; if(!S||!S.admin||!L||L.t!=='v'||typeof window._rfcOuvrir!=='function') return;
+  var A=V.A[k], reste=(A&&A.nR!=null)?A.nR:L.n; if(!(reste>0)) return;
+  // ⚠ _rfPlanEcrit remplace S.l par sa copie normalisée : la ligne se relit à son rang, sinon le retour de la feuille ne la
+  //   retrouve plus et en pose une seconde (vu à l'essai : la ligne proposée restait, doublée d'une ligne sous contrat).
+  if(!S.enr){ _rfPlanEcrit(); L=S.l[k]; if(!L) return; }
+  var o={ n:reste, a:L.a, b:L.b, ctr:L.ctr, hCdd:(V.x.c.hCdd||35) };
+  window._rfcOuvrir(o, function(r){
+    var S2=_RF_P; if(!S2||!r||!Array.isArray(r.noms)||!r.noms.length) return;
+    S2.hist.push(JSON.stringify(S2.l)); if(S2.hist.length>40) S2.hist.shift();
+    var i=S2.l.indexOf(L), q;
+    // Le plan a été réécrit pendant la feuille (une écriture remplace S.l, un autre appareil) : la même ligne, retrouvée à ses
+    //   dates ; à défaut, les fiches existent — la ligne se repose.
+    for(q=0;i<0&&q<S2.l.length;q++){ var Z=S2.l[q]; if(Z&&Z.t==='v'&&Z.a===o.a&&Z.b===o.b&&Z.ctr===o.ctr){ L=Z; i=q; } }
+    if(i<0){ L={ t:'v', n:(r.n||r.noms.length), a:o.a, b:o.b, ctr:o.ctr }; S2.l.push(L); }
+    delete L.p; L.sc=(L.sc||[]).concat(r.noms);
+    S2.touche=true; _rfPlanEcrit(); _rfRefresh();
+  });
+}
 // Sur ordinateur, une barre se GLISSE (le milieu la déplace, un bord change sa date), au jour près ; le graphe, la fin des
 //   travaux et « Comparer » suivent pendant le geste. Au téléphone, le toucher ouvre le réglage de la ligne.
 var _RF_GL=null, _RF_GL_ON=false;
@@ -4463,7 +4524,7 @@ function _rfGlisserBrancher(){
     var bar=e.target&&e.target.closest?e.target.closest('#rf-gt .rfp-bar'):null;
     var S=_RF_P, V=_RF_V; if(!bar||!S||!V||!S.admin||e.button!==0) return;
     var gt=document.getElementById('rf-gt'); if(!gt||gt.classList.contains('rfp-et')) return;
-    var k=parseInt(bar.getAttribute('data-i'),10), L=S.l[k], A=V.A[k]; if(!L||!A) return;
+    var k=parseInt(bar.getAttribute('data-i'),10), L=S.l[k], A=V.A[k]; if(!L||!A||L.sc) return;
     var mode=e.target.classList.contains('l')?'l':(e.target.classList.contains('r')?'r':'m');
     _RF_GL={ bar:bar, k:k, mode:mode, x:e.clientX, o0:A.o0, o1:A.o1, bouge:false, pre:JSON.stringify(S.l), w:(bar.parentNode&&bar.parentNode.clientWidth)||1, raf:0 };
     try{ bar.setPointerCapture(e.pointerId); }catch(eC){ if(window._mvAvale) window._mvAvale(eC,'pilotage.js/_rfGlisser#capture'); }

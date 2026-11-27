@@ -1503,7 +1503,8 @@ function _loginRenderTuiles(){
   var visibles = [];
   for(var i=0; i<MEMBRES.length; i++){
     var mv = MEMBRES[i];
-    if(mv && mv.nom && mv.statut !== 'Inactif') visibles.push(i);
+    // RENF-4 (§620) : une équipe collective sans adresse n'a pas de compte — pas de tuile (créée depuis le Renfort).
+    if(mv && mv.nom && mv.statut !== 'Inactif' && !(mv.collectif && !mv.email)) visibles.push(i);
   }
 
   // Une seule tuile ? Trois conditions, toutes nécessaires.

@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.40';
+export const APP_VERSION = '11.41';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -3361,7 +3361,8 @@ export const MV_INFO = {
     'Dessous, à la même échelle : chaque travail, sa fenêtre et sa fin prévue ; puis vos saisonniers à la vigne et les personnes au tracteur. Touchez une ligne pour régler combien, du … au …, le contrat. Sur ordinateur, une barre se glisse, et un bord change sa date.',
     'La proposition de l’appli : tant qu’un travail déborde de sa fenêtre, le <b>moins de monde possible</b> qui le fait tenir, embauché <b>le plus tard possible</b>. L’équipe déjà sous contrat est comptée, saisonniers et vendangeurs compris. Elle reste « proposé » tant que vous n’y touchez pas.',
     'Au tracteur, le temps <b>mesuré</b> sur la campagne figure d’office (« habituel »). Quelqu’un de l’équipe au tracteur, c’est une personne de moins à la vigne ; quelqu’un d’embauché pour ça est payé, et la vigne garde ses bras.',
-    'Le plan s’<b>enregistre</b> dès qu’on y touche, un par campagne, et L’équipe & le matériel › Renfort le lit. « Annuler » revient en arrière. Rien n’est embauché ici.'
+    'Le plan s’<b>enregistre</b> dès qu’on y touche, un par campagne, et L’équipe & le matériel › Renfort le lit. « Annuler » revient en arrière.',
+    '<b>Créer le contrat</b> (le réglage d’une ligne) fait entrer ces saisonniers dans l’équipe : une fiche par personne, avec son compte, ou une équipe collective. La ligne passe « sous contrat » : le planning les compte, elle ne les compte plus en renfort.'
   ] },
 
   'pil.sim.cout': { t: 'Comparer', p: [
