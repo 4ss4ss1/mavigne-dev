@@ -97,6 +97,7 @@ var CAVE_ELEVAGE = { cuvees: [], operations: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
 var _CAVE_BTL_GID = 0;   // la variable de module qui numerote les degrades (VOL-2)
 function _recKgDom(r){ return (r && r.kg_dom) || 0; }
+function _saigRoseHl(){ return 0; } function _saigRoseVol(){ return 0; }   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
 function _escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function __poser(v, e){
   CAVE_VENDANGE.recoltes = v.recoltes || []; CAVE_VENDANGE.cuves_vinif = v.cuves_vinif || [];
@@ -286,7 +287,7 @@ if (!CONTRE) {
 
 /* ══ CONTRE-ÉPREUVES — le défaut réintroduit, l'assertion doit rougir ══ */
 const MUT = [
-  ['cave', '_vendVolContenu', "if(!(kg>0)) return {hl:0, src:'aucun', kg:0};", "if(!(kg>0)) return {hl:parseFloat(c.volume_hl)||0, src:'estime', kg:0};", 'A3', 'la contenance redevient le repli d’une cuve sans caisse'],
+  ['cave', '_vendVolContenu', "return {hl:0, src:'aucun', kg:0}; }", "return {hl:parseFloat(c.volume_hl)||0, src:'estime', kg:0}; }", 'A3', 'la contenance redevient le repli d’une cuve sans caisse'],   // PRATIQUES-3 (§626) : l'ancre suit la ligne
   ['cave', '_vendVolContenu', '_vendHlKg(kg)-_vendSortiesHl(c)', '_vendHlKg(kg)', 'A2', 'la saignée reste dans la cuve'],
   ['cave', '_vendVolContenu', 'var kg=_vendCuvKgDom(c.id, exclId);', 'var kg=_vendCuvKgDom(c.id);', 'A5', 'la récolte corrigée compte deux fois'],
   ['cave', '_vendIntrVol', 'var v=_vendVolContenu(c);', 'var v={hl:(c&&c.volume_hl)||0, src:\'estime\'};', 'A7', 'le repère des doses redevient la contenance'],

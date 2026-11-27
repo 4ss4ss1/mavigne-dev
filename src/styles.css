@@ -7345,7 +7345,7 @@ body .pil-mast .pil-meteo{ color:var(--texte-med)!important; }
 #page-cave .caj-lien .mv-ic{ transform:rotate(-90deg); }
 #page-cave .k-ouillage{ --k:var(--terre); }
 #page-cave .k-mesure, #page-cave .k-labo{ --k:var(--ink-info); }
-#page-cave .k-soutirage{ --k:var(--phyto-med); }
+#page-cave .k-soutirage, #page-cave .k-debourbage{ --k:var(--phyto-med); }
 #page-cave .k-so2{ --k:var(--vert-med); }
 #page-cave .k-fa, #page-cave .k-decuvage{ --k:var(--or); }
 #page-cave .k-alerte, #page-cave .k-malo{ --k:var(--danger); }

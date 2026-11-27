@@ -2199,6 +2199,10 @@ function saveCuvee() {
   if(!nom){showToast('Saisissez un nom','#E07060');return;}
   // ★ FUT-CAP — une cuvee logee en cuve n'a pas de fut a declarer.
   var _exC=existId?CAVE_ELEVAGE.cuvees.find(function(c){return c.id===existId;}):null;
+  /* ★ PRATIQUES-3 (§626) — la base d'un effervescent ; une couleur nouvelle relue contre les apports déjà reçus : refus AVANT toute écriture. */
+  var _effN=(typeof window._cuvEffPris==='function')?window._cuvEffPris():false;
+  var _ccB=(_exC&&_coulN&&typeof window._cuvCoulBloque==='function')?window._cuvCoulBloque(_exC,_coulN,_effN):'';
+  if(_ccB){ showToast(_ccB,'#B85A1A'); return; }
   /* ★ CONTENANT-1 (§621) — une cuvée NOUVELLE logée en cuve : la cuve est vérifiée ici, AVANT toute écriture. */
   var _cvPret=null;
   if(!existId && _cuvCont==='cuve'){
@@ -2259,6 +2263,7 @@ function saveCuvee() {
       if(!fmlTerminee) _fmlD=null;
       Object.assign(_prevC,{nom:nom,millesime:millesime,tonneaux:tonneaux,statut:statut,fml_terminee:fmlTerminee,fml_terminee_date:_fmlD});
       if(_coulN) _prevC.couleur=_coulN; else delete _prevC.couleur;   // ★ COULEUR-1 (§625) : sans couleur dite, celle de sa cuve
+      if(_effN) _prevC.base_eff=true; else delete _prevC.base_eff;   // ★ PRATIQUES-3 (§626)
       /* ★ FML-1 — même règle de date que « Terminée » : réenregistrer ne la redate pas. */
       var _sansD=_prevC.fml_sans_date||null;
       if(fmlSans&&(!_prevC.fml_sans||!_sansD)) _sansD=_fmlAuj;
@@ -2274,6 +2279,7 @@ function saveCuvee() {
     if(_cvPret){ CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].cuves=[{ref:_cvPret.ref, litres:_cvPret.litres}]; }
     if(fmlSans){ var _nc=CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1]; _nc.fml_sans=true; _nc.fml_sans_date=_fmlAuj; }   // ★ FML-1
     if(_coulN) CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].couleur=_coulN;   // ★ COULEUR-1 (§625)
+    if(_effN) CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].base_eff=true;    // ★ PRATIQUES-3 (§626)
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e')
@@ -2857,7 +2863,7 @@ function openCuveeDetail(cuvId,dans,volet){
   // ⚠️ Ecrivait « N tonneaux » en dur : faux des qu'une cuve est logee. Le
   //   libelle est DERIVE, donc juste dans les trois cas (futs / cuve / mixte).
   var _coulF=(typeof window._cuveeCoul==='function')?window._coulMot(window._cuveeCoul(cuv)):'';   // ★ COULEUR-1 (§625)
-  if(sEl)sEl.textContent=(_coulF?_coulF+' \u00B7 ':'')+(_caveContenantsStr(cuv)||'aucun contenant')+' \u00B7 '+_mvF1(_caveVolHl(cuv))+'\u00a0hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
+  if(sEl)sEl.textContent=(_coulF?_coulF+(cuv.base_eff?' (base d\u2019effervescent)':'')+' \u00B7 ':'')+(_caveContenantsStr(cuv)||'aucun contenant')   /* PRATIQUES-3 (§626) */+' \u00B7 '+_mvF1(_caveVolHl(cuv))+'\u00a0hL'+(_caveTonneauxStr(cuv)?' \u00B7 '+_caveTonneauxStr(cuv):'');
   var seuil=_caveSeuilOu(cuv);
   var lMs=cuv.last_ouillage?new Date(cuv.last_ouillage).getTime():0;
   var dSince=lMs?Math.floor((Date.now()-lMs)/86400000):9999;
@@ -3474,7 +3480,7 @@ function _asmSaisie(){
   _asmL=isFinite(v)?v:0; _asmApercu();
 }
 // ★ COULEUR-1 (§625) — verser la source dans la cuvée : la règle des mélanges (cuvier-pratiques.js), null si rien à dire.
-function _asmMel(cu,s){ return (s&&typeof window._coulMelange==='function')?window._coulMelange(window._cuveeCoul(cu), s.coul):null; }
+function _asmMel(cu,s){ return (s&&typeof window._coulMelange==='function')?window._coulMelange(window._cuveeCoul(cu), s.coul, !!(cu&&cu.base_eff)):null; }   // PRATIQUES-3 (§626) : base d'un effervescent
 function _asmCoulOkSet(id){ _asmCoulOk=id; _asmApercu(); }
 // Ce qui empeche d'ecrire, en mots ('' : rien).
 function _asmRefus(cu,s,L){
@@ -3530,7 +3536,7 @@ function _asmValider(){
   var _melV=_asmMel(cu,s); if(_melV) op.data.couleur_conf={k:_melV.id, par:op.operateur, le:date};   // COULEUR-1 (§625) : confirmé, noté
   cu.manque_l=m-L;
   cu.apports=(cu.apports||[]).concat([{id:id, date:date, l:L, de:s.lbl, de_type:s.type, de_id:s.id,
-    mil:(s.mil!=null?s.mil:null), aoc:s.aocs.join(', ')}]);
+    mil:(s.mil!=null?s.mil:null), aoc:s.aocs.join(', '), coul:s.coul||'?'}]);   // PRATIQUES-3 (§626) : la couleur reçue, notée
   var cles=['cave_elevage'];
   if(s.type==='cuve'){
     var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===s.id; });
@@ -5132,6 +5138,8 @@ function _mlAgenda(from,nSem){
   });
   /* ★ GF-1 (§302) — les sucres au labo : la fin estimée, ce qui stagne ou remonte, ce qui est sec. */
   _vendGfAgenda(from).forEach(function(x){ pousse(x.date,x.it); });
+  /* ★ PRATIQUES-3 (§626) — le soutirage d'un débourbage : à l'heure du repère du domaine (cuvier-pratiques.js). */
+  if(typeof window._debAFaire==='function') window._debAFaire(from).forEach(function(x){ pousse(x.date,x.it); });
   _mlAMesurer(from).forEach(function(x){
     pousse(from,{kind:'mesure', titre:x.cuve.nom,
       detail:x.depuis>900?'aucun relev\u00e9':('dernier relev\u00e9 il y a '+x.depuis+' j'),
@@ -5139,7 +5147,7 @@ function _mlAgenda(from,nSem){
   });
   // Ordre d'affichage. ATTENTION : ne jamais ecrire (ordre[k]||9) — 'alerte' vaut
   // 0 et 0||9 rend 9, ce qui envoie l'alerte en DERNIER, sous les ouillages.
-  var ordre={alerte:0,labo:1,mesure:1,fa:2,decuvage:3,demarrage:4,ouillage:5};
+  var ordre={alerte:0,labo:1,mesure:1,debourbage:1,fa:2,decuvage:3,demarrage:4,ouillage:5};
   sem.forEach(function(s){
     s.items.sort(function(a,b){
       if(a.date!==b.date) return a.date<b.date?-1:1;
@@ -5497,7 +5505,7 @@ function _mlInjectCss(){
 }
 
 // ── RENDU ────────────────────────────────────────────────────────────────
-var _ML_LBL={ouillage:'Ouiller', mesure:'Mesurer', fa:'Fin de fermentation',
+var _ML_LBL={ouillage:'Ouiller', mesure:'Mesurer', fa:'Fin de fermentation', debourbage:'Soutirer le jus clair',
   decuvage:'D\u00e9cuvage possible', alerte:'\u00c0 contr\u00f4ler',
   demarrage:'D\u00e9part en fermentation', soutirage:'Soutirer', malo:'Malo bloqu\u00e9e',
   so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts', labo:'S\u00e8che au labo'};
@@ -5516,6 +5524,12 @@ function _mlGo(kind,ref){
     if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='vendange'; _vendOngletCuves(); renderCave();
     if(typeof openVendDecuvage==='function') openVendDecuvage(ref);
+    return;
+  }
+  if(kind==='debourbage'){   // ★ PRATIQUES-3 (§626) : le soutirage du jus clair
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+    caveSection='vendange'; _vendOngletCuves(); renderCave();
+    if(typeof window.openDebourber==='function') window.openDebourber(ref,'fin');
     return;
   }
   if(kind==='mesure'){
@@ -6457,7 +6471,7 @@ var _AUJ_ICO={ouillage:'goutte', mesure:'thermometre', fa:'sablier', decuvage:'c
   demarrage:'flamme', soutirage:'barrique', malo:'eprouvette', so2:'fiole', fut:'barrique', labo:'eprouvette'};
 // Le verbe du geste — c'est lui qu'on lit a droite de la ligne, pas un chemin.
 var _AUJ_VERBE={ouillage:'Ouiller', mesure:'Relever', fa:'Voir', decuvage:'D\u00e9cuver', alerte:'Relever',
-  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc', labo:'D\u00e9clarer'};
+  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc', labo:'D\u00e9clarer', debourbage:'Soutirer'};
 
 function _aujInjectCss(){
   // ★ CAVEAUJ-1 (§434) : les classes de l'écran vivent dans la feuille (bloc CAVEAUJ-1) ; ne reste ici que la ligne de
@@ -6477,8 +6491,8 @@ function _aujInjectCss(){
 // (_aujColle), et jamais hors de sa zone — le calendrier est rendu HORS de .caj-zone (maquette v1 : la colonne fixe
 // descendait sur le calendrier, vu par Nico). Dessous, les quatre semaines en calendrier. Rien ne s'y saisit.
 var _aujJour=null;   // le jour choisi dans le calendrier (null : aujourd'hui)
-var _AUJ_CUVE={mesure:1, alerte:1, decuvage:1, labo:1, fa:1, demarrage:1};   // ces gestes portent sur une CUVE
-var _AUJ_ORD={alerte:0, malo:0, labo:1, mesure:1, soutirage:2, decuvage:3, so2:5, ouillage:7, fut:8};
+var _AUJ_CUVE={mesure:1, alerte:1, decuvage:1, labo:1, fa:1, demarrage:1, debourbage:1};   // ces gestes portent sur une CUVE
+var _AUJ_ORD={alerte:0, malo:0, labo:1, mesure:1, debourbage:1, soutirage:2, decuvage:3, so2:5, ouillage:7, fut:8};
 
 function _aujMaj(t){ t=String(t||''); return t?t.charAt(0).toUpperCase()+t.slice(1):t; }
 // La raison d'un geste en une phrase : sans le libellé redit, sans « 3 fûts » écrit deux fois.

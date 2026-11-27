@@ -1,0 +1,52 @@
+{
+  "lot": "PRATIQUES-3",
+  "section": "§626",
+  "base": "82556e1a1d49d05b8cb28cc46c03cb7865a20492",
+  "inclut": [],
+  "date": "2026-11-27",
+  "tutos": {
+    "ok": true,
+    "empreinte": "f0127eff7b2e4b249670f579e71622b5ba9764b57d1a50a64dd9145d62a40f47",
+    "date": "2026-11-27T18:33:14.293Z",
+    "joues": {
+      "téléphone": 31,
+      "ordinateur": 31,
+      "côte à côte": 3
+    },
+    "concernes": "tous",
+    "cote": true
+  },
+  "fichiers": {
+    ".mv-base": "e1d408ad5ef8283be0997585b32ef3c02a8e9975ab80b34e97b10ae8f5d750e0",
+    "CLAUDE.md": "cadf03d36ad18a68497e322ecf9de7f36ba0fc956f1a8f228dbec724b79bf250",
+    "docs/claude/INDEX.md": "1f856cfd69a8865228ce6118e3b749f88ebf602b895a0a4974721dea6d3c1a5a",
+    "docs/claude/chantiers-580-629.md": "4c549a9b9d9126edaad1ab5b8c7cd5ed91864787110f071a0ba3e5d5ec1d7920",
+    "docs/claude/journal.md": "00c1973ced0d92ca88896b7ddc915d40dff1bbc1dad2160bf2e2016b6dffaac7",
+    "guide/08-cave.html": "f94dec61a555b06974f190fcba3f197f4c55ebbef9a1a57d0fa55feed48d4cf3",
+    "index.html": "f85e0b4f0566780ff9d7628f8e9bc8fec33a6cc552061a0d0f68b45ca91019cc",
+    "public/guide.html": "1ba9b87fc574f53086583a00103701733b09cd0d3e361894b3db5c4f1f3a9bb2",
+    "public/sw.js": "559e0df39965c0f54daf4756c959120eb50157ef0d97c12d8d55eed2a41a8b51",
+    "scripts/harnais-claude-md.mjs": "161c9bd03ba68d5245eda883ca7c652e340c3714f201f9ac5af66d972a73992e",
+    "scripts/mv-harnais-asm1.mjs": "5cd4cad5b5206bb3950c5f142fd3d5cd9c63eea88839afcf92e718245c4e9ad8",
+    "scripts/mv-harnais-couleur1.mjs": "32b5cc420da234a492a7f99ddc95e4b7b531c64e9fc536081503e075e948a2f6",
+    "scripts/mv-harnais-cuv13.mjs": "6189690a24e6e7ab951f4ab8fc8dc71377644f063d34cfcd94fef0431ac0c713",
+    "scripts/mv-harnais-hlha1.mjs": "ace6887c6fdeb4687599b6500ae4f68e23e0ac1927e0de1a45a74c2e142e9f88",
+    "scripts/mv-harnais-intrants.mjs": "01faa3ac17f9009adb467dd81f4c420baaf4270a76c11fde5119ca12826c8471",
+    "scripts/mv-harnais-liste.mjs": "03c5c01f513bd883b1ec042558dda026077e2a058a203e368b1d34aec35a50a3",
+    "scripts/mv-harnais-pratiques2.mjs": "19310d6514813ef42768046d3cd6bbcd17da32eacf5d885147919198318d2577",
+    "scripts/mv-harnais-vendange-parts.mjs": "750824cda00bde614502d563973ac8434c1c070b106be8fbf4169f73d0923bfa",
+    "scripts/mv-harnais-vol1.mjs": "fc1082038df7278b5344abcbd9a2d0d9239c427770019ff368fde81861b3e4f7",
+    "scripts/tutos-couverture.json": "250a03121c5d66ff3df2297e69a45e2a47263285ce46c8e21d78a3a80a82919a",
+    "scripts/typo-baseline.json": "a9e8e845c0db8315d2a4318aedb15ccc9300f804e56cce17b551c17d4fb2522e",
+    "src/cave.js": "5a0de3c5d2d2829076b56194c74bad8e5e03f8f698555f6b35d5cd9bb32780b2",
+    "src/cuvier-pratiques.js": "47f0781e1c6e2fb6ec329717471513a0f21eac16761f4cd172d7a8af250d6d01",
+    "src/cuvier.js": "b9c5576d83a42978dfd62bbc5bc21ef10379b3539a3079bb0c9bd5d401b3c876",
+    "src/pilotage.js": "a5f74fea5b4af440d611db2f6954ad28275745e28ffb112765fbfda9c1c21cfe",
+    "src/styles.css": "3587184d3adf5d212a7f9073be8a7683b32bec3ac025532e6db53d757cb71056",
+    "src/tutos-cave.js": "827c0e71cafecca3bd3212d46f3a3625b4078459526d7d9847c18b082d6a1efc",
+    "src/tutos.js": "039b5178637a5d927254c322a9e0bb5384d94d1871f9f194a93279f818bc530e",
+    "src/utils.js": "3ce1dfea215da92332ae7e8493d7d1b6cf67d18c35b85acabfc9f9eeb4767dfa",
+    "src/whats-new.js": "7efdca42da5e2f96f834e671b3021deb3a67c3fcc54f1c2ba9598c5431245f62",
+    "scripts/mv-harnais-pratiques3.mjs": "7e61cae24696c100d3a3a653070fd77a8b545e71bc2af785b239446d959118f0"
+  }
+}

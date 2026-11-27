@@ -22,7 +22,8 @@ import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon, _m
 // ★ PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve et son chapeau — dans leur module.
 import { _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
   _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
-  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml } from './cuvier-pratiques.js';   // PRATIQUES-2 (§624) : la frise du blanc, ses choix ; COULEUR-1 (§625) : les mélanges
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml,
+  _saigRoseHtml, _saigRoseReset, _saigRosePret, _saigRoseCree, _saigRoseSuit, _saigRoseBloque, _saigRoseOubli, _saigRoseHl, _saigRoseVol } from './cuvier-pratiques.js';   // PRATIQUES-2 (§624) : la frise du blanc, ses choix ; COULEUR-1 (§625) : les mélanges
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -1711,7 +1712,7 @@ function _vendDetailHtml(c,canEdit){
     if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
     if(c.statut!=='termine')
       h+='<button class="mvv-act2" onclick="openVendStat(\''+_escAttr(c.id)+'\')">Changer l\u2019\u00e9tape</button>';
-    h+='<button class="mvv-act2" onclick="openVendOp(\''+_escAttr(c.id)+'\')">Op\u00e9ration</button>';
+    h+='<button class="mvv-act2" data-tuto="cuv.op" onclick="openVendOp(\''+_escAttr(c.id)+'\')">Op\u00e9ration</button>';
     if(c.statut!=='termine'&&c.statut!=='setup')
       h+='<button class="mvv-act2" onclick="openVendDecuvage(\''+_escAttr(c.id)+'\')">D\u00e9cuver</button>';
     h+='<button class="mvv-act2" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">Modifier</button>';
@@ -2547,7 +2548,9 @@ function saveVendCuve() {
     couleur:_coul||undefined, couleur_conf:_vcuvCoulConf(parcelles,_coul,existing),
     macere:existing?(existing.macere||undefined):undefined,
     /* ★ PRATIQUES-2 (§624) — le débourbage : rebati de zero, l'objet l'aurait perdu (piège récurrent). */
-    debourbage:existing?(existing.debourbage||undefined):undefined};
+    debourbage:existing?(existing.debourbage||undefined):undefined,
+    /* ★ PRATIQUES-3 (§626) — la saignée d'où vient une cuve de rosé : rebati de zero, l'objet l'aurait perdue. */
+    saignee_de:existing?(existing.saignee_de||undefined):undefined};
   /* ★ PRATIQUES-2 (§624) — le pressurage d'arrivée et les choix de la cuve (fût ou cuve, malo), dits dans la fenêtre ;
      non dits, ceux d'avant restent. */
   var _ch=_vcuvChoixPris(_coul);
@@ -2583,6 +2586,7 @@ function deleteVendCuve() {
   var id=((document.getElementById('vcuv-id')||{}).value||'');
   if(!id) return;
   window.openConfirmDel('Supprimer cette cuve ?','Toutes ses mesures seront également supprimées.',function(){
+    _saigRoseOubli((CAVE_VENDANGE.cuves_vinif||[]).find(function(c){return c.id===id;}));   // PRATIQUES-3 (§626) : la saignée ne la désigne plus
     CAVE_VENDANGE.cuves_vinif=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){return c.id!==id;});
     (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.cuve_id===id) r.cuve_id=null; });
     _vendCuvSync();
@@ -3497,7 +3501,8 @@ function _vendVolContenu(c, exclId){
   var m=_vendVolLoge(c);
   if(m>0) return {hl:Math.round(m*100)/100, src:'mesure', kg:0};
   var kg=_vendCuvKgDom(c.id, exclId);
-  if(!(kg>0)) return {hl:0, src:'aucun', kg:0};
+  /* ★ PRATIQUES-3 (§626) — une cuve de rosé de saignée n'a pas de caisses : son contenu est le jus saigné, sorties déduites. */
+  if(!(kg>0)){ var _sl=_saigRoseVol(c); if(_sl>0) return {hl:Math.round(Math.max(0,_sl-_vendSortiesHl(c))*100)/100, src:'saignee', kg:0}; return {hl:0, src:'aucun', kg:0}; }
   var e=Math.max(0, _vendHlKg(kg)-_vendSortiesHl(c));
   return {hl:Math.round(e*100)/100, src:'estime', kg:kg};
 }
@@ -3513,7 +3518,7 @@ function _vendVolCuve(r){
   var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){ return c&&c.id===r.cuve_id; });
   var vol=_vendVolLoge(cv);
   if(!(vol>0)) return null;
-  vol+=_vendPrelevHl(cv);   // ASM-1
+  vol+=_vendPrelevHl(cv)+_saigRoseHl(cv);   // ASM-1 ; PRATIQUES-3 (§626) : le jus saigné en cuve de rosé reste aux parcelles
   var mine=(CAVE_VENDANGE.recoltes||[]).filter(function(x){ return x&&x.cuve_id===cv.id; });
   var tot=mine.reduce(function(s,x){ return s+_recKgDom(x); },0);
   var kd=_recKgDom(r);
@@ -5041,6 +5046,7 @@ function _vendIntrVol(c){
 }
 function _vendIntrVolLbl(s){
   return s==='mesure' ? 'Volume mesur\u00e9 au d\u00e9cuvage.'
+       : s==='saignee' ? 'Le jus de la saign\u00e9e d\u2019o\u00f9 vient cette cuve.'   // PRATIQUES-3 (§626)
        : s==='saisi'  ? 'Volume saisi \u00e0 la main.'
        : s==='aucun'  ? 'Aucune caisse rattach\u00e9e \u00e0 cette cuve\u00a0: saisissez le volume.'
        : 'Volume estim\u00e9 d\u2019apr\u00e8s les caisses, \u00e0 la r\u00e8gle du Cuvier ('
@@ -5154,11 +5160,12 @@ function openVendOp(cuveId,opId){
     return;
   }
   _vendOpCuveId=cuveId;
+  _saigRoseReset();   // PRATIQUES-3 (§626) : le choix « créer la cuve de rosé » repart de vos pratiques
   _vendOpEditId=op?opId:null;
   _vendOpEditOp=op||null;
   _vendOpType=(op&&op.type)||'chaptalisation';
   var chips=_VEND_OPS.map(function(o){
-    return '<button class="mvv-optab'+(o.k===_vendOpType?' on':'')+'" onclick="_vendOpSet(\''+o.k+'\')">'+o.lbl+'</button>';
+    return '<button class="mvv-optab'+(o.k===_vendOpType?' on':'')+'"'+(o.k==='saignee'?' data-tuto="vop.saignee"':'')+' onclick="_vendOpSet(\''+o.k+'\')">'+o.lbl+'</button>';
   }).join('');
   var html=''
     +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(op?'Corriger l\u2019opération':'Opération')+' — '+_escHtml(c.nom)+'</div>'
@@ -5167,7 +5174,7 @@ function openVendOp(cuveId,opId){
     +'<label class="mvv-flbl">Date</label><input id="vop-date" class="mvv-tin" type="date" value="'+((op&&op.date)||_mvToday())+'">'
     +'<div id="vop-fields"></div>'
     +'<label class="mvv-flbl">Note</label><input id="vop-note" class="mvv-tin" type="text" placeholder="Observation…" value="'+_escHtml((op&&op.note)||'')+'">'
-    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendOp()">'+(op?'Enregistrer la correction':'Enregistrer l\u2019opération')+'</button>'
+    +'<button class="mvv-save" style="margin-top:18px" data-tuto="vop.ok" onclick="saveVendOp()">'+(op?'Enregistrer la correction':'Enregistrer l\u2019opération')+'</button>'
     +(op?'<button class="mvv-del" onclick="_vendOpDel()">Supprimer cette opération</button>':'');
   _vendSheet(html);
   _vendOpFields(c);
@@ -5202,7 +5209,8 @@ function _vendOpFields(c){
       +'<div class="mvv-fnote">'+(volMax>0
         ? ('Retiré de ce que contient la cuve\u00a0: environ '+_vendCuvF1(vol)+' hL'+(ref.src==='mesure'?' mesurés':' d\u2019après les caisses')
           +(op?', soit '+_vendCuvF1(volMax)+' hL avant cette saignée':'')+'. La contenance de la cuve ne change pas.')
-        : 'Aucune caisse rattachée à cette cuve\u00a0: son volume n\u2019est pas estimé.')+'</div>';
+        : 'Aucune caisse rattachée à cette cuve\u00a0: son volume n\u2019est pas estimé.')+'</div>'
+      +_saigRoseHtml(c, op);   // PRATIQUES-3 (§626) : le jus saigné peut créer la cuve de rosé
   } else if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement'){
     var tbl=_vendMoyTbl(_vendOpType), moy=(op&&op.moyen)||'';
     h='<label class="mvv-flbl">Température cible (°C)</label><input id="vop-temp" class="mvv-tin" type="number" value="'+_v(op&&op.temp_c)+'" min="0" max="45" step="0.5" placeholder="ex. 18">'
@@ -5308,6 +5316,9 @@ function saveVendOp(){
   var note=((document.getElementById('vop-note')||{}).value||'').trim();
   var editId=_vendOpEditId;
   var prev=editId?((c.operations||[]).find(function(o){return o.id===editId;})||null):null;
+  /* ★ PRATIQUES-3 (§626) — la cuve de rosé : vérifiée AVANT toute écriture (la ligne suivante en est une). */
+  var _rose=(_vendOpType==='saignee')?_saigRosePret(c, parseFloat((document.getElementById('vop-vol')||{}).value)||0, prev):null;
+  if(_rose&&_rose.err){ showToast(_rose.err,'#B85A1A'); return; }
   // ⚠️ Une saignee d'avant VOL-1 (sans `cap_intacte`) rend la contenance qu'elle avait prise (§152b).
   if(prev&&prev.type==='saignee'&&prev.volume_hl&&!prev.cap_intacte) c.volume_hl=(c.volume_hl||0)+prev.volume_hl;
   var op={id:editId||('vop_'+Date.now()),type:_vendOpType,date:date,note:note};
@@ -5321,6 +5332,8 @@ function saveVendOp(){
   } else if(_vendOpType==='saignee'){
     op.volume_hl=parseFloat((document.getElementById('vop-vol')||{}).value)||0;
     op.cap_intacte=true;   // VOL-1
+    _saigRoseSuit(op, prev);                                   // PRATIQUES-3 (§626) : sa cuve de rosé suit la correction
+    if(_rose&&_rose.nom) _saigRoseCree(c, op, _rose.nom);      //   … ou naît, avec le jus saigné
   } else if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement'){
     var _t=parseFloat((document.getElementById('vop-temp')||{}).value);
     op.temp_c=isFinite(_t)?_t:null;                      // 0 °C est une cible, pas une absence
@@ -5373,6 +5386,7 @@ function _vendOpDel(){
   if(!c||!id) return;
   var op=(c.operations||[]).find(function(o){return o.id===id;});
   if(!op) return;
+  var _bl=_saigRoseBloque(op); if(_bl){ showToast(_bl,'#B85A1A'); return; }   // PRATIQUES-3 (§626)
   var avert=(op.type==='saignee'&&op.volume_hl)
     ? ('Les '+_vendCuvF1(op.volume_hl)+' hL saignés seront rendus à la cuve.')
     : 'Elle disparaîtra du suivi et du registre des manipulations.';
@@ -5393,7 +5407,7 @@ function _vendOpDet(o){
   if(o.type==='chaptalisation') return (o.kg_sucre!=null)
     ? (o.kg_sucre||0).toFixed(1).replace('.',',')+' kg de sucre'
     : ('+'+_vendCuvF1(o.degre||0)+'\u00b0 vis\u00e9, volume inconnu');   // VOL-1
-  if(o.type==='saignee') return _vendCuvF1(o.volume_hl||0)+' hL';
+  if(o.type==='saignee') return _vendCuvF1(o.volume_hl||0)+' hL'+(o.vers_rose?' \u2192 '+(o.vers_rose.nom||'la cuve de ros\u00e9'):'');   // PRATIQUES-3 (§626)
   if(o.type==='delestage') return (o.nb||1)+'\u00d7';
   if(_vendEstIntrant(o.type)){
     var di=[];
@@ -9598,6 +9612,7 @@ window.renderVendCuves = renderVendCuves;
 // ★ PRATIQUES-2 (§624) — et pour les gestes du blanc
 window._vendFmlVin = _vendFmlVin;
 window._vendHistPose = _vendHistPose;
+window._vendTriOps = _vendTriOps;   // PRATIQUES-3 (§626) : l'enzymage du débourbage range ses opérations
 // ══ LA FRONTIÈRE — ce que le Chai (cave.js) lit du Cuvier ═════════════════
 // ★ CUV-DEC (§164) — chacun de ces noms est lu par cave.js (au premier geste, jamais au
 //   chargement : cave.js est évalué AVANT ce fichier). Retirer une ligne : ReferenceError.

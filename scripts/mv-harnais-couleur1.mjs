@@ -125,11 +125,11 @@ const T = {
   B7: ['cave.js passe par window, n’importe pas le module des pratiques ; le module les expose', (A, S) =>
     !/from '\.\/cuvier-pratiques\.js'/.test(S.cave) && S.cave.includes('window._caveCuveSource = _caveCuveSource;')
     && ['_cuvCoulSet', '_cuveeCoul', '_vendCuveCoul', '_coulMelange', '_coulMelHtml', '_coulMot', '_chaiCoulHtml', '_cuvCoulOuvrir', '_cuvCoulPrise'].every((n) => new RegExp('^window\\.' + n + ' += ' + n + ';', 'm').test(S.pr))
-    && /_coulMelange, _coulMelHtml \} from '\.\/cuvier-pratiques\.js'/.test(S.cu)],
+    && /_coulMelange, _coulMelHtml[\s\S]{0,400}?\} from '\.\/cuvier-pratiques\.js'/.test(S.cu)],
   B8: ['les deux « C’est voulu » sont écrits en toutes lettres (le compte des gestes les voit) et exemptés avec leur raison', (A, S) => {
     const h = fn(S.pr, '_coulMelHtml'), c = JSON.parse(S.cov);
     return h.includes('onclick="_vendFusCoulOkSet(this.dataset.id)"') && h.includes('onclick="_asmCoulOkSet(this.dataset.id)"')
-      && /COULEUR-1/.test(c.exempts._asmCoulOkSet || '') && /COULEUR-1/.test(c.exempts._vendFusCoulOkSet || '') && c.plafond === 788; }],
+      && /COULEUR-1/.test(c.exempts._asmCoulOkSet || '') && /COULEUR-1/.test(c.exempts._vendFusCoulOkSet || '') && c.plafond <= 788; }],   // PRATIQUES-3 (§626) : le plafond descend
   // C — le tuto
   C1: ['le tuto « créer une cuvée en cuve » choisit Blanc, le couvre, et finit sur une cuvée blanche', (A, S) => {
     const t = S.L.cave.slice(S.L.cave.indexOf("{ id: 'cuvee-cuve'"), S.L.cave.indexOf("{ id: 'pratiques'"));
@@ -160,10 +160,10 @@ const T = {
   E4: ['aucune liste ne lit un outil AU CHARGEMENT (une valeur de propriété nue serait perdue)', (A, S) =>
     LISTES.every((m) => { const v = varsDe(S.L[m]), liste = S.L[m].slice(S.L[m].indexOf('export var TU_TUTOS_'));
       return !v.some((n) => new RegExp('[:,\\[]\\s*' + n.replace('$', '\\$') + '\\s*[,}\\]\\n]').test(sansChaines(liste))); })],
-  E5: ['trente tutos, chacun une fois, chacun dans la liste de son module', (A, S) => {
+  E5: ['trente tutos au moins (PRATIQUES-3 : trente et un), chacun une fois, chacun dans la liste de son module', (A, S) => {
     const ids = [];
     const ok = LISTES.every((m) => [...S.L[m].matchAll(/\n {2}\{ id: '([^']+)'[\s\S]*?module: '([^']+)'/g)].every((x) => { ids.push(x[1]); return x[2] === MODULE[m]; }));
-    return ok && ids.length === 30 && new Set(ids).size === 30; }],
+    return ok && ids.length >= 30 && new Set(ids).size === ids.length; }],
   E6: ['les scripts lisent les tutos par mv-tutos-sources (aucun ne lit src/tutos.js seul)', (A, S) =>
     Object.entries(S.sc).every(([f, t]) => !/(?:lire|L|readFileSync)\(\s*'src\/tutos\.js'/.test(t) || f === 'mv-harnais-tuto10.mjs')],
 };
@@ -188,7 +188,7 @@ async function jouer(S) {
     try { ok = !!f(A, S); } catch (e) { err = e.message; }
     L.push([k + ' · ' + lib, ok, err]);
   }
-  try { const r = await chargeListes(S); L.push(['E7 · les six listes se chargent dans Node, ' + r.n + ' tutos, aucune valeur perdue' + (r.bad.length ? ' (' + r.bad.slice(0, 3).join(', ') + ')' : ''), r.n === 30 && !r.bad.length, '']); }
+  try { const r = await chargeListes(S); L.push(['E7 · les six listes se chargent dans Node, ' + r.n + ' tutos, aucune valeur perdue' + (r.bad.length ? ' (' + r.bad.slice(0, 3).join(', ') + ')' : ''), r.n >= 30 && !r.bad.length, '']); }
   catch (e) { L.push(['E7 · les six listes se chargent dans Node', false, e.message]); }
   return L;
 }
@@ -210,7 +210,7 @@ const DEFAUTS = [
     const t = S.cu.slice(0, i) + S.cu.slice(j); const k = t.indexOf('  _vendTriOps(porteuse);'); return { ...S, cu: t.slice(0, k) + bloc + t.slice(k) }; }],
   ['le labo relit les parcelles', (S) => ({ ...S, cave: remp(S.cave, "window._cuveeCoul(_laboCuveeDe(id))", "_parcCoul(id)") })],
   ['cave.js importe le module des pratiques', (S) => ({ ...S, cave: "import { _coulMot } from './cuvier-pratiques.js';\n" + S.cave })],
-  ['un « C’est voulu » écrit par variable (invisible au compte des gestes)', (S) => ({ ...S, pr: remp(S.pr, "(ou==='fus'?'onclick=\"_vendFusCoulOkSet(this.dataset.id)\"':'onclick=\"_asmCoulOkSet(this.dataset.id)\"')", "'onclick=\"'+ou+'(this.dataset.id)\"'") })],
+  ['un « C’est voulu » écrit par variable (invisible au compte des gestes)', (S) => ({ ...S, pr: remp(S.pr, "(ou==='fus'?'onclick=\"_vendFusCoulOkSet(this.dataset.id)\"':ou==='cuv'?'onclick=\"_cuvCoulOkSet(this.dataset.id)\"':'onclick=\"_asmCoulOkSet(this.dataset.id)\"')", "'onclick=\"'+ou+'(this.dataset.id)\"'") })],
   ['le tuto ne choisit plus la couleur', (S) => ({ ...S, L: { ...S.L, cave: remp(S.L.cave, "'_cuvCoulSet', ", '') } })],
   ['« Quoi de neuf » oublié', (S) => ({ ...S, wn: remp(S.wn, "v: '11.45'", "v: '11.4x'") })],
   ['un tuto resté dans le moteur', (S) => ({ ...S, tu: remp(S.tu, 'var TU_TUTOS = TU_TUTOS_VIGNE.concat(', "var TU_X = [\n  { id: 'reste', module: 'Vigne' }\n];\nvar TU_TUTOS = TU_TUTOS_VIGNE.concat(") })],

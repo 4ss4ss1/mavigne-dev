@@ -85,6 +85,7 @@ var _CAVE_BTL_GID = 0, _asmCuv = null, _asmSrc = null, _asmL = 0, _ASM_GID = 0, 
 var document = { getElementById: function(){ return null; }, querySelectorAll: function(){ return []; } };
 var __journal = { saves: [], toasts: [], confirm: null, rendu: 0 };
 function _recKgDom(r){ return (r && r.kg_dom) || 0; }
+function _saigRoseHl(){ return 0; } function _saigRoseVol(){ return 0; }   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
 function _escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _escAttr(s){ return String(s==null?'':s).replace(/\\\\/g,'\\\\\\\\').replace(/'/g,"\\\\'"); }
 function _mvIcon(n){ return '<i data-ic="'+n+'"></i>'; }
@@ -344,7 +345,7 @@ const MUT = [
   ['_asmSources', '_vendDecuvee(c)||', '', 'B2', 'une cuve décuvée proposée comme source'],
   ['_asmSources', "x.id===cu.id||", '', 'B3', 'la cuvée se complète avec elle-même'],
   ['_vendSortiesHl', "(o.type==='saignee'||o.type==='prelevement')", "(o.type==='saignee')", 'C2', 'le jus prélevé reste dans la cuve'],
-  ['_vendVolCuve', 'vol+=_vendPrelevHl(cv);', '', 'C5', 'le prélevé sort du rendement des parcelles'],
+  ['_vendVolCuve', 'vol+=_vendPrelevHl(cv)+_saigRoseHl(cv);', 'vol+=_saigRoseHl(cv);', 'C5', 'le prélevé sort du rendement des parcelles'],   // PRATIQUES-3 (§626) : l'ancre suit la ligne
   ['_asmRefus', "if(L>m) return", 'if(false) return', 'D1', 'plus de vin que le fût n’en attend'],
   ['_asmValider', 'sc.cuves[k].litres=Math.max(0,(parseFloat(sc.cuves[k].litres)||0)-L);', '', 'E1', 'la cuve du Chai ne baisse pas'],
   ['_asmDefaire', 'if(cv&&cv.operations) cv.operations=cv.operations.filter(function(o){ return !o||o.asm_id!==op.id; });', '', 'F1', 'le prélèvement survit au défaire'],

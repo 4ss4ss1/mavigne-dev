@@ -2188,3 +2188,42 @@ Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’un
 - L’exception de l’article 8 (la cuvée d’un mousseux) : un domaine qui ferait un crémant rosé d’assemblage aurait besoin d’un réglage — rien ne la lève aujourd’hui.
 - Changer la couleur d’une cuvée qui a déjà reçu l’apport d’une autre couleur n’est pas contrôlé.
 - `styles.css` : 1 014 ko pour un plafond de 1 024.
+
+## 626. ★★★ PRATIQUES-3 — LA SAIGNÉE QUI CRÉE LA CUVE DE ROSÉ ; L’ENZYMAGE PRIS DANS LA RÉSERVE ; LE SOUTIRAGE DANS « À FAIRE » ; LA BASE D’UN EFFERVESCENT ; UNE CUVÉE QUI CHANGE DE COULEUR (27/11 — APP 11.45 → 11.46, SW 12.36 → 12.37 — `src/cuvier-pratiques.js` (le bloc PRATIQUES-3, la règle des mélanges) · `src/cuvier.js` (la feuille des opérations, `saveVendOp`, `_vendOpDel`, `deleteVendCuve`, `saveVendCuve`, `_vendVolContenu`, `_vendVolCuve`) · `src/cave.js` (« Nouvelle cuvée », l’assemblage, « À faire ») · `src/pilotage.js` (une ligne) · `src/styles.css` (un sélecteur) · `src/tutos.js` (`_tuCaveSaig`) · `src/tutos-cave.js` (le tuto `saignee`) · `scripts/mv-harnais-pratiques3.mjs` (neuf) · `scripts/mv-harnais-couleur1.mjs`, `asm1`, `cuv13`, `hlha1`, `intrants`, `vendange-parts` (bouchons, ancres) · `scripts/tutos-couverture.json` · `scripts/typo-baseline.json` · `src/utils.js` · `src/whats-new.js` · `guide/08-cave.html`)
+
+**La demande.** Nico, 27/11 : « On fait ce qui reste en un seul lot, la totale » — les restes du §625e.
+
+### 626a. Mesuré avant (`82556e1`, « couleur1 »)
+
+- La saignée (`_VEND_OPS`) retirait du jus à une cuve de rouge ; rien ne le suivait : pas de cuve de rosé, et le jus sortait du rendement des parcelles.
+- L’enzymage du débourbage était un texte libre ; La Réserve ne voyait rien. L’opération « Enzymes » de la feuille des opérations, elle, sait déjà sortir un produit œnologique du stock (`_vendIntrProds`, `_rsvStockPour` lit les opérations qui portent `prod_id`).
+- Le soutirage d’un débourbage n’arrivait nulle part : seule la fiche de la cuve le disait.
+- Le texte des mélanges (§625) disait « interdit en Europe ». **Vérifié** : l’article 8 du règlement 2019/934 interdit le coupage d’un blanc et d’un rouge sans indication géographique pour faire un rosé, sauf pour la cuvée d’un mousseux ou un pétillant ; la France a étendu l’interdiction aux vins tranquilles qui ont une indication géographique (réponses ministérielles, Assemblée nationale, 2009).
+- Une cuvée qui changeait de couleur après un apport n’était pas relue.
+
+### 626b. Ce qui change
+
+- **La saignée crée la cuve de rosé.** Sur une cuve de rouge, la feuille « Saignée » propose « Créer la cuve de rosé » (choisi d’avance si les pratiques font leurs rosés par saignée). La cuve naît en `setup`, `couleur: 'o'`, avec les parcelles de la cuve saignée, le jus saigné comme jus de goutte (`pressurage.goutte_l`) et `saignee_de = {id, nom, op, date, l}` ; la saignée la nomme (`vers_rose`). Vérifié avant toute écriture (un volume nul est refusé). Corriger la saignée corrige son jus tant que la cuve n’est pas débourbée ; la saignée ne se supprime pas tant que la cuve existe ; supprimer la cuve délie la saignée. **Le rendement** : le jus saigné en cuve de rosé reste aux parcelles de la cuve d’où il vient (`_vendVolCuve`, comme un prélèvement ASM-1) ; **le contenu** de la cuve de rosé est ce jus (`_vendVolContenu`, source `saignee`). L’objet rebâti de `saveVendCuve` garde `saignee_de`. La fiche du rosé dit d’où il vient.
+- **L’enzymage pris dans La Réserve.** La feuille « Débourber » propose les produits œnologiques de La Réserve et une dose ; la quantité se calcule sur le jus (pressé ou saigné, sinon le contenu) et le stock se lit à la frappe. À l’enregistrement, une opération « Enzymes » datée du début (`deb:true`, liée par `debourbage.enz_op`) : la même que la feuille des opérations, donc la même sortie de stock. Un produit sans dose est refusé avant d’écrire ; sans intrant œnologique, le texte d’avant.
+- **Le soutirage dans « À faire ».** `_debAFaire` (cuvier-pratiques.js), lu par `_mlAgenda` : à l’heure du repère du domaine (sa durée de débourbage), « dû » une fois passée ; sans repère, le jour même, sans urgence. Le geste `debourbage` a son verbe (« Soutirer », qui ouvre la feuille du jus clair), son ordre, sa couleur (celle du soutirage, un sélecteur ajouté à la règle existante de `styles.css`) ; le Pilotage le compte.
+- **La base d’un effervescent.** « Nouvelle cuvée » propose, pour un blanc ou un rosé, « Base d’un effervescent » (`base_eff`) ; l’assemblage le lit : l’impossible devient « à vérifier » (l’exception de l’article 8 ; le cahier des charges peut l’interdire). Le texte des mélanges dit désormais qui interdit quoi.
+- **Une cuvée qui change de couleur relit ses apports** (`_cuvCoulApports` : la couleur notée sur l’apport — `coul`, écrite désormais à l’assemblage — sinon celle de sa source) : impossible, refusé avant d’écrire ; à vérifier, « C’est voulu » sous la couleur.
+- **Le tuto « tirer un rosé de saignée »** (9 étapes) sur une cuve de rouge chargée pour lui seul (`_tuCaveSaig`). Il couvre `openVendOp`, `_vendOpSet`, `_saigRoseSet`, `saveVendOp` : le compte des gestes sans tuto descend, plafond 788 → **785**. Trois gestes rares exemptés avec leur raison (`_debEnzCalc`, `_cuvEffSet`, `_cuvCoulOkSet`).
+
+### 626c. Mesuré après
+
+- `mv-harnais-pratiques3` : 21 assertions (la saignée, l’enzymage, « À faire », les mélanges JOUÉS dans Node, le branchement, le tuto), 18 contre-épreuves. `couleur1` suit (le troisième « C’est voulu », le plafond, trente et un tutos).
+- **Joué à l’écran sur le build** (téléphone et ordinateur, aucune erreur de page) : 8 hL saignés de la Cuve 3 (107,8 hL estimés) → « Rosé de saignée — Cuve 3 », 800 L de jus, Les Charmes et La Combotte, contenu 8 hL, la Cuve 3 à 99,8 hL ; sa fiche : « Née de la saignée de Cuve 3, le 14/09 : 800 L de jus » ; supprimer la saignée : refusé ; Lallzyme 2 g/hL au débourbage → 16 g, stock 500 → 484 g ; débourbage commencé il y a 14 h, repère 12 h → « Soutirer le jus clair — repère de 12 h atteint » dans « À faire », « Soutirer » ouvre la feuille ; « Crémant rosé », base d’effervescent, reçoit 30 L de blanc après « C’est voulu » ; retirer la base : « Impossible · Pas de blanc dans un rosé », refusé ; supprimer la cuve de rosé : la saignée ne la nomme plus.
+- ⚠️ **Des harnais extraient `_vendVolContenu` et `_vendVolCuve`** (`asm1`, `cuv13`, `hlha1`, `intrants`, `vendange-parts`) : bouchons des noms neufs ; deux contre-épreuves suivent la ligne changée.
+- `tutos-cave.js` 25 → 29 ko (le tuto neuf) : seule sa ligne du barème est regravée — le découpage de COULEUR-1 sert à cela.
+
+### 626d. Leçons
+
+- **Un volume qui part ailleurs reste à sa parcelle** : le jus saigné vers une cuve de rosé est le même raisin ; le compter au rendement de la cuve saignée (et nulle part ailleurs, la cuve de rosé n’ayant pas de caisses) évite de le perdre comme de le compter deux fois.
+- **Réutiliser l’opération qui porte déjà la sortie de stock** : l’enzymage du débourbage est une opération « Enzymes », pas un second chemin vers La Réserve.
+- **Une règle citée se relit** : « interdit en Europe » était trop large — l’article 8 vise les vins sans indication géographique et laisse une exception ; c’est la France qui l’étend aux autres vins tranquilles.
+
+### 626e. Restes
+
+- `styles.css` reste à 1 014 ko : le style du lot n’y a ajouté qu’un sélecteur. Sortir les règles des pratiques dans une feuille à part demande de l’importer dans `app.js`, que Claude n’ouvre pas dans son bac à sable (la feuille importée par un autre module ne se charge pas dans Node, `mv-app-node.mjs` ne retirant que celles d’`app.js`).
+- Une cuve de rosé de saignée se décuve et se suit comme les autres ; la saignée d’une cuve déjà décuvée n’a pas de sens et n’est pas bloquée (l’opération existait avant ce lot).

@@ -83,6 +83,7 @@ var CAVE_ELEVAGE = { cuvees: [] };
 window.CAVE_VENDANGE = CAVE_VENDANGE; window.CAVE_ELEVAGE = CAVE_ELEVAGE;
 var _caveMillFilter = 'tous', _mlCuvSel = null, _mlCuvFiche = false;   // CAVE-RANGE-1 (§449) : le millésime regardé est celui de toute la Cave
 function _mlCampagne(){ return 2026; }
+function _saigRoseHl(){ return 0; } function _saigRoseVol(){ return 0; }   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
 function _vendClient(){ return null; }
 function _caveVolL(){ return 0; }
 function canWrite(){ return __ecrit; }

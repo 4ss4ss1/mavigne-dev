@@ -89,6 +89,7 @@ function _caveCuve(id){ return PARC[id] || null; }
 function _escHtml(s){ return String(s == null ? '' : s); }
 function _escAttr(s){ return String(s == null ? '' : s); }
 function _mvIcon(){ return '<svg></svg>'; }
+function _saigRoseHl(){ return 0; } function _saigRoseVol(){ return 0; }   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
 function _pratStepperHtml(){ return ''; }   // PRATIQUES-2 (§624) : bouchon — la frise d'un blanc se joue dans mv-harnais-pratiques2
 function _vendCfg(){ return { poids_caisse_kg: 25, ratio_min: 130, ratio_max: 140, sucre_par_degre: 16.83 }; }
 function _recCaisses(){ return 0; }

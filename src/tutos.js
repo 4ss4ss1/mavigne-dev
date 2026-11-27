@@ -930,6 +930,14 @@ function _tuCaveDeb() {
     date_entree: _tuJour(-1), pressurage: { goutte_l: 2000, presse_l: 380 }, mesures_fa: [], statut_hist: [{ id: 'vst_tu_cvb', statut: 'setup', date: _tuJour(-1) }] }];
   return d;
 }
+/* ★ PRATIQUES-3 (§626) — POUR LE TUTO « TIRER UN ROSÉ DE SAIGNÉE » SEUL : une cuve de rouge encuvée hier (Les Charmes, un pinot
+   noir), avant la fermentation. Chargée pour lui seul, comme celle du débourbage. */
+function _tuCaveSaig() {
+  var d = _tuCave();
+  d.cuves_vinif = [{ id: 'tu_cvr', nom: 'Cuve 4 — Les Charmes', volume_hl: 60, statut: 'setup', parcelles: ['Les Charmes'], couleur: 'r',
+    date_entree: _tuJour(-1), mesures_fa: [], operations: [], statut_hist: [{ id: 'vst_tu_cvr', statut: 'setup', date: _tuJour(-1) }] }];
+  return d;
+}
 /* ★ TUTO-9 (§423) — UN JOURNAL POUR LE DOMAINE FICTIF. Le tuto « corriger l'équipe d'une validation » (ACCV-4, §419) vise le
    bouton « Équipe » d'une validation : le domaine fictif n'en avait AUCUNE (« Journal vide »), le tuto restait à l'étape 1
    partout. test:tutos ne l'a pas vu au téléphone : il y jouait un autre tuto sous son nom (§423b). La première validation est
@@ -966,6 +974,7 @@ function _charger() {
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('sessions', _tuSessions()); } catch (e) { _avale(e, '_charger#sessions'); } }   // COEQ-3 (§524)
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('kml_polygons', _tuKml()); } catch (e) { _avale(e, '_charger#kml'); } }   // YALLER-1 (§527)
   if (String(window.__MV_TUTO || '') === 'debourber' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveDeb()); } catch (e) { _avale(e, '_charger#cave_deb'); } }   // PRATIQUES-2 (§624)
+  if (String(window.__MV_TUTO || '') === 'saignee' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveSaig()); } catch (e) { _avale(e, '_charger#cave_saig'); } }   // PRATIQUES-3 (§626)
   if (String(window.__MV_TUTO || '') === 'rentree' && typeof window.applyFbData === 'function') { try { window.applyFbData('traitements', _tuTraitements()); } catch (e) { _avale(e, '_charger#traitements'); } }   // REG27-1A (§572)
 }
 function _demarrer() {

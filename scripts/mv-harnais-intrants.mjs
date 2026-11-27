@@ -95,7 +95,8 @@ function monterCave(mutation) {
   /* ★ VOL-1 — le repère lit les caisses : deux bouchons de DONNÉES (le réglage
      du Cuvier, et les kilos domaine d'une récolte), aucune règle réécrite. */
   const BOUCHONS = "function _vendCfg(){ return { ratio_min:130, ratio_max:140 }; }\n"
-                 + "function _recKgDom(r){ return (r && r.kg_dom) || 0; }\n";
+                 + "function _recKgDom(r){ return (r && r.kg_dom) || 0; }\n"
+                 + "function _saigRoseVol(){ return 0; }\n";   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
   return new Function('CAVE_ELEVAGE', 'window', 'CAVE_VENDANGE',
     BOUCHONS + corps + '\nreturn {_vendEstIntrant,_vendIntrQte,_vendIntrQteTxt,_vendIntrVol,'
           + '_vendIntrUnite,_vendIntrUniteQ,_vendOpDet,_rmDetail,_VEND_OPS,RM_TYPES,RM_FAMILLES};'
@@ -250,8 +251,8 @@ if (!CONTRE) {
      C => C._vendIntrVol({ id: 'vide', volume_hl: 50 }).src === 'aucun',
      'le volume redevient « mesur\u00e9 » sans d\u00e9cuvage'],
     ['C1b \u00b7 VOL-1 : la contenance redevient le rep\u00e8re d\u2019une cuve sans caisse',
-     b => b.replace("  if(!(kg>0)) return {hl:0, src:'aucun', kg:0};",
-                    "  if(!(kg>0)) return {hl:(c&&c.volume_hl)||0, src:'estime', kg:0};"),
+     b => b.replace("if(_sl>0) return {hl:Math.round(Math.max(0,_sl-_vendSortiesHl(c))*100)/100, src:'saignee', kg:0}; return {hl:0, src:'aucun', kg:0}; }",
+                    "return {hl:(c&&c.volume_hl)||0, src:'estime', kg:0}; }"),   // PRATIQUES-3 (§626) : l'ancre suit la ligne
      C => C._vendIntrVol({ id: 'vide', volume_hl: 50 }).hl === 0,
      'une cuve vide re\u00e7oit 50 hL de dose'],
     ['C1c \u00b7 VOL-1 : la saign\u00e9e n\u2019est plus d\u00e9duite',

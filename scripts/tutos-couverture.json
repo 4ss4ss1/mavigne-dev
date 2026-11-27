@@ -1,5 +1,5 @@
 {
-  "plafond": 788,
+  "plafond": 785,
   "exempts": {
     "_rfcGeste": "RENF-4 (§620) : la feuille « Créer le contrat » (Pilotage › Décider › Renfort, une ligne) — ses boutons créent des comptes et des fiches dans l’équipe (createAuthAccount) : rien à jouer sur le domaine d’entraînement sans écrire dans l’équipe ; le tuto se fera avec une équipe d’entraînement qui l’accepte (mv-harnais-renf4 joue la feuille)",
     "_rfcSaisie": "RENF-4 (§620) : la saisie des prénoms et des adresses de la même feuille — même raison que _rfcGeste",
@@ -86,6 +86,9 @@
     "_vcuvFaLieu": "PRATIQUES-2 (§624) : n’apparaît que si le domaine fermente ses blancs de plusieurs façons (réglage) ; le domaine fictif n’a pas de réglage",
     "_vcuvMaloSet": "PRATIQUES-2 (§624) : n’apparaît que si le domaine a plusieurs malos pour ses blancs (réglage) ; le domaine fictif n’a pas de réglage",
     "_asmCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur du blanc versé dans un rouge — un mélange rare, et l’encadré qui le propose dit lui-même quoi vérifier",
-    "_vendFusCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur une cuve de blanc réunie à une de rouge — rare, et l’encadré qui le propose dit lui-même quoi vérifier"
+    "_vendFusCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur une cuve de blanc réunie à une de rouge — rare, et l’encadré qui le propose dit lui-même quoi vérifier",
+    "_debEnzCalc": "PRATIQUES-3 (§626) : l’enzymage du débourbage (produit de La Réserve, dose) — facultatif, la même règle que l’opération « Enzymes » ; le domaine fictif n’a pas d’intrant œnologique",
+    "_cuvEffSet": "PRATIQUES-3 (§626) : « Base d’un effervescent » sur une cuvée de blanc ou de rosé — rare (un crémant), et l’encadré du mélange dit ce qu’elle change",
+    "_cuvCoulOkSet": "PRATIQUES-3 (§626) : « C’est voulu » quand une cuvée change de couleur après un apport — rare, et l’encadré qui le propose dit lui-même quoi vérifier"
   }
 }

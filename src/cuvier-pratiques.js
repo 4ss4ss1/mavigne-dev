@@ -60,6 +60,7 @@ var _PRAT_ETQ = {
   'prat.o.met.direct':'data-tuto="prat.o.met.direct"', 'prat.b.ml.bloq':'data-tuto="prat.b.ml.bloq"', 'prat.b.lies.bat':'data-tuto="prat.b.lies.bat"',
   'vcuv.coul.r':'data-tuto="vcuv.coul.r"', 'vcuv.coul.b':'data-tuto="vcuv.coul.b"', 'vcuv.coul.o':'data-tuto="vcuv.coul.o"',
   'cuv.coul.r':'data-tuto="cuv.coul.r"', 'cuv.coul.b':'data-tuto="cuv.coul.b"', 'cuv.coul.o':'data-tuto="cuv.coul.o"',   // COULEUR-1 (§625)
+  'saig.rose':'data-tuto="saig.rose"', 'saig.nom':'data-tuto="saig.nom"', 'cuv.eff':'data-tuto="cuv.eff"',   // PRATIQUES-3 (§626)
   // PRATIQUES-2 (§624) : la feuille « Débourber » et le prochain geste
   'deb.go':'data-tuto="deb.go"', 'deb.ok':'data-tuto="deb.ok"', 'deb.temp':'data-tuto="deb.temp"', 'deb.jus':'data-tuto="deb.jus"',
   'deb.bourbes':'data-tuto="deb.bourbes"', 'deb.suite.cuve':'data-tuto="deb.suite.cuve"', 'deb.suite.fut':'data-tuto="deb.suite.fut"'
@@ -439,6 +440,9 @@ function _vcuvCoulPret(noms, k, existing){
 function _vendParcoursHtml(c){
   var P=_pratCfg(), k=_vendCuveCoul(c);
   var nx=_debProchainHtml(c);   // PRATIQUES-2 (§624) : le prochain geste d'un blanc ou d'un rosé — avec ou sans réglage
+  /* ★ PRATIQUES-3 (§626) : une cuve de rosé née d'une saignée dit d'où vient son jus. */
+  if(c&&c.saignee_de) nx='<p class="prat-note">Née de la saignée de <b>'+_escHtml(c.saignee_de.nom||'une cuve de rouge')+'</b>'
+    +(c.saignee_de.date?', le '+_escHtml(String(c.saignee_de.date).slice(8,10)+'/'+String(c.saignee_de.date).slice(5,7)):'')+(c.saignee_de.l?' : '+_nbL(c.saignee_de.l)+' L de jus':'')+'.</p>'+nx;
   if(!P||!_PRAT_Q[k]||!P.actif[k]) return nx;
   var conf=c.couleur_conf?'<p class="prat-note">'+_escHtml(c.couleur_conf.t||'Couleur confirmée')+' : confirmé'+(c.couleur_conf.par?' par '+_escHtml(c.couleur_conf.par):'')+(c.couleur_conf.le?' le '+_vendFrDate(c.couleur_conf.le):'')+'.</p>':'';
   var mac=c.macere?'<p class="prat-note">Blanc de macération : pigeages et remontages notés'+(c.macere.par?' (confirmé par '+_escHtml(c.macere.par)+')':'')+'.</p>':'';
@@ -692,7 +696,7 @@ function _debRendre(){
       +(d?'<div class="mvv-fnote">Proposée d’après vos pratiques.</div>':'')
       +'<label class="mvv-flbl">Début</label><div style="display:flex;gap:9px"><input id="deb-d" class="mvv-tin" type="date" value="'+_escAttr(auj)+'"><input id="deb-h" class="mvv-tin" type="time" value="'+_escAttr(hh)+'"></div>'
       +'<label class="mvv-flbl">Température <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:8px;align-items:center"><input id="deb-t" class="mvv-tin" type="text" inputmode="decimal" '+_pratEtq('deb.temp')+' placeholder="ex. 12"><span class="mvv-step2-u">°C</span></div>'
-      +'<label class="mvv-flbl">Enzymage <span class="mvv-fhint">(facultatif — produit et dose)</span></label><input id="deb-e" class="mvv-tin" type="text" placeholder="ex. pectinase, 2 g/hL">'
+      +_debEnzHtml(c)   // PRATIQUES-3 (§626) : le produit de La Réserve et sa dose ; sans intrant œno, le texte d'avant
       +(_debNtuOn(c)?'<label class="mvv-flbl">Turbidité au départ <span class="mvv-fhint">(facultatif)</span></label><div style="display:flex;gap:8px;align-items:center"><input id="deb-n" class="mvv-tin" type="text" inputmode="decimal" placeholder="ex. 1450"><span class="mvv-step2-u">NTU</span></div>':'')
       +((rep&&parseFloat(rep.deb_h)>0)?'<div class="mvv-fnote">Durée prévue : <b>'+String(rep.deb_h).replace('.',',')+' h</b> — votre repère, réglé dans vos pratiques.</div>':'')
       +'<button class="mvv-save" style="margin-top:18px" '+_pratEtq('deb.ok')+' onclick="saveDebourber()">Mettre à débourber</button>';
@@ -745,8 +749,16 @@ function saveDebourber(){
   if(_debEt.mode==='debut'){
     var bl=_debBloque(c); if(bl){ showToast(bl,'#B85A1A'); return; }   // ⚠ AVANT toute écriture
     if(!quand){ showToast('Indiquez le début du débourbage','#B85A1A'); return; }
-    var t=_debNum('deb-t'), n=_debNum('deb-n'), e=String(((document.getElementById('deb-e')||{}).value)||'').trim();
-    c.debourbage={ methode:_debEt.meth, debut:quand, temp:(t!=null?t:null), enz:e||null, ntu0:(n!=null&&n>=0?n:null), par:qui };
+    var t=_debNum('deb-t'), n=_debNum('deb-n'), ez=_debEnzPris(c);
+    if(ez&&ez.err){ showToast(ez.err,'#B85A1A'); return; }   // PRATIQUES-3 (§626) : ⚠ AVANT toute écriture
+    c.debourbage={ methode:_debEt.meth, debut:quand, temp:(t!=null?t:null), enz:(ez&&ez.txt)||null, ntu0:(n!=null&&n>=0?n:null), par:qui };
+    /* ★ PRATIQUES-3 (§626) — l'enzymage est une opération « Enzymes » de la cuve, datée du début : La Réserve en tire la sortie de stock. */
+    if(ez&&ez.op){
+      var _eo=Object.assign({id:'vop_deb_'+Date.now(), date:quand.slice(0,10)}, ez.op);
+      if(!Array.isArray(c.operations)) c.operations=[];
+      c.operations.push(_eo); c.debourbage.enz_op=_eo.id;
+      if(typeof window._vendTriOps==='function') window._vendTriOps(c);
+    }
     window.CAVE_VENDANGE=CAVE_VENDANGE;
     _vendSheetClose();
     _vendFbSave((c.nom||'La cuve')+' : mise à débourber','#3D6B27');
@@ -832,9 +844,16 @@ function _cuveeCoul(cu){
   return _coulOk(k)?k:'?';
 }
 /* ★ LA SOURCE DES MÉLANGES : verser `kDe` dans `kVers`. null, ou {id, niv:'w' (à vérifier) | 'b' (impossible), t, d}. */
-function _coulMelange(kVers, kDe){
+/* ★ PRATIQUES-3 (§626) : `eff` — la cuvée d'arrivée est la base d'un effervescent. L'article 8 n'interdit pas ce coupage
+   quand il prépare la cuvée d'un mousseux ou un pétillant : l'impossible devient « à vérifier » (le cahier des charges).
+   Le texte dit qui interdit quoi : l'Europe pour les vins sans indication géographique, la France pour les vins
+   tranquilles qui en ont une (réponse ministérielle, Assemblée nationale, 2009). */
+function _coulMelange(kVers, kDe, eff){
   if(!_coulOk(kVers)||!_coulOk(kDe)||kVers===kDe) return null;
-  var regle='un rosé ne se fait pas en mélangeant un rouge et un blanc — c’est interdit en Europe (règlement 2019/934, article 8).';
+  var regle='un rosé ne se fait pas en mélangeant un rouge et un blanc. L’Europe l’interdit pour les vins sans indication géographique (règlement 2019/934, article 8), la France pour les vins tranquilles qui en ont une.';
+  var bloque=(kVers==='b')||(kVers==='o'&&kDe==='b');
+  if(bloque&&eff) return {id:'mel-eff-'+kVers+'-'+kDe, niv:'w', t:'Un rosé d’assemblage pour un effervescent',
+    d:'Permis par le règlement 2019/934 (article 8) pour la cuvée d’un mousseux ou un pétillant ; le cahier des charges de l’appellation peut l’interdire. Vérifiez-le.'};
   if(kVers==='b') return {id:'mel-b-'+kDe, niv:'b', t:'Pas de '+_PRAT_NOM[kDe]+' dans un blanc', d:'Le blanc deviendrait un rosé de mélange : '+regle};
   if(kVers==='o'&&kDe==='b') return {id:'mel-o-b', niv:'b', t:'Pas de blanc dans un rosé', d:'U'+regle.slice(1)};
   if(kVers==='r'&&kDe==='b') return {id:'mel-r-b', niv:'w', t:'Du blanc dans un rouge',
@@ -849,7 +868,7 @@ function _coulMelHtml(m, ok, ou){
   return '<div class="mvencadre mvencadre-'+(m.niv==='b'?'danger':'attention')+' prat-al">'+_mvIcon(m.niv==='b'?'interdit':'alerte',18)
     +'<span><b class="mvencadre-t">'+_PRAT_NIV[m.niv]+' · '+m.t+'</b>'+m.d
     +(m.niv==='w'?'<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact prat-al-b" data-id="'+m.id+'" '
-      +(ou==='fus'?'onclick="_vendFusCoulOkSet(this.dataset.id)"':'onclick="_asmCoulOkSet(this.dataset.id)"')+'>C’est voulu</button>':'')+'</span></div>';
+      +(ou==='fus'?'onclick="_vendFusCoulOkSet(this.dataset.id)"':ou==='cuv'?'onclick="_cuvCoulOkSet(this.dataset.id)"':'onclick="_asmCoulOkSet(this.dataset.id)"')+'>C’est voulu</button>':'')+'</span></div>';
 }
 /* Au Chai, la couleur ne se dit sur les cartes que si le domaine en a plusieurs (ses pratiques, ou ses cuvées). */
 function _chaiMultiCoul(){
@@ -867,7 +886,7 @@ function _chaiCoulHtml(c){
 var _cuvCoul=null, _cuvCoulEx=null;
 function _cuvCoulSeule(){ var P=_pratCfg(); if(!P) return null; var a=['r','b','o'].filter(function(k){ return P.actif[k]; }); return a.length===1?a[0]:null; }
 function _cuvCoulOuvrir(cu){
-  _cuvCoulEx=cu||null;
+  _cuvCoulEx=cu||null; _cuvEff=!!(cu&&cu.base_eff); _cuvCoulOk=null;   // PRATIQUES-3 (§626)
   var k=cu?_cuveeCoul(cu):'?';
   _cuvCoul=cu?(k!=='?'?k:null):_cuvCoulSeule();
   _cuvCoulRendre();
@@ -879,11 +898,176 @@ function _cuvCoulRendre(){
   el.innerHTML='<div class="fl" style="margin-top:14px">Couleur <span style="font-weight:400;opacity:.75">— '+(herite?'celle de sa cuve au Cuvier':'facultatif')+'</span></div>'
     +'<div class="prat-ch" role="group" aria-label="Couleur de la cuvée">'+['r','b','o'].filter(function(x){ return x!=='o'||ro; }).map(function(x){
       return '<button type="button" class="prat-o'+(_cuvCoul===x?' on':'')+'" aria-pressed="'+(_cuvCoul===x)+'" '+_pratEtq('cuv.coul.'+x)+' data-c="'+x+'" onclick="_cuvCoulSet(this.dataset.c)">'+_coulMot(x)+'</button>';
-    }).join('')+'</div>';
+    }).join('')+'</div>'
+    /* ★ PRATIQUES-3 (§626) : la base d'un effervescent (un blanc ou un rosé) — l'exception de l'article 8 ; et ce que les
+       apports déjà reçus disent de la couleur choisie. */
+    +((_cuvCoul==='b'||_cuvCoul==='o')?'<div class="prat-ch" role="group" aria-label="Effervescent" style="margin-top:8px"><button type="button" class="prat-o'+(_cuvEff?' on':'')+'" aria-pressed="'+_cuvEff+'" '+_pratEtq('cuv.eff')+' onclick="_cuvEffSet()">Base d’un effervescent<small>crémant, pétillant</small></button></div>':'')
+    +_coulMelHtml(_cuvCoulApports(_cuvCoulEx,_cuvCoul,_cuvEff), _cuvCoulOk, 'cuv');
 }
-function _cuvCoulSet(k){ if(!_coulOk(k)) return; _cuvCoul=(_cuvCoul===k)?null:k; _cuvCoulRendre(); }
+function _cuvCoulSet(k){ if(!_coulOk(k)) return; _cuvCoul=(_cuvCoul===k)?null:k; _cuvCoulOk=null; _cuvCoulRendre(); }
+var _cuvEff=false, _cuvCoulOk=null;
+function _cuvEffSet(){ _cuvEff=!_cuvEff; _cuvCoulOk=null; _cuvCoulRendre(); }
+function _cuvCoulOkSet(id){ _cuvCoulOk=id; _cuvCoulRendre(); }
+/* La couleur d'un apport reçu (ASM-1) : la sienne, notée à l'assemblage, sinon celle de sa source aujourd'hui. */
+function _cuvApportCoul(a){
+  if(a&&_coulOk(a.coul)) return a.coul;
+  var V=window.CAVE_VENDANGE||{}, E=window.CAVE_ELEVAGE||{};
+  if(a&&a.de_type==='cuve'){ var cv=(V.cuves_vinif||[]).find(function(x){ return x&&x.id===a.de_id; }); return cv?_vendCuveCoul(cv):'?'; }
+  if(a&&a.de_type==='cuvee'){ var cu=(E.cuvees||[]).find(function(x){ return x&&x.id===a.de_id; }); return cu?_cuveeCoul(cu):'?'; }
+  return '?';
+}
+/* Une cuvée qui change de couleur : chacun de ses apports est relu dans la couleur nouvelle. Le plus grave l'emporte. */
+function _cuvCoulApports(cu, k, eff){
+  if(!cu||!_coulOk(k)) return null;
+  var pire=null;
+  (cu.apports||[]).forEach(function(a){ var m=_coulMelange(k,_cuvApportCoul(a),eff); if(m&&(!pire||(m.niv==='b'&&pire.niv!=='b'))) pire=m; });
+  return pire;
+}
+/* Lu par saveCuvee AVANT d'écrire : '' (rien), ou la raison du refus. */
+function _cuvCoulBloque(cu, k, eff){
+  var m=_cuvCoulApports(cu,k,eff); if(!m) return '';
+  if(m.niv==='b') return m.t+' : cette cuvée a déjà reçu un apport qui l’empêche.';
+  return (_cuvCoulOk===m.id)?'':(m.t+' : confirmez d’abord, sous la couleur.');
+}
+function _cuvEffPris(){ return !!_cuvEff&&(_cuvCoul==='b'||_cuvCoul==='o'); }
 /* Lu par saveCuvee : la couleur à écrire, ou null (rien de dit). */
 function _cuvCoulPrise(){ return _coulOk(_cuvCoul)?_cuvCoul:null; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ★★★ PRATIQUES-3 (§626) — LA SAIGNÉE QUI CRÉE LA CUVE DE ROSÉ ; L'ENZYMAGE PRIS DANS LA RÉSERVE ;
+   LE SOUTIRAGE D'UN DÉBOURBAGE DANS « À FAIRE »
+   ═══════════════════════════════════════════════════════════════════════════ */
+function _p3Cuves(){ return ((window.CAVE_VENDANGE||{}).cuves_vinif)||[]; }
+function _p3Cuve(id){ return _p3Cuves().find(function(x){ return x&&x.id===id; })||null; }
+
+/* —— La saignée crée la cuve de rosé (la feuille « Saignée », cuvier.js) —— */
+var _saigRose=null, _saigRoseC=null;   // le choix de la feuille ('oui' | 'non'), la cuve saignée
+function _saigRoseDefaut(){ var P=_pratCfg(); return (P&&P.actif.o&&_pratHas(P,'o','met','sai'))?'oui':'non'; }
+function _saigRoseReset(){ _saigRose=null; _saigRoseC=null; }
+/* Pour une cuve de rouge seulement ; une saignée qui a déjà sa cuve de rosé la nomme. */
+function _saigRoseHtml(c, op){
+  if(!c||_vendCuveCoul(c)!=='r') return '';
+  _saigRoseC=c.id;
+  var lie=op&&op.vers_rose&&_p3Cuve(op.vers_rose.id);
+  if(lie) return '<div class="mvv-fnote">Le jus saigné est dans <b>'+_escHtml(lie.nom||'la cuve de rosé')+'</b>. Corriger le volume corrige son jus, tant qu’elle n’est pas débourbée.</div>';
+  if(_saigRose==null) _saigRose=_saigRoseDefaut();
+  var h='<label class="mvv-flbl">Le jus saigné</label><div class="mvv-optabs">'
+    +'<button type="button" class="mvv-optab'+(_saigRose==='non'?' on':'')+'" data-r="non" onclick="_saigRoseSet(this.dataset.r)">Ne pas le suivre</button>'
+    +'<button type="button" class="mvv-optab'+(_saigRose==='oui'?' on':'')+'" '+_pratEtq('saig.rose')+' data-r="oui" onclick="_saigRoseSet(this.dataset.r)">Créer la cuve de rosé</button></div>';
+  if(_saigRose==='oui') h+='<label class="mvv-flbl">Nom de la cuve de rosé</label><input id="vop-rose-nom" class="mvv-tin" type="text" '+_pratEtq('saig.nom')+' value="'+_escAttr('Rosé de saignée — '+(c.nom||'cuve'))+'">'
+    +'<div class="mvv-fnote">Une cuve de rosé naît avec ce jus : les parcelles de cette cuve, la couleur rosé, son parcours (débourbage, fermentation). Son vin reste dans le rendement de ces parcelles.</div>';
+  return '<div id="vop-rose">'+h+'</div>';
+}
+function _saigRoseSet(r){
+  if(r!=='oui'&&r!=='non') return;
+  var n=(document.getElementById('vop-rose-nom')||{}).value, el=document.getElementById('vop-rose'), c=_p3Cuve(_saigRoseC);
+  _saigRose=r;
+  if(el&&c){ el.outerHTML=_saigRoseHtml(c,null); var i=document.getElementById('vop-rose-nom'); if(i&&n) i.value=n; }
+}
+/* Lu par saveVendOp AVANT d'écrire : null (rien à créer), {err}, ou {nom}. */
+function _saigRosePret(c, vol, prev){
+  if(!c||_vendCuveCoul(c)!=='r'||_saigRose!=='oui'||(prev&&prev.vers_rose)) return null;
+  if(!(vol>0)) return {err:'Indiquez le volume saigné : c’est le jus de la cuve de rosé.'};
+  return {nom:String((document.getElementById('vop-rose-nom')||{}).value||'').trim()||('Rosé de saignée — '+(c.nom||'cuve'))};
+}
+/* La cuve de rosé : le jus saigné (en litres) est son jus de goutte ; elle garde d'où elle vient (`saignee_de`). */
+function _saigRoseCree(c, op, nom){
+  var l=Math.round((op.volume_hl||0)*100), d=op.date||'';
+  var r={id:'vcuv_'+Date.now()+'_rose', nom:nom, volume_hl:0, statut:'setup', cuve_ref:null, parcelles:(c.parcelles||[]).slice(),
+    date_entree:d, mesures_fa:[], decuvage:null, operations:[], couleur:'o', pressurage:{goutte_l:l, presse_l:null},
+    saignee_de:{id:c.id, nom:c.nom||'Cuve', op:op.id, date:d, l:l}, statut_hist:[]};
+  if(typeof window._vendHistPose==='function') window._vendHistPose(r,'setup',d);
+  window.CAVE_VENDANGE.cuves_vinif.push(r);
+  op.vers_rose={id:r.id, nom:r.nom};
+  return r;
+}
+/* Une saignée corrigée : sa cuve de rosé suit, tant qu'elle n'est pas débourbée (son jus n'a pas encore servi). */
+function _saigRoseSuit(op, prev){
+  if(!prev||!prev.vers_rose) return;
+  op.vers_rose=prev.vers_rose;
+  var r=_p3Cuve(prev.vers_rose.id), l=Math.round((op.volume_hl||0)*100);
+  if(!r||(r.debourbage&&r.debourbage.debut)||!(l>0)) return;
+  r.pressurage=Object.assign({}, r.pressurage||{}, {goutte_l:l});
+  if(r.saignee_de) r.saignee_de.l=l;
+}
+/* Supprimer une saignée qui a sa cuve de rosé : refusé tant que la cuve existe. '' ou la raison. */
+function _saigRoseBloque(op){ var r=op&&op.vers_rose&&_p3Cuve(op.vers_rose.id); return r?('Cette saignée a créé « '+(r.nom||'la cuve de rosé')+' » : supprimez d’abord cette cuve.'):''; }
+/* Supprimer la cuve de rosé : la saignée d'origine ne la désigne plus. */
+function _saigRoseOubli(r){
+  var s=r&&r.saignee_de&&_p3Cuve(r.saignee_de.id); if(!s) return;
+  (s.operations||[]).forEach(function(o){ if(o&&o.vers_rose&&o.vers_rose.id===r.id) delete o.vers_rose; });
+}
+/* Le rendement : le jus saigné en cuve de rosé reste aux parcelles de la cuve d'où il vient (comme un prélèvement, ASM-1). */
+function _saigRoseHl(c){
+  return ((c&&c.operations)||[]).reduce(function(s,o){ var v=(o&&o.type==='saignee'&&o.vers_rose)?parseFloat(o.volume_hl):0; return s+((isFinite(v)&&v>0)?v:0); },0);
+}
+/* Le contenu d'une cuve de rosé de saignée, sans caisses ni mesure : son jus, en hL. */
+function _saigRoseVol(c){ var l=c&&c.saignee_de&&parseFloat(c.saignee_de.l); return (l>0)?l/100:0; }
+
+/* —— L'enzymage pris dans La Réserve (la feuille « Débourber ») —— */
+function _debEnzProds(){ return (typeof window._vendIntrProds==='function')?window._vendIntrProds():[]; }
+function _debEnzProd(id){ return id?(_debEnzProds().find(function(p){ return p&&p.id===id; })||null):null; }
+/* Le volume dosé : le jus pressé (ou saigné) s'il est dit, sinon le contenu de la cuve. */
+function _debEnzVol(c){
+  var j=_debJusL(c); if(j>0) return {hl:Math.round(j)/100, src:'saisi'};
+  return (typeof window._vendIntrVol==='function')?window._vendIntrVol(c):{hl:0, src:'aucun'};
+}
+function _debEnzHtml(c){
+  var P=_debEnzProds();
+  if(!P.length) return '<label class="mvv-flbl">Enzymage <span class="mvv-fhint">(facultatif)</span></label><input id="deb-e" class="mvv-tin" type="text" placeholder="ex. pectinase, 2 g/hL">'
+    +'<div class="mvv-fnote">Aucun intrant œnologique dans La Réserve : le produit s’écrit ici, sans sortie de stock.</div>';
+  return '<label class="mvv-flbl">Enzymage <span class="mvv-fhint">(facultatif — La Réserve, catégorie Œno)</span></label>'
+    +'<select id="deb-ep" class="mvv-tin" onchange="_debEnzCalc()"><option value="">— Pas d’enzymage —</option>'
+    +P.map(function(p){ return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.nom)+'</option>'; }).join('')+'</select>'
+    +'<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="deb-ed" class="mvv-tin" type="text" inputmode="decimal" placeholder="dose, ex. 2" oninput="_debEnzCalc()"><span class="mvv-fhint" id="deb-eu">g/hL</span></div>'
+    +'<div class="mvv-fnote" id="deb-eq"></div>';
+}
+function _debEnzCalc(){
+  var c=_debEt&&_debCuve(_debEt.id), p=_debEnzProd((document.getElementById('deb-ep')||{}).value), u=document.getElementById('deb-eu'), q=document.getElementById('deb-eq');
+  if(u) u.textContent=(typeof window._vendIntrUnite==='function')?window._vendIntrUnite(p):'g/hL';
+  if(!q) return;
+  if(!p||!c){ q.textContent=''; return; }
+  var dose=_debNum('deb-ed'), v=_debEnzVol(c), qt=(dose>0&&v.hl>0&&window._vendIntrQte)?window._vendIntrQte(dose,v.hl):0;
+  if(!(v.hl>0)){ q.textContent='Le volume de la cuve n’est pas connu : l’enzymage s’écrit sans quantité, le stock ne bouge pas.'; return; }
+  var tx=(window._vendIntrQteTxt&&window._vendIntrUniteQ)?window._vendIntrQteTxt(qt,window._vendIntrUniteQ(p)):{n:'—',u:''};
+  var s=(qt>0&&window._rsvStockPour)?window._rsvStockPour(p.id,null):null, st='';
+  if(s&&s.suit){ var a=window._vendIntrQteTxt(Math.abs(s.q),s.unite), b=window._vendIntrQteTxt(Math.abs(s.q-qt),s.unite); st=' · stock '+(s.q<0?'−':'')+a.n+' '+a.u+' → '+((s.q-qt)<0?'−':'')+b.n+' '+b.u; }
+  q.textContent='Pour '+String(v.hl).replace('.',',')+' hL de jus : '+tx.n+' '+tx.u+st+'.';
+}
+/* Lu par saveDebourber AVANT d'écrire : null (pas d'enzymage), {err}, ou {txt, op} — l'opération « Enzymes » de la cuve,
+   la même que la feuille des opérations : La Réserve en tire la sortie de stock. */
+function _debEnzPris(c){
+  var sel=document.getElementById('deb-ep');
+  if(!sel){ var t=String(((document.getElementById('deb-e')||{}).value)||'').trim(); return t?{txt:t}:null; }
+  if(!sel.value) return null;
+  var p=_debEnzProd(sel.value); if(!p) return {err:'Ce produit n’est plus dans La Réserve.'};
+  var dose=_debNum('deb-ed'); if(!(dose>0)) return {err:'Indiquez la dose de '+p.nom+'.'};
+  var v=_debEnzVol(c), u=window._vendIntrUnite(p), uq=window._vendIntrUniteQ(p);
+  return {txt:p.nom+' · '+String(dose).replace('.',',')+' '+u, op:{type:'enzymes', prod_id:p.id, produit:p.nom, dose:dose, dose_unit:u,
+    volume_hl:(v.hl>0?v.hl:null), vol_src:(v.hl>0?v.src:'estime'), qte:(v.hl>0?window._vendIntrQte(dose,v.hl):0), qte_unite:uq, note:'Enzymage au débourbage', deb:true}};
+}
+
+/* —— Le soutirage d'un débourbage dans « À faire » (cave.js, _mlAgenda) ——
+   À l'heure du repère du domaine (sa durée de débourbage) : le jour où il tombe, « dû » une fois l'heure passée. Sans
+   repère : le jour même, sans urgence — le jus se juge à l'œil. */
+function _p3Jour(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function _p3Heure(d){ return ('0'+d.getHours()).slice(-2)+' h '+('0'+d.getMinutes()).slice(-2); }
+function _debAFaire(from, maintenant){
+  var now=maintenant||new Date(), out=[];
+  _p3Cuves().forEach(function(c){
+    if(!c||_debEtat(c)!=='encours'||(c.decuvage&&c.decuvage.date)) return;
+    var d=_pratDe(c), rep=d&&d.P[d.k]&&d.P[d.k].rep, h=rep?parseFloat(rep.deb_h):NaN, t0=new Date(String(c.debourbage.debut));
+    if(!(h>0)||isNaN(t0.getTime())){
+      var hh=isNaN(t0.getTime())?null:Math.max(0,Math.round((now-t0)/36e5));
+      out.push({date:from, it:{kind:'debourbage', titre:c.nom||'Cuve', detail:'en débourbage'+(hh!=null?' depuis '+hh+' h':''), note:'soutirer quand le jus est clair', ref:c.id}});
+      return;
+    }
+    var due=new Date(t0.getTime()+h*36e5), j=_p3Jour(due), passe=now>=due;
+    out.push({date:(j<from?from:j), it:{kind:'debourbage', titre:c.nom||'Cuve',
+      detail:'soutirer le jus clair — repère de '+String(h).replace('.',',')+' h '+(passe?'atteint':'à '+_p3Heure(due)), urgence:passe?'due':'', ref:c.id}});
+  });
+  return out;
+}
 
 // ── Les gestes (onclick) ──
 window.openPratiques   = openPratiques;
@@ -915,7 +1099,16 @@ window._coulMot        = _coulMot;
 window._chaiCoulHtml   = _chaiCoulHtml;
 window._cuvCoulOuvrir  = _cuvCoulOuvrir;
 window._cuvCoulPrise   = _cuvCoulPrise;
+// PRATIQUES-3 (§626) : les gestes, et ce que cave.js et cuvier.js lisent
+window._saigRoseSet    = _saigRoseSet;
+window._debEnzCalc     = _debEnzCalc;
+window._cuvEffSet      = _cuvEffSet;
+window._cuvCoulOkSet   = _cuvCoulOkSet;
+window._cuvCoulBloque  = _cuvCoulBloque;
+window._cuvEffPris     = _cuvEffPris;
+window._debAFaire      = _debAFaire;
 // ── Lus par cuvier.js ──
 export { _pratCfg, _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
   _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre,
-  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml };
+  _pratStepperHtml, _pratEtapeLbl, _vcuvChoixPris, _coulMelange, _coulMelHtml,
+  _saigRoseHtml, _saigRoseReset, _saigRosePret, _saigRoseCree, _saigRoseSuit, _saigRoseBloque, _saigRoseOubli, _saigRoseHl, _saigRoseVol };

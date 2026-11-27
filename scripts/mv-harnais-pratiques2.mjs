@@ -206,7 +206,7 @@ const CASSES = [
   ['pr', "    var bl=_debBloque(c); if(bl){ showToast(bl,'#B85A1A'); return; }   // ⚠ AVANT toute écriture\n", "", 'D1', 'le début écrit sans contrôle'],
   ['pr', "    _vendHistPose(c,'fa',f.fin.slice(0,10));", "", 'D2', 'la fermentation en cuve non datée'],
   ['cu', "    _vendDecFaSet(0);\n", "", 'D3', 'un entonnage qui déclare la fermentation finie'],
-  ['cu', "    debourbage:existing?(existing.debourbage||undefined):undefined};", "};", 'D4', 'le débourbage perdu par l’objet rebâti'],
+  ['cu', "    debourbage:existing?(existing.debourbage||undefined):undefined,", "", 'D4', 'le débourbage perdu par l’objet rebâti'],   // PRATIQUES-3 (§626) : saignee_de suit désormais
   ['pr', "  if(g&&_g!=null) g.value=_g;", "", 'D8', 'le pressurage tapé perdu au choix d’une couleur'],
   ['tu', "  if (String(window.__MV_TUTO || '') === 'debourber' && typeof window.applyFbData === 'function')", "  if (false && typeof window.applyFbData === 'function')", 'F2', 'la cuve du tuto jamais chargée']
 ];

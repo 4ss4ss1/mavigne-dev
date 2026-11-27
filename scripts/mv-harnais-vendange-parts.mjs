@@ -66,6 +66,7 @@ if (manquants.length){
    config du Cuvier. Elles sont pilotées par le harnais. */
 let CLIENTS = [], CFG = { poids_caisse_kg: 25 };
 const PRELUDE = 'function _vendClient(n){ return CLIENTS.find(function(c){return c.nom===n;})||null; }\n'
+              + 'function _saigRoseHl(){ return 0; }\n'   // PRATIQUES-3 (§626) : bouchons — la cuve de rosé de saignée se joue dans mv-harnais-pratiques3
               + 'function _vendCfg(){ return CFG; }\n';
 let code = PRELUDE + NOMS.map(corps).join('\n') + '\nreturn {' + NOMS.join(',') + '};';
 if (CONTRE){

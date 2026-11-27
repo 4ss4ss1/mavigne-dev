@@ -7,6 +7,14 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.46', d: '2026-11-27', items: [   // PRATIQUES-3 (§626) : la saignée crée la cuve de rosé, l'enzymage de La Réserve, le soutirage dans « À faire »
+    { niv: 1, pour: ['admin', 'cave'], emoji: 'cuve', titre: 'Un rosé de saignée',
+      desc: "Une saignée sur une cuve de rouge peut créer la cuve de rosé\u00a0: «\u00a0Opération\u00a0» › «\u00a0Saignée\u00a0», le volume, puis «\u00a0Créer la cuve de rosé\u00a0». La cuve naît avec ce jus, les parcelles de la cuve saignée et son parcours de rosé\u00a0; son vin reste dans leur rendement. Un tuto le montre." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'eprouvette', titre: 'L’enzymage pris dans La Réserve',
+      desc: "Au débourbage, l’enzymage se choisit parmi vos produits œnologiques de La Réserve, avec sa dose\u00a0: la quantité se calcule sur le jus, et le stock la déduit." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'chrono', titre: 'Le soutirage dans «\u00a0À faire\u00a0»',
+      desc: "Une cuve qui débourbe arrive dans «\u00a0À faire\u00a0» à l’heure de votre repère\u00a0; «\u00a0Soutirer\u00a0» ouvre la feuille du jus clair. Pour une cuvée qui sera la base d’un effervescent, un rosé d’assemblage se confirme au lieu d’être refusé, après avoir vérifié le cahier des charges." },
+  ] },
   { v: '11.45', d: '2026-11-27', items: [   // COULEUR-1 (§625) : la couleur de la cuvée au Chai, les mélanges qui ne se font pas
     { niv: 1, pour: ['admin', 'cave'], emoji: 'verre', titre: 'La couleur de vos cuvées, au Chai',
       desc: "Une cuvée garde la couleur de sa cuve en quittant le Cuvier\u00a0; une cuvée créée au Chai la reçoit à «\u00a0Nouvelle cuvée\u00a0» (facultatif). Sa fiche la dit, et sa carte aussi quand le domaine fait plusieurs couleurs. Compléter un fût ou fusionner des cuves refuse un rouge versé dans un blanc et du blanc dans un rosé\u00a0: un rosé ne se fait pas en mélangeant un rouge et un blanc. Du blanc dans un rouge se confirme, après avoir vérifié votre cahier des charges." },
