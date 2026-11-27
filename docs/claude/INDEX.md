@@ -674,3 +674,4 @@
 | 618 | 618. ★★ MOTS-18 — PHYTO › FERTILISATION, LA CAVE, LA FICHE D’UNE PERSONNE ALLÉGÉES ; LA FEUILLE PURGÉE DES … | `docs/claude/chantiers-580-629.md` |
 | 619 | 619. ★★ RENF-3 — PILOTAGE › DÉCIDER › RENFORT : VOTRE PLAN, LIGNE PAR LIGNE ; LE TRACTEUR EN LIGNE ; LE GRA… | `docs/claude/chantiers-580-629.md` |
 | 620 | 620. ★★ RENF-4 — « CRÉER LE CONTRAT » DEPUIS UNE LIGNE DU RENFORT ; LA LIGNE « SOUS CONTRAT » (27/11 — APP … | `docs/claude/chantiers-580-629.md` |
+| 621 | 621. ★★ CONTENANT-1 — « NOUVELLE CUVÉE » : DES FÛTS OU UNE CUVE (27/11 — APP 11.42, SW 12.33 — `src/cave.js… | `docs/claude/chantiers-580-629.md` |

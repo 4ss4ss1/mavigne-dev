@@ -1,0 +1,40 @@
+{
+  "lot": "CONTENANT-1",
+  "section": "§621",
+  "base": "222a823f7e5b6fb1e67a1455a55feb83a1988027",
+  "inclut": [],
+  "date": "2026-11-27",
+  "tutos": {
+    "ok": true,
+    "empreinte": "ccf124cc146614c6db8ef108be63aa1bfd1887c8a3843d88af4297d128bcc9ca",
+    "date": "2026-11-27T09:35:36.430Z",
+    "joues": {
+      "téléphone": 1,
+      "ordinateur": 1,
+      "côte à côte": 0
+    },
+    "concernes": [
+      "cuvee-cuve"
+    ],
+    "cote": false
+  },
+  "fichiers": {
+    "CLAUDE.md": "f21bd09c6026b46e9cb5cb5b5dae758bb3cb381012a1dccf141eaeee05fc9802",
+    "docs/claude/INDEX.md": "4cb02ae6e8650661deb67d07848ae3b55c9f54c5e547b761eb3b21dfccc84791",
+    "docs/claude/chantiers-580-629.md": "b6641e637d5891ef4997044bea66ea0b31a1545aea2587dba7c3198dd6fa6470",
+    "docs/claude/journal.md": "3a642969ad8f1003b9046681cf276b834b5c1e6ed62579ed19677d082d1d8d21",
+    "guide/08-cave.html": "07e2cac0c22b58e011ea8b067ed5eabcf1cf5b2b0ffe278a8e2f948da96d3c45",
+    "index.html": "f50cb2c45820944f1871b53c197a3baf2099fde50ea134d71bb61575fd73b300",
+    "public/guide.html": "aa3c7d934768487497ae10c0557e479a85e2bf90d99471d6dc9c12ae04751b2d",
+    "public/sw.js": "430a6f3433d8b6ffdad835ca993732e61894db12b847827277b38d2f1c2e897c",
+    "scripts/harnais-claude-md.mjs": "880d9ff95b7047fcd622a970729a1e178d24f87a5eb43bb17be9f75253d9e735",
+    "scripts/mv-harnais-liste.mjs": "aa47cfde178de6db5515e4a7ad1158253050c9c93e383961ef1bbef2f1604b8d",
+    "scripts/tutos-couverture.json": "59147430af8a36e050a48e913266f44ebb1cb01db756dbc1fc9dc8c9c6e703b2",
+    "scripts/typo-baseline.json": "6eea83569368d23e0d536713f3423a0000b95b5f083626da269e730cdc898412",
+    "src/cave.js": "bf7915024b5bee8d28d977de9d2adceaf69237c13f688975ef5d9527c5f74648",
+    "src/tutos.js": "aad15c2c95cfa39f307ed7f86f45de41983a9b1e4cde2c72f92864d725a80902",
+    "src/utils.js": "c0fb366c86bb5a2b91c19f36b244ceb4500c495c16e9428ee7e424ba44a53494",
+    "src/whats-new.js": "db9dcbc4b2c65490cf75b9c77a2a3d2c20c5656597f0461f6bc1abef383807e8",
+    "scripts/mv-harnais-contenant1.mjs": "920f11bd07b7b00dd910558a7d91902d01c3f306e98329e7217969211927649c"
+  }
+}

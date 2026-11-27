@@ -967,6 +967,70 @@ var TU_TUTOS = [
       { type: 'regarder', cible: '[data-tuto="mat.ordre"]',
         txt: function () { return 'La mesure prend sa place dans l’ordre de maturité, face à la fourchette visée. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
     ] },
+  // ★ CONTENANT-1 (§621) : créer au Chai une cuvée logée en cuve. Le parc du domaine fictif est vide : la cuve se déclare
+  //   sur place (« Une autre cuve » s'ouvre d'elle-même). Le choix d'une cuve libre (_cuvCuvePick) n'y apparaît donc pas.
+  { id: 'cuvee-cuve', titre: 'Comment faire pour créer une cuvée en cuve\u00a0?', fin: 'créer une cuvée en cuve',
+    module: 'Cave', pages: ['cave'], pour: 'admin', duree: '1 min', depart: 'home',
+    couvre: ['openOvCavee', '_cuvContSet', '_cuvNvSaisie', '_cuvNvMat', '_cuvCuveVol', 'saveCuvee'],
+    retenir: ['Cave › Le Chai › « Nouvelle cuvée ».',
+              '« Où est le vin ? » : en fûts, ou en cuve.',
+              'Une cuve pas encore au parc se déclare sur place ; elle y reste.',
+              'Inox et béton ne respirent pas : pas de jauge d’ouillage, c’est voulu.'],
+    avant: function (memo) { memo.n0 = ((window.CAVE_ELEVAGE || {}).cuvees || []).length; },
+    etapes: [
+      { type: 'aller', page: 'cave', pourquoi: 'Les vins en élevage vivent dans la Cave, au Chai.' },
+      { type: 'toucher', chemin: true, cible: '[data-tuto="cave.chai"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="cave.chai"]') || 'Le Chai') + ' ».'; },
+        fait: function () { var b = _q('[data-tuto="cave.chai"]'); return !!(b && b.classList.contains('active')) && !!_q('[data-tuto="chai.nouvelle"]'); },
+        ok: 'Voici le Chai : les cuvées en élevage.' },
+      { type: 'toucher', cible: '[data-tuto="chai.nouvelle"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="chai.nouvelle"]') || '+ Nouvelle cuvée') + ' ».'; },
+        fait: function () { return _ouvert('ovCuveeMgmt') && !!_q('[data-tuto="cuv.encuve"]'); },
+        ok: 'La fiche d’une nouvelle cuvée s’ouvre.' },
+      { type: 'taper', cible: '[data-tuto="cuv.nom"]', exemple: 'Bourgogne blanc',
+        txt: function () { return 'Tapez le nom de la cuvée, par exemple « Bourgogne blanc ».'; },
+        txtReel: 'le nom de votre cuvée.',
+        valide: function (x) { return String(x || '').trim().length >= 2; },
+        ok: function () { return 'Le millésime se propose seul : l’année en cours.'; } },
+      { type: 'toucher', cible: '[data-tuto="cuv.encuve"]',
+        txt: function () { return 'Ce vin est en cuve inox. {T} « En cuve ».'; },
+        fait: function () { var b = _q('[data-tuto="cuv.encuve"]'); return !!(b && b.classList.contains('on')) && !!_q('[data-tuto="cuv.nvnom"]'); },
+        ok: 'Aucune cuve n’est libre au parc : sa déclaration s’ouvre ici.' },
+      { type: 'taper', cible: '[data-tuto="cuv.nvnom"]', exemple: 'Cuve inox 4',
+        txt: function () { return 'Tapez le nom de la cuve, celui écrit dessus — par exemple « Cuve inox 4 ».'; },
+        txtReel: 'le nom de la cuve.',
+        valide: function (x) { return String(x || '').trim().length >= 1; },
+        ok: function () { return 'Elle rejoindra le parc à cuves à l’enregistrement.'; } },
+      { type: 'taper', cible: '[data-tuto="cuv.nvl"]', exemple: '2400',
+        txt: function () { return 'Tapez sa contenance en litres, par exemple 2400.'; },
+        txtReel: 'la contenance de la cuve, en litres.',
+        valide: function (x) { var n = _num(x); return n >= 100 && n <= 100000; },
+        ok: function (x) { return _nb(_num(x)) + ' L : le volume logé se propose à 92 % — on remplit rarement à ras.'; } },
+      { type: 'regarder', cible: '[data-tuto="cuv.mat"]',
+        txt: function () { return 'La matière : inox par défaut. L’inox ne respire pas : la cuvée n’aura pas de jauge d’ouillage, et c’est voulu.'; } },
+      // Le volume se PROPOSE dès la contenance tapée (92 %) : il est valide avant qu'on y touche. Sans `reel`, le miroir le
+      //   voyait fait deux étapes trop tôt (saut d'étape) ; il ne compte que s'il diffère de la proposition. Facultatif : garder
+      //   la proposition, c'est « Passer ».
+      { type: 'taper', facultatif: true, cible: '[data-tuto="cuv.vol"]', exemple: '21.5',
+        reel: function () {
+          var c = _q('[data-tuto="cuv.vol"]'), l = _q('[data-tuto="cuv.nvl"]'), v = c ? _num(c.value) : NaN, L0 = l ? _num(l.value) : NaN;
+          var p = isFinite(L0) ? Math.round(L0 * 0.92 / 10) * 10 / 100 : NaN;
+          return isFinite(v) && v > 0 && v <= 1000 && !(isFinite(p) && Math.abs(v - p) < 0.05);
+        },
+        txt: function () { return 'Corrigez le volume logé si besoin, par exemple 21,5 hL.'; },
+        txtReel: 'le volume réellement dans la cuve, en hL.',
+        valide: function (x) { var n = _num(x); return n > 0 && n <= 1000; },
+        ok: function () { return 'L’aperçu dit le remplissage, le ciel et les bouteilles.'; } },
+      { type: 'toucher', cible: '[data-tuto="cuv.ok"]',
+        txt: function () { return '{T} « ' + (L('[data-tuto="cuv.ok"]') || 'Enregistrer') + ' ».'; },
+        fait: function (memo) {
+          var C = ((window.CAVE_ELEVAGE || {}).cuvees || []), c = C[C.length - 1];
+          return !_ouvert('ovCuveeMgmt') && C.length > (memo.n0 || 0) && !!(c && Array.isArray(c.cuves) && c.cuves.length);
+        },
+        ok: 'La cuvée est au Chai, logée dans sa cuve.' },
+      { type: 'regarder', cible: '.mvc-cuv[data-cuv]',
+        txt: function () { return 'Sa carte dit sa cuve, sans jauge d’ouillage. Sur votre domaine, rien n’a bougé : c’était un entraînement.'; } }
+    ] },
   // ★ PHENO-1C (§508) : noter le stade d'une parcelle (administrateur) — le chemin de la fiche, qui marche en toute saison.
   { id: 'stade', titre: 'Comment faire pour noter le stade d’une parcelle\u00a0?', fin: 'noter le stade d’une parcelle',
     module: 'Vigne', pages: ['parcelles'], pour: 'admin', duree: '1 min', depart: 'parcelles',   // au téléphone, Parcelles n'est ni dans le dock ni dans « Plus » (un onglet de la Vigne) : le tuto y démarre, comme celui du Journal

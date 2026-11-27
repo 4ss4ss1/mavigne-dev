@@ -1,5 +1,5 @@
 {
-  "plafond": 791,
+  "plafond": 790,
   "exempts": {
     "_rfcGeste": "RENF-4 (§620) : la feuille « Créer le contrat » (Pilotage › Décider › Renfort, une ligne) — ses boutons créent des comptes et des fiches dans l’équipe (createAuthAccount) : rien à jouer sur le domaine d’entraînement sans écrire dans l’équipe ; le tuto se fera avec une équipe d’entraînement qui l’accepte (mv-harnais-renf4 joue la feuille)",
     "_rfcSaisie": "RENF-4 (§620) : la saisie des prénoms et des adresses de la même feuille — même raison que _rfcGeste",

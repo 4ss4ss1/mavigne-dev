@@ -7,6 +7,10 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.42', d: '2026-11-27', items: [   // CONTENANT-1 (§621) : « Nouvelle cuvée » — en fûts ou en cuve, une cuve déclarée sur place
+    { niv: 0, pour: ['admin'], emoji: 'cuve', titre: 'Nouvelle cuvée\u00a0: en fûts ou en cuve',
+      desc: "Une cuvée élevée en cuve (inox, béton, foudre) ne pouvait pas être créée au Chai\u00a0: la fiche demandait au moins un tonneau. «\u00a0Nouvelle cuvée\u00a0» demande maintenant où est le vin\u00a0: en fûts, comme avant, ou en cuve — une cuve libre du parc, puis le volume logé. Une cuve pas encore déclarée se déclare sur place, et rejoint le parc à cuves." },
+  ] },
   { v: '11.41', d: '2026-11-27', items: [   // RENF-4 (§620) : « Créer le contrat » depuis une ligne du Renfort
     { niv: 1, pour: ['admin'], emoji: 'document', titre: 'Renfort\u00a0: créer le contrat depuis la ligne',
       desc: "Dans le réglage d\u2019une ligne de saisonniers, «\u00a0Créer le contrat\u00a0» les fait entrer dans l\u2019équipe\u00a0: au choix, une fiche par personne (son prénom, son compte, son mot de passe affiché une fois) ou une équipe collective, sans compte. Le contrat et ses dates sont ceux de la ligne. La ligne passe «\u00a0sous contrat\u00a0»\u00a0: le planning les compte, elle ne les compte plus en renfort." },

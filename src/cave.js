@@ -405,6 +405,208 @@ function updateCuvTonneau(i, field, val) {
   _renderCuvTonneaux();
 }
 
+/* ★★ CONTENANT-1 (§621) — « NOUVELLE CUVÉE » : DES FÛTS OU UNE CUVE.
+   Remonté du terrain le 18/11 : un blanc élevé en cuve inox, collé la veille, ne pouvait pas entrer au Chai avant
+   la mise — la fiche exigeait « au moins un tonneau ». Seul le décuvage du Cuvier proposait une cuve.
+   ⚠️ La cuve s'écrit dans cuvee.cuves[] ({ref, litres}), JAMAIS dans tonneaux[] (« LE PARC A CUVES », en tête de
+      fichier) — même écriture que _caveAffSave.
+   ⚠️ Une cuve absente du parc se déclare ICI, sur place : sinon le geste du jour demandait un détour par la roue
+      crantée. Elle part au parc (CONFIG.cave.cuves), même forme que _cavePkSave, et seulement à l'enregistrement.
+   ⚠️ La frappe MUTE l'état sans re-rendre (même piège que _cavePkMatSet : re-rendre efface le curseur). On ne
+      re-rend qu'au choix d'une cuve, d'une matière ou du contenant.
+   Modifier une cuvée : le choix n'apparaît pas — ses cuves se lisent ici et se changent dans sa fiche (Contenants). */
+var _cuvCont='futs';      // 'futs' | 'cuve' — seulement pour une cuvée NOUVELLE
+var _cuvContEdit=null;    // id de la cuvée modifiée, null = nouvelle
+var _cuvCuveRef=null;     // id d'une cuve libre du parc · '' = une cuve déclarée ici · null = rien de choisi
+var _cuvCuveL=0;          // litres logés
+var _cuvCuveVolMan=false; // le volume a été tapé : on ne le recalcule plus
+var _cuvNeuve={nom:'', litres:0, matiere:'inox'};
+
+function _cuvContReset(cuvId){
+  _cuvContEdit=cuvId||null; _cuvCont='futs'; _cuvCuveRef=null; _cuvCuveL=0; _cuvCuveVolMan=false;
+  _cuvNeuve={nom:'', litres:0, matiere:'inox'};
+  _cuvContRender();
+}
+function _cuvContEditCuv(){
+  if(!_cuvContEdit) return null;
+  return ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).find(function(c){ return c&&c.id===_cuvContEdit; })||null;
+}
+// La contenance et la matière de la cuve choisie — du parc, ou celle qu'on déclare.
+function _cuvCuveCible(){
+  if(_cuvCuveRef===null) return null;
+  if(_cuvCuveRef==='') return {nom:_cuvNeuve.nom||'la cuve', litres:_cuvNeuve.litres||0, matiere:_cuvNeuve.matiere};
+  var p=_caveCuve(_cuvCuveRef);
+  return p?{nom:p.nom||'Cuve', litres:parseFloat(p.litres)||0, matiere:_caveMatKey(p.matiere)}:null;
+}
+function _cuvContRender(){
+  var hd=document.getElementById('cuv-cont-body'), fw=document.getElementById('cuv-futs-wrap'),
+      cb=document.getElementById('cuv-cuve-body');
+  if(!hd) return;
+  if(typeof _caveV2InjectCss==='function') _caveV2InjectCss();
+  var ed=_cuvContEditCuv();
+  if(_cuvContEdit){
+    // Une cuvée existante : ses fûts restent modifiables ici, ses cuves se lisent (la fiche les change).
+    var cs=(ed&&Array.isArray(ed.cuves))?ed.cuves:[];
+    var h='';
+    if(cs.length){
+      h+='<div class="fl" style="margin-top:14px">Cuve</div>';   // .fl:first-child perd sa marge : la remettre
+      cs.forEach(function(x){
+        var p=_caveCuve(x&&x.ref), L=parseFloat(x&&x.litres)||0;
+        h+='<div class="mvc-pk"><span class="mvc-pk-ic '+(p?_caveMatKey(p.matiere):'inox')+'">'+_mvIcon('cuve',18)+'</span>'
+          +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p?(p.nom||'Cuve'):'Cuve retirée du parc')+'</span>'
+          +'<span class="mvc-pk-m">'+_escHtml(p?_caveMat(p.matiere).lbl:'contenant inconnu')+'</span></span>'
+          +'<span class="mvc-pk-r"><span class="mvc-pk-cap">'+_mvF1(L/100)+'<span class="u">hL</span></span></span></div>';
+      });
+      h+='<div class="mvc-pk-hint" style="display:block;margin:6px 0 14px;font-size:var(--pt-txt,13px);color:var(--texte-doux)">Pour changer de cuve\u00a0: la fiche de la cuvée, rubrique Contenants.</div>';
+    }
+    hd.innerHTML=h;
+    if(fw) fw.style.display='';
+    if(cb) cb.innerHTML='';
+    return;
+  }
+  var seg=function(k,lbl,sm){
+    return '<button type="button" data-cont="'+k+'"'+(k==='cuve'?' data-tuto="cuv.encuve"':'')+(_cuvCont===k?' class="on" aria-pressed="true"':' aria-pressed="false"')
+      +' onclick="_cuvContSet(\''+_escAttr(k)+'\')">'+lbl+'<span class="sm">'+sm+'</span></button>';
+  };
+  hd.innerHTML='<div class="fl" style="margin-top:14px">Où est le vin\u00a0?</div>'
+    +'<div class="mvc-pk-seg" id="cuv-cont-seg" style="margin-bottom:14px">'
+    +seg('futs','En fûts','barriques, demi-muids')+seg('cuve','En cuve','inox, béton, foudre')+'</div>';
+  if(fw) fw.style.display=(_cuvCont==='futs')?'':'none';
+  if(cb){
+    if(_cuvCont==='cuve'){
+      // Aucune cuve libre : on déclare directement — un choix à une seule option n'est pas un choix.
+      if(_cuvCuveRef===null && !_cuvCuvesLibres().length) _cuvCuveRef='';
+      cb.innerHTML=_cuvCuveHtml();
+      _cuvCuvePrev();
+    } else cb.innerHTML='';
+  }
+}
+function _cuvCuvesLibres(){ return _caveParc().filter(function(p){ return !_caveCuveOcc(p.id); }); }
+function _cuvCuveNoteHtml(m){
+  return _caveMat(m).ouille
+    ? '<div class="mvc-pk-note">Le bois respire\u00a0: la cuvée <b>garde son suivi d’ouillage</b>, comme en barrique.</div>'
+    : '<div class="mvc-pk-note froid">'+_escHtml(_caveMat(m).lbl)+' ne respire pas\u00a0: la cuvée n’aura <b>pas de jauge d’ouillage</b>, '
+      +'et n’entrera pas dans les alertes d’ouillage du Chai. C’est voulu.</div>';
+}
+function _cuvCuveHtml(){
+  var parc=_caveParc(), libres=_cuvCuvesLibres(), h='';
+  if(libres.length){
+    h+='<div class="fl" style="margin-top:0">Quelle cuve</div>'
+      +'<div class="mvc-pk-hint" style="display:block;margin:-4px 0 8px;font-size:var(--pt-txt,13px);color:var(--texte-doux)">Seules les cuves libres apparaissent.</div>';
+    libres.forEach(function(p){
+      var sel=(_cuvCuveRef===p.id), m=_caveMat(p.matiere);
+      h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" aria-pressed="'+(sel?'true':'false')+'" onclick="_cuvCuvePick(\''+_escAttr(p.id)+'\')">'
+        +'<span class="mvc-aff-rad"></span>'
+        +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
+        +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
+        +'<span class="mvc-pk-m">'+_escHtml(m.lbl)+(m.ouille?' · suit l’ouillage':'')+'</span></span>'
+        +'<span class="mvc-pk-r"><span class="mvc-pk-cap">'+_mvF1((parseFloat(p.litres)||0)/100)+'<span class="u">hL</span></span></span></button>';
+    });
+  } else {
+    h+='<div class="mvc-pk-vide" style="margin-bottom:10px">'
+      +(parc.length?'Toutes les cuves du parc sont occupées.':'Aucune cuve déclarée au parc.')
+      +'<br>Déclarez-la ici\u00a0: elle rejoindra le parc à cuves.</div>';
+  }
+  var nv=(_cuvCuveRef==='');
+  if(libres.length)
+    h+='<button type="button" class="mvc-pk mvc-aff-c'+(nv?' sel':'')+'" aria-pressed="'+(nv?'true':'false')+'" onclick="_cuvCuvePick(\'\')">'
+      +'<span class="mvc-aff-rad"></span><span class="mvc-pk-ic inox">'+_mvIcon('cuve',18)+'</span>'
+      +'<span class="mvc-pk-b"><span class="mvc-pk-n">Une autre cuve</span><span class="mvc-pk-m">pas encore déclarée au parc</span></span></button>';
+  if(nv){
+    h+='<label class="mvc-pk-lbl" for="cuv-nv-nom">Nom de la cuve</label>'
+      +'<input id="cuv-nv-nom" data-tuto="cuv.nvnom" class="mvc-pk-in" type="text" placeholder="ex. Cuve inox 4" value="'+_escHtml(_cuvNeuve.nom||'')+'" oninput="_cuvNvSaisie()">'
+      +'<label class="mvc-pk-lbl" for="cuv-nv-l">Contenance <span class="mvc-pk-hint">(en litres)</span></label>'
+      +'<input id="cuv-nv-l" data-tuto="cuv.nvl" class="mvc-pk-in" type="number" inputmode="numeric" placeholder="ex. 2400" value="'+(_cuvNeuve.litres?String(_cuvNeuve.litres):'')+'" oninput="_cuvNvSaisie()">'
+      +'<label class="mvc-pk-lbl">Matière</label><div class="mvc-pk-seg" id="cuv-nv-seg" data-tuto="cuv.mat">';
+    MV_CUVE_MATS.forEach(function(k){
+      var m=MV_CUVE_MAT[k];
+      h+='<button type="button" data-m="'+k+'"'+(k===_cuvNeuve.matiere?' class="on" aria-pressed="true"':' aria-pressed="false"')+' onclick="_cuvNvMat(\''+_escAttr(k)+'\')">'
+        +_escHtml(m.lbl)+'<span class="sm">'+(m.ouille?'ouillage suivi':'pas d’ouillage')+'</span></button>';
+    });
+    h+='</div>';
+  }
+  var cib=_cuvCuveCible();
+  if(cib){
+    h+='<label class="mvc-pk-lbl" for="cuv-cv-v">Volume logé <span class="mvc-pk-hint">(en hL — on remplit rarement à ras)</span></label>'
+      +'<input id="cuv-cv-v" data-tuto="cuv.vol" class="mvc-pk-in" type="number" step="0.1" inputmode="decimal" placeholder="ex. 22" '
+      +'value="'+(_cuvCuveL>0?_mvF1(_cuvCuveL/100).replace(',','.'):'')+'" oninput="_cuvCuveVol(this.value)">'
+      +'<div class="mvc-pk-prev" id="cuv-cv-prev"></div>'
+      +'<div id="cuv-cv-note">'+_cuvCuveNoteHtml(cib.matiere)+'</div>';
+  }
+  return h+'<div style="height:14px"></div>';
+}
+function _cuvContSet(k){
+  _cuvCont=(k==='cuve')?'cuve':'futs';
+  _cuvContRender();
+}
+function _cuvCuvePick(ref){
+  if(ref){ var p=_caveCuve(ref); if(!p) return; }
+  _cuvCuveRef=ref||'';
+  // 92 % : le ciel d'une cuve, comme « Ajouter une cuve » (_caveAffSel) ; arrondi à 10 L.
+  if(!_cuvCuveVolMan){
+    var c=_cuvCuveCible(); _cuvCuveL=(c&&c.litres>0)?Math.round(c.litres*0.92/10)*10:0;
+  }
+  var cb=document.getElementById('cuv-cuve-body');
+  if(cb){ cb.innerHTML=_cuvCuveHtml(); _cuvCuvePrev(); }
+}
+function _cuvNvSaisie(){
+  _cuvNeuve.nom=((document.getElementById('cuv-nv-nom')||{}).value||'').trim();
+  var L=parseFloat(String((document.getElementById('cuv-nv-l')||{}).value||'').replace(',','.'));
+  _cuvNeuve.litres=(isFinite(L)&&L>0)?L:0;
+  if(!_cuvCuveVolMan){
+    _cuvCuveL=_cuvNeuve.litres>0?Math.round(_cuvNeuve.litres*0.92/10)*10:0;
+    var v=document.getElementById('cuv-cv-v'); if(v) v.value=_cuvCuveL>0?_mvF1(_cuvCuveL/100).replace(',','.'):'';
+  }
+  _cuvCuvePrev();
+}
+function _cuvNvMat(m){
+  _cuvNeuve.matiere=_caveMatKey(m);
+  var seg=document.getElementById('cuv-nv-seg');
+  if(seg) Array.prototype.forEach.call(seg.querySelectorAll('button'),function(b){
+    var on=b.getAttribute('data-m')===_cuvNeuve.matiere; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false');
+  });
+  var n=document.getElementById('cuv-cv-note'); if(n) n.innerHTML=_cuvCuveNoteHtml(_cuvNeuve.matiere);
+}
+function _cuvCuveVol(val){
+  var v=parseFloat(String(val==null?'':val).replace(',','.'))*100;
+  _cuvCuveL=(isFinite(v)&&v>0)?Math.round(v):0;
+  _cuvCuveVolMan=true;
+  _cuvCuvePrev();
+}
+function _cuvCuvePrev(){
+  var e=document.getElementById('cuv-cv-prev'); if(!e) return;
+  var c=_cuvCuveCible(), cap=c?c.litres:0;
+  if(!(_cuvCuveL>0)){ e.textContent='Le volume réellement dans la cuve, pas sa contenance.'; return; }
+  if(!(cap>0)){ e.textContent='soit '+_mvF1(_cuvCuveL/100)+' hL · environ '+_mvBtl(_cuvCuveL/100)+' bouteilles'; return; }
+  e.innerHTML=(_cuvCuveL>cap)
+    ? '<span style="color:var(--orange,#B85A1A)">Au-delà de la contenance de la cuve ('+_mvF1(cap/100)+' hL).</span>'
+    : 'Remplie à '+Math.round(_cuvCuveL*100/cap)+'\u00a0% · ciel de '+_mvF1((cap-_cuvCuveL)/100)+' hL · environ '+_mvBtl(_cuvCuveL/100)+' bouteilles';
+}
+/* Ce que l'enregistrement écrira, VÉRIFIÉ, ou null (le toast a déjà dit pourquoi). Rien n'est écrit ici. */
+function _cuvCuvePret(){
+  if(_cuvCuveRef===null){ showToast('Choisissez la cuve','#B85A1A'); return null; }
+  var neuve=null, ref=_cuvCuveRef, cap=0, nom='';
+  if(ref===''){
+    if(!(typeof isAdmin==='function'&&isAdmin())){ showToast('Déclarer une cuve est réservé à l’administrateur','#C0392B'); return null; }
+    nom=(_cuvNeuve.nom||'').trim();
+    if(!nom){ showToast('Donnez un nom à la cuve','#B85A1A'); return null; }
+    if(!isFinite(_cuvNeuve.litres)||_cuvNeuve.litres<100||_cuvNeuve.litres>100000){ showToast('Contenance attendue entre 100 et 100\u00a0000 L','#B85A1A'); return null; }
+    var dbl=_caveParc().some(function(p){ return String(p.nom||'').trim().toLowerCase()===nom.toLowerCase(); });
+    if(dbl){ showToast('Une cuve «\u00a0'+nom+'\u00a0» existe déjà au parc','#B85A1A'); return null; }
+    cap=_cuvNeuve.litres;
+    neuve={id:'cvi_'+Date.now(), nom:nom, litres:_cuvNeuve.litres, matiere:_caveMatKey(_cuvNeuve.matiere)};
+  } else {
+    var p=_caveCuve(ref);
+    if(!p){ showToast('Cuve introuvable','#E07060'); return null; }
+    // ⚠️ Dernier filet, comme _caveAffSave : un autre poste a pu prendre la cuve depuis l'ouverture.
+    if(_caveCuveOcc(p.id)){ showToast((p.nom||'La cuve')+' vient d’être prise','#B85A1A'); _cuvCuveRef=null; _cuvContRender(); return null; }
+    cap=parseFloat(p.litres)||0; nom=p.nom||'la cuve';
+  }
+  if(!(_cuvCuveL>0)){ showToast('Indiquez le volume logé','#B85A1A'); return null; }
+  if(cap>0&&_cuvCuveL>cap){ showToast('Volume supérieur à la contenance','#B85A1A'); return null; }
+  return {ref:neuve?neuve.id:ref, neuve:neuve, litres:_cuvCuveL, nom:nom};
+}
+
 // \u2500\u2500 Multi-intervenants (v4.33) \u2500\u2500
 // R\u00e9tro-compatible : anciennes ops = operateur (texte), nouvelles = intervenants[].
 function _caveIntLabel(arr){
@@ -1366,7 +1568,7 @@ function renderCaveCuvees() {
   if(!cuvs.length) {
     el.innerHTML='<div class="cave-empty"><div class="cave-empty-ico">'+_mvIcon('seau',40)+'</div>'
       +'<div class="cave-empty-txt">Aucune cuv\u00e9e.</div>'
-      +((typeof isAdmin==='function'&&isAdmin())?'<button class="cave-empty-btn" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>':'')
+      +((typeof isAdmin==='function'&&isAdmin())?'<button class="cave-empty-btn" data-tuto="chai.nouvelle" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>':'')
       +'</div>';
     return;
   }
@@ -1393,7 +1595,7 @@ function renderCaveCuvees() {
   }
   sorted.filter(_caveDansFiltre).forEach(function(c){ html+=_caveCuvCardHtml(c,w); });
   if(typeof isAdmin==='function'&&isAdmin()){
-    html+='<button class="mvc-add" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>';
+    html+='<button class="mvc-add" data-tuto="chai.nouvelle" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>';
   }
   el.innerHTML=html;
   if(typeof _chaiFicheSync==='function')_chaiFicheSync(sorted.filter(_caveDansFiltre));   // CAVE-3 (§290)
@@ -1976,6 +2178,7 @@ function openOvCavee(cuvId) {
   _renderCuvTonneaux();
   el=document.getElementById('cuv-id'); if(el) el.value=cuvId||'';
   el=document.getElementById('cuv-del-btn'); if(el) el.style.display=cuv?'block':'none';
+  _cuvContReset(cuv?cuvId:null);   // ★ CONTENANT-1 (§621) — fûts ou cuve, pour une cuvée nouvelle
   var _ovCm=document.getElementById('ovCuveeMgmt');if(_ovCm)_ovCm.classList.add('open');
 }
 
@@ -1993,7 +2196,13 @@ function saveCuvee() {
   if(!nom){showToast('Saisissez un nom','#E07060');return;}
   // ★ FUT-CAP — une cuvee logee en cuve n'a pas de fut a declarer.
   var _exC=existId?CAVE_ELEVAGE.cuvees.find(function(c){return c.id===existId;}):null;
-  if(!nbTotal && !(_exC && (_exC.cuves||[]).length)){showToast('Indiquez au moins un tonneau','#E07060');return;}
+  /* ★ CONTENANT-1 (§621) — une cuvée NOUVELLE logée en cuve : la cuve est vérifiée ici, AVANT toute écriture. */
+  var _cvPret=null;
+  if(!existId && _cuvCont==='cuve'){
+    _cvPret=_cuvCuvePret(); if(!_cvPret) return;
+    tonneaux=[]; nbTotal=0;
+  }
+  if(!nbTotal && !_cvPret && !(_exC && (_exC.cuves||[]).length)){showToast('Indiquez au moins un tonneau','#E07060');return;}
   // ★ La declaration de la fiche est DATEE : c'est ce qui permet a une analyse
   //   posterieure de la corriger sans qu'on ait a revenir decocher le bouton.
   var _fmlAuj=_mvToday(), _rendus=0;
@@ -2053,13 +2262,17 @@ function saveCuvee() {
       else { delete _prevC.fml_sans; delete _prevC.fml_sans_date; }
     }
   } else {
+    // ★ CONTENANT-1 (§621) — la cuve déclarée sur place rejoint le parc d'abord : la cuvée la désigne par son id.
+    if(_cvPret && _cvPret.neuve) _caveParcSave(_caveParc().concat([_cvPret.neuve]));
     CAVE_ELEVAGE.cuvees.push({id:'cuv_'+Date.now(),nom:nom,millesime:millesime,
       tonneaux:tonneaux,statut:'elevage',fml_terminee:fmlTerminee,fml_terminee_date:fmlTerminee?_fmlAuj:null,
       last_ouillage:null,last_analyse:null});
+    if(_cvPret){ CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1].cuves=[{ref:_cvPret.ref, litres:_cvPret.litres}]; }
     if(fmlSans){ var _nc=CAVE_ELEVAGE.cuvees[CAVE_ELEVAGE.cuvees.length-1]; _nc.fml_sans=true; _nc.fml_sans_date=_fmlAuj; }   // ★ FML-1
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e')
+    +(_cvPret?(' \u00b7 '+_mvF1(_cvPret.litres/100)+' hL dans '+_cvPret.nom):'')   // ★ CONTENANT-1 (§621)
     +(_rendus?(' \u00b7 '+_rendus+' f\u00fbt'+(_rendus>1?'s':'')+' rendu'+(_rendus>1?'s':'')+' \u00e0 La R\u00e9serve'):''),'#C0845A');
   window.closeOv(null,'ovCuveeMgmt');
   renderCave();
@@ -3719,6 +3932,11 @@ window._caveLastAna         = _caveLastAna;
 window.addCuvTonneau        = addCuvTonneau;
 window.removeCuvTonneau     = removeCuvTonneau;
 window.updateCuvTonneau     = updateCuvTonneau;
+window._cuvContSet          = _cuvContSet;      // ★ CONTENANT-1 (§621)
+window._cuvCuvePick         = _cuvCuvePick;
+window._cuvNvSaisie         = _cuvNvSaisie;
+window._cuvNvMat            = _cuvNvMat;
+window._cuvCuveVol          = _cuvCuveVol;
 
 window.CAVE_VENDANGE        = CAVE_VENDANGE;
 window.renderCaveVendange   = renderCaveVendange;
@@ -4377,7 +4595,7 @@ function renderCaveBouteille(){
       var hl=_caveVolHl(c), auto=_mvBtl(hl);
       html+='<div class="mvb-card"><div class="mvb-badge">\u2019'+String(c.millesime||'').slice(-2)+'</div>'
         +'<div class="mvb-name">'+_escHtml(c.nom)+'</div>'
-        +'<div class="mvb-meta">Millésime '+(c.millesime||'?')+' · '+_caveNbTonneaux(c)+' fûts · '+_mvF1(hl)+' hL élevés</div>'
+        +'<div class="mvb-meta">Millésime '+(c.millesime||'?')+' · '+(_caveContenantsHtml(c)||'aucun contenant')+' · '+_mvF1(hl)+' hL élevés</div>'   /* CONTENANT-1 (§621) : « 0 fûts » pour une cuvée en cuve */
         +'<div class="mvb-line">théorique <b>'+auto+'</b> bouteilles</div>';
       if(w){
         if(_caveBtlConfirm===c.id){

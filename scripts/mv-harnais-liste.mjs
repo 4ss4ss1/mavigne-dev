@@ -880,6 +880,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-renf3.mjs --contre'],     //   en même temps), le tracteur en ligne, le plan enregistré par campagne et lu par L'équipe & le matériel
   ['node scripts/mv-harnais-renf4.mjs'],              // RENF-4 (§620) : « Créer le contrat » depuis une ligne — une fiche par personne (son compte, son contrat
   ['node scripts/mv-harnais-renf4.mjs --contre'],     //   au journal) ou une équipe collective ; la ligne « sous contrat » ne compte plus en renfort
+  ['node scripts/mv-harnais-contenant1.mjs'],          // CONTENANT-1 (§621) : « Nouvelle cuvée » en fûts OU en cuve — le contrôle d'avant l'écriture JOUÉ (cuve libre, prise,
+  ['node scripts/mv-harnais-contenant1.mjs --contre'], //   trop pleine, déclarée sur place par l'administrateur), la cuve dans cuves[] jamais dans tonneaux[], le parc avant la cuvée
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

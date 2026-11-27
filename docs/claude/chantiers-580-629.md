@@ -1986,3 +1986,41 @@ Le cliquet du contraste est regravé : une paire mesurée de moins, celle d’un
 - ⚠️ **Une écriture qui remplace le tableau perd les références qu’on tenait.** `_rfPlanEcrit` repose une copie normalisée de `S.l` : la ligne gardée par la feuille n’était plus dans le plan à son retour, et le retour en posait une seconde. On relit la ligne à son rang après l’écriture, et le retour la retrouve à ses dates.
 - ⚠️ **Un « sous contrat » qui compte encore en renfort compte deux fois.** Dès que la fiche existe, le planning la compte : la ligne ne compte plus que ce qui manque, et se relit à chaque rendu (une fiche retirée redemande du monde).
 - ⚠️ **Une question avant de créer des comptes.** Le « go » donnait le geste, pas sa forme : une fiche par personne et une équipe collective ne créent pas la même chose (des comptes, ou pas). Une question, trois choix, la réponse « les deux ».
+
+## 621. ★★ CONTENANT-1 — « NOUVELLE CUVÉE » : DES FÛTS OU UNE CUVE (27/11 — APP 11.42, SW 12.33 — `src/cave.js` · `index.html` · `src/utils.js` · `src/whats-new.js` · `guide/08-cave.html` · `public/sw.js` · `src/tutos.js` · `scripts/mv-harnais-contenant1.mjs` (neuf) · `scripts/tutos-couverture.json` · `scripts/typo-baseline.json` · `scripts/mv-harnais-liste.mjs`)
+
+**La demande.** Nico, 18/11 au matin : un blanc élevé en cuve inox, collé la veille, doit entrer au Chai avant les mises en masse et la mise — « ça ne me propose que des fûts ». Le lot a été livré le jour même (zip sur `9fd63cb`, « mots9 », alors §593, APP 11.21) **mais jamais posé** : le §593 est devenu DEBORD-1, et le 27/11 `cave.js` refusait toujours une cuvée sans tonneau (ligne 1996). Vu en préparant la maquette « Les pratiques de cave du domaine » ; Nico, 27/11 : « oui, si tu peux tout faire en même temps c’est mieux ». **Refait sur `222a823` (« renf4 »)**.
+
+### 621a. Mesuré avant
+
+- L’appli connaissait déjà les cuves : parc à cuves (`CONFIG.cave.cuves`, inox/béton/bois), « + Ajouter une cuve » dans la fiche d’une cuvée (`_caveAffOpen`), cuve au décuvage (`_vendDecPickHtml`).
+- **Mais `saveCuvee` refusait une cuvée NOUVELLE sans tonneau** (« Indiquez au moins un tonneau ») : la garde FUT-CAP (`_exC.cuves`) ne valait que pour une cuvée existante. Un vin qui n’est pas passé par le Cuvier (pressé ailleurs, entré au Chai à la main — le cas des blancs) n’avait aucun chemin vers une cuve, sauf à créer de faux fûts puis les retirer (ce qui touche le parc à fûts : à ne jamais conseiller).
+- Le parc de démo est vide : la déclaration sur place n’est pas un luxe, c’est le cas le plus probable chez un client.
+
+### 621b. Ce qui change
+
+- **« Où est le vin ? »** en tête des contenants de « Nouvelle cuvée » : **En fûts** (le bloc d’avant, inchangé, dans `#cuv-futs-wrap`) ou **En cuve** (`#cuv-cuve-body`) : les cuves **libres** du parc, puis le volume logé (92 % de la contenance proposés, arrondis à 10 L — la règle de `_caveAffSel`), l’aperçu (remplissage, ciel, bouteilles) et la note d’ouillage selon la matière.
+- **Une cuve pas encore au parc se déclare sur place** (« Une autre cuve », ouverte d’office quand aucune n’est libre) : nom, contenance, matière — même forme et mêmes bornes que `_cavePkSave` (100 à 100 000 L), nom en double refusé, **administrateur seul**. Elle rejoint le parc **à l’enregistrement**, avant la cuvée qui la désigne.
+- **`_cuvCuvePret`** vérifie tout AVANT la moindre écriture (dont la cuve prise entre-temps par un autre poste : le choix se vide et l’écran se redessine). La cuvée porte la cuve dans `cuves[]` (`{ref, litres}`), **jamais** dans `tonneaux[]` ; aucun fût n’est écrit.
+- **Aux Bouteilles**, « Prêt à mettre en bouteille » écrivait « 0 fûts » d’une cuvée en cuve (`_caveNbTonneaux`) : il dit ses contenants (`_caveContenantsHtml`, « Cuve inox 4 »).
+- **Un tuto neuf, « Comment faire pour créer une cuvée en cuve ? »** (`cuvee-cuve`, 11 étapes, administrateur). Étiquettes posées : `cave.chai`, `cuv.nom`, `cuv.ok` (index.html), `chai.nouvelle`, `cuv.encuve`, `cuv.nvnom`, `cuv.nvl`, `cuv.mat`, `cuv.vol` (cave.js).
+- **Modifier une cuvée ne change pas** : pas de choix ; ses cuves se lisent en tête, ses fûts restent modifiables, la phrase renvoie à la fiche (Contenants). Chaque ouverture repart à zéro (`_cuvContReset`).
+
+### 621c. Mesuré après
+
+- Le code du 18/11 s’est recollé **en trois voies sans conflit** sur `renf4` (`cave.js`, `tutos.js`, guide de la Cave) : aucun des 27 lots d’entre-temps n’avait touché la fenêtre « Nouvelle cuvée ». `index.html`, l’aide, « Quoi de neuf », le SW et la doc ont été reposés à la main aux numéros du jour.
+- `mv-harnais-contenant1` : 31 assertions (le contrôle d’avant l’écriture JOUÉ dans Node sur la vraie fonction : douze cas ; le tuto), 12 contre-épreuves. `mots9`, `renf3`, `renf4` restent verts.
+- **Joué à l’écran sur le build** (domaine de démo, téléphone 390 × 844 et ordinateur 1280 × 860, aucune erreur de page) : parc vide → la déclaration s’ouvre seule ; 2 400 L déclarés → 22,1 hL proposés ; 21,5 hL → « Remplie à 90 % · ciel de 2,5 hL · environ 2867 bouteilles » ; enregistré → 0 fût et `cuves:[{ref:'cvi_…', litres:2150}]`, le parc a sa cuve inox ; « Modifier » → la cuve en lecture ; nouvelle ouverture → « En fûts », rien de choisi.
+- **Tutos** : 790 gestes sans tuto, plafond abaissé de 791 à 790. `test:tutos --concernes` : téléphone, ordinateur, panneau et miroir verts (11/11).
+- **Barème typographique rouge** (`mv-harnais-typo`, « aucun module n’enfle de plus de 5 % ») : `src/tutos.js` 162 → 171 ko. Le tuto neuf pèse 5,4 ko ; la base en avait déjà pris 4 sans regraver. Question du découpage posée : le bon découpage serait la liste des tutos par module, hors de ce lot (aux restes). Seule la ligne de `tutos.js` est regravée dans `scripts/typo-baseline.json`, pas tout le barème.
+
+### 621d. Leçons
+
+- ⚠️ **Un zip livré n’est pas un zip posé.** Le résumé de la conversation disait le lot fait ; le dépôt disait le contraire. Avant de bâtir sur un lot ancien, le chercher **dans le dépôt** (`grep` de sa garde, de son harnais), pas dans la conversation.
+- Un lot rejoué garde son code et change tout ce qui porte un numéro : section, APP, SW, annonce, harnais, commentaires « (§N) ».
+
+### 621e. Restes, à leur lot
+
+- **Les pratiques de cave du domaine** (demande du 27/11) : maquette v1 validée (« c’est ok »), v2 en cours avec les **sécurités entre pratiques incompatibles** (question sans objet cachée, avertissement confirmable, blocage expliqué) — hors dépôt tant qu’elle n’est pas validée. Lots proposés : **PRATIQUES-1** (le réglage par couleur, le parcours des cuves qui en découle), **PRATIQUES-2** (pressurage d’arrivée, débourbage, entonnage), **COULEUR-1** (la couleur de la cuvée au Chai).
+- `src/tutos.js` grossit à chaque tuto (171 ko) : sortir la liste des tutos par module, le moteur restant seul.
+- Mesuré dans `cuvier.js` (27/11) : un seul cycle pour toutes les cuves (`_VEND_STEPS`), pas de débourbage, et une mesure de fermentation propose 2 remontages et 1 pigeage par défaut même sur un blanc (`_chap`).
