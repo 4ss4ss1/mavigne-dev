@@ -53,6 +53,7 @@ function jouer(S) {
     _vendRdtBase: () => ctx.CAVE_VENDANGE.config.rdt_base, _vendSetRdtBase: (b) => { appels.push('base:' + b); ctx.CAVE_VENDANGE.config.rdt_base = b; },
     _caveV2InjectCss() {}, _caveSeuilGlobal: () => 14, _caveMilsEnCave: () => ['2025', '2026'], _caveSeuilOu: (m) => (ctx.CAVE_ELEVAGE.config.ouillage_par_mil[m] || 14),
     _caveFutL: () => 228, _caveParcCardHtml: () => '<div class="MARQUE-PARC"></div>',
+    _pratRegLigne: () => '<div class="creg-l MARQUE-PRATIQUES"></div>',   // PRATIQUES-1 (§622) : bouchon — la ligne se joue dans mv-harnais-pratiques1
     openOv: (id) => appels.push('ouvre:' + id), closeOv: (e, id) => appels.push('ferme:' + id),
     openPrompt: (o) => { appels.push('prompt:' + o.titre + ':' + o.valeur); o.cb(ctx.REPONSE); },
   };

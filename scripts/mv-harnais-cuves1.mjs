@@ -62,6 +62,8 @@ function jouer(S) {
     _vendDetailHtml: (c) => '<div class="MARQUE-DETAIL">' + c.id + '</div>', _vendRepere: (c) => c.id.toUpperCase(), _caveCuve: () => ({ materiau: 'inox' }),
     _parcCoul: () => 'r', _vendStatLbl: (s) => ({ fa: 'FA', mpf: 'MPF', setup: 'Setup', termine: 'Terminé' })[s] || s, _vendCuvF1: (x) => String(x),
     _vendPeindreGraphes: () => appels.push('peindre'), _vendRefreshCockpit() {},
+    // PRATIQUES-1 (§622) : bouchons — le bandeau, la couleur et le parcours prévu se jouent dans mv-harnais-pratiques1.
+    _pratBandeauHtml: () => '', _vendCuveCoul: (c) => ctx._parcCoul((c.parcelles || [])[0]), _vendParcoursHtml: () => '', _matVin: (c) => c,
   };
   ctx.window = ctx;
   ctx._mvGraphOublier = () => {};

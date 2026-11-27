@@ -20,7 +20,8 @@
 //       au chargement, jamais réaffecté (Le Cuvier lirait l'ancien) ;
 //    D. chaque famille reste chez elle : pas de `_vend*` dans cave.js, pas de
 //       `_cave*` dans cuvier.js — Le Cuvier ne regagne pas le fichier qu'il a quitté ;
-//    E. chacun déclare son `const DEBUG`, cuvier.js n'importe que utils.js ;
+//    E. chacun déclare son `const DEBUG`, cuvier.js n'importe que utils.js — et, depuis PRATIQUES-1 (§622), son
+//       module des pratiques de cave, cuvier-pratiques.js, qui n'importe que utils.js lui aussi ;
 //    F. rien ne s'exécute au chargement hors déclarations et expositions.
 //
 //  Usage :  node scripts/mv-harnais-cuvier.mjs [--contre]
@@ -120,7 +121,11 @@ function controle(src) {
   /* E — en-tête */
   const dbg = (A) => A.decl.has('DEBUG') && A.decl.get('DEBUG').defs[0].parent && A.decl.get('DEBUG').defs[0].parent.kind === 'const';
   t('E1', 'cave.js et cuvier.js déclarent chacun const DEBUG', dbg(K) && dbg(C));
-  t('E2', 'cuvier.js n\u2019importe que ./utils.js', C.imports.length === 1 && C.imports[0] === './utils.js', C.imports.join(', '));
+  // ★ PRATIQUES-1 (§622) : les pratiques de cave sortent de cuvier.js dans cuvier-pratiques.js, qu'il importe. Rien d'autre.
+  t('E2', 'cuvier.js n\u2019importe que ./utils.js (et ./cuvier-pratiques.js)', C.imports[0] === './utils.js' && C.imports.every(i => i === './utils.js' || i === './cuvier-pratiques.js'), C.imports.join(', '));
+  let P = null;
+  try { P = src.prat ? analyser(src.prat) : null; } catch (e) { P = null; }
+  t('E3', 'cuvier-pratiques.js se lit et n\u2019importe que ./utils.js', !!P && P.imports.length === 1 && P.imports[0] === './utils.js', P ? P.imports.join(', ') : 'illisible');
 
   /* F — rien ne tourne au chargement */
   const actifs = (A) => A.ast.body.filter(n => {
@@ -131,13 +136,13 @@ function controle(src) {
     }
     return true;
   }).map(n => 'L' + n.loc.start.line);
-  const aK = actifs(K), aC = actifs(C);
+  const aK = actifs(K), aC = actifs(C), aP = P ? actifs(P).filter(l => !/^L\d+$/.test(l) || !P.ast.body.some(n => n.type === 'ExportNamedDeclaration' && 'L' + n.loc.start.line === l)) : [];
   t('F', 'aucun des deux n\u2019exécute de code au chargement (hors déclarations et window.X = …)',
-    !aK.length && !aC.length, 'cave.js ' + aK.join(' ') + ' · cuvier.js ' + aC.join(' '));
+    !aK.length && !aC.length && !aP.length, 'cave.js ' + aK.join(' ') + ' · cuvier.js ' + aC.join(' ') + ' · cuvier-pratiques.js ' + aP.join(' '));
   return res;
 }
 
-const SAIN = { cave: lire('src/cave.js'), cuvier: lire('src/cuvier.js'), app: lire('src/app.js') };
+const SAIN = { cave: lire('src/cave.js'), cuvier: lire('src/cuvier.js'), app: lire('src/app.js'), prat: lire('src/cuvier-pratiques.js') };
 const vert = (s) => '\x1b[32m' + s + '\x1b[0m', rouge = (s) => '\x1b[31m' + s + '\x1b[0m';
 
 if (!CONTRE) {
@@ -176,6 +181,13 @@ const DEFAUTS = [
     s => ({ ...s, cuvier: rempl(s.cuvier, "const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';", "var DEBUG_NON = 0;") })],
   ['du code tourne au chargement', 'F',
     s => ({ ...s, cuvier: s.cuvier + '\n_vendInjectCss();\n' })],
+  // ★ PRATIQUES-1 (§622)
+  ['cuvier.js importe un autre module que ses pratiques', 'E2',
+    s => ({ ...s, cuvier: "import { x } from './reglages.js';\n" + s.cuvier })],
+  ['les pratiques importent le Cuvier (une boucle)', 'E3',
+    s => ({ ...s, prat: "import { renderVendCuves } from './cuvier.js';\n" + s.prat })],
+  ['du code tourne au chargement des pratiques', 'F',
+    s => ({ ...s, prat: s.prat + '\n_pratRendre();\n' })],
 ];
 console.log('\n\x1b[1m── CUV-DEC — contre-épreuves (' + DEFAUTS.length + ' défauts, un à la fois)\x1b[0m\n');
 const base = controle(SAIN);

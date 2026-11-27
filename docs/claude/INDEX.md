@@ -675,3 +675,4 @@
 | 619 | 619. ★★ RENF-3 — PILOTAGE › DÉCIDER › RENFORT : VOTRE PLAN, LIGNE PAR LIGNE ; LE TRACTEUR EN LIGNE ; LE GRA… | `docs/claude/chantiers-580-629.md` |
 | 620 | 620. ★★ RENF-4 — « CRÉER LE CONTRAT » DEPUIS UNE LIGNE DU RENFORT ; LA LIGNE « SOUS CONTRAT » (27/11 — APP … | `docs/claude/chantiers-580-629.md` |
 | 621 | 621. ★★ CONTENANT-1 — « NOUVELLE CUVÉE » : DES FÛTS OU UNE CUVE (27/11 — APP 11.42, SW 12.33 — `src/cave.js… | `docs/claude/chantiers-580-629.md` |
+| 622 | 622. ★★★ PRATIQUES-1 — LES PRATIQUES DE CAVE DU DOMAINE ; LA COULEUR D’UNE CUVE VÉRIFIÉE ; PAS DE CHAPEAU S… | `docs/claude/chantiers-580-629.md` |

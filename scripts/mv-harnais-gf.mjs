@@ -204,7 +204,8 @@ function contre() {
     ['C8', 'la déclaration n’écrit plus la fin', 'cuvier.js', '  c.decuvage.fa_finie=true;\n', '', 'G29'],
     ['C9', 'la densité projette encore une cuve suivie au labo', 'cave.js', "var p=_vendMesGF(c).length?{etat:'labo'}:_mlProjFA(c,from);", 'var p=_mlProjFA(c,from);', 'G34'],
     ['C10', 'la ligne du Chai perd son span : chaque <b> refait sa colonne', 'cave.js', '\'<span class="mvc-fl-t"><b>Fermentation', "'<b>Fermentation", 'G36'],
-    ['C11', 'après le pressurage, 2 remontages reviennent par défaut', 'cuvier.js', '_vmRem=m?(m.remontages||0):(_chap?2:0);', '_vmRem=m?(m.remontages||0):2;', 'G22'],
+    // PRATIQUES-1 (§622) : le défaut proposé dépend aussi de la couleur et des gestes du domaine — l'ancre suit le code.
+    ['C11', 'après le pressurage, 2 remontages reviennent par défaut', 'cuvier.js', "_vmRem=m?(m.remontages||0):(_chap&&_rg&&_pratGeste('rem')?2:0);", '_vmRem=m?(m.remontages||0):2;', 'G22'],
     ['C12', 'le cahier perd sa colonne labo', 'cave.js', '<th class="n">Labo g/L</th>', '', 'G38'],
     ['C13', 'l’agenda réclame de nouveau une densité par jour', 'cave.js', '    var g=_vendGfAMesurer(c,from); if(g!==null) return g;', '', 'G35'],
     ['C14', '« 0,8 » écrit en texte se relit 0', 'cuvier.js', "var n=parseFloat(String(v==null?'':v).replace(',','.'));", "var n=parseFloat(String(v==null?'':v));", 'G11'],

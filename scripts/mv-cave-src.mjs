@@ -26,7 +26,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const RACINE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /* L'ordre est celui d'app.js : cave.js, puis cuvier.js, juste après lui. */
-export const CAVE_FICHIERS = ['src/cave.js', 'src/cuvier.js'];
+/* ★ PRATIQUES-1 (§622) : cuvier-pratiques.js, importé par cuvier.js — les pratiques de cave, la couleur d'une cuve. */
+export const CAVE_FICHIERS = ['src/cave.js', 'src/cuvier.js', 'src/cuvier-pratiques.js'];
 
 /* Le texte des deux fichiers, dans l'ordre d'import. `racine` : une copie du
    dépôt (contre-épreuves qui travaillent sur un dossier temporaire). */

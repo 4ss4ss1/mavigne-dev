@@ -53,6 +53,7 @@ function _vendEstFusionnee(c){ return !!(c.fusion); }
 function _vendMesD20(m){ return m?m.densite:null; }   // bouchon : pas de T° ici
 function _vendDSec(){ return 996; }                   // bouchon : cf. cuv8
 function _vendCuvF1(x){ return String(x); }
+function _vtMontre(){ return true; }                 // PRATIQUES-1 (§622) : bouchon — P et R se jouent dans mv-harnais-pratiques1
 function _escAttr(s){ return String(s==null?'':s); }
 function _escHtml(s){ return String(s==null?'':s); }
 function _mvIcon(){ return '<svg></svg>'; }

@@ -882,6 +882,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-renf4.mjs --contre'],     //   au journal) ou une équipe collective ; la ligne « sous contrat » ne compte plus en renfort
   ['node scripts/mv-harnais-contenant1.mjs'],          // CONTENANT-1 (§621) : « Nouvelle cuvée » en fûts OU en cuve — le contrôle d'avant l'écriture JOUÉ (cuve libre, prise,
   ['node scripts/mv-harnais-contenant1.mjs --contre'], //   trop pleine, déclarée sur place par l'administrateur), la cuve dans cuves[] jamais dans tonneaux[], le parc avant la cuvée
+  ['node scripts/mv-harnais-pratiques1.mjs'],          // PRATIQUES-1 (§622) : les pratiques de cave du domaine — les sécurités JOUÉES (à vérifier, à mettre d'accord,
+  ['node scripts/mv-harnais-pratiques1.mjs --contre'], //   impossible, caché), la couleur d'une cuve contre ses parcelles, le chapeau d'un blanc, le branchement, les tutos
   ['node scripts/mv-harnais-vitrine3.mjs'],            // VITRINE-3 (§606) : la page logiciel-vigne resserrée — l'ordre des sections, les onglets du téléphone,
   ['node scripts/mv-harnais-vitrine3.mjs --contre'],   //   un essai par formule, la pérennité (écran = JSON-LD), aucun retour client inventé ; llms.txt suit
   ['node scripts/mv-harnais-cuivre7.mjs'],             // VITRINE-3 (§606) : le cumul de cuivre sur sept ans JOUÉ (la page promet qu'il est testé avant chaque

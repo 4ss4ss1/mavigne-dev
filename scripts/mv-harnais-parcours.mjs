@@ -108,6 +108,11 @@ var _vstCuveId = null, _vstEditId = null, _vstSel = '';
 function showToast(m, c){ TOASTS.push(String(m)); }
 function _vendGarde(){ return true; }
 function _vendFbSave(m){ if(m) TOASTS.push(String(m)); }
+// PRATIQUES-1 (§622) : bouchons — la couleur d'une cuve se joue dans mv-harnais-pratiques1.
+function _vcuvCoulChoisie(){ return null; }
+function _vcuvCoulPret(){ return null; }
+function _vcuvCoulRendre(){}
+function _vcuvCoulConf(){ return undefined; }
 function _vendSheetClose(){}
 function renderVendCuves(){ RENDUS++; }
 function _caveCuveOcc(){ return false; }

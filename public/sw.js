@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.33
+// MA VIGNE — Service Worker v12.34
+// v12.34 (27/11/2026) — PRATIQUES-1 (§622) : « Vos pratiques de cave » — le réglage par couleur (rouge, blanc, rosé) dans un module neuf, cuvier-pratiques.js, avec ses sécurités (caché, à vérifier, à mettre d'accord, impossible) ; la couleur d'une cuve proposée et vérifiée contre ses parcelles ; pas de chapeau sur un blanc ou un rosé ; la mesure et la tournée ne proposent que les gestes d'extraction du domaine ; le parcours prévu dans la fiche d'une cuve. APP 11.43.
 // v12.33 (27/11/2026) — CONTENANT-1 (§621) : « Nouvelle cuvée » demande où est le vin — en fûts (comme avant) ou en cuve : une cuve libre du parc, le volume logé (92 % proposés), une cuve pas encore au parc déclarée sur place par l'administrateur ; la cuve va dans cuves[], jamais dans tonneaux[]. Refait sur la base actuelle (le lot du 18/11 n'avait pas été posé). APP 11.42.
 // v12.32 (27/11/2026) — RENF-4 (§620) : « Créer le contrat » depuis une ligne du Renfort (Pilotage › Décider) — au choix, une fiche par personne (son compte, le contrat de la ligne dans son journal) ou une équipe collective ; la ligne passe « sous contrat » et ne compte plus en renfort. APP 11.41.
 // v12.31 (27/11/2026) — RENF-3 (§619) : Pilotage › Décider › Renfort refait d'après la maquette Renfort v1 — votre plan, ligne par ligne : combien de saisonniers, de quand à quand, le contrat ; une ou plusieurs personnes au tracteur (le temps mesuré y figure d'office) ; le graphique montre le besoin de chaque travail face aux bras ; la proposition de l'appli (le moins de monde, embauché le plus tard) ; le plan enregistré par campagne, lu par L'équipe & le matériel › Renfort. APP 11.40.
@@ -4765,7 +4766,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.33';
+const CACHE_NAME   = 'mavigne-v12.34';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4782,7 +4783,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.33 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.34 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4802,7 +4803,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.33 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.34 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1,0 +1,55 @@
+{
+  "lot": "PRATIQUES-1",
+  "section": "§622",
+  "base": "e0e0e6226027acfdf2dbf244aa889b9b333ee7c1",
+  "inclut": [],
+  "date": "2026-11-27",
+  "tutos": {
+    "ok": true,
+    "empreinte": "b0786698e9a074ba5c61e028d5be66239294c4d3255a404f9651dd64f6c4d3da",
+    "date": "2026-11-27T11:54:12.091Z",
+    "joues": {
+      "téléphone": 3,
+      "ordinateur": 3,
+      "côte à côte": 3
+    },
+    "concernes": [
+      "maturites",
+      "pratiques",
+      "cuve-blanc"
+    ],
+    "cote": true
+  },
+  "fichiers": {
+    "CLAUDE.md": "d684e3aa9db24daaeb5468029412811daa44139708ee4191ea2b1c688971b776",
+    "docs/claude/INDEX.md": "21f22b2f8485b66c330ac48eda2241c2729ef3824c0df0642739a20cae1e4670",
+    "docs/claude/chantiers-580-629.md": "4f9d2b0a8b47f97a67640f36004cb95bec0b1cbbb32279132d17d70cbbccec56",
+    "docs/claude/journal.md": "0f8235a9623124511cc0b2c8300ce00a0235d8650b88e46b2c3b5e5b0e67a6d3",
+    "guide/08-cave.html": "d98ec6eeb53fe2bd60c9d11a077d783ed29392a41b704a904df93841d80d5984",
+    "index.html": "62b31fef0714693166c9bbdee23d9f7b5e99f159d6f2521db94fff5a95e39094",
+    "public/guide.html": "1d4483faec1923a643a787f25490fb856bef2693ab8a7a94300e33b0a173f77a",
+    "public/sw.js": "5dab93aaca586afe83292232dc5f13aef3b048767d8a38af2759ce57ffa5184d",
+    "scripts/harnais-claude-md.mjs": "b7667aaf3f762194d793dc7addea5796fc127d6008b61d09d9f580f6a06e034c",
+    "scripts/mv-cave-src.mjs": "431fdbe38795419c8e9d859769163ca8dcb52675349c1af341736e8a2550624b",
+    "scripts/mv-harnais-ajour1.mjs": "eab33b7d98fbd145afa5bcd9711ff7458448934ff06db0f42408b610f6814824",
+    "scripts/mv-harnais-cavereg2.mjs": "14acb1930242f6450ee915bf117ca011fd933a1432e2e4b6b0db49a37ebe49bb",
+    "scripts/mv-harnais-cuv7.mjs": "dc6b9630329d41e3a55678128f65281cb737e65ccc3216afcf000a16a504d02f",
+    "scripts/mv-harnais-cuves1.mjs": "0bb2925da3d8391fce1557e7fc361d0c13ee866d9c0a593427f73741269872bc",
+    "scripts/mv-harnais-cuvier.mjs": "9b585b22be5c84c58e2588a2805c74d97b91db264f7cd0d684d30486c22323d6",
+    "scripts/mv-harnais-fml1.mjs": "54b59d7ae6e3f092f0bfebfdf30141491492ca45c975de2511b30815d85a8e40",
+    "scripts/mv-harnais-gf.mjs": "b4d3eebc2e090dc4fd810c5e173a1458711d1e0f8a0ed2d856f1348f347e8c83",
+    "scripts/mv-harnais-liste.mjs": "1bdf37062d9ac7859abd59f7abc30f0d19252b42fd9da02d5b0c5a0cbf7cbe1b",
+    "scripts/mv-harnais-parcours.mjs": "07726db22d48e4e56d77c7394c0f41cf79822bbb56b16fd406b423e21ad5613a",
+    "scripts/tutos-couverture.json": "c7477445359c5768a0dd4d8e316e40361de96347a57fc4eff0a12654018d2d6c",
+    "scripts/typo-baseline.json": "cd0ecca9a9e6e0d48101d68a5867a913de127469d19724369443553f72eb1e90",
+    "src/cuvier.js": "76c24b5b2bfe3575ed502ef69c33c2771094afc91f2c486fda33287f0ddb551a",
+    "src/styles.css": "9952ba37b39090266f101aa3a88ee6389d7b5d05a6a3ab4a8ed8d53f1de99c67",
+    "src/tutos.js": "998178597c0719c9e276a1aabf5f7135f26aee8c4e1e39152f31f32e2939d90e",
+    "src/utils.js": "6e1b222b3524be1298276b3413ec5c2c17db72162887b3cf23613fdcfd705da3",
+    "src/whats-new.js": "dddbd92402a004ab941397b71c4843765201ebf2e129351d7426d8e70f944758",
+    "docs/maquettes/maquette-cave-chaine-v1.html": "a6a1d98f83b2cae7f999adf3cdfd1adc4a9f7dbbc4593f4643893a8b83562242",
+    "docs/maquettes/maquette-pratiques-cave-v2.html": "73a752464508d8d89e3fa0f91afa2a414166f280ab56380412aeaa55cd9d0d5b",
+    "scripts/mv-harnais-pratiques1.mjs": "5c3e8c17974221df3933dea00ac29b687ded1ec5cef5a4eb19929ee7020915a0",
+    "src/cuvier-pratiques.js": "3957bce8e7cd598d43f50abe5c0bc7002c15863106f98d8881286b28539545b6"
+  }
+}

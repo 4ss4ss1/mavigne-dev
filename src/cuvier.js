@@ -19,6 +19,9 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { isAdmin, canWrite, showToast, _escHtml, _escAttr, _mvBadge, _mvIcon, _mvInfoBtn, _mvInfoSet } from './utils.js';
+// ★ PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve et son chapeau — dans leur module.
+import { _pratGeste, _pratBandeauHtml, _pratRegLigne, _vendCuveCoul, _vendChapeau, _vcuvCoulInject, _vcuvCoulRendre,
+  _vcuvCoulChoisie, _vcuvCoulPret, _vcuvCoulConf, _vendParcoursHtml, _vmMacInject, _vmMacPris, _vtMontre } from './cuvier-pratiques.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -958,7 +961,7 @@ function _vendCockpitHtml(){
     //   et l'onglet d'arrivee (_vendTab) sont inchanges.
     +'<button class="mvu-tab" id="mvv-tab-ana" data-tuto="cuv.maturites" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Maturités</button>'
     +'<button class="mvu-tab" id="mvv-tab-rec" onclick="switchVendOng(\'rec\')"><span class="t-ico"></span> Récoltes</button>'
-    +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuves</button>'
+    +'<button class="mvu-tab" id="mvv-tab-cuves" data-tuto="cuv.cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuves</button>'
     // ★★ Lot CUV-7 : « Tournée » est le geste QUOTIDIEN, en aval des cuves —
     //   il garde donc l'ordre amont → aval posé par CAVE-6. L'onglet d'arrivée
     //   reste `cuves` : on n'atterrit pas dans un écran de saisie.
@@ -1879,6 +1882,7 @@ function renderVendCuves() {
       +'<p class="rec-note">Leur vin se suit au Chai, dans les cuvées du millésime '+_escHtml(an)+'.</p></section>';
     el.innerHTML=h; _vendRefreshCockpit(); return;
   }
+  h+=_pratBandeauHtml();   // ★ PRATIQUES-1 (§622) : proposé une fois à l'administrateur, « Plus tard » le range
   if(cuves.length) h+=_vendChiffresHtml(cuves);
   if(due.length){
     h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' \u00e0 mesurer '+_mvInfoBtn('cave.mesurer')+'</div>'   // ★ MOTS-18 : le pourquoi derrière le « i »
@@ -1910,7 +1914,7 @@ function _vendTeteHtml(an, courante, canEdit, nAct){
     : '<span class="mat-an-t">Vendange '+_escHtml(an)+'</span>';
   return '<div class="mat-tete"><div class="mat-tete-g">'+titre+'<span class="mat-ref">'+(courante?'au '+_vendDateLongue(_mvToday()):'vendange passée')+'</span></div>'
     +(canEdit&&nAct>=2?'<button type="button" class="mvbtn mvbtn-secondaire" onclick="openVendFusion()">Fusionner</button>':'')
-    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal rec-nouv" onclick="openOvVendCuve(null)">'+_mvIcon('ajout',16)+'<span class="lg">Nouvelle cuve</span><span class="sm">Cuve</span></button>':'')
+    +(canEdit?'<button type="button" class="mvbtn mvbtn-principal rec-nouv" data-tuto="vend.nouvelle" onclick="openOvVendCuve(null)">'+_mvIcon('ajout',16)+'<span class="lg">Nouvelle cuve</span><span class="sm">Cuve</span></button>':'')
     +'</div>';
 }
 
@@ -1949,17 +1953,17 @@ function _vendRempHtml(cuves){
 function _vendFicheHtml(c, canEdit){
   var rep=_vendRepere(c), p=c.cuve_ref?_caveCuve(c.cuve_ref):null;
   var mat=p?String(p.materiau||p.type||''):'';
-  var coul=(c.parcelles&&c.parcelles.length)?_parcCoul(c.parcelles[0]):'?';
+  var coul=_vendCuveCoul(c);   // ★ PRATIQUES-1 (§622) : la couleur dite à la création, sinon celle des parcelles
   var tag=function(t){ return '<span class="mvpas mvpas-etiquette">'+t+'</span>'; };
   var h='<div class="mat-fi-hd"><div class="mat-fi-cel"><h3 class="mat-fi-t">'+_escHtml(c.nom||'Cuve')+'</h3><div class="mat-tags">'
     +(rep?tag('Cuve '+_escHtml(rep)):'')+tag(_escHtml(_vendStatLbl(c.statut)))
     +((mat||c.volume_hl)?tag(_escHtml([mat, c.volume_hl?_vendCuvF1(c.volume_hl)+'\u00a0hL':''].filter(Boolean).join(' · '))):'')
-    +((coul==='r'||coul==='b')?tag('<i class="mat-pt '+_matVin(coul)+'"></i>'+(coul==='r'?'Rouge':'Blanc')):'')
+    +((coul==='r'||coul==='b'||coul==='o')?tag('<i class="mat-pt '+(coul==='o'?'prat-pt-o':_matVin(coul))+'"></i>'+(coul==='r'?'Rouge':coul==='b'?'Blanc':'Ros\u00e9')):'')
     +'</div></div><button type="button" class="mvbtn mvbtn-icone mvbtn-secondaire" aria-label="Fermer la fiche" data-id="'+_escAttr(c.id)+'" onclick="_vendBascOuv(this.dataset.id)">'+_mvIcon('croix',16)+'</button></div>';
   if(_vendADue(c)) h+='<div class="mvencadre mvencadre-attention rec-fi-enc">'+_mvIcon('alerte',18)
     +'<span>Pas de relevé depuis '+_matPlur(Math.max(1,_vendStale(c)),'jour')+'. En macération comme en fermentation, un relevé par jour suit la cinétique et voit venir un arrêt.</span>'
     +(canEdit?'<button type="button" class="mvbtn mvbtn-principal mvbtn-compact" data-id="'+_escAttr(c.id)+'" onclick="openOvVendMesure(this.dataset.id)">Noter un relevé</button>':'')+'</div>';
-  return h+'<div class="cuv-fi-corps">'+_vendDetailHtml(c,canEdit)+'</div>';
+  return h+_vendParcoursHtml(c)+'<div class="cuv-fi-corps">'+_vendDetailHtml(c,canEdit)+'</div>';   // ★ PRATIQUES-1 (§622) : le parcours prévu, replié
 }
 
 function _vendCfg(){return Object.assign({poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},CAVE_VENDANGE.config||{});}
@@ -1997,6 +2001,7 @@ function renderVendParam(){
   var four=function(w){ return w ? Math.round(w.min)+' à '+Math.round(w.max)+' g/L' : 'aucune'; };
   var fourS=function(w){ return w ? _mvF1(w.min/spd)+' à '+_mvF1(w.max/spd)+' %vol potentiel' : 'pas de bande dans les Maturités'; };
   el.innerHTML=_caveSaisBanner()
+    +_vendRegGroupe('Vos pratiques de cave', 'Comment chaque couleur passe au cuvier : le parcours prévu des cuves, les gestes proposés à la mesure et dans la tournée.', _pratRegLigne())   // ★ PRATIQUES-1 (§622)
     +_vendRegGroupe('Maturité', 'La fourchette visée de chaque couleur trace sa bande dans les Maturités. Le minimum de chaque appellation se règle dans Appellations.',
        _vendRegLigne('Fourchette des rouges', four(f.r), fourS(f.r), mod, "_vendReg('four-r')", true)
       +_vendRegLigne('Fourchette des blancs', four(f.b), fourS(f.b), mod, "_vendReg('four-b')", true)
@@ -2446,6 +2451,7 @@ function openOvVendCuve(id) {
   el=document.getElementById('vcuv-mpf-duree'); if(el) el.value=c&&c.mpf?(c.mpf.duree_j||4):4;
   var p=document.getElementById('vcuv-mpf-params'); if(p) p.style.display=_vcuvMpfActive?'block':'none';
   _vcuvParcRender();
+  _vcuvCoulInject(c);   // ★ PRATIQUES-1 (§622) : la couleur de la cuve, proposée d'après les parcelles et vérifiée contre elles
   el=document.getElementById('vcuv-id'); if(el) el.value=id||'';
   _vcuvStat0=c?(c.statut||'setup'):null;
   _vcuvInjectStatDate(c);
@@ -2515,6 +2521,10 @@ function saveVendCuve() {
   if(statut==='termine' && !(existing && existing.statut==='termine') && !_vendFmlPassee(existing)){
     showToast('La malo n\u2019est pas faite\u00a0: passez par l\u2019\u00e9tape FML, ou \u00ab\u00a0D\u00e9cuver\u00a0\u00bb vers Le Chai','#B85A1A'); return;
   }
+  /* ★ PRATIQUES-1 (§622) — LA COULEUR SE VÉRIFIE CONTRE LES PARCELLES, AVANT TOUTE ÉCRITURE : un rouge ou un rosé
+     sur des parcelles de cépage blanc est refusé ; un blanc de raisins noirs, un mélange rouge et blanc se confirment. */
+  var _coul=_vcuvCoulChoisie(parcelles), _coulKo=_vcuvCoulPret(parcelles,_coul,existing);
+  if(_coulKo){ showToast(_coulKo,'#B85A1A'); _vcuvCoulRendre(); return; }
   // ⚠️ Dernier filet : la cuve a pu etre prise depuis l'ouverture de la fiche.
   if(_vcuvRef && _caveCuveOcc(_vcuvRef, id||null)){
     var _pk=_caveCuve(_vcuvRef);
@@ -2529,7 +2539,10 @@ function saveVendCuve() {
     // ⚠️ `obj` est rebati de zero : sans ces deux lignes, rouvrir la fiche
     //   d'une cuve fusionnee effacerait la fusion. Piege recurrent du projet.
     fusion:existing?(existing.fusion||null):null,
-    fusion_src:existing&&Array.isArray(existing.fusion_src)?existing.fusion_src.slice():undefined};
+    fusion_src:existing&&Array.isArray(existing.fusion_src)?existing.fusion_src.slice():undefined,
+    /* ★ PRATIQUES-1 (§622) — la couleur, sa confirmation, le blanc de macération : rebati de zero, l'objet les perdait. */
+    couleur:_coul||undefined, couleur_conf:_vcuvCoulConf(parcelles,_coul,existing),
+    macere:existing?(existing.macere||undefined):undefined};
   if(!id && _vcuvFromGrp){
     var _d=_vcuvFromGrp;
     obj.cuvee_src=_d.cuvee; obj.vcuvee_id=_d.id||null; obj.recolte_ids=_d.ids.slice(); obj.nb_caisses=_d.caisses;
@@ -2629,8 +2642,10 @@ function openOvVendMesure(cuveId, mesureId) {
   // « ce qui trainait dans le DOM » (§20, defaut 3 : l'analyse rouverte).
   /* ★ GF-1 : apres le pressurage il n'y a plus de chapeau. Le bloc disparait, et un
      releve neuf n'invente plus 2 remontages et 1 pigeage par defaut. */
-  var _chap=!(c&&(_vendPressee(c)||_vendDecuvee(c)));
-  _vmRem=m?(m.remontages||0):(_chap?2:0); _vmPig=m?(m.pigeages||0):(_chap?1:0);
+  /* ★ PRATIQUES-1 (§622) : un blanc ou un rosé n'a pas de chapeau non plus (sauf blanc de macération confirmé), et un
+     rouge ne se voit proposer que les gestes d'extraction du domaine (réglage « Vos pratiques »). */
+  var _chap=!(c&&(_vendPressee(c)||_vendDecuvee(c))) && _vendChapeau(c), _rg=(_vendCuveCoul(c)!=='b'&&_vendCuveCoul(c)!=='o');
+  _vmRem=m?(m.remontages||0):(_chap&&_rg&&_pratGeste('rem')?2:0); _vmPig=m?(m.pigeages||0):(_chap&&_rg&&_pratGeste('pig')?1:0);
   var el;
   el=document.getElementById('vm-date'); if(el) el.value=(m&&m.date)||_mvToday();
   el=document.getElementById('vm-densite'); if(el) el.value=(m&&m.densite!=null)?m.densite:'';
@@ -2639,7 +2654,8 @@ function openOvVendMesure(cuveId, mesureId) {
   el=document.getElementById('vm-pig-val'); if(el) el.textContent=_vmPig;
   el=document.getElementById('vm-note'); if(el) el.value=(m&&m.note)||'';
   el=document.getElementById('vm-gf'); if(el) el.value=(m&&_vendGfNum(m.gf)!=null)?_vendGfNum(m.gf):'';     // GF-1, pose en JS (§24 n°5)
-  el=document.getElementById('vm-chap'); if(el) el.style.display=_chap?'':'none';
+  el=document.getElementById('vm-chap'); if(el) el.style.display=(_chap||(m&&(m.pigeages||m.remontages)))?'':'none';   // un chiffre déjà posé reste visible
+  _vmMacInject(c, _chap||!!(m&&(m.pigeages||m.remontages)));   // ★ PRATIQUES-1 (§622)
   _vmInjectActions(_vmesureEditId);
   _vmIntRender(m&&((m.qui&&m.qui.length)?m.qui:m.intervenants));   // ★★ PRESENCE-2 (§346), `qui` depuis PRESENCE-2B
   var ov=document.getElementById('ovVendMesure'); if(typeof window.openOv==='function') window.openOv('ovVendMesure'); else if(ov) ov.classList.add('open');   /* ★ CUVFICHE-1 : openOv place la feuille AU-DESSUS de la fiche (z-index), classList.add la laissait dessous */
@@ -2703,6 +2719,7 @@ function saveVendMesure() {
     delete mesure.intervenants;   // PRESENCE-2B : l'ancien champ de PRESENCE-2 se fond dans `qui`
   }
   if(pos!==-1) cu.mesures_fa[pos]=mesure; else cu.mesures_fa.push(mesure);
+  if(_vmMacPris()&&!cu.macere) cu.macere={ par:(window.currentUser&&window.currentUser.nom)||'', le:_mlAuj() };   // ★ PRATIQUES-1 (§622) : confirmé à la mesure
   _vendTriMes(cu);            // la date vient peut-etre de changer : on range
   _vmesureEditId=null;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
@@ -7495,7 +7512,7 @@ function _vtRowHtml(c,canEdit){
         +'oninput="_vtIn(\''+_escAttr(c.id)+'\')" onkeydown="_vtNav(event,this)" onfocus="this.select()" '
         +'aria-label="Densité de '+_escAttr(c.nom||'la cuve')+'">'
         +'<span class="ec" id="vt-ec-'+_escAttr(c.id)+'"></span></div>'
-        +_vtCntHtml(c.id,'p','P')+_vtCntHtml(c.id,'r','R')
+        +(_vtMontre(c,'p')?_vtCntHtml(c.id,'p','P'):'')+(_vtMontre(c,'r')?_vtCntHtml(c.id,'r','R'):'')   // ★ PRATIQUES-1 (§622)
         +'</div>';
     } else if(mj){
       h+='<div class="vt-ro">'+(mj.densite!=null?Math.round(mj.densite):'—')+' · '
@@ -9531,6 +9548,14 @@ function saveVendFaFin(){
   renderVendCuves();
 }
 
+// ★ PRATIQUES-1 (§622) — ce que cuvier-pratiques.js lit du Cuvier (au premier geste, jamais au chargement).
+window._vendRegLigne = _vendRegLigne;
+window._vtB = _vtB;
+window._matVin = _matVin;
+window._matPlur = _matPlur;
+window._vendGarde = _vendGarde;
+window._vendPressee = _vendPressee;
+window.renderVendCuves = renderVendCuves;
 // ══ LA FRONTIÈRE — ce que le Chai (cave.js) lit du Cuvier ═════════════════
 // ★ CUV-DEC (§164) — chacun de ces noms est lu par cave.js (au premier geste, jamais au
 //   chargement : cave.js est évalué AVANT ce fichier). Retirer une ligne : ReferenceError.

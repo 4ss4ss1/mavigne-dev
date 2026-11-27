@@ -1,5 +1,5 @@
 {
-  "plafond": 790,
+  "plafond": 788,
   "exempts": {
     "_rfcGeste": "RENF-4 (§620) : la feuille « Créer le contrat » (Pilotage › Décider › Renfort, une ligne) — ses boutons créent des comptes et des fiches dans l’équipe (createAuthAccount) : rien à jouer sur le domaine d’entraînement sans écrire dans l’équipe ; le tuto se fera avec une équipe d’entraînement qui l’accepte (mv-harnais-renf4 joue la feuille)",
     "_rfcSaisie": "RENF-4 (§620) : la saisie des prénoms et des adresses de la même feuille — même raison que _rfcGeste",
@@ -76,6 +76,11 @@
     "closePlanFrais": "FRAIS-1 (§595) : ferme la fenêtre d’un frais — fermer ou annuler",
     "planFraisPhoto": "FRAIS-1 (§595) : la photo du ticket ou de la carte grise — pas d’appareil photo dans un tuto ; le tuto « noter un frais à rembourser » dit que la photo est facultative",
     "planFraisSuppr": "FRAIS-1 (§595) : supprime un frais dans sa fenêtre, après confirmation — même fenêtre que le tuto « noter un frais à rembourser », rien d’autre à montrer",
-    "planFraisTaux": "FRAIS-1 (§595) : le taux du domaine, dans la roue du Planning — un réglage d’une fois, expliqué à côté de lui (barème fiscal par défaut)"
+    "planFraisTaux": "FRAIS-1 (§595) : le taux du domaine, dans la roue du Planning — un réglage d’une fois, expliqué à côté de lui (barème fiscal par défaut)",
+    "_pratFix": "PRATIQUES-1 (§622) : n’apparaît que si deux réponses se contredisent (un rosé de saignée, un rouge « pas de saignée ») ; le tuto « régler vos pratiques » montre la sécurité voisine, « C’est notre pratique »",
+    "_pratPlusTard": "PRATIQUES-1 (§622) : range le bandeau de la première ouverture du Cuvier ; le tuto « régler vos pratiques » passe par « Régler »",
+    "_vcuvCoulOkSet": "PRATIQUES-1 (§622) : confirme un cas rare (un blanc de raisins noirs, des raisins rouges et blancs dans une cuve) ; le tuto « créer une cuve de blanc » montre le refus voisin",
+    "_vmMacOuvrir": "PRATIQUES-1 (§622) : un blanc de macération longue, rare ; le domaine fictif n’a pas de cuve de blanc en fermentation",
+    "_vmMacConfirmer": "PRATIQUES-1 (§622) : la confirmation du blanc de macération (voir _vmMacOuvrir)"
   }
 }

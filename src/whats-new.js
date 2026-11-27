@@ -7,6 +7,12 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.43', d: '2026-11-27', items: [   // PRATIQUES-1 (§622) : les pratiques de cave du domaine, la couleur d'une cuve, pas de chapeau sur un blanc
+    { niv: 1, pour: ['admin'], emoji: 'raisin', titre: 'Vos pratiques de cave',
+      desc: "Chaque domaine passe ses vins au cuvier à sa façon. Réglez-la une fois, par couleur\u00a0: l’arrivée de la vendange, la clarification des jus, la fermentation, la malo, l’élevage — et le rosé, si vous en faites. La fiche de chaque cuve montre son parcours prévu\u00a0; la mesure et la tournée ne proposent que vos gestes d’extraction. Deux réponses rares ensemble se confirment, une réponse impossible est refusée avec la raison. Le Cuvier vous le propose à la première ouverture\u00a0; ensuite, roue crantée, bloc Le Cuvier." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'cuve', titre: 'La couleur d’une cuve, vérifiée',
+      desc: "Une nouvelle cuve propose sa couleur d’après ses parcelles\u00a0: rouge, blanc, ou rosé si le domaine en fait. Un rouge ou un rosé sur des parcelles de cépage blanc est refusé\u00a0; un blanc de raisins noirs, ou des raisins rouges et blancs dans la même cuve, se confirment. Une cuve de blanc ou de rosé n’a pas de chapeau\u00a0: la mesure ne propose plus de pigeage ni de remontage." },
+  ] },
   { v: '11.42', d: '2026-11-27', items: [   // CONTENANT-1 (§621) : « Nouvelle cuvée » — en fûts ou en cuve, une cuve déclarée sur place
     { niv: 0, pour: ['admin'], emoji: 'cuve', titre: 'Nouvelle cuvée\u00a0: en fûts ou en cuve',
       desc: "Une cuvée élevée en cuve (inox, béton, foudre) ne pouvait pas être créée au Chai\u00a0: la fiche demandait au moins un tonneau. «\u00a0Nouvelle cuvée\u00a0» demande maintenant où est le vin\u00a0: en fûts, comme avant, ou en cuve — une cuve libre du parc, puis le volume logé. Une cuve pas encore déclarée se déclare sur place, et rejoint le parc à cuves." },

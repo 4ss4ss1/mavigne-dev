@@ -8220,6 +8220,54 @@ mark.p-mk{background:var(--accent-doux,rgba(122,40,80,.11));color:inherit;border
 .creg-ed-choix .mvbtn{height:auto;flex-direction:column;align-items:flex-start;gap:var(--e-0,2px);padding:var(--e-3,12px);text-align:left;white-space:normal}
 .creg-ed-choix small{font-size:var(--pt-micro,12px);font-weight:var(--fw-reg,400)}
 /* ★ FIN CAVEREG-2 */
+/* ★★ PRATIQUES-1 (§622) — LES PRATIQUES DE CAVE DU DOMAINE : la fenêtre (#ovPratiques), le choix de la couleur d’une cuve,
+   le parcours prévu dans sa fiche, le bandeau de la première ouverture. Les encadrés et les boutons sont ceux de la charte. */
+.mat-pt.prat-pt-o{background:#D98A9B}
+#prat-corps{flex:1;min-height:0;overflow-y:auto;padding:var(--e-4,16px) var(--e-4,16px) var(--e-5,20px)}   /* la fenêtre défile, son pied avec elle */
+#vcuv-coul-row>.fl{margin-top:14px}   /* .fl:first-child ôte la marge : la couleur collait aux parcelles */
+.prat-tete{margin:0 0 var(--e-3,12px)}
+.prat-sous{margin:var(--e-1,4px) 0 0;font-size:var(--pt-txt,13px);color:var(--texte-doux);line-height:1.45}
+.prat-coul{display:flex;width:100%;margin:0 0 var(--e-2,8px)}
+.prat-coul>.mvbtn-option{flex:1;position:relative;gap:var(--e-2,8px);min-height:44px}
+.prat-coul>.mvbtn-option.prat-off{opacity:.6}
+.prat-pt{position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--attention-texte)}
+.prat-q{border-top:var(--bw,1px) solid var(--ligne,#E7E6E2);padding:var(--e-3,12px) 0 var(--e-1,4px)}
+.prat-q-t{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.prat-m{margin-left:var(--e-2,8px);font-size:var(--pt-micro,12px);font-weight:var(--fw-reg,400);color:var(--texte-doux)}
+.prat-q-a{margin:var(--e-0,2px) 0 0;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.45}
+.prat-ch{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin:var(--e-2,8px) 0 var(--e-1,4px)}
+.prat-o{display:inline-flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:44px;padding:var(--e-1,4px) var(--e-3,12px);border:var(--bw,1px) solid var(--ligne-forte);border-radius:var(--r-md,8px);background:var(--bg-card);color:var(--texte);font:inherit;font-size:var(--pt-txt,13px);text-align:left;line-height:1.3;cursor:pointer}
+.prat-o small{font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.prat-o.on{border-color:var(--accent-texte);background:var(--accent-doux);color:var(--accent-texte);font-weight:var(--fw-semi,600)}   /* le « choisi » de la charte (.mvbtn-option.on) */
+.prat-o.on small{color:var(--accent-texte)}
+.prat-o:disabled{cursor:default}
+.prat-o.prat-dis{border-style:dashed;opacity:.6}
+.prat-o.prat-dis.on{opacity:1;border-color:var(--danger-texte);background:var(--danger-doux);color:var(--danger-texte)}
+.prat-o.prat-dis.on small{color:var(--danger-texte)}
+.prat-al{margin:var(--e-2,8px) 0 var(--e-1,4px);font-size:var(--pt-txt,13px);line-height:1.45}
+.prat-al .mvencadre-t{margin-bottom:var(--e-0,2px)}
+.prat-al-b{display:flex;margin-top:var(--e-2,8px)}
+.prat-cache{margin:var(--e-2,8px) 0 0;padding-top:var(--e-2,8px);border-top:var(--bw,1px) solid var(--ligne,#E7E6E2);font-size:var(--pt-micro,12px);font-style:italic;color:var(--texte-doux)}
+.prat-vide{margin:var(--e-2,8px) 0}
+.prat-plein{width:100%;margin-bottom:var(--e-3,12px)}
+.prat-parc{margin:var(--e-3,12px) 0 0;padding:var(--e-3,12px);border-radius:var(--r-md,8px);background:var(--survol)}
+.prat-et{list-style:none;counter-reset:pe;margin:var(--e-2,8px) 0 0;padding:0}
+.prat-et li{counter-increment:pe;position:relative;padding:0 0 var(--e-2,8px) 30px;font-size:var(--pt-txt,13px);line-height:1.35}
+.prat-et li::before{content:counter(pe);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--texte-med);color:var(--texte-med);font-size:var(--pt-micro,12px);font-weight:var(--fw-semi,600);display:grid;place-items:center;background:var(--bg-card)}
+.prat-et li b{font-weight:var(--fw-semi,600);color:var(--texte)}
+.prat-et li small{display:block;font-size:var(--pt-micro,12px);color:var(--texte-doux)}
+.prat-chg{margin:var(--e-2,8px) 0 0;padding-left:18px;font-size:var(--pt-micro,12px);color:var(--texte-med);line-height:1.45}
+.prat-bil{margin:var(--e-3,12px) 0 0}
+.prat-bil-l{display:flex;align-items:center;gap:var(--e-2,8px);width:100%;min-height:44px;margin:var(--e-2,8px) 0 0;padding:var(--e-2,8px) var(--e-3,12px);border:var(--bw,1px) solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card);font:inherit;font-size:var(--pt-txt,13px);color:var(--texte);text-align:left;cursor:pointer}
+.prat-bil-l .mvpas{margin-left:auto}
+.prat-pied{display:flex;flex-direction:column;gap:var(--e-2,8px);margin:var(--e-3,12px) 0 0}
+.prat-pied .mvbtn-principal{width:100%}
+.prat-band{margin:0 0 var(--e-3,12px)}
+.prat-band-b{display:flex;flex-wrap:wrap;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}
+.prat-note{margin:var(--e-2,8px) 0;font-size:var(--pt-micro,12px);color:var(--texte-doux);line-height:1.45}
+.prat-parc-f{margin:0 0 var(--e-3,12px);padding:var(--e-2,8px) var(--e-3,12px);border:var(--bw,1px) solid var(--ligne,#E7E6E2);border-radius:var(--r-md,8px);background:var(--bg-card)}
+.prat-parc-f summary{min-height:32px;display:flex;align-items:center;font-size:var(--pt-txt,13px);font-weight:var(--fw-semi,600);color:var(--texte-med);cursor:pointer}
+/* ★ FIN PRATIQUES-1 */
 /* ★ CAVE-3 (§290) — LE CHAI EN LISTE + FICHE (MAQUETTE V8). La fiche est celle de l'appli (openCuveeDetail écrite dans
    #chai-fiche) ; au téléphone, la fenêtre comme avant. Cuvées au cadre neutre (la choisie cerclée), alerte d'ouillage en ambre,
    « Ouiller les … » et « Nouvelle cuvée » à l'accent. Par jetons. */
