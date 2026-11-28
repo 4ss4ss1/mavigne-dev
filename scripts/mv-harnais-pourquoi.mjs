@@ -75,7 +75,7 @@ if (!CONTRE) {
   t('Parcelles : sans priorité verrouillée (l’admin), la tâche choisie porte sa pastille', /pTacheFilter===t\.nom&&window\._mvPqBtn\?window\._mvPqBtn\(t\.nom,'vigne'\)/.test(A));
   t('la feuille de validation remplit #vp-pq', /getElementById\('vp-pq'\)[\s\S]{0,120}_mvPqBtn\(nomTache,'vigne'\)/.test(A) && H.includes('id="vp-pq"'));
   t('la fiche d’une session tracteur remplit #sd-pq', /getElementById\('sd-pq'\)[\s\S]{0,120}_mvPqBtn\(s\.activite,'trac'\)/.test(T) && H.includes('id="sd-pq"'));
-  t('« Nouvelle opération » de la cave remplit #cop-pq au choix du type', /function selCaveOpType\(type\) \{[\s\S]{0,260}getElementById\('cop-pq'\)[\s\S]{0,120}_mvPqBtn\(type,'cave'\)/.test(C) && H.includes('id="cop-pq"'));
+  t('« Nouvelle opération » de la cave remplit #cop-pq au choix du type', /function selCaveOpType\(type\) \{[\s\S]{0,700}getElementById\('cop-pq'\)[\s\S]{0,120}_mvPqBtn\(vue,'cave'\)/.test(C) /* CAVE-SUITE (§627) : la fiche du bouton choisi, « Coller » n'est pas « Autre traitement » */ && H.includes('id="cop-pq"'));
   t('les fiches entrent dans MV_INFO sous pqt.<slug>', /MV_INFO\['pqt\.' \+ s\] = \{/.test(U) && U.indexOf("MV_INFO['pqt.' + s]") > U.indexOf('export const MV_INFO = {'));
   t('la pastille est un vrai bouton, nommé, qui passe par l’écouteur délégué [data-mvi]',
     /class="mv-pq"/.test(U) && /type="button"/.test(U.slice(U.indexOf('export function _mvPqBtn'), U.indexOf('export function _mvPqBtn') + 600)) && /aria-label="Pourquoi on le fait/.test(U));

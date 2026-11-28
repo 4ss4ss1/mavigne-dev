@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v12.37
+// MA VIGNE — Service Worker v12.38
+// v12.38 (27/11/2026) — CAVE-SUITE (§627) : la Cave jusqu'à la bouteille — la mise en masse (des fûts vers une cuve, en un geste) ; préparer la mise (date, compte à rebours, matières sèches face au stock) ; mettre en bouteille (formats, n° de lot, contrôles, mises en plusieurs fois, matières sèches sorties de La Réserve, stock par format) ; la feuille des gestes rangée par étape (bâtonner, coller, stabiliser) ; les rappels du Chai dans « À faire » ; le parcours en haut de la fiche d'une cuvée ; confier un geste de cave à quelqu'un. Module neuf cave-mise.js.
 // v12.37 (27/11/2026) — PRATIQUES-3 (§626) : la saignée d'une cuve de rouge crée la cuve de rosé (son jus, ses parcelles, d'où elle vient ; son vin reste au rendement des parcelles ; la saignée ne se supprime pas tant que la cuve existe) ; l'enzymage du débourbage pris dans La Réserve (une opération « Enzymes », la sortie de stock) ; le soutirage d'un débourbage dans « À faire » à l'heure du repère ; la base d'un effervescent (l'exception de l'article 8 : à vérifier, plus impossible) ; une cuvée qui change de couleur relit ses apports ; le texte des mélanges dit qui interdit quoi. Tuto « tirer un rosé de saignée ».
 // v12.36 (27/11/2026) — COULEUR-1 (§625) : la couleur de la cuvée au Chai — héritée de sa cuve au décuvage, ou dite à « Nouvelle cuvée » (facultatif) ; la carte du Chai la montre quand le domaine en fait plusieurs, la fiche toujours ; l'assemblage (« Compléter le fût ») et la fusion du Cuvier refusent un rouge dans un blanc et du blanc dans un rosé (règlement 2019/934), demandent de confirmer du blanc dans un rouge ; le labo lit la même couleur. Et la liste des tutos rangée par module (src/tutos-vigne.js, -tracteur, -planning, -phyto, -reserve, -cave) : tutos.js ne garde que le moteur.
 // v12.35 (27/11/2026) — PRATIQUES-2 (§624) : les gestes du blanc au Cuvier — « Débourber » (début, puis soutirage du jus clair, avec ses blocages), la suite : entonner (la feuille de décuvage en mode entonnage, la fermentation finit au Chai) ou fermenter dans la cuve ; le pressurage d'arrivée et les choix de la cuve (fût ou cuve, malo) ; la frise et le prochain geste d'une cuve de blanc ; les repères du domaine (durée, turbidité visée). APP 11.44.
@@ -4769,7 +4770,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v12.37';
+const CACHE_NAME   = 'mavigne-v12.38';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4786,7 +4787,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.37 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.38 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4806,7 +4807,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v12.37 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v12.38 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

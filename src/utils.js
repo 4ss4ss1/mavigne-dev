@@ -28,7 +28,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 //   niv 0 = le Journal seul · 1 = pastille « Nouveau » sur la cible · 2 = carte « À vérifier »
 //   de l'Accueil jusqu'a « Vu » · 3 = la grande fenetre (au plus une fois tous les 30 jours).
 // Regle : seulement les changements visibles par les utilisateurs ; items:[] = version technique.
-export const APP_VERSION = '11.46';
+export const APP_VERSION = '11.47';
 // ★★ VER-1 (27/09/2026) — FORMAT DES DONNÉES. À monter de 1, DANS LE LOT, chaque fois qu'un lot change
 //   la FORME de ce qui est écrit en base (nouvelle structure, champ renommé, sens d'un champ modifié) —
 //   pas pour un changement d'écran ou de calcul. Le build le publie dans /version.json ; un appareil
@@ -2927,6 +2927,10 @@ var MV_AIDE = {
       ['Vos pratiques de cave', "se règlent une fois, par couleur : comment vos rouges, vos blancs et vos rosés passent au cuvier (roue crantée de la Cave, bloc Le Cuvier ; proposé à la première ouverture). La fiche de chaque cuve montre son parcours prévu, la mesure et la tournée ne proposent que vos gestes d’extraction. Deux réponses rares ensemble se confirment ; une réponse impossible est refusée, avec la raison."],
       ['Une cuve de blanc', "suit son parcours : sa fiche dit le prochain geste. « Débourber » : la méthode, le début, la température (et la turbidité, l’enzymage, facultatifs). Puis « Soutirer le jus clair » : le jus, les bourbes, et la suite — entonner (la feuille des fûts : la cuvée naît au Chai, sa fermentation y reste suivie) ou fermenter dans la cuve. Une cuve qui fermente ne se débourbe plus ; plus de jus clair et de bourbes que de jus est refusé. Le pressurage (goutte, presse) se dit à la création de la cuve, et, si le domaine a plusieurs façons, la cuve choisit la sienne (en fût ou en cuve, la malo). Vos repères (durée, turbidité visée) se règlent dans vos pratiques."],
       ['Un rosé de saignée', "une saignée sur une cuve de rouge (« Opération » › « Saignée ») peut créer la cuve de rosé : le jus saigné devient son jus, avec les parcelles de la cuve saignée et son parcours de rosé (débourbage, fermentation). Son vin reste dans le rendement de ces parcelles. Corriger la saignée corrige son jus tant qu’elle n’est pas débourbée ; la saignée ne se supprime pas tant que la cuve de rosé existe. Au débourbage, l’enzymage se prend dans La Réserve (produit, dose : le stock suit), et le soutirage arrive dans « À faire » à l’heure de votre repère."],
+      ['La mise en bouteille', "Le Chai › Bouteilles. « Préparer la mise » : une date, le compte à rebours (analyse à J-28, SO₂ à J-21, stabilités, filtration, mise en masse, CO₂ et oxygène la veille), coché tout seul par ce que l’appli sait déjà ; les formats prévus et les matières sèches face au stock de La Réserve (« Fournitures cave »). « Mettre en bouteille » : la date, le n° de lot (précédé de L), les formats, les contrôles ; ce qui reste en cuve attend une autre mise. Bouteilles, bouchons, capsules, étiquettes et cartons sortent de La Réserve ; « Annuler la dernière mise » défait tout."],
+      ['La mise en masse', "rassemble les fûts d’une cuvée dans une cuve, en un geste (Bouteilles, ou la feuille des gestes) : une cuve libre du parc ou l’une des siennes, le volume mesuré dans la cuve, les lies et pertes calculées. Les fûts reviennent au parc, vides, vieillis d’un vin ; le registre note un soutirage."],
+      ['Confier un geste', "« Confier », sur une ligne de « Aujourd’hui » de la Cave (administrateur) : le geste, la cuvée, le jour (matin, après-midi, la journée), la ou les personnes au travail ce jour-là, une consigne. Elles le voient sur leur Accueil, dans leur message du matin et dans « Pour toi » ; « Faire » ouvre le geste déjà rempli, et l’opération enregistrée le solde. « Pas fait » dit pourquoi, et le geste reste. « Ça lui prend la matinée » marque la demi-journée de cave au Planning."],
+      ['Coller, stabiliser, bâtonner', "la feuille des gestes du Chai est rangée par étape. Coller : les produits de La Réserve selon la couleur, l’allergène (lait, œuf) suivi jusqu’à la mise, le rappel du soutirage. Stabiliser : protéique ou tartrique, la méthode, le test. Bâtonner : le prochain arrive dans « À faire ». La suite d’une dégustation (soutirer, analyser…) y arrive aussi, jusqu’au geste qui la solde."],
       ['La couleur d’une cuvée', "la cuvée garde celle de sa cuve en quittant le Cuvier ; une cuvée créée au Chai la reçoit à « Nouvelle cuvée » (facultatif, modifiable dans sa fiche). Compléter un fût ou fusionner des cuves refuse un rouge versé dans un blanc et du blanc dans un rosé — un rosé ne se fait pas en mélangeant un rouge et un blanc ; du blanc versé dans un rouge se confirme (« C’est voulu »), après avoir vérifié le cahier des charges de l’appellation."],
       ['La couleur d’une cuve', "se propose d’après ses parcelles et se vérifie contre elles : un rouge ou un rosé sur des parcelles de cépage blanc est refusé ; un blanc de raisins noirs ou des raisins rouges et blancs dans la même cuve se confirment. Un blanc ou un rosé n’a pas de chapeau : ni pigeage ni remontage, sauf un blanc de macération confirmé à la mesure."],
       ['Au Cuvier', "une cuve de vinification peut être rattachée à une cuve du parc. C’est ce rattachement qui rend l’occupation juste : sans lui, le parc ne voit que Le Chai et annonce libre une cuve qui fermente. Facultatif — la saisie libre reste possible."],
@@ -3981,6 +3985,8 @@ const MV_POURQUOI = {
   ouillage:        { d: 'cave', n: 'Ouillage', q: 'Régulièrement, pendant l’élevage.', p: 'Le vin s’évapore à travers le bois : c’est la « part des anges ». On remplit les fûts à ras, car un fût qui n’est pas plein laisse l’air abîmer le vin.', v: 'Un vin protégé de l’oxydation.' },
   soufre:          { d: 'cave', n: 'Soufre', q: 'Au fil de l’élevage, d’après les analyses.', p: 'Un peu de soufre protège le vin de l’oxydation et des bactéries. La dose est mesurée et notée.', v: 'Un vin stable, qui vieillit bien.' },
   collage:         { d: 'cave', n: 'Traitement du vin', q: 'Avant la mise, si le vin en a besoin.', p: 'On ajoute une colle, de l’albumine par exemple, ou un produit autorisé, pour clarifier ou stabiliser le vin.', v: 'Un vin limpide, plus souple.' },
+  batonnage:       { d: 'cave', n: 'Bâtonnage', q: 'Pendant l’élevage sur lies, surtout les blancs, une fois par semaine ou moins.', p: 'On remet les lies fines en suspension avec un bâton. Elles nourrissent le vin et le protègent un peu de l’air.', v: 'Plus de gras, de rondeur en bouche.' },
+  stab:            { d: 'cave', n: 'Stabilisation', q: 'Avant la mise, après le collage.', p: 'On évite qu’un dépôt apparaisse en bouteille : le tartre au froid, le trouble des protéines, la reprise du gaz. Un test dit si le vin est prêt.', v: 'Une bouteille limpide chez le client.' },
   filtration:      { d: 'cave', n: 'Filtration', q: 'Juste avant la mise, si le domaine filtre.', p: 'On fait passer le vin à travers un filtre pour retirer les dernières particules.', v: 'Un vin limpide et stable en bouteille.' },
   assemblage:      { d: 'cave', n: 'Assemblage', q: 'Avant la mise.', p: 'On réunit des vins de plusieurs fûts ou cuves pour composer la cuvée.', v: 'L’équilibre et la signature de la cuvée.' },
   degustation:     { d: 'cave', n: 'Dégustation', q: 'Régulièrement, pendant l’élevage.', p: 'On goûte les vins pour suivre leur évolution et décider des soins : soutirer, ouiller, mettre en bouteille.', v: 'Chaque décision part du goût.' },
@@ -6258,6 +6264,7 @@ window._mvFenFr           = _mvFenFr;
 var MV_FUT_MOTIFS = {
   achat:       {sens:'entree', lbl:'Achat',                     ico:'\u{1F6D2}'},
   embouteille: {sens:'entree', lbl:'Mise en bouteille',         ico:'\u{1F37E}'},
+  masse:       {sens:'entree', lbl:'Mise en masse',             ico:'\u2261'},   // ★ CAVE-SUITE (§627) : les fûts vidés dans une cuve
   retrait:     {sens:'entree', lbl:'Retir\u00e9 d\u2019une cuv\u00e9e', ico:'\u{1F513}'},
   entonnage:   {sens:'sortie', lbl:'Entonnage',                 ico:'\u{1F377}'},
   vente:       {sens:'sortie', lbl:'Vente',                     ico:'\u{1F4B6}'},
@@ -6593,11 +6600,11 @@ function _mvFutEntrer(INTRANTS, lot, nb, motif, note){
 }
 
 // ── LA MISE EN BOUTEILLE rend tous les futs de la cuvee ───────────────────
-function _mvFutLiberer(cuvee, INTRANTS, note){
+function _mvFutLiberer(cuvee, INTRANTS, note, motif){   // ★ CAVE-SUITE (§627) : motif « masse » pour la mise en masse
   var rendus = 0;
   ((cuvee && cuvee.tonneaux) || []).forEach(function(t){
     var q = parseInt(t && t.nb, 10) || 0; if(q <= 0) return;
-    rendus += _mvFutEntrer(INTRANTS, t, q, 'embouteille',
+    rendus += _mvFutEntrer(INTRANTS, t, q, (motif === 'masse') ? 'masse' : 'embouteille',
       note || ((cuvee.nom||'') + (cuvee.millesime ? ' ' + cuvee.millesime : '')));
   });
   return rendus;

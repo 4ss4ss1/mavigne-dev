@@ -242,15 +242,17 @@ const T = {
   D11: ['le tri du cahier s’appelle « Contenance »', (A, S) => /\{ v:'volume',\s+lbl:'Contenance'/.test(S.cave)],
   D12: ['Le millésime (vieux millésimes figés) ne relit plus la contenance', (A, S) => !/cuveHl/.test(code(S.cave, '_mlChaine'))],
   D13: ['la mise en bouteille fige les étapes, sans la contenance', (A, S) => {
-    const f = code(S.cave, '_caveBtlConfirmYes'); return f.includes('entonneHl:ch.entonneHl') && !f.includes('cuveHl'); }],
+    // ★ CAVE-SUITE (§627) : la mise vit dans cave-mise.js (saveMise) — la mise finale fige la chaîne.
+    const f = code(S.cave, 'saveMise'); return f.includes('entonneHl:ch.entonneHl') && !f.includes('cuveHl'); }],
   D14: ['la carte des courbes compte l’entonné MESURÉ et propose de le saisir', (A, S) => {
     // ★ RANGE-1 (§335) : la chaine vit dans la fiche d'une cuvee (vue Cuvees) ; la regle, dans les cases.
     const f = code(S.cave, '_mlCuvFicheHtml') + code(S.cave, '_pcrbCvCellules');
     return f.includes("ch.entonneSrc==='mesure'") && f.includes('_vendDvolCorriger') && !f.includes('cuveHl'); }],
   D15: ['la saisie ouverte depuis Le millésime repeint l’écran d’où l’on vient', (A, S) =>
     code(S.cave, '_vendDvolCorriger').includes("if(_caveSectionAct()==='vendange'||typeof renderCave!=='function') renderVendCuves(); else renderCave();")],   // ★ CUV-DEC (§164) : la section se lit par le Chai
-  D16: ['l’onglet Bouteilles lit le vivant d’abord', (A, S) => code(S.cave, 'renderCaveBouteille').includes('var ch=_caveBilanChaine(c);')
-    && !code(S.cave, 'renderCaveBouteille').includes('c.bilan_perte||_caveBilanChaine(c)')],
+  // ★ CAVE-SUITE (§627) : l'onglet Bouteilles vit dans cave-mise.js ; chaque carte lit sa chaîne par _cmChaine.
+  D16: ['l’onglet Bouteilles lit le vivant d’abord', (A, S) => code(S.cave, '_cmChaine').includes('window._caveBilanChaine(c)')
+    && !code(S.cave, '_cmChaine').includes('bilan_perte') && code(S.cave, '_cmStockCarte').includes('_cmChaine(c)')],
   D17: ['une chaptalisation sans volume ne dit pas « 0,0 kg de sucre »', A =>
     /volume inconnu/.test(A._vendOpDet({ type: 'chaptalisation', degre: 1, kg_sucre: null }))
     && A._vendOpDet({ type: 'chaptalisation', degre: 1, kg_sucre: 12.34 }) === '12,3 kg de sucre'],

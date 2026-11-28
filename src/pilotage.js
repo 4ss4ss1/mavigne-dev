@@ -5867,7 +5867,7 @@ function _pilCk2Cave(V){
   var hlCu=cuves.reduce(function(a,c){ return a+(c.e==='vide'?0:(c.hl||0)); },0), capCu=cuves.reduce(function(a,c){ return a+(c.cap||0); },0);
   var nBtl=Y.btl.reduce(function(a,b){ return a+b.n; },0);
   // — la semaine : les journées de cave du Planning face aux gestes —
-  var lu=sem[0].lundi, LIBK={mesure:['relev\u00e9'], ouillage:['ouillage'], soutirage:['soutirage'], so2:['dose'], decuvage:['d\u00e9cuvage'], debourbage:['soutirage de jus clair','soutirages de jus clair'], alerte:['contr\u00f4le'], malo:['contr\u00f4le de malo','contr\u00f4les de malo'], labo:['fin de FA \u00e0 d\u00e9clarer','fins de FA \u00e0 d\u00e9clarer']};
+  var lu=sem[0].lundi, LIBK={mesure:['relev\u00e9'], ouillage:['ouillage'], soutirage:['soutirage'], so2:['dose'], decuvage:['d\u00e9cuvage'], debourbage:['soutirage de jus clair','soutirages de jus clair'], batonnage:['b\u00e2tonnage'], analyse:['analyse'], mise:['pr\u00e9paratif de mise','pr\u00e9paratifs de mise'], consigne:['geste confi\u00e9','gestes confi\u00e9s'], asm:['assemblage'], retfut:['retrait de f\u00fbt','retraits de f\u00fbts'], alerte:['contr\u00f4le'], malo:['contr\u00f4le de malo','contr\u00f4les de malo'], labo:['fin de FA \u00e0 d\u00e9clarer','fins de FA \u00e0 d\u00e9clarer']};
   var jours=[0,1,2,3,4].map(function(n){
     var x=add(lu,n), ev=[], cpt={};
     gestes(s0.filter(function(i){ return i&&i.date===x; })).forEach(function(i){ cpt[i.kind]=(cpt[i.kind]||0)+1; });

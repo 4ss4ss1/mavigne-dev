@@ -305,7 +305,9 @@ const T = {
     && A._caveJDet({ type: 'assemblage', data: { litres: 30, de_nom: 'Cuve 7', vers_nom: 'Ruchottes 2026' } }).includes('30\u00a0L de Cuve 7 \u2192 Ruchottes 2026')],
   K2: ['un assemblage ne se « modifie » pas : il se défait', (A, S) => {
     const j = code(S.cave, 'renderCaveJournal'), fi = code(S.cave, 'openCuveeDetail');
-    return j.includes("(op.type!=='assemblage'?'<button onclick=\"window.openOvCaveOp(") && fi.includes("if(op.type!=='assemblage') html+='<button onclick=\"window.openOvCaveOp"); }],
+    // ★ CAVE-SUITE (§627) : la mise en bouteille et la mise en masse rejoignent l'assemblage — elles ne se « modifient » pas.
+    return j.includes("(op.type!=='assemblage'&&op.type!=='miseenbouteille'&&!(op.data&&op.data.masse)?'<button onclick=\"window.openOvCaveOp(")
+      && fi.includes("if(op.type!=='assemblage'&&op.type!=='miseenbouteille'&&!(op.data&&op.data.masse)) html+='<button onclick=\"window.openOvCaveOp"); }],
   K3: ['la cuvée où l’on a puisé voit l’assemblage dans sa fiche', (A, S) =>
     code(S.cave, 'openCuveeDetail').includes("(op.type==='assemblage'&&op.data&&op.data.de_type==='cuvee'&&op.data.de_id===cuvId)")],
   // L — l'accompagnement

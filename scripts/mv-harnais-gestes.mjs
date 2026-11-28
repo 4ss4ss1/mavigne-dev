@@ -39,8 +39,10 @@ function suite(S) {
     T('index : icône #ic-' + ic + ' déclarée', X.includes('<symbol id="ic-' + ic + '"'));
     for (const motif of ["'" + k + "'", k + ':']) T('cave.js : « ' + motif + ' » présent', C.includes(motif));
   }
-  T('selCaveOpType connaît les huit types', /\['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'\]\.forEach\(function\(t\) \{/.test(C));
-  T('export : « Tous types » compte huit types', C.includes("_caveExpTypes.size===8?'Tous types'"));
+  // ★ CAVE-SUITE (§627) : la feuille range bâtonner, coller, stabiliser ; l'export garde le bâtonnage et la mise (dix types).
+  T('selCaveOpType connaît ses onze boutons', /\['ouillage','batonnage','soutirage','soufre','analyse','degustation','collage','stab','traitement','filtration','autre'\]\.forEach\(function\(t\) \{/.test(C));
+  T('export : « Tous types » compte dix types, bâtonnage et mise compris', C.includes("_caveExpTypes.size===_CAVE_EXP_N?'Tous types'") && C.includes('var _CAVE_EXP_N = 10;')
+    && (C.match(/\['ouillage','batonnage','soutirage','soufre','analyse','degustation','traitement','filtration','miseenbouteille','autre'\]/g) || []).length === 3);
   T('saveCaveOp passe par _copNouvData', /_caveOpType==='filtration'\)\{\s*var _nd=_copNouvData\(cuvees\);/.test(C));
   T('une dégustation porte sur UNE cuvée (toggleCopCuvee)', C.includes("function toggleCopCuvee(id){if(_caveOpType==='degustation'){_copAllCuv=false;_copCuvSel=new Set([id]);"));
   T('« goûter la suivante » câblé', X.includes('id="cop-dg-next"') && C.includes('_copDgOuvrirSuivante(firstId)'));

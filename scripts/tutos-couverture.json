@@ -1,5 +1,5 @@
 {
-  "plafond": 785,
+  "plafond": 781,
   "exempts": {
     "_rfcGeste": "RENF-4 (§620) : la feuille « Créer le contrat » (Pilotage › Décider › Renfort, une ligne) — ses boutons créent des comptes et des fiches dans l’équipe (createAuthAccount) : rien à jouer sur le domaine d’entraînement sans écrire dans l’équipe ; le tuto se fera avec une équipe d’entraînement qui l’accepte (mv-harnais-renf4 joue la feuille)",
     "_rfcSaisie": "RENF-4 (§620) : la saisie des prénoms et des adresses de la même feuille — même raison que _rfcGeste",
@@ -89,6 +89,28 @@
     "_vendFusCoulOkSet": "COULEUR-1 (§625) : « C’est voulu » sur une cuve de blanc réunie à une de rouge — rare, et l’encadré qui le propose dit lui-même quoi vérifier",
     "_debEnzCalc": "PRATIQUES-3 (§626) : l’enzymage du débourbage (produit de La Réserve, dose) — facultatif, la même règle que l’opération « Enzymes » ; le domaine fictif n’a pas d’intrant œnologique",
     "_cuvEffSet": "PRATIQUES-3 (§626) : « Base d’un effervescent » sur une cuvée de blanc ou de rosé — rare (un crémant), et l’encadré du mélange dit ce qu’elle change",
-    "_cuvCoulOkSet": "PRATIQUES-3 (§626) : « C’est voulu » quand une cuvée change de couleur après un apport — rare, et l’encadré qui le propose dit lui-même quoi vérifier"
+    "_cuvCoulOkSet": "PRATIQUES-3 (§626) : « C’est voulu » quand une cuvée change de couleur après un apport — rare, et l’encadré qui le propose dit lui-même quoi vérifier",
+    "_cmMsChoix": "CAVE-SUITE (§627) — le produit d’une matière sèche : une liste à choisir, dite dans la feuille de la mise",
+    "_cmCarton": "CAVE-SUITE (§627) — cartons de 6 ou de 12 : deux boutons, dits sur place",
+    "_cmCocher": "CAVE-SUITE (§627) — cocher un contrôle du compte à rebours : la ligne dit « cocher »",
+    "_mpDate": "CAVE-SUITE (§627) — la date de mise : un champ date ; le tuto « mise » garde la date proposée",
+    "_mpPar": "CAVE-SUITE (§627) — le domaine ou le camion de mise : deux boutons",
+    "_miPar": "CAVE-SUITE (§627) — le domaine ou le camion de mise : deux boutons",
+    "_mpFmt": "CAVE-SUITE (§627) — les formats prévus : des champs nombre, comme ceux de la mise (tuto « mise »)",
+    "_mpRetirer": "CAVE-SUITE (§627) — retirer la date de mise : rare, le bouton le dit",
+    "_miFmt": "CAVE-SUITE (§627) — la feuille se redessine à la sortie du champ ; la frappe est couverte par le tuto « mise » (_miFmtLive)",
+    "_miFinSet": "CAVE-SUITE (§627) — ce qui reste en cuve, ou en lies : deux boutons, dits sous le résultat",
+    "_cmStockCorriger": "CAVE-SUITE (§627) — corriger le stock d’un format : un champ nombre, rare",
+    "_cmNbCorriger": "CAVE-SUITE (§627) — corriger un stock de bouteilles d’avant les formats : un champ nombre, rare",
+    "_cmMiseAnnuler": "CAVE-SUITE (§627) — annuler la dernière mise : administrateur, rare, confirmé",
+    "_cmOpSet": "CAVE-SUITE (§627) — les options de Coller, Stabiliser et Bâtonner : boutons et champs de la feuille des gestes, dits sur place",
+    "_pcRetirer": "CAVE-SUITE (§627) — retirer un geste confié : administrateur, rare",
+    "_pcPas": "CAVE-SUITE (§627) — « Pas fait » et son motif : trois boutons, dits sur place",
+    "_pcPasMotif": "CAVE-SUITE (§627) — « Pas fait » et son motif : trois boutons, dits sur place",
+    "savePcPas": "CAVE-SUITE (§627) — « Pas fait » et son motif : trois boutons, dits sur place",
+    "_pcFaire": "CAVE-SUITE (§627) — « Faire » ouvre la feuille du geste, que ses tutos enseignent déjà (ouiller, soutirer…)",
+    "_pcAllerCave": "CAVE-SUITE (§627) — le lien « Voir » de la carte de l’Accueil vers la Cave",
+    "_cmOpMasse": "CAVE-SUITE (§627) — la mise en masse depuis la feuille des gestes ouvre la feuille du tuto « masse »",
+    "_cmQMan": "CAVE-SUITE (§627) — une quantité de matière sèche corrigée à la main : un champ nombre, rare"
   }
 }

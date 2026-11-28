@@ -136,7 +136,8 @@ const T = {
   C6: ['« au moins un tonneau » reste la règle des fûts (et d’une cuvée modifiée sans cuve)', (A, S) =>
     fn(S.cave, 'saveCuvee').includes("if(!nbTotal && !_cvPret && !(_exC && (_exC.cuves||[]).length)){showToast('Indiquez au moins un tonneau'")],
   C7: ['« Prêt à mettre en bouteille » dit la cuve d’une cuvée en cuve, pas « 0 fûts »', (A, S) => {
-    const f = fn(S.cave, 'renderCaveBouteille'); return f.includes("(_caveContenantsHtml(c)||'aucun contenant')+' · '+_mvF1(hl)+' hL élevés") && !f.includes("_caveNbTonneaux(c)+' fûts · '"); }],
+    // ★ CAVE-SUITE (§627) : l'onglet Bouteilles vit dans cave-mise.js (_cmBouteilles) ; la règle ne change pas.
+    const f = fn(S.cave, '_cmBouteilles'); return f.includes("window._caveContenantsStr(c):'')||'aucun contenant')+' · '+_cmV1(hl)+' hL élevés") && !f.includes("fûts · '"); }],
   // D — la fenêtre repart à zéro ; une cuvée existante n'a pas le choix
   D1: ['chaque ouverture repart à zéro (fûts, rien de choisi)', (A, S) => {
     const o = fn(S.cave, 'openOvCavee'), r = fn(S.cave, '_cuvContReset');
@@ -185,7 +186,7 @@ const CASSES = [
   ['cave', "if(_cuvCuveRef===null && !_cuvCuvesLibres().length) _cuvCuveRef='';", "void 0;", 'D3', 'un choix à une seule option'],
   ['idx', '<div id="cuv-cuve-body"></div>', '', 'A3', 'la place de la cuve oubliée'],
   ['cave', "window._cuvNvMat            = _cuvNvMat;\n", "", 'E1', 'un geste non exposé'],
-  ['cave', "(_caveContenantsHtml(c)||'aucun contenant')+' · '+_mvF1(hl)+' hL élevés", "_caveNbTonneaux(c)+' fûts · '+_mvF1(hl)+' hL élevés", 'C7', '« 0 fûts » revenu aux Bouteilles'],
+  ['cave', "window._caveContenantsStr(c):'')||'aucun contenant')+' · '+_cmV1(hl)+' hL élevés", "window._caveContenantsStr(c):'')||'aucun contenant')+' · '+_cmNbFuts(c)+' fûts · '+_cmV1(hl)+' hL élevés", 'C7', '« 0 fûts » revenu aux Bouteilles'],
   ['tu', "      { type: 'taper', facultatif: true, cible: '[data-tuto=\"cuv.vol\"]'", "      { type: 'taper', cible: '[data-tuto=\"cuv.vol\"]'", 'F4', 'le volume proposé redevient une étape obligatoire (le miroir sauterait)']
 ];
 

@@ -896,6 +896,8 @@ export const HARNAIS = [
   ['node scripts/mv-harnais-couleur1.mjs --contre'],  //   refusés (rouge dans un blanc, blanc dans un rosé) JOUÉS, la fusion et l'assemblage ; la liste des tutos rangée par module
   ['node scripts/mv-harnais-pratiques3.mjs'],          // PRATIQUES-3 (§626) : la saignée qui crée la cuve de rosé, l'enzymage pris dans La Réserve, le soutirage
   ['node scripts/mv-harnais-pratiques3.mjs --contre'], //   dans « À faire », la base d'un effervescent, une cuvée qui change de couleur — JOUÉS, et chaque refus avant d'écrire
+  ['node scripts/mv-harnais-cavesuite.mjs'],           // CAVE-SUITE (§627) : la mise en masse, la mise en bouteille (en plusieurs fois, matières sèches), les rappels
+  ['node scripts/mv-harnais-cavesuite.mjs --contre'],  //   du Chai, coller et stabiliser, confier un geste (soldé par l'opération) — JOUÉS, et chaque refus avant d'écrire
   ['node scripts/mv-harnais-tarif1.mjs'],             // TARIF-1 (§608) : la grille dite pareil partout — _planModule JOUÉE comparée à la console, à essai.html,
   ['node scripts/mv-harnais-tarif1.mjs --contre'],    //   aux cartes, au guide, à llms.txt ; 250 € ; plus d'offre de lancement ; téléphone et WhatsApp ; le modèle Excel rejoué octet pour octet
   ['node scripts/mv-harnais-frais1.mjs'],              // FRAIS-1 (§595) : les frais à rembourser — le barème (9 avril 2026), le calcul au fil de l'année, le mois

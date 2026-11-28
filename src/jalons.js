@@ -517,7 +517,9 @@ function _mvCaveNoteRender() {
     .concat(_mvCuvierNotees(u.nom, (window.CAVE_VENDANGE && window.CAVE_VENDANGE.cuves_vinif) || [], auj, 3))   // PRESENCE-2 (§346)
     .filter(function (o) { return vus.indexOf(o.id) < 0; })
     .sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); }).slice(0, 2);
-  if (!ops.length) { box.innerHTML = ''; return; }
+  // ★ CAVE-SUITE (§627) — les gestes de cave confiés à la personne, du jour et en retard (cave-mise.js) : en tête, sans « Vu »
+  var conf = (typeof window._pcAccueilHtml === 'function') ? window._pcAccueilHtml(u.nom) : '';
+  if (!ops.length) { box.innerHTML = conf; return; }
   var cuvees = (window.CAVE_ELEVAGE && window.CAVE_ELEVAGE.cuvees) || [];
   box.innerHTML = ops.map(function (o) {
     if (o.type === 'chapeau') {   // ★★ PRESENCE-2 (§346) : un relevé du Cuvier
@@ -539,6 +541,7 @@ function _mvCaveNoteRender() {
       + (pq ? '<div class="hcn-pq"><b>Pourquoi ?</b> ' + esc(pq) + '</div>' : '')
       + '<button type="button" class="hcn-vu" data-id="' + _mvJalEnc(o.id) + '" onclick="_mvCaveNoteVu(this.dataset.id)">Vu</button></div>';   // l'identifiant passe par data-id, jamais dans le code de l'attribut
   }).join('');
+  if (conf) box.innerHTML = conf + box.innerHTML;   // ★ CAVE-SUITE (§627)
 }
 // ★★ PREMIERES-1 (§345) — la frise dans « Ma trace », au-dessus de « Mes jalons ».
 function _mvPremieresSection() {

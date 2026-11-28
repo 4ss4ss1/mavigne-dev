@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { cave: lire('src/cave.js'), css: lire('src/styles.css'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/08-cave.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
+const S0 = { cave: lire('src/cave.js') + '\n' + lire('src/cave-mise.js'),   /* CAVE-SUITE (§627) : l'onglet Bouteilles vit dans cave-mise.js */ css: lire('src/styles.css'), utils: (lire('src/utils.js') + '\n' + lire('src/whats-new.js')), guide: lire('guide/08-cave.html'), liste: lire('scripts/mv-harnais-liste.mjs') };
 function corps(src, nom) { const i = src.indexOf('function ' + nom + '('); if (i < 0) throw new Error('fonction absente : ' + nom); const j = src.indexOf('{', i); let p = 0, k = j; for (; k < src.length; k++) { const c = src[k]; if (c === '{') p++; else if (c === '}' && --p === 0) break; } return src.slice(i, k + 1); }
 let ok = 0, ko = 0;
 const t = (nom, cond, det) => { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + nom + (det ? '\n      → ' + det : '')); } };
@@ -30,7 +30,8 @@ function jouer(S) {
   t('② plus de lien « Fiche complète » dans la seconde fiche (elle ne sert plus aux cuvées du Chai)', !/Fiche compl\\u00e8te de la cuv/.test(C));
   t('③ la fiche écrite dans un panneau cherche ses éléments DANS ce panneau (Chai et Millésime ont chacun le leur)', /bodyEl=_pn\.querySelector\('#cuvf-bd'\);/.test(oc) && /var tEl=dans\?_pn\.querySelector\('#cuvf-t'\)/.test(oc) && !/getElementById\(dans\?'cuvf-/.test(oc));
   t('③ l’en-tête de fiche a le même style dans le panneau du Millésime', S.css.includes(':is(#trac-fiche,#ph-fiche,#cat-fiche,#chai-fiche,#ml-fiche) .trf-hd{') && /#ml-fiche \.catf-bd\{/.test(S.css));
-  t('④ une cuvée embouteillée mène à sa fiche (Bouteilles)', /Mis en bouteille'[\s\S]{0,200}onclick="openCuveeDetail\(this\.getAttribute\(\\'data-id\\'\),null,\\'vol\\'\)">Fiche de la cuv/.test(C));
+  // ★ CAVE-SUITE (§627) : la carte d'une cuvée en stock (_cmStockCarte, cave-mise.js) dit lots et formats avant le bouton.
+  t('④ une cuvée embouteillée mène à sa fiche (Bouteilles)', /Mis en bouteille'[\s\S]{0,900}onclick="openCuveeDetail\(this\.getAttribute\(\\'data-id\\'\),null,\\'vol\\'\)">Fiche de la cuv/.test(C));
   t('⑤ la nouveauté et le guide le disent ; la liste joue ce fichier', /titre: 'Cave : une cuvée s’ouvre dans sa fiche, depuis Le Millésime et les bouteilles'/.test(S.utils) && /<b>Fiche de la cuvée<\/b>/.test(S.guide) && S.liste.indexOf("mv-harnais-caverange3.mjs'") > 0 && S.liste.indexOf("mv-harnais-caverange3.mjs --contre'") > 0);
 }
 if (!CONTRE) {

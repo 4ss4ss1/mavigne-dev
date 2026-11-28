@@ -17,7 +17,8 @@ const COCKPIT = fs.readFileSync('src/cockpit.js', 'utf8');
    Pilotage aurait dit « fiche orpheline » sur une pastille bien reelle. */
 // ★ MATU-1 (§366) : depuis CUV-DEC (§164), Le Cuvier vit dans cuvier.js. Lire cave.js seul faisait passer
 //   pour orpheline toute bulle posée au Cuvier (vécu : « cave.maturite »).
-const CAVE = fs.readFileSync('src/cave.js', 'utf8') + '\n' + fs.readFileSync('src/cuvier.js', 'utf8');
+const CAVE = fs.readFileSync('src/cave.js', 'utf8') + '\n' + fs.readFileSync('src/cuvier.js', 'utf8')
+  + '\n' + fs.readFileSync('src/cave-mise.js', 'utf8');   // ★ CAVE-SUITE (§627) : l'onglet Bouteilles pose sa pastille (cave.btl) depuis cave-mise.js
 /* ★ Lot AXE-1 : le catalogue des documents vit dans reglages.js, et ses panneaux
    de choix posent leurs pastilles (doc.fenetres, doc.journal). Meme cause que la
    ligne au-dessus, deux lots plus tard — quand une surface pose une pastille,

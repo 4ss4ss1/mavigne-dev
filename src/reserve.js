@@ -178,17 +178,20 @@ function _consoCuvierEstime(pid){
 }
 function _conso(p){
   var src=p.conso_src||'registre';
-  if(src==='manual'){ return {q:(p.conso_manuel||0), known:true}; }
-  if(src==='cuvier'){ return {q:_consoCuvier(p.id,null), known:true}; }
+  /* ★ CAVE-SUITE (§627) — les matières sèches sorties par les mises en bouteille (cave-mise.js), ajoutées pour TOUTE source :
+     la saisie manuelle compte ce qui sort hors des mises. Lues à chaque calcul, jamais écrites dans le produit. */
+  var _mi=(typeof window!=='undefined'&&typeof window._cmConsoMise==='function')?(window._cmConsoMise(p&&p.id)||0):0;
+  if(src==='manual'){ return {q:(p.conso_manuel||0)+_mi, known:true}; }
+  if(src==='cuvier'){ return {q:_consoCuvier(p.id,null)+_mi, known:true}; }
   if(src==='cave_so2'){
     var CE=window.CAVE_ELEVAGE;
-    if(!CE||!CE.operations) return {q:0, known:true};
+    if(!CE||!CE.operations) return {q:_mi, known:true};
     var g=0;
     CE.operations.forEach(function(op){
       if(op&&op.data&&op.data.so2_total_g) g+=parseFloat(op.data.so2_total_g)||0;
       else if(op&&op.data&&op.data.so2&&op.data.so2.total_g) g+=parseFloat(op.data.so2.total_g)||0;
     });
-    return {q: g/1000, known:true}; // g → kg
+    return {q: g/1000+_mi, known:true}; // g → kg
   }
   // 'registre' phyto : dose_val × surface, uniquement pour les entrées structurées
   var T=window.TRAITEMENTS||[];
@@ -203,7 +206,7 @@ function _conso(p){
     if(base==='g') q/=1000;
     tot+=q;
   });
-  return {q:tot, known:got}; // known=false tant qu'aucune entrée n'a de dose_val
+  return {q:tot+_mi, known:got||_mi>0}; // known=false tant qu'aucune entrée n'a de dose_val
 }
 // ★ REG27-1A (§572) : la surface TRAITÉE (window._mvSurfT, utils.js) — une parcelle traitée en partie ne consomme que ses
 //   hectares. Repli : l'ancien calcul (la parcelle entière), si utils.js est d'avant ce lot.
@@ -912,7 +915,7 @@ window._rsvConsoEdit=function(id){
   window.openPrompt({
     icone:'✏️',
     titre:'Consommé cette saison',
-    sub:p.nom,                       // pose via textContent : pas d'echappement a faire ici
+    sub:p.nom+((typeof window._cmConsoMise==='function'&&window._cmConsoMise(p.id)>0)?' — hors mises en bouteille ('+window._cmConsoMise(p.id)+' sortis par les mises, comptés à part)':''),   // ★ CAVE-SUITE (§627) ; pose via textContent
     unite:_rsvU(p.unite,2),
     valeur:(p.conso_manuel||0),
     cb:function(v){

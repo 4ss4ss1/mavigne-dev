@@ -17,6 +17,9 @@
 
 import { isAdmin, isSaisonnier, canWrite, showToast, _escHtml, _escAttr,
          _mvIcon, _mvSetIcon, _mvIconInline } from './utils.js';
+// ★ CAVE-SUITE (§627) : la mise en masse, la mise en bouteille, les rappels du Chai, le parcours d'une cuvée et les gestes
+//   confiés vivent dans cave-mise.js (ce fichier est au barème) ; il lit la Cave par window (le bloc CAVE-SUITE plus bas).
+import './cave-mise.js';
 // ★ SYNC-1 (26/09/2026) — passer par window.showSyncBadge, jamais par l'import de utils.js.
 //   app.js enveloppe window.showSyncBadge pour piloter le POINT de synchro ; l'import
 //   direct appelait la version brute et contournait l'enveloppe : la pilule changeait,
@@ -49,7 +52,9 @@ var _jFilter = 'tous';    // filtre journal cave: tous|ouillage|soutirage|soufre
 var _caveAnaLinkedOpIds = [];  // IDs ops s\u00E9lectionn\u00E9es pour rattachement PDF (multi)
 var _caveExpAllCuv = true;     // export: toutes cuv\u00E9es
 var _caveExpCuvSel = new Set(); // export: cuv\u00E9es s\u00E9lectionn\u00E9es
-var _caveExpTypes = new Set(['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre']); // export: types actifs
+var _caveExpTypes = new Set(['ouillage','batonnage','soutirage','soufre','analyse','degustation','traitement','filtration','miseenbouteille','autre']); // export: types actifs
+// ★ CAVE-SUITE (§627) — le bâtonnage et la mise en bouteille sont des opérations du registre : l'export les garde (dix types).
+var _CAVE_EXP_N = 10;
 var _convMode = 'liq2past'; // convertisseur SO2
 var _convDilution = 5;
 
@@ -752,7 +757,7 @@ function _caveFmlLabel(v) {
 
 function _caveTypeLabel(type) {
   // ROB-2 : une opération sans type (fiche abîmée) s'affichait « undefined » dans le journal.
-  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'}[type]||(type?String(type):'Op\u00e9ration');
+  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre',batonnage:'B\u00e2tonnage',miseenbouteille:'Mise en bouteille'}[type]||(type?String(type):'Op\u00e9ration');
 }
 
 // \u2500\u2500 helpers multi-cuv\u00E9es formulaire op\u00E9ration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -808,6 +813,7 @@ function _copUpdateChips(){
     b.classList.toggle('on',!!on);b.setAttribute('aria-pressed',on?'true':'false');
   });
   _copNouvSync(); // ★ GESTES-1
+  if(typeof window._cmOpDim==='function'){ window._cmOpDim(); window._cmOpExtra(); }   // ★ CAVE-SUITE (§627)
 }
 function _copUpdateFutsSummary(){
   var n=_copGetNbFuts(),el=document.getElementById('cop-cuvees-summary');if(!el)return;
@@ -1651,6 +1657,7 @@ function openOvCaveOp(opId) {
   _copSyncSoufreUI();
   var nEl=document.getElementById('cop-notes');if(nEl)nEl.value='';
   _copNouvReset(); // ★ GESTES-1
+  if(typeof window._cmOpPrefill==='function') window._cmOpPrefill(null);   // ★ CAVE-SUITE (§627)
   var idEl=document.getElementById('cop-op-id');if(idEl)idEl.value=opId||'';
   var titleEl=document.getElementById('ov-cave-title');
   if(titleEl)titleEl.textContent=opId?'Modifier op\u00e9ration':'Nouvelle op\u00e9ration';
@@ -1658,7 +1665,7 @@ function openOvCaveOp(opId) {
     var op=CAVE_ELEVAGE.operations.find(function(o){return o.id===opId;});
     if(op){
       if(dateEl)dateEl.value=op.date;
-      selCaveOpType(op.type);
+      selCaveOpType((typeof window._cmOpPrefill==='function')?(window._cmOpPrefill(op)||op.type):op.type);   // ★ CAVE-SUITE (§627) : un collage rouvre sur « Coller »
       var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
       // On se place sur le millesime de l'operation editee, sinon ses cuvees
       // ne seraient meme pas affichees. Une operation mixte heritee du passe
@@ -1706,6 +1713,7 @@ function openOvCaveOp(opId) {
         _copUpdateSoufreCalc();
       }
       if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvPrefill(op); // ★ GESTES-1
+      if(typeof window._cmOpExtra==='function') window._cmOpExtra();   // ★ CAVE-SUITE (§627)
       if(nEl)nEl.value=op.notes||'';
       _copIntSel=(op.intervenants&&op.intervenants.length)?op.intervenants.slice():(op.operateur?[op.operateur]:_copIntSel);
       _copRenderIntChips();
@@ -1738,11 +1746,16 @@ function openOvCaveOp(opId) {
 // remplac\u00E9 par syst\u00E8me chips multi-cuv\u00E9es
 
 function selCaveOpType(type) {
+  /* ★ CAVE-SUITE (§627) — la feuille rangée par étape : « Coller » et « Stabiliser » sont des traitements (nature col / sta),
+     « Bâtonner » un geste à lui ; ce qui leur est propre vit dans cave-mise.js (_cmOpSel, _cmOpExtra, _cmOpData). */
+  var vue=type;
+  if(typeof window._cmOpSel==='function') type=window._cmOpSel(vue);
+  if(type==='traitement'){ if(vue==='collage') _copTr.nature='col'; else if(vue==='stab') _copTr.nature='sta'; else if(_copTr.nature==='col'||_copTr.nature==='sta') _copTr.nature='aci'; }
   _caveOpType=type;
-  var _copPq=document.getElementById('cop-pq');if(_copPq)_copPq.innerHTML=window._mvPqBtn?window._mvPqBtn(type,'cave'):'';   // POURQUOI-1 (§336)
-  ['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'].forEach(function(t) {
+  var _copPq=document.getElementById('cop-pq');if(_copPq)_copPq.innerHTML=window._mvPqBtn?window._mvPqBtn(vue,'cave'):'';   // POURQUOI-1 (§336) — CAVE-SUITE : la fiche du geste choisi (Coller, Stabiliser), pas celle du traitement
+  ['ouillage','batonnage','soutirage','soufre','analyse','degustation','collage','stab','traitement','filtration','autre'].forEach(function(t) {
     var btn=document.getElementById('cot-'+t);
-    if(btn) btn.classList.toggle('sel',t===type);
+    if(btn) btn.classList.toggle('sel',t===vue);
     var fields=document.getElementById('cop-fields-'+t);
     if(fields) fields.style.display=t===type?'block':'none';
   });
@@ -1757,6 +1770,7 @@ function selCaveOpType(type) {
   var _nx=document.getElementById('cop-dg-next'); if(_nx) _nx.style.display=(type==='degustation')?'':'none';
   var _ne=document.getElementById('cop-notes'); if(_ne) _ne.placeholder=(type==='degustation')?'Nez, bouche, finale\u2026':'Observations\u2026';
   _copUpdateChips();
+  if(typeof window._cmOpExtra==='function') window._cmOpExtra();   // ★ CAVE-SUITE (§627)
 }
 
 /* ════ ★★ GESTES-1 (§239) — DÉGUSTATION, TRAITEMENT, FILTRATION ════════════════
@@ -1856,18 +1870,19 @@ function _copDgOuvrirSuivante(prevId){
 }
 function _copTrSync(){
   var n=document.getElementById('cop-tr-nat');
-  if(n) n.innerHTML=_COP_TR_NAT.map(function(x){ return _copTogH(_copTr.nature===x[0],_escHtml(x[1]),"_copTrNat('"+x[0]+"')",'1 1 30%'); }).join('');
+  var _vue=(typeof window._cmOpVue==='function')?window._cmOpVue():'';   // ★ CAVE-SUITE (§627)
+  if(n) n.innerHTML=_COP_TR_NAT.filter(function(x){ return _vue!=='traitement'||(x[0]!=='col'&&x[0]!=='sta'); }).map(function(x){ return _copTogH(_copTr.nature===x[0],_escHtml(x[1]),"_copTrNat('"+x[0]+"')",'1 1 30%'); }).join('');
   var s=document.getElementById('cop-tr-prod');
   if(s){
-    var prods=_copTrProds();
-    s.innerHTML='<option value="">\u2014 Aucun produit (hors bilan matière) \u2014</option>'+prods.map(function(p){ return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.nom)+'</option>'; }).join('');
+    var prods=_copTrProds(), _po=(_vue==='collage'&&typeof window._cmColleOpts==='function')?window._cmColleOpts(prods):prods.map(function(p){ return {id:p.id, lbl:p.nom}; });
+    s.innerHTML='<option value="">\u2014 Aucun produit (hors bilan matière) \u2014</option>'+_po.map(function(p){ return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.lbl)+'</option>'; }).join('');
     if(!_copTrProdObj()) _copTr.prod='';
     s.value=_copTr.prod;
   }
   _copTrCalc();
 }
 window._copTrNat=function(v){ _copTr.nature=v; _copTrSync(); };
-window._copTrProd=function(v){ _copTr.prod=String(v||''); _copTrCalc(); };
+window._copTrProd=function(v){ _copTr.prod=String(v||''); _copTrCalc(); if(typeof window._cmOpExtra==='function') window._cmOpExtra(); };
 window._copTrVolEdit=function(){ _copTr.volMan=true; _copTrCalc(); };
 window._copTrCalc=_copTrCalc;
 function _copTrCalc(){
@@ -2106,9 +2121,12 @@ async function saveCaveOp() {
     var _nd=_copNouvData(cuvees);   // ★ GESTES-1
     if(!_nd) return;
     opData=_nd;
+  } else if(_caveOpType==='batonnage'){   // ★ CAVE-SUITE (§627)
+    opData={};
   } else {
     opData={desc:((document.getElementById('cop-autre-desc')||{}).value||'').trim()};
   }
+  if(typeof window._cmOpData==='function'){ opData=window._cmOpData(_caveOpType,opData,date); if(!opData) return; }   // ★ CAVE-SUITE (§627) : ⚠ AVANT toute écriture
   var firstId=cuvIds[0]||null;
   var existId=(document.getElementById('cop-op-id')||{}).value;
   if(existId){
@@ -2227,6 +2245,11 @@ function saveCuvee() {
          fois. S'il en manque (repartis dans une autre cuvee, vendus, retires), on
          REFUSE, avant toute ecriture. Une mise en bouteille annulee n'a pas eu
          lieu : ses traces (bouteilles, date, bilan) partent avec elle. */
+      /* ★ CAVE-SUITE (§627) — une cuvée mise par la feuille « Mettre en bouteille » porte ses mises (formats, lot, matières
+         sèches) : elle se remet en élevage en annulant sa dernière mise (onglet Bouteilles), qui défait tout. */
+      if(statut!=='embouteille' && _prevC.statut==='embouteille' && (_prevC.mises||[]).length){
+        showToast('Annulez sa dernière mise dans l\u2019onglet Bouteilles : elle remet tout en place','#B85A1A'); return;
+      }
       if(statut!=='embouteille' && _prevC.statut==='embouteille'
          && typeof window._mvFutReprendre==='function' && window.INTRANTS){
         var _dsp=window._mvFutDispo({tonneaux:tonneaux}, window.INTRANTS);
@@ -2586,14 +2609,15 @@ function renderCaveJournal() {
     byMonth[k].sort(function(a,b){return b.date>a.date?1:-1;}).forEach(function(op){
       var m=opMeta[op.type]||opMeta.autre;
       html+='<div class="mvc-jitem"><div class="mvc-jdot" style="background:'+m.col+'"></div><div class="mvc-jcard">';
-      html+='<div class="mvc-jhead"><span class="mvc-jico">'+_mvIcon(m.ico,18)+'</span><span class="mvc-jtype">'+_caveTypeLabel(op.type)+'</span>'+_caveWhoHtml(op)+'</div>';
+      html+='<div class="mvc-jhead"><span class="mvc-jico">'+_mvIcon(m.ico,18)+'</span><span class="mvc-jtype">'+((window._cmOpTitre&&window._cmOpTitre(op))||_caveTypeLabel(op.type))+'</span>'+_caveWhoHtml(op)+'</div>';
       html+=_caveCuvPillsHtml(op);
       var det=_caveJDet(op); if(det) html+=det;
       if(op.notes&&op.type!=='analyse') html+='<div class="mvc-jnote">'+_escHtml(op.notes)+'</div>';
       html+='<div class="mvc-jdate">'+_caveDateFr((op.type==='analyse')?(op.date_analyse||op.date):op.date)+'</div>';
       if(op._src==='op'&&typeof isAdmin==='function'&&isAdmin()){
         // ★ ASM-1 — un assemblage ne se modifie pas : il se defait (la corbeille), puis se refait.
-        html+='<div class="mvc-jact">'+(op.type!=='assemblage'?'<button onclick="window.openOvCaveOp(\''+op.id+'\')" class="mvc-jact-e">\u270f\ufe0f Modifier</button>':'')+'<button onclick="window.deleteCaveOp(\''+op.id+'\')" class="mvc-jact-d">\ud83d\uddd1</button></div>';
+        // ★ CAVE-SUITE (§627) — une mise en bouteille ne se modifie ni ne se supprime ici (elle s'annule aux Bouteilles) ; une mise en masse ne se modifie pas.
+        html+='<div class="mvc-jact">'+(op.type!=='assemblage'&&op.type!=='miseenbouteille'&&!(op.data&&op.data.masse)?'<button onclick="window.openOvCaveOp(\''+op.id+'\')" class="mvc-jact-e">\u270f\ufe0f Modifier</button>':'')+(op.type!=='miseenbouteille'?'<button onclick="window.deleteCaveOp(\''+op.id+'\')" class="mvc-jact-d">\ud83d\uddd1</button>':'')+'</div>';
       }
       html+='</div></div>';
     });
@@ -2806,7 +2830,8 @@ var _CDV=[['elev','\u00c9levage'],['ana','Analyses'],['vol','Volumes & origine']
 function _cdvHtml(cuv, elevH, anaH, volet){
   var on=(_CDV.some(function(v){ return v[0]===volet; }))?volet:'elev';
   var secs={elev:elevH, ana:anaH||'<div class="pcav-vide">Aucune analyse pour cette cuv\u00e9e.</div>', vol:_cdvVolumesHtml(cuv), dgn:_cdvDiagHtml(cuv)};
-  var h='<div class="cdv"><div class="mvcm-chips cdv-tabs" role="tablist" aria-label="Volets de la fiche">';
+  // ★ CAVE-SUITE (§627) : le parcours de la cuvée en tête de sa fiche, au-dessus des volets, et son prochain geste
+  var h=((typeof window._cmParcoursHtml==='function')?window._cmParcoursHtml(cuv):'')+'<div class="cdv"><div class="mvcm-chips cdv-tabs" role="tablist" aria-label="Volets de la fiche">';
   _CDV.forEach(function(v){ h+='<button type="button" role="tab" class="mvcm-chip'+(v[0]===on?' on':'')+'" aria-selected="'+(v[0]===on)+'" data-k="'+v[0]+'" onclick="_cdvShow(this)">'+v[1]+'</button>'; });
   h+='</div>';
   _CDV.forEach(function(v){ h+='<div class="cdv-sec" data-k="'+v[0]+'"'+(v[0]===on?'':' hidden')+'>'+secs[v[0]]+'</div>'; });
@@ -2944,18 +2969,18 @@ function openCuveeDetail(cuvId,dans,volet){
   // Journal
   if(allIt.length){
     html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-bottom:8px">Journal</div>';
-    var tI={degustation:'verre',traitement:'fiole',filtration:'entonnoir',ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon'};
-    var tL={degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
+    var tI={degustation:'verre',traitement:'fiole',filtration:'entonnoir',ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon',batonnage:'rotation',miseenbouteille:'bouteille'};
+    var tL={degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre',batonnage:'B\u00e2tonnage',miseenbouteille:'Mise en bouteille'};
     allIt.forEach(function(op){
-      var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||_caveTypeLabel(op.type);   // ROB-2 : jamais « undefined »
+      var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=(window._cmOpTitre&&window._cmOpTitre(op))||tL[op.type]||_caveTypeLabel(op.type);   // ROB-2 : jamais « undefined » ; CAVE-SUITE : le geste rangé (Collage, Stabilisation, Mise en masse)
       html+='<div class="mvcarte-fond" style="padding:11px;margin-bottom:7px">';
       html+='<div style="display:flex;align-items:flex-start;gap:8px;">';
       html+='<span style="font-size:var(--pt-sm,16px);margin-top:1px;">'+ico+'</span>';
       html+='<div style="flex:1;min-width:0;"><div style="font-size:var(--pt-txt,13px);font-weight:600;color:var(--texte);">'+lbl+'</div>';
       html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);">'+_caveDateFr(op.date)+(_caveWho(op)?' \u00B7 '+_escHtml(_caveWho(op)):'')+'</div></div>';
       if(op._src==='op'&&typeof isAdmin==='function'&&isAdmin()){
-        if(op.type!=='assemblage') html+='<button onclick="window.openOvCaveOp&&window.openOvCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,13px);cursor:pointer;color:var(--texte-doux);padding:2px;min-width:28px;">\u270F\uFE0F</button>';
-        html+='<button onclick="window.deleteCaveOp&&window.deleteCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,13px);cursor:pointer;color:#E07060;padding:2px;min-width:28px;">\uD83D\uDDD1</button>';
+        if(op.type!=='assemblage'&&op.type!=='miseenbouteille'&&!(op.data&&op.data.masse)) html+='<button onclick="window.openOvCaveOp&&window.openOvCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,13px);cursor:pointer;color:var(--texte-doux);padding:2px;min-width:28px;">\u270F\uFE0F</button>';
+        if(op.type!=='miseenbouteille') html+='<button onclick="window.deleteCaveOp&&window.deleteCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,13px);cursor:pointer;color:#E07060;padding:2px;min-width:28px;">\uD83D\uDDD1</button>';
       }
       html+='</div>';
       var det=[];
@@ -2965,6 +2990,7 @@ function openCuveeDetail(cuvId,dans,volet){
         : (op.data.litres+'\u00a0L de '+_escHtml(op.data.de_nom||'une autre cuve')));
       if(op.type==='soufre'&&op.data&&op.data.grammes_pastille)det.push(op.data.grammes_pastille+'g \u00D7 '+op.data.nb_total+' = '+op.data.so2_total_g+' g SO\u2082');
       if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvLignes(op).forEach(function(x){det.push(_escHtml(x));}); // ★ GESTES-1
+      if(typeof window._cmOpLignes==='function') window._cmOpLignes(op).forEach(function(x){det.push(_escHtml(x));});   // ★ CAVE-SUITE (§627)
       if(op.type==='soutirage'&&op.data&&(op.data.air===true||op.data.air===false)) det.push(op.data.air?'\u00c0 l\u2019air':'\u00c0 l\u2019abri de l\u2019air');   // ★ DIAG-2 (§430)
       if(op.type==='soutirage'&&op.data&&op.data.so2&&op.data.so2.mode!=='none'){var ss=op.data.so2;det.push('SO\u2082 '+ss.dose+' '+(ss.unite||'cL')+(ss.mode==='unique'?' dose unique':' \u00D7 '+ss.nb_doses));}
       if(op.type==='analyse'&&op._src==='op'&&op.data){
@@ -3089,6 +3115,8 @@ function deleteCaveOp(opId) {
   // ★ ASM-1 — supprimer un assemblage le defait (§153b).
   var _op=(CAVE_ELEVAGE.operations||[]).find(function(o){ return o&&o.id===opId; });
   var _asm=!!(_op&&_op.type==='assemblage');
+  // ★ CAVE-SUITE (§627) — supprimer la trace d'une mise laisserait le stock et la cuve à côté : elle s'annule aux Bouteilles.
+  if(_op&&_op.type==='miseenbouteille'){ showToast('Une mise s\u2019annule aux Bouteilles (la derni\u00e8re seulement)','#E07060'); return; }
   window.openConfirmDel(_asm?'D\u00e9faire cet assemblage ?':'Supprimer cette opération ?',
     _asm?'Le f\u00fbt redevient entam\u00e9, et le vin retourne \u00e0 sa source.':'',function(){
     if(_asm) _asmDefaire(_op);
@@ -3107,9 +3135,9 @@ window.openOvCaveExport = function() {
   if(!isAdmin())return;
   _caveExpAllCuv=true;
   _caveExpCuvSel=new Set();
-  _caveExpTypes=new Set(['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre']);
+  _caveExpTypes=new Set(['ouillage','batonnage','soutirage','soufre','analyse','degustation','traitement','filtration','miseenbouteille','autre']);
   _renderCaveExpCuvChips();
-  ['ouillage','soutirage','soufre','analyse','degustation','traitement','filtration','autre'].forEach(function(t){
+  ['ouillage','batonnage','soutirage','soufre','analyse','degustation','traitement','filtration','miseenbouteille','autre'].forEach(function(t){
     var el=document.getElementById('cexp-type-'+t);if(el)el.checked=true;
   });
   var d=document.getElementById('cexp-date-deb');if(d)d.value='';
@@ -3207,18 +3235,19 @@ function generateCaveExport() {
       if(op.data.fichier)lines.push(op.data.fichier);
     }
     if(op.type==='degustation'||op.type==='traitement'||op.type==='filtration') _copNouvLignes(op).forEach(function(x){lines.push(x);}); // ★ GESTES-1
+    if(typeof window._cmOpLignes==='function') window._cmOpLignes(op).forEach(function(x){lines.push(x);});   // ★ CAVE-SUITE (§627) : collage, stabilisation, bâtonnage, masse, mise
     if(op.notes)lines.push('<em>'+_escHtml(op.notes)+'</em>');
     return lines.map(function(l){return _escHtml(l.replace(/<em>|<\/em>/g,''));}).join('<br>');
   }
 
-  var typeColors={ouillage:'#7B4A1A',soutirage:'#1A5E36',soufre:'#1A5E1A',analyse:'#1D4E89',degustation:'#7A3555',traitement:'#8A6A1E',filtration:'#2E6378',autre:'#444'};
-  var typeIcos={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',degustation:'verre',traitement:'fiole',filtration:'entonnoir',autre:'crayon'};
-  var typeLabels={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'};
+  var typeColors={ouillage:'#7B4A1A',batonnage:'#6B5A2E',miseenbouteille:'#5E2A44',soutirage:'#1A5E36',soufre:'#1A5E1A',analyse:'#1D4E89',degustation:'#7A3555',traitement:'#8A6A1E',filtration:'#2E6378',autre:'#444'};
+  var typeIcos={ouillage:'seau',batonnage:'rotation',miseenbouteille:'bouteille',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',degustation:'verre',traitement:'fiole',filtration:'entonnoir',autre:'crayon'};
+  var typeLabels={ouillage:'Ouillage',batonnage:'B\u00e2tonnage',miseenbouteille:'Mise en bouteille',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'};
 
   function _opRow(op){
     var tc=typeColors[op.type]||'#444';
     var ti=typeIcos[op.type]||'';
-    var tl=typeLabels[op.type]||op.type;
+    var tl=(window._cmOpTitre&&window._cmOpTitre(op))||typeLabels[op.type]||op.type;   // ★ CAVE-SUITE (§627)
     return '<tr><td style="padding:7px 10px;white-space:nowrap;color:var(--texte-doux,#666);font-size:var(--pt-txt,13px);vertical-align:top;">'+_caveDateFr(op.date)+'</td>'
       +'<td style="padding:7px 10px;vertical-align:top;"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:var(--pt-micro,11px);font-weight:600;color:'+tc+';background:'+tc+'22;">'+ti+' '+tl+'</span></td>'
       +'<td style="padding:7px 10px;vertical-align:top;font-size:var(--pt-txt,13px);color:var(--texte,#333);">'+_escHtml(_caveExpCuvLabelTxt(op))+'</td>'
@@ -3250,8 +3279,8 @@ function generateCaveExport() {
     rows=all.map(_opRow).join('');
   }
 
-  var typeLabelsAll={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',autre:'Autre'};
-  var typeFiltLbl=_caveExpTypes.size===8?'Tous types':Array.from(_caveExpTypes).map(function(t){return typeLabelsAll[t]||t;}).join(', ');
+  var typeLabelsAll={ouillage:'Ouillage',batonnage:'B\u00e2tonnage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',degustation:'D\u00e9gustation',traitement:'Traitement',filtration:'Filtration',miseenbouteille:'Mise en bouteille',autre:'Autre'};
+  var typeFiltLbl=_caveExpTypes.size===_CAVE_EXP_N?'Tous types':Array.from(_caveExpTypes).map(function(t){return typeLabelsAll[t]||t;}).join(', ');
   var cuvFiltLbl=_caveExpAllCuv?'Toutes cuv\u00E9es':Array.from(_caveExpCuvSel).map(function(id){var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;});return c?c.nom+(c.millesime?' '+c.millesime:''):id;}).join(', ');
   var perFiltLbl=(deb||fin)?((deb?_caveDateFr(deb):'-')+' \u2192 '+(fin?_caveDateFr(fin):'-')):'Toutes dates';
 
@@ -3984,7 +4013,6 @@ window.saveRetraitFut       = saveRetraitFut;
 window._retraitFutAdj       = _retraitFutAdj;
 window._retraitFutSetRaison = _retraitFutSetRaison;
 var _caveMillFilter  = 'tous';    // LE millésime regardé par la Cave (Le Chai et Le Millésime) — CAVE-RANGE-1 (§449)
-var _caveBtlConfirm  = null;      // id cuvée en attente de confirmation d'embouteillage
 
 function _mvBtl(hl){ return Math.round((hl||0)*100/0.75); }               // bouteilles 75 cl
 function _mvF1(n){ return (Math.round((n||0)*10)/10).toString().replace('.',','); }
@@ -4601,134 +4629,13 @@ function _caveBtlGraphSvg(ch,nbBtl,w){
     +(ap?(', dont '+_mvF1(ap)+' hL apport\u00e9s d\u2019une autre cuve'):'')+'.';
   return window._mvGraphSvg(c,aria,g);
 }
-function renderCaveBouteille(){
-  _caveV2InjectCss();
-  var el=document.getElementById('mvc-view-bouteille'); if(!el) return;
-  // ★ Lot CAVE-6 : les deux listes suivent le filtre millesime du Chai.
-  var cuvs=(CAVE_ELEVAGE.cuvees||[]).filter(_caveDansFiltre);
-  var act=cuvs.filter(function(c){return c.statut!=='embouteille';});
-  var emb=cuvs.filter(function(c){return c.statut==='embouteille';});
-  var w=canWrite();
-  // ★ MOTS-18 (§618) : le calcul des bouteilles et la sortie du chai derrière le « i » (maquette v3)
-  var html='<div class="mvb-sec">Prêt à mettre en bouteille'+(typeof window._mvInfoBtn==='function'?' '+window._mvInfoBtn('cave.btl'):'')+'</div>';
-  if(!act.length){
-    html+='<div class="mvb-empty">Aucune cuvée en élevage.</div>';
-  } else {
-    act.forEach(function(c){
-      var hl=_caveVolHl(c), auto=_mvBtl(hl);
-      html+='<div class="mvb-card"><div class="mvb-badge">\u2019'+String(c.millesime||'').slice(-2)+'</div>'
-        +'<div class="mvb-name">'+_escHtml(c.nom)+'</div>'
-        +'<div class="mvb-meta">Millésime '+(c.millesime||'?')+' · '+(_caveContenantsHtml(c)||'aucun contenant')+' · '+_mvF1(hl)+' hL élevés</div>'   /* CONTENANT-1 (§621) : « 0 fûts » pour une cuvée en cuve */
-        +'<div class="mvb-line">théorique <b>'+auto+'</b> bouteilles</div>';
-      if(w){
-        if(_caveBtlConfirm===c.id){
-          html+='<div class="mvb-ask">Mettre « '+_escHtml(c.nom)+' » en bouteille ? Elle quittera le chai.</div>'
-            +'<div class="mvb-frow"><div class="mvb-fld"><label>Bouteilles réelles</label><input id="mvb-reel-'+c.id+'" type="number" value="'+auto+'"></div>'
-             /* ★ DIAG-5 (§433) — les mesures de la mise, facultatives, lues par le diagnostic du Chai (protection en bouteille, dépôts) */
-             +'<div class="mvb-fld"><label>Oxygène dissous (mg/L)</label><input id="mvb-o2-'+c.id+'" type="number" step="0.1" min="0" placeholder="facultatif"></div>'
-             +'<div class="mvb-fld"><label>Test tartrique</label><select class="fsel" id="mvb-tart-'+c.id+'"><option value="">Non fait</option><option value="stable">Stable</option><option value="instable">Instable</option></select></div>'
-             +'<div class="mvb-fld"><label>Test protéique</label><select class="fsel" id="mvb-prot-'+c.id+'"><option value="">Non fait</option><option value="stable">Stable</option><option value="instable">Instable</option></select></div>'
-            +'<button class="mvb-yes" onclick="_caveBtlConfirmYes(\''+c.id+'\')">Confirmer</button>'
-            +'<button class="mvb-no" onclick="_caveBtlConfirmNo()">Annuler</button></div>';
-        } else {
-          html+='<div class="mvb-frow"><button class="mvb-btn" onclick="_caveMettreEnBouteille(\''+c.id+'\')">Mettre en bouteille</button></div>';
-        }
-      }
-      html+='</div>';
-    });
-  }
-  html+='<div class="mvb-sec sep">En stock · archive par millésime</div>';
-  if(!emb.length){
-    html+='<div class="mvb-empty">Aucune cuvée embouteillée.</div>';
-  } else {
-    window._mvGraphOublier('#mvg-btl-');
-    var byM={};
-    emb.forEach(function(c){ var m=c.millesime||'?'; (byM[m]=byM[m]||[]).push(c); });
-    var mills=Object.keys(byM).sort(function(a,b){return b-a;});
-    mills.forEach(function(m){
-      var list=byM[m];
-      var totBtl=list.reduce(function(s,c){return s+(c.nb_bouteilles||0);},0);
-      html+='<div class="mvb-grp"><div class="mvb-grphead">Millésime '+m+' · '+totBtl+' bouteilles</div>';
-      list.forEach(function(c){
-        // ★ VOL-1 — le vivant d'abord (une mesure saisie apres la mise se voit), le fige en repli.
-        var ch=_caveBilanChaine(c);
-        var perteTot=(ch.recolteKg!=null&&c.nb_bouteilles)?Math.round((1-c.nb_bouteilles/_mvBtl(ch.recolteKg/_mlKgHl()))*100):null;
-        html+='<div class="mvb-card"><div class="mvb-name">'+_escHtml(c.nom)+'</div>'
-          +'<div class="mvb-meta">Mis en bouteille'+(c.date_embouteillage?' · '+_caveDateFr(c.date_embouteillage):'')+'</div>'
-          +'<button type="button" class="mlc-ret" style="margin:4px 0 6px" data-id="'+_escHtml(String(c.id))+'" onclick="openCuveeDetail(this.getAttribute(\'data-id\'),null,\'vol\')">Fiche de la cuv\u00e9e \u203a</button>'   /* CAVE-RANGE-3 (§452) */
-          +'<div class="mvb-split"><div><div class="mvb-tot">'+(c.nb_bouteilles||0)+'<small>bouteilles en stock</small></div></div>'
-          +(perteTot!=null?'<div style="margin-left:auto;text-align:right"><div class="mvb-tot" style="font-size:var(--pt-lg,24px)">\u2212'+perteTot+'%<small>perte récolte → bouteille</small></div></div>':'')
-          +'</div>';
-        var g=_caveBtlGraphSvg(ch,c.nb_bouteilles!=null?c.nb_bouteilles:null, window._mvGraphW(null));
-        if(g){
-          (function(ch2,nb,id){ window._mvGraphSuivre('#mvg-btl-'+_mvgId(id), function(lg){ return _caveBtlGraphSvg(ch2,nb,lg); }); })(ch,(c.nb_bouteilles!=null?c.nb_bouteilles:null),c.id);
-          html+='<div class="mvb-sec" style="margin:14px 0 0;border:0">Évolution du volume (équiv. bouteilles)</div><div id="mvg-btl-'+_mvgId(c.id)+'"></div>';
-        }
-        else html+='<div class="mvb-hint" style="margin-top:8px">Chaîne de perte partielle — liez la cuvée à sa cuve de vinification pour l\'afficher.</div>';
-        if(w) html+='<div class="mvb-frow"><div class="mvb-fld"><label>Corriger bouteilles</label><input type="number" value="'+(c.nb_bouteilles||0)+'" onchange="_caveBtlEditReel(\''+c.id+'\',this.value)"></div></div>';
-        html+='</div>';
-      });
-      html+='</div>';
-    });
-  }
-  el.innerHTML=html;
-}
-function _caveMettreEnBouteille(id){
-  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
-  _caveBtlConfirm=id; renderCaveBouteille();
-}
-function _caveBtlConfirmNo(){ _caveBtlConfirm=null; renderCaveBouteille(); }
-function _caveBtlConfirmYes(id){
-  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
-  var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;}); if(!c) return;
-  var hl=_caveVolHl(c);
-  var reel=parseInt((document.getElementById('mvb-reel-'+id)||{}).value)||_mvBtl(hl);
-  var _o2=parseFloat(String((document.getElementById('mvb-o2-'+id)||{}).value||'').replace(',','.')), _ta=((document.getElementById('mvb-tart-'+id)||{}).value)||'', _pr=((document.getElementById('mvb-prot-'+id)||{}).value)||'';   // ★ DIAG-5 (§433)
-  var ch=_caveBilanChaine(c);
-  // Les futs de la cuvee redeviennent disponibles : ils sont physiquement vides,
-  // vieillis d'un vin. Sans ce retour, le parc fondait a chaque mise en bouteille.
-  // ⚠️ AVANT de poser le statut : _mvFutLiberer ignore les cuvees embouteillees.
-  var _rendus=0;
-  if(typeof window._mvFutLiberer==='function' && window.INTRANTS){
-    _rendus=window._mvFutLiberer(c, window.INTRANTS);
-    if(_rendus && typeof window.saveIntrants==='function') window.saveIntrants();
-  }
-  c.statut='embouteille';
-  c.nb_bouteilles=reel;
-  c.date_embouteillage=_mvToday();
-  if(isFinite(_o2)&&_o2>=0) c.mise_o2=Math.round(_o2*100)/100; if(_ta==='stable'||_ta==='instable') c.mise_tart=_ta; if(_pr==='stable'||_pr==='instable') c.mise_prot=_pr;   // ★ DIAG-5 (§433) : lus par le diagnostic
-  // ★ VOL-1 — plus de `cuveHl` (la contenance) (§152b).
-  c.bilan_perte={recolteKg:ch.recolteKg,estHl:ch.estHl,entonneHl:ch.entonneHl,entonneSrc:ch.entonneSrc,eleveHl:hl};
-  _caveBtlConfirm=null;
-  window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
-  // ⚠️ Les CUVES se liberent toutes seules : _caveCuveOcc ignore les cuvees
-  //   embouteillees. Rien a ecrire — mais il faut le DIRE, sinon le domaine
-  //   croit sa cuve encore prise et n'ose pas la reutiliser.
-  var _nc=((c.cuves)||[]).filter(function(x){ return _caveCuve(x&&x.ref); }).length;
-  var _rend=[];
-  if(_rendus) _rend.push(_rendus+' fût'+(_rendus>1?'s':''));
-  if(_nc) _rend.push(_nc+' cuve'+(_nc>1?'s':''));
-  showToast('« '+c.nom+' » embouteillée'
-    +(_rend.length?(' — '+_rend.join(' et ')+' de retour au parc'):' — retirée du chai'),'#C0845A');
-  if(typeof _mvcRenderHeader==='function') _mvcRenderHeader();
-  renderCaveBouteille();
-}
-function _caveBtlEditReel(id,val){
-  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
-  var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;}); if(!c) return;
-  c.nb_bouteilles=parseInt(val)||0;
-  window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
-  renderCaveBouteille();
-}
+/* ★★ CAVE-SUITE (§627) — L'onglet Bouteilles est dessiné par cave-mise.js : « Mises à venir », ce qui est en élevage, puis
+   « En stock » par format. L'ancien geste (un nombre de 75 cl, une seule mise, confirmé sur la carte) y est devenu
+   « Préparer la mise » et « Mettre en bouteille » (formats, n° de lot, matières sèches, mises en plusieurs fois). */
+function renderCaveBouteille(){ if(typeof window._cmBouteilles==='function') window._cmBouteilles(); }
 window._caveSetMill         = _caveSetMill;
 window._caveEnsureBtlTab    = _caveEnsureBtlTab;
 window.renderCaveBouteille  = renderCaveBouteille;
-window._caveMettreEnBouteille = _caveMettreEnBouteille;
-window._caveBtlConfirmYes   = _caveBtlConfirmYes;
-window._caveBtlConfirmNo    = _caveBtlConfirmNo;
-window._caveBtlEditReel     = _caveBtlEditReel;
 
 
 // ── expositions refonte élevage (mvc) ──
@@ -5508,12 +5415,14 @@ function _mlInjectCss(){
 var _ML_LBL={ouillage:'Ouiller', mesure:'Mesurer', fa:'Fin de fermentation', debourbage:'Soutirer le jus clair',
   decuvage:'D\u00e9cuvage possible', alerte:'\u00c0 contr\u00f4ler',
   demarrage:'D\u00e9part en fermentation', soutirage:'Soutirer', malo:'Malo bloqu\u00e9e',
-  so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts', labo:'S\u00e8che au labo'};
+  so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts', labo:'S\u00e8che au labo',
+  batonnage:'B\u00e2tonner', analyse:'Analyser', asm:'Assembler', retfut:'Retirer le f\u00fbt', mise:'La mise', consigne:'Geste confi\u00e9', degustation:'D\u00e9guster', collage:'Coller', masse:'Mise en masse'};   // ★ CAVE-SUITE (§627)
 
 // ★ CAVEAUJ-1 (§434) : _mlEvHtml (une ligne par geste) a laissé place à _aujLigne (une ligne par contenant).
 
 // Chaque ligne renvoie vers l'ecran qui existe deja : rien de neuf a apprendre.
 function _mlGo(kind,ref){
+  if(typeof window._cmGo==='function'&&window._cmGo(kind,ref)) return;   // ★ CAVE-SUITE (§627) : bâtonner, analyser, la mise, un geste confié…
   if(kind==='ouillage'){
     if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='elevage'; renderCave();
@@ -6376,6 +6285,10 @@ function _mlAgendaComplet(from,nSem){
       detail:'dose '+d.rang+'/'+d.sur+(d.dose?' \u00b7 '+d.dose+' '+d.unite:''),
       note:'programm\u00e9e au soutirage', ref:d.ref});
   });
+  /* ★ CAVE-SUITE (§627) — soutirer après un collage, bâtonner, la suite d'une dégustation, préparer la mise (cave-mise.js) ;
+     puis les gestes confiés, accrochés à la ligne du même geste ou à part. */
+  if(typeof window._cmAgenda==='function') window._cmAgenda(from,nSem).forEach(function(x){ pousse(x.date,x.it); });
+  if(typeof window._pcAgenda==='function') window._pcAgenda(sem,from,pousse);
   // Meme regle d'ordre que _mlAgenda : jamais (ordre[k]||9), 'alerte' vaut 0.
   var ordre={alerte:0,malo:0,labo:1,mesure:1,soutirage:2,fa:3,decuvage:4,so2:5,demarrage:6,ouillage:7};
   sem.forEach(function(s){
@@ -6471,7 +6384,8 @@ var _AUJ_ICO={ouillage:'goutte', mesure:'thermometre', fa:'sablier', decuvage:'c
   demarrage:'flamme', soutirage:'barrique', malo:'eprouvette', so2:'fiole', fut:'barrique', labo:'eprouvette'};
 // Le verbe du geste — c'est lui qu'on lit a droite de la ligne, pas un chemin.
 var _AUJ_VERBE={ouillage:'Ouiller', mesure:'Relever', fa:'Voir', decuvage:'D\u00e9cuver', alerte:'Relever',
-  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc', labo:'D\u00e9clarer', debourbage:'Soutirer'};
+  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc', labo:'D\u00e9clarer', debourbage:'Soutirer',
+  batonnage:'B\u00e2tonner', analyse:'Analyser', asm:'Assembler', retfut:'Voir', mise:'Pr\u00e9parer', consigne:'Voir', degustation:'D\u00e9guster', collage:'Coller', masse:'Rassembler'};   // ★ CAVE-SUITE (§627)
 
 function _aujInjectCss(){
   // ★ CAVEAUJ-1 (§434) : les classes de l'écran vivent dans la feuille (bloc CAVEAUJ-1) ; ne reste ici que la ligne de
@@ -6492,7 +6406,7 @@ function _aujInjectCss(){
 // descendait sur le calendrier, vu par Nico). Dessous, les quatre semaines en calendrier. Rien ne s'y saisit.
 var _aujJour=null;   // le jour choisi dans le calendrier (null : aujourd'hui)
 var _AUJ_CUVE={mesure:1, alerte:1, decuvage:1, labo:1, fa:1, demarrage:1, debourbage:1};   // ces gestes portent sur une CUVE
-var _AUJ_ORD={alerte:0, malo:0, labo:1, mesure:1, debourbage:1, soutirage:2, decuvage:3, so2:5, ouillage:7, fut:8};
+var _AUJ_ORD={alerte:0, malo:0, labo:1, mesure:1, debourbage:1, soutirage:2, decuvage:3, mise:4, so2:5, batonnage:6, ouillage:7, fut:8};
 
 function _aujMaj(t){ t=String(t||''); return t?t.charAt(0).toUpperCase()+t.slice(1):t; }
 // La raison d'un geste en une phrase : sans le libellé redit, sans « 3 fûts » écrit deux fois.
@@ -6550,15 +6464,16 @@ function _aujLigne(x){
   x.G.forEach(function(it){ var k=_AUJ_GESTE[it.kind]||it.kind; if(vus[k]) return; vus[k]=1; B.push(k); });
   var h='<li class="caj-l'+(B.length>1?' plus':'')+'" data-k="'+_escAttr(x.k)+'" onclick="_aujSel(this.dataset.k)"><span class="caj-ico'+(x.rang<2?' due':'')+'">'+_mvIcon(x.cuve?'cuve':'barrique',18)+'</span>'
     +'<div class="caj-lc"><span class="caj-nom">'+_escHtml(x.titre||'')+'</span>'+(meta?'<span class="caj-meta">'+_escHtml(meta)+'</span>':'')+'<span class="caj-rs">';
-  x.G.forEach(function(it){ h+='<span class="caj-r k-'+_escAttr(it.kind)+(it.urgence==='due'?' due':'')+'"><i></i><span>'+_escHtml(_aujRaison(it))+'</span></span>'; });
+  x.G.forEach(function(it){ h+='<span class="caj-r k-'+_escAttr(it.kind)+(it.urgence==='due'?' due':'')+'"><i></i><span>'+_escHtml(_aujRaison(it))+'</span></span>'+((typeof window._pcPill==='function')?window._pcPill(it):''); });   // ★ CAVE-SUITE (§627) : qui le fait
   h+='</span></div><div class="caj-acts">';
-  B.forEach(function(k){ h+='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-b" onclick="event.stopPropagation();_mlGo(\''+_escAttr(k)+'\',\''+_escAttr(x.ref)+'\')">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; });
+  B.forEach(function(k){ if(k==='consigne') return; h+='<button type="button" class="mvbtn mvbtn-secondaire mvbtn-compact caj-b" onclick="event.stopPropagation();_mlGo(\''+_escAttr(k)+'\',\''+_escAttr(x.ref)+'\')">'+_escHtml(_AUJ_VERBE[k]||'Voir')+'</button>'; });
+  if(typeof window._pcBoutons==='function') h+=window._pcBoutons(x);   // ★ CAVE-SUITE (§627) : Confier, Reconfier, Fait
   return h+'</div></li>';
 }
 // Ce qui est déjà fait aujourd'hui : les opérations du Chai datées du jour, les relevés et les décuvages du Cuvier.
 function _aujFaits(auj){
   var out=[], nomV={};
-  var LIB={ouillage:'Ouillage', soutirage:'Soutirage', soufre:'Sulfitage', analyse:'Analyse', degustation:'D\u00e9gustation', traitement:'Traitement', filtration:'Filtration', miseenbouteille:'Mise en bouteille'};
+  var LIB={ouillage:'Ouillage', soutirage:'Soutirage', soufre:'Sulfitage', analyse:'Analyse', degustation:'D\u00e9gustation', traitement:'Traitement', filtration:'Filtration', miseenbouteille:'Mise en bouteille', batonnage:'B\u00e2tonnage'};
   ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).forEach(function(c){ if(c&&c.id) nomV[c.id]=_mlNomCuvee(c); });
   ((CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[]).forEach(function(o){
     if(!o||String(o.date||'').slice(0,10)!==auj) return;
@@ -6913,7 +6828,7 @@ window._caveSynthese=_caveSynthese;
 // Les derniers gestes, sur dix jours : opérations du Chai, relevés et décuvages du Cuvier, du plus récent au plus ancien.
 function _aujRecents(auj){
   var ev=[], nomV={}, depuis=_mlAddJ(auj,-10);
-  var LIB={ouillage:['Ouillage','goutte'], soutirage:['Soutirage','hautbas'], soufre:['Sulfitage','fiole'], analyse:['Analyse','eprouvette'], degustation:['D\u00e9gustation','verre'], traitement:['Traitement','fiole'], filtration:['Filtration','fiole'], miseenbouteille:['Mise en bouteille','verre']};
+  var LIB={ouillage:['Ouillage','goutte'], soutirage:['Soutirage','hautbas'], soufre:['Sulfitage','fiole'], analyse:['Analyse','eprouvette'], degustation:['D\u00e9gustation','verre'], traitement:['Traitement','fiole'], filtration:['Filtration','fiole'], miseenbouteille:['Mise en bouteille','bouteille'], batonnage:['B\u00e2tonnage','rotation']};
   (CAVE_ELEVAGE.cuvees||[]).forEach(function(c){ if(c&&c.id) nomV[c.id]=_mlNomCuvee(c); });
   (CAVE_ELEVAGE.operations||[]).forEach(function(o){
     var d=String((o&&o.date)||'').slice(0,10); if(!d||d<depuis||d>auj) return;
@@ -6965,7 +6880,8 @@ function _aujRender(){
   //   cette semaine », « 43 fûts en vin »), et le sommaire disait 6 quand elle disait 5 (il comptait la fin estimée).
   _AUJ_N={ presse:auj.length, cuves:nSu, releves:faits.length, veille:0 };
   var etat=auj.length?auj.length+' geste'+(auj.length>1?'s':'')+' \u00b7 '+G.length+' contenant'+(G.length>1?'s':''):(faits.length?'tout est fait':'rien \u00e0 faire');
-  var h='<div class="caj-zone"><div class="caj-g"><section class="mvcarte caj-c caj-hero" aria-labelledby="caj-titre">'
+  var h=((typeof window._pcPourToiHtml==='function')?window._pcPourToiHtml():'')   // ★ CAVE-SUITE (§627) : les gestes confiés à la personne connectée
+    +'<div class="caj-zone"><div class="caj-g"><section class="mvcarte caj-c caj-hero" aria-labelledby="caj-titre">'
     +'<div class="caj-hh"><span class="caj-hl">'+_mvIcon('eclair',16)+'Ce qui presse'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span><span class="mvpas mvpas-statut '+({due:'mvpas-retard', warn:'mvpas-surveiller', ok:'mvpas-fait'})[v.cls]+' caj-etat">'+PL[v.cls]+'</span></div>'
     // MOTS-14 : la raison seule — « Puis : … » redisait la liste et le calendrier juste dessous (le Pilotage garde v.puis)
     +'<h2 class="caj-titre" id="caj-titre">'+_escHtml(v.t)+'</h2><p class="caj-why">'+_escHtml(v.why||v.s)+'</p>'
@@ -8838,7 +8754,10 @@ var RM_TYPES = {
   soutirage:       {fam:'pratique',       lbl:'Soutirage'},
   // ★ GESTES-1 (§239) — la famille d'un traitement suit sa nature : _rmTraitT
   traitement:      {fam:'intrant',        lbl:'Traitement'},
-  filtration:      {fam:'pratique',       lbl:'Filtration'}
+  filtration:      {fam:'pratique',       lbl:'Filtration'},
+  // ★ CAVE-SUITE (§627)
+  batonnage:       {fam:'pratique',       lbl:'B\u00e2tonnage'},
+  miseenbouteille: {fam:'pratique',       lbl:'Mise en bouteille'}
 };
 /* Volontairement HORS registre, et resumes en pied de document. */
 var RM_HORS = {ouillage:'Ouillages', analyse:'Analyses', retrait_fut:'Retraits de f\u00fbts', degustation:'D\u00e9gustations', autre:'Autres'};
@@ -12100,6 +12019,13 @@ window._fermLegende = _fermLegende;
 window._cuveCouches = _cuveCouches;
 window._parcCoul = _parcCoul;
 window._caveCuveSource = _caveCuveSource;   // COULEUR-1 (§625) : lue par _cuveeCoul (cuvier-pratiques.js)
+// ★ CAVE-SUITE (§627) — ce que lit cave-mise.js (la mise, les rappels, le parcours, les gestes confiés)
+window._caveNbTonneaux = _caveNbTonneaux;
+window._caveGroupesL = _caveGroupesL;
+window._mlNomCuvee = _mlNomCuvee;
+window._copNouvCuvs = _copNouvCuvs;
+window._mlVerbe = function(k){ return _AUJ_VERBE[k]||'Voir'; };
+window._mlLibelle = function(k){ return _ML_LBL[k]||'Geste'; };
 window._mlAuj = _mlAuj;
 window._mlEcartJ = _mlEcartJ;
 window._mlCampagne = _mlCampagne;

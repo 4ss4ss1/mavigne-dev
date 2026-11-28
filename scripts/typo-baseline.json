@@ -177,7 +177,7 @@
   "src/tutos-cave.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 29
+    "ko": 41
   },
   "src/tutos-phyto.js": {
     "dur": 0,
@@ -203,5 +203,10 @@
     "dur": 0,
     "petit": 0,
     "ko": 17
+  },
+  "src/cave-mise.js": {
+    "dur": 5,
+    "petit": 2,
+    "ko": 101
   }
 }

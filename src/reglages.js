@@ -3304,6 +3304,7 @@ function _mvNotifLignes(mbr,iso){
     var reste=Math.max(0,p.dar-Math.round((j-td)/86400000));
     if(reste>0&&reste<=3){ vus[t.produit]=1; l.push('DAR '+t.produit+' : récolte possible dans '+reste+' j'); }
   });
+  if(typeof window._pcNotifLignes==='function') l=window._pcNotifLignes(mbr.nom,iso).concat(l);   // ★ CAVE-SUITE (§627) : les gestes de cave confiés, en premier
   return l.slice(0,6);
 }
 // Publie les heures de prise de poste et les lignes des quatorze jours qui viennent — administrateur seulement.

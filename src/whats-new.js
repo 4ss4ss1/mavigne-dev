@@ -7,6 +7,16 @@
 // le code de l'appli ne voit aucune différence ; les contrôles lisent utils.js + ce fichier, bout à bout.
 // =============================================================================
 export const WHATS_NEW = [
+  { v: '11.47', d: '2026-11-27', items: [   // CAVE-SUITE (§627) : la mise en masse, la mise en bouteille, les gestes rangés, confier un geste
+    { niv: 1, pour: ['admin', 'cave'], emoji: 'bouteille', titre: 'La mise en bouteille, de la préparation au stock',
+      desc: "Cave › Le Chai › Bouteilles\u00a0: «\u00a0Préparer la mise\u00a0» donne une date et lance le compte à rebours (analyse, collage, stabilités, SO₂, filtration, mise en masse), coché tout seul par ce que l’appli sait déjà\u00a0; les matières sèches se comparent au stock. «\u00a0Mettre en bouteille\u00a0» note les formats, le n° de lot et les contrôles, en une ou plusieurs fois\u00a0; bouteilles, bouchons, capsules, étiquettes et cartons sortent de La Réserve. Deux tutos le montrent." },
+    { niv: 1, pour: ['admin', 'cave'], emoji: 'cuve', titre: 'La mise en masse en un geste',
+      desc: "Des fûts vers une cuve\u00a0: la cuve libre, le volume mesuré, les lies et pertes calculées\u00a0; les fûts reviennent au parc." },
+    { niv: 1, pour: ['admin', 'salaries', 'cave'], emoji: 'equipe', titre: 'Confier un geste de cave',
+      desc: "Dans «\u00a0Aujourd’hui\u00a0» de la Cave, «\u00a0Confier\u00a0» donne un geste à quelqu’un de l’équipe, pour un jour, avec une consigne. La personne le voit sur son Accueil, dans son message du matin et dans «\u00a0Pour toi\u00a0»\u00a0; il se solde quand l’opération est enregistrée." },
+    { niv: 0, pour: ['admin', 'cave'], emoji: 'goutte', titre: 'Les gestes du Chai rangés par étape',
+      desc: "Bâtonner, coller (les produits selon la couleur, l’allergène suivi jusqu’à la mise, le rappel du soutirage), stabiliser (protéique ou tartrique, la méthode, le test). Les rappels arrivent dans «\u00a0À faire\u00a0», comme la suite d’une dégustation. La fiche d’une cuvée commence par son parcours et son prochain geste." }
+  ] },
   { v: '11.46', d: '2026-11-27', items: [   // PRATIQUES-3 (§626) : la saignée crée la cuve de rosé, l'enzymage de La Réserve, le soutirage dans « À faire »
     { niv: 1, pour: ['admin', 'cave'], emoji: 'cuve', titre: 'Un rosé de saignée',
       desc: "Une saignée sur une cuve de rouge peut créer la cuve de rosé\u00a0: «\u00a0Opération\u00a0» › «\u00a0Saignée\u00a0», le volume, puis «\u00a0Créer la cuve de rosé\u00a0». La cuve naît avec ce jus, les parcelles de la cuve saignée et son parcours de rosé\u00a0; son vin reste dans leur rendement. Un tuto le montre." },

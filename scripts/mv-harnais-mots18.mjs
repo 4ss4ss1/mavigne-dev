@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTRE = process.argv.includes('--contre');
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
-const S0 = { phy: lire('src/phyto.js'), cuv: lire('src/cuvier.js'), cav: lire('src/cave.js'), dgn: lire('src/diagnostic.js'), pl: lire('src/planning.js'),
+const S0 = { phy: lire('src/phyto.js'), cuv: lire('src/cuvier.js'), cav: lire('src/cave.js') + '\n' + lire('src/cave-mise.js'),   /* CAVE-SUITE (§627) : l'onglet Bouteilles vit dans cave-mise.js */ dgn: lire('src/diagnostic.js'), pl: lire('src/planning.js'),
   uti: lire('src/utils.js'), css: lire('src/styles.css'), ban: lire('src/bandeau.css') };
 // le texte d'une source, échappements \uXXXX décodés (les modules écrivent les accents ainsi)
 const dec = (t) => t.replace(/\\u([0-9a-fA-F]{4})/g, (m, h) => String.fromCharCode(parseInt(h, 16)));

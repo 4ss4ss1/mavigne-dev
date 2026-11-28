@@ -938,6 +938,15 @@ function _tuCaveSaig() {
     date_entree: _tuJour(-1), mesures_fa: [], operations: [], statut_hist: [{ id: 'vst_tu_cvr', statut: 'setup', date: _tuJour(-1) }] }];
   return d;
 }
+/* ★ CAVE-SUITE (§627) — LE CHAI DES TUTOS « mise en masse », « mise en bouteille » et « confier un geste ». Le Clos du Moulin 2025,
+   un rouge : en quatre fûts (masse, confier — jamais ouillé depuis son entonnage, sa ligne « Ouiller » attend), ou déjà en cuve
+   (mise). Deux cuves au parc, « Cuve béton 1 » (2 000 L) et « Cuve inox 1 » (1 500 L) : posées dans la configuration du domaine fictif. */
+function _tuCaveElev(k) {
+  var c = { id: 'tu_cvm', nom: 'Clos du Moulin', millesime: 2025, couleur: 'r', statut: 'elevage', date_entonnage: _tuJour(-300),
+    tonneaux: [{ annee: 2023, nb: 4, l: 228, four: 'Tonnellerie du Val' }], cuves: [] };
+  if (k === 'mise') { c.tonneaux = []; c.cuves = [{ ref: 'tu_ci1', litres: 1200 }]; }
+  return { cuvees: [c], operations: [], analyses: [], consignes: [] };
+}
 /* ★ TUTO-9 (§423) — UN JOURNAL POUR LE DOMAINE FICTIF. Le tuto « corriger l'équipe d'une validation » (ACCV-4, §419) vise le
    bouton « Équipe » d'une validation : le domaine fictif n'en avait AUCUNE (« Journal vide »), le tuto restait à l'étape 1
    partout. test:tutos ne l'a pas vu au téléphone : il y jouait un autre tuto sous son nom (§423b). La première validation est
@@ -975,6 +984,16 @@ function _charger() {
   if (typeof window.applyFbData === 'function') { try { window.applyFbData('kml_polygons', _tuKml()); } catch (e) { _avale(e, '_charger#kml'); } }   // YALLER-1 (§527)
   if (String(window.__MV_TUTO || '') === 'debourber' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveDeb()); } catch (e) { _avale(e, '_charger#cave_deb'); } }   // PRATIQUES-2 (§624)
   if (String(window.__MV_TUTO || '') === 'saignee' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveSaig()); } catch (e) { _avale(e, '_charger#cave_saig'); } }   // PRATIQUES-3 (§626)
+  var _tk = String(window.__MV_TUTO || '');   // CAVE-SUITE (§627) : le Chai et la cuve du parc des tutos de la mise et des gestes confiés
+  if ((_tk === 'masse' || _tk === 'mise' || _tk === 'confier') && typeof window.applyFbData === 'function') {
+    try {
+      var _cf = JSON.parse(JSON.stringify(d.config || {}));
+      // Deux cuves libres : la feuille de la mise en masse propose la première (Cuve béton 1) ; le tuto fait CHOISIR l'autre. Une seule
+      //   cuve, déjà choisie à l'ouverture, faisait voir l'étape « choisir la cuve » faite avant son tour (saut d'étape au miroir).
+      _cf.cave = Object.assign({}, _cf.cave || {}, { cuves: [{ id: 'tu_cb1', nom: 'Cuve béton 1', litres: 2000, matiere: 'beton' }, { id: 'tu_ci1', nom: 'Cuve inox 1', litres: 1500, matiere: 'inox' }] });
+      window.applyFbData('config', _cf); window.applyFbData('cave_elevage', _tuCaveElev(_tk));
+    } catch (e) { _avale(e, '_charger#cave_elev'); }
+  }
   if (String(window.__MV_TUTO || '') === 'rentree' && typeof window.applyFbData === 'function') { try { window.applyFbData('traitements', _tuTraitements()); } catch (e) { _avale(e, '_charger#traitements'); } }   // REG27-1A (§572)
 }
 function _demarrer() {

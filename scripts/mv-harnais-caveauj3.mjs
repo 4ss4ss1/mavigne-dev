@@ -43,7 +43,8 @@ function objet(src, nom) {
 function monter(S) {
   const code = [objet(S.cave, '_AUJ_VERBE'), objet(S.cave, '_AUJ_GESTE'), corps(S.cave, '_aujMaj'), corps(S.cave, '_aujRaison'), corps(S.cave, '_aujLigne')].join('\n');
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  return new Function('_escHtml', '_escAttr', '_mvIcon', '_aujMeta', '_ML_LBL', code + '\nreturn _aujLigne;')(esc, esc, () => '<svg></svg>', () => '', { so2: 'Dose de SO\u2082' });
+  // ★ CAVE-SUITE (§627) : _aujLigne lit les gestes confiés par window (_pcPill, _pcBoutons, cave-mise.js) — un window vide, rien de confié.
+  return new Function('_escHtml', '_escAttr', '_mvIcon', '_aujMeta', '_ML_LBL', 'window', code + '\nreturn _aujLigne;')(esc, esc, () => '<svg></svg>', () => '', { so2: 'Dose de SO\u2082' }, {});
 }
 const boutons = (h) => [...h.matchAll(/<button\b[^>]*?class="([^"]*)"[^>]*?onclick="([^"]*)"[^>]*>([^<]*)<\/button>/g)].map((m) => ({ cls: m[1], on: m[2], txt: m[3] }));
 

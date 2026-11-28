@@ -158,7 +158,7 @@ const T = {
       && fn(S.pr, '_debRendre').includes('+_debEnzHtml(c)') && S.cu.includes('window._vendTriOps = _vendTriOps;'); }],
   E4: ['« À faire » : _mlAgenda lit _debAFaire ; le geste, son verbe, son ordre ; « Soutirer » ouvre la feuille du soutirage ; le Pilotage le compte', (A, S) =>
     fn(S.cave, '_mlAgenda').includes("window._debAFaire(from).forEach(function(x){ pousse(x.date,x.it); });") && /var _AUJ_CUVE=\{[^}]*debourbage:1/.test(S.cave)
-    && /var _AUJ_ORD=\{[^}]*debourbage:1/.test(S.cave) && /debourbage:'Soutirer'\}/.test(S.cave) && /var _ML_LBL=\{[^}]*debourbage:'Soutirer le jus clair'/.test(S.cave)
+    && /var _AUJ_ORD=\{[^}]*debourbage:1/.test(S.cave) && /debourbage:'Soutirer'[,}]/.test(S.cave) && /var _ML_LBL=\{[^}]*debourbage:'Soutirer le jus clair'/.test(S.cave)
     && /if\(kind==='debourbage'\)\{[\s\S]{0,300}window\.openDebourber\(ref,'fin'\)/.test(fn(S.cave, '_mlGo')) && S.pil.includes("debourbage:['soutirage de jus clair','soutirages de jus clair']")
     && S.css.includes('#page-cave .k-soutirage, #page-cave .k-debourbage{')],
   E5: ['une cuvée : sa couleur relue AVANT d’écrire, la base d’effervescent écrite ; l’assemblage lit la base et note la couleur reçue', (A, S) => {
@@ -170,8 +170,8 @@ const T = {
     return /couvre: \['openVendOp', '_vendOpSet', '_saigRoseSet', 'saveVendOp'\]/.test(t) && t.includes('[data-tuto="saig.rose"]') && t.includes("x.saignee_de.id === 'tu_cvr'")
       && S.tu.includes("=== 'saignee' && typeof window.applyFbData === 'function') { try { window.applyFbData('cave_vendange', _tuCaveSaig());")
       && /'saig\.rose':'data-tuto="saig\.rose"'/.test(S.pr) && S.cu.includes('data-tuto="cuv.op"') && S.cu.includes(' data-tuto="vop.saignee"') && S.cu.includes('data-tuto="vop.ok"'); }],
-  F2: ['les trois gestes rares exemptés avec leur raison ; le plafond descendu à 785', (A, S) => {
-    const c = JSON.parse(S.cov); return ['_debEnzCalc', '_cuvEffSet', '_cuvCoulOkSet'].every((n) => /PRATIQUES-3/.test(c.exempts[n] || '')) && c.plafond === 785; }],
+  F2: ['les trois gestes rares exemptés avec leur raison ; le plafond au plus à 785', (A, S) => {   // CAVE-SUITE (§627) : il ne fait que descendre
+    const c = JSON.parse(S.cov); return ['_debEnzCalc', '_cuvEffSet', '_cuvCoulOkSet'].every((n) => /PRATIQUES-3/.test(c.exempts[n] || '')) && c.plafond <= 785; }],
   G1: ['l’aide, le guide et « Quoi de neuf » disent la saignée, l’enzymage, « À faire », l’effervescent', (A, S) =>
     S.utils.includes("['Un rosé de saignée', ") && S.g08.includes('<b>Un rosé de saignée</b>') && /v: '11\.46'[^\n]*PRATIQUES-3/.test(S.wn)
     && /enzymage/i.test(S.wn.slice(S.wn.indexOf("v: '11.46'"), S.wn.indexOf("v: '11.45'"))) && /effervescent/.test(S.g08)],
